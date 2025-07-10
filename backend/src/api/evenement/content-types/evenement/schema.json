@@ -1,0 +1,106 @@
+{
+  "kind": "collectionType",
+  "collectionName": "evenements",
+  "info": {
+    "singularName": "evenement",
+    "pluralName": "evenements",
+    "displayName": "Evenement",
+    "description": "Municipal events and activities"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "richtext",
+      "required": true
+    },
+    "start_date": {
+      "type": "datetime",
+      "required": true
+    },
+    "end_date": {
+      "type": "datetime",
+      "required": false
+    },
+    "location": {
+      "type": "string",
+      "required": false,
+      "maxLength": 200
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "required": false
+    },
+    "price": {
+      "type": "string",
+      "required": false,
+      "default": "Free"
+    },
+    "external_link": {
+      "type": "string",
+      "required": false,
+      "regex": "^https?://.*"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "unique": true
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["cultural", "sport", "meeting", "celebration", "workshop", "conference"],
+      "default": "cultural",
+      "required": true
+    },
+    "organizer": {
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    "contact_email": {
+      "type": "email",
+      "required": false
+    },
+    "contact_phone": {
+      "type": "string",
+      "required": false
+    },
+    "max_participants": {
+      "type": "integer",
+      "required": false
+    },
+    "registration_required": {
+      "type": "boolean",
+      "default": false
+    },
+    "registration_deadline": {
+      "type": "datetime",
+      "required": false
+    },
+    "address": {
+      "type": "text",
+      "required": false
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "events",
+      "required": true
+    }
+  }
+}

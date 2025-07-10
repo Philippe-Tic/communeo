@@ -1,0 +1,78 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pages",
+  "info": {
+    "singularName": "page",
+    "pluralName": "pages",
+    "displayName": "Page",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "published", "archived"],
+      "default": "draft",
+      "required": true
+    },
+    "meta_description": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "featured_image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "menu_order": {
+      "type": "integer",
+      "default": 0
+    },
+    "show_in_menu": {
+      "type": "boolean",
+      "default": true
+    },
+    "template": {
+      "type": "enumeration",
+      "enum": ["default", "homepage", "contact", "about", "services"],
+      "default": "default"
+    },
+    "seo_keywords": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "is_homepage": {
+      "type": "boolean",
+      "default": false
+    },
+    "parent_page": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::page.page",
+      "inversedBy": "child_pages"
+    },
+    "child_pages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::page.page",
+      "mappedBy": "parent_page"
+    }
+  }
+}

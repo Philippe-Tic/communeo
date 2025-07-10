@@ -1,0 +1,83 @@
+{
+  "kind": "collectionType",
+  "collectionName": "articles",
+  "info": {
+    "singularName": "article",
+    "pluralName": "articles",
+    "displayName": "Article",
+    "description": "News articles and posts"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "unique": true
+    },
+    "content": {
+      "type": "richtext",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "published", "archived"],
+      "default": "draft",
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "required": false
+    },
+    "publication_date": {
+      "type": "datetime",
+      "default": null
+    },
+    "summary": {
+      "type": "text",
+      "maxLength": 300,
+      "required": false
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["news", "event", "information", "emergency"],
+      "default": "news",
+      "required": true
+    },
+    "author": {
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "meta_description": {
+      "type": "string",
+      "maxLength": 160,
+      "required": false
+    },
+    "view_count": {
+      "type": "integer",
+      "default": 0
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "articles",
+      "required": true
+    }
+  }
+}

@@ -60,7 +60,7 @@
       "target": "api::article.article",
       "mappedBy": "site"
     },
-    "events": {
+    "evenements": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::evenement.evenement",

@@ -535,6 +535,8 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
         maxLength: 255;
       }>;
     show_in_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
       Schema.Attribute.Required &
@@ -574,7 +576,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    events: Schema.Attribute.Relation<'oneToMany', 'api::evenement.evenement'>;
+    evenements: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::evenement.evenement'
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> &
       Schema.Attribute.Private;

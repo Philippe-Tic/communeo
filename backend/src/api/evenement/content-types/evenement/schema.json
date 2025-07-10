@@ -99,7 +99,7 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::site.site",
-      "inversedBy": "events",
+      "inversedBy": "evenements",
       "required": true
     }
   }

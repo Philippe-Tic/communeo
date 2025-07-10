@@ -73,6 +73,13 @@
       "relation": "oneToMany",
       "target": "api::page.page",
       "mappedBy": "parent_page"
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "pages",
+      "required": true
     }
   }
 }

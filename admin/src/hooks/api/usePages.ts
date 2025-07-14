@@ -1,13 +1,50 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
+/**
+ * Hook usePages - Récupère les pages avec filtres et pagination
+ *
+ * Exemples d'utilisation :
+ *
+ * // Récupérer toutes les pages d'un site
+ * const { data: pages } = usePages({ siteId: 1 })
+ *
+ * // Récupérer les pages publiées d'un site avec recherche
+ * const { data: pages } = usePages({
+ *   siteId: 1,
+ *   status: 'published',
+ *   search: 'accueil'
+ * })
+ *
+ * // Récupérer les pages racines (sans parent) d'un site
+ * const { data: rootPages } = usePages({
+ *   siteId: 1,
+ *   parent: null
+ * })
+ *
+ * // Récupérer les enfants d'une page spécifique
+ * const { data: childPages } = usePages({
+ *   siteId: 1,
+ *   parent: 5
+ * })
+ *
+ * // Pagination avec tri personnalisé
+ * const { data: pages } = usePages({
+ *   siteId: 1,
+ *   page: 1,
+ *   pageSize: 10,
+ *   sortBy: 'title',
+ *   sortOrder: 'desc'
+ * })
+ */
+
 // Types
 export interface Page {
   id: number
   title: string
   slug: string
   content: string
-  excerpt?: string
+  meta_description?: string
   featured_image?: {
     id: number
     url: string
@@ -30,35 +67,36 @@ export interface Page {
     name: string
     slug: string
   }
-  parent?: {
+  parent_page?: {
     id: number
     title: string
     slug: string
   }
-  children?: Array<{
+  child_pages?: Array<{
     id: number
     title: string
     slug: string
   }>
   menu_order?: number
+  show_in_menu?: boolean
   is_homepage?: boolean
-  seo_title?: string
-  seo_description?: string
-  template?: string
+  seo_keywords?: string
+  template?: 'default' | 'homepage' | 'contact' | 'about' | 'services'
 }
 
 export interface CreatePageData {
   title: string
   content: string
-  excerpt?: string
+  meta_description?: string
   status?: 'draft' | 'published' | 'archived'
   featured_image?: number
-  parent?: number
+  parent_page?: number
   menu_order?: number
+  show_in_menu?: boolean
   is_homepage?: boolean
-  seo_title?: string
-  seo_description?: string
-  template?: string
+  seo_keywords?: string
+  template?: 'default' | 'homepage' | 'contact' | 'about' | 'services'
+  site: number // Required field
 }
 
 export interface UpdatePageData extends Partial<CreatePageData> {
@@ -89,6 +127,7 @@ export const PAGES_QUERY_KEYS = {
 
 // Hooks
 export const usePages = (params: {
+  siteId?: number
   page?: number
   pageSize?: number
   status?: 'draft' | 'published' | 'archived'
@@ -99,17 +138,25 @@ export const usePages = (params: {
 } = {}) => {
   const queryParams = new URLSearchParams()
 
+  // Pagination
   if (params.page) queryParams.append('pagination[page]', params.page.toString())
   if (params.pageSize) queryParams.append('pagination[pageSize]', params.pageSize.toString())
+
+  // Filters
+  if (params.siteId) queryParams.append('filters[site][id][$eq]', params.siteId.toString())
   if (params.status) queryParams.append('filters[status][$eq]', params.status)
   if (params.search) queryParams.append('filters[title][$containsi]', params.search)
+
+  // Parent page filter
   if (params.parent !== undefined) {
     if (params.parent === null) {
-      queryParams.append('filters[parent][$null]', 'true')
+      queryParams.append('filters[parent_page][$null]', 'true')
     } else {
-      queryParams.append('filters[parent][$eq]', params.parent.toString())
+      queryParams.append('filters[parent_page][id][$eq]', params.parent.toString())
     }
   }
+
+  // Sorting
   if (params.sortBy) {
     const sortOrder = params.sortOrder || 'asc'
     queryParams.append('sort', `${params.sortBy}:${sortOrder}`)
@@ -119,7 +166,7 @@ export const usePages = (params: {
   }
 
   // Always populate relations
-  queryParams.append('populate', 'author,site,parent,children,featured_image')
+  // queryParams.append('populate', 'author,site,parent_page,child_pages,featured_image')
 
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.list(params),
@@ -135,7 +182,7 @@ export const usePage = (id: number) => {
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.detail(id),
     queryFn: async (): Promise<Page> => {
-      const url = `/api/pages/${id}?populate=author,site,parent,children,featured_image`
+      const url = `/api/pages/${id}?populate=author,site,parent_page,child_pages,featured_image`
       const response = await apiClient.get<{ data: Page }>(url)
       return response.data
     },
@@ -144,11 +191,16 @@ export const usePage = (id: number) => {
   })
 }
 
-export const usePagesHierarchy = () => {
+export const usePagesHierarchy = (siteId?: number) => {
   return useQuery({
-    queryKey: PAGES_QUERY_KEYS.hierarchy(),
+    queryKey: [...PAGES_QUERY_KEYS.hierarchy(), { siteId }],
     queryFn: async (): Promise<Page[]> => {
-      const url = `/api/pages?populate=parent,children&sort=menu_order:asc`
+      const queryParams = new URLSearchParams()
+      if (siteId) queryParams.append('filters[site][id][$eq]', siteId.toString())
+      queryParams.append('populate', 'parent_page,child_pages')
+      queryParams.append('sort', 'menu_order:asc')
+
+      const url = `/api/pages?${queryParams.toString()}`
       const response = await apiClient.get<PagesResponse>(url)
       return response.data
     },

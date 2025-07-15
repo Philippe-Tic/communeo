@@ -1,59 +1,50 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
-// Types
+// Types alignés avec le schéma backend
 export interface Article {
   id: number
+  documentId: string
   title: string
   slug: string
   content: string
-  excerpt?: string
-  featured_image?: {
+  summary?: string
+  image?: {
     id: number
     url: string
     alternativeText?: string
     caption?: string
   }
   status: 'draft' | 'published' | 'archived'
-  publishedAt?: string
+  publication_date?: string
+  category: 'news' | 'event' | 'information' | 'emergency'
+  author?: string
+  featured: boolean
+  meta_description?: string
+  view_count: number
   createdAt: string
   updatedAt: string
-  author: {
-    id: number
-    username: string
-    email: string
-    first_name: string
-    last_name: string
-  }
   site: {
     id: number
     name: string
     slug: string
   }
-  categories?: Array<{
-    id: number
-    name: string
-    slug: string
-  }>
-  tags?: Array<{
-    id: number
-    name: string
-    slug: string
-  }>
 }
 
 export interface CreateArticleData {
   title: string
   content: string
-  excerpt?: string
+  summary?: string
   status?: 'draft' | 'published'
-  featured_image?: number
-  categories?: number[]
-  tags?: number[]
+  image?: number
+  category?: 'news' | 'event' | 'information' | 'emergency'
+  author?: string
+  featured?: boolean
+  meta_description?: string
 }
 
 export interface UpdateArticleData extends Partial<CreateArticleData> {
-  id: number
+  id: string
 }
 
 export interface ArticlesResponse {
@@ -74,7 +65,7 @@ export const ARTICLES_QUERY_KEYS = {
   lists: () => [...ARTICLES_QUERY_KEYS.all, 'list'] as const,
   list: (filters: Record<string, unknown>) => [...ARTICLES_QUERY_KEYS.lists(), filters] as const,
   details: () => [...ARTICLES_QUERY_KEYS.all, 'detail'] as const,
-  detail: (id: number) => [...ARTICLES_QUERY_KEYS.details(), id] as const,
+  detail: (documentId: string) => [...ARTICLES_QUERY_KEYS.details(), documentId] as const,
 }
 
 // Hooks
@@ -85,6 +76,8 @@ export const useArticles = (params: {
   search?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
+  category?: 'news' | 'event' | 'information' | 'emergency'
+  featured?: boolean
 } = {}) => {
   const queryParams = new URLSearchParams()
 
@@ -92,13 +85,18 @@ export const useArticles = (params: {
   if (params.pageSize) queryParams.append('pagination[pageSize]', params.pageSize.toString())
   if (params.status) queryParams.append('filters[status][$eq]', params.status)
   if (params.search) queryParams.append('filters[title][$containsi]', params.search)
+  if (params.category) queryParams.append('filters[category][$eq]', params.category)
+  if (params.featured !== undefined) queryParams.append('filters[featured][$eq]', params.featured.toString())
   if (params.sortBy) {
     const sortOrder = params.sortOrder || 'asc'
     queryParams.append('sort', `${params.sortBy}:${sortOrder}`)
+  } else {
+    // Default sort by creation date
+    queryParams.append('sort', 'createdAt:desc')
   }
 
   // Always populate relations
-  queryParams.append('populate', 'author,site,categories,tags,featured_image')
+  queryParams.append('populate', '*')
 
   return useQuery({
     queryKey: ARTICLES_QUERY_KEYS.list(params),
@@ -110,15 +108,15 @@ export const useArticles = (params: {
   })
 }
 
-export const useArticle = (id: number) => {
+export const useArticle = (documentId: string) => {
   return useQuery({
-    queryKey: ARTICLES_QUERY_KEYS.detail(id),
+    queryKey: ARTICLES_QUERY_KEYS.detail(documentId),
     queryFn: async (): Promise<Article> => {
-      const url = `/api/articles/${id}?populate=author,site,categories,tags,featured_image`
+      const url = `/api/articles/${documentId}?populate=site,image`
       const response = await apiClient.get<{ data: Article }>(url)
       return response.data
     },
-    enabled: !!id,
+    enabled: !!documentId,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 }
@@ -148,7 +146,7 @@ export const useUpdateArticle = () => {
     },
     onSuccess: (data) => {
       // Update the specific article in cache
-      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate articles list to refetch
       queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() })
@@ -160,12 +158,12 @@ export const useDeleteArticle = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: number): Promise<void> => {
-      await apiClient.delete(`/api/articles/${id}`)
+    mutationFn: async (documentId: string): Promise<void> => {
+      await apiClient.delete(`/api/articles/${documentId}`)
     },
-    onSuccess: (_, id) => {
-      // Remove the article from cache
-      queryClient.removeQueries({ queryKey: ARTICLES_QUERY_KEYS.detail(id) })
+    onSuccess: (_, documentId) => {
+      // Remove the specific article from cache
+      queryClient.removeQueries({ queryKey: ARTICLES_QUERY_KEYS.detail(documentId) })
 
       // Invalidate articles list to refetch
       queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() })
@@ -177,15 +175,15 @@ export const usePublishArticle = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: number): Promise<Article> => {
-      const response = await apiClient.put<{ data: Article }>(`/api/articles/${id}`, {
-        data: { status: 'published', publishedAt: new Date().toISOString() }
+    mutationFn: async (documentId: string): Promise<Article> => {
+      const response = await apiClient.put<{ data: Article }>(`/api/articles/${documentId}`, {
+        data: { status: 'published', publication_date: new Date().toISOString() }
       })
       return response.data
     },
     onSuccess: (data) => {
       // Update the specific article in cache
-      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate articles list to refetch
       queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() })
@@ -197,18 +195,51 @@ export const useUnpublishArticle = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: number): Promise<Article> => {
-      const response = await apiClient.put<{ data: Article }>(`/api/articles/${id}`, {
-        data: { status: 'draft', publishedAt: null }
+    mutationFn: async (documentId: string): Promise<Article> => {
+      const response = await apiClient.put<{ data: Article }>(`/api/articles/${documentId}`, {
+        data: { status: 'draft', publication_date: null }
       })
       return response.data
     },
     onSuccess: (data) => {
       // Update the specific article in cache
-      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate articles list to refetch
       queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() })
+    },
+  })
+}
+
+export const useFeaturedArticles = (limit: number = 5) => {
+  return useQuery({
+    queryKey: [...ARTICLES_QUERY_KEYS.all, 'featured'],
+    queryFn: async (): Promise<Article[]> => {
+      const url = `/api/articles?filters[featured][$eq]=true&filters[status][$eq]=published&sort=publication_date:desc&pagination[pageSize]=${limit}&populate=site,image`
+      const response = await apiClient.get<ArticlesResponse>(url)
+      return response.data
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  })
+}
+
+export const useToggleArticleFeatured = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ documentId, featured }: { documentId: string, featured: boolean }): Promise<Article> => {
+      const response = await apiClient.put<{ data: Article }>(`/api/articles/${documentId}`, {
+        data: { featured }
+      })
+      return response.data
+    },
+    onSuccess: (data) => {
+      // Update the specific article in cache
+      queryClient.setQueryData(ARTICLES_QUERY_KEYS.detail(data.documentId), data)
+
+      // Invalidate articles list and featured articles to refetch
+      queryClient.invalidateQueries({ queryKey: ARTICLES_QUERY_KEYS.lists() })
+      queryClient.invalidateQueries({ queryKey: [...ARTICLES_QUERY_KEYS.all, 'featured'] })
     },
   })
 }

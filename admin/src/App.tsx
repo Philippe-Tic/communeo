@@ -6,7 +6,13 @@ import { LoginForm } from './components/forms/LoginForm'
 import { MainLayout } from './components/layout/MainLayout'
 import { Toaster } from './components/ui/toaster'
 import { AuthProvider } from './contexts/AuthContext'
+import { ArticleDetail } from './pages/ArticleDetail'
+import { CreateArticle, EditArticle } from './pages/ArticleForm'
+import { Articles } from './pages/Articles'
 import { Dashboard } from './pages/Dashboard'
+import { EventDetail } from './pages/EventDetail'
+import { CreateEvent, EditEvent } from './pages/EventForm'
+import { Events } from './pages/Events'
 import { PageDetail } from './pages/PageDetail'
 import { CreatePage, EditPage } from './pages/PageForm'
 import { Pages } from './pages/Pages'
@@ -43,21 +49,97 @@ function App() {
           }
         />
 
-        {/* Placeholder protected routes */}
+        {/* Articles routes */}
         <Route
           path="/articles"
           element={
             <ProtectedRoute>
               <MainLayout>
-                <Box>
-                  <h1>Articles</h1>
-                  <p>Gestion des articles (à implémenter)</p>
-                </Box>
+                <Articles />
               </MainLayout>
             </ProtectedRoute>
           }
         />
 
+        <Route
+          path="/articles/new"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <CreateArticle />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/articles/:id"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ArticleDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/articles/:id/edit"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <EditArticle />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Events routes */}
+        <Route
+          path="/events"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Events />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/events/new"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <CreateEvent />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/events/:id"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <EventDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/events/:id/edit"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <EditEvent />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Pages routes */}
         <Route
           path="/pages"
           element={
@@ -102,20 +184,7 @@ function App() {
           }
         />
 
-        <Route
-          path="/events"
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-                <Box>
-                  <h1>Événements</h1>
-                  <p>Gestion des événements (à implémenter)</p>
-                </Box>
-              </MainLayout>
-            </ProtectedRoute>
-          }
-        />
-
+        {/* Other routes */}
         <Route
           path="/site"
           element={

@@ -4,6 +4,7 @@ import apiClient from '../../services/apiClient'
 // Types
 export interface Page {
   id: number
+  documentId: string,
   title: string
   slug: string
   content: string
@@ -63,7 +64,7 @@ export interface CreatePageData {
 }
 
 export interface UpdatePageData extends Partial<CreatePageData> {
-  id: number
+  id: string
 }
 
 export interface PagesResponse {
@@ -84,7 +85,7 @@ export const PAGES_QUERY_KEYS = {
   lists: () => [...PAGES_QUERY_KEYS.all, 'list'] as const,
   list: (filters: Record<string, unknown>) => [...PAGES_QUERY_KEYS.lists(), filters] as const,
   details: () => [...PAGES_QUERY_KEYS.all, 'detail'] as const,
-  detail: (id: number) => [...PAGES_QUERY_KEYS.details(), id] as const,
+  detail: (id: string) => [...PAGES_QUERY_KEYS.details(), id] as const,
   hierarchy: () => [...PAGES_QUERY_KEYS.all, 'hierarchy'] as const,
 }
 
@@ -139,11 +140,11 @@ export const usePages = (params: {
   })
 }
 
-export const usePage = (id: number) => {
+export const usePage = (id: string) => {
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.detail(id),
     queryFn: async (): Promise<Page> => {
-      const url = `/api/pages/${id}?populate=author,site,parent_page,child_pages,featured_image`
+      const url = `/api/pages/${id}?populate=*`
       const response = await apiClient.get<{ data: Page }>(url)
       return response.data
     },
@@ -158,7 +159,7 @@ export const usePagesHierarchy = (siteId?: number) => {
     queryFn: async (): Promise<Page[]> => {
       const queryParams = new URLSearchParams()
       if (siteId) queryParams.append('filters[site][documentId][$eq]', siteId.toString())
-      queryParams.append('populate', 'parent_page,child_pages')
+      queryParams.append('populate', '*')
       queryParams.append('sort', 'menu_order:asc')
 
       const url = `/api/pages?${queryParams.toString()}`
@@ -195,7 +196,7 @@ export const useUpdatePage = () => {
     },
     onSuccess: (data) => {
       // Update the specific page in cache
-      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate pages list and hierarchy to refetch
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
@@ -208,12 +209,12 @@ export const useDeletePage = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (id: number): Promise<void> => {
+    mutationFn: async (id: string): Promise<void> => {
       await apiClient.delete(`/api/pages/${id}`)
     },
-    onSuccess: (_, id) => {
-      // Remove the page from cache
-      queryClient.removeQueries({ queryKey: PAGES_QUERY_KEYS.detail(id) })
+    onSuccess: () => {
+      // Remove the page from cache - need to find documentId first
+      queryClient.removeQueries({ queryKey: PAGES_QUERY_KEYS.details() })
 
       // Invalidate pages list and hierarchy to refetch
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
@@ -234,7 +235,7 @@ export const usePublishPage = () => {
     },
     onSuccess: (data) => {
       // Update the specific page in cache
-      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate pages list to refetch
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
@@ -254,7 +255,7 @@ export const useUnpublishPage = () => {
     },
     onSuccess: (data) => {
       // Update the specific page in cache
-      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate pages list to refetch
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
@@ -274,7 +275,7 @@ export const useSetHomepage = () => {
     },
     onSuccess: (data) => {
       // Update the specific page in cache
-      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.id), data)
+      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate pages list to refetch (other pages will have is_homepage: false)
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })

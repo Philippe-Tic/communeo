@@ -1,15 +1,7 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Spinner,
-  Stack,
-  Text,
-  VStack,
-} from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
+import { PageHeader } from '../components/layout'
 import { useDeletePage, usePage } from '../hooks/api/usePages'
 import { toaster } from '../lib/toaster'
 
@@ -17,7 +9,7 @@ export function PageDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
-  const { data: page, isLoading, error } = usePage(parseInt(id || ''))
+  const { data: page, isLoading, error } = usePage(id || '')
   const deletePageMutation = useDeletePage()
 
   const handleDelete = async () => {
@@ -25,7 +17,7 @@ export function PageDetail() {
 
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer la page "${page.title}" ?`)) {
       try {
-        await deletePageMutation.mutateAsync(page.id)
+        await deletePageMutation.mutateAsync(page.documentId)
         toaster.create({
           title: 'Page supprimée',
           description: `La page "${page.title}" a été supprimée avec succès.`,
@@ -46,122 +38,107 @@ export function PageDetail() {
   }
 
   if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
-        <Spinner size="lg" />
-      </Box>
-    )
+    return <LoadingSpinner message="Chargement de la page..." />
   }
 
   if (error || !page) {
     return (
-      <Box p={6}>
-        <Text color="red.500">Erreur lors du chargement de la page</Text>
-      </Box>
+      <ErrorState
+        title="Page non trouvée"
+        message="La page que vous recherchez n'existe pas ou n'a pas pu être chargée."
+        onRetry={() => window.location.reload()}
+      />
     )
   }
+
+  const headerActions = [
+    {
+      label: 'Retour',
+      onClick: () => navigate('/pages'),
+      variant: 'outline' as const,
+      colorScheme: 'gray'
+    },
+    {
+      label: 'Modifier',
+      onClick: () => navigate(`/pages/${page.documentId}/edit`),
+      colorScheme: 'blue'
+    },
+    {
+      label: 'Supprimer',
+      onClick: handleDelete,
+      variant: 'outline' as const,
+      colorScheme: 'red',
+      loading: deletePageMutation.isPending
+    }
+  ]
 
   return (
     <Box maxWidth="4xl" mx="auto" p={6}>
       <VStack gap={6} align="stretch">
-        <HStack justify="space-between" align="center">
-          <Heading size="lg">{page.title}</Heading>
-          <HStack>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/pages')}
-            >
-              Retour
-            </Button>
-            <Button
-              onClick={() => navigate(`/pages/${page.id}/edit`)}
-            >
-              Modifier
-            </Button>
-            <Button
-              colorScheme="red"
-              variant="outline"
-              onClick={handleDelete}
-              loading={deletePageMutation.isPending}
-            >
-              Supprimer
-            </Button>
-          </HStack>
-        </HStack>
+        <PageHeader
+          title={page.title}
+          subtitle={`/${page.slug}`}
+          actions={headerActions}
+        />
 
-        <Stack gap={6}>
-          <Box>
-            <Heading size="md" mb={4}>Informations générales</Heading>
-            <Stack gap={3}>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Statut:</Text>
-                <Badge colorScheme={page.status === 'published' ? 'green' : page.status === 'draft' ? 'yellow' : 'gray'}>
-                  {page.status === 'published' ? 'Publié' : page.status === 'draft' ? 'Brouillon' : 'Archivé'}
-                </Badge>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Slug:</Text>
-                <Text>{page.slug}</Text>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Template:</Text>
-                <Text>{page.template || 'default'}</Text>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Ordre menu:</Text>
-                <Text>{page.menu_order}</Text>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Page d'accueil:</Text>
-                <Badge colorScheme={page.is_homepage ? 'green' : 'gray'}>
-                  {page.is_homepage ? 'Oui' : 'Non'}
-                </Badge>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Créé le:</Text>
-                <Text>{new Date(page.createdAt).toLocaleDateString()}</Text>
-              </HStack>
-              <HStack>
-                <Text fontWeight="medium" minW="120px">Mis à jour le:</Text>
-                <Text>{new Date(page.updatedAt).toLocaleDateString()}</Text>
-              </HStack>
-            </Stack>
-          </Box>
-
-          <Box>
-            <Heading size="md" mb={4}>Contenu</Heading>
-            <Box
-              p={4}
-              bg="gray.50"
-              rounded="md"
-              whiteSpace="pre-wrap"
-              maxH="400px"
-              overflowY="auto"
-            >
-              {page.content}
-            </Box>
-          </Box>
-
-          {(page.seo_title || page.seo_description) && (
+        <Box p={6} borderWidth={1} borderRadius="md" bg="white">
+          <VStack gap={4} align="stretch">
             <Box>
-              <Heading size="md" mb={4}>SEO</Heading>
-              <Stack gap={3}>
-                {page.seo_title && (
-                  <HStack>
-                    <Text fontWeight="medium" minW="120px">Titre SEO:</Text>
-                    <Text>{page.seo_title}</Text>
-                  </HStack>
-                )}
-                {page.seo_description && (
-                  <HStack>
-                    <Text fontWeight="medium" minW="120px">Description SEO:</Text>
-                    <Text>{page.seo_description}</Text>
-                  </HStack>
-                )}
-              </Stack>
+              <Text fontWeight="medium" color="gray.600" mb={2}>
+                Statut
+              </Text>
+              <StatusBadge status={page.status} />
             </Box>
-          )}
-        </Stack>
+
+            {page.meta_description && (
+              <Box>
+                <Text fontWeight="medium" color="gray.600" mb={2}>
+                  Description
+                </Text>
+                <Text>{page.meta_description}</Text>
+              </Box>
+            )}
+
+            <Box>
+              <Text fontWeight="medium" color="gray.600" mb={2}>
+                Contenu
+              </Text>
+              <Box
+                p={4}
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="md"
+                bg="gray.50"
+                dangerouslySetInnerHTML={{ __html: page.content }}
+              />
+            </Box>
+
+            <Box>
+              <Text fontWeight="medium" color="gray.600" mb={2}>
+                Informations
+              </Text>
+              <VStack gap={2} align="start">
+                <Text fontSize="sm" color="gray.600">
+                  Créé le: {new Date(page.createdAt).toLocaleDateString('fr-FR')}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Modifié le: {new Date(page.updatedAt).toLocaleDateString('fr-FR')}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Ordre du menu: {page.menu_order}
+                </Text>
+                <Text fontSize="sm" color="gray.600">
+                  Template: {page.template}
+                </Text>
+                {page.is_homepage && (
+                  <Text fontSize="sm" color="blue.600" fontWeight="medium">
+                    ✓ Page d'accueil
+                  </Text>
+                )}
+              </VStack>
+            </Box>
+          </VStack>
+        </Box>
       </VStack>
     </Box>
   )

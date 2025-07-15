@@ -72,9 +72,13 @@ export default (config: any, { strapi }: { strapi: any }) => {
     try {
       console.log(`🔍 Verifying ownership - contentType: ${contentType}, documentId: ${documentId}, userSiteDocumentId: ${userSiteDocumentId}`);
 
-      const entity = await strapi.entityService.findOne(contentType, documentId, {
+      // Dans Strapi v5, pour chercher par documentId, il faut utiliser findMany avec des filtres
+      const entities = await strapi.entityService.findMany(contentType, {
+        filters: { documentId: { $eq: documentId } },
         populate: ['site']
       });
+
+      const entity = entities && entities.length > 0 ? entities[0] : null;
 
       console.log('🔍 Entity found:', entity ? {
         id: entity.id,

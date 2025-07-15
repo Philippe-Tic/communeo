@@ -157,7 +157,7 @@ export const useSites = (params: {
   }
 
   // Always populate relations
-  queryParams.append('populate', 'logo,favicon,users')
+  queryParams.append('populate', '*')
 
   return useQuery({
     queryKey: SITES_QUERY_KEYS.list(params),

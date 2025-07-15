@@ -13,15 +13,15 @@ import {
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useCreatePage, usePages, useUpdatePage, type Page } from '../hooks/api/usePages'
+import { useCreatePage, usePage, usePages, useUpdatePage, type Page } from '../hooks/api/usePages'
 import { toaster } from '../lib/toaster'
 
 interface PageFormData {
   title: string
   content: string
   slug: string
-  seo_title: string
-  seo_description: string
+  seo_keywords: string
+  meta_description: string
   status: 'draft' | 'published' | 'archived'
   is_homepage: boolean
   parent_id?: string
@@ -48,8 +48,8 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
       title: '',
       content: '',
       slug: '',
-      seo_title: '',
-      seo_description: '',
+      seo_keywords: '',
+      meta_description: '',
       status: 'draft',
       is_homepage: false,
       parent_id: '',
@@ -69,7 +69,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
       setValue('slug', slug)
-      setValue('seo_title', watchedTitle)
+      setValue('seo_keywords', watchedTitle)
     }
   }, [watchedTitle, setValue, isEditing])
 
@@ -80,11 +80,11 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
         title: initialData.title,
         content: initialData.content,
         slug: initialData.slug,
-        seo_title: initialData.seo_title || initialData.title,
-        seo_description: initialData.seo_description || '',
+        seo_keywords: initialData.seo_keywords || initialData.title,
+        meta_description: initialData.meta_description || '',
         status: initialData.status,
         is_homepage: initialData.is_homepage,
-        parent_id: initialData.parent?.id?.toString() || '',
+        parent_id: initialData.parent_page?.id?.toString() || '',
         menu_order: initialData.menu_order,
         template: initialData.template || 'default',
       })
@@ -104,7 +104,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
       }
 
       if (isEditing && id) {
-        await updatePageMutation.mutateAsync({ id: parseInt(id), ...apiData })
+        await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'homepage' | 'contact' | 'about' | 'services' })
         toaster.create({
           title: 'Page mise à jour',
           description: 'La page a été mise à jour avec succès.',
@@ -112,7 +112,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
           duration: 3000,
         })
       } else {
-        await createPageMutation.mutateAsync(apiData)
+        await createPageMutation.mutateAsync({ ...apiData, template: apiData.template as 'default' | 'homepage' | 'contact' | 'about' | 'services', site: 1 })
         toaster.create({
           title: 'Page créée',
           description: 'La page a été créée avec succès.',
@@ -289,7 +289,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                   <Text fontWeight="medium" mb={2}>Titre SEO</Text>
                   <Input
                     placeholder="Titre pour les moteurs de recherche"
-                    {...register('seo_title')}
+                    {...register('seo_keywords')}
                   />
                 </Box>
 
@@ -298,7 +298,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                   <Textarea
                     placeholder="Description pour les moteurs de recherche"
                     rows={3}
-                    {...register('seo_description')}
+                    {...register('meta_description')}
                   />
                 </Box>
               </Stack>
@@ -333,10 +333,7 @@ export function CreatePage() {
 
 export function EditPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: pagesResponse, isLoading } = usePages()
-
-  const pages = pagesResponse?.data || []
-  const page = pages.find((p: Page) => p.id === parseInt(id || ''))
+  const { data: page, isLoading, error } = usePage(id || '')
 
   if (isLoading) {
     return (
@@ -346,7 +343,7 @@ export function EditPage() {
     )
   }
 
-  if (!page) {
+  if (error || !page) {
     return (
       <Box p={4} bg="red.50" borderRadius="md" border="1px solid" borderColor="red.200">
         <Text color="red.700">Page non trouvée</Text>

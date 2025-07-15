@@ -225,9 +225,6 @@ export function ArticleDetail() {
                     Publié le: {new Date(article.publication_date).toLocaleDateString('fr-FR')}
                   </Text>
                 )}
-                <Text fontSize="sm" color="gray.600">
-                  Site: {article.site.name}
-                </Text>
               </VStack>
             </Box>
           </VStack>

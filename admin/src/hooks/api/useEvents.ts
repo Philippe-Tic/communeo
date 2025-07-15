@@ -149,7 +149,7 @@ export const useUpcomingEvents = (limit: number = 5) => {
     queryKey: EVENTS_QUERY_KEYS.upcoming(),
     queryFn: async (): Promise<Event[]> => {
       const today = new Date().toISOString().split('T')[0]
-      const url = `/api/evenements?filters[start_date][$gte]=${today}&sort=start_date:asc&pagination[pageSize]=${limit}&populate=site,image`
+      const url = `/api/evenements?filters[start_date][$gte]=${today}&sort=start_date:asc&pagination[pageSize]=${limit}`
       const response = await apiClient.get<EventsResponse>(url)
       return response.data
     },
@@ -165,7 +165,7 @@ export const useCalendarEvents = (month: string) => {
       const startDate = `${year}-${monthNum}-01`
       const endDate = new Date(parseInt(year), parseInt(monthNum), 0).toISOString().split('T')[0]
 
-      const url = `/api/evenements?filters[start_date][$gte]=${startDate}&filters[start_date][$lte]=${endDate}&sort=start_date:asc&populate=site,image`
+      const url = `/api/evenements?filters[start_date][$gte]=${startDate}&filters[start_date][$lte]=${endDate}&sort=start_date:asc`
       const response = await apiClient.get<EventsResponse>(url)
       return response.data
     },

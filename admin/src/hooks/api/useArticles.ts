@@ -112,7 +112,7 @@ export const useArticle = (documentId: string) => {
   return useQuery({
     queryKey: ARTICLES_QUERY_KEYS.detail(documentId),
     queryFn: async (): Promise<Article> => {
-      const url = `/api/articles/${documentId}?populate=site,image`
+      const url = `/api/articles/${documentId}`
       const response = await apiClient.get<{ data: Article }>(url)
       return response.data
     },
@@ -215,7 +215,7 @@ export const useFeaturedArticles = (limit: number = 5) => {
   return useQuery({
     queryKey: [...ARTICLES_QUERY_KEYS.all, 'featured'],
     queryFn: async (): Promise<Article[]> => {
-      const url = `/api/articles?filters[featured][$eq]=true&filters[status][$eq]=published&sort=publication_date:desc&pagination[pageSize]=${limit}&populate=site,image`
+      const url = `/api/articles?filters[featured][$eq]=true&filters[status][$eq]=published&sort=publication_date:desc&pagination[pageSize]=${limit}`
       const response = await apiClient.get<ArticlesResponse>(url)
       return response.data
     },

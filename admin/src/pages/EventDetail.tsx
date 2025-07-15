@@ -291,9 +291,6 @@ export function EventDetail() {
                 <Text fontSize="sm" color="gray.600">
                   Modifié le: {new Date(event.updatedAt).toLocaleDateString('fr-FR')}
                 </Text>
-                <Text fontSize="sm" color="gray.600">
-                  Site: {event.site.name}
-                </Text>
               </VStack>
             </Box>
           </VStack>

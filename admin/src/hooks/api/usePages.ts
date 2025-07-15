@@ -1,43 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
-/**
- * Hook usePages - Récupère les pages avec filtres et pagination
- *
- * Exemples d'utilisation :
- *
- * // Récupérer toutes les pages d'un site
- * const { data: pages } = usePages({ siteId: 1 })
- *
- * // Récupérer les pages publiées d'un site avec recherche
- * const { data: pages } = usePages({
- *   siteId: 1,
- *   status: 'published',
- *   search: 'accueil'
- * })
- *
- * // Récupérer les pages racines (sans parent) d'un site
- * const { data: rootPages } = usePages({
- *   siteId: 1,
- *   parent: null
- * })
- *
- * // Récupérer les enfants d'une page spécifique
- * const { data: childPages } = usePages({
- *   siteId: 1,
- *   parent: 5
- * })
- *
- * // Pagination avec tri personnalisé
- * const { data: pages } = usePages({
- *   siteId: 1,
- *   page: 1,
- *   pageSize: 10,
- *   sortBy: 'title',
- *   sortOrder: 'desc'
- * })
- */
-
 // Types
 export interface Page {
   id: number
@@ -127,7 +90,6 @@ export const PAGES_QUERY_KEYS = {
 
 // Hooks
 export const usePages = (params: {
-  siteId?: number
   page?: number
   pageSize?: number
   status?: 'draft' | 'published' | 'archived'
@@ -143,7 +105,6 @@ export const usePages = (params: {
   if (params.pageSize) queryParams.append('pagination[pageSize]', params.pageSize.toString())
 
   // Filters
-  if (params.siteId) queryParams.append('filters[site][id][$eq]', params.siteId.toString())
   if (params.status) queryParams.append('filters[status][$eq]', params.status)
   if (params.search) queryParams.append('filters[title][$containsi]', params.search)
 
@@ -152,7 +113,7 @@ export const usePages = (params: {
     if (params.parent === null) {
       queryParams.append('filters[parent_page][$null]', 'true')
     } else {
-      queryParams.append('filters[parent_page][id][$eq]', params.parent.toString())
+      queryParams.append('filters[parent_page][documentId][$eq]', params.parent.toString())
     }
   }
 
@@ -166,13 +127,12 @@ export const usePages = (params: {
   }
 
   // Always populate relations
-  // queryParams.append('populate', 'author,site,parent_page,child_pages,featured_image')
+  queryParams.append('populate', '*')
 
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.list(params),
     queryFn: async (): Promise<PagesResponse> => {
-      // const url = `/api/pages?${queryParams.toString()}`
-      const url = `/api/pages`
+      const url = `/api/pages?${queryParams.toString()}`
       return apiClient.get<PagesResponse>(url)
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -197,7 +157,7 @@ export const usePagesHierarchy = (siteId?: number) => {
     queryKey: [...PAGES_QUERY_KEYS.hierarchy(), { siteId }],
     queryFn: async (): Promise<Page[]> => {
       const queryParams = new URLSearchParams()
-      if (siteId) queryParams.append('filters[site][id][$eq]', siteId.toString())
+      if (siteId) queryParams.append('filters[site][documentId][$eq]', siteId.toString())
       queryParams.append('populate', 'parent_page,child_pages')
       queryParams.append('sort', 'menu_order:asc')
 

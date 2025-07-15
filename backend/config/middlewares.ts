@@ -7,9 +7,7 @@ export default [
   'strapi::query',
   'strapi::body',
   'strapi::session',
-  {
-    resolve: './src/middlewares/site-isolation',
-  },
+  'global::site-isolation',
   'strapi::favicon',
   'strapi::public',
 ];

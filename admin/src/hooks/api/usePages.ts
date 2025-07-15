@@ -171,7 +171,8 @@ export const usePages = (params: {
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.list(params),
     queryFn: async (): Promise<PagesResponse> => {
-      const url = `/api/pages?${queryParams.toString()}`
+      // const url = `/api/pages?${queryParams.toString()}`
+      const url = `/api/pages`
       return apiClient.get<PagesResponse>(url)
     },
     staleTime: 1000 * 60 * 5, // 5 minutes

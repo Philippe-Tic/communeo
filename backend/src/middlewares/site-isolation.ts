@@ -1,7 +1,9 @@
 interface StrapiUser {
   id: number;
+  documentId: string;
   site: {
     id: number;
+    documentId: string;
   };
 }
 
@@ -9,15 +11,14 @@ interface StrapiContext {
   state: {
     user?: StrapiUser;
   };
-  params: {
-    pluralApiId?: string;
-    documentId?: string;
-  };
   request: {
     method: string;
+    url?: string;
+    path?: string;
     body: {
       data?: any;
     };
+    headers?: any;
   };
   query: {
     filters?: any;
@@ -34,49 +35,161 @@ interface OwnershipResult {
   entity?: any;
 }
 
+interface ParsedUrl {
+  pluralApiId: string | null;
+  documentId: string | null;
+}
+
 export default (config: any, { strapi }: { strapi: any }) => {
+  console.log('🔧 Site Isolation Middleware - LOADING');
+
+  // Helper function pour parser l'URL et extraire les paramètres
+  const parseUrl = (url: string): ParsedUrl => {
+    console.log('🔍 Parsing URL:', url);
+
+    // Pattern pour les routes API Strapi v5: /api/{pluralApiId}/{documentId?}
+    // documentId peut être un string (UUID-like) ou un nombre
+    const apiRoutePattern = /^\/api\/([a-zA-Z0-9-_]+)(?:\/([a-zA-Z0-9-_]+))?(?:\?.*)?$/;
+    const match = url.match(apiRoutePattern);
+
+    if (!match) {
+      return { pluralApiId: null, documentId: null };
+    }
+
+    const pluralApiId = match[1];
+    const documentId = match[2] || null;
+
+    console.log('✅ Parsed URL:', { pluralApiId, documentId });
+    return { pluralApiId, documentId };
+  };
+
   // Helper function pour vérifier l'ownership d'une entité
   const verifyOwnership = async (
     contentType: string,
     documentId: string,
-    userSiteId: number
+    userSiteDocumentId: string
   ): Promise<OwnershipResult> => {
     try {
+      console.log(`🔍 Verifying ownership - contentType: ${contentType}, documentId: ${documentId}, userSiteDocumentId: ${userSiteDocumentId}`);
+
       const entity = await strapi.entityService.findOne(contentType, documentId, {
         populate: ['site']
       });
 
+      console.log('🔍 Entity found:', entity ? {
+        id: entity.id,
+        documentId: entity.documentId,
+        site: entity.site ? { id: entity.site.id, documentId: entity.site.documentId } : null
+      } : 'null');
+
       if (!entity) {
+        console.log('❌ Entity not found');
         return { error: 'notFound' };
       }
 
-      // Gérer le cas où l'entité n'a pas de site (données legacy)
       if (!entity.site) {
-        strapi.log.warn(`Entity ${documentId} of type ${contentType} has no site relation`);
+        console.log('❌ Entity has no site relation');
         return { error: 'forbidden', message: 'Ressource sans site assigné' };
       }
 
-      if (entity.site.id !== userSiteId) {
+      if (entity.site.documentId !== userSiteDocumentId) {
+        console.log(`❌ Site mismatch - entity.site.documentId: ${entity.site.documentId}, userSiteDocumentId: ${userSiteDocumentId}`);
         return { error: 'forbidden', message: 'Accès non autorisé à cette ressource' };
       }
 
+      console.log('✅ Ownership verified successfully');
       return { entity };
     } catch (error) {
-      strapi.log.error(`Error verifying ownership for ${contentType}:${documentId}`, error);
+      console.log('❌ Error verifying ownership:', error);
       return { error: 'forbidden', message: 'Erreur lors de la vérification des permissions' };
     }
   };
 
-  return async (ctx: StrapiContext, next: () => Promise<void>) => {
-    const { user } = ctx.state;
+  // Helper function pour récupérer l'utilisateur depuis le token
+  const getUserFromToken = async (token: string): Promise<StrapiUser | null> => {
+    try {
+      console.log('🔍 Attempting to get user from token...');
 
-    // Skip middleware if no user or user has no site
-    if (!user || !user.site) {
-      return await next();
+      // Décoder le token JWT
+      const jwt = strapi.plugin('users-permissions').service('jwt');
+      const decoded = await jwt.verify(token);
+
+      console.log('🔍 Token decoded:', { userId: decoded.id });
+
+      // Récupérer l'utilisateur avec sa relation site
+      const user = await strapi.entityService.findOne('plugin::users-permissions.user', decoded.id, {
+        populate: ['site']
+      });
+
+      console.log('🔍 User found:', user ? {
+        id: user.id,
+        documentId: user.documentId,
+        email: user.email,
+        site: user.site ? { id: user.site.id, documentId: user.site.documentId, name: user.site.name } : null
+      } : 'null');
+
+      return user;
+    } catch (error) {
+      console.log('❌ Error getting user from token:', error.message);
+      return null;
+    }
+  };
+
+  console.log('🔧 Site Isolation Middleware - LOADED SUCCESSFULLY');
+
+  return async (ctx: StrapiContext, next: () => Promise<void>) => {
+    const startTime = Date.now();
+    const requestId = Math.random().toString(36).substr(2, 9);
+
+    // Extraire l'URL
+    const url = ctx.request.url || ctx.request.path || '';
+    const method = ctx.request.method;
+
+    // Debug: Log every request
+    console.log(`\n🌐 [${requestId}] === Site Isolation Middleware START ===`);
+    console.log(`🌐 [${requestId}] URL: ${url}`);
+    console.log(`🌐 [${requestId}] Method: ${method}`);
+
+    // Parser l'URL pour extraire les paramètres
+    const { pluralApiId, documentId } = parseUrl(url);
+
+    // Vérifier l'authentification
+    let user = ctx.state.user;
+
+    // Si pas d'utilisateur dans ctx.state, essayer de l'obtenir du token
+    if (!user) {
+      const authHeader = ctx.request.headers?.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        user = await getUserFromToken(token);
+      }
     }
 
-    const { pluralApiId, documentId } = ctx.params;
-    const method = ctx.request.method;
+    console.log(`🔍 [${requestId}] Final user:`, user ? {
+      id: user.id,
+      documentId: user.documentId,
+      site: user.site ? { id: user.site.id, documentId: user.site.documentId } : null
+    } : 'No user');
+
+    // Skip middleware if no user
+    if (!user) {
+      console.log(`🔄 [${requestId}] Skipping middleware: No user authenticated`);
+      const result = await next();
+      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (no user) === ${Date.now() - startTime}ms`);
+      return result;
+    }
+
+    if (!user.site) {
+      console.log(`🔄 [${requestId}] Skipping middleware: User has no site - User ID: ${user.id}`);
+      const result = await next();
+      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (no site) === ${Date.now() - startTime}ms`);
+      return result;
+    }
+
+    console.log(`🔍 [${requestId}] - pluralApiId: ${pluralApiId}`);
+    console.log(`🔍 [${requestId}] - documentId: ${documentId}`);
+    console.log(`🔍 [${requestId}] - method: ${method}`);
+    console.log(`🔍 [${requestId}] - user.site.documentId: ${user.site.documentId}`);
 
     // Content-types that need site isolation
     const contentTypes: Record<string, string> = {
@@ -87,79 +200,81 @@ export default (config: any, { strapi }: { strapi: any }) => {
 
     // Skip if not a content-type that needs site isolation
     if (!pluralApiId || !contentTypes[pluralApiId]) {
-      return await next();
+      console.log(`🔄 [${requestId}] Skipping middleware: Not a content-type that needs site isolation`);
+      const result = await next();
+      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (not target content) === ${Date.now() - startTime}ms`);
+      return result;
     }
 
     const contentType = contentTypes[pluralApiId];
-    const userSiteId = user.site.id;
+    const userSiteDocumentId = user.site.documentId;
 
-    // Debug logging
-    strapi.log.debug(
-      `Site isolation: ${method} ${pluralApiId}${documentId ? `/${documentId}` : ''} - User site: ${userSiteId}`
-    );
+    console.log(`🎯 [${requestId}] === APPLYING SITE ISOLATION ===`);
+    console.log(`🎯 [${requestId}] Content Type: ${contentType}`);
+    console.log(`🎯 [${requestId}] User Site Document ID: ${userSiteDocumentId}`);
 
     try {
       switch (method) {
         case 'GET':
           if (!documentId) {
             // GET list - add site filter automatically
+            console.log(`📝 [${requestId}] GET LIST - Adding site filter`);
+
+            if (!ctx.query) {
+              ctx.query = {};
+            }
+
             if (!ctx.query.filters) {
               ctx.query.filters = {};
             }
 
-            // Preserve existing filters and add site filter
+            // Preserve existing filters and add site filter using documentId
             ctx.query.filters = {
               ...ctx.query.filters,
-              site: { id: { $eq: userSiteId } }
+              site: { documentId: { $eq: userSiteDocumentId } }
             };
 
-            strapi.log.debug(`Applied site filter for listing ${pluralApiId}`);
+            console.log(`📝 [${requestId}] After filter - ctx.query:`, JSON.stringify(ctx.query, null, 2));
+            console.log(`📝 [${requestId}] Site filter applied successfully`);
           } else {
             // GET single - verify ownership
-            const result = await verifyOwnership(contentType, documentId, userSiteId);
+            console.log(`📝 [${requestId}] GET SINGLE - Verifying ownership`);
+            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
             if (result.error) {
-              strapi.log.warn(
-                `Access denied: User ${user.id} (site ${userSiteId}) tried to access ${contentType}:${documentId}`
-              );
+              console.log(`❌ [${requestId}] Access denied for single GET`);
               return result.error === 'notFound'
                 ? ctx.notFound()
                 : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
             }
-
-            strapi.log.debug(`Access granted for ${contentType}:${documentId}`);
+            console.log(`✅ [${requestId}] Access granted for single GET`);
           }
           break;
 
         case 'POST':
-          // POST create - force user's site
+          // POST create - force user's site using documentId
+          console.log(`📝 [${requestId}] POST CREATE - Forcing user's site`);
+
           if (!ctx.request.body.data) {
             ctx.request.body.data = {};
           }
 
-          // Force the user's site, even if another site is specified
-          const originalSite = ctx.request.body.data.site;
-          ctx.request.body.data.site = userSiteId;
-
-          if (originalSite && originalSite !== userSiteId) {
-            strapi.log.warn(
-              `User ${user.id} tried to create ${contentType} for site ${originalSite}, forced to ${userSiteId}`
-            );
-          }
-
-          strapi.log.debug(`Creating ${contentType} for site ${userSiteId}`);
+          // Force the user's site using documentId
+          ctx.request.body.data.site = userSiteDocumentId;
+          console.log(`📝 [${requestId}] Forced site documentId: ${userSiteDocumentId}`);
           break;
 
         case 'PUT':
           // PUT update - verify ownership and prevent site change
+          console.log(`📝 [${requestId}] PUT UPDATE - Verifying ownership`);
+
           if (!documentId) {
+            console.log(`❌ [${requestId}] PUT without document ID`);
             return ctx.badRequest('Document ID is required for PUT operations');
           }
 
-          const updateResult = await verifyOwnership(contentType, documentId, userSiteId);
+          const updateResult = await verifyOwnership(contentType, documentId, userSiteDocumentId);
           if (updateResult.error) {
-            strapi.log.warn(
-              `Update denied: User ${user.id} (site ${userSiteId}) tried to update ${contentType}:${documentId}`
-            );
+            console.log(`❌ [${requestId}] Update denied`);
             return updateResult.error === 'notFound'
               ? ctx.notFound()
               : ctx.forbidden(updateResult.message || 'Accès non autorisé à cette ressource');
@@ -167,61 +282,66 @@ export default (config: any, { strapi }: { strapi: any }) => {
 
           // Prevent site change in update
           if (ctx.request.body.data && ctx.request.body.data.site) {
-            const attemptedSite = ctx.request.body.data.site;
             delete ctx.request.body.data.site;
-
-            if (attemptedSite !== userSiteId) {
-              strapi.log.warn(
-                `User ${user.id} tried to change site of ${contentType}:${documentId} from ${userSiteId} to ${attemptedSite}`
-              );
-            }
+            console.log(`📝 [${requestId}] Removed site change attempt`);
           }
 
-          strapi.log.debug(`Updating ${contentType}:${documentId} for site ${userSiteId}`);
+          console.log(`✅ [${requestId}] Update authorized`);
           break;
 
         case 'DELETE':
           // DELETE - verify ownership
+          console.log(`📝 [${requestId}] DELETE - Verifying ownership`);
+
           if (!documentId) {
+            console.log(`❌ [${requestId}] DELETE without document ID`);
             return ctx.badRequest('Document ID is required for DELETE operations');
           }
 
-          const deleteResult = await verifyOwnership(contentType, documentId, userSiteId);
+          const deleteResult = await verifyOwnership(contentType, documentId, userSiteDocumentId);
           if (deleteResult.error) {
-            strapi.log.warn(
-              `Delete denied: User ${user.id} (site ${userSiteId}) tried to delete ${contentType}:${documentId}`
-            );
+            console.log(`❌ [${requestId}] Delete denied`);
             return deleteResult.error === 'notFound'
               ? ctx.notFound()
               : ctx.forbidden(deleteResult.message || 'Accès non autorisé à cette ressource');
           }
 
-          strapi.log.debug(`Deleting ${contentType}:${documentId} for site ${userSiteId}`);
+          console.log(`✅ [${requestId}] Delete authorized`);
           break;
 
         default:
-          // For other HTTP methods (PATCH, etc.), apply same logic as PUT
+          // For other HTTP methods, apply same logic as PUT
+          console.log(`📝 [${requestId}] OTHER METHOD (${method})`);
+
           if (documentId) {
-            const result = await verifyOwnership(contentType, documentId, userSiteId);
+            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
             if (result.error) {
+              console.log(`❌ [${requestId}] Access denied for ${method}`);
               return result.error === 'notFound'
                 ? ctx.notFound()
                 : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
             }
 
-            // Prevent site change for any modification
             if (ctx.request.body.data && ctx.request.body.data.site) {
               delete ctx.request.body.data.site;
+              console.log(`📝 [${requestId}] Removed site change attempt for ${method}`);
             }
           }
           break;
       }
     } catch (error) {
-      strapi.log.error('Site isolation middleware error:', error);
+      console.log(`❌ [${requestId}] Site isolation middleware error:`, error);
       return ctx.internalServerError('Erreur lors de la vérification des permissions');
     }
 
+    console.log(`🔄 [${requestId}] Calling next middleware...`);
+
     // Continue to next middleware
-    await next();
+    const result = await next();
+
+    console.log(`✅ [${requestId}] Next middleware completed`);
+    console.log(`🌐 [${requestId}] === Site Isolation Middleware END === ${Date.now() - startTime}ms`);
+
+    return result;
   };
 };

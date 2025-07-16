@@ -1,14 +1,14 @@
 import {
-    Box,
-    Button,
-    Heading,
-    HStack,
-    Input,
-    Spinner,
-    Stack,
-    Text,
-    Textarea,
-    VStack
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Input,
+  Spinner,
+  Stack,
+  Text,
+  Textarea,
+  VStack
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -280,11 +280,11 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
 
                 <HStack gap={4}>
                   <Box flex={1}>
-                    <Text fontWeight="medium" mb={2}>Email de contact</Text>
+                    <Text fontWeight="medium" mb={2}>Email de contact*</Text>
                     <Input
                       type="email"
                       placeholder="contact@example.com"
-                      {...register('contact_email')}
+                      {...register('contact_email', { required: 'L\'email de contact est requis' })}
                     />
                   </Box>
 

@@ -63,7 +63,7 @@ export interface ArticlesResponse {
 export const ARTICLES_QUERY_KEYS = {
   all: ['articles'] as const,
   lists: () => [...ARTICLES_QUERY_KEYS.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...ARTICLES_QUERY_KEYS.lists(), filters] as const,
+  list: (filters: Record<string, any>) => [...ARTICLES_QUERY_KEYS.lists(), filters] as const,
   details: () => [...ARTICLES_QUERY_KEYS.all, 'detail'] as const,
   detail: (documentId: string) => [...ARTICLES_QUERY_KEYS.details(), documentId] as const,
 }

@@ -28,6 +28,7 @@ export interface AuthResponse {
     municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
     site: {
       id: number
+      documentId: string
       name: string
       slug: string
     }
@@ -39,7 +40,7 @@ export interface ApiError {
     status: number
     name: string
     message: string
-    details?: unknown
+    details?: any
   }
 }
 

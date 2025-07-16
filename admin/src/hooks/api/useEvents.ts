@@ -77,7 +77,7 @@ export interface EventsResponse {
 export const EVENTS_QUERY_KEYS = {
   all: ['events'] as const,
   lists: () => [...EVENTS_QUERY_KEYS.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...EVENTS_QUERY_KEYS.lists(), filters] as const,
+  list: (filters: Record<string, any>) => [...EVENTS_QUERY_KEYS.lists(), filters] as const,
   details: () => [...EVENTS_QUERY_KEYS.all, 'detail'] as const,
   detail: (documentId: string) => [...EVENTS_QUERY_KEYS.details(), documentId] as const,
   upcoming: () => [...EVENTS_QUERY_KEYS.all, 'upcoming'] as const,

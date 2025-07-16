@@ -5,7 +5,7 @@ export interface ApiError {
     status: number
     name: string
     message: string
-    details?: unknown
+    details?: any
   }
 }
 
@@ -71,17 +71,17 @@ class ApiClient {
     return response.data
   }
 
-  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.post(url, data, config)
     return response.data
   }
 
-  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.put(url, data, config)
     return response.data
   }
 
-  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.patch(url, data, config)
     return response.data
   }
@@ -92,7 +92,7 @@ class ApiClient {
   }
 
   // Method to make requests without auth (for login, register, etc.)
-  async postWithoutAuth<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+  async postWithoutAuth<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.post(url, data, {
       ...config,
       headers: {

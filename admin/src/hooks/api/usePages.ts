@@ -83,7 +83,7 @@ export interface PagesResponse {
 export const PAGES_QUERY_KEYS = {
   all: ['pages'] as const,
   lists: () => [...PAGES_QUERY_KEYS.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...PAGES_QUERY_KEYS.lists(), filters] as const,
+  list: (filters: Record<string, any>) => [...PAGES_QUERY_KEYS.lists(), filters] as const,
   details: () => [...PAGES_QUERY_KEYS.all, 'detail'] as const,
   detail: (id: string) => [...PAGES_QUERY_KEYS.details(), id] as const,
   hierarchy: () => [...PAGES_QUERY_KEYS.all, 'hierarchy'] as const,

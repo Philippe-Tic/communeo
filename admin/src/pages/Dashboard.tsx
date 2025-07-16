@@ -5,10 +5,11 @@ import { ArticleCard, StatsCard } from '../components/pages'
 import { useArticles, type Article } from '../hooks/api/useArticles'
 import { useEvents } from '../hooks/api/useEvents'
 import { usePages } from '../hooks/api/usePages'
-import { useAuth } from '../hooks/useAuth'
+import { useUser, useUserProfile } from '../hooks/useUser'
 
 export const Dashboard = () => {
-  const { user } = useAuth()
+  const { fullName, user } = useUser()
+  const { firstName } = useUserProfile()
   const navigate = useNavigate()
 
   // Fetch data for stats
@@ -63,8 +64,8 @@ export const Dashboard = () => {
     <Box maxW="full" mx="auto">
       <VStack gap={8} align="stretch">
         <PageHeader
-          title={`Bienvenue, ${user?.first_name || 'Admin'} !`}
-          subtitle="Voici un aperçu de votre tableau de bord"
+          title={`Bienvenue, ${firstName || fullName || 'Admin'} !`}
+          subtitle={`Voici un aperçu de votre tableau de bord${user?.site ? ` - ${user.site.name}` : ''}`}
         />
 
         {/* Stats Cards */}

@@ -18,7 +18,7 @@ const navItems: NavItem[] = [
   { name: 'Pages', path: '/pages' },
   { name: 'Événements', path: '/events' },
   { name: 'Site', path: '/site' },
-  { name: 'Utilisateurs', path: '/users' },
+  // { name: 'Utilisateurs', path: '/users' }, // Temporarily hidden
 ]
 
 interface SidebarProps {

@@ -1,0 +1,236 @@
+---
+import type { Article } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import { getArticles, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+
+// Récupération de tous les articles
+let articles: Article[] = [];
+
+try {
+  articles = await getArticles();
+} catch (error) {
+  console.error('Erreur lors de la récupération des articles:', error);
+}
+
+// Catégories disponibles pour le filtrage
+const categories = [
+  { key: 'all', label: 'Toutes les actualités' },
+  { key: 'news', label: 'Actualités' },
+  { key: 'information', label: 'Informations' },
+  { key: 'event', label: 'Événements' },
+  { key: 'emergency', label: 'Urgences' }
+];
+
+// Grouper les articles par catégorie
+const articlesByCategory = articles.reduce((acc, article) => {
+  const category = article.category;
+  if (!acc[category]) {
+    acc[category] = [];
+  }
+  acc[category].push(article);
+  return acc;
+}, {} as Record<string, Article[]>);
+---
+
+<Layout
+  title="Actualités"
+  description="Toutes les actualités de votre mairie : informations municipales, événements et annonces importantes."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Header -->
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Actualités
+          </h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Restez informés des dernières actualités et annonces de votre mairie
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filtres de catégories -->
+    <section class="py-6 bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+          {categories.map((category) => (
+            <button
+              type="button"
+              class="filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary"
+              data-category={category.key}
+            >
+              {category.label}
+              {category.key !== 'all' && articlesByCategory[category.key] && (
+                <span class="ml-1 text-xs">({articlesByCategory[category.key].length})</span>
+              )}
+              {category.key === 'all' && (
+                <span class="ml-1 text-xs">({articles.length})</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Liste des articles -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {articles.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {articles.map((article) => (
+              <article
+                class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow article-card"
+                data-category={article.category}
+              >
+                {article.image?.data && (
+                  <div class="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getStrapiImageUrl(article.image.data.url)}
+                      alt={article.image.data.alternativeText || article.title}
+                      class="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      article.category === 'emergency' ? 'bg-red-100 text-red-800' :
+                      article.category === 'news' ? 'bg-blue-100 text-blue-800' :
+                      article.category === 'event' ? 'bg-green-100 text-green-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {article.category === 'emergency' ? 'Urgence' :
+                       article.category === 'news' ? 'Actualité' :
+                       article.category === 'event' ? 'Événement' :
+                       'Information'}
+                    </span>
+
+                    {article.featured && (
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        ⭐ À la une
+                      </span>
+                    )}
+                  </div>
+
+                  {article.publication_date && (
+                    <time class="text-sm text-gray-500 mb-3 block" datetime={article.publication_date}>
+                      {formatDate(article.publication_date)}
+                    </time>
+                  )}
+
+                  <h2 class="text-xl font-semibold text-gray-900 mb-3">
+                    <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors">
+                      {article.title}
+                    </a>
+                  </h2>
+
+                  {article.summary && (
+                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                      {article.summary}
+                    </p>
+                  )}
+
+                  <a
+                    href={`/articles/${article.slug}`}
+                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm"
+                  >
+                    Lire la suite
+                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Aucune actualité disponible</h2>
+            <p class="text-gray-600">
+              Les actualités seront publiées ici dès qu'elles seront disponibles.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer simple -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-gray-400">
+          © 2025 Site officiel de votre mairie. Tous droits réservés.
+        </p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Styles pour limiter le texte à 3 lignes */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Styles pour les filtres actifs */
+  .filter-btn.active {
+    background-color: rgb(var(--color-primary));
+    color: white;
+    border-color: rgb(var(--color-primary));
+  }
+
+  /* Animation pour les articles filtrés */
+  .article-card.hidden {
+    display: none;
+  }
+
+  .article-card {
+    transition: opacity 0.3s ease-in-out;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const articleCards = document.querySelectorAll('.article-card');
+
+    // Activer le filtre "Toutes les actualités" par défaut
+    const allButton = document.querySelector('[data-category="all"]');
+    if (allButton) {
+      allButton.classList.add('active');
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const category = button.getAttribute('data-category');
+
+        // Mettre à jour les boutons actifs
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        // Filtrer les articles
+        articleCards.forEach(card => {
+          const cardCategory = card.getAttribute('data-category');
+
+          if (category === 'all' || cardCategory === category) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+  });
+</script>

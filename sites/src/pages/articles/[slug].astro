@@ -1,0 +1,398 @@
+---
+import type { Article } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import { getArticles, getArticleBySlug, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+
+export async function getStaticPaths() {
+  try {
+    const articles = await getArticles();
+
+    return articles.map(article => ({
+      params: { slug: article.slug },
+      props: { article }
+    }));
+  } catch (error) {
+    console.error('Erreur lors de la récupération des articles:', error);
+    return [];
+  }
+}
+
+// Récupération de l'article depuis les props ou fallback
+let article: Article | null = null;
+
+if (Astro.props.article) {
+  article = Astro.props.article;
+} else {
+  // Fallback pour le mode développement
+  try {
+    const slug = Astro.params.slug as string;
+    article = await getArticleBySlug(slug);
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'article:', error);
+  }
+}
+
+// Si aucun article n'est trouvé, rediriger vers 404
+if (!article) {
+  return Astro.redirect('/404');
+}
+
+const attributes = article;
+
+// Articles suggérés (récupération simple pour la démo)
+let suggestedArticles: Article[] = [];
+try {
+  const allArticles = await getArticles();
+  suggestedArticles = allArticles
+    .filter(a => a.id !== article.id)
+    .slice(0, 3);
+} catch (error) {
+  console.error('Erreur lors de la récupération des articles suggérés:', error);
+}
+---
+
+<Layout
+  title={attributes.title}
+  description={attributes.summary || `${attributes.title} - Actualité de votre mairie`}
+  image={attributes.image?.data?.url}
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Breadcrumb -->
+    <nav class="bg-gray-50 border-b border-gray-200 py-4" aria-label="Fil d'ariane">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ol class="flex items-center space-x-2 text-sm">
+          <li>
+            <a href="/" class="text-gray-500 hover:text-primary transition-colors">Accueil</a>
+          </li>
+          <li class="text-gray-500">/</li>
+          <li>
+            <a href="/articles" class="text-gray-500 hover:text-primary transition-colors">Actualités</a>
+          </li>
+          <li class="text-gray-500">/</li>
+          <li class="text-gray-900 font-medium" aria-current="page">
+            {attributes.title}
+          </li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- Article principal -->
+    <article class="py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header de l'article -->
+        <header class="mb-8">
+          <div class="flex items-center space-x-3 mb-4">
+            <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              attributes.category === 'emergency' ? 'bg-red-100 text-red-800' :
+              attributes.category === 'news' ? 'bg-blue-100 text-blue-800' :
+              attributes.category === 'event' ? 'bg-green-100 text-green-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {attributes.category === 'emergency' ? 'Urgence' :
+               attributes.category === 'news' ? 'Actualité' :
+               attributes.category === 'event' ? 'Événement' :
+               'Information'}
+            </span>
+
+            {attributes.featured && (
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                ⭐ À la une
+              </span>
+            )}
+          </div>
+
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            {attributes.title}
+          </h1>
+
+          {attributes.summary && (
+            <p class="text-xl text-gray-600 leading-relaxed mb-6">
+              {attributes.summary}
+            </p>
+          )}
+
+          <div class="flex items-center space-x-4 text-sm text-gray-500">
+            {attributes.publication_date && (
+              <time datetime={attributes.publication_date}>
+                📅 Publié le {formatDate(attributes.publication_date)}
+              </time>
+            )}
+
+            <time datetime={attributes.updatedAt}>
+              ✏️ Mis à jour le {formatDate(attributes.updatedAt)}
+            </time>
+          </div>
+        </header>
+
+        <!-- Image principale -->
+        {attributes.image?.data && (
+          <div class="mb-8">
+            <img
+              src={getStrapiImageUrl(attributes.image.data.url)}
+              alt={attributes.image.data.alternativeText || attributes.title}
+              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+            />
+            {attributes.image.data.alternativeText && (
+              <p class="text-sm text-gray-500 mt-2 text-center italic">
+                {attributes.image.data.alternativeText}
+              </p>
+            )}
+          </div>
+        )}
+
+        <!-- Contenu de l'article -->
+        <div
+          class="prose prose-lg max-w-none"
+          set:html={attributes.content}
+        >
+        </div>
+
+        <!-- Actions de partage -->
+        <div class="mt-12 pt-8 border-t border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Partager cet article</h3>
+          <div class="flex items-center space-x-4">
+            <button
+              type="button"
+              class="share-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              data-url={Astro.url.href}
+              data-title={attributes.title}
+            >
+              📧 Par email
+            </button>
+
+            <button
+              type="button"
+              class="copy-url-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              data-url={Astro.url.href}
+            >
+              🔗 Copier le lien
+            </button>
+
+            <button
+              type="button"
+              class="print-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              🖨️ Imprimer
+            </button>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- Articles suggérés -->
+    {suggestedArticles.length > 0 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+            Autres actualités
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {suggestedArticles.map((suggestedArticle) => (
+              <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {suggestedArticle.image?.data && (
+                  <div class="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getStrapiImageUrl(suggestedArticle.image.data.url)}
+                      alt={suggestedArticle.image.data.alternativeText || suggestedArticle.title}
+                      class="w-full h-32 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div class="p-4">
+                  <span class={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mb-2 ${
+                    suggestedArticle.category === 'emergency' ? 'bg-red-100 text-red-800' :
+                    suggestedArticle.category === 'news' ? 'bg-blue-100 text-blue-800' :
+                    suggestedArticle.category === 'event' ? 'bg-green-100 text-green-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {suggestedArticle.category === 'emergency' ? 'Urgence' :
+                     suggestedArticle.category === 'news' ? 'Actualité' :
+                     suggestedArticle.category === 'event' ? 'Événement' :
+                     'Information'}
+                  </span>
+
+                  <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <a href={`/articles/${suggestedArticle.slug}`} class="hover:text-primary transition-colors">
+                      {suggestedArticle.title}
+                    </a>
+                  </h3>
+
+                  {suggestedArticle.publication_date && (
+                    <time class="text-xs text-gray-500" datetime={suggestedArticle.publication_date}>
+                      {formatDate(suggestedArticle.publication_date)}
+                    </time>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div class="text-center mt-8">
+            <a
+              href="/articles"
+              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+            >
+              Voir toutes les actualités
+            </a>
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+
+  <!-- Footer simple -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-gray-400">
+          © 2025 Site officiel de votre mairie. Tous droits réservés.
+        </p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Styles pour le contenu riche */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h1:first-child,
+  .prose h2:first-child,
+  .prose h3:first-child {
+    margin-top: 0;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+
+  .prose ul, .prose ol {
+    margin: 1em 0;
+    padding-left: 1.5em;
+  }
+
+  .prose li {
+    margin-bottom: 0.5em;
+  }
+
+  .prose blockquote {
+    border-left: 4px solid rgb(var(--color-secondary));
+    padding-left: 1em;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: #6b7280;
+  }
+
+  .prose img {
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    margin: 1.5em auto;
+  }
+
+  /* Limiter le texte à 2 lignes pour les suggestions */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Styles pour l'impression */
+  @media print {
+    .skip-link,
+    nav,
+    .share-btn,
+    .copy-url-btn,
+    .print-btn,
+    footer {
+      display: none !important;
+    }
+
+    .prose {
+      font-size: 12pt;
+      line-height: 1.4;
+    }
+
+    .prose h1, .prose h2, .prose h3 {
+      color: black;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Bouton de partage par email
+    const shareBtn = document.querySelector('.share-btn');
+    if (shareBtn) {
+      shareBtn.addEventListener('click', () => {
+        const url = shareBtn.getAttribute('data-url');
+        const title = shareBtn.getAttribute('data-title');
+        const subject = encodeURIComponent(`${title} - Actualité de votre mairie`);
+        const body = encodeURIComponent(`Je vous partage cet article : ${url}`);
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      });
+    }
+
+        // Bouton de copie d'URL
+    const copyBtn = document.querySelector('.copy-url-btn') as HTMLButtonElement;
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async () => {
+        const url = copyBtn.getAttribute('data-url') || '';
+
+        try {
+          await navigator.clipboard.writeText(url);
+          // Feedback visuel
+          const originalText = copyBtn.textContent || '🔗 Copier le lien';
+          copyBtn.textContent = '✅ Lien copié !';
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+          }, 2000);
+        } catch (err) {
+          console.error('Erreur lors de la copie :', err);
+          // Fallback pour les navigateurs anciens
+          const textArea = document.createElement('textarea');
+          textArea.value = url;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+
+          const originalText = copyBtn.textContent || '🔗 Copier le lien';
+          copyBtn.textContent = '✅ Lien copié !';
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+          }, 2000);
+        }
+      });
+    }
+
+    // Bouton d'impression
+    const printBtn = document.querySelector('.print-btn');
+    if (printBtn) {
+      printBtn.addEventListener('click', () => {
+        window.print();
+      });
+    }
+  });
+</script>

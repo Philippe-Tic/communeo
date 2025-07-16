@@ -1,0 +1,153 @@
+---
+import type { Event } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import { getEvents, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+
+// Récupération de tous les événements
+let events: Event[] = [];
+
+try {
+  events = await getEvents();
+} catch (error) {
+  console.error('Erreur lors de la récupération des événements:', error);
+}
+---
+
+<Layout
+  title="Événements"
+  description="Découvrez tous les événements organisés par votre mairie : festivals, manifestations, réunions publiques et activités communales."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Header -->
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Événements
+          </h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Découvrez tous les événements organisés par votre mairie
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Liste des événements -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {events.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {events.map((event) => (
+              <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {event.image?.data && (
+                  <div class="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getStrapiImageUrl(event.image.data.url)}
+                      alt={event.image.data.alternativeText || event.title}
+                      class="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.category === 'cultural' ? 'bg-purple-100 text-purple-800' :
+                      event.category === 'sport' ? 'bg-green-100 text-green-800' :
+                      event.category === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                      event.category === 'celebration' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {event.category === 'cultural' ? 'Culturel' :
+                       event.category === 'sport' ? 'Sport' :
+                       event.category === 'meeting' ? 'Réunion' :
+                       event.category === 'celebration' ? 'Fête' :
+                       'Atelier'}
+                    </span>
+
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.status === 'published' ? 'bg-blue-100 text-blue-800' :
+                      event.status === 'draft' ? 'bg-green-100 text-green-800' :
+                      event.status === 'archived' ? 'bg-gray-100 text-gray-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {event.status === 'published' ? 'Publié' :
+                       event.status === 'draft' ? 'Brouillon' :
+                       'Annulé'}
+                    </span>
+                  </div>
+
+                  <h2 class="text-xl font-semibold text-gray-900 mb-3">
+                    <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors">
+                      {event.title}
+                    </a>
+                  </h2>
+
+                  <div class="text-sm text-gray-600 mb-2">
+                    <time datetime={event.start_date}>
+                      📅 {formatDate(event.start_date)}
+                    </time>
+                  </div>
+
+                  {event.location && (
+                    <div class="text-sm text-gray-600 mb-3">
+                      📍 {event.location}
+                    </div>
+                  )}
+
+                  {event.description && (
+                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                      {event.description.substring(0, 150)}...
+                    </p>
+                  )}
+
+                  <a
+                    href={`/evenements/${event.slug}`}
+                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm"
+                  >
+                    En savoir plus
+                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-12">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Aucun événement programmé</h2>
+            <p class="text-gray-600">
+              Les événements seront annoncés ici dès qu'ils seront programmés.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer simple -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-gray-400">
+          © 2025 Site officiel de votre mairie. Tous droits réservés.
+        </p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

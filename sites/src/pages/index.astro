@@ -1,16 +1,327 @@
 ---
+import type { Page, Article, Event } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import {
+  getHomepage,
+  getFeaturedArticles,
+  getUpcomingEvents,
+  getStrapiImageUrl,
+  formatDate
+} from '../utils/strapi';
 
+// Récupération des données pour la page d'accueil
+let homepage: Page | null = null;
+let featuredArticles: Article[] = [];
+let upcomingEvents: Event[] = [];
+
+try {
+  [homepage, featuredArticles, upcomingEvents] = await Promise.all([
+    getHomepage(),
+    getFeaturedArticles(3),
+    getUpcomingEvents(3)
+  ]);
+} catch (error) {
+  console.error('Erreur lors de la récupération des données d\'accueil:', error);
+}
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+  title={homepage?.title}
+  description={homepage?.meta_description}
+  image={homepage?.featured_image?.data?.url}
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Hero Section - Page d'accueil -->
+    {homepage && (
+      <section class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <h1 class="text-4xl font-bold text-gray-900 mb-6">
+                {homepage.title}
+              </h1>
+
+              {homepage.featured_image?.data && (
+                <div class="lg:hidden mb-6">
+                  <img
+                    src={getStrapiImageUrl(homepage.featured_image.data.url)}
+                    alt={homepage.featured_image.data.alternativeText || homepage.title}
+                    class="w-full h-64 object-cover rounded-lg shadow-lg"
+                  />
+                </div>
+              )}
+
+              <div
+                class="prose prose-lg max-w-none text-gray-700"
+                set:html={homepage.content}
+              >
+              </div>
+            </div>
+
+            {homepage.featured_image?.data && (
+              <div class="hidden lg:block">
+                <img
+                  src={getStrapiImageUrl(homepage.featured_image.data.url)}
+                  alt={homepage.featured_image.data.alternativeText || homepage.title}
+                  class="w-full h-96 object-cover rounded-lg shadow-xl"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Articles mis en avant -->
+    {featuredArticles.length > 0 && (
+      <section class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Actualités</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              Restez informés des dernières actualités et annonces de votre mairie.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {featuredArticles.map((article) => (
+              <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {article.image?.data && (
+                  <div class="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getStrapiImageUrl(article.image.data.url)}
+                      alt={article.image.data.alternativeText || article.title}
+                      class="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      article.category === 'emergency' ? 'bg-red-100 text-red-800' :
+                      article.category === 'news' ? 'bg-blue-100 text-blue-800' :
+                      article.category === 'event' ? 'bg-green-100 text-green-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {article.category === 'emergency' ? 'Urgence' :
+                       article.category === 'news' ? 'Actualité' :
+                       article.category === 'event' ? 'Événement' :
+                       'Information'}
+                    </span>
+
+                    {article.publication_date && (
+                      <time class="text-sm text-gray-500" datetime={article.publication_date}>
+                        {formatDate(article.publication_date)}
+                      </time>
+                    )}
+                  </div>
+
+                  <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                    <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors">
+                      {article.title}
+                    </a>
+                  </h3>
+
+                  {article.summary && (
+                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                      {article.summary}
+                    </p>
+                  )}
+
+                  <a
+                    href={`/articles/${article.slug}`}
+                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm"
+                  >
+                    Lire la suite
+                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div class="text-center">
+            <a
+              href="/articles"
+              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+            >
+              Voir toutes les actualités
+            </a>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Événements à venir -->
+    {upcomingEvents.length > 0 && (
+      <section class="py-12 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Événements à venir</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+              Découvrez les prochains événements organisés par votre mairie.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {upcomingEvents.map((event) => (
+              <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                {event.image?.data && (
+                  <div class="aspect-w-16 aspect-h-9">
+                    <img
+                      src={getStrapiImageUrl(event.image.data.url)}
+                      alt={event.image.data.alternativeText || event.title}
+                      class="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.category === 'cultural' ? 'bg-purple-100 text-purple-800' :
+                      event.category === 'sport' ? 'bg-green-100 text-green-800' :
+                      event.category === 'meeting' ? 'bg-blue-100 text-blue-800' :
+                      event.category === 'celebration' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {event.category === 'cultural' ? 'Culturel' :
+                       event.category === 'sport' ? 'Sport' :
+                       event.category === 'meeting' ? 'Réunion' :
+                       event.category === 'celebration' ? 'Fête' :
+                       'Atelier'}
+                    </span>
+                  </div>
+
+                  <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                    <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors">
+                      {event.title}
+                    </a>
+                  </h3>
+
+                  <div class="text-sm text-gray-600 mb-2">
+                    <time datetime={event.start_date}>
+                      📅 {formatDate(event.start_date)}
+                    </time>
+                  </div>
+
+                  {event.location && (
+                    <div class="text-sm text-gray-600 mb-3">
+                      📍 {event.location}
+                    </div>
+                  )}
+
+                  {event.description && (
+                    <p class="text-gray-600 text-sm line-clamp-3 mb-4">
+                      {event.description.substring(0, 150)}...
+                    </p>
+                  )}
+
+                  <a
+                    href={`/evenements/${event.slug}`}
+                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm"
+                  >
+                    En savoir plus
+                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div class="text-center">
+            <a
+              href="/evenements"
+              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors"
+            >
+              Voir tous les événements
+            </a>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Section d'absence de contenu -->
+    {!homepage && featuredArticles.length === 0 && upcomingEvents.length === 0 && (
+      <section class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Bienvenue sur le site de votre mairie
+          </h1>
+          <p class="text-xl text-gray-600 mb-8">
+            Le contenu est en cours de préparation. Revenez bientôt pour découvrir toutes les actualités et services de votre commune.
+          </p>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+            <p class="text-blue-800">
+              <strong>Information :</strong> Si vous êtes administrateur, assurez-vous qu'une page avec le statut "Page d'accueil" est configurée dans votre CMS.
+            </p>
+          </div>
+        </div>
+      </section>
+    )}
+  </main>
+
+  <!-- Footer simple -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-gray-400">
+          © 2025 Site officiel de votre mairie. Tous droits réservés.
+        </p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Styles pour limiter le texte à 3 lignes */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Styles pour le contenu riche */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+
+  .prose ul, .prose ol {
+    margin: 1em 0;
+    padding-left: 1.5em;
+  }
+
+  .prose blockquote {
+    border-left: 4px solid rgb(var(--color-secondary));
+    padding-left: 1em;
+    margin: 1.5em 0;
+    font-style: italic;
+  }
+</style>

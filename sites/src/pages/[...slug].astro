@@ -1,0 +1,278 @@
+---
+import type { Page } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import { getPages, getPageBySlug, getStrapiImageUrl } from '../utils/strapi';
+
+export async function getStaticPaths() {
+  try {
+    const pages = await getPages();
+
+    return pages
+      .filter(page => !page.is_homepage) // Exclure la page d'accueil
+      .map(page => ({
+        params: { slug: page.slug },
+        props: { page }
+      }));
+  } catch (error) {
+    console.error('Erreur lors de la récupération des pages:', error);
+    return [];
+  }
+};
+
+// Récupération de la page depuis les props ou fallback
+let page: Page | null = null;
+
+if (Astro.props.page) {
+  page = Astro.props.page;
+} else {
+  // Fallback pour le mode développement
+  try {
+    const slug = Astro.params.slug as string;
+    page = await getPageBySlug(slug);
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la page:', error);
+  }
+}
+
+// Si aucune page n'est trouvée, rediriger vers 404
+if (!page) {
+  return Astro.redirect('/404');
+}
+
+const attributes = page;
+---
+
+<Layout
+  title={attributes.title}
+  description={attributes.meta_description || `${attributes.title} - Page officielle`}
+  image={attributes.featured_image?.data?.url}
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Header de la page -->
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            {attributes.title}
+          </h1>
+
+          {attributes.meta_description && (
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+              {attributes.meta_description}
+            </p>
+          )}
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenu principal -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {attributes.template === 'contact' ? (
+          <!-- Template spécial pour la page contact -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div>
+              <div
+                class="prose prose-lg max-w-none"
+                set:html={attributes.content}
+              >
+              </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg p-8">
+              <h2 class="text-2xl font-bold text-gray-900 mb-6">Nous contacter</h2>
+
+              <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Adresse</h3>
+                    <p class="text-gray-600">
+                      Mairie de votre commune<br />
+                      Place de la Mairie<br />
+                      12345 Votre Ville
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Téléphone</h3>
+                    <p class="text-gray-600">01 23 45 67 89</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Email</h3>
+                    <p class="text-gray-600">contact@mairie-votrecommune.fr</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start space-x-3">
+                  <svg class="w-6 h-6 text-primary mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div>
+                    <h3 class="font-semibold text-gray-900">Horaires d'ouverture</h3>
+                    <div class="text-gray-600">
+                      <p>Lundi - Vendredi : 8h30 - 12h00 / 14h00 - 17h30</p>
+                      <p>Samedi : 8h30 - 12h00</p>
+                      <p>Dimanche : Fermé</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <!-- Template par défaut -->
+          <div class="max-w-4xl mx-auto">
+            {attributes.featured_image?.data && (
+              <div class="mb-8">
+                <img
+                  src={getStrapiImageUrl(attributes.featured_image.data.url)}
+                  alt={attributes.featured_image.data.alternativeText || attributes.title}
+                  class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                />
+              </div>
+            )}
+
+            <div
+              class="prose prose-lg max-w-none"
+              set:html={attributes.content}
+            >
+            </div>
+
+            {attributes.template === 'services' && (
+              <div class="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h2 class="text-2xl font-bold text-blue-900 mb-4">Besoin d'aide ?</h2>
+                <p class="text-blue-800 mb-4">
+                  Nos équipes sont à votre disposition pour vous accompagner dans vos démarches.
+                </p>
+                <a
+                  href="/contact"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  Nous contacter
+                </a>
+              </div>
+            )}
+
+            {attributes.template === 'about' && (
+              <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-50 rounded-lg p-6 text-center">
+                  <div class="text-3xl font-bold text-primary mb-2">1234</div>
+                  <div class="text-gray-600">Habitants</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 text-center">
+                  <div class="text-3xl font-bold text-primary mb-2">15</div>
+                  <div class="text-gray-600">Services publics</div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-6 text-center">
+                  <div class="text-3xl font-bold text-primary mb-2">50+</div>
+                  <div class="text-gray-600">Événements par an</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer simple -->
+  <footer class="bg-gray-900 text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <p class="text-gray-400">
+          © 2025 Site officiel de votre mairie. Tous droits réservés.
+        </p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  /* Styles pour le contenu riche */
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h1:first-child,
+  .prose h2:first-child,
+  .prose h3:first-child {
+    margin-top: 0;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+
+  .prose ul, .prose ol {
+    margin: 1em 0;
+    padding-left: 1.5em;
+  }
+
+  .prose li {
+    margin-bottom: 0.5em;
+  }
+
+  .prose blockquote {
+    border-left: 4px solid rgb(var(--color-secondary));
+    padding-left: 1em;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: #6b7280;
+  }
+
+  .prose img {
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    margin: 1.5em auto;
+  }
+
+  .prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+  }
+
+  .prose th,
+  .prose td {
+    border: 1px solid #e5e7eb;
+    padding: 0.75em;
+    text-align: left;
+  }
+
+  .prose th {
+    background-color: #f9fafb;
+    font-weight: bold;
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+import type { Site } from '../types/strapi';
+import { getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  noIndex?: boolean;
+}
+
+// Récupération de la configuration du site
+let siteConfig: Site | null = null;
+try {
+  siteConfig = await getSiteConfig();
+} catch (error) {
+  console.error('Erreur lors de la récupération de la configuration du site:', error);
+}
+
+const {
+  title = siteConfig?.name || 'Site de la mairie',
+  description = `Site officiel de la ${siteConfig?.name || 'mairie'}`,
+  image,
+  noIndex = false
+} = Astro.props;
+
+// Construction de l'URL complète pour le titre
+const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?.name}`;
+
+// URL de l'image pour les réseaux sociaux
+const socialImage = image ? getStrapiImageUrl(image) :
+  (siteConfig?.logo?.data ? getStrapiImageUrl(siteConfig.logo.data.url) : '');
+
+// Couleurs du thème
+const primaryColor = siteConfig?.colors?.primary || '#1f2937';
+const secondaryColor = siteConfig?.colors?.secondary || '#3b82f6';
+
+// Conversion des couleurs hex en RGB pour CSS custom properties
+function hexToRgb(hex: string): string {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
+    : '31, 41, 55'; // Fallback
+}
+
+const primaryRgb = hexToRgb(primaryColor);
+const secondaryRgb = hexToRgb(secondaryColor);
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- SEO -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {socialImage && <meta property="og:image" content={socialImage} />}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta property="twitter:description" content={description} />
+    {socialImage && <meta property="twitter:image" content={socialImage} />}
+
+    <!-- Couleurs du thème en CSS custom properties -->
+    <style>
+      :root {
+        --color-primary: {primaryRgb};
+        --color-secondary: {secondaryRgb};
+      }
+    </style>
+  </head>
+  <body class={`theme-${siteConfig?.theme || 'modern'} min-h-screen bg-gray-50`}>
+    <slot />
+
+    <!-- Script pour l'accessibilité clavier -->
+    <script>
+      // Amélioration de l'accessibilité pour la navigation au clavier
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          document.body.classList.add('keyboard-navigation');
+        }
+      });
+
+      document.addEventListener('mousedown', () => {
+        document.body.classList.remove('keyboard-navigation');
+      });
+    </script>
+
+    <!-- Styles pour l'accessibilité -->
+    <style>
+      /* Focus visible uniquement pour la navigation clavier */
+      .keyboard-navigation *:focus {
+        outline: 2px solid rgb(var(--color-secondary));
+        outline-offset: 2px;
+      }
+
+      /* Masquer l'outline par défaut sauf pour la navigation clavier */
+      *:focus {
+        outline: none;
+      }
+
+      /* Skip link pour l'accessibilité */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 6px;
+        background: rgb(var(--color-primary));
+        color: white;
+        padding: 8px;
+        text-decoration: none;
+        transition: top 0.3s;
+      }
+
+      .skip-link:focus {
+        top: 6px;
+      }
+
+      /* Styles pour les différents thèmes */
+      .theme-classic {
+        font-family: Georgia, 'Times New Roman', serif;
+      }
+
+      .theme-modern {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .theme-accessible {
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        line-height: 1.6;
+      }
+    </style>
+  </body>
+</html>

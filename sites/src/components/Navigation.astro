@@ -1,0 +1,210 @@
+---
+import type { Page, Site } from '../types/strapi';
+import { getMenuPages, getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+
+// Récupération des pages du menu et de la configuration du site
+let menuPages: Page[] = [];
+let siteConfig: Site | null = null;
+
+try {
+  [menuPages, siteConfig] = await Promise.all([
+    getMenuPages(),
+    getSiteConfig()
+  ]);
+} catch (error) {
+  console.error('Erreur lors de la récupération des données de navigation:', error);
+}
+
+// URL actuelle pour la navigation active
+const currentPath = Astro.url.pathname;
+---
+
+<nav class="bg-white shadow-lg border-b border-gray-200" role="navigation" aria-label="Navigation principale">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo et nom de la mairie -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-3 text-gray-900 hover:text-primary transition-colors">
+          {siteConfig?.logo?.data && (
+            <img
+              src={getStrapiImageUrl(siteConfig.logo.data.url)}
+              alt={siteConfig.logo.data.alternativeText || `Logo ${siteConfig.name}`}
+              class="h-10 w-auto"
+            />
+          )}
+          <span class="font-bold text-xl">{siteConfig?.name}</span>
+        </a>
+      </div>
+
+      <!-- Navigation desktop -->
+      <div class="hidden md:block">
+        <div class="ml-10 flex items-baseline space-x-4">
+          <a
+            href="/"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath === '/'
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath === '/' ? 'page' : undefined}
+          >
+            Accueil
+          </a>
+
+          {menuPages.map((page) => (
+            <a
+              href={`/${page.slug}`}
+              class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                currentPath === `/${page.slug}`
+                  ? 'bg-primary text-white'
+                  : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+              }`}
+              aria-current={currentPath === `/${page.slug}` ? 'page' : undefined}
+            >
+              {page.title}
+            </a>
+          ))}
+
+          <a
+            href="/articles"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/articles')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/articles') ? 'page' : undefined}
+          >
+            Actualités
+          </a>
+
+          <a
+            href="/evenements"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/evenements')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/evenements') ? 'page' : undefined}
+          >
+            Événements
+          </a>
+        </div>
+      </div>
+
+      <!-- Bouton hamburger pour mobile -->
+      <div class="md:hidden">
+        <button
+          type="button"
+          class="bg-gray-100 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+          id="mobile-menu-button"
+        >
+          <span class="sr-only">Ouvrir le menu principal</span>
+          <!-- Icon hambourger -->
+          <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div class="md:hidden hidden" id="mobile-menu" role="menu" aria-orientation="vertical" aria-labelledby="mobile-menu-button">
+    <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t border-gray-200">
+      <a
+        href="/"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath === '/'
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Accueil
+      </a>
+
+      {menuPages.map((page) => (
+        <a
+          href={`/${page.slug}`}
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+            currentPath === `/${page.slug}`
+              ? 'bg-primary text-white'
+              : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+          }`}
+          role="menuitem"
+        >
+          {page.title}
+        </a>
+      ))}
+
+      <a
+        href="/articles"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/articles')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Actualités
+      </a>
+
+      <a
+        href="/evenements"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/evenements')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Événements
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- Script pour le menu mobile -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        const isExpanded = mobileMenuButton.getAttribute('aria-expanded') === 'true';
+
+        // Toggle du menu
+        mobileMenu.classList.toggle('hidden');
+        mobileMenuButton.setAttribute('aria-expanded', (!isExpanded).toString());
+
+        // Changement de l'icône (hamburger <-> X)
+        const icon = mobileMenuButton.querySelector('svg');
+        if (icon) {
+          if (isExpanded) {
+            // Icône hamburger
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+          } else {
+            // Icône X
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+          }
+        }
+      });
+
+      // Fermer le menu quand on clique sur un lien (mobile)
+      const mobileLinks = mobileMenu.querySelectorAll('a');
+      mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.add('hidden');
+          mobileMenuButton.setAttribute('aria-expanded', 'false');
+          const icon = mobileMenuButton.querySelector('svg');
+          if (icon) {
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+          }
+        });
+      });
+    }
+  });
+</script>

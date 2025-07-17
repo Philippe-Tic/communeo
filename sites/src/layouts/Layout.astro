@@ -42,9 +42,6 @@ function hexToRgb(hex: string): string {
     ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
     : '31, 41, 55'; // Fallback
 }
-
-const primaryRgb = hexToRgb(primaryColor);
-const secondaryRgb = hexToRgb(secondaryColor);
 ---
 
 <!doctype html>

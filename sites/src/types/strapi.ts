@@ -90,7 +90,6 @@ export interface Event {
   title: string;
   description: string;
   slug: string;
-  status: 'draft' | 'published' | 'archived';
   start_date: string;
   end_date?: string;
   location?: string;

@@ -1,6 +1,5 @@
 import type {
-  Site, Page, Article, Event,
-  StrapiResponse, StrapiCollectionResponse
+  Site, Page, Article, Event, StrapiCollectionResponse
 } from '../types/strapi';
 
 // Configuration depuis les variables d'environnement
@@ -247,7 +246,7 @@ export async function getUpcomingEvents(limit?: number): Promise<Event[]> {
   const url = buildStrapiUrl('evenements', {
     filters: {
       start_date: { $gte: now },
-      status: { $in: ['scheduled', 'ongoing'] }
+      category: { $in: ['cultural', 'sport', 'meeting', 'celebration', 'workshop', 'conference'] }
     },
     populate: ['image', 'site'],
     sort: ['start_date:asc'],

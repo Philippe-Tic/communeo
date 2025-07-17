@@ -16,6 +16,11 @@ let featuredArticles: Article[] = [];
 let upcomingEvents: Event[] = [];
 
 try {
+  // [homepage, featuredArticles, upcomingEvents] = await Promise.all([
+  //   getHomepage(),
+  //   getFeaturedArticles(3),
+  //   getUpcomingEvents(3)
+  // ]);
   [homepage, featuredArticles, upcomingEvents] = await Promise.all([
     getHomepage(),
     getFeaturedArticles(3),

@@ -436,6 +436,54 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
+  collectionName: 'deployments';
+  info: {
+    description: 'Track deployments to Netlify';
+    displayName: 'Deployment';
+    pluralName: 'deployments';
+    singularName: 'deployment';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    build_time: Schema.Attribute.Integer;
+    completed_at: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    deployment_id: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    deployment_url: Schema.Attribute.String;
+    error_message: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::deployment.deployment'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    status: Schema.Attribute.Enumeration<['building', 'ready', 'error']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'building'>;
+    triggered_at: Schema.Attribute.DateTime &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'now'>;
+    triggered_by: Schema.Attribute.Relation<
+      'manyToOne',
+      'plugin::users-permissions.user'
+    > &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
   collectionName: 'evenements';
   info: {
@@ -576,10 +624,23 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    custom_domain: Schema.Attribute.String;
+    deployments: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::deployment.deployment'
+    >;
+    domain_configured_at: Schema.Attribute.DateTime;
+    domain_status: Schema.Attribute.Enumeration<
+      ['pending', 'verified', 'error']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
+    domain_verification_token: Schema.Attribute.String &
+      Schema.Attribute.Private;
     evenements: Schema.Attribute.Relation<
       'oneToMany',
       'api::evenement.evenement'
     >;
+    live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> &
       Schema.Attribute.Private;
@@ -590,9 +651,16 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
+    netlify_site_id: Schema.Attribute.String &
+      Schema.Attribute.Private &
+      Schema.Attribute.Unique;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
+    plan_type: Schema.Attribute.Enumeration<['basic', 'premium']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'basic'>;
     publishedAt: Schema.Attribute.DateTime;
-    slug: Schema.Attribute.UID<'nom'> & Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     theme: Schema.Attribute.Enumeration<
       ['classique', 'moderne', 'accessible']
     > &
@@ -1126,6 +1194,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::article.article': ApiArticleArticle;
+      'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::page.page': ApiPagePage;
       'api::site.site': ApiSiteSite;

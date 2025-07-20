@@ -1,5 +1,6 @@
 import {
     Box,
+    HStack,
     Text,
     useBreakpointValue,
     VStack,
@@ -10,15 +11,18 @@ import { useLocation, useNavigate } from 'react-router-dom'
 interface NavItem {
   name: string
   path: string
+  icon?: string
 }
 
 const navItems: NavItem[] = [
-  { name: 'Tableau de bord', path: '/dashboard' },
-  { name: 'Articles', path: '/articles' },
-  { name: 'Pages', path: '/pages' },
-  { name: 'Événements', path: '/events' },
-  { name: 'Site', path: '/site' },
-  // { name: 'Utilisateurs', path: '/users' }, // Temporarily hidden
+  { name: 'Tableau de bord', path: '/dashboard', icon: '📊' },
+  { name: 'Articles', path: '/articles', icon: '📝' },
+  { name: 'Pages', path: '/pages', icon: '📄' },
+  { name: 'Événements', path: '/events', icon: '📅' },
+  { name: 'Site', path: '/site', icon: '⚙️' },
+  { name: 'Déploiement', path: '/deployment', icon: '🚀' },
+  { name: 'Domaines', path: '/domain', icon: '🌐' },
+  // { name: 'Utilisateurs', path: '/users', icon: '👥' }, // Temporarily hidden
 ]
 
 interface SidebarProps {
@@ -94,7 +98,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               transition="all 0.2s"
               onClick={() => handleNavClick(item.path)}
             >
-              <Text fontSize="sm">{item.name}</Text>
+              <HStack gap={3} align="center">
+                {item.icon && (
+                  <Text fontSize="md" lineHeight={1}>
+                    {item.icon}
+                  </Text>
+                )}
+                <Text fontSize="sm">{item.name}</Text>
+              </HStack>
             </Box>
           )
         })}

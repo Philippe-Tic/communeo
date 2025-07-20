@@ -29,15 +29,15 @@ interface StrapiContext {
   internalServerError: (message: string) => void;
 }
 
-interface OwnershipResult {
-  error?: 'notFound' | 'forbidden';
-  message?: string;
-  entity?: any;
-}
-
 interface ParsedUrl {
   pluralApiId: string | null;
   documentId: string | null;
+}
+
+interface OwnershipResult {
+  entity?: any;
+  error?: 'notFound' | 'forbidden';
+  message?: string;
 }
 
 export default (config: any, { strapi }: { strapi: any }) => {
@@ -133,7 +133,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       } : 'null');
 
       return user;
-    } catch (error) {
+    } catch (error: any) {
       console.log('❌ Error getting user from token:', error.message);
       return null;
     }
@@ -167,6 +167,24 @@ export default (config: any, { strapi }: { strapi: any }) => {
         const token = authHeader.substring(7);
         user = await getUserFromToken(token);
       }
+    } else {
+      // Même si l'utilisateur existe dans ctx.state, s'assurer qu'il a sa relation site
+      if (!user.site) {
+        console.log('🔍 User exists but missing site relation, fetching complete user...');
+        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
+          populate: ['site']
+        });
+
+        if (completeUser) {
+          user = completeUser;
+        }
+      }
+    }
+
+    // IMPORTANT: Toujours mettre à jour ctx.state.user avec l'utilisateur complet
+    if (user) {
+      ctx.state.user = user;
+      console.log(`🔄 [${requestId}] Updated ctx.state.user with complete user data including site`);
     }
 
     console.log(`🔍 [${requestId}] Final user:`, user ? {
@@ -199,23 +217,42 @@ export default (config: any, { strapi }: { strapi: any }) => {
     const contentTypes: Record<string, string> = {
       'pages': 'api::page.page',
       'articles': 'api::article.article',
-      'evenements': 'api::evenement.evenement'
+      'evenements': 'api::evenement.evenement',
     };
 
-    // Skip if not a content-type that needs site isolation
-    if (!pluralApiId || !contentTypes[pluralApiId]) {
-      console.log(`🔄 [${requestId}] Skipping middleware: Not a content-type that needs site isolation`);
+    // Endpoints spéciaux qui nécessitent juste la vérification de la relation site
+    const specialEndpoints = [
+      'deployment', // /api/deployment/* - toutes les routes de déploiement
+      'domain'      // /api/domain/* - toutes les routes de domaine
+    ];
+
+    // Skip if not a content-type that needs site isolation and not a special endpoint
+    if (!pluralApiId || (!contentTypes[pluralApiId] && !specialEndpoints.includes(pluralApiId))) {
+      console.log(`🔄 [${requestId}] Skipping middleware: Not a content-type that needs site isolation or special endpoint`);
       const result = await next();
       console.log(`🌐 [${requestId}] === Site Isolation Middleware END (not target content) === ${Date.now() - startTime}ms`);
+      return result;
+    }
+
+    console.log(`🎯 [${requestId}] === APPLYING SITE ISOLATION ===`);
+    console.log(`🎯 [${requestId}] pluralApiId: ${pluralApiId}`);
+    console.log(`🎯 [${requestId}] User Site Document ID: ${user.site.documentId}`);
+
+    // Traitement spécial pour les endpoints deployment et domain
+    if (specialEndpoints.includes(pluralApiId)) {
+      console.log(`🎯 [${requestId}] Special endpoint detected: ${pluralApiId}`);
+      // Pour ces endpoints, on s'assure juste que l'utilisateur a une relation site
+      // Le contrôleur se chargera de la logique métier spécifique
+      console.log(`✅ [${requestId}] Special endpoint access granted - user has site`);
+      const result = await next();
+      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (special endpoint) === ${Date.now() - startTime}ms`);
       return result;
     }
 
     const contentType = contentTypes[pluralApiId];
     const userSiteDocumentId = user.site.documentId;
 
-    console.log(`🎯 [${requestId}] === APPLYING SITE ISOLATION ===`);
     console.log(`🎯 [${requestId}] Content Type: ${contentType}`);
-    console.log(`🎯 [${requestId}] User Site Document ID: ${userSiteDocumentId}`);
 
     try {
       switch (method) {
@@ -268,49 +305,41 @@ export default (config: any, { strapi }: { strapi: any }) => {
           break;
 
         case 'PUT':
-          // PUT update - verify ownership and prevent site change
-          console.log(`📝 [${requestId}] PUT UPDATE - Verifying ownership`);
+        case 'PATCH':
+          // PUT/PATCH update - verify ownership and prevent site changes
+          if (documentId) {
+            console.log(`📝 [${requestId}] ${method} UPDATE - Verifying ownership`);
+            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
+            if (result.error) {
+              console.log(`❌ [${requestId}] Access denied for ${method}`);
+              return result.error === 'notFound'
+                ? ctx.notFound()
+                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
+            }
 
-          if (!documentId) {
-            console.log(`❌ [${requestId}] PUT without document ID`);
-            return ctx.badRequest('Document ID is required for PUT operations');
+            // Remove site changes from request body to prevent site switching
+            if (ctx.request.body.data && ctx.request.body.data.site) {
+              delete ctx.request.body.data.site;
+              console.log(`📝 [${requestId}] Removed site change attempt for ${method}`);
+            }
+
+            console.log(`✅ [${requestId}] Access granted for ${method}`);
           }
-
-          const updateResult = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-          if (updateResult.error) {
-            console.log(`❌ [${requestId}] Update denied`);
-            return updateResult.error === 'notFound'
-              ? ctx.notFound()
-              : ctx.forbidden(updateResult.message || 'Accès non autorisé à cette ressource');
-          }
-
-          // Prevent site change in update
-          if (ctx.request.body.data && ctx.request.body.data.site) {
-            delete ctx.request.body.data.site;
-            console.log(`📝 [${requestId}] Removed site change attempt`);
-          }
-
-          console.log(`✅ [${requestId}] Update authorized`);
           break;
 
         case 'DELETE':
           // DELETE - verify ownership
-          console.log(`📝 [${requestId}] DELETE - Verifying ownership`);
-
-          if (!documentId) {
-            console.log(`❌ [${requestId}] DELETE without document ID`);
-            return ctx.badRequest('Document ID is required for DELETE operations');
+          if (documentId) {
+            console.log(`📝 [${requestId}] DELETE - Verifying ownership`);
+            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
+            if (result.error) {
+              console.log(`❌ [${requestId}] Access denied for DELETE`);
+              return result.error === 'notFound'
+                ? ctx.notFound()
+                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
+            }
+            console.log(`✅ [${requestId}] Access granted for DELETE`);
           }
-
-          const deleteResult = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-          if (deleteResult.error) {
-            console.log(`❌ [${requestId}] Delete denied`);
-            return deleteResult.error === 'notFound'
-              ? ctx.notFound()
-              : ctx.forbidden(deleteResult.message || 'Accès non autorisé à cette ressource');
-          }
-
-          console.log(`✅ [${requestId}] Delete authorized`);
           break;
 
         default:

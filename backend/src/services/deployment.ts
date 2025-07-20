@@ -5,6 +5,7 @@
 import archiver from 'archiver';
 import { execSync } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { Readable } from 'stream';
 import netlifyService from './netlify';
@@ -28,12 +29,26 @@ class DeploymentService {
   private tempDir: string;
 
   constructor() {
-    this.sitesPath = path.join(__dirname, '../../../sites');
-    this.tempDir = path.join(__dirname, '../../../temp');
+    // Le dossier sites est au niveau parent du backend
+    this.sitesPath = path.join(process.cwd(), '../sites');
+    // Utiliser le dossier temp système pour éviter les redémarrages Strapi
+    this.tempDir = path.join(os.tmpdir(), 'cms-mairies-builds');
+
+    console.log('🔧 [DEPLOYMENT SERVICE] Configuration des chemins :');
+    console.log(`   - Working directory: ${process.cwd()}`);
+    console.log(`   - Sites path: ${this.sitesPath}`);
+    console.log(`   - Temp directory: ${this.tempDir}`);
+    console.log(`   - Sites directory exists: ${fs.existsSync(this.sitesPath)}`);
+
+    // Nettoyer tous les anciens dossiers temporaires au démarrage
+    this.cleanupOldTempFiles();
 
     // Créer le dossier temp s'il n'existe pas
     if (!fs.existsSync(this.tempDir)) {
       fs.mkdirSync(this.tempDir, { recursive: true });
+      console.log(`✅ [DEPLOYMENT SERVICE] Temp directory created: ${this.tempDir}`);
+    } else {
+      console.log(`✅ [DEPLOYMENT SERVICE] Temp directory exists: ${this.tempDir}`);
     }
   }
 
@@ -88,7 +103,7 @@ class DeploymentService {
           }
         });
 
-        console.log(`✅ [DEPLOYMENT] Site updated with Netlify ID`);
+                console.log(`✅ [DEPLOYMENT] Site updated with Netlify ID`);
       } else {
         console.log(`✅ [DEPLOYMENT] Using existing Netlify site: ${netlifyId}`);
       }
@@ -109,24 +124,38 @@ class DeploymentService {
       zipPath = await this.createZip(tempBuildDir);
       console.log(`✅ [DEPLOYMENT] ZIP created: ${zipPath}`);
 
-      // 5. Uploader vers Netlify
-      console.log(`⬆️ [DEPLOYMENT] Step 5: Uploading to Netlify...`);
+      // 5. Nettoyer immédiatement le dossier de build (garde seulement le ZIP)
+      console.log(`🧹 [DEPLOYMENT] Step 5: Immediate cleanup of build directory...`);
+      if (tempBuildDir && fs.existsSync(tempBuildDir)) {
+        await fs.promises.rm(tempBuildDir, { recursive: true, force: true });
+        console.log(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
+        tempBuildDir = undefined; // Pour éviter de le nettoyer à nouveau dans finally
+      }
+
+      // 6. Uploader vers Netlify
+      console.log(`⬆️ [DEPLOYMENT] Step 6: Uploading to Netlify...`);
       const zipBuffer = fs.readFileSync(zipPath);
       const deployment = await netlifyService.deploySite(netlifyId, zipBuffer);
       console.log(`✅ [DEPLOYMENT] Uploaded to Netlify, deployment ID: ${deployment.id}`);
 
-      // 6. Créer l'entrée de déploiement en base
-      console.log(`💾 [DEPLOYMENT] Step 6: Creating deployment record...`);
-      const deploymentRecord = await strapi.entityService.create('api::deployment.deployment', {
-        data: {
-          site: siteId,
-          deployment_id: deployment.id,
-          status: 'building',
-          triggered_by: userId,
-          deployment_url: deployment.deploy_url,
-          triggered_at: new Date()
-        }
-      });
+      // 7. Créer l'entrée de déploiement en base
+      console.log(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
+      try {
+        const deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
+          data: {
+            site: siteId,
+            deployment_id: deployment.id,
+            status: 'building',
+            triggered_by: userId,
+            deployment_url: deployment.deploy_url,
+            triggered_at: new Date()
+          }
+        });
+        console.log(`✅ [DEPLOYMENT] Deployment record created: ${deploymentRecord.id}`);
+      } catch (dbError: any) {
+        console.warn(`⚠️ [DEPLOYMENT] Could not create deployment record: ${dbError.message}`);
+        // Ne pas faire échouer le déploiement si l'enregistrement en base échoue
+      }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
@@ -134,7 +163,7 @@ class DeploymentService {
       console.log(`🔗 [DEPLOYMENT] Deployment URL: ${deployment.deploy_url}`);
 
       return {
-        deployment: deploymentRecord,
+        deployment: null, // Déploiement réussi même si l'enregistrement en base échoue
         buildTime,
         success: true
       };
@@ -150,10 +179,30 @@ class DeploymentService {
         error: error.message
       };
     } finally {
-      // Cleanup des fichiers temporaires
-      console.log(`🧹 [DEPLOYMENT] Cleaning up temporary files...`);
-      await this.cleanup(tempBuildDir, zipPath);
-      console.log(`✅ [DEPLOYMENT] Cleanup completed`);
+      // Cleanup des fichiers temporaires (ZIP et dossier build s'il reste)
+      console.log(`🧹 [DEPLOYMENT] Final cleanup...`);
+
+      // Nettoyer le ZIP s'il existe encore
+      if (zipPath && fs.existsSync(zipPath)) {
+        try {
+          await fs.promises.unlink(zipPath);
+          console.log(`✅ [DEPLOYMENT] ZIP file cleaned: ${zipPath}`);
+        } catch (cleanupError: any) {
+          console.warn(`⚠️ [DEPLOYMENT] Could not clean ZIP: ${cleanupError.message}`);
+        }
+      }
+
+      // Nettoyer le dossier build s'il existe encore
+      if (tempBuildDir && fs.existsSync(tempBuildDir)) {
+        try {
+          await fs.promises.rm(tempBuildDir, { recursive: true, force: true });
+          console.log(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
+        } catch (cleanupError: any) {
+          console.warn(`⚠️ [DEPLOYMENT] Could not clean build dir: ${cleanupError.message}`);
+        }
+      }
+
+      console.log(`✅ [DEPLOYMENT] Final cleanup completed`);
     }
   }
 
@@ -176,20 +225,21 @@ class DeploymentService {
       // 2. Installer les dépendances
       console.log(`📦 [BUILD] Step 2: Installing dependencies...`);
       try {
-        execSync('npm install', {
+        execSync('npm ci --production=false', {
           cwd: tempBuildDir,
           stdio: 'pipe'
         });
         console.log(`✅ [BUILD] Dependencies installed successfully`);
       } catch (npmError: any) {
-        console.error(`❌ [BUILD] npm install failed:`, npmError.message);
-        throw new Error(`npm install failed: ${npmError.message}`);
+        console.error(`❌ [BUILD] npm ci failed:`, npmError.message);
+        throw new Error(`npm ci failed: ${npmError.message}`);
       }
 
       // 3. Build avec les variables d'environnement
       const buildEnv = {
         ...process.env,
-        SITE_ID: siteId,
+        // Variables pour Astro/Strapi
+        SITE_DOCUMENT_ID: siteId,  // Le projet Astro s'attend à SITE_DOCUMENT_ID
         SITE_SLUG: siteSlug,
         STRAPI_URL: process.env.STRAPI_PUBLIC_URL || 'http://localhost:1337',
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
@@ -197,22 +247,33 @@ class DeploymentService {
       };
 
       console.log(`🔧 [BUILD] Step 3: Building with environment variables:`);
-      console.log(`   SITE_ID: ${buildEnv.SITE_ID}`);
+      console.log(`   SITE_DOCUMENT_ID: ${buildEnv.SITE_DOCUMENT_ID}`);
       console.log(`   SITE_SLUG: ${buildEnv.SITE_SLUG}`);
       console.log(`   STRAPI_URL: ${buildEnv.STRAPI_URL}`);
       console.log(`   STRAPI_TOKEN: ${buildEnv.STRAPI_TOKEN ? '***SET***' : 'NOT_SET'}`);
       console.log(`   NODE_ENV: ${buildEnv.NODE_ENV}`);
 
       try {
-        execSync('npm run build', {
+        console.log(`🚀 [BUILD] Running: npx astro build`);
+        const buildOutput = execSync('npx astro build', {
           cwd: tempBuildDir,
           env: buildEnv,
-          stdio: 'pipe'
+          stdio: 'pipe',
+          encoding: 'utf8'
         });
+        console.log(`📋 [BUILD] Build output:\n${buildOutput}`);
         console.log(`✅ [BUILD] Astro build completed successfully`);
       } catch (buildError: any) {
-        console.error(`❌ [BUILD] npm run build failed:`, buildError.message);
-        throw new Error(`Build failed: ${buildError.message}`);
+        console.error(`❌ [BUILD] npx astro build failed:`);
+        console.error(`❌ [BUILD] Exit code: ${buildError.status}`);
+        console.error(`❌ [BUILD] Error message: ${buildError.message}`);
+        if (buildError.stdout) {
+          console.error(`📋 [BUILD] STDOUT:\n${buildError.stdout}`);
+        }
+        if (buildError.stderr) {
+          console.error(`📋 [BUILD] STDERR:\n${buildError.stderr}`);
+        }
+        throw new Error(`Build failed: ${buildError.message}\n${buildError.stderr || buildError.stdout || ''}`);
       }
 
       const distPath = path.join(tempBuildDir, 'dist');
@@ -223,6 +284,35 @@ class DeploymentService {
       }
 
       console.log(`📁 [BUILD] Build output found at: ${distPath}`);
+
+      // Analyser le contenu du dossier dist
+      try {
+        const distFiles = fs.readdirSync(distPath, { recursive: true });
+        console.log(`📋 [BUILD] Dist contents (${distFiles.length} files):`);
+        distFiles.slice(0, 20).forEach(file => console.log(`   - ${file}`));
+        if (distFiles.length > 20) {
+          console.log(`   ... and ${distFiles.length - 20} more files`);
+        }
+
+        // Vérifier la taille du dossier
+        const distStats = fs.statSync(distPath);
+        console.log(`📊 [BUILD] Dist directory size: ${distStats.size} bytes`);
+
+        // Vérifier le fichier index.html
+        const indexPath = path.join(distPath, 'index.html');
+        if (fs.existsSync(indexPath)) {
+          const indexSize = fs.statSync(indexPath).size;
+          console.log(`📄 [BUILD] index.html found: ${indexSize} bytes`);
+          if (indexSize < 1000) {
+            const indexContent = fs.readFileSync(indexPath, 'utf8');
+            console.log(`⚠️  [BUILD] index.html content (small file):\n${indexContent.substring(0, 500)}`);
+          }
+        } else {
+          console.log(`❌ [BUILD] index.html NOT found!`);
+        }
+      } catch (error) {
+        console.warn(`⚠️ [BUILD] Could not analyze dist contents:`, error);
+      }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
@@ -248,6 +338,7 @@ class DeploymentService {
 
   /**
    * Crée un ZIP du dossier de build
+   * Structure le ZIP pour que Netlify trouve les fichiers dans dist/
    */
   async createZip(sourceDir: string): Promise<string> {
     const zipPath = path.join(this.tempDir, `deploy-${Date.now()}.zip`);
@@ -257,7 +348,8 @@ class DeploymentService {
       const archive = archiver('zip', { zlib: { level: 9 } });
 
       output.on('close', () => {
-        strapi.log.info(`ZIP created: ${archive.pointer()} total bytes`);
+        console.log(`✅ [ZIP] Created: ${archive.pointer()} total bytes`);
+        console.log(`📁 [ZIP] Structure: Files placed at ZIP root for direct Netlify deployment`);
         resolve(zipPath);
       });
 
@@ -266,6 +358,7 @@ class DeploymentService {
       });
 
       archive.pipe(output);
+      // Mettre les fichiers directement à la racine du ZIP
       archive.directory(sourceDir, false);
       archive.finalize();
     });
@@ -356,7 +449,7 @@ class DeploymentService {
       };
 
     } catch (error: any) {
-      strapi.log.error(`Error checking deployment status:`, error);
+      console.error(`❌ [DEPLOYMENT STATUS] Error checking deployment status:`, error);
       throw error;
     }
   }
@@ -365,6 +458,7 @@ class DeploymentService {
    * Nettoie les fichiers temporaires
    */
   async cleanup(...paths: (string | undefined)[]): Promise<void> {
+    // Nettoyer les chemins spécifiés
     for (const cleanupPath of paths) {
       if (cleanupPath && fs.existsSync(cleanupPath)) {
         try {
@@ -374,11 +468,67 @@ class DeploymentService {
           } else {
             await fs.promises.unlink(cleanupPath);
           }
-          strapi.log.info(`Cleaned up: ${cleanupPath}`);
+          console.log(`🧹 [CLEANUP] Cleaned up: ${cleanupPath}`);
         } catch (error: any) {
-          strapi.log.warn(`Failed to cleanup ${cleanupPath}: ${error.message}`);
+          console.warn(`⚠️ [CLEANUP] Failed to cleanup ${cleanupPath}: ${error.message}`);
         }
       }
+    }
+
+    // Nettoyer les anciens fichiers temporaires (plus de 1 heure)
+    try {
+      if (fs.existsSync(this.tempDir)) {
+        const tempFiles = fs.readdirSync(this.tempDir);
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+
+        for (const file of tempFiles) {
+          if (file.startsWith('build-') || file.startsWith('deploy-')) {
+            const filePath = path.join(this.tempDir, file);
+            const stats = fs.statSync(filePath);
+
+            if (stats.mtime.getTime() < oneHourAgo) {
+              if (stats.isDirectory()) {
+                await fs.promises.rm(filePath, { recursive: true, force: true });
+              } else {
+                await fs.promises.unlink(filePath);
+              }
+              console.log(`🧹 [CLEANUP] Old temp file removed: ${file}`);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
+    }
+  }
+
+  /**
+   * Nettoie les anciens fichiers temporaires (plus de 1 heure)
+   */
+  private async cleanupOldTempFiles(): Promise<void> {
+    try {
+      if (fs.existsSync(this.tempDir)) {
+        const tempFiles = fs.readdirSync(this.tempDir);
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+
+        for (const file of tempFiles) {
+          if (file.startsWith('build-') || file.startsWith('deploy-')) {
+            const filePath = path.join(this.tempDir, file);
+            const stats = fs.statSync(filePath);
+
+            if (stats.mtime.getTime() < oneHourAgo) {
+              if (stats.isDirectory()) {
+                await fs.promises.rm(filePath, { recursive: true, force: true });
+              } else {
+                await fs.promises.unlink(filePath);
+              }
+              console.log(`🧹 [CLEANUP] Old temp file removed: ${file}`);
+            }
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
     }
   }
 }

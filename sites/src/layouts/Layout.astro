@@ -73,10 +73,13 @@ function hexToRgb(hex: string): string {
     {socialImage && <meta property="twitter:image" content={socialImage} />}
 
     <!-- Couleurs du thème en CSS custom properties -->
-    <style>
+    <style define:vars={{
+      'color-primary': siteConfig?.colors?.primaryRgb || '59, 130, 246',  // bleu par défaut
+      'color-secondary': siteConfig?.colors?.secondaryRgb || '16, 185, 129' // vert par défaut
+    }}>
       :root {
-        --color-primary: {primaryRgb};
-        --color-secondary: {secondaryRgb};
+        --color-primary: var(--color-primary);
+        --color-secondary: var(--color-secondary);
       }
     </style>
   </head>

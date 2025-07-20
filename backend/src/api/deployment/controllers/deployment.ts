@@ -90,7 +90,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
                 triggered_at: new Date(),
                 completed_at: new Date()
               }
-            }).catch(err => strapi.log.error('Failed to create error deployment record:', err));
+                          }).catch(err => console.error('Failed to create error deployment record:', err));
           } else {
             console.log('✅ Deployment successful, deployment ID:', result.deployment?.deployment_id);
           }

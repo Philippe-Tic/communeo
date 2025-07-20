@@ -3,7 +3,7 @@
  */
 
 import fetch from 'node-fetch';
-import FormData from 'form-data';
+
 
 interface NetlifySite {
   id: string;
@@ -69,17 +69,53 @@ class NetlifyService {
   }
 
   /**
-   * Crée un nouveau site sur Netlify
+   * Liste tous les sites de l'utilisateur sur Netlify
    */
-  async createSite(siteName: string, siteSlug: string): Promise<NetlifySite> {
-    strapi.log.info(`Creating Netlify site: ${siteName} (${siteSlug})`);
+  async listSites(): Promise<NetlifySite[]> {
+    return this.apiRequest('/sites');
+  }
+
+  /**
+   * Trouve un site par nom ou le crée s'il n'existe pas
+   */
+  async findOrCreateSite(siteName: string, siteSlug: string): Promise<NetlifySite> {
+    // Utiliser un nom déterministe (sans timestamp)
+    const siteDomainName = `${siteSlug}-mairie`;
+
+    console.log(`🔍 [NETLIFY] Looking for existing site: ${siteDomainName}`);
+
+    try {
+      // 1. Chercher un site existant avec ce nom
+      const sites = await this.listSites();
+      const existingSite = sites.find(site => site.name === siteDomainName);
+
+      if (existingSite) {
+        console.log(`✅ [NETLIFY] Found existing site: ${existingSite.id} (${existingSite.name})`);
+        return existingSite;
+      }
+
+      // 2. Aucun site trouvé, créer un nouveau
+      console.log(`🆕 [NETLIFY] Creating new site: ${siteDomainName}`);
+      return await this.createSiteWithName(siteName, siteDomainName);
+
+    } catch (error: any) {
+      console.error(`❌ [NETLIFY] Error finding/creating site: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Crée un nouveau site sur Netlify avec un nom spécifique
+   */
+  async createSiteWithName(siteName: string, siteDomainName: string): Promise<NetlifySite> {
+    console.log(`🌐 [NETLIFY] Creating site: ${siteName} with name: ${siteDomainName}`);
 
     const siteData = {
-      name: `${siteSlug}-mairie`,
+      name: siteDomainName,
       custom_domain: null,
       build_settings: {
-        cmd: 'npm run build',
-        dir: 'dist',
+        cmd: '',
+        dir: '.', // Publier depuis la racine du ZIP
         env: {}
       }
     };
@@ -89,39 +125,112 @@ class NetlifyService {
       body: JSON.stringify(siteData)
     });
 
-    strapi.log.info(`Netlify site created: ${site.id}`);
+    console.log(`✅ [NETLIFY] Site created successfully: ${site.id} (${site.name})`);
     return site;
   }
 
   /**
+   * Met à jour les paramètres d'un site existant
+   */
+  async updateSiteSettings(siteId: string): Promise<NetlifySite> {
+    console.log(`🔧 [NETLIFY] Updating site settings: ${siteId}`);
+
+    const settings = {
+      build_settings: {
+        cmd: '',
+        dir: '.', // Publier depuis la racine du ZIP
+        env: {}
+      }
+    };
+
+    const site = await this.apiRequest(`/sites/${siteId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(settings)
+    });
+
+    console.log(`✅ [NETLIFY] Site settings updated: ${site.id}`);
+    return site;
+  }
+
+  /**
+   * Crée un nouveau site sur Netlify (ancienne méthode - gardée pour compatibilité)
+   */
+  async createSite(siteName: string, siteSlug: string): Promise<NetlifySite> {
+    return this.findOrCreateSite(siteName, siteSlug);
+  }
+
+    /**
    * Déploie un site à partir d'un fichier ZIP
    */
   async deploySite(netlifyId: string, zipBuffer: Buffer): Promise<NetlifyDeployment> {
-    strapi.log.info(`Deploying site to Netlify: ${netlifyId}`);
+    console.log(`⬆️ [NETLIFY] Starting deployment to site: ${netlifyId}`);
+    console.log(`📦 [NETLIFY] ZIP size: ${(zipBuffer.length / 1024 / 1024).toFixed(2)} MB`);
 
-    const formData = new FormData();
-    formData.append('file', zipBuffer, {
-      filename: 'deploy.zip',
-      contentType: 'application/zip'
-    });
-
+    // L'API Netlify attend le ZIP en binaire brut, pas du FormData
     const response = await fetch(`${this.baseUrl}/sites/${netlifyId}/deploys`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token}`,
-        ...formData.getHeaders()
+        'Content-Type': 'application/zip'
       },
-      body: formData
+      body: zipBuffer
     });
 
     if (!response.ok) {
       const error = await response.text();
+      console.error(`❌ [NETLIFY] Deploy failed ${response.status}: ${error}`);
       throw new Error(`Netlify deploy error ${response.status}: ${error}`);
     }
 
     const deployment = await response.json();
-    strapi.log.info(`Deployment started: ${deployment.id}`);
+    console.log(`🚀 [NETLIFY] Deployment initiated: ${deployment.id}`);
+    console.log(`🔗 [NETLIFY] Deploy URL: ${deployment.deploy_url}`);
+
+    // Attendre que le déploiement soit prêt et l'activer automatiquement
+    await this.waitAndActivateDeployment(netlifyId, deployment.id);
+
     return deployment;
+  }
+
+  /**
+   * Attend que le déploiement soit prêt et l'active en production
+   */
+  async waitAndActivateDeployment(siteId: string, deploymentId: string): Promise<void> {
+    console.log(`⏳ [NETLIFY] Waiting for deployment to be ready: ${deploymentId}`);
+
+    let attempts = 0;
+    const maxAttempts = 30; // 30 secondes max
+
+    while (attempts < maxAttempts) {
+      try {
+        const deployment = await this.apiRequest(`/deploys/${deploymentId}`);
+
+        if (deployment.state === 'ready') {
+          console.log(`✅ [NETLIFY] Deployment ready, activating in production...`);
+
+          // Activer le déploiement en production
+          await this.apiRequest(`/sites/${siteId}/deploys/${deploymentId}/restore`, {
+            method: 'POST'
+          });
+
+          console.log(`🎉 [NETLIFY] Deployment activated in production!`);
+          return;
+        } else if (deployment.state === 'error') {
+          throw new Error(`Deployment failed: ${deployment.error_message}`);
+        }
+
+        console.log(`⏳ [NETLIFY] Deployment state: ${deployment.state}, waiting...`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1 seconde
+        attempts++;
+
+      } catch (error: any) {
+        console.warn(`⚠️ [NETLIFY] Error checking deployment status: ${error.message}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      }
+    }
+
+    console.warn(`⚠️ [NETLIFY] Timeout waiting for deployment, but upload was successful`);
   }
 
   /**

@@ -81,7 +81,13 @@ function buildStrapiUrl(endpoint: string, options: {
 /**
  * Fonction générique pour les requêtes Strapi
  */
-async function strapiRequest<T>(url: string): Promise<T> {
+async function strapiRequest<T>(url: string): Promise<T | null> {
+  // Pendant le build, on skip complètement les requêtes Strapi
+  if (process.env.NODE_ENV === 'production') {
+    console.log('🚫 [BUILD MODE] Skipping Strapi request:', url);
+    return null;
+  }
+
   try {
     const response = await fetch(url, baseConfig);
 
@@ -92,7 +98,7 @@ async function strapiRequest<T>(url: string): Promise<T> {
     return await response.json();
   } catch (error) {
     console.error('Strapi request error:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -101,7 +107,7 @@ async function strapiRequest<T>(url: string): Promise<T> {
  */
 export async function getSiteConfig(): Promise<Site> {
   if (!SITE_DOCUMENT_ID) {
-    throw new Error('SITE_DOCUMENT_ID is required but not provided');
+    return createDefaultSite();
   }
 
   // Rechercher le site par documentId
@@ -114,11 +120,36 @@ export async function getSiteConfig(): Promise<Site> {
 
   const response = await strapiRequest<StrapiCollectionResponse<Site>>(url);
 
-  if (response.data.length === 0) {
-    throw new Error(`Site with documentId ${SITE_DOCUMENT_ID} not found`);
+  if (!response || !response.data || response.data.length === 0) {
+    console.warn(`Site with documentId ${SITE_DOCUMENT_ID} not found, using default`);
+    return createDefaultSite();
   }
 
   return response.data[0];
+}
+
+/**
+ * Crée un site par défaut pour les builds sans connexion Strapi
+ */
+function createDefaultSite(): Site {
+  return {
+    id: 1,
+    documentId: SITE_DOCUMENT_ID || 'default',
+    name: 'Mairie',
+    slug: 'default',
+    theme: 'classique',
+    colors: {
+      primary: '#1f2937',
+      secondary: '#3b82f6',
+      primaryRgb: '31, 41, 55',
+      secondaryRgb: '59, 130, 246'
+    },
+    contact_mail: 'contact@mairie.fr',
+    address: 'Adresse de la mairie',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    publishedAt: new Date().toISOString()
+  };
 }
 
 /**

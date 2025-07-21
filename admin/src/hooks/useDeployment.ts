@@ -18,7 +18,7 @@ export const DEPLOYMENT_QUERY_KEYS = {
  */
 export const useDeployment = () => {
   const queryClient = useQueryClient()
-  const pollingIntervalRef = useRef<number | undefined>()
+  const pollingIntervalRef = useRef<number | undefined>(undefined)
 
   // Query pour récupérer les déploiements
   const deploymentsQuery = useQuery({

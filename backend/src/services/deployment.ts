@@ -59,6 +59,7 @@ class DeploymentService {
     const startTime = Date.now();
     let tempBuildDir: string | undefined;
     let zipPath: string | undefined;
+    let deploymentRecord: any = null;
 
     console.log(`🚀 [DEPLOYMENT] Starting deployment for site ${siteSlug} (ID: ${siteId})`);
 
@@ -141,7 +142,7 @@ class DeploymentService {
       // 7. Créer l'entrée de déploiement en base
       console.log(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
       try {
-        const deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
+        deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
           data: {
             site: siteId,
             deployment_id: deployment.id,
@@ -159,11 +160,29 @@ class DeploymentService {
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
+      // 8. Mettre à jour le statut final du déploiement
+      console.log(`📊 [DEPLOYMENT] Step 8: Updating deployment status to ready...`);
+
+      if (deploymentRecord) {
+        try {
+          await global.strapi.entityService.update('api::deployment.deployment', deploymentRecord.id, {
+            data: {
+              status: 'ready',
+              build_time: buildTime,
+              completed_at: new Date()
+            }
+          });
+          console.log(`✅ [DEPLOYMENT] Deployment status updated to ready`);
+        } catch (updateError: any) {
+          console.warn(`⚠️ [DEPLOYMENT] Could not update deployment status: ${updateError.message}`);
+        }
+      }
+
       console.log(`🎉 [DEPLOYMENT] Deployment initiated successfully in ${buildTime}s`);
       console.log(`🔗 [DEPLOYMENT] Deployment URL: ${deployment.deploy_url}`);
 
       return {
-        deployment: null, // Déploiement réussi même si l'enregistrement en base échoue
+        deployment: deploymentRecord,
         buildTime,
         success: true
       };
@@ -172,8 +191,44 @@ class DeploymentService {
       const buildTime = Math.round((Date.now() - startTime) / 1000);
       console.error(`💥 [DEPLOYMENT] Deployment failed for site ${siteSlug} after ${buildTime}s:`, error);
 
+      // Mettre à jour le statut du déploiement en erreur s'il existe
+      if (deploymentRecord) {
+        try {
+          await global.strapi.entityService.update('api::deployment.deployment', deploymentRecord.id, {
+            data: {
+              status: 'error',
+              build_time: buildTime,
+              error_message: error.message,
+              completed_at: new Date()
+            }
+          });
+          console.log(`❌ [DEPLOYMENT] Deployment status updated to error`);
+        } catch (updateError: any) {
+          console.warn(`⚠️ [DEPLOYMENT] Could not update deployment error status: ${updateError.message}`);
+        }
+      } else {
+        // Créer un record d'erreur s'il n'existe pas encore
+        try {
+          deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
+            data: {
+              site: siteId,
+              deployment_id: `error-${Date.now()}`,
+              status: 'error',
+              triggered_by: userId,
+              build_time: buildTime,
+              error_message: error.message,
+              triggered_at: new Date(),
+              completed_at: new Date()
+            }
+          });
+          console.log(`❌ [DEPLOYMENT] Error deployment record created: ${deploymentRecord.id}`);
+        } catch (dbError: any) {
+          console.warn(`⚠️ [DEPLOYMENT] Could not create error deployment record: ${dbError.message}`);
+        }
+      }
+
       return {
-        deployment: null,
+        deployment: deploymentRecord,
         buildTime,
         success: false,
         error: error.message

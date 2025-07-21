@@ -124,7 +124,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
   },
 
   /**
-   * Récupère l'historique des déploiements du site de l'utilisateur
+   * Récupère le statut du dernier déploiement + historique
    * GET /api/deployment/status
    */
   async status(ctx) {
@@ -146,7 +146,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
         if (completeUser && (completeUser as any).site) {
           user = completeUser;
-          console.log('✅ Complete user fetched with site:', (completeUser as any).site);
+          console.log('✅ Complete user fetched with site test:', (completeUser as any).site);
         }
       }
 
@@ -156,12 +156,45 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       const siteId = (user as any).site.documentId || (user as any).site.id;
 
-      // Pagination
+      console.log('🔍 Site ID:', siteId);
+
+      // 1. Récupérer le statut du dernier déploiement
+      const latestDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
+        filters: {
+          site: siteId
+        },
+        sort: { triggered_at: 'desc' },
+        limit: 1,
+        populate: {
+          triggered_by: {
+            fields: ['first_name', 'last_name', 'email']
+          }
+        }
+      });
+
+      console.log('🔍 Latest deployments:', latestDeployments);
+
+      const lastDeployment = latestDeployments.length > 0 ? latestDeployments[0] : null;
+
+      // Si le dernier déploiement est en cours, vérifier son statut sur Netlify
+      let currentStatus = null;
+      if (lastDeployment && lastDeployment.status === 'building') {
+        try {
+          currentStatus = await deploymentService.checkDeploymentStatus(lastDeployment.deployment_id);
+        } catch (error) {
+          console.warn('Could not check deployment status:', error);
+          currentStatus = lastDeployment;
+        }
+      } else {
+        currentStatus = lastDeployment;
+      }
+
+      // 2. Pagination pour l'historique
       const page = parseInt(ctx.query.page as string) || 1;
       const pageSize = parseInt(ctx.query.pageSize as string) || 10;
       const start = (page - 1) * pageSize;
 
-      // Récupérer les déploiements
+      // 3. Récupérer l'historique paginé
       const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
           site: siteId
@@ -176,7 +209,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         }
       });
 
-      // Compter le total
+      // 4. Compter le total
       const total = await strapi.entityService.count('api::deployment.deployment', {
         filters: {
           site: siteId
@@ -184,6 +217,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       });
 
       ctx.body = {
+        currentDeployment: currentStatus,
         data: deployments,
         meta: {
           pagination: {

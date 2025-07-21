@@ -1,15 +1,15 @@
 import {
-    Badge,
-    Box,
-    Button,
-    Card,
-    HStack,
-    IconButton,
-    Link,
-    Separator,
-    Table,
-    Text,
-    VStack
+  Badge,
+  Box,
+  Button,
+  Card,
+  HStack,
+  IconButton,
+  Link,
+  Separator,
+  Table,
+  Text,
+  VStack
 } from '@chakra-ui/react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -118,7 +118,7 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                     onClick={() => refetch()}
                     disabled={isLoading}
                   >
-                    ⟳
+                    ↩️
                   </IconButton>
 
                   <Button

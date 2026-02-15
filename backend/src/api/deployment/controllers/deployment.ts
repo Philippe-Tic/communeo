@@ -40,9 +40,10 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       console.log('🔍 User site object:', (user as any).site);
 
       // Vérifier s'il n'y a pas déjà un déploiement en cours
+      const siteIdForRelation = (user as any).site.id;
       const ongoingDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
-          site: siteId,
+          site: siteIdForRelation,
           status: 'building'
         }
       });
@@ -81,7 +82,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
             // Créer une entrée d'erreur en base
             strapi.entityService.create('api::deployment.deployment', {
               data: {
-                site: siteId,
+                site: siteIdForRelation,
                 deployment_id: `error-${Date.now()}`,
                 status: 'error',
                 triggered_by: userId,
@@ -159,9 +160,12 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       console.log('🔍 Site ID:', siteId);
 
       // 1. Récupérer le statut du dernier déploiement
+      // Utiliser l'ID du site pour la relation, pas le documentId
+      const siteIdForRelation = (user as any).site.id;
+
       const latestDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
-          site: siteId
+          site: siteIdForRelation
         },
         sort: { triggered_at: 'desc' },
         limit: 1,
@@ -197,7 +201,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       // 3. Récupérer l'historique paginé
       const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
-          site: siteId
+          site: siteIdForRelation
         },
         sort: { triggered_at: 'desc' },
         start,
@@ -212,7 +216,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       // 4. Compter le total
       const total = await strapi.entityService.count('api::deployment.deployment', {
         filters: {
-          site: siteId
+          site: siteIdForRelation
         }
       });
 
@@ -266,10 +270,11 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       const siteId = (user as any).site.documentId || (user as any).site.id;
 
       // Vérifier que le déploiement appartient au site de l'utilisateur
+      const siteIdForRelation = (user as any).site.id;
       const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
           deployment_id: deploymentId,
-          site: siteId
+          site: siteIdForRelation
         },
         populate: {
           site: {

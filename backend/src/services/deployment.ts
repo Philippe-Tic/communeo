@@ -142,9 +142,12 @@ class DeploymentService {
       // 7. Créer l'entrée de déploiement en base
       console.log(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
       try {
+        // Utiliser l'ID du site pour la relation, pas le documentId
+        const siteIdForRelation = (site as any).id;
+
         deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
           data: {
-            site: siteId,
+            site: siteIdForRelation,
             deployment_id: deployment.id,
             status: 'building',
             triggered_by: userId,
@@ -207,11 +210,18 @@ class DeploymentService {
           console.warn(`⚠️ [DEPLOYMENT] Could not update deployment error status: ${updateError.message}`);
         }
       } else {
-        // Créer un record d'erreur s'il n'existe pas encore
+                // Créer un record d'erreur s'il n'existe pas encore
         try {
+          // Récupérer le site pour obtenir son ID
+          const sites = await global.strapi.entityService.findMany('api::site.site', {
+            filters: { documentId: siteId } as any
+          });
+          const siteForError = sites && sites.length > 0 ? sites[0] : null;
+          const siteIdForRelation = siteForError ? (siteForError as any).id : siteId;
+
           deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
             data: {
-              site: siteId,
+              site: siteIdForRelation,
               deployment_id: `error-${Date.now()}`,
               status: 'error',
               triggered_by: userId,

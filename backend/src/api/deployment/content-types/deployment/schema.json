@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deployments",
+  "info": {
+    "singularName": "deployment",
+    "pluralName": "deployments",
+    "displayName": "Deployment",
+    "description": "Track deployments to Netlify"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "deployments",
+      "required": true
+    },
+    "deployment_id": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["building", "ready", "error"],
+      "default": "building",
+      "required": true
+    },
+    "triggered_by": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "build_time": {
+      "type": "integer",
+      "required": false
+    },
+    "error_message": {
+      "type": "text",
+      "required": false
+    },
+    "deployment_url": {
+      "type": "string",
+      "required": false
+    },
+    "triggered_at": {
+      "type": "datetime",
+      "default": "now",
+      "required": true
+    },
+    "completed_at": {
+      "type": "datetime",
+      "required": false
+    }
+  }
+}

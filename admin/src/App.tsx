@@ -11,6 +11,8 @@ import { ArticleDetail } from './pages/ArticleDetail'
 import { CreateArticle, EditArticle } from './pages/ArticleForm'
 import { Articles } from './pages/Articles'
 import { Dashboard } from './pages/Dashboard'
+import { Deployment } from './pages/Deployment'
+import { DomainSettings } from './pages/DomainSettings'
 import { EventDetail } from './pages/EventDetail'
 import { CreateEvent, EditEvent } from './pages/EventForm'
 import { Events } from './pages/Events'
@@ -19,6 +21,7 @@ import { CreatePage, EditPage } from './pages/PageForm'
 import { Pages } from './pages/Pages'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
+import { SiteManagement } from './pages/SiteManagement'
 
 function App() {
   return (
@@ -188,7 +191,7 @@ function App() {
             }
           />
 
-          {/* Site Configuration routes */}
+          {/* Site configuration routes */}
           <Route
             path="/site"
             element={
@@ -206,6 +209,40 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <SiteConfigEdit />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Deployment and domain management routes */}
+          <Route
+            path="/deployment"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Deployment />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/domain"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <DomainSettings />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/site-management"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <SiteManagement />
                 </MainLayout>
               </ProtectedRoute>
             }

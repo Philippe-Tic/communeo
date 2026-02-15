@@ -20,7 +20,7 @@
     },
     "slug": {
       "type": "uid",
-      "targetField": "nom",
+      "targetField": "name",
       "required": true
     },
     "theme": {
@@ -48,6 +48,47 @@
     "address": {
       "type": "text"
     },
+    "netlify_site_id": {
+      "type": "string",
+      "required": false,
+      "unique": true,
+      "private": true
+    },
+    "live_url": {
+      "type": "string",
+      "required": false
+    },
+    "custom_domain": {
+      "type": "string",
+      "required": false,
+      "regex": "^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$"
+    },
+    "domain_status": {
+      "type": "enumeration",
+      "enum": ["pending", "verified", "error"],
+      "default": "pending",
+      "required": false
+    },
+    "domain_verification_token": {
+      "type": "string",
+      "required": false,
+      "private": true
+    },
+    "plan_type": {
+      "type": "enumeration",
+      "enum": ["basic", "premium"],
+      "default": "basic",
+      "required": true
+    },
+    "domain_configured_at": {
+      "type": "datetime",
+      "required": false
+    },
+    "ssl_enabled": {
+      "type": "boolean",
+      "default": true,
+      "required": false
+    },
     "pages": {
       "type": "relation",
       "relation": "oneToMany",
@@ -64,6 +105,12 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::evenement.evenement",
+      "mappedBy": "site"
+    },
+    "deployments": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::deployment.deployment",
       "mappedBy": "site"
     }
   }

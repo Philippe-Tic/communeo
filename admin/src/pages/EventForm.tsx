@@ -1,18 +1,12 @@
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Input,
-  Spinner,
-  Stack,
-  Text,
-  Textarea,
-  VStack
-} from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { LoadingSpinner } from '../components/common'
 import { useCreateEvent, useEvent, useUpdateEvent, type Event } from '../hooks/api/useEvents'
 import { toaster } from '../lib/toaster'
 
@@ -68,8 +62,6 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
       featured: false,
     },
   })
-
-
 
   // Réinitialiser le formulaire avec les données initiales
   useEffect(() => {
@@ -139,61 +131,52 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
   }
 
   return (
-    <Box maxWidth="4xl" mx="auto" p={6}>
-      <VStack gap={6} align="stretch">
-        <HStack justify="space-between" align="center">
-          <Heading size="lg">
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">
             {isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement'}
-          </Heading>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/events')}
-          >
+          </h1>
+          <Button variant="outline" onClick={() => navigate('/events')}>
             Retour
           </Button>
-        </HStack>
+        </div>
 
-        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-          <Stack gap={6}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-6">
             {/* Informations de base */}
-            <Box>
-              <Heading size="md" mb={4}>Informations de base</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Titre *</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Informations de base</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Titre *</Label>
                   <Input
                     placeholder="Titre de l'événement"
                     {...register('title', { required: 'Le titre est requis' })}
                   />
                   {errors.title && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.title.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Description *</Text>
+                <div>
+                  <Label className="mb-2">Description *</Label>
                   <Textarea
                     placeholder="Description de l'événement"
                     rows={8}
                     {...register('description', { required: 'La description est requise' })}
                   />
                   {errors.description && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.description.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.description.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Catégorie</Text>
-                  <select {...register('category')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+                <div>
+                  <Label className="mb-2">Catégorie</Label>
+                  <select
+                    {...register('category')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="cultural">Culturel</option>
                     <option value="sport">Sport</option>
                     <option value="meeting">Réunion</option>
@@ -201,163 +184,157 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
                     <option value="workshop">Atelier</option>
                     <option value="conference">Conférence</option>
                   </select>
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Dates et lieu */}
-            <Box>
-              <Heading size="md" mb={4}>Dates et lieu</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Date et heure de début *</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Dates et lieu</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Date et heure de début *</Label>
                   <Input
                     type="datetime-local"
                     {...register('start_date', { required: 'La date de début est requise' })}
                   />
                   {errors.start_date && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.start_date.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.start_date.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Date et heure de fin</Text>
+                <div>
+                  <Label className="mb-2">Date et heure de fin</Label>
                   <Input
                     type="datetime-local"
                     {...register('end_date')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Lieu</Text>
+                <div>
+                  <Label className="mb-2">Lieu</Label>
                   <Input
                     placeholder="Nom du lieu"
                     {...register('location')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Adresse complète</Text>
+                <div>
+                  <Label className="mb-2">Adresse complète</Label>
                   <Textarea
                     placeholder="Adresse complète du lieu"
                     rows={3}
                     {...register('address')}
                   />
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Informations pratiques */}
-            <Box>
-              <Heading size="md" mb={4}>Informations pratiques</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Prix</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Informations pratiques</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Prix</Label>
                   <Input
                     placeholder="Gratuit / 10€ / Sur inscription..."
                     {...register('price')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Lien externe</Text>
+                <div>
+                  <Label className="mb-2">Lien externe</Label>
                   <Input
                     type="url"
                     placeholder="https://..."
                     {...register('external_link')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Organisateur</Text>
+                <div>
+                  <Label className="mb-2">Organisateur</Label>
                   <Input
                     placeholder="Nom de l'organisateur"
                     {...register('organizer')}
                   />
-                </Box>
+                </div>
 
-                <HStack gap={4}>
-                  <Box flex={1}>
-                    <Text fontWeight="medium" mb={2}>Email de contact*</Text>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div>
+                    <Label className="mb-2">Email de contact *</Label>
                     <Input
                       type="email"
                       placeholder="contact@example.com"
                       {...register('contact_email', { required: 'L\'email de contact est requis' })}
                     />
-                  </Box>
+                  </div>
 
-                  <Box flex={1}>
-                    <Text fontWeight="medium" mb={2}>Téléphone</Text>
+                  <div>
+                    <Label className="mb-2">Téléphone</Label>
                     <Input
                       placeholder="01 23 45 67 89"
                       {...register('contact_phone')}
                     />
-                  </Box>
-                </HStack>
-              </Stack>
-            </Box>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Inscription */}
-            <Box>
-              <Heading size="md" mb={4}>Inscription</Heading>
-              <Stack gap={4}>
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Text fontWeight="medium">Inscription requise</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Inscription</h2>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <Label>Inscription requise</Label>
                   <input
                     type="checkbox"
                     {...register('registration_required')}
+                    className="h-4 w-4 rounded border-gray-300"
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Nombre maximum de participants</Text>
+                <div>
+                  <Label className="mb-2">Nombre maximum de participants</Label>
                   <Input
                     type="number"
                     placeholder="50"
                     {...register('max_participants')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Date limite d'inscription</Text>
+                <div>
+                  <Label className="mb-2">Date limite d'inscription</Label>
                   <Input
                     type="datetime-local"
                     {...register('registration_deadline')}
                   />
-                </Box>
+                </div>
 
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Text fontWeight="medium">Événement à la une</Text>
+                <div className="flex items-center gap-3">
+                  <Label>Événement à la une</Label>
                   <input
                     type="checkbox"
                     {...register('featured')}
+                    className="h-4 w-4 rounded border-gray-300"
                   />
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Actions */}
-            <HStack justify="flex-end">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/events')}
-              >
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" type="button" onClick={() => navigate('/events')}>
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                colorScheme="blue"
-                loading={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Mettre à jour' : 'Créer'}
               </Button>
-            </HStack>
-          </Stack>
-        </Box>
-      </VStack>
-    </Box>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -370,18 +347,14 @@ export function EditEvent() {
   const { data: event, isLoading, error } = useEvent(id || '')
 
   if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="200px">
-        <Spinner size="lg" />
-      </Box>
-    )
+    return <LoadingSpinner message="Chargement de l'événement..." />
   }
 
   if (error || !event) {
     return (
-      <Box p={4} bg="red.50" borderRadius="md" border="1px solid" borderColor="red.200">
-        <Text color="red.700">Événement non trouvé</Text>
-      </Box>
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-destructive">Événement non trouvé</p>
+      </div>
     )
   }
 

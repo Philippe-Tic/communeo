@@ -1,4 +1,3 @@
-import { Box, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common'
@@ -179,8 +178,8 @@ export const Events = () => {
   ]
 
   return (
-    <Box p={6}>
-      <VStack align="stretch" gap={6}>
+    <div className="p-6">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title="Événements"
           subtitle="Gérez les événements de votre site"
@@ -225,7 +224,7 @@ export const Events = () => {
           isLoading={deleteMutation.isPending}
           type="danger"
         />
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }

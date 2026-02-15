@@ -1,15 +1,13 @@
+import { Button } from '@/components/ui/button'
 import {
-    Box,
-    Button,
-    HStack,
-    IconButton,
-    Stack,
-    Text,
-    VStack
-} from '@chakra-ui/react'
-import { useState } from 'react'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreVertical } from 'lucide-react'
 import type { Page } from '../../hooks/api/usePages'
-import { DeleteIcon, EditIcon, EyeIcon, MoreIcon } from '../../utils/icons'
+import { DeleteIcon, EditIcon, EyeIcon } from '../../utils/icons'
 import { StatusBadge } from '../common'
 
 interface PageCardProps {
@@ -20,134 +18,58 @@ interface PageCardProps {
 }
 
 export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
-  const [showActions, setShowActions] = useState(false)
-
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + '...'
   }
 
   return (
-    <Box
-      borderWidth={1}
-      borderRadius="md"
-      p={4}
-      bg="white"
-      boxShadow="sm"
-      _hover={{ boxShadow: 'md' }}
-      transition="all 0.2s"
-      position="relative"
-    >
-      <VStack align="stretch" gap={3}>
-        <HStack justify="space-between" align="start">
-          <VStack align="start" gap={1} flex={1}>
-            <Text fontWeight="bold" fontSize="lg" lineHeight="1.2">
+    <div className="relative rounded-md border bg-card p-4 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-1">
+            <p className="text-lg font-bold leading-tight">
               {truncateText(page.title, 50)}
-            </Text>
-            <Text color="gray.600" fontSize="sm">
-              /{page.slug}
-            </Text>
-          </VStack>
+            </p>
+            <p className="text-sm text-muted-foreground">/{page.slug}</p>
+          </div>
 
-          <Box position="relative">
-            <IconButton
-              aria-label="More actions"
-              size="sm"
-              variant="ghost"
-              onClick={() => setShowActions(!showActions)}
-            >
-              <MoreIcon />
-            </IconButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(page)}>
+                <EditIcon /> <span className="ml-2">Modifier</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onView(page)}>
+                <EyeIcon /> <span className="ml-2">Voir</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onDelete(page)} className="text-destructive focus:text-destructive">
+                <DeleteIcon /> <span className="ml-2">Supprimer</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-            {showActions && (
-              <Box
-                position="absolute"
-                top="100%"
-                right={0}
-                mt={1}
-                bg="white"
-                border="1px solid"
-                borderColor="gray.200"
-                borderRadius="md"
-                shadow="lg"
-                p={2}
-                zIndex={10}
-                minW="200px"
-              >
-                <Stack gap={1}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    justifyContent="flex-start"
-                    onClick={() => {
-                      onEdit(page)
-                      setShowActions(false)
-                    }}
-                  >
-                    <HStack gap={2}>
-                      <EditIcon />
-                      <Text>Modifier</Text>
-                    </HStack>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    justifyContent="flex-start"
-                    onClick={() => {
-                      onView(page)
-                      setShowActions(false)
-                    }}
-                  >
-                    <HStack gap={2}>
-                      <EyeIcon />
-                      <Text>Voir</Text>
-                    </HStack>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    justifyContent="flex-start"
-                    colorScheme="red"
-                    onClick={() => {
-                      onDelete(page)
-                      setShowActions(false)
-                    }}
-                  >
-                    <HStack gap={2}>
-                      <DeleteIcon />
-                      <Text>Supprimer</Text>
-                    </HStack>
-                  </Button>
-                </Stack>
-              </Box>
-            )}
-          </Box>
-        </HStack>
+        <p className="text-sm text-muted-foreground">
+          {truncateText(page.content.replace(/<[^>]*>/g, '') || 'Aucun contenu', 100)}
+        </p>
 
-        <Box>
-          <Text color="gray.700" fontSize="sm">
-            {truncateText(page.content.replace(/<[^>]*>/g, '') || 'Aucun contenu', 100)}
-          </Text>
-        </Box>
-
-        <HStack justify="space-between" align="center">
+        <div className="flex items-center justify-between">
           <StatusBadge status={page.status} />
           {page.is_homepage && (
-            <Text fontSize="xs" color="blue.600" fontWeight="medium">
-              Page d'accueil
-            </Text>
+            <span className="text-xs font-medium text-primary">Page d'accueil</span>
           )}
-        </HStack>
+        </div>
 
-        <HStack justify="space-between" align="center">
-          <Text fontSize="xs" color="gray.500">
-            Modifié: {new Date(page.updatedAt).toLocaleDateString('fr-FR')}
-          </Text>
-          <Text fontSize="xs" color="gray.500">
-            Ordre: {page.menu_order}
-          </Text>
-        </HStack>
-      </VStack>
-    </Box>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Modifié: {new Date(page.updatedAt).toLocaleDateString('fr-FR')}</span>
+          <span>Ordre: {page.menu_order}</span>
+        </div>
+      </div>
+    </div>
   )
 }

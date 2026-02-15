@@ -1,4 +1,4 @@
-import { Box, Button, Heading, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
@@ -61,15 +61,15 @@ export const Dashboard = () => {
   }
 
   return (
-    <Box maxW="full" mx="auto">
-      <VStack gap={8} align="stretch">
+    <div className="mx-auto w-full">
+      <div className="flex flex-col gap-8">
         <PageHeader
           title={`Bienvenue, ${firstName || fullName || 'Admin'} !`}
           subtitle={`Voici un aperçu de votre tableau de bord${user?.site ? ` - ${user.site.name}` : ''}`}
         />
 
         {/* Stats Cards */}
-        <SimpleGrid columns={{ base: 1, md: 3, lg: 3 }} gap={6}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {statsData.map((stat, index) => (
             <StatsCard
               key={index}
@@ -79,68 +79,55 @@ export const Dashboard = () => {
               icon={stat.icon}
             />
           ))}
-        </SimpleGrid>
+        </div>
 
         {/* Quick Actions */}
-        <Box>
-          <VStack gap={4} align="stretch">
-            <HStack justify="space-between" align="center">
-              <Heading size="md" color="gray.700">
+        <div>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground">
                 Actions rapides
-              </Heading>
-            </HStack>
+              </h3>
+            </div>
 
-            <HStack gap={4} wrap="wrap">
+            <div className="flex flex-wrap gap-4">
               <RouterLink to="/articles/new">
-                <Button
-                  colorScheme="blue"
-                  size="sm"
-                >
+                <Button size="sm">
                   📝 Nouvel article
                 </Button>
               </RouterLink>
               <RouterLink to="/events/new">
-                <Button
-                  colorScheme="purple"
-                  size="sm"
-                >
+                <Button size="sm" variant="outline">
                   📅 Nouvel événement
                 </Button>
               </RouterLink>
               <RouterLink to="/pages/new">
-                <Button
-                  colorScheme="green"
-                  size="sm"
-                >
+                <Button size="sm" variant="outline">
                   📄 Nouvelle page
                 </Button>
               </RouterLink>
-            </HStack>
-          </VStack>
-        </Box>
+            </div>
+          </div>
+        </div>
 
-        <Box height="1px" bg="gray.200" />
+        <div className="h-px bg-border" />
 
         {/* Recent Articles */}
         {recentArticles.length > 0 && (
-          <Box>
-            <VStack gap={4} align="stretch">
-              <HStack justify="space-between" align="center">
-                <Heading size="md" color="gray.700">
+          <div>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground">
                   Articles récents
-                </Heading>
+                </h3>
                 <RouterLink to="/articles">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    colorScheme="blue"
-                  >
+                  <Button variant="ghost" size="sm">
                     Voir tout
                   </Button>
                 </RouterLink>
-              </HStack>
+              </div>
 
-              <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={6}>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {recentArticles.map((article) => (
                   <ArticleCard
                     key={article.documentId}
@@ -150,28 +137,25 @@ export const Dashboard = () => {
                     onDelete={handleArticleDelete}
                   />
                 ))}
-              </SimpleGrid>
-            </VStack>
-          </Box>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Empty state messages */}
         {recentArticles.length === 0 && !articlesLoading && (
-          <Box textAlign="center" py={8}>
-            <Text color="gray.500" mb={4}>
+          <div className="py-8 text-center">
+            <p className="mb-4 text-muted-foreground">
               Aucun article publié pour le moment
-            </Text>
+            </p>
             <RouterLink to="/articles/new">
-              <Button
-                colorScheme="blue"
-                size="sm"
-              >
+              <Button size="sm">
                 Créer votre premier article
               </Button>
             </RouterLink>
-          </Box>
+          </div>
         )}
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }

@@ -1,17 +1,14 @@
-import {
-  Badge,
-  Box,
-  Heading,
-  Image,
-  SimpleGrid,
-  Text,
-  VStack
-} from '@chakra-ui/react'
+import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useSite } from '../hooks/api/useSites'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
+
+const THEME_COLORS: Record<string, string> = {
+  moderne: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  accessible: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+}
 
 export const SiteConfig = () => {
   const { site: userSite } = useUserSite()
@@ -28,8 +25,8 @@ export const SiteConfig = () => {
   if (!site) return <ErrorState title="Site non trouvé" message="Aucune configuration de site disponible" />
 
   return (
-    <Box maxW="full" mx="auto">
-      <VStack gap={6} align="stretch">
+    <div className="mx-auto w-full">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title="Configuration du site"
           subtitle="Paramètres et informations du site"
@@ -43,193 +40,176 @@ export const SiteConfig = () => {
         />
 
         {!canEditConfig && (
-          <Box bg="orange.50" p={4} borderRadius="md" borderWidth={1} borderColor="orange.200">
-            <Text color="orange.800" fontSize="sm">
+          <div className="rounded-md border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950">
+            <p className="text-sm text-orange-800 dark:text-orange-200">
               <strong>Information :</strong> Vous pouvez consulter la configuration mais seuls les maires et adjoints peuvent la modifier.
-            </Text>
-          </Box>
+            </p>
+          </div>
         )}
 
         {/* Informations générales */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-          <VStack gap={4} align="stretch">
-            <Heading size="md" color="gray.700">
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-foreground">
               Informations générales
-            </Heading>
+            </h2>
 
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Nom du site
-                </Text>
-                <Text fontSize="lg" fontWeight="semibold">
+                </p>
+                <p className="text-lg font-semibold">
                   {site.name}
-                </Text>
-              </VStack>
+                </p>
+              </div>
 
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Slug
-                </Text>
-                <Text fontSize="lg">
+                </p>
+                <p className="text-lg">
                   {site.slug}
-                </Text>
-              </VStack>
+                </p>
+              </div>
 
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Thème
-                </Text>
-                <Badge
-                  colorScheme={
-                    site.theme === 'moderne' ? 'blue' :
-                    site.theme === 'accessible' ? 'green' : 'gray'
-                  }
-                  size="lg"
-                  textTransform="capitalize"
-                >
+                </p>
+                <Badge className={THEME_COLORS[site.theme] || ''}>
                   {site.theme}
                 </Badge>
-              </VStack>
+              </div>
 
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Email de contact
-                </Text>
-                <Text fontSize="lg">
+                </p>
+                <p className="text-lg">
                   {site.contact_mail}
-                </Text>
-              </VStack>
-            </SimpleGrid>
-          </VStack>
-        </Box>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Contact et adresse */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-          <VStack gap={4} align="stretch">
-            <Heading size="md" color="gray.700">
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-foreground">
               Informations de contact
-            </Heading>
+            </h2>
 
-            <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {site.contact_phone && (
-                <VStack align="start" gap={2}>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600">
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-sm font-medium text-muted-foreground">
                     Téléphone
-                  </Text>
-                  <Text fontSize="lg">
+                  </p>
+                  <p className="text-lg">
                     {site.contact_phone}
-                  </Text>
-                </VStack>
+                  </p>
+                </div>
               )}
 
               {site.address && (
-                <VStack align="start" gap={2}>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600">
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-sm font-medium text-muted-foreground">
                     Adresse
-                  </Text>
-                  <Text fontSize="lg" whiteSpace="pre-line">
+                  </p>
+                  <p className="whitespace-pre-line text-lg">
                     {site.address}
-                  </Text>
-                </VStack>
+                  </p>
+                </div>
               )}
-            </SimpleGrid>
+            </div>
 
             {(!site.contact_phone && !site.address) && (
-              <Text color="gray.500" fontStyle="italic">
+              <p className="italic text-muted-foreground">
                 Aucune information de contact additionnelle configurée
-              </Text>
+              </p>
             )}
-          </VStack>
-        </Box>
+          </div>
+        </div>
 
         {/* Logo */}
         {site.logo && (
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-            <VStack gap={4} align="stretch">
-              <Heading size="md" color="gray.700">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 Logo du site
-              </Heading>
+              </h2>
 
-              <Box>
-                <Image
+              <div>
+                <img
                   src={site.logo.url}
                   alt={site.logo.alternativeText || `Logo de ${site.name}`}
-                  maxH="200px"
-                  objectFit="contain"
-                  borderRadius="md"
+                  className="max-h-[200px] rounded-md object-contain"
                 />
-              </Box>
-            </VStack>
-          </Box>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Couleurs du thème */}
         {site.colors && (
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-            <VStack gap={4} align="stretch">
-              <Heading size="md" color="gray.700">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 Configuration des couleurs
-              </Heading>
+              </h2>
 
-              <Box>
-                <Text fontSize="sm" color="gray.600" mb={2}>
+              <div>
+                <p className="mb-2 text-sm text-muted-foreground">
                   Paramètres JSON des couleurs du thème
-                </Text>
-                <Box
-                  bg="gray.50"
-                  p={4}
-                  borderRadius="md"
-                  fontFamily="mono"
-                  fontSize="sm"
-                  whiteSpace="pre-wrap"
-                  overflowX="auto"
-                >
+                </p>
+                <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4 font-mono text-sm">
                   {JSON.stringify(site.colors, null, 2)}
-                </Box>
-              </Box>
-            </VStack>
-          </Box>
+                </pre>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Informations système */}
-        <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-          <VStack gap={4} align="stretch">
-            <Heading size="md" color="gray.700">
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-foreground">
               Informations système
-            </Heading>
+            </h2>
 
-            <SimpleGrid columns={{ base: 1, md: 3 }} gap={6}>
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Créé le
-                </Text>
-                <Text fontSize="lg">
+                </p>
+                <p className="text-lg">
                   {new Date(site.createdAt).toLocaleDateString('fr-FR')}
-                </Text>
-              </VStack>
+                </p>
+              </div>
 
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   Modifié le
-                </Text>
-                <Text fontSize="lg">
+                </p>
+                <p className="text-lg">
                   {new Date(site.updatedAt).toLocaleDateString('fr-FR')}
-                </Text>
-              </VStack>
+                </p>
+              </div>
 
-              <VStack align="start" gap={2}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">
                   ID du site
-                </Text>
-                <Text fontSize="lg" fontFamily="mono">
+                </p>
+                <p className="font-mono text-lg">
                   {site.documentId}
-                </Text>
-              </VStack>
-            </SimpleGrid>
-          </VStack>
-        </Box>
-      </VStack>
-    </Box>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,31 +1,28 @@
-import { Box, HStack, Text } from '@chakra-ui/react'
+import { Label } from '@/components/ui/label'
 import { forwardRef } from 'react'
 
 interface FormCheckboxProps {
   label: string
   error?: string
-  // Remove custom onChange, will use standard HTML props
 }
 
 export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
   ({ label, error, ...props }, ref) => {
     return (
-      <Box>
-        <HStack gap={3} align="center">
+      <div>
+        <div className="flex items-center gap-3">
           <input
             type="checkbox"
             ref={ref}
-            style={{ width: '1rem', height: '1rem' }}
+            className="h-4 w-4 rounded border-input"
             {...(props as any)}
           />
-          <Text fontWeight="medium">{label}</Text>
-        </HStack>
+          <Label className="font-medium">{label}</Label>
+        </div>
         {error && (
-          <Text color="red.500" fontSize="sm" mt={1}>
-            {error}
-          </Text>
+          <p className="mt-1 text-sm text-destructive">{error}</p>
         )}
-      </Box>
+      </div>
     )
   }
 )

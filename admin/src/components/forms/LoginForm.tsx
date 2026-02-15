@@ -1,14 +1,6 @@
-import {
-    Box,
-    Button,
-    Heading,
-    Input,
-    Link,
-    Stack,
-    Text,
-    useBreakpointValue,
-    VStack,
-} from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Loader2 } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -32,25 +24,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const navigate = useNavigate()
   const [error, setError] = useState<string>('')
 
-  // Responsive values
-  const containerWidth = useBreakpointValue({
-    base: '90%',
-    sm: '400px',
-    md: '450px'
-  })
-  const containerPadding = useBreakpointValue({
-    base: 6,
-    md: 8
-  })
-  const titleSize = useBreakpointValue({
-    base: 'md',
-    md: 'lg'
-  }) as 'md' | 'lg'
-  const containerMarginTop = useBreakpointValue({
-    base: 4,
-    md: 8
-  })
-
   const {
     register,
     handleSubmit,
@@ -61,7 +34,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     try {
       setError('')
       await login(data.email, data.password)
-      // Redirect to dashboard on successful login
       navigate('/dashboard')
     } catch (err) {
       setError(
@@ -71,132 +43,92 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   }
 
   return (
-    <Box
-      maxWidth={containerWidth}
-      width="full"
-      margin="auto"
-      mt={containerMarginTop}
-      px={{ base: 4, sm: 0 }}
-    >
-      <Box
-        p={containerPadding}
-        borderWidth={1}
-        borderRadius="lg"
-        boxShadow={{ base: 'md', md: 'lg' }}
-        bg="white"
-      >
-        <VStack gap={{ base: 5, md: 6 }} align="stretch">
-          <Box textAlign="center">
-            <Heading size={titleSize} mb={2}>
-              Connexion
-            </Heading>
-            <Text color="gray.600" fontSize={{ base: 'sm', md: 'md' }}>
+    <div className="mx-auto w-full max-w-[450px] px-4 sm:px-0">
+      <div className="rounded-lg border bg-card p-6 shadow-lg md:p-8">
+        <div className="space-y-5 md:space-y-6">
+          <div className="text-center">
+            <h1 className="mb-2 text-xl font-bold md:text-2xl">Connexion</h1>
+            <p className="text-sm text-muted-foreground md:text-base">
               Connectez-vous à votre espace d'administration
-            </Text>
-          </Box>
+            </p>
+          </div>
 
           {error && (
-            <Box
-              p={3}
-              bg="red.50"
-              borderColor="red.200"
-              borderWidth={1}
-              borderRadius="md"
-            >
-              <Text color="red.800" fontSize="sm">
-                {error}
-              </Text>
-            </Box>
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Stack gap={4}>
-              <Box>
-                <Text mb={2} fontWeight="medium" fontSize={{ base: 'sm', md: 'md' }}>
-                  Email
-                </Text>
-                <Input
-                  type="email"
-                  placeholder="votre@email.com"
-                  size={{ base: 'md', md: 'lg' }}
-                  {...register('email', {
-                    required: 'L\'email est requis',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Format d\'email invalide',
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <Text color="red.500" fontSize="sm" mt={1}>
-                    {errors.email.message}
-                  </Text>
-                )}
-              </Box>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium md:text-base">Email</label>
+              <Input
+                type="email"
+                placeholder="votre@email.com"
+                {...register('email', {
+                  required: "L'email est requis",
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Format d'email invalide",
+                  },
+                })}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+            </div>
 
-              <Box>
-                <Text mb={2} fontWeight="medium" fontSize={{ base: 'sm', md: 'md' }}>
-                  Mot de passe
-                </Text>
-                <Input
-                  type="password"
-                  placeholder="Votre mot de passe"
-                  size={{ base: 'md', md: 'lg' }}
-                  {...register('password', {
-                    required: 'Le mot de passe est requis',
-                    minLength: {
-                      value: 6,
-                      message: 'Le mot de passe doit contenir au moins 6 caractères',
-                    },
-                  })}
-                />
-                {errors.password && (
-                  <Text color="red.500" fontSize="sm" mt={1}>
-                    {errors.password.message}
-                  </Text>
-                )}
-              </Box>
+            <div className="space-y-2">
+              <label className="text-sm font-medium md:text-base">Mot de passe</label>
+              <Input
+                type="password"
+                placeholder="Votre mot de passe"
+                {...register('password', {
+                  required: 'Le mot de passe est requis',
+                  minLength: {
+                    value: 6,
+                    message: 'Le mot de passe doit contenir au moins 6 caractères',
+                  },
+                })}
+              />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
+            </div>
 
-              <Button
-                type="submit"
-                bg="brand.500"
-                color="white"
-                size={{ base: 'md', md: 'lg' }}
-                loading={isSubmitting || loading}
-                width="full"
-                _hover={{ bg: 'brand.600' }}
-                mt={2}
-              >
-                Se connecter
-              </Button>
-            </Stack>
+            <Button
+              type="submit"
+              className="mt-2 w-full"
+              disabled={isSubmitting || loading}
+            >
+              {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Se connecter
+            </Button>
           </form>
 
-          <VStack gap={2} textAlign="center">
+          <div className="space-y-2 text-center">
             {onForgotPassword && (
-              <Link
+              <button
                 onClick={onForgotPassword}
-                color="brand.500"
-                fontSize={{ base: 'sm', md: 'md' }}
+                className="text-sm text-primary hover:underline md:text-base"
               >
                 Mot de passe oublié ?
-              </Link>
+              </button>
             )}
             {onSignUp && (
-              <Text fontSize="sm" color="gray.600">
+              <p className="text-sm text-muted-foreground">
                 Pas encore de compte ?{' '}
-                <Link
+                <button
                   onClick={onSignUp}
-                  color="brand.500"
-                  fontSize={{ base: 'sm', md: 'md' }}
+                  className="text-sm text-primary hover:underline md:text-base"
                 >
                   Créer un compte
-                </Link>
-              </Text>
+                </button>
+              </p>
             )}
-          </VStack>
-        </VStack>
-      </Box>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

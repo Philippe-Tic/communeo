@@ -1,4 +1,4 @@
-import { Box, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Loader2 } from 'lucide-react'
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -7,6 +7,8 @@ interface LoadingSpinnerProps {
   centered?: boolean
 }
 
+const sizeMap = { sm: 'h-4 w-4', md: 'h-6 w-6', lg: 'h-8 w-8', xl: 'h-12 w-12' }
+
 export function LoadingSpinner({
   size = 'lg',
   message = 'Chargement...',
@@ -14,26 +16,19 @@ export function LoadingSpinner({
   centered = true
 }: LoadingSpinnerProps) {
   const content = (
-    <VStack gap={4}>
-      <Spinner size={size} color="blue.500" />
+    <div className="flex flex-col items-center gap-4">
+      <Loader2 className={`${sizeMap[size]} animate-spin text-primary`} />
       {message && (
-        <Text color="gray.600" fontSize="sm">
-          {message}
-        </Text>
+        <p className="text-sm text-muted-foreground">{message}</p>
       )}
-    </VStack>
+    </div>
   )
 
   if (centered) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minH={minHeight}
-      >
+      <div className="flex items-center justify-center" style={{ minHeight }}>
         {content}
-      </Box>
+      </div>
     )
   }
 

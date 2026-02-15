@@ -1,20 +1,16 @@
-import { Box, Heading, Stack } from '@chakra-ui/react'
-
 interface FormSectionProps {
   title: string
   children: React.ReactNode
   gap?: number
 }
 
-export function FormSection({ title, children, gap = 4 }: FormSectionProps) {
+export function FormSection({ title, children }: FormSectionProps) {
   return (
-    <Box>
-      <Heading size="md" mb={4}>
-        {title}
-      </Heading>
-      <Stack gap={gap}>
+    <div>
+      <h3 className="mb-4 text-lg font-semibold">{title}</h3>
+      <div className="space-y-4">
         {children}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   )
 }

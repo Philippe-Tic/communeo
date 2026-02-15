@@ -1,4 +1,3 @@
-import { Box, useBreakpointValue } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { Header } from './Header'
 import { Sidebar } from './Sidebar'
@@ -10,58 +9,30 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-  // Determine if we should show desktop or mobile layout
-  const isMobile = useBreakpointValue({ base: true, md: false })
-
-  // Simplified margin logic
-  const contentMarginLeft = useBreakpointValue({
-    base: 0,
-    md: 250
-  })
-
-  const handleMobileMenuToggle = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
-
-  const handleMobileMenuClose = () => {
-    setIsMobileMenuOpen(false)
-  }
-
   return (
-    <Box minH="100vh" bg="gray.50">
-      {/* Header - always visible */}
+    <div className="min-h-screen bg-background">
       <Header
-        onMenuClick={isMobile ? handleMobileMenuToggle : undefined}
+        onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
 
-      {/* Desktop Sidebar - hidden on mobile */}
-      {!isMobile && (
+      {/* Desktop Sidebar */}
+      <div className="hidden md:block">
         <Sidebar variant="sidebar" />
-      )}
+      </div>
 
       {/* Mobile Drawer Sidebar */}
-      {isMobile && (
+      <div className="md:hidden">
         <Sidebar
           variant="drawer"
           isOpen={isMobileMenuOpen}
-          onClose={handleMobileMenuClose}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
-      )}
+      </div>
 
-      {/* Main Content - Direct container without Flex wrapper */}
-      <Box
-        ml={contentMarginLeft}
-        pt="88px" // Compensate for fixed header
-        px={{ base: 4, md: 6 }}
-        pb={{ base: 4, md: 6 }}
-        transition="margin-left 0.3s ease"
-        bg="white"
-        minH="100vh"
-        w="auto"
-        maxW="none"
-      >
+      {/* Main Content */}
+      <div className="min-h-screen bg-card pt-[72px] transition-[margin-left] duration-300 ease-in-out md:ml-[250px] md:px-6 md:pb-6 px-4 pb-4">
         {children}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Box, Grid, Input, Text } from '@chakra-ui/react'
+import { Input } from '@/components/ui/input'
 
 interface FilterOption {
   label: string
@@ -28,61 +28,38 @@ export function FilterPanel({
   filters,
   fields,
   onChange,
-  columns = { base: 1, md: 2, lg: 4 }
 }: FilterPanelProps) {
-  const renderField = (field: FilterField) => {
-    if (field.type === 'select' && field.options) {
-      return (
-        <select
-          value={filters[field.key] || ''}
-          onChange={(e) => onChange(field.key, e.target.value)}
-          style={{
-            padding: '0.5rem',
-            borderRadius: '0.375rem',
-            border: '1px solid #e2e8f0',
-            width: '100%',
-            fontSize: '1rem',
-            backgroundColor: 'white'
-          }}
-        >
-          <option value="">{field.placeholder || `Tous les ${field.label.toLowerCase()}`}</option>
-          {field.options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      )
-    }
-
-    return (
-      <Input
-        placeholder={field.placeholder || `Rechercher par ${field.label.toLowerCase()}...`}
-        value={filters[field.key] || ''}
-        onChange={(e) => onChange(field.key, e.target.value)}
-      />
-    )
-  }
-
   return (
-    <Box p={4} borderWidth={1} borderRadius="md" bg="white">
-      <Grid
-        templateColumns={{
-          base: `repeat(${columns.base}, 1fr)`,
-          md: `repeat(${columns.md}, 1fr)`,
-          lg: `repeat(${columns.lg}, 1fr)`
-        }}
-        gap={4}
-      >
+    <div className="rounded-md border bg-card p-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {fields.map((field) => (
-          <Box key={field.key}>
-            <Text fontSize="sm" fontWeight="medium" mb={2}>
+          <div key={field.key}>
+            <label className="mb-2 block text-sm font-medium">
               {field.label}
-            </Text>
-            {renderField(field)}
-          </Box>
+            </label>
+            {field.type === 'select' && field.options ? (
+              <select
+                value={filters[field.key] || ''}
+                onChange={(e) => onChange(field.key, e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              >
+                <option value="">{field.placeholder || `Tous les ${field.label.toLowerCase()}`}</option>
+                {field.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <Input
+                placeholder={field.placeholder || `Rechercher par ${field.label.toLowerCase()}...`}
+                value={filters[field.key] || ''}
+                onChange={(e) => onChange(field.key, e.target.value)}
+              />
+            )}
+          </div>
         ))}
-      </Grid>
-    </Box>
+      </div>
+    </div>
   )
 }

@@ -1,9 +1,23 @@
-import { Badge, Box, HStack, Image, Text, VStack } from '@chakra-ui/react'
+import { Badge } from '@/components/ui/badge'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useArticle, useDeleteArticle, useToggleArticleFeatured } from '../hooks/api/useArticles'
 import { toaster } from '../lib/toaster'
+
+const CATEGORY_COLORS: Record<string, string> = {
+  news: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  event: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  information: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  emergency: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  news: 'Actualité',
+  event: 'Événement',
+  information: 'Information',
+  emergency: 'Urgence',
+}
 
 export function ArticleDetail() {
   const { id } = useParams<{ id: string }>()
@@ -77,26 +91,6 @@ export function ArticleDetail() {
     )
   }
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'news': return 'blue'
-      case 'event': return 'purple'
-      case 'information': return 'green'
-      case 'emergency': return 'red'
-      default: return 'gray'
-    }
-  }
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'news': return 'Actualité'
-      case 'event': return 'Événement'
-      case 'information': return 'Information'
-      case 'emergency': return 'Urgence'
-      default: return category
-    }
-  }
-
   const headerActions = [
     {
       label: 'Retour',
@@ -126,110 +120,104 @@ export function ArticleDetail() {
   ]
 
   return (
-    <Box maxWidth="4xl" mx="auto" p={6}>
-      <VStack gap={6} align="stretch">
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title={article.title}
           subtitle={`/${article.slug}`}
           actions={headerActions}
         />
 
-        <Box p={6} borderWidth={1} borderRadius="md" bg="white">
-          <VStack gap={6} align="stretch">
+        <div className="rounded-md border bg-card p-6">
+          <div className="flex flex-col gap-6">
             {/* Status and badges */}
-            <HStack wrap="wrap" gap={2}>
+            <div className="flex flex-wrap gap-2">
               <StatusBadge status={article.status} />
-              <Badge colorScheme={getCategoryColor(article.category)} size="sm">
-                {getCategoryLabel(article.category)}
+              <Badge className={CATEGORY_COLORS[article.category] || ''}>
+                {CATEGORY_LABELS[article.category] || article.category}
               </Badge>
               {article.featured && (
-                <Badge colorScheme="orange" size="sm">
+                <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                   ⭐ À la une
                 </Badge>
               )}
-            </HStack>
+            </div>
 
             {/* Featured image */}
             {article.image && (
-              <Box>
-                <Text fontWeight="medium" color="gray.600" mb={2}>
+              <div>
+                <p className="mb-2 font-medium text-muted-foreground">
                   Image à la une
-                </Text>
-                <Image
+                </p>
+                <img
                   src={article.image.url}
                   alt={article.image.alternativeText || article.title}
-                  maxH="300px"
-                  borderRadius="md"
-                  objectFit="cover"
+                  className="max-h-[300px] rounded-md object-cover"
                 />
-              </Box>
+              </div>
             )}
 
             {/* Summary */}
             {article.summary && (
-              <Box>
-                <Text fontWeight="medium" color="gray.600" mb={2}>
+              <div>
+                <p className="mb-2 font-medium text-muted-foreground">
                   Résumé
-                </Text>
-                <Text>{article.summary}</Text>
-              </Box>
+                </p>
+                <p>{article.summary}</p>
+              </div>
             )}
 
             {/* Meta description */}
             {article.meta_description && (
-              <Box>
-                <Text fontWeight="medium" color="gray.600" mb={2}>
+              <div>
+                <p className="mb-2 font-medium text-muted-foreground">
                   Description SEO
-                </Text>
-                <Text fontSize="sm" color="gray.600">{article.meta_description}</Text>
-              </Box>
+                </p>
+                <p className="text-sm text-muted-foreground">{article.meta_description}</p>
+              </div>
             )}
 
             {/* Content */}
-            <Box>
-              <Text fontWeight="medium" color="gray.600" mb={2}>
+            <div>
+              <p className="mb-2 font-medium text-muted-foreground">
                 Contenu
-              </Text>
-              <Box
-                p={4}
-                border="1px solid"
-                borderColor="gray.200"
-                borderRadius="md"
-                bg="gray.50"
+              </p>
+              <div
+                className="rounded-md border bg-muted/50 p-4"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
-            </Box>
+            </div>
 
             {/* Article info */}
-            <Box>
-              <Text fontWeight="medium" color="gray.600" mb={2}>
+            <div>
+              <p className="mb-2 font-medium text-muted-foreground">
                 Informations
-              </Text>
-              <VStack gap={2} align="start">
+              </p>
+              <div className="flex flex-col items-start gap-2">
                 {article.author && (
-                  <Text fontSize="sm" color="gray.600">
+                  <p className="text-sm text-muted-foreground">
                     Auteur: {article.author}
-                  </Text>
+                  </p>
                 )}
-                <Text fontSize="sm" color="gray.600">
+                <p className="text-sm text-muted-foreground">
                   Vues: {article.view_count}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Créé le: {new Date(article.createdAt).toLocaleDateString('fr-FR')}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Modifié le: {new Date(article.updatedAt).toLocaleDateString('fr-FR')}
-                </Text>
+                </p>
                 {article.publication_date && (
-                  <Text fontSize="sm" color="gray.600">
+                  <p className="text-sm text-muted-foreground">
                     Publié le: {new Date(article.publication_date).toLocaleDateString('fr-FR')}
-                  </Text>
+                  </p>
                 )}
-              </VStack>
-            </Box>
-          </VStack>
-        </Box>
-      </VStack>
-    </Box>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

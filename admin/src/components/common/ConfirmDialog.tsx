@@ -1,11 +1,15 @@
 import {
-    Box,
-    Button,
-    Heading,
-    HStack,
-    Text,
-    VStack
-} from '@chakra-ui/react'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -30,67 +34,29 @@ export function ConfirmDialog({
   isLoading = false,
   type = 'danger'
 }: ConfirmDialogProps) {
-  const getColorScheme = () => {
-    switch (type) {
-      case 'danger':
-        return 'red'
-      case 'warning':
-        return 'orange'
-      case 'info':
-        return 'blue'
-      default:
-        return 'gray'
-    }
-  }
-
-  if (!isOpen) return null
-
   return (
-    <Box
-      position="fixed"
-      top={0}
-      left={0}
-      right={0}
-      bottom={0}
-      bg="blackAlpha.600"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      zIndex={1000}
-      onClick={onClose}
-    >
-      <Box
-        bg="white"
-        borderRadius="md"
-        boxShadow="lg"
-        maxW="md"
-        w="full"
-        mx={4}
-        onClick={(e: React.MouseEvent) => e.stopPropagation()}
-      >
-        <VStack gap={0} align="stretch">
-          <Box p={6} borderBottom="1px solid" borderColor="gray.200">
-            <Heading size="md">{title}</Heading>
-          </Box>
-          <Box p={6}>
-            <Text>{message}</Text>
-          </Box>
-          <Box p={6} borderTop="1px solid" borderColor="gray.200">
-            <HStack justifyContent="flex-end" gap={3}>
-              <Button variant="outline" onClick={onClose} disabled={isLoading}>
-                {cancelText}
-              </Button>
-              <Button
-                colorScheme={getColorScheme()}
-                onClick={onConfirm}
-                loading={isLoading}
-              >
-                {confirmText}
-              </Button>
-            </HStack>
-          </Box>
-        </VStack>
-      </Box>
-    </Box>
+    <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose() }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{message}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isLoading}>{cancelText}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={(e) => { e.preventDefault(); onConfirm() }}
+            disabled={isLoading}
+            className={cn(
+              type === 'danger' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+              type === 'warning' && 'bg-orange-500 text-white hover:bg-orange-600',
+              type === 'info' && 'bg-primary text-primary-foreground hover:bg-primary/90'
+            )}
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {confirmText}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -1,4 +1,4 @@
-import { Box, Flex, Spinner } from '@chakra-ui/react'
+import { Loader2 } from 'lucide-react'
 import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -12,19 +12,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (loading) {
     return (
-      <Flex
-        minH="100vh"
-        alignItems="center"
-        justifyContent="center"
-        bg="gray.50"
-      >
-        <Box textAlign="center">
-          <Spinner
-            color="brand.500"
-            size="xl"
-          />
-        </Box>
-      </Flex>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
     )
   }
 

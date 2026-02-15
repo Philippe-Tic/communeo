@@ -1,18 +1,12 @@
-import {
-  Box,
-  Button,
-  Heading,
-  HStack,
-  Input,
-  Spinner,
-  Stack,
-  Text,
-  Textarea,
-  VStack
-} from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { LoadingSpinner } from '../components/common'
 import { useCreatePage, usePage, usePages, useUpdatePage, type Page } from '../hooks/api/usePages'
 import { toaster } from '../lib/toaster'
 
@@ -145,94 +139,81 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
   })
 
   return (
-    <Box maxWidth="4xl" mx="auto" p={6}>
-      <VStack gap={6} align="stretch">
-        <HStack justify="space-between" align="center">
-          <Heading size="lg">
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">
             {isEditing ? 'Modifier la page' : 'Créer une nouvelle page'}
-          </Heading>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/pages')}
-          >
+          </h1>
+          <Button variant="outline" onClick={() => navigate('/pages')}>
             Retour
           </Button>
-        </HStack>
+        </div>
 
-        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-          <Stack gap={6}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-6">
             {/* Informations de base */}
-            <Box>
-              <Heading size="md" mb={4}>Informations de base</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Titre *</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Informations de base</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Titre *</Label>
                   <Input
                     placeholder="Titre de la page"
                     {...register('title', { required: 'Le titre est requis' })}
                   />
                   {errors.title && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.title.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Contenu *</Text>
+                <div>
+                  <Label className="mb-2">Contenu *</Label>
                   <Textarea
                     placeholder="Contenu de la page"
                     rows={10}
                     {...register('content', { required: 'Le contenu est requis' })}
                   />
                   {errors.content && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.content.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.content.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Slug *</Text>
+                <div>
+                  <Label className="mb-2">Slug *</Label>
                   <Input
                     placeholder="slug-de-la-page"
                     {...register('slug', { required: 'Le slug est requis' })}
                   />
                   {errors.slug && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.slug.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
                   )}
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Organisation */}
-            <Box>
-              <Heading size="md" mb={4}>Organisation</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Statut</Text>
-                  <select {...register('status')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Organisation</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Statut</Label>
+                  <select
+                    {...register('status')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="draft">Brouillon</option>
                     <option value="published">Publié</option>
                     <option value="archived">Archivé</option>
                   </select>
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Page parent</Text>
-                  <select {...register('parent_id')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+                <div>
+                  <Label className="mb-2">Page parent</Label>
+                  <select
+                    {...register('parent_id')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="">Aucune (page racine)</option>
                     {availableParentPages.map((page: Page) => (
                       <option key={page.id} value={page.id}>
@@ -240,90 +221,82 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                       </option>
                     ))}
                   </select>
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Ordre dans le menu</Text>
+                <div>
+                  <Label className="mb-2">Ordre dans le menu</Label>
                   <Input
                     type="number"
                     {...register('menu_order', { valueAsNumber: true })}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Template</Text>
-                  <select {...register('template')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+                <div>
+                  <Label className="mb-2">Template</Label>
+                  <select
+                    {...register('template')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="default">Par défaut</option>
                     <option value="full-width">Pleine largeur</option>
                     <option value="sidebar">Avec barre latérale</option>
                   </select>
-                </Box>
+                </div>
 
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Text fontWeight="medium">Page d'accueil</Text>
+                <div className="flex items-center gap-3">
+                  <Label>Page d'accueil</Label>
                   <input
                     type="checkbox"
                     {...register('is_homepage')}
-                    style={{ marginLeft: '0.5rem' }}
+                    className="h-4 w-4 rounded border-gray-300"
                   />
-                </Box>
+                </div>
 
                 {watchedIsHomepage && (
-                  <Box p={4} bg="blue.50" borderRadius="md" border="1px solid" borderColor="blue.200">
-                    <Text color="blue.700">Cette page sera définie comme page d'accueil du site.</Text>
-                  </Box>
+                  <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                    <p className="text-blue-700 dark:text-blue-300">Cette page sera définie comme page d'accueil du site.</p>
+                  </div>
                 )}
-              </Stack>
-            </Box>
+              </div>
+            </div>
 
             {/* SEO */}
-            <Box>
-              <Heading size="md" mb={4}>SEO</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Titre SEO</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">SEO</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Titre SEO</Label>
                   <Input
                     placeholder="Titre pour les moteurs de recherche"
                     {...register('seo_keywords')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Description SEO</Text>
+                <div>
+                  <Label className="mb-2">Description SEO</Label>
                   <Textarea
                     placeholder="Description pour les moteurs de recherche"
                     rows={3}
                     {...register('meta_description')}
                   />
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Actions */}
-            <HStack justify="flex-end">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/pages')}
-              >
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" type="button" onClick={() => navigate('/pages')}>
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                colorScheme="blue"
-                loading={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Mettre à jour' : 'Créer'}
               </Button>
-            </HStack>
-          </Stack>
-        </Box>
-      </VStack>
-    </Box>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -336,18 +309,14 @@ export function EditPage() {
   const { data: page, isLoading, error } = usePage(id || '')
 
   if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="200px">
-        <Spinner size="lg" />
-      </Box>
-    )
+    return <LoadingSpinner message="Chargement de la page..." />
   }
 
   if (error || !page) {
     return (
-      <Box p={4} bg="red.50" borderRadius="md" border="1px solid" borderColor="red.200">
-        <Text color="red.700">Page non trouvée</Text>
-      </Box>
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-destructive">Page non trouvée</p>
+      </div>
     )
   }
 

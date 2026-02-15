@@ -1,4 +1,4 @@
-import { Box, Button, Heading, HStack, Stack, Text } from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
 import { toaster } from '../lib/toaster'
 
 export function ToastTest() {
@@ -48,33 +48,32 @@ export function ToastTest() {
   }
 
   return (
-    <Box maxWidth="600px" mx="auto" p={6}>
-      <Stack gap={6}>
-        <Heading size="lg">Test du système de Toast</Heading>
+    <div className="mx-auto max-w-[600px] p-6">
+      <div className="flex flex-col gap-6">
+        <h1 className="text-2xl font-bold">Test du système de Toast</h1>
 
-        <Text>
-          Cliquez sur les boutons ci-dessous pour tester les différents types de toast
-          avec le nouveau système de Chakra UI v3.
-        </Text>
+        <p className="text-muted-foreground">
+          Cliquez sur les boutons ci-dessous pour tester les différents types de toast.
+        </p>
 
-        <HStack gap={4} flexWrap="wrap">
-          <Button colorScheme="green" onClick={showSuccessToast}>
+        <div className="flex flex-wrap gap-4">
+          <Button className="bg-green-600 text-white hover:bg-green-700" onClick={showSuccessToast}>
             Toast Succès
           </Button>
-          <Button colorScheme="red" onClick={showErrorToast}>
+          <Button variant="destructive" onClick={showErrorToast}>
             Toast Erreur
           </Button>
-          <Button colorScheme="yellow" onClick={showWarningToast}>
+          <Button className="bg-yellow-500 text-white hover:bg-yellow-600" onClick={showWarningToast}>
             Toast Attention
           </Button>
-          <Button colorScheme="blue" onClick={showInfoToast}>
+          <Button onClick={showInfoToast}>
             Toast Info
           </Button>
-          <Button colorScheme="gray" onClick={showLoadingToast}>
+          <Button variant="secondary" onClick={showLoadingToast}>
             Toast Chargement
           </Button>
-        </HStack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </div>
   )
 }

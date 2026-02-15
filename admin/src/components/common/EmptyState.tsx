@@ -1,4 +1,4 @@
-import { Box, Button, Text, VStack } from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
 
 interface EmptyStateProps {
   title: string
@@ -16,27 +16,19 @@ export function EmptyState({
   icon
 }: EmptyStateProps) {
   return (
-    <Box p={8} textAlign="center">
-      <VStack gap={4}>
+    <div className="p-8 text-center">
+      <div className="flex flex-col items-center gap-4">
         {icon && (
-          <Box fontSize="4xl" color="gray.400">
-            {icon}
-          </Box>
+          <div className="text-4xl text-muted-foreground">{icon}</div>
         )}
-        <Text fontSize="lg" fontWeight="medium" color="gray.600">
-          {title}
-        </Text>
+        <p className="text-lg font-medium text-muted-foreground">{title}</p>
         {description && (
-          <Text color="gray.500" maxW="md">
-            {description}
-          </Text>
+          <p className="max-w-md text-muted-foreground">{description}</p>
         )}
         {actionLabel && onAction && (
-          <Button colorScheme="blue" onClick={onAction} mt={2}>
-            {actionLabel}
-          </Button>
+          <Button onClick={onAction} className="mt-2">{actionLabel}</Button>
         )}
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }

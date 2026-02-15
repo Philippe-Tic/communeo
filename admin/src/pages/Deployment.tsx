@@ -1,20 +1,19 @@
-import { Box, VStack } from '@chakra-ui/react'
 import React from 'react'
 import { DeploymentPanel } from '../components/deployment/DeploymentPanel'
 import { PageHeader } from '../components/layout/PageHeader'
 
 export const Deployment: React.FC = () => {
   return (
-    <Box>
-            <PageHeader
+    <div>
+      <PageHeader
         title="Déploiement"
         subtitle="Publiez votre site et gérez ses déploiements"
       />
 
-      <VStack gap={6} align="stretch" maxW="4xl" mx="auto">
+      <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <DeploymentPanel />
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }
 

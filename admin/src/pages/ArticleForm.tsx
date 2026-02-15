@@ -1,18 +1,12 @@
-import {
-    Box,
-    Button,
-    Heading,
-    HStack,
-    Input,
-    Spinner,
-    Stack,
-    Text,
-    Textarea,
-    VStack
-} from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
+import { LoadingSpinner } from '../components/common'
 import { useArticle, useCreateArticle, useUpdateArticle, type Article } from '../hooks/api/useArticles'
 import { toaster } from '../lib/toaster'
 
@@ -126,166 +120,148 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
   }
 
   return (
-    <Box maxWidth="4xl" mx="auto" p={6}>
-      <VStack gap={6} align="stretch">
-        <HStack justify="space-between" align="center">
-          <Heading size="lg">
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">
             {isEditing ? 'Modifier l\'article' : 'Créer un nouvel article'}
-          </Heading>
-          <Button
-            variant="outline"
-            onClick={() => navigate('/articles')}
-          >
+          </h1>
+          <Button variant="outline" onClick={() => navigate('/articles')}>
             Retour
           </Button>
-        </HStack>
+        </div>
 
-        <Box as="form" onSubmit={handleSubmit(onSubmit)}>
-          <Stack gap={6}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col gap-6">
             {/* Informations de base */}
-            <Box>
-              <Heading size="md" mb={4}>Informations de base</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Titre *</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Informations de base</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Titre *</Label>
                   <Input
                     placeholder="Titre de l'article"
                     {...register('title', { required: 'Le titre est requis' })}
                   />
                   {errors.title && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.title.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Slug *</Text>
+                <div>
+                  <Label className="mb-2">Slug *</Label>
                   <Input
                     placeholder="slug-de-l-article"
                     {...register('slug', { required: 'Le slug est requis' })}
                   />
                   {errors.slug && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.slug.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Résumé</Text>
+                <div>
+                  <Label className="mb-2">Résumé</Label>
                   <Textarea
                     placeholder="Résumé de l'article"
                     rows={3}
                     {...register('summary')}
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Contenu *</Text>
+                <div>
+                  <Label className="mb-2">Contenu *</Label>
                   <Textarea
                     placeholder="Contenu de l'article"
                     rows={15}
                     {...register('content', { required: 'Le contenu est requis' })}
                   />
                   {errors.content && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.content.message}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.content.message}</p>
                   )}
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* Catégorisation */}
-            <Box>
-              <Heading size="md" mb={4}>Catégorisation</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Catégorie</Text>
-                  <select {...register('category')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">Catégorisation</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Catégorie</Label>
+                  <select
+                    {...register('category')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="news">Actualité</option>
                     <option value="event">Événement</option>
                     <option value="information">Information</option>
                     <option value="emergency">Urgence</option>
                   </select>
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Statut</Text>
-                  <select {...register('status')} style={{
-                    padding: '0.5rem',
-                    borderRadius: '0.375rem',
-                    border: '1px solid #e2e8f0',
-                    width: '100%'
-                  }}>
+                <div>
+                  <Label className="mb-2">Statut</Label>
+                  <select
+                    {...register('status')}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     <option value="draft">Brouillon</option>
                     <option value="published">Publié</option>
                     <option value="archived">Archivé</option>
                   </select>
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Auteur</Text>
+                <div>
+                  <Label className="mb-2">Auteur</Label>
                   <Input
                     placeholder="Nom de l'auteur"
                     {...register('author')}
                   />
-                </Box>
+                </div>
 
-                <Box display="flex" alignItems="center" gap={3}>
-                  <Text fontWeight="medium">Article à la une</Text>
+                <div className="flex items-center gap-3">
+                  <Label>Article à la une</Label>
                   <input
                     type="checkbox"
                     {...register('featured')}
+                    className="h-4 w-4 rounded border-gray-300"
                   />
-                </Box>
-              </Stack>
-            </Box>
+                </div>
+              </div>
+            </div>
 
             {/* SEO */}
-            <Box>
-              <Heading size="md" mb={4}>SEO</Heading>
-              <Stack gap={4}>
-                <Box>
-                  <Text fontWeight="medium" mb={2}>Description SEO</Text>
+            <div>
+              <h2 className="mb-4 text-lg font-semibold">SEO</h2>
+              <div className="flex flex-col gap-4">
+                <div>
+                  <Label className="mb-2">Description SEO</Label>
                   <Textarea
                     placeholder="Description pour les moteurs de recherche"
                     rows={3}
                     {...register('meta_description')}
                   />
-                  <Text fontSize="xs" color="gray.500" mt={1}>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Recommandé: 150-160 caractères
-                  </Text>
-                </Box>
-              </Stack>
-            </Box>
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Actions */}
-            <HStack justify="flex-end">
-              <Button
-                variant="outline"
-                onClick={() => navigate('/articles')}
-              >
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" type="button" onClick={() => navigate('/articles')}>
                 Annuler
               </Button>
-              <Button
-                type="submit"
-                colorScheme="blue"
-                loading={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isEditing ? 'Mettre à jour' : 'Créer'}
               </Button>
-            </HStack>
-          </Stack>
-        </Box>
-      </VStack>
-    </Box>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -298,18 +274,14 @@ export function EditArticle() {
   const { data: article, isLoading, error } = useArticle(id || '')
 
   if (isLoading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minH="200px">
-        <Spinner size="lg" />
-      </Box>
-    )
+    return <LoadingSpinner message="Chargement de l'article..." />
   }
 
   if (error || !article) {
     return (
-      <Box p={4} bg="red.50" borderRadius="md" border="1px solid" borderColor="red.200">
-        <Text color="red.700">Article non trouvé</Text>
-      </Box>
+      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
+        <p className="text-destructive">Article non trouvé</p>
+      </div>
     )
   }
 

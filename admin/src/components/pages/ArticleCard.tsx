@@ -1,4 +1,5 @@
-import { Badge, Box, Button, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { Article } from '../../hooks/api/useArticles'
 import { StatusBadge } from '../common'
 
@@ -12,172 +13,83 @@ interface ArticleCardProps {
   onUnpublish?: (article: Article) => void
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  news: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  event: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  information: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  emergency: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  news: 'Actualité', event: 'Événement', information: 'Information', emergency: 'Urgence',
+}
+
 export const ArticleCard = ({
-  article,
-  onEdit,
-  onView,
-  onDelete,
-  onToggleFeatured,
-  onPublish,
-  onUnpublish
+  article, onEdit, onView, onDelete, onToggleFeatured, onPublish, onUnpublish
 }: ArticleCardProps) => {
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'news': return 'blue'
-      case 'event': return 'purple'
-      case 'information': return 'green'
-      case 'emergency': return 'red'
-      default: return 'gray'
-    }
-  }
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'news': return 'Actualité'
-      case 'event': return 'Événement'
-      case 'information': return 'Information'
-      case 'emergency': return 'Urgence'
-      default: return category
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR')
-  }
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR')
 
   return (
-    <Box
-      borderWidth={1}
-      borderRadius="md"
-      p={4}
-      bg="white"
-      h="full"
-      _hover={{ shadow: 'md' }}
-      transition="all 0.2s"
-      display="flex"
-      flexDirection="column"
-    >
+    <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
       {/* Header */}
-      <VStack align="start" gap={2} mb={3}>
-        <HStack wrap="wrap" gap={2}>
+      <div className="mb-3 space-y-2">
+        <div className="flex flex-wrap gap-2">
           <StatusBadge status={article.status} />
-          <Badge colorScheme={getCategoryColor(article.category)} size="sm">
-            {getCategoryLabel(article.category)}
+          <Badge className={CATEGORY_COLORS[article.category] || ''}>
+            {CATEGORY_LABELS[article.category] || article.category}
           </Badge>
           {article.featured && (
-            <Badge colorScheme="orange" size="sm">
-              ⭐ À la une
-            </Badge>
+            <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">⭐ À la une</Badge>
           )}
-        </HStack>
-        <Heading size="md" lineHeight="shorter">
-          {article.title}
-        </Heading>
-      </VStack>
+        </div>
+        <h3 className="text-lg font-semibold leading-tight">{article.title}</h3>
+      </div>
 
       {/* Body */}
-      <VStack align="start" gap={3} flex={1}>
+      <div className="flex flex-1 flex-col gap-3">
         {article.image && (
-          <Box
-            w="full"
-            h="120px"
-            bg="gray.100"
-            borderRadius="md"
-            backgroundImage={`url(${article.image.url})`}
-            backgroundSize="cover"
-            backgroundPosition="center"
+          <div
+            className="h-[120px] w-full rounded-md bg-muted bg-cover bg-center"
+            style={{ backgroundImage: `url(${article.image.url})` }}
           />
         )}
 
         {article.summary && (
-          <Text fontSize="sm" color="gray.600" lineHeight="base">
-            {article.summary}
-          </Text>
+          <p className="text-sm leading-relaxed text-muted-foreground">{article.summary}</p>
         )}
 
-        <VStack align="start" gap={1} fontSize="xs" color="gray.500" w="full">
-          <HStack justify="space-between" w="full">
-            <Text>
-              Vues: {article.view_count}
-            </Text>
-            {article.author && (
-              <Text>
-                Par: {article.author}
-              </Text>
-            )}
-          </HStack>
-          <Text>
-            Créé: {formatDate(article.createdAt)}
-          </Text>
-          {article.publication_date && (
-            <Text>
-              Publié: {formatDate(article.publication_date)}
-            </Text>
-          )}
-        </VStack>
-      </VStack>
+        <div className="mt-auto space-y-1 text-xs text-muted-foreground">
+          <div className="flex w-full justify-between">
+            <span>Vues: {article.view_count}</span>
+            {article.author && <span>Par: {article.author}</span>}
+          </div>
+          <p>Créé: {formatDate(article.createdAt)}</p>
+          {article.publication_date && <p>Publié: {formatDate(article.publication_date)}</p>}
+        </div>
+      </div>
 
       {/* Footer Actions */}
-      <VStack gap={2} mt={4}>
-        <HStack w="full" justify="space-between">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onView(article)}
-          >
-            Voir
-          </Button>
-          <Button
-            size="sm"
-            colorScheme="blue"
-            onClick={() => onEdit(article)}
-          >
-            Modifier
-          </Button>
-        </HStack>
+      <div className="mt-4 space-y-2">
+        <div className="flex w-full justify-between">
+          <Button size="sm" variant="outline" onClick={() => onView(article)}>Voir</Button>
+          <Button size="sm" onClick={() => onEdit(article)}>Modifier</Button>
+        </div>
 
-        <HStack w="full" gap={1} flexWrap="wrap">
+        <div className="flex w-full flex-wrap gap-1">
           {onToggleFeatured && (
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => onToggleFeatured(article)}
-              title={article.featured ? 'Retirer de la une' : 'Mettre à la une'}
-            >
+            <Button size="sm" variant="ghost" onClick={() => onToggleFeatured(article)} title={article.featured ? 'Retirer de la une' : 'Mettre à la une'}>
               {article.featured ? '⭐' : '☆'}
             </Button>
           )}
           {onPublish && article.status !== 'published' && (
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => onPublish(article)}
-              title="Publier"
-            >
-              📤
-            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onPublish(article)} title="Publier">📤</Button>
           )}
           {onUnpublish && article.status === 'published' && (
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => onUnpublish(article)}
-              title="Dépublier"
-            >
-              📥
-            </Button>
+            <Button size="sm" variant="ghost" onClick={() => onUnpublish(article)} title="Dépublier">📥</Button>
           )}
-          <Button
-            size="xs"
-            variant="ghost"
-            onClick={() => onDelete(article)}
-            color="red.500"
-            title="Supprimer"
-          >
-            🗑️
-          </Button>
-        </HStack>
-      </VStack>
-    </Box>
+          <Button size="sm" variant="ghost" onClick={() => onDelete(article)} className="text-destructive" title="Supprimer">🗑️</Button>
+        </div>
+      </div>
+    </div>
   )
 }

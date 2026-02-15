@@ -1,4 +1,3 @@
-import { Box, Text, VStack } from '@chakra-ui/react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
 import { PageHeader } from '../components/layout'
@@ -73,73 +72,69 @@ export function PageDetail() {
   ]
 
   return (
-    <Box maxWidth="4xl" mx="auto" p={6}>
-      <VStack gap={6} align="stretch">
+    <div className="mx-auto max-w-4xl p-6">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title={page.title}
           subtitle={`/${page.slug}`}
           actions={headerActions}
         />
 
-        <Box p={6} borderWidth={1} borderRadius="md" bg="white">
-          <VStack gap={4} align="stretch">
-            <Box>
-              <Text fontWeight="medium" color="gray.600" mb={2}>
+        <div className="rounded-md border bg-card p-6">
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="mb-2 font-medium text-muted-foreground">
                 Statut
-              </Text>
+              </p>
               <StatusBadge status={page.status} />
-            </Box>
+            </div>
 
             {page.meta_description && (
-              <Box>
-                <Text fontWeight="medium" color="gray.600" mb={2}>
+              <div>
+                <p className="mb-2 font-medium text-muted-foreground">
                   Description
-                </Text>
-                <Text>{page.meta_description}</Text>
-              </Box>
+                </p>
+                <p>{page.meta_description}</p>
+              </div>
             )}
 
-            <Box>
-              <Text fontWeight="medium" color="gray.600" mb={2}>
+            <div>
+              <p className="mb-2 font-medium text-muted-foreground">
                 Contenu
-              </Text>
-              <Box
-                p={4}
-                border="1px solid"
-                borderColor="gray.200"
-                borderRadius="md"
-                bg="gray.50"
+              </p>
+              <div
+                className="rounded-md border bg-muted/50 p-4"
                 dangerouslySetInnerHTML={{ __html: page.content }}
               />
-            </Box>
+            </div>
 
-            <Box>
-              <Text fontWeight="medium" color="gray.600" mb={2}>
+            <div>
+              <p className="mb-2 font-medium text-muted-foreground">
                 Informations
-              </Text>
-              <VStack gap={2} align="start">
-                <Text fontSize="sm" color="gray.600">
+              </p>
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm text-muted-foreground">
                   Créé le: {new Date(page.createdAt).toLocaleDateString('fr-FR')}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Modifié le: {new Date(page.updatedAt).toLocaleDateString('fr-FR')}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Ordre du menu: {page.menu_order}
-                </Text>
-                <Text fontSize="sm" color="gray.600">
+                </p>
+                <p className="text-sm text-muted-foreground">
                   Template: {page.template}
-                </Text>
+                </p>
                 {page.is_homepage && (
-                  <Text fontSize="sm" color="blue.600" fontWeight="medium">
+                  <p className="text-sm font-medium text-primary">
                     ✓ Page d'accueil
-                  </Text>
+                  </p>
                 )}
-              </VStack>
-            </Box>
-          </VStack>
-        </Box>
-      </VStack>
-    </Box>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

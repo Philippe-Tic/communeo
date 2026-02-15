@@ -1,4 +1,3 @@
-import { Box, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common'
@@ -109,8 +108,8 @@ export const Pages = () => {
   ]
 
   return (
-    <Box p={6}>
-      <VStack align="stretch" gap={6}>
+    <div className="p-6">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title="Pages"
           subtitle="Gérez les pages de votre site"
@@ -153,7 +152,7 @@ export const Pages = () => {
           isLoading={deleteMutation.isPending}
           type="danger"
         />
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }

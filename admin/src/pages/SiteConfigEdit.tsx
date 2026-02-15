@@ -1,14 +1,8 @@
-import {
-  Box,
-  Button,
-  HStack,
-  Heading,
-  Input,
-  SimpleGrid,
-  Text,
-  Textarea,
-  VStack
-} from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
@@ -160,9 +154,9 @@ export const SiteConfigEdit = () => {
   if (!site) return <ErrorState title="Site non trouvé" message="Aucune configuration de site disponible" />
 
   return (
-    <Box maxW="full" mx="auto">
+    <div className="mx-auto w-full">
       <form onSubmit={handleSubmit}>
-        <VStack gap={6} align="stretch">
+        <div className="flex flex-col gap-6">
           <PageHeader
             title="Modifier la configuration"
             subtitle="Paramètres du site"
@@ -185,171 +179,135 @@ export const SiteConfigEdit = () => {
           />
 
           {/* Informations générales */}
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-            <VStack gap={4} align="stretch">
-              <Heading size="md" color="gray.700">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 Informations générales
-              </Heading>
+              </h2>
 
-              <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Nom du site
-                  </Text>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <Label className="mb-2">Nom du site</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    borderColor={errors.name ? 'red.300' : 'gray.200'}
+                    className={errors.name ? 'border-destructive' : ''}
                   />
                   {errors.name && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.name}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.name}</p>
                   )}
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Slug
-                  </Text>
+                <div>
+                  <Label className="mb-2">Slug</Label>
                   <Input
                     value={site.slug}
                     disabled
-                    bg="gray.50"
+                    className="bg-muted"
                   />
-                  <Text fontSize="sm" color="gray.600" mt={1}>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Le slug ne peut pas être modifié
-                  </Text>
-                </Box>
+                  </p>
+                </div>
 
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Thème
-                  </Text>
+                <div>
+                  <Label className="mb-2">Thème</Label>
                   <select
                     value={formData.theme}
                     onChange={(e) => handleInputChange('theme', e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px',
-                      borderWidth: '1px',
-                      borderColor: '#E2E8F0',
-                      borderRadius: '6px',
-                      backgroundColor: 'white'
-                    }}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <option value="classique">Classique</option>
                     <option value="moderne">Moderne</option>
                     <option value="accessible">Accessible</option>
                   </select>
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Email de contact
-                  </Text>
+                <div>
+                  <Label className="mb-2">Email de contact</Label>
                   <Input
                     type="email"
                     value={formData.contact_mail}
                     onChange={(e) => handleInputChange('contact_mail', e.target.value)}
-                    borderColor={errors.contact_mail ? 'red.300' : 'gray.200'}
+                    className={errors.contact_mail ? 'border-destructive' : ''}
                   />
                   {errors.contact_mail && (
-                    <Text color="red.500" fontSize="sm" mt={1}>
-                      {errors.contact_mail}
-                    </Text>
+                    <p className="mt-1 text-sm text-destructive">{errors.contact_mail}</p>
                   )}
-                </Box>
-              </SimpleGrid>
-            </VStack>
-          </Box>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Contact et adresse */}
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-            <VStack gap={4} align="stretch">
-              <Heading size="md" color="gray.700">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 Informations de contact
-              </Heading>
+              </h2>
 
-              <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Téléphone
-                  </Text>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                  <Label className="mb-2">Téléphone</Label>
                   <Input
                     type="tel"
                     value={formData.contact_phone}
                     onChange={(e) => handleInputChange('contact_phone', e.target.value)}
                     placeholder="Ex: 01 23 45 67 89"
                   />
-                </Box>
+                </div>
 
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                    Adresse
-                  </Text>
+                <div>
+                  <Label className="mb-2">Adresse</Label>
                   <Textarea
                     value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     placeholder="Adresse complète de la mairie"
                     rows={3}
                   />
-                </Box>
-              </SimpleGrid>
-            </VStack>
-          </Box>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Configuration des couleurs */}
-          <Box bg="white" p={6} borderRadius="lg" shadow="sm" borderWidth={1}>
-            <VStack gap={4} align="stretch">
-              <Heading size="md" color="gray.700">
+          <div className="rounded-lg border bg-card p-6 shadow-sm">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold text-foreground">
                 Configuration des couleurs
-              </Heading>
+              </h2>
 
-              <Box>
-                <Text fontSize="sm" fontWeight="medium" color="gray.600" mb={2}>
-                  Couleurs du thème (JSON)
-                </Text>
+              <div>
+                <Label className="mb-2">Couleurs du thème (JSON)</Label>
                 <Textarea
                   value={formData.colors}
                   onChange={(e) => handleInputChange('colors', e.target.value)}
                   placeholder='{"primary": "#3182ce", "secondary": "#2d3748"}'
                   rows={6}
-                  fontFamily="mono"
-                  fontSize="sm"
-                  borderColor={errors.colors ? 'red.300' : 'gray.200'}
+                  className={`font-mono text-sm ${errors.colors ? 'border-destructive' : ''}`}
                 />
-                <Text fontSize="sm" color="gray.600" mt={1}>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Configuration JSON optionnelle pour personnaliser les couleurs du thème
-                </Text>
+                </p>
                 {errors.colors && (
-                  <Text color="red.500" fontSize="sm" mt={1}>
-                    {errors.colors}
-                  </Text>
+                  <p className="mt-1 text-sm text-destructive">{errors.colors}</p>
                 )}
-              </Box>
-            </VStack>
-          </Box>
+              </div>
+            </div>
+          </div>
 
           {/* Actions */}
-          <HStack justify="end" gap={4}>
-            <Button
-              variant="ghost"
-              onClick={handleCancel}
-              disabled={isPending}
-            >
+          <div className="flex justify-end gap-4">
+            <Button variant="ghost" type="button" onClick={handleCancel} disabled={isPending}>
               Annuler
             </Button>
-            <Button
-              type="submit"
-              colorScheme="blue"
-              loading={isPending}
-            >
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isPending ? "Sauvegarde..." : "Sauvegarder"}
             </Button>
-          </HStack>
-        </VStack>
+          </div>
+        </div>
       </form>
-    </Box>
+    </div>
   )
 }

@@ -1,4 +1,6 @@
-import { Button, Heading, HStack, Text, VStack } from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 interface PageHeaderAction {
   label: string
@@ -16,32 +18,38 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, actions = [] }: PageHeaderProps) {
   return (
-    <HStack justify="space-between" align="start" flexWrap="wrap" gap={4}>
-      <VStack align="start" gap={1}>
-        <Heading size="lg">{title}</Heading>
+    <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold">{title}</h1>
         {subtitle && (
-          <Text color="gray.600" fontSize="md">
-            {subtitle}
-          </Text>
+          <p className="text-muted-foreground">{subtitle}</p>
         )}
-      </VStack>
+      </div>
 
       {actions.length > 0 && (
-        <HStack gap={3} flexWrap="wrap">
+        <div className="flex flex-wrap gap-3">
           {actions.map((action, index) => (
             <Button
               key={index}
-              variant={action.variant || 'solid'}
-              colorScheme={action.colorScheme || 'blue'}
+              variant={
+                action.variant === 'outline' ? 'outline' :
+                action.variant === 'ghost' ? 'ghost' : 'default'
+              }
               onClick={action.onClick}
-              loading={action.loading}
-              size={{ base: 'md', md: 'lg' }}
+              disabled={action.loading}
+              className={cn(
+                action.colorScheme === 'red' && action.variant === 'outline' && 'border-destructive text-destructive hover:bg-destructive/10',
+                action.colorScheme === 'red' && action.variant !== 'outline' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+                action.colorScheme === 'orange' && 'border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950',
+                action.colorScheme === 'gray' && action.variant === 'outline' && 'border-border text-muted-foreground'
+              )}
             >
+              {action.loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {action.label}
             </Button>
           ))}
-        </HStack>
+        </div>
       )}
-    </HStack>
+    </div>
   )
 }

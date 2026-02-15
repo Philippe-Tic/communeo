@@ -1,4 +1,3 @@
-import { Box } from '@chakra-ui/react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ToastTest } from './components/ToastTest'
@@ -32,9 +31,9 @@ function App() {
           <Route
             path="/login"
             element={
-              <Box minH="100vh" bg="gray.50" display="flex" alignItems="center">
+              <div className="flex min-h-screen items-center bg-background">
                 <LoginForm />
-              </Box>
+              </div>
             }
           />
 
@@ -247,23 +246,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* Users routes - Temporarily hidden */}
-          {/*
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <Box>
-                    <h1>Utilisateurs</h1>
-                    <p>Gestion des utilisateurs (à implémenter)</p>
-                  </Box>
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
-          */}
 
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -1,20 +1,12 @@
-import {
-    Alert,
-    Badge,
-    Box,
-    Button,
-    Card,
-    Code,
-    Field,
-    HStack,
-    IconButton,
-    Input,
-    Link,
-    Separator,
-    Table,
-    Text,
-    VStack
-} from '@chakra-ui/react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { AlertCircle, CheckCircle, Info, Loader2, RefreshCw } from 'lucide-react'
 import React, { useState } from 'react'
 import { useDomain } from '../../hooks/useDomain'
 import { toaster } from '../../lib/toaster'
@@ -25,39 +17,19 @@ interface DomainManagementProps {
 
 export const DomainManagement: React.FC<DomainManagementProps> = ({ className }) => {
   const {
-    domainStatus,
-    hasCustomDomain,
-    isConfigured,
-    isPending,
-    hasError,
-    isLoading,
-    configureDomain,
-    verifyDomain,
-    removeDomain,
-    refetch,
-    isConfiguring,
-    isVerifying,
-    isRemoving
+    domainStatus, hasCustomDomain, isConfigured, isPending, hasError,
+    isLoading, configureDomain, verifyDomain, removeDomain, refetch,
+    isConfiguring, isVerifying, isRemoving
   } = useDomain()
 
   const [domainInput, setDomainInput] = useState('')
 
   const handleConfigureDomain = async () => {
     if (!domainInput.trim()) {
-      toaster.create({
-        title: 'Erreur',
-        description: 'Veuillez saisir un nom de domaine',
-        type: 'error',
-        duration: 5000,
-      })
+      toaster.create({ title: 'Erreur', description: 'Veuillez saisir un nom de domaine', type: 'error', duration: 5000 })
       return
     }
-
     configureDomain(domainInput.trim())
-  }
-
-  const handleVerifyDomain = () => {
-    verifyDomain()
   }
 
   const handleRemoveDomain = () => {
@@ -68,276 +40,174 @@ export const DomainManagement: React.FC<DomainManagementProps> = ({ className })
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toaster.create({
-      title: 'Copié',
-      description: 'Texte copié dans le presse-papier',
-      type: 'success',
-      duration: 3000,
-    })
+    toaster.create({ title: 'Copié', description: 'Texte copié dans le presse-papier', type: 'success', duration: 3000 })
   }
 
   const getStatusBadge = () => {
     if (!hasCustomDomain) return null
-
-    let colorPalette = 'gray'
-    let text = 'Inconnu'
-
-    switch (domainStatus?.domainStatus) {
-      case 'pending':
-        colorPalette = 'orange'
-        text = 'En attente de vérification'
-        break
-      case 'verified':
-        colorPalette = 'green'
-        text = 'Vérifié et actif'
-        break
-      case 'error':
-        colorPalette = 'red'
-        text = 'Erreur de configuration'
-        break
+    const configs: Record<string, { className: string; text: string }> = {
+      pending: { className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', text: 'En attente de vérification' },
+      verified: { className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', text: 'Vérifié et actif' },
+      error: { className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', text: 'Erreur de configuration' },
     }
-
-    return (
-      <Badge colorPalette={colorPalette}>
-        {text}
-      </Badge>
-    )
+    const config = configs[domainStatus?.domainStatus || ''] || { className: '', text: 'Inconnu' }
+    return <Badge className={config.className}>{config.text}</Badge>
   }
 
   return (
-    <Box className={className}>
-      <Card.Root>
-        <Card.Header>
-          <Card.Title>Domaine personnalisé</Card.Title>
-          <Card.Description>
-            Configurez un nom de domaine personnalisé pour votre site
-          </Card.Description>
-        </Card.Header>
-
-        <Card.Body>
-          <VStack gap={6} align="stretch">
-            {/* État actuel */}
-            <Box>
-              <HStack justify="space-between" mb={4}>
-                <VStack align="start" gap={1}>
-                  <Text fontWeight="medium">État actuel</Text>
-                  {hasCustomDomain ? (
-                    <HStack>
-                      <Text fontSize="lg" fontWeight="medium">
-                        {domainStatus?.customDomain}
-                      </Text>
-                      {getStatusBadge()}
-                      {isConfigured && domainStatus?.liveUrl && (
-                        <Link href={domainStatus.liveUrl} target="_blank" color="blue.500">
-                          ↗
-                        </Link>
-                      )}
-                    </HStack>
-                  ) : (
-                    <Text color="gray.500">Aucun domaine personnalisé configuré</Text>
-                  )}
-                </VStack>
-
-                <HStack>
-                  <IconButton
-                    aria-label="Actualiser"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => refetch()}
-                    disabled={isLoading}
-                  >
-                    ⟳
-                  </IconButton>
-
-                  {hasCustomDomain && (
-                    <Button
-                      colorPalette="red"
-                      variant="outline"
-                      onClick={handleRemoveDomain}
-                      loading={isRemoving}
-                      size="sm"
-                    >
-                      Supprimer
-                    </Button>
-                  )}
-                </HStack>
-              </HStack>
-
-              {/* URL du site */}
-              {domainStatus?.liveUrl && (
-                <Box>
-                  <Text fontSize="sm" color="gray.600" mb={1}>URL du site :</Text>
-                  <Link href={domainStatus.liveUrl} target="_blank" color="blue.500" fontFamily="mono">
-                    {domainStatus.liveUrl}
-                  </Link>
-                </Box>
-              )}
-            </Box>
-
-            <Separator />
-
-            {/* Configuration selon l'état */}
-            {!hasCustomDomain && (
-              <>
-                <Box>
-                  <Text fontWeight="medium" mb={4}>Configurer un domaine personnalisé</Text>
-
-                  <Field.Root>
-                    <Field.Label>Nom de domaine</Field.Label>
-                    <Input
-                      placeholder="exemple: mairie-lyon.fr"
-                      value={domainInput}
-                      onChange={(e) => setDomainInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleConfigureDomain()
-                        }
-                      }}
-                    />
-                    <Field.HelperText>
-                      Saisissez votre nom de domaine sans "www" ni "https://"
-                    </Field.HelperText>
-                  </Field.Root>
-
-                  <Button
-                    colorPalette="blue"
-                    variant="solid"
-                    onClick={handleConfigureDomain}
-                    loading={isConfiguring}
-                    disabled={!domainInput.trim() || isLoading}
-                    mt={4}
-                  >
-                    Configurer le domaine
-                  </Button>
-                </Box>
-
-                <Alert.Root status="info">
-                  <Alert.Title>ℹ️ Plan requis</Alert.Title>
-                  <Alert.Description>
-                    Un domaine personnalisé nécessite un plan premium.
-                    Contactez votre administrateur pour plus d'informations.
-                  </Alert.Description>
-                </Alert.Root>
-              </>
-            )}
-
-            {/* Instructions DNS pour domaine en attente */}
-            {isPending && domainStatus && (
-              <>
-                <Box>
-                  <Text fontWeight="medium" mb={4}>Configuration DNS requise</Text>
-
-                                     <Alert.Root status="warning" mb={4}>
-                     <Alert.Title>⚠️ Action requise</Alert.Title>
-                    <Alert.Description>
-                      Configurez les enregistrements DNS suivants chez votre registraire de domaine.
-                    </Alert.Description>
-                  </Alert.Root>
-
-                  <Table.Root size="sm">
-                    <Table.Header>
-                      <Table.Row>
-                        <Table.ColumnHeader>Type</Table.ColumnHeader>
-                        <Table.ColumnHeader>Nom</Table.ColumnHeader>
-                        <Table.ColumnHeader>Valeur</Table.ColumnHeader>
-                        <Table.ColumnHeader>Action</Table.ColumnHeader>
-                      </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                      <Table.Row>
-                        <Table.Cell>
-                          <Badge colorPalette="purple">TXT</Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Code fontSize="sm">_netlify-cms-verification.{domainStatus.customDomain}</Code>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Code fontSize="sm">{domainStatus.verificationToken}</Code>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            size="xs"
-                            variant="outline"
-                            onClick={() => copyToClipboard(domainStatus.verificationToken || '')}
-                          >
-                            Copier
-                          </Button>
-                        </Table.Cell>
-                      </Table.Row>
-                      <Table.Row>
-                        <Table.Cell>
-                          <Badge colorPalette="blue">CNAME</Badge>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Code fontSize="sm">{domainStatus.customDomain}</Code>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Code fontSize="sm">netlify.app</Code>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            size="xs"
-                            variant="outline"
-                            onClick={() => copyToClipboard('netlify.app')}
-                          >
-                            Copier
-                          </Button>
-                        </Table.Cell>
-                      </Table.Row>
-                    </Table.Body>
-                  </Table.Root>
-
-                  <Button
-                    colorPalette="green"
-                    variant="solid"
-                    onClick={handleVerifyDomain}
-                    loading={isVerifying}
-                    mt={4}
-                  >
-                    Vérifier la configuration DNS
-                  </Button>
-                </Box>
-              </>
-            )}
-
-            {/* Domaine configuré avec succès */}
-            {isConfigured && (
-                             <Alert.Root status="success">
-                 <Alert.Title>✅ Domaine actif</Alert.Title>
-                <Alert.Description>
-                  Votre domaine personnalisé est configuré et actif.
-                  Le certificat SSL est {domainStatus?.sslEnabled ? 'activé' : 'en cours d\'activation'}.
-                </Alert.Description>
-              </Alert.Root>
-            )}
-
-            {/* Erreur de configuration */}
-            {hasError && (
-                             <Alert.Root status="error">
-                 <Alert.Title>❌ Erreur de configuration</Alert.Title>
-                <Alert.Description>
-                  La vérification du domaine a échoué. Vérifiez votre configuration DNS et réessayez.
-                </Alert.Description>
-              </Alert.Root>
-            )}
-
-            {/* Informations sur le plan */}
-            {domainStatus && (
-              <Box>
-                <Text fontSize="sm" color="gray.600">
-                  Plan actuel : <Badge colorPalette="gray">{domainStatus.planType}</Badge>
-                </Text>
-                {domainStatus.domainConfiguredAt && (
-                  <Text fontSize="sm" color="gray.600" mt={1}>
-                    Configuré le : {new Date(domainStatus.domainConfiguredAt).toLocaleDateString('fr-FR')}
-                  </Text>
+    <div className={className}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Domaine personnalisé</CardTitle>
+          <CardDescription>Configurez un nom de domaine personnalisé pour votre site</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Current status */}
+          <div>
+            <div className="mb-4 flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="font-medium">État actuel</p>
+                {hasCustomDomain ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-medium">{domainStatus?.customDomain}</span>
+                    {getStatusBadge()}
+                    {isConfigured && domainStatus?.liveUrl && (
+                      <a href={domainStatus.liveUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">↗</a>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground">Aucun domaine personnalisé configuré</p>
                 )}
-              </Box>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                {hasCustomDomain && (
+                  <Button variant="outline" size="sm" onClick={handleRemoveDomain} disabled={isRemoving} className="border-destructive text-destructive hover:bg-destructive/10">
+                    {isRemoving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Supprimer
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {domainStatus?.liveUrl && (
+              <div>
+                <p className="mb-1 text-sm text-muted-foreground">URL du site :</p>
+                <a href={domainStatus.liveUrl} target="_blank" rel="noopener noreferrer" className="font-mono text-primary hover:underline">
+                  {domainStatus.liveUrl}
+                </a>
+              </div>
             )}
-          </VStack>
-        </Card.Body>
-      </Card.Root>
-    </Box>
+          </div>
+
+          <Separator />
+
+          {/* Configure domain */}
+          {!hasCustomDomain && (
+            <>
+              <div>
+                <p className="mb-4 font-medium">Configurer un domaine personnalisé</p>
+                <div className="space-y-2">
+                  <Label>Nom de domaine</Label>
+                  <Input
+                    placeholder="exemple: mairie-lyon.fr"
+                    value={domainInput}
+                    onChange={(e) => setDomainInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleConfigureDomain() }}
+                  />
+                  <p className="text-sm text-muted-foreground">Saisissez votre nom de domaine sans "www" ni "https://"</p>
+                </div>
+                <Button onClick={handleConfigureDomain} disabled={!domainInput.trim() || isLoading || isConfiguring} className="mt-4">
+                  {isConfiguring && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Configurer le domaine
+                </Button>
+              </div>
+
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Plan requis</AlertTitle>
+                <AlertDescription>Un domaine personnalisé nécessite un plan premium. Contactez votre administrateur pour plus d'informations.</AlertDescription>
+              </Alert>
+            </>
+          )}
+
+          {/* DNS instructions */}
+          {isPending && domainStatus && (
+            <div>
+              <p className="mb-4 font-medium">Configuration DNS requise</p>
+              <Alert variant="destructive" className="mb-4 border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-200 [&>svg]:text-orange-600">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Action requise</AlertTitle>
+                <AlertDescription>Configurez les enregistrements DNS suivants chez votre registraire de domaine.</AlertDescription>
+              </Alert>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Valeur</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell><Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">TXT</Badge></TableCell>
+                    <TableCell><code className="text-sm">_netlify-cms-verification.{domainStatus.customDomain}</code></TableCell>
+                    <TableCell><code className="text-sm">{domainStatus.verificationToken}</code></TableCell>
+                    <TableCell>
+                      <Button size="sm" variant="outline" onClick={() => copyToClipboard(domainStatus.verificationToken || '')}>Copier</Button>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell><Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">CNAME</Badge></TableCell>
+                    <TableCell><code className="text-sm">{domainStatus.customDomain}</code></TableCell>
+                    <TableCell><code className="text-sm">netlify.app</code></TableCell>
+                    <TableCell>
+                      <Button size="sm" variant="outline" onClick={() => copyToClipboard('netlify.app')}>Copier</Button>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+
+              <Button onClick={() => verifyDomain()} disabled={isVerifying} className="mt-4 bg-green-600 text-white hover:bg-green-700">
+                {isVerifying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Vérifier la configuration DNS
+              </Button>
+            </div>
+          )}
+
+          {isConfigured && (
+            <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200 [&>svg]:text-green-600">
+              <CheckCircle className="h-4 w-4" />
+              <AlertTitle>Domaine actif</AlertTitle>
+              <AlertDescription>
+                Votre domaine personnalisé est configuré et actif. Le certificat SSL est {domainStatus?.sslEnabled ? 'activé' : 'en cours d\'activation'}.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {hasError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erreur de configuration</AlertTitle>
+              <AlertDescription>La vérification du domaine a échoué. Vérifiez votre configuration DNS et réessayez.</AlertDescription>
+            </Alert>
+          )}
+
+          {domainStatus && (
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>Plan actuel : <Badge variant="secondary">{domainStatus.planType}</Badge></p>
+              {domainStatus.domainConfiguredAt && (
+                <p>Configuré le : {new Date(domainStatus.domainConfiguredAt).toLocaleDateString('fr-FR')}</p>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

@@ -1,10 +1,5 @@
-import {
-    Box,
-    HStack,
-    Text,
-    useBreakpointValue,
-    VStack,
-} from '@chakra-ui/react'
+import { cn } from '@/lib/utils'
+import { X } from 'lucide-react'
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -22,7 +17,6 @@ const navItems: NavItem[] = [
   { name: 'Site', path: '/site', icon: '⚙️' },
   { name: 'Déploiement', path: '/deployment', icon: '🚀' },
   { name: 'Domaines', path: '/domain', icon: '🌐' },
-  // { name: 'Utilisateurs', path: '/users', icon: '👥' }, // Temporarily hidden
 ]
 
 interface SidebarProps {
@@ -39,13 +33,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const location = useLocation()
   const navigate = useNavigate()
 
-  const sidebarWidth = useBreakpointValue({ base: '280px', md: '250px' })
-  const sidebarHeight = variant === 'drawer'
-    ? '100vh'
-    : 'calc(100vh - 88px)' // Adjust based on header height
-
-  const sidebarTop = variant === 'drawer' ? 0 : '88px' // Header height
-
   const handleNavClick = (path: string) => {
     navigate(path)
     if (variant === 'drawer' && onClose) {
@@ -54,88 +41,64 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }
 
   const sidebarContent = (
-    <Box
-      w={sidebarWidth}
-      bg="gray.50"
-      borderRightWidth={variant === 'sidebar' ? 1 : 0}
-      borderColor="gray.200"
-      h={sidebarHeight}
-      position="fixed"
-      top={sidebarTop}
-      left={variant === 'drawer' && !isOpen ? '-100%' : 0}
-      overflowY="auto"
-      zIndex={variant === 'drawer' ? 1100 : 1}
-      transition="left 0.3s ease"
-      boxShadow={variant === 'drawer' ? 'xl' : 'none'}
+    <div
+      className={cn(
+        'fixed overflow-y-auto bg-muted/50 transition-all duration-300 ease-in-out',
+        variant === 'sidebar'
+          ? 'top-[72px] left-0 h-[calc(100vh-72px)] w-[250px] border-r'
+          : 'top-0 left-0 z-[1100] h-screen w-[280px] shadow-xl md:w-[250px]',
+        variant === 'drawer' && !isOpen && '-left-full'
+      )}
     >
-      <VStack gap={1} p={4} align="stretch">
-        <Text
-          fontSize="xs"
-          fontWeight="bold"
-          color="gray.500"
-          textTransform="uppercase"
-          letterSpacing="wide"
-          mb={2}
-        >
+      {variant === 'drawer' && (
+        <div className="flex items-center justify-between border-b p-4">
+          <h2 className="font-bold text-primary">Admin CMS</h2>
+          <button onClick={onClose} className="rounded-md p-1 hover:bg-accent">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+      <div className="flex flex-col gap-1 p-4">
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
           Navigation
-        </Text>
+        </p>
 
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
 
           return (
-            <Box
+            <button
               key={item.path}
-              p={3}
-              borderRadius="md"
-              bg={isActive ? 'brand.500' : 'transparent'}
-              color={isActive ? 'white' : 'gray.700'}
-              cursor="pointer"
-              _hover={{
-                bg: isActive ? 'brand.600' : 'gray.100',
-              }}
-              fontWeight={isActive ? 'semibold' : 'normal'}
-              transition="all 0.2s"
               onClick={() => handleNavClick(item.path)}
+              className={cn(
+                'flex items-center gap-3 rounded-md p-3 text-left text-sm transition-all',
+                isActive
+                  ? 'bg-primary font-semibold text-primary-foreground'
+                  : 'text-foreground hover:bg-accent'
+              )}
             >
-              <HStack gap={3} align="center">
-                {item.icon && (
-                  <Text fontSize="md" lineHeight={1}>
-                    {item.icon}
-                  </Text>
-                )}
-                <Text fontSize="sm">{item.name}</Text>
-              </HStack>
-            </Box>
+              {item.icon && <span className="text-base leading-none">{item.icon}</span>}
+              <span>{item.name}</span>
+            </button>
           )
         })}
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 
-  // Mobile drawer overlay
   if (variant === 'drawer') {
     return (
       <>
-        {/* Overlay */}
         {isOpen && (
-          <Box
-            position="fixed"
-            top={0}
-            left={0}
-            w="100vw"
-            h="100vh"
-            bg="blackAlpha.600"
-            zIndex={1050}
+          <div
+            className="fixed inset-0 z-[1050] bg-black/60"
             onClick={onClose}
           />
         )}
-        {/* Sidebar content */}
         {sidebarContent}
       </>
     )
   }
 
-  // Desktop sidebar
   return sidebarContent
 }

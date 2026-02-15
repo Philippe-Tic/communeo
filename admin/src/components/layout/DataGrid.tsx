@@ -1,4 +1,3 @@
-import { Box, Grid } from '@chakra-ui/react'
 import { EmptyState, ErrorState, LoadingSpinner } from '../common'
 
 interface DataGridProps<T> {
@@ -27,8 +26,6 @@ export function DataGrid<T>({
   emptyDescription,
   emptyActionLabel,
   onEmptyAction,
-  columns = { base: 1, md: 2, lg: 3 },
-  gap = 4
 }: DataGridProps<T>) {
   if (isLoading) {
     return <LoadingSpinner />
@@ -50,19 +47,12 @@ export function DataGrid<T>({
   }
 
   return (
-    <Grid
-      templateColumns={{
-        base: `repeat(${columns.base}, 1fr)`,
-        md: `repeat(${columns.md}, 1fr)`,
-        lg: `repeat(${columns.lg}, 1fr)`
-      }}
-      gap={gap}
-    >
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {data.map((item, index) => (
-        <Box key={index}>
+        <div key={index}>
           {renderItem(item, index)}
-        </Box>
+        </div>
       ))}
-    </Grid>
+    </div>
   )
 }

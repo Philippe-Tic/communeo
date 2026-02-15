@@ -1,4 +1,4 @@
-import { Box, Button, Text, VStack } from '@chakra-ui/react'
+import { Button } from '@/components/ui/button'
 
 interface ErrorStateProps {
   title?: string
@@ -14,21 +14,17 @@ export function ErrorState({
   retryLabel = 'Réessayer'
 }: ErrorStateProps) {
   return (
-    <Box p={8} textAlign="center">
-      <VStack gap={4}>
-        <Box fontSize="4xl">❌</Box>
-        <Text fontSize="lg" fontWeight="medium" color="red.600">
-          {title}
-        </Text>
-        <Text color="gray.600" maxW="md">
-          {message}
-        </Text>
+    <div className="p-8 text-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="text-4xl">❌</div>
+        <p className="text-lg font-medium text-destructive">{title}</p>
+        <p className="max-w-md text-muted-foreground">{message}</p>
         {onRetry && (
-          <Button colorScheme="red" variant="outline" onClick={onRetry} mt={2}>
+          <Button variant="outline" onClick={onRetry} className="mt-2 border-destructive text-destructive hover:bg-destructive/10">
             {retryLabel}
           </Button>
         )}
-      </VStack>
-    </Box>
+      </div>
+    </div>
   )
 }

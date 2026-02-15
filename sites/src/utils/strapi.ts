@@ -165,6 +165,7 @@ export async function getHomepage(): Promise<Page | null> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
+  if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
 }
 
@@ -181,7 +182,7 @@ export async function getPages(): Promise<Page[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -198,7 +199,7 @@ export async function getMenuPages(): Promise<Page[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -214,6 +215,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
+  if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
 }
 
@@ -231,7 +233,7 @@ export async function getArticles(limit?: number): Promise<Article[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -249,7 +251,7 @@ export async function getFeaturedArticles(limit: number = 3): Promise<Article[]>
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -265,6 +267,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
+  if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
 }
 
@@ -285,7 +288,7 @@ export async function getUpcomingEvents(limit?: number): Promise<Event[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Event>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -298,7 +301,7 @@ export async function getEvents(): Promise<Event[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Event>>(url);
-  return response.data;
+  return response?.data ?? [];
 }
 
 /**
@@ -313,6 +316,7 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Event>>(url);
+  if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
 }
 

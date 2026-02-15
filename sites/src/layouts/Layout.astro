@@ -31,17 +31,6 @@ const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?
 const socialImage = image ? getStrapiImageUrl(image) :
   (siteConfig?.logo?.data ? getStrapiImageUrl(siteConfig.logo.data.url) : '');
 
-// Couleurs du thème
-const primaryColor = siteConfig?.colors?.primary || '#1f2937';
-const secondaryColor = siteConfig?.colors?.secondary || '#3b82f6';
-
-// Conversion des couleurs hex en RGB pour CSS custom properties
-function hexToRgb(hex: string): string {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`
-    : '31, 41, 55'; // Fallback
-}
 ---
 
 <!doctype html>

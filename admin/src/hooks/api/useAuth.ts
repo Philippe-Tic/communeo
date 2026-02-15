@@ -30,6 +30,7 @@ export interface AuthResponse {
     municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
     site: {
       id: number
+      documentId: string
       name: string
       slug: string
     }
@@ -47,6 +48,7 @@ export interface User {
   municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
   site: {
     id: number
+    documentId: string
     name: string
     slug: string
   }

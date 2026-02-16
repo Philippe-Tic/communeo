@@ -101,3 +101,50 @@ npm run type-check # Astro type checking only
 | Admin | React 19, Vite 7, Tailwind CSS 4, shadcn/ui, TanStack Query 5, React Router 7, Axios |
 | Sites | Astro 4, Tailwind CSS 3, TypeScript 5 |
 | Hosting | Netlify (static sites) |
+
+## GitHub Project Workflow
+
+Le projet GitHub **#5 "CMS Mairies - Conformité légale"** (owner: Philippe-Tic) suit les 21 issues de conformité (#2 à #22) sur un board Kanban.
+
+### Règles de mise à jour du board
+
+Quand tu travailles sur une tâche liée à une issue de conformité :
+
+1. **En début de tâche** : passer l'issue en "In Progress" sur le board
+2. **En fin de tâche** : passer l'issue en "Done" sur le board
+3. **Si une issue est bloquée** : la laisser en "Todo" et mentionner le blocage
+
+### Commandes
+
+```bash
+# Voir l'état du board
+gh project item-list 5 --owner Philippe-Tic
+
+# Changer le status d'un item (récupérer ITEM_ID via item-list)
+gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOBBJ-t84BPYWQ \
+  --field-id PVTSSF_lAHOBBJ-t84BPYWQzg9zjFA \
+  --single-select-option-id <STATUS_OPTION_ID>
+```
+
+### IDs de référence
+
+| Élément | ID |
+|---------|-----|
+| Project ID | `PVT_kwHOBBJ-t84BPYWQ` |
+| Status field | `PVTSSF_lAHOBBJ-t84BPYWQzg9zjFA` |
+| Todo | `f75ad846` |
+| In Progress | `47fc9ee4` |
+| Done | `98236657` |
+| Phase field | `PVTSSF_lAHOBBJ-t84BPYWQzg9zkY4` |
+
+### Mapping issues → phases
+
+| Issues | Phase |
+|--------|-------|
+| #2-#6 | Phase 1 - Fondations |
+| #7-#11 | Phase 2 - Cookies & SVE |
+| #12-#14 | Phase 3 - Documents |
+| #15-#16 | Phase 4 - Conformité |
+| #17-#18 | Phase 5 - Open Data |
+| #19 | Phase 6 - Écoconception |
+| #20-#22 | Phase 7 - Contenus |

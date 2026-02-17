@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_legal_infos_pratiques",
+  "info": {
+    "displayName": "Infos pratiques",
+    "description": "Horaires d'ouverture et informations pratiques"
+  },
+  "attributes": {
+    "opening_hours": {
+      "type": "json"
+    },
+    "population": {
+      "type": "integer"
+    }
+  }
+}

@@ -616,6 +616,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    accessibilite: Schema.Attribute.Component<'legal.accessibilite', false>;
     address: Schema.Attribute.Text;
     articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
     colors: Schema.Attribute.JSON;
@@ -640,11 +641,16 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::evenement.evenement'
     >;
+    infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> &
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images'>;
+    mentions_legales: Schema.Attribute.Component<
+      'legal.mentions-legales',
+      false
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique &
@@ -659,6 +665,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'basic'>;
     publishedAt: Schema.Attribute.DateTime;
+    rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     theme: Schema.Attribute.Enumeration<

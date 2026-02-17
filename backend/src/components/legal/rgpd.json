@@ -1,0 +1,21 @@
+{
+  "collectionName": "components_legal_rgpd",
+  "info": {
+    "displayName": "RGPD",
+    "description": "Politique de confidentialité et DPO"
+  },
+  "attributes": {
+    "rgpd_policy": {
+      "type": "richtext"
+    },
+    "dpo_name": {
+      "type": "string"
+    },
+    "dpo_email": {
+      "type": "email"
+    },
+    "dpo_phone": {
+      "type": "string"
+    }
+  }
+}

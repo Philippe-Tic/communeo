@@ -1,0 +1,33 @@
+{
+  "collectionName": "components_legal_mentions_legales",
+  "info": {
+    "displayName": "Mentions légales",
+    "description": "Informations légales obligatoires (LCEN)"
+  },
+  "attributes": {
+    "siret": {
+      "type": "string"
+    },
+    "publication_director": {
+      "type": "string"
+    },
+    "publication_director_title": {
+      "type": "string"
+    },
+    "hebergeur_name": {
+      "type": "string"
+    },
+    "hebergeur_address": {
+      "type": "string"
+    },
+    "hebergeur_phone": {
+      "type": "string"
+    },
+    "credits": {
+      "type": "richtext"
+    },
+    "mentions_legales_extra": {
+      "type": "richtext"
+    }
+  }
+}

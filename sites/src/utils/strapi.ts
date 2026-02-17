@@ -82,12 +82,6 @@ function buildStrapiUrl(endpoint: string, options: {
  * Fonction générique pour les requêtes Strapi
  */
 async function strapiRequest<T>(url: string): Promise<T | null> {
-  // Pendant le build, on skip complètement les requêtes Strapi
-  if (process.env.NODE_ENV === 'production') {
-    console.log('🚫 [BUILD MODE] Skipping Strapi request:', url);
-    return null;
-  }
-
   try {
     const response = await fetch(url, baseConfig);
 

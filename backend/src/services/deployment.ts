@@ -3,12 +3,15 @@
  */
 
 import archiver from 'archiver';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { Readable } from 'stream';
+import { promisify } from 'util';
 import netlifyService from './netlify';
+
+const execAsync = promisify(exec);
 
 interface BuildResult {
   success: boolean;
@@ -290,9 +293,9 @@ class DeploymentService {
       // 2. Installer les dépendances
       console.log(`📦 [BUILD] Step 2: Installing dependencies...`);
       try {
-        execSync('npm ci --production=false', {
+        await execAsync('npm ci --production=false', {
           cwd: tempBuildDir,
-          stdio: 'pipe'
+          maxBuffer: 10 * 1024 * 1024
         });
         console.log(`✅ [BUILD] Dependencies installed successfully`);
       } catch (npmError: any) {
@@ -320,17 +323,16 @@ class DeploymentService {
 
       try {
         console.log(`🚀 [BUILD] Running: npx astro build`);
-        const buildOutput = execSync('npx astro build', {
+        const { stdout: buildOutput } = await execAsync('npx astro build', {
           cwd: tempBuildDir,
           env: buildEnv,
-          stdio: 'pipe',
-          encoding: 'utf8'
+          maxBuffer: 10 * 1024 * 1024
         });
         console.log(`📋 [BUILD] Build output:\n${buildOutput}`);
         console.log(`✅ [BUILD] Astro build completed successfully`);
       } catch (buildError: any) {
         console.error(`❌ [BUILD] npx astro build failed:`);
-        console.error(`❌ [BUILD] Exit code: ${buildError.status}`);
+        console.error(`❌ [BUILD] Exit code: ${buildError.code}`);
         console.error(`❌ [BUILD] Error message: ${buildError.message}`);
         if (buildError.stdout) {
           console.error(`📋 [BUILD] STDOUT:\n${buildError.stdout}`);

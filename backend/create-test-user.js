@@ -225,6 +225,16 @@ async function setupPermissions(adminToken) {
     }
   }
 
+  // Deployment custom actions (not standard CRUD)
+  const deploymentActions = ['trigger', 'status', 'check', 'debug'];
+  if (!permissions['api::deployment']) permissions['api::deployment'] = { controllers: {} };
+  if (!permissions['api::deployment'].controllers) permissions['api::deployment'].controllers = {};
+  if (!permissions['api::deployment'].controllers['deployment'])
+    permissions['api::deployment'].controllers['deployment'] = {};
+  for (const action of deploymentActions) {
+    permissions['api::deployment'].controllers['deployment'][action] = { enabled: true, policy: '' };
+  }
+
   await axios.put(
     `${STRAPI_URL}/users-permissions/roles/${authRole.id}`,
     { permissions },

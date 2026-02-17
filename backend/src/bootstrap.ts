@@ -98,6 +98,12 @@ export default async ({ strapi }) => {
       { action: 'api::site.site.create', enabled: true },
       { action: 'api::site.site.update', enabled: true },
       { action: 'api::site.site.delete', enabled: true },
+
+      // Deployment (custom actions)
+      { action: 'api::deployment.deployment.trigger', enabled: true },
+      { action: 'api::deployment.deployment.status', enabled: true },
+      { action: 'api::deployment.deployment.check', enabled: true },
+      { action: 'api::deployment.deployment.debug', enabled: true },
     ];
 
     // Appliquer les permissions

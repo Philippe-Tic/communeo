@@ -115,7 +115,7 @@ export async function getSiteConfig(): Promise<Site> {
     filters: {
       documentId: { $eq: SITE_DOCUMENT_ID }
     },
-    populate: ['logo']
+    populate: ['logo', 'mentions_legales', 'rgpd', 'accessibilite', 'infos_pratiques']
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Site>>(url);

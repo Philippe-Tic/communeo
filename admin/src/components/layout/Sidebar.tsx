@@ -43,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div
       className={cn(
-        'fixed overflow-y-auto bg-muted/50 transition-all duration-300 ease-in-out',
+        'fixed overflow-y-auto bg-muted/50 transition-[left] duration-300 ease-in-out',
         variant === 'sidebar'
           ? 'top-[72px] left-0 h-[calc(100vh-72px)] w-[250px] border-r'
           : 'top-0 left-0 z-[1100] h-screen w-[280px] shadow-xl md:w-[250px]',
@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               key={item.path}
               onClick={() => handleNavClick(item.path)}
               className={cn(
-                'flex items-center gap-3 rounded-md p-3 text-left text-sm transition-all',
+                'flex items-center gap-3 rounded-md p-3 text-left text-sm transition-colors',
                 isActive
                   ? 'bg-primary font-semibold text-primary-foreground'
                   : 'text-foreground hover:bg-accent'

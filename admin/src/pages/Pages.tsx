@@ -108,7 +108,7 @@ export const Pages = () => {
   ]
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex flex-col gap-6">
         <PageHeader
           title="Pages"

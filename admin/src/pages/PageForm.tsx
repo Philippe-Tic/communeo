@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../components/common'
+import { PageHeader } from '../components/layout'
 import { useCreatePage, usePage, usePages, useUpdatePage, type Page } from '../hooks/api/usePages'
 import { toaster } from '../lib/toaster'
 
@@ -139,16 +140,12 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
   })
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">
-            {isEditing ? 'Modifier la page' : 'Créer une nouvelle page'}
-          </h1>
-          <Button variant="outline" onClick={() => navigate('/pages')}>
-            Retour
-          </Button>
-        </div>
+        <PageHeader
+          title={isEditing ? 'Modifier la page' : 'Créer une nouvelle page'}
+          actions={[{ label: 'Retour', onClick: () => navigate('/pages'), variant: 'outline' }]}
+        />
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">

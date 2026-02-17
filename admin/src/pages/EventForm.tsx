@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../components/common'
+import { PageHeader } from '../components/layout'
 import { useCreateEvent, useEvent, useUpdateEvent, type Event } from '../hooks/api/useEvents'
 import { toaster } from '../lib/toaster'
 
@@ -131,16 +132,12 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">
-            {isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement'}
-          </h1>
-          <Button variant="outline" onClick={() => navigate('/events')}>
-            Retour
-          </Button>
-        </div>
+        <PageHeader
+          title={isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement'}
+          actions={[{ label: 'Retour', onClick: () => navigate('/events'), variant: 'outline' }]}
+        />
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">

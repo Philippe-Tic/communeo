@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { Calendar, File, FileText } from 'lucide-react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
@@ -31,19 +32,19 @@ export const Dashboard = () => {
       label: 'Articles',
       value: articlesLoading ? '...' : articles.length,
       color: 'blue',
-      icon: '📝'
+      icon: <FileText className="h-6 w-6" />
     },
     {
       label: 'Pages',
       value: pagesLoading ? '...' : pages.length,
       color: 'green',
-      icon: '📄'
+      icon: <File className="h-6 w-6" />
     },
     {
       label: 'Événements',
       value: eventsLoading ? '...' : events.length,
       color: 'purple',
-      icon: '📅'
+      icon: <Calendar className="h-6 w-6" />
     },
   ]
 
@@ -62,7 +63,7 @@ export const Dashboard = () => {
 
   return (
     <div className="mx-auto w-full">
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         <PageHeader
           title={`Bienvenue, ${firstName || fullName || 'Admin'} !`}
           subtitle={`Voici un aperçu de votre tableau de bord${user?.site ? ` - ${user.site.name}` : ''}`}
@@ -93,17 +94,17 @@ export const Dashboard = () => {
             <div className="flex flex-wrap gap-4">
               <RouterLink to="/articles/new">
                 <Button size="sm">
-                  📝 Nouvel article
+                  Nouvel article
                 </Button>
               </RouterLink>
               <RouterLink to="/events/new">
                 <Button size="sm" variant="outline">
-                  📅 Nouvel événement
+                  Nouvel événement
                 </Button>
               </RouterLink>
               <RouterLink to="/pages/new">
                 <Button size="sm" variant="outline">
-                  📄 Nouvelle page
+                  Nouvelle page
                 </Button>
               </RouterLink>
             </div>

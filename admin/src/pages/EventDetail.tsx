@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, ExternalLink, Home, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
@@ -127,7 +128,7 @@ export function EventDetail() {
   ]
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-6">
         <PageHeader
           title={event.title}
@@ -144,22 +145,22 @@ export function EventDetail() {
               </Badge>
               {event.featured && (
                 <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                  ⭐ À la une
+                  <Star className="mr-1 inline h-3 w-3" /> À la une
                 </Badge>
               )}
               {isUpcoming && (
                 <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  📅 À venir
+                  <CalendarCheck className="mr-1 inline h-3 w-3" /> À venir
                 </Badge>
               )}
               {isPast && (
                 <Badge variant="secondary">
-                  ⏰ Passé
+                  <Clock className="mr-1 inline h-3 w-3" /> Passé
                 </Badge>
               )}
               {event.registration_required && (
                 <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  📝 Inscription requise
+                  <ClipboardList className="mr-1 inline h-3 w-3" /> Inscription requise
                 </Badge>
               )}
             </div>
@@ -184,31 +185,31 @@ export function EventDetail() {
                 Détails de l'événement
               </p>
               <div className="flex flex-col items-start gap-3">
-                <p className="font-medium text-primary">
-                  📅 Début: {new Date(event.start_date).toLocaleString('fr-FR')}
+                <p className="flex items-center gap-1.5 font-medium text-primary">
+                  <Calendar className="h-4 w-4" /> Début: {new Date(event.start_date).toLocaleString('fr-FR')}
                 </p>
 
                 {event.end_date && (
-                  <p className="text-muted-foreground">
-                    ➡️ Fin: {new Date(event.end_date).toLocaleString('fr-FR')}
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <ArrowRight className="h-4 w-4" /> Fin: {new Date(event.end_date).toLocaleString('fr-FR')}
                   </p>
                 )}
 
                 {event.location && (
-                  <p className="text-muted-foreground">
-                    📍 Lieu: {event.location}
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <MapPin className="h-4 w-4" /> Lieu: {event.location}
                   </p>
                 )}
 
                 {event.address && (
-                  <p className="text-muted-foreground">
-                    🏠 Adresse: {event.address}
+                  <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <Home className="h-4 w-4" /> Adresse: {event.address}
                   </p>
                 )}
 
                 {event.price && (
-                  <p className="font-medium text-green-600 dark:text-green-400">
-                    💰 Prix: {event.price}
+                  <p className="flex items-center gap-1.5 font-medium text-green-600 dark:text-green-400">
+                    <Banknote className="h-4 w-4" /> Prix: {event.price}
                   </p>
                 )}
               </div>
@@ -258,8 +259,8 @@ export function EventDetail() {
                 )}
                 {event.external_link && (
                   <p className="text-sm text-primary">
-                    <a href={event.external_link} target="_blank" rel="noopener noreferrer">
-                      🔗 Lien externe
+                    <a href={event.external_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1">
+                      <ExternalLink className="h-3.5 w-3.5" /> Lien externe
                     </a>
                   </p>
                 )}

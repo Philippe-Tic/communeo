@@ -1,5 +1,13 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Download, Eye, MoreVertical, Pencil, Star, Trash2, Upload } from 'lucide-react'
 import type { Article } from '../../hooks/api/useArticles'
 import { StatusBadge } from '../common'
 
@@ -33,14 +41,54 @@ export const ArticleCard = ({
     <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
       {/* Header */}
       <div className="mb-3 space-y-2">
-        <div className="flex flex-wrap gap-2">
-          <StatusBadge status={article.status} />
-          <Badge className={CATEGORY_COLORS[article.category] || ''}>
-            {CATEGORY_LABELS[article.category] || article.category}
-          </Badge>
-          {article.featured && (
-            <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">⭐ À la une</Badge>
-          )}
+        <div className="flex items-start justify-between">
+          <div className="flex flex-wrap gap-2">
+            <StatusBadge status={article.status} />
+            <Badge className={CATEGORY_COLORS[article.category] || ''}>
+              {CATEGORY_LABELS[article.category] || article.category}
+            </Badge>
+            {article.featured && (
+              <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
+                <Star className="mr-1 inline h-3 w-3" /> À la une
+              </Badge>
+            )}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(article)}>
+                <Pencil className="mr-2 h-4 w-4" /> Modifier
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onView(article)}>
+                <Eye className="mr-2 h-4 w-4" /> Voir
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {onToggleFeatured && (
+                <DropdownMenuItem onClick={() => onToggleFeatured(article)}>
+                  <Star className="mr-2 h-4 w-4" /> {article.featured ? 'Retirer de la une' : 'Mettre à la une'}
+                </DropdownMenuItem>
+              )}
+              {onPublish && article.status !== 'published' && (
+                <DropdownMenuItem onClick={() => onPublish(article)}>
+                  <Upload className="mr-2 h-4 w-4" /> Publier
+                </DropdownMenuItem>
+              )}
+              {onUnpublish && article.status === 'published' && (
+                <DropdownMenuItem onClick={() => onUnpublish(article)}>
+                  <Download className="mr-2 h-4 w-4" /> Dépublier
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDelete(article)} className="text-destructive focus:text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <h3 className="text-lg font-semibold leading-tight">{article.title}</h3>
       </div>
@@ -65,29 +113,6 @@ export const ArticleCard = ({
           </div>
           <p>Créé: {formatDate(article.createdAt)}</p>
           {article.publication_date && <p>Publié: {formatDate(article.publication_date)}</p>}
-        </div>
-      </div>
-
-      {/* Footer Actions */}
-      <div className="mt-4 space-y-2">
-        <div className="flex w-full justify-between">
-          <Button size="sm" variant="outline" onClick={() => onView(article)}>Voir</Button>
-          <Button size="sm" onClick={() => onEdit(article)}>Modifier</Button>
-        </div>
-
-        <div className="flex w-full flex-wrap gap-1">
-          {onToggleFeatured && (
-            <Button size="sm" variant="ghost" onClick={() => onToggleFeatured(article)} title={article.featured ? 'Retirer de la une' : 'Mettre à la une'}>
-              {article.featured ? '⭐' : '☆'}
-            </Button>
-          )}
-          {onPublish && article.status !== 'published' && (
-            <Button size="sm" variant="ghost" onClick={() => onPublish(article)} title="Publier">📤</Button>
-          )}
-          {onUnpublish && article.status === 'published' && (
-            <Button size="sm" variant="ghost" onClick={() => onUnpublish(article)} title="Dépublier">📥</Button>
-          )}
-          <Button size="sm" variant="ghost" onClick={() => onDelete(article)} className="text-destructive" title="Supprimer">🗑️</Button>
         </div>
       </div>
     </div>

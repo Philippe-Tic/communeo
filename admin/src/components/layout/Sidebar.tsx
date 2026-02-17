@@ -1,22 +1,22 @@
 import { cn } from '@/lib/utils'
-import { X } from 'lucide-react'
+import { Calendar, File, FileText, Globe, LayoutDashboard, Rocket, Settings, X, type LucideIcon } from 'lucide-react'
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 interface NavItem {
   name: string
   path: string
-  icon?: string
+  icon?: LucideIcon
 }
 
 const navItems: NavItem[] = [
-  { name: 'Tableau de bord', path: '/dashboard', icon: '📊' },
-  { name: 'Articles', path: '/articles', icon: '📝' },
-  { name: 'Pages', path: '/pages', icon: '📄' },
-  { name: 'Événements', path: '/events', icon: '📅' },
-  { name: 'Site', path: '/site', icon: '⚙️' },
-  { name: 'Déploiement', path: '/deployment', icon: '🚀' },
-  { name: 'Domaines', path: '/domain', icon: '🌐' },
+  { name: 'Tableau de bord', path: '/dashboard', icon: LayoutDashboard },
+  { name: 'Articles', path: '/articles', icon: FileText },
+  { name: 'Pages', path: '/pages', icon: File },
+  { name: 'Événements', path: '/events', icon: Calendar },
+  { name: 'Site', path: '/site', icon: Settings },
+  { name: 'Déploiement', path: '/deployment', icon: Rocket },
+  { name: 'Domaines', path: '/domain', icon: Globe },
 ]
 
 interface SidebarProps {
@@ -77,7 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   : 'text-foreground hover:bg-accent'
               )}
             >
-              {item.icon && <span className="text-base leading-none">{item.icon}</span>}
+              {item.icon && <item.icon className="h-5 w-5" />}
               <span>{item.name}</span>
             </button>
           )

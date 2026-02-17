@@ -5,9 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVertical } from 'lucide-react'
+import { Eye, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { Page } from '../../hooks/api/usePages'
-import { DeleteIcon, EditIcon, EyeIcon } from '../../utils/icons'
 import { StatusBadge } from '../common'
 
 interface PageCardProps {
@@ -42,13 +41,13 @@ export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => onEdit(page)}>
-                <EditIcon /> <span className="ml-2">Modifier</span>
+                <Pencil className="mr-2 h-4 w-4" /> Modifier
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onView(page)}>
-                <EyeIcon /> <span className="ml-2">Voir</span>
+                <Eye className="mr-2 h-4 w-4" /> Voir
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onDelete(page)} className="text-destructive focus:text-destructive">
-                <DeleteIcon /> <span className="ml-2">Supprimer</span>
+                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

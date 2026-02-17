@@ -20,7 +20,7 @@ export function StatsCard({ label, value, color, icon }: StatsCardProps) {
     <div className="rounded-lg border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex flex-col gap-3">
         {icon && (
-          <div className={`text-2xl ${colors.icon}`}>{icon}</div>
+          <div className={colors.icon}>{icon}</div>
         )}
         <div className="space-y-1">
           <p className={`text-3xl font-bold leading-none ${colors.text}`}>{value}</p>

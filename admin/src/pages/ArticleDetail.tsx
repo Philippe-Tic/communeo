@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
 import { PageHeader } from '../components/layout'
@@ -120,7 +121,7 @@ export function ArticleDetail() {
   ]
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-6">
         <PageHeader
           title={article.title}
@@ -138,7 +139,7 @@ export function ArticleDetail() {
               </Badge>
               {article.featured && (
                 <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                  ⭐ À la une
+                  <Star className="mr-1 inline h-3 w-3" /> À la une
                 </Badge>
               )}
             </div>

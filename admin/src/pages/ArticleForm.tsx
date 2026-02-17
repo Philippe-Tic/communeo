@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../components/common'
+import { PageHeader } from '../components/layout'
 import { useArticle, useCreateArticle, useUpdateArticle, type Article } from '../hooks/api/useArticles'
 import { toaster } from '../lib/toaster'
 
@@ -120,16 +121,12 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-4xl">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">
-            {isEditing ? 'Modifier l\'article' : 'Créer un nouvel article'}
-          </h1>
-          <Button variant="outline" onClick={() => navigate('/articles')}>
-            Retour
-          </Button>
-        </div>
+        <PageHeader
+          title={isEditing ? 'Modifier l\'article' : 'Créer un nouvel article'}
+          actions={[{ label: 'Retour', onClick: () => navigate('/articles'), variant: 'outline' }]}
+        />
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">

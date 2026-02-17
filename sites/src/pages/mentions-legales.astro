@@ -1,0 +1,124 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteConfig } from '../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+const ml = siteConfig.mentions_legales;
+---
+
+<Layout title="Mentions légales" description={`Mentions légales du site ${siteConfig.name}`}>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">Mentions légales</h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Informations légales relatives au site {siteConfig.name}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <section class="py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="prose prose-lg max-w-none">
+
+          <h2>Éditeur du site</h2>
+          <p>
+            <strong>{siteConfig.name}</strong><br />
+            {siteConfig.address
+              ? <>{siteConfig.address}<br /></>
+              : <><em>Adresse non renseignée</em><br /></>
+            }
+            {siteConfig.contact_phone && (
+              <>Téléphone : <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`}>{siteConfig.contact_phone}</a><br /></>
+            )}
+            {siteConfig.contact_mail && (
+              <>Email : <a href={`mailto:${siteConfig.contact_mail}`}>{siteConfig.contact_mail}</a><br /></>
+            )}
+            {ml?.siret
+              ? <>SIRET : {ml.siret}</>
+              : <><em>SIRET non renseigné</em></>
+            }
+          </p>
+
+          <h2>Directeur de la publication</h2>
+          {ml?.publication_director ? (
+            <p>
+              {ml.publication_director_title && <>{ml.publication_director_title} — </>}
+              {ml.publication_director}
+            </p>
+          ) : (
+            <p><em>Information non renseignée</em></p>
+          )}
+
+          <h2>Hébergeur</h2>
+          {ml?.hebergeur_name ? (
+            <p>
+              <strong>{ml.hebergeur_name}</strong><br />
+              {ml.hebergeur_address && <>{ml.hebergeur_address}<br /></>}
+              {ml.hebergeur_phone && <>Téléphone : {ml.hebergeur_phone}</>}
+            </p>
+          ) : (
+            <p><em>Information non renseignée</em></p>
+          )}
+
+          {ml?.credits && (
+            <>
+              <h2>Crédits</h2>
+              <Fragment set:html={ml.credits} />
+            </>
+          )}
+
+          {ml?.mentions_legales_extra && (
+            <>
+              <h2>Mentions complémentaires</h2>
+              <Fragment set:html={ml.mentions_legales_extra} />
+            </>
+          )}
+
+          <h2>Propriété intellectuelle</h2>
+          <p>
+            L'ensemble du contenu de ce site (textes, images, vidéos) est protégé par le droit d'auteur.
+            Toute reproduction, même partielle, est soumise à autorisation préalable de {siteConfig.name}.
+          </p>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+</style>

@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteConfig } from '../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+const rgpd = siteConfig.rgpd;
+---
+
+<Layout title="Politique de confidentialité" description={`Politique de confidentialité et protection des données personnelles — ${siteConfig.name}`}>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">Politique de confidentialité</h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Protection des données personnelles
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <section class="py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="prose prose-lg max-w-none">
+
+          {rgpd?.rgpd_policy ? (
+            <Fragment set:html={rgpd.rgpd_policy} />
+          ) : (
+            <>
+              <h2>Collecte des données personnelles</h2>
+              <p>
+                {siteConfig.name} s'engage à protéger la vie privée des utilisateurs de son site internet,
+                conformément au Règlement Général sur la Protection des Données (RGPD) et à la loi
+                Informatique et Libertés.
+              </p>
+              <p>
+                Les données personnelles collectées sur ce site sont uniquement destinées à assurer
+                le bon fonctionnement des services proposés et ne sont en aucun cas cédées à des tiers.
+              </p>
+
+              <h2>Vos droits</h2>
+              <p>
+                Conformément à la réglementation en vigueur, vous disposez d'un droit d'accès,
+                de rectification, d'effacement, de limitation, de portabilité et d'opposition
+                au traitement de vos données personnelles.
+              </p>
+              <p>
+                Pour exercer ces droits, vous pouvez nous contacter à l'adresse suivante :
+                <a href={`mailto:${siteConfig.contact_mail}`}>{siteConfig.contact_mail}</a>.
+              </p>
+            </>
+          )}
+
+          {(rgpd?.dpo_name || rgpd?.dpo_email) && (
+            <>
+              <h2>Délégué à la protection des données (DPO)</h2>
+              <p>
+                {rgpd.dpo_name && <><strong>{rgpd.dpo_name}</strong><br /></>}
+                {rgpd.dpo_email && (
+                  <>Email : <a href={`mailto:${rgpd.dpo_email}`}>{rgpd.dpo_email}</a><br /></>
+                )}
+                {rgpd.dpo_phone && <>Téléphone : {rgpd.dpo_phone}</>}
+              </p>
+            </>
+          )}
+
+          <h2>Réclamation</h2>
+          <p>
+            Si vous estimez que le traitement de vos données personnelles constitue une violation
+            de la réglementation en vigueur, vous pouvez introduire une réclamation auprès de la
+            CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>).
+          </p>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+</style>

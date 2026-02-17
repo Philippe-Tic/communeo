@@ -112,6 +112,26 @@
       "relation": "oneToMany",
       "target": "api::deployment.deployment",
       "mappedBy": "site"
+    },
+    "mentions_legales": {
+      "type": "component",
+      "component": "legal.mentions-legales",
+      "required": false
+    },
+    "rgpd": {
+      "type": "component",
+      "component": "legal.rgpd",
+      "required": false
+    },
+    "accessibilite": {
+      "type": "component",
+      "component": "legal.accessibilite",
+      "required": false
+    },
+    "infos_pratiques": {
+      "type": "component",
+      "component": "legal.infos-pratiques",
+      "required": false
     }
   }
 }

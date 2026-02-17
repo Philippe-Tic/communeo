@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_legal_accessibilite",
+  "info": {
+    "displayName": "Accessibilité",
+    "description": "Déclaration d'accessibilité RGAA"
+  },
+  "attributes": {
+    "accessibility_level": {
+      "type": "enumeration",
+      "enum": ["non-conforme", "partiellement-conforme", "conforme"],
+      "default": "non-conforme"
+    },
+    "accessibility_declaration": {
+      "type": "richtext"
+    },
+    "accessibility_schema_url": {
+      "type": "string"
+    },
+    "accessibility_action_plan_url": {
+      "type": "string"
+    }
+  }
+}

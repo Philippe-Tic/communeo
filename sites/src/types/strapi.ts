@@ -33,6 +33,7 @@ export interface Site {
   theme: 'classique' | 'moderne' | 'accessible';
   colors?: any;            // JSON field
   logo?: MediaAttribute;
+  accessibility_level?: 'non conforme' | 'partiellement conforme' | 'totalement conforme';
   contact_mail: string;
   contact_phone?: string;
   address?: string;

@@ -1,0 +1,79 @@
+---
+import type { Site } from '../types/strapi';
+import { getSiteConfig } from '../utils/strapi';
+
+let siteConfig: Site | null = null;
+
+try {
+  siteConfig = await getSiteConfig();
+} catch (error) {
+  console.error('Erreur lors de la récupération de la configuration du site:', error);
+}
+
+const currentYear = new Date().getFullYear();
+const accessibilityLevel = siteConfig?.accessibility_level || 'non conforme';
+---
+
+<footer class="bg-gray-900 text-white py-12" role="contentinfo" aria-label="Pied de page">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <!-- Colonne 1 - Coordonnées -->
+      <div>
+        <h2 class="text-lg font-semibold text-white mb-4">
+          {siteConfig?.name || 'Votre mairie'}
+        </h2>
+        <address class="not-italic text-gray-400 space-y-2">
+          {siteConfig?.address && (
+            <p>{siteConfig.address}</p>
+          )}
+          {siteConfig?.contact_phone && (
+            <p>
+              <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-primary transition-colors">
+                {siteConfig.contact_phone}
+              </a>
+            </p>
+          )}
+          {siteConfig?.contact_mail && (
+            <p>
+              <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-primary transition-colors">
+                {siteConfig.contact_mail}
+              </a>
+            </p>
+          )}
+        </address>
+      </div>
+
+      <!-- Colonne 2 - Liens légaux -->
+      <div>
+        <h2 class="text-lg font-semibold text-white mb-4">Informations légales</h2>
+        <nav aria-label="Liens légaux">
+          <ul class="space-y-2 text-gray-400">
+            <li>
+              <a href="/mentions-legales" class="hover:text-primary transition-colors">
+                Mentions légales
+              </a>
+            </li>
+            <li>
+              <a href="/politique-confidentialite" class="hover:text-primary transition-colors">
+                Politique de confidentialité
+              </a>
+            </li>
+            <li>
+              <a href="/accessibilite" class="hover:text-primary transition-colors">
+                Accessibilité
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Barre inférieure -->
+    <div class="border-t border-gray-800 pt-8">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+        <p>&copy; {currentYear} {siteConfig?.name || 'Votre mairie'}. Tous droits réservés.</p>
+        <p>Accessibilité : {accessibilityLevel}</p>
+      </div>
+    </div>
+  </div>
+</footer>

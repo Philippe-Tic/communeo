@@ -1,7 +1,41 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
-// Types
+// Types — Composants légaux Strapi
+export interface MentionsLegales {
+  id?: number
+  siret?: string
+  publication_director?: string
+  publication_director_title?: string
+  hebergeur_name?: string
+  hebergeur_address?: string
+  hebergeur_phone?: string
+  credits?: string
+  mentions_legales_extra?: string
+}
+
+export interface RGPD {
+  id?: number
+  rgpd_policy?: string
+  dpo_name?: string
+  dpo_email?: string
+  dpo_phone?: string
+}
+
+export interface Accessibilite {
+  id?: number
+  accessibility_level?: 'non-conforme' | 'partiellement-conforme' | 'conforme'
+  accessibility_declaration?: string
+  accessibility_schema_url?: string
+  accessibility_action_plan_url?: string
+}
+
+export interface InfosPratiques {
+  id?: number
+  opening_hours?: any
+  population?: number
+}
+
 export interface Site {
   id: number
   documentId: string
@@ -20,28 +54,11 @@ export interface Site {
   address?: string
   createdAt: string
   updatedAt: string
-  // Mentions légales
-  siret?: string
-  publication_director?: string
-  publication_director_title?: string
-  hebergeur_name?: string
-  hebergeur_address?: string
-  hebergeur_phone?: string
-  credits?: string
-  mentions_legales_extra?: string
-  // RGPD
-  dpo_name?: string
-  dpo_email?: string
-  dpo_phone?: string
-  rgpd_policy?: string
-  // Accessibilité
-  accessibility_level?: 'non-conforme' | 'partiellement-conforme' | 'conforme'
-  accessibility_declaration?: string
-  accessibility_schema_url?: string
-  accessibility_action_plan_url?: string
-  // Infos pratiques
-  opening_hours?: any
-  population?: number
+  // Composants légaux
+  mentions_legales?: MentionsLegales
+  rgpd?: RGPD
+  accessibilite?: Accessibilite
+  infos_pratiques?: InfosPratiques
   // Relations
   pages?: any[]
   articles?: any[]
@@ -57,28 +74,11 @@ export interface CreateSiteData {
   contact_mail: string
   contact_phone?: string
   address?: string
-  // Mentions légales
-  siret?: string
-  publication_director?: string
-  publication_director_title?: string
-  hebergeur_name?: string
-  hebergeur_address?: string
-  hebergeur_phone?: string
-  credits?: string
-  mentions_legales_extra?: string
-  // RGPD
-  dpo_name?: string
-  dpo_email?: string
-  dpo_phone?: string
-  rgpd_policy?: string
-  // Accessibilité
-  accessibility_level?: 'non-conforme' | 'partiellement-conforme' | 'conforme'
-  accessibility_declaration?: string
-  accessibility_schema_url?: string
-  accessibility_action_plan_url?: string
-  // Infos pratiques
-  opening_hours?: any
-  population?: number
+  // Composants légaux
+  mentions_legales?: Partial<Omit<MentionsLegales, 'id'>>
+  rgpd?: Partial<Omit<RGPD, 'id'>>
+  accessibilite?: Partial<Omit<Accessibilite, 'id'>>
+  infos_pratiques?: Partial<Omit<InfosPratiques, 'id'>>
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {
@@ -147,7 +147,7 @@ export const useSite = (documentId: string) => {
   return useQuery({
     queryKey: SITES_QUERY_KEYS.current(),
     queryFn: async (): Promise<Site> => {
-      const url = `/api/sites/${documentId}`
+      const url = `/api/sites/${documentId}?populate=*`
       const response = await apiClient.get<{ data: Site }>(url)
       return response.data
     },

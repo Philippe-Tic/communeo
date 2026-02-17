@@ -74,24 +74,28 @@ export const SiteConfigEdit = () => {
         contact_phone: site.contact_phone || '',
         address: site.address || '',
         colors: site.colors ? JSON.stringify(site.colors, null, 2) : '',
-        siret: site.siret || '',
-        publication_director: site.publication_director || '',
-        publication_director_title: site.publication_director_title || '',
-        hebergeur_name: site.hebergeur_name || '',
-        hebergeur_address: site.hebergeur_address || '',
-        hebergeur_phone: site.hebergeur_phone || '',
-        credits: site.credits || '',
-        mentions_legales_extra: site.mentions_legales_extra || '',
-        dpo_name: site.dpo_name || '',
-        dpo_email: site.dpo_email || '',
-        dpo_phone: site.dpo_phone || '',
-        rgpd_policy: site.rgpd_policy || '',
-        accessibility_level: site.accessibility_level || '',
-        accessibility_declaration: site.accessibility_declaration || '',
-        accessibility_schema_url: site.accessibility_schema_url || '',
-        accessibility_action_plan_url: site.accessibility_action_plan_url || '',
-        opening_hours: site.opening_hours ? JSON.stringify(site.opening_hours, null, 2) : '',
-        population: site.population?.toString() || '',
+        // Mentions légales (composant imbriqué)
+        siret: site.mentions_legales?.siret || '',
+        publication_director: site.mentions_legales?.publication_director || '',
+        publication_director_title: site.mentions_legales?.publication_director_title || '',
+        hebergeur_name: site.mentions_legales?.hebergeur_name || '',
+        hebergeur_address: site.mentions_legales?.hebergeur_address || '',
+        hebergeur_phone: site.mentions_legales?.hebergeur_phone || '',
+        credits: site.mentions_legales?.credits || '',
+        mentions_legales_extra: site.mentions_legales?.mentions_legales_extra || '',
+        // RGPD (composant imbriqué)
+        dpo_name: site.rgpd?.dpo_name || '',
+        dpo_email: site.rgpd?.dpo_email || '',
+        dpo_phone: site.rgpd?.dpo_phone || '',
+        rgpd_policy: site.rgpd?.rgpd_policy || '',
+        // Accessibilité (composant imbriqué)
+        accessibility_level: site.accessibilite?.accessibility_level || '',
+        accessibility_declaration: site.accessibilite?.accessibility_declaration || '',
+        accessibility_schema_url: site.accessibilite?.accessibility_schema_url || '',
+        accessibility_action_plan_url: site.accessibilite?.accessibility_action_plan_url || '',
+        // Infos pratiques (composant imbriqué)
+        opening_hours: site.infos_pratiques?.opening_hours ? JSON.stringify(site.infos_pratiques.opening_hours, null, 2) : '',
+        population: site.infos_pratiques?.population?.toString() || '',
       })
     }
   }, [site])
@@ -199,28 +203,32 @@ export const SiteConfigEdit = () => {
       contact_phone: formData.contact_phone || undefined,
       address: formData.address || undefined,
       colors: parsedColors,
-      // Mentions légales
-      siret: formData.siret || undefined,
-      publication_director: formData.publication_director || undefined,
-      publication_director_title: formData.publication_director_title || undefined,
-      hebergeur_name: formData.hebergeur_name || undefined,
-      hebergeur_address: formData.hebergeur_address || undefined,
-      hebergeur_phone: formData.hebergeur_phone || undefined,
-      credits: formData.credits || undefined,
-      mentions_legales_extra: formData.mentions_legales_extra || undefined,
-      // RGPD
-      dpo_name: formData.dpo_name || undefined,
-      dpo_email: formData.dpo_email || undefined,
-      dpo_phone: formData.dpo_phone || undefined,
-      rgpd_policy: formData.rgpd_policy || undefined,
-      // Accessibilité
-      accessibility_level: formData.accessibility_level || undefined,
-      accessibility_declaration: formData.accessibility_declaration || undefined,
-      accessibility_schema_url: formData.accessibility_schema_url || undefined,
-      accessibility_action_plan_url: formData.accessibility_action_plan_url || undefined,
-      // Infos pratiques
-      opening_hours: parsedOpeningHours,
-      population: formData.population ? Number(formData.population) : undefined,
+      mentions_legales: {
+        siret: formData.siret || undefined,
+        publication_director: formData.publication_director || undefined,
+        publication_director_title: formData.publication_director_title || undefined,
+        hebergeur_name: formData.hebergeur_name || undefined,
+        hebergeur_address: formData.hebergeur_address || undefined,
+        hebergeur_phone: formData.hebergeur_phone || undefined,
+        credits: formData.credits || undefined,
+        mentions_legales_extra: formData.mentions_legales_extra || undefined,
+      },
+      rgpd: {
+        dpo_name: formData.dpo_name || undefined,
+        dpo_email: formData.dpo_email || undefined,
+        dpo_phone: formData.dpo_phone || undefined,
+        rgpd_policy: formData.rgpd_policy || undefined,
+      },
+      accessibilite: {
+        accessibility_level: formData.accessibility_level || undefined,
+        accessibility_declaration: formData.accessibility_declaration || undefined,
+        accessibility_schema_url: formData.accessibility_schema_url || undefined,
+        accessibility_action_plan_url: formData.accessibility_action_plan_url || undefined,
+      },
+      infos_pratiques: {
+        opening_hours: parsedOpeningHours,
+        population: formData.population ? Number(formData.population) : undefined,
+      },
     }
 
     updateSite(updateData, {

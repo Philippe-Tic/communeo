@@ -20,6 +20,9 @@ import { CreatePage, EditPage } from './pages/PageForm'
 import { Pages } from './pages/Pages'
 import { ContactSubmissionDetail } from './pages/ContactSubmissionDetail'
 import { ContactSubmissions } from './pages/ContactSubmissions'
+import { OfficialDocumentDetail } from './pages/OfficialDocumentDetail'
+import { CreateOfficialDocument, EditOfficialDocument } from './pages/OfficialDocumentForm'
+import { OfficialDocuments } from './pages/OfficialDocuments'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
@@ -210,6 +213,51 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <ContactSubmissionDetail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Documents officiels routes */}
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <OfficialDocuments />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/documents/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateOfficialDocument />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/documents/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <OfficialDocumentDetail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/documents/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditOfficialDocument />
                 </MainLayout>
               </ProtectedRoute>
             }

@@ -682,6 +682,70 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiOfficialDocumentOfficialDocument
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'official_documents';
+  info: {
+    description: 'Documents officiels des communes (PV, d\u00E9lib\u00E9rations, arr\u00EAt\u00E9s, budgets)';
+    displayName: 'Official Document';
+    pluralName: 'official-documents';
+    singularName: 'official-document';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    additional_files: Schema.Attribute.Media<'files' | 'images', true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    document_date: Schema.Attribute.Date & Schema.Attribute.Required;
+    document_type: Schema.Attribute.Enumeration<
+      [
+        'pv-conseil-municipal',
+        'deliberation',
+        'arrete',
+        'plu',
+        'scot',
+        'carte-communale',
+        'budget-primitif',
+        'compte-administratif',
+        'rapport-orientations-budgetaires',
+        'autre',
+      ]
+    > &
+      Schema.Attribute.Required;
+    file: Schema.Attribute.Media<'files'> & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::official-document.official-document'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    reference_number: Schema.Attribute.String;
+    session_date: Schema.Attribute.Date;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    slug: Schema.Attribute.UID<'title'> &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'draft'>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    year: Schema.Attribute.Integer & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiPagePage extends Struct.CollectionTypeSchema {
   collectionName: 'pages';
   info: {
@@ -797,6 +861,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     netlify_site_id: Schema.Attribute.String &
       Schema.Attribute.Private &
       Schema.Attribute.Unique;
+    official_documents: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::official-document.official-document'
+    >;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     plan_type: Schema.Attribute.Enumeration<['basic', 'premium']> &
       Schema.Attribute.Required &
@@ -1343,6 +1411,7 @@ declare module '@strapi/strapi' {
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
+      'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
       'api::site.site': ApiSiteSite;
       'plugin::content-releases.release': PluginContentReleasesRelease;

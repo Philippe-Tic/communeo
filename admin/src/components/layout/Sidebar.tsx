@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Calendar, File, FileText, Globe, LayoutDashboard, Mail, Rocket, Settings, X, type LucideIcon } from 'lucide-react'
+import { Calendar, File, FileArchive, FileText, Globe, LayoutDashboard, Mail, Rocket, Settings, X, type LucideIcon } from 'lucide-react'
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { name: 'Pages', path: '/pages', icon: File },
   { name: 'Événements', path: '/events', icon: Calendar },
   { name: 'Messages', path: '/messages', icon: Mail },
+  { name: 'Documents', path: '/documents', icon: FileArchive },
   { name: 'Site', path: '/site', icon: Settings },
   { name: 'Déploiement', path: '/deployment', icon: Rocket },
   { name: 'Domaines', path: '/domain', icon: Globe },

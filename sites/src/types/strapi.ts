@@ -1,4 +1,4 @@
-// Types pour les médias Strapi v5
+// Types pour les médias Strapi v5 (format wrappé legacy)
 export interface MediaAttribute {
   data?: {
     id: number;
@@ -13,6 +13,20 @@ export interface MediaAttribute {
     createdAt: string;
     updatedAt: string;
   } | null;
+}
+
+// Média Strapi v5 format plat (retourné par populate)
+export interface StrapiMedia {
+  id: number;
+  documentId: string;
+  name: string;
+  url: string;
+  alternativeText?: string;
+  width?: number;
+  height?: number;
+  size: number;
+  mime: string;
+  ext?: string;
 }
 
 // Type pour les relations Strapi v5
@@ -178,8 +192,29 @@ export interface StrapiCollectionResponse<T> {
   };
 }
 
+// Documents officiels - Strapi v5
+export interface OfficialDocument {
+  id: number;
+  documentId: string;
+  title: string;
+  slug: string;
+  description?: string;
+  document_type: 'pv-conseil-municipal' | 'deliberation' | 'arrete' | 'plu' | 'scot' | 'carte-communale' | 'budget-primitif' | 'compte-administratif' | 'rapport-orientations-budgetaires' | 'autre';
+  document_date: string;
+  session_date?: string;
+  file: StrapiMedia | null;
+  additional_files?: StrapiMedia[];
+  status: 'draft' | 'published' | 'archived';
+  reference_number?: string;
+  year: number;
+  site: StrapiData<Site> | Site;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Types utilitaires
 export type SiteData = Site;
 export type PageData = Page;
 export type ArticleData = Article;
 export type EventData = Event;
+export type OfficialDocumentData = OfficialDocument;

@@ -139,6 +139,18 @@ const isActive = (pagePath: string) =>
           >
             Événements
           </a>
+
+          <a
+            href="/documents"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/documents')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/documents') ? 'page' : undefined}
+          >
+            Documents
+          </a>
         </div>
       </div>
 
@@ -234,6 +246,18 @@ const isActive = (pagePath: string) =>
         role="menuitem"
       >
         Événements
+      </a>
+
+      <a
+        href="/documents"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/documents')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Documents
       </a>
     </div>
   </div>

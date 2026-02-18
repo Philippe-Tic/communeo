@@ -1,0 +1,254 @@
+---
+import type { OfficialDocument } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { getOfficialDocuments, getOfficialDocumentBySlug, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+
+export async function getStaticPaths() {
+  try {
+    const documents = await getOfficialDocuments();
+
+    return documents.map(doc => ({
+      params: { slug: doc.slug },
+      props: { document: doc }
+    }));
+  } catch (error) {
+    console.error('Erreur lors de la récupération des documents:', error);
+    return [];
+  }
+}
+
+// Récupération du document depuis les props ou fallback
+let document: OfficialDocument | null = null;
+
+if (Astro.props.document) {
+  document = Astro.props.document;
+} else {
+  // Fallback pour le mode développement
+  try {
+    const slug = Astro.params.slug as string;
+    document = await getOfficialDocumentBySlug(slug);
+  } catch (error) {
+    console.error('Erreur lors de la récupération du document:', error);
+  }
+}
+
+if (!document) {
+  return Astro.redirect('/404');
+}
+
+// Labels lisibles pour chaque type
+const typeLabels: Record<string, string> = {
+  'pv-conseil-municipal': 'PV Conseil municipal',
+  'deliberation': 'Délibération',
+  'arrete': 'Arrêté',
+  'plu': 'PLU',
+  'scot': 'SCoT',
+  'carte-communale': 'Carte communale',
+  'budget-primitif': 'Budget primitif',
+  'compte-administratif': 'Compte administratif',
+  'rapport-orientations-budgetaires': 'ROB',
+  'autre': 'Autre',
+};
+
+const typeColors: Record<string, string> = {
+  'pv-conseil-municipal': 'bg-blue-100 text-blue-800',
+  'deliberation': 'bg-indigo-100 text-indigo-800',
+  'arrete': 'bg-red-100 text-red-800',
+  'plu': 'bg-green-100 text-green-800',
+  'scot': 'bg-emerald-100 text-emerald-800',
+  'carte-communale': 'bg-teal-100 text-teal-800',
+  'budget-primitif': 'bg-amber-100 text-amber-800',
+  'compte-administratif': 'bg-yellow-100 text-yellow-800',
+  'rapport-orientations-budgetaires': 'bg-orange-100 text-orange-800',
+  'autre': 'bg-gray-100 text-gray-800',
+};
+
+const fileUrl = document.file ? getStrapiImageUrl(document.file.url) : null;
+const fileName = document.file?.name || 'document.pdf';
+const fileSize = document.file?.size;
+
+// Formater la taille du fichier
+function formatFileSize(sizeKb: number): string {
+  if (sizeKb < 1024) return `${Math.round(sizeKb)} Ko`;
+  return `${(sizeKb / 1024).toFixed(1)} Mo`;
+}
+
+// Annexes
+const additionalFiles = Array.isArray(document.additional_files)
+  ? document.additional_files.filter(f => f?.url)
+  : [];
+---
+
+<Layout
+  title={document.title}
+  description={document.description || `${typeLabels[document.document_type] || 'Document officiel'} - ${document.title}`}
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Breadcrumb -->
+    <nav class="bg-gray-50 border-b border-gray-200 py-4" aria-label="Fil d'ariane">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ol class="flex items-center space-x-2 text-sm">
+          <li>
+            <a href="/" class="text-gray-500 hover:text-primary transition-colors">Accueil</a>
+          </li>
+          <li class="text-gray-500">/</li>
+          <li>
+            <a href="/documents" class="text-gray-500 hover:text-primary transition-colors">Documents</a>
+          </li>
+          <li class="text-gray-500">/</li>
+          <li class="text-gray-900 font-medium" aria-current="page">
+            {document.title}
+          </li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- Contenu du document -->
+    <article class="py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <header class="mb-8">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${typeColors[document.document_type] || 'bg-gray-100 text-gray-800'}`}>
+              {typeLabels[document.document_type] || document.document_type}
+            </span>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+              {document.year}
+            </span>
+          </div>
+
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            {document.title}
+          </h1>
+        </header>
+
+        <!-- Informations -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-8">
+          <h2 class="sr-only">Informations du document</h2>
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <dt class="font-medium text-gray-500">Date du document</dt>
+              <dd class="mt-1 text-gray-900">{formatDate(document.document_date)}</dd>
+            </div>
+
+            {document.session_date && (
+              <div>
+                <dt class="font-medium text-gray-500">Date de session</dt>
+                <dd class="mt-1 text-gray-900">{formatDate(document.session_date)}</dd>
+              </div>
+            )}
+
+            <div>
+              <dt class="font-medium text-gray-500">Année</dt>
+              <dd class="mt-1 text-gray-900">{document.year}</dd>
+            </div>
+
+            {document.reference_number && (
+              <div>
+                <dt class="font-medium text-gray-500">Numéro de référence</dt>
+                <dd class="mt-1 text-gray-900">{document.reference_number}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+
+        <!-- Description -->
+        {document.description && (
+          <div class="prose prose-lg max-w-none mb-8">
+            <p>{document.description}</p>
+          </div>
+        )}
+
+        <!-- Bouton téléchargement principal -->
+        {fileUrl && (
+          <div class="bg-white border-2 border-primary/20 rounded-lg p-6 mb-8 text-center">
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              class="inline-flex items-center gap-3 px-6 py-3 text-lg font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Télécharger le document
+            </a>
+            <p class="text-sm text-gray-500 mt-2">
+              {fileName}
+              {fileSize && ` — ${formatFileSize(fileSize)}`}
+            </p>
+          </div>
+        )}
+
+        <!-- Annexes -->
+        {additionalFiles.length > 0 && (
+          <div class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+              Annexes ({additionalFiles.length})
+            </h2>
+            <ul class="space-y-2">
+              {additionalFiles.map((f) => {
+                return (
+                  <li>
+                    <a
+                      href={getStrapiImageUrl(f.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group"
+                    >
+                      <svg class="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      <span class="flex-1 text-sm text-gray-700 group-hover:text-primary transition-colors">
+                        {f.name || 'Fichier annexe'}
+                      </span>
+                      {f.size && (
+                        <span class="text-xs text-gray-400">{formatFileSize(f.size)}</span>
+                      )}
+                      <svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        <!-- Retour à la liste -->
+        <div class="pt-8 border-t border-gray-200">
+          <a
+            href="/documents"
+            class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm transition-colors"
+          >
+            <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour aux documents
+          </a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  @media print {
+    .skip-link,
+    nav[aria-label="Navigation principale"],
+    footer {
+      display: none !important;
+    }
+  }
+</style>

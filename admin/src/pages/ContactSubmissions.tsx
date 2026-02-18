@@ -1,5 +1,5 @@
 import { Badge } from '@/components/ui/badge'
-import { Clock, Mail, Search } from 'lucide-react'
+import { Clock, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common'

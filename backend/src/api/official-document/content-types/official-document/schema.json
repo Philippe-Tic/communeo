@@ -1,0 +1,84 @@
+{
+  "kind": "collectionType",
+  "collectionName": "official_documents",
+  "info": {
+    "singularName": "official-document",
+    "pluralName": "official-documents",
+    "displayName": "Official Document",
+    "description": "Documents officiels des communes (PV, délibérations, arrêtés, budgets)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "unique": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "document_type": {
+      "type": "enumeration",
+      "enum": [
+        "pv-conseil-municipal",
+        "deliberation",
+        "arrete",
+        "plu",
+        "scot",
+        "carte-communale",
+        "budget-primitif",
+        "compte-administratif",
+        "rapport-orientations-budgetaires",
+        "autre"
+      ],
+      "required": true
+    },
+    "document_date": {
+      "type": "date",
+      "required": true
+    },
+    "session_date": {
+      "type": "date"
+    },
+    "file": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files"],
+      "required": true
+    },
+    "additional_files": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["files", "images"]
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "published", "archived"],
+      "default": "draft",
+      "required": true
+    },
+    "reference_number": {
+      "type": "string"
+    },
+    "year": {
+      "type": "integer",
+      "required": true
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "official_documents",
+      "required": true
+    }
+  }
+}

@@ -1,0 +1,309 @@
+---
+import type { OfficialDocument } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { getOfficialDocuments, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+
+// Récupération de tous les documents officiels
+let documents: OfficialDocument[] = [];
+
+try {
+  documents = await getOfficialDocuments();
+} catch (error) {
+  console.error('Erreur lors de la récupération des documents:', error);
+}
+
+// Années disponibles (triées décroissantes)
+const years = [...new Set(documents.map(d => d.year))].sort((a, b) => b - a);
+
+// Familles de documents pour les onglets
+const families = [
+  { key: 'all', label: 'Tous', types: [] as string[] },
+  { key: 'conseil', label: 'Conseils & délibérations', types: ['pv-conseil-municipal', 'deliberation'] },
+  { key: 'urbanisme', label: 'Urbanisme', types: ['plu', 'scot', 'carte-communale'] },
+  { key: 'budget', label: 'Budget & finances', types: ['budget-primitif', 'compte-administratif', 'rapport-orientations-budgetaires'] },
+  { key: 'arrete', label: 'Arrêtés', types: ['arrete'] },
+  { key: 'autre', label: 'Autres', types: ['autre'] },
+];
+
+// Labels lisibles pour chaque type
+const typeLabels: Record<string, string> = {
+  'pv-conseil-municipal': 'PV Conseil municipal',
+  'deliberation': 'Délibération',
+  'arrete': 'Arrêté',
+  'plu': 'PLU',
+  'scot': 'SCoT',
+  'carte-communale': 'Carte communale',
+  'budget-primitif': 'Budget primitif',
+  'compte-administratif': 'Compte administratif',
+  'rapport-orientations-budgetaires': 'ROB',
+  'autre': 'Autre',
+};
+
+// Couleurs de badge par type
+const typeColors: Record<string, string> = {
+  'pv-conseil-municipal': 'bg-blue-100 text-blue-800',
+  'deliberation': 'bg-indigo-100 text-indigo-800',
+  'arrete': 'bg-red-100 text-red-800',
+  'plu': 'bg-green-100 text-green-800',
+  'scot': 'bg-emerald-100 text-emerald-800',
+  'carte-communale': 'bg-teal-100 text-teal-800',
+  'budget-primitif': 'bg-amber-100 text-amber-800',
+  'compte-administratif': 'bg-yellow-100 text-yellow-800',
+  'rapport-orientations-budgetaires': 'bg-orange-100 text-orange-800',
+  'autre': 'bg-gray-100 text-gray-800',
+};
+
+// Compter les documents par famille
+function countByFamily(familyTypes: string[]): number {
+  if (familyTypes.length === 0) return documents.length;
+  return documents.filter(d => familyTypes.includes(d.document_type)).length;
+}
+
+// Déterminer la famille d'un document
+function getDocumentFamily(docType: string): string {
+  for (const family of families) {
+    if (family.types.includes(docType)) return family.key;
+  }
+  return 'autre';
+}
+---
+
+<Layout
+  title="Documents officiels"
+  description="Consultez et téléchargez les documents officiels de votre commune : délibérations, arrêtés, budgets, documents d'urbanisme."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Header -->
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Documents officiels
+          </h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Consultez et téléchargez les documents publics de votre commune
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filtres -->
+    <section class="py-6 bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Filtre année -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+          <div class="flex items-center gap-2">
+            <label for="year-filter" class="text-sm font-medium text-gray-700">Année :</label>
+            <select
+              id="year-filter"
+              class="rounded-md border-gray-300 shadow-sm text-sm focus:border-primary focus:ring-primary py-2 px-3 border"
+            >
+              <option value="all">Toutes les années</option>
+              {years.map(year => (
+                <option value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+
+          <p class="text-sm text-gray-500">
+            <span id="visible-count">{documents.length}</span> document{documents.length !== 1 ? 's' : ''}
+          </p>
+        </div>
+
+        <!-- Onglets par famille -->
+        <div class="flex flex-wrap gap-2 justify-center">
+          {families.map((family) => {
+            const count = countByFamily(family.types);
+            return count > 0 || family.key === 'all' ? (
+              <button
+                type="button"
+                class="family-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary"
+                data-family={family.key}
+              >
+                {family.label}
+                <span class="ml-1 text-xs">({count})</span>
+              </button>
+            ) : null;
+          })}
+        </div>
+      </div>
+    </section>
+
+    <!-- Liste des documents -->
+    <section class="py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {documents.length > 0 ? (
+          <div class="space-y-3" id="documents-list">
+            {documents.map((doc) => (
+              <div
+                class="doc-row bg-white rounded-lg border border-gray-200 hover:border-primary/30 hover:shadow-sm transition-all p-4"
+                data-family={getDocumentFamily(doc.document_type)}
+                data-type={doc.document_type}
+                data-year={doc.year}
+              >
+                <!-- Mobile: stack vertical -->
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <!-- Badge type -->
+                  <span class={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${typeColors[doc.document_type] || 'bg-gray-100 text-gray-800'}`}>
+                    {typeLabels[doc.document_type] || doc.document_type}
+                  </span>
+
+                  <!-- Titre + ref -->
+                  <div class="flex-1 min-w-0">
+                    <a
+                      href={`/documents/${doc.slug}`}
+                      class="text-gray-900 font-medium hover:text-primary transition-colors line-clamp-1"
+                    >
+                      {doc.title}
+                    </a>
+                    {doc.reference_number && (
+                      <span class="text-xs text-gray-400 ml-2">Ref. {doc.reference_number}</span>
+                    )}
+                  </div>
+
+                  <!-- Date -->
+                  <time
+                    class="text-sm text-gray-500 whitespace-nowrap"
+                    datetime={doc.document_date}
+                  >
+                    {formatDate(doc.document_date)}
+                  </time>
+
+                  <!-- Bouton télécharger -->
+                  {doc.file && (
+                    <a
+                      href={getStrapiImageUrl(doc.file.url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap self-start sm:self-center"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      PDF
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Aucun document disponible</h2>
+            <p class="text-gray-600">
+              Les documents officiels seront publiés ici dès qu'ils seront disponibles.
+            </p>
+          </div>
+        )}
+
+        <!-- Empty state filtré (masqué par défaut) -->
+        <div id="no-results" class="hidden text-center py-12">
+          <p class="text-gray-600">Aucun document ne correspond à vos critères de recherche.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .family-btn.active {
+    background-color: rgb(var(--color-primary));
+    color: white;
+    border-color: rgb(var(--color-primary));
+  }
+
+  .doc-row.hidden {
+    display: none;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const familyButtons = document.querySelectorAll('.family-btn');
+    const docRows = document.querySelectorAll('.doc-row');
+    const yearFilter = document.getElementById('year-filter') as HTMLSelectElement;
+    const visibleCount = document.getElementById('visible-count');
+    const noResults = document.getElementById('no-results');
+    const docList = document.getElementById('documents-list');
+
+    let activeFamily = 'all';
+    let activeYear = 'all';
+
+    // Activer le filtre "Tous" par défaut
+    const allButton = document.querySelector('[data-family="all"]');
+    if (allButton) {
+      allButton.classList.add('active');
+    }
+
+    function applyFilters() {
+      let count = 0;
+
+      docRows.forEach(row => {
+        const family = row.getAttribute('data-family');
+        const year = row.getAttribute('data-year');
+
+        const matchFamily = activeFamily === 'all' || family === activeFamily;
+        const matchYear = activeYear === 'all' || year === activeYear;
+
+        if (matchFamily && matchYear) {
+          row.classList.remove('hidden');
+          count++;
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+
+      if (visibleCount) {
+        visibleCount.textContent = String(count);
+      }
+
+      // Afficher/masquer empty state
+      if (noResults && docList) {
+        if (count === 0 && docRows.length > 0) {
+          noResults.classList.remove('hidden');
+          docList.classList.add('hidden');
+        } else {
+          noResults.classList.add('hidden');
+          docList.classList.remove('hidden');
+        }
+      }
+    }
+
+    // Filtrage par famille
+    familyButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        activeFamily = button.getAttribute('data-family') || 'all';
+        familyButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        applyFilters();
+      });
+    });
+
+    // Filtrage par année
+    if (yearFilter) {
+      yearFilter.addEventListener('change', () => {
+        activeYear = yearFilter.value;
+        applyFilters();
+      });
+    }
+  });
+</script>

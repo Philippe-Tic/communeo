@@ -119,6 +119,12 @@
       "target": "api::contact-submission.contact-submission",
       "mappedBy": "site"
     },
+    "official_documents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::official-document.official-document",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

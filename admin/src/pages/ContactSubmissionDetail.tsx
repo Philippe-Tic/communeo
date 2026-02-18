@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Calendar, Clock, Mail, Phone, Tag, User } from 'lucide-react'
+import { Calendar, Clock, Mail, Phone, Tag, User } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'

@@ -213,6 +213,7 @@ async function setupPermissions(adminToken) {
     { ns: 'api::article', controller: 'article' },
     { ns: 'api::evenement', controller: 'evenement' },
     { ns: 'api::site', controller: 'site' },
+    { ns: 'api::official-document', controller: 'official-document' },
   ];
   const actions = ['find', 'findOne', 'create', 'update', 'delete'];
 

@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, StrapiCollectionResponse
 } from '../types/strapi';
 
 // Configuration depuis les variables d'environnement
@@ -310,6 +310,40 @@ export async function getEventBySlug(slug: string): Promise<Event | null> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Event>>(url);
+  if (!response?.data) return null;
+  return response.data.length > 0 ? response.data[0] : null;
+}
+
+/**
+ * Récupère tous les documents officiels publiés
+ */
+export async function getOfficialDocuments(): Promise<OfficialDocument[]> {
+  const url = buildStrapiUrl('official-documents', {
+    filters: {
+      status: { $eq: 'published' }
+    },
+    populate: ['file', 'additional_files', 'site'],
+    sort: ['document_date:desc'],
+    pagination: { pageSize: 500 }
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<OfficialDocument>>(url);
+  return response?.data ?? [];
+}
+
+/**
+ * Récupère un document officiel par son slug
+ */
+export async function getOfficialDocumentBySlug(slug: string): Promise<OfficialDocument | null> {
+  const url = buildStrapiUrl('official-documents', {
+    filters: {
+      slug: { $eq: slug },
+      status: { $eq: 'published' }
+    },
+    populate: ['file', 'additional_files', 'site']
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<OfficialDocument>>(url);
   if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
 }

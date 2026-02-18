@@ -113,6 +113,19 @@ export default async ({ strapi }) => {
       { action: 'api::contact-submission.contact-submission.update', enabled: true },
       { action: 'api::contact-submission.contact-submission.delete', enabled: true },
 
+      // Official Documents
+      { action: 'api::official-document.official-document.find', enabled: true },
+      { action: 'api::official-document.official-document.findOne', enabled: true },
+      { action: 'api::official-document.official-document.create', enabled: true },
+      { action: 'api::official-document.official-document.update', enabled: true },
+      { action: 'api::official-document.official-document.delete', enabled: true },
+
+      // Upload (needed for file uploads)
+      { action: 'plugin::upload.content-api.upload', enabled: true },
+      { action: 'plugin::upload.content-api.find', enabled: true },
+      { action: 'plugin::upload.content-api.findOne', enabled: true },
+      { action: 'plugin::upload.content-api.destroy', enabled: true },
+
       // Deployment (custom actions)
       { action: 'api::deployment.deployment.trigger', enabled: true },
       { action: 'api::deployment.deployment.status', enabled: true },

@@ -18,6 +18,8 @@ import { Events } from './pages/Events'
 import { PageDetail } from './pages/PageDetail'
 import { CreatePage, EditPage } from './pages/PageForm'
 import { Pages } from './pages/Pages'
+import { ContactSubmissionDetail } from './pages/ContactSubmissionDetail'
+import { ContactSubmissions } from './pages/ContactSubmissions'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
@@ -185,6 +187,29 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditPage />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Messages routes */}
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <ContactSubmissions />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/messages/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <ContactSubmissionDetail />
                 </MainLayout>
               </ProtectedRoute>
             }

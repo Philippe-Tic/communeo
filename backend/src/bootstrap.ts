@@ -42,22 +42,29 @@ export default async ({ strapi }) => {
     });
 
     if (!testUser) {
-      testUser = await strapi.query('plugin::users-permissions.user').create({
-        data: {
-          username: 'testuser',
-          email: 'test@example.com',
-          password: await strapi.service('plugin::users-permissions.user').hashPassword('test123'),
-          confirmed: true,
-          blocked: false,
-          role: authenticatedRole.id,
-          site: testSite.documentId,
-          municipality_role: 'editor',
-          first_name: 'Test',
-          last_name: 'User',
-          active: true,
-        },
-      });
-      console.log('✅ Bootstrap - Created test user:', testUser.id);
+      try {
+        // In Strapi v5, use the plugin service to hash passwords
+        const userService = strapi.plugin('users-permissions').service('user');
+        const hashedPassword = await userService.hashPassword('test123');
+        testUser = await strapi.query('plugin::users-permissions.user').create({
+          data: {
+            username: 'testuser',
+            email: 'test@example.com',
+            password: hashedPassword,
+            confirmed: true,
+            blocked: false,
+            role: authenticatedRole.id,
+            site: testSite.documentId,
+            municipality_role: 'editor',
+            first_name: 'Test',
+            last_name: 'User',
+            active: true,
+          },
+        });
+        console.log('✅ Bootstrap - Created test user:', testUser.id);
+      } catch (error) {
+        console.log('⚠️ Bootstrap - Could not create test user:', error.message);
+      }
     } else {
       // Mettre à jour l'utilisateur existant avec le site
       await strapi.query('plugin::users-permissions.user').update({
@@ -99,6 +106,13 @@ export default async ({ strapi }) => {
       { action: 'api::site.site.update', enabled: true },
       { action: 'api::site.site.delete', enabled: true },
 
+      // Contact Submissions
+      { action: 'api::contact-submission.contact-submission.find', enabled: true },
+      { action: 'api::contact-submission.contact-submission.findOne', enabled: true },
+      { action: 'api::contact-submission.contact-submission.create', enabled: true },
+      { action: 'api::contact-submission.contact-submission.update', enabled: true },
+      { action: 'api::contact-submission.contact-submission.delete', enabled: true },
+
       // Deployment (custom actions)
       { action: 'api::deployment.deployment.trigger', enabled: true },
       { action: 'api::deployment.deployment.status', enabled: true },
@@ -137,6 +151,47 @@ export default async ({ strapi }) => {
         }
       } catch (error) {
         console.log(`❌ Bootstrap - Error setting permission ${permission.action}:`, error.message);
+      }
+    }
+
+    // Permissions publiques pour le formulaire de contact SVE
+    const publicRole = await strapi.query('plugin::users-permissions.role').findOne({
+      where: { type: 'public' },
+    });
+
+    if (publicRole) {
+      const publicPermissions = [
+        { action: 'api::contact-submission.contact-submission.publicCreate', enabled: true },
+      ];
+
+      for (const permission of publicPermissions) {
+        try {
+          const existingPermission = await strapi.query('plugin::users-permissions.permission').findOne({
+            where: {
+              action: permission.action,
+              role: publicRole.id,
+            },
+          });
+
+          if (existingPermission) {
+            await strapi.query('plugin::users-permissions.permission').update({
+              where: { id: existingPermission.id },
+              data: { enabled: permission.enabled },
+            });
+            console.log(`✅ Bootstrap - Updated public permission: ${permission.action}`);
+          } else {
+            await strapi.query('plugin::users-permissions.permission').create({
+              data: {
+                action: permission.action,
+                enabled: permission.enabled,
+                role: publicRole.id,
+              },
+            });
+            console.log(`✅ Bootstrap - Created public permission: ${permission.action}`);
+          }
+        } catch (error) {
+          console.log(`❌ Bootstrap - Error setting public permission ${permission.action}:`, error.message);
+        }
       }
     }
 

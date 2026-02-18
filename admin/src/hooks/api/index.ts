@@ -5,6 +5,7 @@ export * from './useAuth'
 export * from './useArticles'
 export * from './usePages'
 export * from './useEvents'
+export * from './useContactSubmissions'
 export * from './useSites'
 
 // Re-export commonly used types

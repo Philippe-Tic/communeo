@@ -33,11 +33,13 @@ export interface Page {
   }
   parent_page?: {
     id: number
+    documentId: string
     title: string
     slug: string
   }
   child_pages?: Array<{
     id: number
+    documentId: string
     title: string
     slug: string
   }>
@@ -45,7 +47,7 @@ export interface Page {
   show_in_menu?: boolean
   is_homepage?: boolean
   seo_keywords?: string
-  template?: 'default' | 'homepage' | 'contact' | 'about' | 'services'
+  template?: 'default' | 'homepage' | 'about' | 'services'
 }
 
 export interface CreatePageData {
@@ -54,13 +56,13 @@ export interface CreatePageData {
   meta_description?: string
   status?: 'draft' | 'published' | 'archived'
   featured_image?: number
-  parent_page?: number
+  parent_page?: string | null
   menu_order?: number
   show_in_menu?: boolean
   is_homepage?: boolean
   seo_keywords?: string
-  template?: 'default' | 'homepage' | 'contact' | 'about' | 'services'
-  site: number // Required field
+  template?: 'default' | 'homepage' | 'about' | 'services'
+  site?: string
 }
 
 export interface UpdatePageData extends Partial<CreatePageData> {

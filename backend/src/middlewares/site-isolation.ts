@@ -218,6 +218,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'pages': 'api::page.page',
       'articles': 'api::article.article',
       'evenements': 'api::evenement.evenement',
+      'contact-submissions': 'api::contact-submission.contact-submission',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

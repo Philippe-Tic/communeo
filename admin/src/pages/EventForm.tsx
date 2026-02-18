@@ -13,6 +13,7 @@ import { toaster } from '../lib/toaster'
 
 interface EventFormData {
   title: string
+  slug: string
   description: string
   start_date: string
   end_date: string
@@ -43,9 +44,10 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
   const createEventMutation = useCreateEvent()
   const updateEventMutation = useUpdateEvent()
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<EventFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<EventFormData>({
     defaultValues: {
       title: '',
+      slug: '',
       description: '',
       start_date: '',
       end_date: '',
@@ -64,11 +66,25 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
     },
   })
 
+  const watchedTitle = watch('title')
+
+  // Auto-générer le slug basé sur le titre
+  useEffect(() => {
+    if (watchedTitle && !isEditing) {
+      const slug = watchedTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+      setValue('slug', slug)
+    }
+  }, [watchedTitle, setValue, isEditing])
+
   // Réinitialiser le formulaire avec les données initiales
   useEffect(() => {
     if (initialData) {
       reset({
         title: initialData.title,
+        slug: initialData.slug,
         description: initialData.description,
         start_date: initialData.start_date.split('T')[0] + 'T' + initialData.start_date.split('T')[1].substring(0, 5),
         end_date: initialData.end_date ? initialData.end_date.split('T')[0] + 'T' + initialData.end_date.split('T')[1].substring(0, 5) : '',
@@ -95,8 +111,24 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
 
     try {
       const submitData = {
-        ...data,
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        start_date: data.start_date,
+        category: data.category,
+        featured: data.featured,
+        registration_required: data.registration_required,
+        // Champs optionnels : undefined si vides
+        end_date: data.end_date || undefined,
+        location: data.location || undefined,
+        address: data.address || undefined,
+        price: data.price || undefined,
+        external_link: data.external_link || undefined,
+        organizer: data.organizer || undefined,
+        contact_email: data.contact_email || undefined,
+        contact_phone: data.contact_phone || undefined,
         max_participants: data.max_participants ? parseInt(data.max_participants) : undefined,
+        registration_deadline: data.registration_deadline || undefined,
       }
 
       if (isEditing && id) {
@@ -153,6 +185,17 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
                   />
                   {errors.title && (
                     <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="mb-2">Slug *</Label>
+                  <Input
+                    placeholder="slug-de-l-evenement"
+                    {...register('slug', { required: 'Le slug est requis' })}
+                  />
+                  {errors.slug && (
+                    <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
                   )}
                 </div>
 
@@ -258,11 +301,11 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <Label className="mb-2">Email de contact *</Label>
+                    <Label className="mb-2">Email de contact</Label>
                     <Input
                       type="email"
                       placeholder="contact@example.com"
-                      {...register('contact_email', { required: 'L\'email de contact est requis' })}
+                      {...register('contact_email')}
                     />
                   </div>
 

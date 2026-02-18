@@ -39,6 +39,7 @@ export interface Event {
 
 export interface CreateEventData {
   title: string
+  slug: string
   description: string
   start_date: string
   end_date?: string
@@ -256,6 +257,7 @@ export const useDuplicateEvent = () => {
       // Create a copy with modified title and reset dates
       const duplicateData: CreateEventData = {
         title: `${originalEvent.title} (Copie)`,
+        slug: `${originalEvent.slug}-copie`,
         description: originalEvent.description,
         start_date: originalEvent.start_date,
         end_date: originalEvent.end_date,

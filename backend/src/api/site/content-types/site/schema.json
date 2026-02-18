@@ -113,6 +113,12 @@
       "target": "api::deployment.deployment",
       "mappedBy": "site"
     },
+    "contact_submissions": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contact-submission.contact-submission",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

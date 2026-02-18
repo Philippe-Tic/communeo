@@ -493,6 +493,82 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiContactSubmissionContactSubmission
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'contact_submissions';
+  info: {
+    displayName: 'Contact Submission';
+    pluralName: 'contact-submissions';
+    singularName: 'contact-submission';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    acknowledged_at: Schema.Attribute.DateTime;
+    acknowledgment_sent: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    attachments: Schema.Attribute.Media<'images' | 'files', true>;
+    category: Schema.Attribute.Enumeration<
+      [
+        'general',
+        'urbanisme',
+        'etat-civil',
+        'voirie',
+        'associations',
+        'rgpd',
+        'autre',
+      ]
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'general'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    first_name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    last_name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::contact-submission.contact-submission'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text & Schema.Attribute.Required;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    reference_number: Schema.Attribute.String & Schema.Attribute.Unique;
+    responded_at: Schema.Attribute.DateTime;
+    response: Schema.Attribute.RichText;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    status: Schema.Attribute.Enumeration<
+      ['received', 'in_progress', 'resolved', 'closed']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'received'>;
+    subject: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
   collectionName: 'deployments';
   info: {
@@ -647,7 +723,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'draft'>;
     template: Schema.Attribute.Enumeration<
-      ['default', 'homepage', 'contact', 'about', 'services']
+      ['default', 'homepage', 'about', 'services']
     > &
       Schema.Attribute.DefaultTo<'default'>;
     title: Schema.Attribute.String &
@@ -679,6 +755,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     colors: Schema.Attribute.JSON;
     contact_mail: Schema.Attribute.Email & Schema.Attribute.Required;
     contact_phone: Schema.Attribute.String;
+    contact_submissions: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::contact-submission.contact-submission'
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1260,6 +1340,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::article.article': ApiArticleArticle;
+      'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::page.page': ApiPagePage;

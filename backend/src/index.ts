@@ -1,4 +1,4 @@
-// import type { Core } from '@strapi/strapi';
+import bootstrap from './bootstrap';
 
 export default {
   /**
@@ -7,7 +7,7 @@ export default {
    *
    * This gives you an opportunity to extend code.
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register() {},
 
   /**
    * An asynchronous bootstrap function that runs before
@@ -16,5 +16,5 @@ export default {
    * This gives you an opportunity to set up your data model,
    * run jobs, or perform some special logic.
    */
-  bootstrap(/* { strapi }: { strapi: Core.Strapi } */) {},
+  bootstrap,
 };

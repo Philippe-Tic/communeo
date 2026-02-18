@@ -1,0 +1,82 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contact_submissions",
+  "info": {
+    "singularName": "contact-submission",
+    "pluralName": "contact-submissions",
+    "displayName": "Contact Submission"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "first_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "last_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "subject": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["general", "urbanisme", "etat-civil", "voirie", "associations", "rgpd", "autre"],
+      "required": true,
+      "default": "general"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["received", "in_progress", "resolved", "closed"],
+      "required": true,
+      "default": "received"
+    },
+    "reference_number": {
+      "type": "string",
+      "unique": true
+    },
+    "acknowledgment_sent": {
+      "type": "boolean",
+      "default": false
+    },
+    "acknowledged_at": {
+      "type": "datetime"
+    },
+    "response": {
+      "type": "richtext"
+    },
+    "responded_at": {
+      "type": "datetime"
+    },
+    "attachments": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images", "files"]
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "contact_submissions",
+      "required": true
+    }
+  }
+}

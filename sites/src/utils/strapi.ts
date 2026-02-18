@@ -135,8 +135,8 @@ function createDefaultSite(): Site {
     colors: {
       primary: '#1f2937',
       secondary: '#3b82f6',
-      primaryRgb: '31, 41, 55',
-      secondaryRgb: '59, 130, 246'
+      primaryRgb: '31 41 55',
+      secondaryRgb: '59 130 246'
     },
     contact_mail: 'contact@mairie.fr',
     address: 'Adresse de la mairie',
@@ -155,7 +155,7 @@ export async function getHomepage(): Promise<Page | null> {
       status: { $eq: 'published' },
       is_homepage: { $eq: true }
     },
-    populate: ['featured_image', 'site']
+    populate: ['featured_image', 'site', 'parent_page']
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
@@ -171,7 +171,7 @@ export async function getPages(): Promise<Page[]> {
     filters: {
       status: { $eq: 'published' }
     },
-    populate: ['featured_image', 'site'],
+    populate: ['featured_image', 'site', 'parent_page', 'child_pages'],
     sort: ['menu_order:asc', 'title:asc']
   });
 
@@ -188,7 +188,7 @@ export async function getMenuPages(): Promise<Page[]> {
       status: { $eq: 'published' },
       show_in_menu: { $eq: true }
     },
-    populate: ['site'],
+    populate: ['site', 'parent_page', 'child_pages'],
     sort: ['menu_order:asc', 'title:asc']
   });
 
@@ -205,7 +205,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
       slug: { $eq: slug },
       status: { $eq: 'published' }
     },
-    populate: ['featured_image', 'site']
+    populate: ['featured_image', 'site', 'parent_page', 'child_pages']
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
@@ -341,6 +341,49 @@ export function formatDate(dateString: string): string {
     month: 'long',
     day: 'numeric'
   });
+}
+
+/**
+ * Construit le chemin hiérarchique complet d'une page en remontant la chaîne des parents.
+ * Ex: page "Permis" (parent: "Urbanisme") → "urbanisme/permis"
+ */
+export function getPagePath(page: Page, allPages: Page[]): string {
+  const segments: string[] = [];
+  let current: Page | undefined = page;
+
+  while (current) {
+    segments.unshift(current.slug);
+    if (current.parent_page) {
+      current = allPages.find(p => p.documentId === current!.parent_page?.documentId);
+    } else {
+      current = undefined;
+    }
+  }
+
+  return segments.join('/');
+}
+
+/**
+ * Construit le fil d'Ariane pour une page.
+ * Retourne un tableau [{title, path}] du parent racine jusqu'à la page courante.
+ */
+export function buildBreadcrumbs(page: Page, allPages: Page[]): Array<{ title: string; path: string }> {
+  const crumbs: Array<{ title: string; path: string }> = [];
+  let current: Page | undefined = page;
+
+  while (current) {
+    crumbs.unshift({
+      title: current.title,
+      path: '/' + getPagePath(current, allPages),
+    });
+    if (current.parent_page) {
+      current = allPages.find(p => p.documentId === current!.parent_page?.documentId);
+    } else {
+      current = undefined;
+    }
+  }
+
+  return crumbs;
 }
 
 /**

@@ -57,6 +57,7 @@ export interface InfosPratiques {
   id?: number;
   opening_hours?: any;
   population?: number;
+  contact_form_intro?: string;
 }
 
 // Configuration du site (mairie) - Strapi v5
@@ -92,8 +93,10 @@ export interface Page {
   featured_image?: MediaAttribute;
   menu_order: number;
   show_in_menu: boolean;
-  template: 'default' | 'homepage' | 'contact' | 'about' | 'services';
+  template: 'default' | 'homepage' | 'about' | 'services';
   is_homepage: boolean;
+  parent_page?: Page | null;
+  child_pages?: Page[];
   site: StrapiData<Site> | Site;  // Relation (peut être peuplée ou non)
   createdAt: string;
   updatedAt: string;

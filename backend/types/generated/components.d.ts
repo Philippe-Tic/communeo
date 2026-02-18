@@ -24,6 +24,7 @@ export interface LegalInfosPratiques extends Struct.ComponentSchema {
     displayName: 'Infos pratiques';
   };
   attributes: {
+    contact_form_intro: Schema.Attribute.Text;
     opening_hours: Schema.Attribute.JSON;
     population: Schema.Attribute.Integer;
   };

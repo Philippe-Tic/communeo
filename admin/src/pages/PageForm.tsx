@@ -55,6 +55,14 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
 
   const watchedTitle = watch('title')
   const watchedIsHomepage = watch('is_homepage')
+  const watchedParentId = watch('parent_id')
+
+  // Décocher "Page d'accueil" si un parent est sélectionné
+  useEffect(() => {
+    if (watchedParentId) {
+      setValue('is_homepage', false)
+    }
+  }, [watchedParentId, setValue])
 
   // Auto-générer le slug et le titre SEO basé sur le titre
   useEffect(() => {
@@ -79,7 +87,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
         meta_description: initialData.meta_description || '',
         status: initialData.status,
         is_homepage: initialData.is_homepage,
-        parent_id: initialData.parent_page?.id?.toString() || '',
+        parent_id: initialData.parent_page?.documentId || '',
         menu_order: initialData.menu_order,
         template: initialData.template || 'default',
       })
@@ -95,11 +103,11 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
       const { parent_id, ...formData } = data
       const apiData = {
         ...formData,
-        parent: parent_id ? parseInt(parent_id) : undefined,
+        parent_page: parent_id || null,
       }
 
       if (isEditing && id) {
-        await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'homepage' | 'contact' | 'about' | 'services' })
+        await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'homepage' | 'about' | 'services' })
         toaster.create({
           title: 'Page mise à jour',
           description: 'La page a été mise à jour avec succès.',
@@ -107,7 +115,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
           duration: 3000,
         })
       } else {
-        await createPageMutation.mutateAsync({ ...apiData, template: apiData.template as 'default' | 'homepage' | 'contact' | 'about' | 'services', site: 1 })
+        await createPageMutation.mutateAsync({ ...apiData, template: apiData.template as 'default' | 'homepage' | 'about' | 'services' })
         toaster.create({
           title: 'Page créée',
           description: 'La page a été créée avec succès.',
@@ -134,7 +142,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
   const pages = pagesResponse?.data || []
   const availableParentPages = pages.filter((page: Page) => {
     if (isEditing && initialData) {
-      return page.id !== initialData.id
+      return page.documentId !== initialData.documentId
     }
     return true
   })
@@ -213,7 +221,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                   >
                     <option value="">Aucune (page racine)</option>
                     {availableParentPages.map((page: Page) => (
-                      <option key={page.id} value={page.id}>
+                      <option key={page.documentId} value={page.documentId}>
                         {page.title}
                       </option>
                     ))}
@@ -240,19 +248,23 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Label>Page d'accueil</Label>
-                  <input
-                    type="checkbox"
-                    {...register('is_homepage')}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
-                </div>
+                {!watchedParentId && (
+                  <>
+                    <div className="flex items-center gap-3">
+                      <Label>Page d'accueil</Label>
+                      <input
+                        type="checkbox"
+                        {...register('is_homepage')}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                    </div>
 
-                {watchedIsHomepage && (
-                  <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-                    <p className="text-blue-700 dark:text-blue-300">Cette page sera définie comme page d'accueil du site.</p>
-                  </div>
+                    {watchedIsHomepage && (
+                      <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
+                        <p className="text-blue-700 dark:text-blue-300">Cette page sera définie comme page d'accueil du site.</p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

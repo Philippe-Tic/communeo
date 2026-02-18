@@ -51,7 +51,7 @@
     },
     "template": {
       "type": "enumeration",
-      "enum": ["default", "homepage", "contact", "about", "services"],
+      "enum": ["default", "homepage", "about", "services"],
       "default": "default"
     },
     "seo_keywords": {

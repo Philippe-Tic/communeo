@@ -1,6 +1,6 @@
 ---
 import type { Page, Site } from '../types/strapi';
-import { getMenuPages, getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+import { getMenuPages, getSiteConfig, getStrapiImageUrl, getPagePath } from '../utils/strapi';
 
 // Récupération des pages du menu et de la configuration du site
 let menuPages: Page[] = [];
@@ -17,6 +17,17 @@ try {
 
 // URL actuelle pour la navigation active
 const currentPath = Astro.url.pathname;
+
+// Construire l'arbre du menu : pages racines avec leurs enfants
+const rootPages = menuPages.filter(p => !p.parent_page && !p.is_homepage);
+const menuTree = rootPages.map(page => ({
+  ...page,
+  children: menuPages.filter(p => p.parent_page?.documentId === page.documentId)
+}));
+
+// Un lien est actif si le path courant correspond ou est un sous-path
+const isActive = (pagePath: string) =>
+  currentPath === pagePath || currentPath.startsWith(pagePath + '/');
 ---
 
 <nav class="bg-white shadow-lg border-b border-gray-200" role="navigation" aria-label="Navigation principale">
@@ -51,19 +62,59 @@ const currentPath = Astro.url.pathname;
             Accueil
           </a>
 
-          {menuPages.map((page) => (
-            <a
-              href={`/${page.slug}`}
-              class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                currentPath === `/${page.slug}`
-                  ? 'bg-primary text-white'
-                  : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
-              }`}
-              aria-current={currentPath === `/${page.slug}` ? 'page' : undefined}
-            >
-              {page.title}
-            </a>
-          ))}
+          {menuTree.map((page) => {
+            const pagePath = '/' + getPagePath(page, menuPages);
+            const active = isActive(pagePath);
+            return page.children.length > 0 ? (
+              <div class="relative group">
+                <a
+                  href={pagePath}
+                  class={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-primary text-white'
+                      : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+                  }`}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {page.title}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </a>
+                <div class="absolute left-0 top-full hidden group-hover:block group-focus-within:block bg-white rounded-md shadow-lg border border-gray-200 min-w-48 z-50 py-1">
+                  {page.children.map((child) => {
+                    const childPath = '/' + getPagePath(child, menuPages);
+                    const childActive = currentPath === childPath;
+                    return (
+                      <a
+                        href={childPath}
+                        class={`block px-4 py-2 text-sm transition-colors ${
+                          childActive
+                            ? 'bg-primary/10 text-primary font-medium'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-primary'
+                        }`}
+                        aria-current={childActive ? 'page' : undefined}
+                      >
+                        {child.title}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <a
+                href={pagePath}
+                class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  active
+                    ? 'bg-primary text-white'
+                    : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+                }`}
+                aria-current={active ? 'page' : undefined}
+              >
+                {page.title}
+              </a>
+            );
+          })}
 
           <a
             href="/articles"
@@ -101,7 +152,6 @@ const currentPath = Astro.url.pathname;
           id="mobile-menu-button"
         >
           <span class="sr-only">Ouvrir le menu principal</span>
-          <!-- Icon hambourger -->
           <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -125,19 +175,42 @@ const currentPath = Astro.url.pathname;
         Accueil
       </a>
 
-      {menuPages.map((page) => (
-        <a
-          href={`/${page.slug}`}
-          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-            currentPath === `/${page.slug}`
-              ? 'bg-primary text-white'
-              : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
-          }`}
-          role="menuitem"
-        >
-          {page.title}
-        </a>
-      ))}
+      {menuTree.map((page) => {
+        const pagePath = '/' + getPagePath(page, menuPages);
+        const active = isActive(pagePath);
+        return (
+          <>
+            <a
+              href={pagePath}
+              class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                active
+                  ? 'bg-primary text-white'
+                  : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+              }`}
+              role="menuitem"
+            >
+              {page.title}
+            </a>
+            {page.children.map((child) => {
+              const childPath = '/' + getPagePath(child, menuPages);
+              const childActive = currentPath === childPath;
+              return (
+                <a
+                  href={childPath}
+                  class={`block pl-8 pr-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    childActive
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-primary'
+                  }`}
+                  role="menuitem"
+                >
+                  {child.title}
+                </a>
+              );
+            })}
+          </>
+        );
+      })}
 
       <a
         href="/articles"

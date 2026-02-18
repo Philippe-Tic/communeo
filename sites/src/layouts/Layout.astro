@@ -1,6 +1,7 @@
 ---
 import type { Site } from '../types/strapi';
 import { getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+import CookieBanner from '../components/CookieBanner.astro';
 
 export interface Props {
   title?: string;
@@ -63,8 +64,8 @@ const socialImage = image ? getStrapiImageUrl(image) :
 
     <!-- Couleurs du thème en CSS custom properties -->
     <style define:vars={{
-      'color-primary': siteConfig?.colors?.primaryRgb || '59, 130, 246',  // bleu par défaut
-      'color-secondary': siteConfig?.colors?.secondaryRgb || '16, 185, 129' // vert par défaut
+      'color-primary': siteConfig?.colors?.primaryRgb || '59 130 246',  // bleu par défaut
+      'color-secondary': siteConfig?.colors?.secondaryRgb || '16 185 129' // vert par défaut
     }}>
       :root {
         --color-primary: var(--color-primary);
@@ -90,7 +91,7 @@ const socialImage = image ? getStrapiImageUrl(image) :
     </script>
 
     <!-- Styles pour l'accessibilité -->
-    <style>
+    <style is:global>
       /* Focus visible uniquement pour la navigation clavier */
       .keyboard-navigation *:focus {
         outline: 2px solid rgb(var(--color-secondary));
@@ -133,5 +134,7 @@ const socialImage = image ? getStrapiImageUrl(image) :
         line-height: 1.6;
       }
     </style>
+
+    <CookieBanner />
   </body>
 </html>

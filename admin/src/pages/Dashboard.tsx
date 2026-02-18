@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button'
-import { Calendar, File, FileText } from 'lucide-react'
+import { Calendar, File, FileText, Mail } from 'lucide-react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
 import { useArticles, type Article } from '../hooks/api/useArticles'
 import { useEvents } from '../hooks/api/useEvents'
+import { useContactSubmissionsCount } from '../hooks/api/useContactSubmissions'
 import { usePages } from '../hooks/api/usePages'
 import { useUser, useUserProfile } from '../hooks/useUser'
 
@@ -17,6 +18,7 @@ export const Dashboard = () => {
   const { data: articlesData, isLoading: articlesLoading } = useArticles()
   const { data: pagesData, isLoading: pagesLoading } = usePages()
   const { data: eventsData, isLoading: eventsLoading } = useEvents()
+  const { data: messagesCount, isLoading: messagesLoading } = useContactSubmissionsCount()
 
   // Fetch recent content
   const { data: recentArticlesData } = useArticles({ status: 'published', pageSize: 3 })
@@ -46,6 +48,12 @@ export const Dashboard = () => {
       color: 'purple',
       icon: <Calendar className="h-6 w-6" />
     },
+    {
+      label: 'Messages',
+      value: messagesLoading ? '...' : (messagesCount ?? 0),
+      color: 'orange',
+      icon: <Mail className="h-6 w-6" />
+    },
   ]
 
   // Callbacks for article cards
@@ -70,7 +78,7 @@ export const Dashboard = () => {
         />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {statsData.map((stat, index) => (
             <StatsCard
               key={index}

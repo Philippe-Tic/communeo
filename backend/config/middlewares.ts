@@ -2,6 +2,7 @@ export default [
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
+  'global::private-network-access',
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',

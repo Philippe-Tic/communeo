@@ -34,6 +34,7 @@ export interface InfosPratiques {
   id?: number
   opening_hours?: any
   population?: number
+  contact_form_intro?: string
 }
 
 export interface Site {

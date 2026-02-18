@@ -10,6 +10,9 @@
     },
     "population": {
       "type": "integer"
+    },
+    "contact_form_intro": {
+      "type": "text"
     }
   }
 }

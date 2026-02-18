@@ -59,6 +59,7 @@ export const SiteConfigEdit = () => {
     // Infos pratiques
     opening_hours: '',
     population: '',
+    contact_form_intro: '',
   })
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
@@ -96,6 +97,7 @@ export const SiteConfigEdit = () => {
         // Infos pratiques (composant imbriqué)
         opening_hours: site.infos_pratiques?.opening_hours ? JSON.stringify(site.infos_pratiques.opening_hours, null, 2) : '',
         population: site.infos_pratiques?.population?.toString() || '',
+        contact_form_intro: site.infos_pratiques?.contact_form_intro || '',
       })
     }
   }, [site])
@@ -228,6 +230,7 @@ export const SiteConfigEdit = () => {
       infos_pratiques: {
         opening_hours: parsedOpeningHours,
         population: formData.population ? Number(formData.population) : undefined,
+        contact_form_intro: formData.contact_form_intro || undefined,
       },
     }
 
@@ -641,6 +644,19 @@ export const SiteConfigEdit = () => {
                         <p className="mt-1 text-sm text-destructive">{errors.population}</p>
                       )}
                     </div>
+                  </div>
+
+                  <div>
+                    <Label className="mb-2">Texte d'introduction de la page Contact</Label>
+                    <Textarea
+                      value={formData.contact_form_intro}
+                      onChange={(e) => handleInputChange('contact_form_intro', e.target.value)}
+                      placeholder="Vous pouvez nous contacter en utilisant le formulaire ci-dessous..."
+                      rows={4}
+                    />
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Affiché au-dessus du formulaire sur la page /contact
+                    </p>
                   </div>
 
                   <div>

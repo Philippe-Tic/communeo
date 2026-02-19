@@ -10,6 +10,7 @@ import {
   usePublishOfficialDocument,
   type OfficialDocument,
 } from '../hooks/api'
+import { DOCUMENT_TYPE_OPTIONS } from '../lib/official-document-types'
 import { toaster } from '../lib/toaster'
 
 export const OfficialDocuments = () => {
@@ -132,18 +133,7 @@ export const OfficialDocuments = () => {
       key: 'document_type',
       label: 'Type',
       type: 'select' as const,
-      options: [
-        { value: 'pv-conseil-municipal', label: 'PV de conseil municipal' },
-        { value: 'deliberation', label: 'Délibération' },
-        { value: 'arrete', label: 'Arrêté' },
-        { value: 'plu', label: 'PLU' },
-        { value: 'scot', label: 'SCoT' },
-        { value: 'carte-communale', label: 'Carte communale' },
-        { value: 'budget-primitif', label: 'Budget primitif' },
-        { value: 'compte-administratif', label: 'Compte administratif' },
-        { value: 'rapport-orientations-budgetaires', label: "Rapport d'orientations budgétaires" },
-        { value: 'autre', label: 'Autre' },
-      ],
+      options: DOCUMENT_TYPE_OPTIONS,
     },
     {
       key: 'year',

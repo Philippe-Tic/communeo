@@ -23,6 +23,7 @@ import { ContactSubmissions } from './pages/ContactSubmissions'
 import { OfficialDocumentDetail } from './pages/OfficialDocumentDetail'
 import { CreateOfficialDocument, EditOfficialDocument } from './pages/OfficialDocumentForm'
 import { OfficialDocuments } from './pages/OfficialDocuments'
+import { Compliance } from './pages/Compliance'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
@@ -258,6 +259,18 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditOfficialDocument />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Compliance route */}
+          <Route
+            path="/compliance"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Compliance />
                 </MainLayout>
               </ProtectedRoute>
             }

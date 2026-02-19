@@ -15,20 +15,8 @@ import {
   useUpdateOfficialDocument,
   type OfficialDocument,
 } from '../hooks/api/useOfficialDocuments'
+import { DOCUMENT_TYPE_OPTIONS } from '../lib/official-document-types'
 import { toaster } from '../lib/toaster'
-
-const DOCUMENT_TYPE_OPTIONS = [
-  { value: 'pv-conseil-municipal', label: 'PV de conseil municipal' },
-  { value: 'deliberation', label: 'Délibération' },
-  { value: 'arrete', label: 'Arrêté' },
-  { value: 'plu', label: 'PLU' },
-  { value: 'scot', label: 'SCoT' },
-  { value: 'carte-communale', label: 'Carte communale' },
-  { value: 'budget-primitif', label: 'Budget primitif' },
-  { value: 'compte-administratif', label: 'Compte administratif' },
-  { value: 'rapport-orientations-budgetaires', label: "Rapport d'orientations budgétaires" },
-  { value: 'autre', label: 'Autre' },
-]
 
 interface OfficialDocumentFormData {
   title: string

@@ -71,6 +71,7 @@ const TAB_FIELDS: Record<string, string[]> = {
   rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
   accessibility: ['accessibility_level'],
   info: ['opening_hours'],
+  opendata: [],
 }
 
 export const SiteConfigEdit = () => {
@@ -111,6 +112,10 @@ export const SiteConfigEdit = () => {
     opening_hours: '',
     population: '',
     contact_form_intro: '',
+    // Open Data
+    open_data_enabled: false,
+    open_data_url: '',
+    open_data_platform: 'none' as 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none',
   })
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
@@ -149,6 +154,10 @@ export const SiteConfigEdit = () => {
         opening_hours: site.infos_pratiques?.opening_hours ? JSON.stringify(site.infos_pratiques.opening_hours, null, 2) : '',
         population: site.infos_pratiques?.population?.toString() || '',
         contact_form_intro: site.infos_pratiques?.contact_form_intro || '',
+        // Open Data
+        open_data_enabled: site.open_data_enabled || false,
+        open_data_url: site.open_data_url || '',
+        open_data_platform: site.open_data_platform || 'none',
       })
     }
   }, [site])
@@ -313,6 +322,9 @@ export const SiteConfigEdit = () => {
         population: formData.population ? Number(formData.population) : undefined,
         contact_form_intro: formData.contact_form_intro || undefined,
       },
+      open_data_enabled: formData.open_data_enabled,
+      open_data_url: formData.open_data_url || undefined,
+      open_data_platform: formData.open_data_platform,
     }
 
     updateSite(updateData, {
@@ -396,6 +408,10 @@ export const SiteConfigEdit = () => {
               <TabsTrigger value="info" className="gap-1.5">
                 Infos pratiques
                 {tabHasErrors('info') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
+              </TabsTrigger>
+              <TabsTrigger value="opendata" className="gap-1.5">
+                Open Data
+                {tabHasErrors('opendata') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
               </TabsTrigger>
             </TabsList>
 
@@ -793,6 +809,76 @@ export const SiteConfigEdit = () => {
                       <p className="mt-1 text-sm text-destructive">{errors.opening_hours}</p>
                     )}
                   </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Onglet 6 — Open Data */}
+            <TabsContent value="opendata">
+              <div className="rounded-lg border bg-card p-6 shadow-sm">
+                <div className="flex flex-col gap-4">
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Open Data
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Les communes de plus de 3 500 habitants ont l'obligation de publier certaines données en open data (Art. L312-1-1 CRPA).
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={formData.open_data_enabled}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, open_data_enabled: !prev.open_data_enabled }))
+                        setIsDirty(true)
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                        formData.open_data_enabled ? 'bg-primary' : 'bg-input'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                          formData.open_data_enabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                    <Label>Activer la page Open Data sur le site public</Label>
+                  </div>
+
+                  {formData.open_data_enabled && (
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <Label className="mb-2">Plateforme Open Data</Label>
+                        <select
+                          value={formData.open_data_platform}
+                          onChange={(e) => handleInputChange('open_data_platform', e.target.value)}
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <option value="none">Aucune</option>
+                          <option value="data-gouv-fr">data.gouv.fr</option>
+                          <option value="opendatasoft">OpenDataSoft</option>
+                          <option value="custom">Autre plateforme</option>
+                        </select>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Plateforme sur laquelle vos données sont publiées
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label className="mb-2">URL du portail Open Data</Label>
+                        <Input
+                          type="url"
+                          value={formData.open_data_url}
+                          onChange={(e) => handleInputChange('open_data_url', e.target.value)}
+                          placeholder="https://www.data.gouv.fr/fr/organizations/..."
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Lien direct vers votre page sur la plateforme choisie
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </TabsContent>

@@ -60,6 +60,10 @@ export interface Site {
   rgpd?: RGPD
   accessibilite?: Accessibilite
   infos_pratiques?: InfosPratiques
+  // Open Data
+  open_data_enabled?: boolean
+  open_data_url?: string
+  open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
   // Relations
   pages?: any[]
   articles?: any[]
@@ -80,6 +84,10 @@ export interface CreateSiteData {
   rgpd?: Partial<Omit<RGPD, 'id'>>
   accessibilite?: Partial<Omit<Accessibilite, 'id'>>
   infos_pratiques?: Partial<Omit<InfosPratiques, 'id'>>
+  // Open Data
+  open_data_enabled?: boolean
+  open_data_url?: string
+  open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {

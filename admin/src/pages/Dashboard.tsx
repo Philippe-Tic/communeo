@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button'
-import { Calendar, File, FileText, Mail } from 'lucide-react'
+import { useSite } from '@/hooks/api/useSites'
+import { useUserSite } from '@/hooks/useUser'
+import { AlertTriangle, Calendar, File, FileText, Mail } from 'lucide-react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
@@ -12,7 +14,11 @@ import { useUser, useUserProfile } from '../hooks/useUser'
 export const Dashboard = () => {
   const { fullName, user } = useUser()
   const { firstName } = useUserProfile()
+  const { site: userSite } = useUserSite()
   const navigate = useNavigate()
+
+  // Fetch site data for legal config check
+  const { data: siteData } = useSite(userSite?.documentId || '')
 
   // Fetch data for stats
   const { data: articlesData, isLoading: articlesLoading } = useArticles()
@@ -76,6 +82,40 @@ export const Dashboard = () => {
           title={`Bienvenue, ${firstName || fullName || 'Admin'} !`}
           subtitle={`Voici un aperçu de votre tableau de bord${user?.site ? ` - ${user.site.name}` : ''}`}
         />
+
+        {/* Legal config incomplete banner */}
+        {siteData && (() => {
+          const ml = siteData.mentions_legales
+          const rgpd = siteData.rgpd
+          const missing = [
+            !ml?.siret && 'SIRET',
+            !ml?.publication_director && 'Directeur de publication',
+            !ml?.hebergeur_name && 'Hébergeur',
+            !rgpd?.dpo_name && 'DPO',
+            !(typeof rgpd?.rgpd_policy === 'string' && rgpd.rgpd_policy.trim().length >= 50) && 'Politique RGPD',
+          ].filter(Boolean) as string[]
+          if (missing.length === 0) return null
+          return (
+            <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950/30">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
+              <div className="text-sm">
+                <p className="font-medium text-orange-800 dark:text-orange-300">
+                  Configuration légale incomplète
+                </p>
+                <p className="mt-1 text-orange-700 dark:text-orange-400">
+                  Il manque : {missing.join(', ')}.{' '}
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 text-orange-700 underline dark:text-orange-400"
+                    onClick={() => navigate('/site/edit')}
+                  >
+                    Compléter la configuration
+                  </Button>
+                </p>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">

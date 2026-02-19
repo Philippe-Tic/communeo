@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
+  Settings,
   ShieldCheck,
   XCircle,
 } from 'lucide-react'
@@ -328,10 +329,16 @@ export function Compliance() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Conformité légale"
-        subtitle="Vérifiez que votre site respecte les obligations légales des collectivités"
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Conformité légale"
+          subtitle="Vérifiez que votre site respecte les obligations légales des collectivités"
+        />
+        <Button onClick={() => navigate('/site/edit')}>
+          <Settings className="mr-1.5 h-4 w-4" />
+          Configurer
+        </Button>
+      </div>
 
       {/* Stats cards */}
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">

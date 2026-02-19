@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, Wand2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
@@ -13,12 +13,63 @@ import { useSite, useUpdateSite, type UpdateSiteData } from '../hooks/api/useSit
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
 import { toaster } from '../lib/toaster'
 
+// RGPD template
+const RGPD_TEMPLATE = `<h2>Politique de confidentialité</h2>
+<p>La commune de <strong>[NOM DE LA COMMUNE]</strong> s'engage à protéger la vie privée des utilisateurs de son site internet, conformément au Règlement Général sur la Protection des Données (RGPD - Règlement UE 2016/679) et à la loi Informatique et Libertés du 6 janvier 1978 modifiée.</p>
+
+<h3>Responsable du traitement</h3>
+<p>Le responsable du traitement des données est la commune de <strong>[NOM DE LA COMMUNE]</strong>, représentée par son Maire.</p>
+
+<h3>Données collectées</h3>
+<p>Dans le cadre de l'utilisation de ce site, les données suivantes peuvent être collectées :</p>
+<ul>
+<li>Données d'identification : nom, prénom, adresse email, numéro de téléphone</li>
+<li>Données de connexion : adresse IP, date et heure de connexion, pages consultées</li>
+<li>Données transmises via les formulaires de contact</li>
+</ul>
+
+<h3>Finalités du traitement</h3>
+<p>Les données personnelles sont collectées pour :</p>
+<ul>
+<li>Répondre aux demandes des usagers via le formulaire de contact</li>
+<li>Assurer le bon fonctionnement et la sécurité du site</li>
+<li>Établir des statistiques de fréquentation anonymisées</li>
+</ul>
+
+<h3>Base légale</h3>
+<p>Le traitement des données repose sur :</p>
+<ul>
+<li>L'exécution d'une mission d'intérêt public (article 6.1.e du RGPD)</li>
+<li>Le consentement de l'utilisateur pour les cookies non essentiels (article 6.1.a du RGPD)</li>
+</ul>
+
+<h3>Durée de conservation</h3>
+<p>Les données personnelles sont conservées pendant une durée n'excédant pas celle nécessaire aux finalités pour lesquelles elles sont collectées, conformément à la réglementation en vigueur.</p>
+
+<h3>Droits des personnes</h3>
+<p>Conformément au RGPD, vous disposez des droits suivants :</p>
+<ul>
+<li>Droit d'accès à vos données personnelles</li>
+<li>Droit de rectification</li>
+<li>Droit à l'effacement</li>
+<li>Droit à la limitation du traitement</li>
+<li>Droit à la portabilité</li>
+<li>Droit d'opposition</li>
+</ul>
+<p>Pour exercer ces droits, contactez le Délégué à la Protection des Données (DPO) aux coordonnées indiquées dans les mentions légales.</p>
+
+<h3>Cookies</h3>
+<p>Ce site utilise des cookies essentiels au fonctionnement du site. Les cookies non essentiels ne sont déposés qu'après recueil de votre consentement via le bandeau cookies.</p>
+
+<h3>Réclamation</h3>
+<p>Si vous estimez que le traitement de vos données constitue une violation du RGPD, vous pouvez introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.</p>`
+
 // Fields belonging to each tab, for error indicators
 const TAB_FIELDS: Record<string, string[]> = {
   general: ['name', 'contact_mail', 'colors'],
   legal: ['siret', 'publication_director', 'hebergeur_name'],
-  rgpd: [],
-  accessibility: [],
+  rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
+  accessibility: ['accessibility_level'],
   info: ['opening_hours'],
 }
 
@@ -147,9 +198,39 @@ export const SiteConfigEdit = () => {
       }
     }
 
-    // Mentions légales
-    if (formData.siret && !/^\d{14}$/.test(formData.siret.replace(/\s/g, ''))) {
+    // Mentions légales — required fields
+    if (!formData.siret.trim()) {
+      newErrors.siret = 'Le SIRET est requis'
+    } else if (!/^\d{14}$/.test(formData.siret.replace(/\s/g, ''))) {
       newErrors.siret = 'Le SIRET doit contenir 14 chiffres'
+    }
+
+    if (!formData.publication_director.trim()) {
+      newErrors.publication_director = 'Le directeur de publication est requis'
+    }
+
+    if (!formData.hebergeur_name.trim()) {
+      newErrors.hebergeur_name = 'Le nom de l\'hébergeur est requis'
+    }
+
+    // RGPD — required fields
+    if (!formData.dpo_name.trim()) {
+      newErrors.dpo_name = 'Le nom du DPO est requis'
+    }
+
+    if (!formData.dpo_email.trim()) {
+      newErrors.dpo_email = 'L\'email du DPO est requis'
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.dpo_email)) {
+      newErrors.dpo_email = 'Format d\'email invalide'
+    }
+
+    if (!formData.rgpd_policy || formData.rgpd_policy.replace(/<[^>]*>/g, '').trim().length < 50) {
+      newErrors.rgpd_policy = 'La politique de confidentialité est requise (min. 50 caractères)'
+    }
+
+    // Accessibilité — required field
+    if (!formData.accessibility_level) {
+      newErrors.accessibility_level = 'Le niveau d\'accessibilité est requis'
     }
 
     // Infos pratiques
@@ -435,7 +516,7 @@ export const SiteConfigEdit = () => {
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <Label className="mb-2">SIRET</Label>
+                      <Label className="mb-2">SIRET <span className="text-destructive">*</span></Label>
                       <Input
                         value={formData.siret}
                         onChange={(e) => handleInputChange('siret', e.target.value)}
@@ -448,12 +529,16 @@ export const SiteConfigEdit = () => {
                     </div>
 
                     <div>
-                      <Label className="mb-2">Directeur de publication</Label>
+                      <Label className="mb-2">Directeur de publication <span className="text-destructive">*</span></Label>
                       <Input
                         value={formData.publication_director}
                         onChange={(e) => handleInputChange('publication_director', e.target.value)}
                         placeholder="Nom du directeur de publication"
+                        className={errors.publication_director ? 'border-destructive' : ''}
                       />
+                      {errors.publication_director && (
+                        <p className="mt-1 text-sm text-destructive">{errors.publication_director}</p>
+                      )}
                     </div>
 
                     <div>
@@ -466,12 +551,16 @@ export const SiteConfigEdit = () => {
                     </div>
 
                     <div>
-                      <Label className="mb-2">Nom de l'hébergeur</Label>
+                      <Label className="mb-2">Nom de l'hébergeur <span className="text-destructive">*</span></Label>
                       <Input
                         value={formData.hebergeur_name}
                         onChange={(e) => handleInputChange('hebergeur_name', e.target.value)}
                         placeholder="Ex: Netlify, OVH..."
+                        className={errors.hebergeur_name ? 'border-destructive' : ''}
                       />
+                      {errors.hebergeur_name && (
+                        <p className="mt-1 text-sm text-destructive">{errors.hebergeur_name}</p>
+                      )}
                     </div>
 
                     <div>
@@ -526,22 +615,30 @@ export const SiteConfigEdit = () => {
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <Label className="mb-2">Nom du DPO</Label>
+                      <Label className="mb-2">Nom du DPO <span className="text-destructive">*</span></Label>
                       <Input
                         value={formData.dpo_name}
                         onChange={(e) => handleInputChange('dpo_name', e.target.value)}
                         placeholder="Délégué à la protection des données"
+                        className={errors.dpo_name ? 'border-destructive' : ''}
                       />
+                      {errors.dpo_name && (
+                        <p className="mt-1 text-sm text-destructive">{errors.dpo_name}</p>
+                      )}
                     </div>
 
                     <div>
-                      <Label className="mb-2">Email du DPO</Label>
+                      <Label className="mb-2">Email du DPO <span className="text-destructive">*</span></Label>
                       <Input
                         type="email"
                         value={formData.dpo_email}
                         onChange={(e) => handleInputChange('dpo_email', e.target.value)}
                         placeholder="dpo@mairie.fr"
+                        className={errors.dpo_email ? 'border-destructive' : ''}
                       />
+                      {errors.dpo_email && (
+                        <p className="mt-1 text-sm text-destructive">{errors.dpo_email}</p>
+                      )}
                     </div>
 
                     <div>
@@ -556,12 +653,30 @@ export const SiteConfigEdit = () => {
                   </div>
 
                   <div className="pt-2">
-                    <Label className="mb-2">Politique de confidentialité</Label>
+                    <div className="mb-2 flex items-center justify-between">
+                      <Label>Politique de confidentialité <span className="text-destructive">*</span></Label>
+                      {!formData.rgpd_policy && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            handleInputChange('rgpd_policy', RGPD_TEMPLATE)
+                          }}
+                        >
+                          <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+                          Charger le modèle
+                        </Button>
+                      )}
+                    </div>
                     <RichTextEditor
                       value={formData.rgpd_policy}
                       onChange={(value) => handleInputChange('rgpd_policy', value)}
                       placeholder="Décrivez votre politique de confidentialité..."
                     />
+                    {errors.rgpd_policy && (
+                      <p className="mt-1 text-sm text-destructive">{errors.rgpd_policy}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -576,17 +691,20 @@ export const SiteConfigEdit = () => {
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <Label className="mb-2">Niveau de conformité</Label>
+                      <Label className="mb-2">Niveau de conformité <span className="text-destructive">*</span></Label>
                       <select
                         value={formData.accessibility_level}
                         onChange={(e) => handleInputChange('accessibility_level', e.target.value)}
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className={`w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.accessibility_level ? 'border-destructive' : 'border-input'}`}
                       >
                         <option value="">— Sélectionner —</option>
                         <option value="non-conforme">Non conforme</option>
                         <option value="partiellement-conforme">Partiellement conforme</option>
                         <option value="conforme">Conforme</option>
                       </select>
+                      {errors.accessibility_level && (
+                        <p className="mt-1 text-sm text-destructive">{errors.accessibility_level}</p>
+                      )}
                     </div>
 
                     <div>

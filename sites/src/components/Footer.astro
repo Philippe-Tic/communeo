@@ -78,6 +78,13 @@ const accessibilityLevel = siteConfig?.accessibilite?.accessibility_level || 'no
                 Documents officiels
               </a>
             </li>
+            {siteConfig?.open_data_enabled && (
+              <li>
+                <a href="/open-data" class="hover:text-primary transition-colors">
+                  Open Data
+                </a>
+              </li>
+            )}
             <li>
               <a href="/contact" class="hover:text-primary transition-colors">
                 Nous contacter

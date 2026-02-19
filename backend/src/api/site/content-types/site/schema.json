@@ -144,6 +144,18 @@
       "type": "component",
       "component": "legal.infos-pratiques",
       "required": false
+    },
+    "open_data_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "open_data_url": {
+      "type": "string"
+    },
+    "open_data_platform": {
+      "type": "enumeration",
+      "enum": ["data-gouv-fr", "opendatasoft", "custom", "none"],
+      "default": "none"
     }
   }
 }

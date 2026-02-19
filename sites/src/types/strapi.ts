@@ -90,6 +90,10 @@ export interface Site {
   contact_mail: string;
   contact_phone?: string;
   address?: string;
+  // Open Data
+  open_data_enabled?: boolean;
+  open_data_url?: string;
+  open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none';
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

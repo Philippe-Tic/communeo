@@ -1,0 +1,182 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteConfig } from '../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+const openDataEnabled = siteConfig.open_data_enabled;
+const platform = siteConfig.open_data_platform || 'none';
+const customUrl = siteConfig.open_data_url;
+const slug = siteConfig.slug;
+
+// Construire l'URL du portail selon la plateforme
+let portalUrl = customUrl || '';
+let portalName = '';
+
+if (platform === 'data-gouv-fr') {
+  portalName = 'data.gouv.fr';
+  if (!portalUrl) {
+    portalUrl = `https://www.data.gouv.fr/fr/organizations/commune-de-${slug}/`;
+  }
+} else if (platform === 'opendatasoft') {
+  portalName = 'OpenDataSoft';
+} else if (platform === 'custom') {
+  portalName = 'notre portail open data';
+}
+---
+
+<Layout title="Open Data" description={`Données ouvertes de ${siteConfig.name}`}>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">Open Data</h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Données ouvertes de {siteConfig.name}
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <section class="py-12">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {!openDataEnabled ? (
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Page non activée</h2>
+            <p class="text-gray-600">
+              La publication des données ouvertes n'est pas encore activée pour cette commune.
+            </p>
+          </div>
+        ) : (
+          <div class="prose prose-lg max-w-none">
+            <h2>Obligations légales</h2>
+            <p>
+              Conformément à l'article L312-1-1 du Code des relations entre le public et l'administration (CRPA),
+              les communes de plus de 3 500 habitants sont tenues de publier en ligne leurs principaux documents
+              et données dans un format ouvert et réutilisable.
+            </p>
+            <p>Cette obligation concerne notamment :</p>
+            <ul>
+              <li>Les documents budgétaires et financiers</li>
+              <li>Les délibérations et comptes rendus du conseil municipal</li>
+              <li>Les arrêtés municipaux</li>
+              <li>Les données de marchés publics</li>
+              <li>Les données relatives aux subventions versées</li>
+            </ul>
+
+            {portalUrl && portalName && (
+              <>
+                <h2>Accéder à nos données ouvertes</h2>
+                <p>
+                  Les données ouvertes de {siteConfig.name} sont publiées sur <strong>{portalName}</strong>.
+                </p>
+                <a
+                  href={portalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors no-underline"
+                >
+                  Accéder au portail {portalName}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </>
+            )}
+
+            {!portalUrl && platform !== 'none' && (
+              <>
+                <h2>Accéder à nos données ouvertes</h2>
+                <p>
+                  Les données ouvertes de {siteConfig.name} sont en cours de publication.
+                </p>
+              </>
+            )}
+
+            <h2>Documents officiels</h2>
+            <p>
+              Vous pouvez consulter et télécharger les documents officiels de la commune
+              (délibérations, arrêtés, budgets) sur notre page dédiée :
+            </p>
+            <a
+              href="/documents"
+              class="btn-outline inline-flex items-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors no-underline"
+            >
+              Consulter les documents officiels
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </a>
+
+            <h2>Réutilisation des données</h2>
+            <p>
+              Les données publiées sont réutilisables librement, sous réserve du respect de la
+              licence associée. Sauf mention contraire, les données sont publiées sous
+              <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/" target="_blank" rel="noopener noreferrer">
+                Licence Ouverte / Open Licence
+              </a> d'Etalab, qui permet leur libre réutilisation à condition de mentionner la source.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .prose h2 {
+    color: rgb(var(--color-primary));
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .prose h2:first-child {
+    margin-top: 0;
+  }
+
+  .prose a {
+    color: rgb(var(--color-secondary));
+    text-decoration: underline;
+  }
+
+  .prose a:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose a.no-underline {
+    text-decoration: none;
+  }
+
+  .prose a.btn-primary {
+    color: white;
+    text-decoration: none;
+  }
+
+  .prose a.btn-primary:hover {
+    color: white;
+  }
+
+  .prose a.btn-outline {
+    color: rgb(var(--color-primary));
+    text-decoration: none;
+  }
+
+  .prose a.btn-outline:hover {
+    color: rgb(var(--color-primary));
+  }
+
+  .prose p {
+    margin-bottom: 1em;
+    line-height: 1.7;
+  }
+</style>

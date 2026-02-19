@@ -151,6 +151,20 @@ const isActive = (pagePath: string) =>
           >
             Documents
           </a>
+
+          {siteConfig?.open_data_enabled && (
+            <a
+              href="/open-data"
+              class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                currentPath.startsWith('/open-data')
+                  ? 'bg-primary text-white'
+                  : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+              }`}
+              aria-current={currentPath.startsWith('/open-data') ? 'page' : undefined}
+            >
+              Open Data
+            </a>
+          )}
         </div>
       </div>
 
@@ -259,6 +273,20 @@ const isActive = (pagePath: string) =>
       >
         Documents
       </a>
+
+      {siteConfig?.open_data_enabled && (
+        <a
+          href="/open-data"
+          class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+            currentPath.startsWith('/open-data')
+              ? 'bg-primary text-white'
+              : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+          }`}
+          role="menuitem"
+        >
+          Open Data
+        </a>
+      )}
     </div>
   </div>
 </nav>

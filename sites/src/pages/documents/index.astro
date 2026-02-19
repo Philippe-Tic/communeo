@@ -3,10 +3,12 @@ import type { OfficialDocument } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
-import { getOfficialDocuments, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+import { getOfficialDocuments, getStrapiImageUrl, formatDate, getSiteConfig } from '../../utils/strapi';
 
-// Récupération de tous les documents officiels
+// Récupération des documents et de la configuration du site
 let documents: OfficialDocument[] = [];
+const siteConfig = await getSiteConfig();
+const highlightBudget = (siteConfig.infos_pratiques?.population ?? 0) > 3500;
 
 try {
   documents = await getOfficialDocuments();
@@ -120,14 +122,22 @@ function getDocumentFamily(docType: string): string {
         <div class="flex flex-wrap gap-2 justify-center">
           {families.map((family) => {
             const count = countByFamily(family.types);
+            const isBudgetHighlighted = highlightBudget && family.key === 'budget';
             return count > 0 || family.key === 'all' ? (
               <button
                 type="button"
-                class="family-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary"
+                class={`family-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                  isBudgetHighlighted
+                    ? 'border-amber-500 bg-amber-50 text-amber-800 hover:bg-primary hover:text-white hover:border-primary'
+                    : 'border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary'
+                }`}
                 data-family={family.key}
               >
                 {family.label}
                 <span class="ml-1 text-xs">({count})</span>
+                {isBudgetHighlighted && (
+                  <span class="ml-1 text-xs font-bold" title="Obligation de publication pour les communes > 3 500 hab.">*</span>
+                )}
               </button>
             ) : null;
           })}

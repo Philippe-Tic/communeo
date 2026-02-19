@@ -865,6 +865,13 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::official-document.official-document'
     >;
+    open_data_enabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    open_data_platform: Schema.Attribute.Enumeration<
+      ['data-gouv-fr', 'opendatasoft', 'custom', 'none']
+    > &
+      Schema.Attribute.DefaultTo<'none'>;
+    open_data_url: Schema.Attribute.String;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     plan_type: Schema.Attribute.Enumeration<['basic', 'premium']> &
       Schema.Attribute.Required &

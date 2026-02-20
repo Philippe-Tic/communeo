@@ -180,6 +180,18 @@ const isActive = (pagePath: string) =>
             Associations
           </a>
 
+          <a
+            href="/demarches"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/demarches')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/demarches') ? 'page' : undefined}
+          >
+            Démarches
+          </a>
+
           {siteConfig?.open_data_enabled && (
             <a
               href="/open-data"
@@ -324,6 +336,18 @@ const isActive = (pagePath: string) =>
         role="menuitem"
       >
         Associations
+      </a>
+
+      <a
+        href="/demarches"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/demarches')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Démarches
       </a>
 
       {siteConfig?.open_data_enabled && (

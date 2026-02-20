@@ -1,0 +1,97 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { categories } from '../data/demarches';
+---
+
+<Layout
+  title="Démarches en ligne"
+  description="Accédez aux téléservices publics : état civil, carte d'identité, passeport, permis de conduire, carte grise, urbanisme, impôts, aides sociales et santé."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <!-- Header -->
+    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            Démarches en ligne
+          </h1>
+          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+            Accédez aux services publics nationaux directement depuis le site de votre mairie
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Note info -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+        </svg>
+        <p class="text-sm text-blue-800">
+          Ces liens vous dirigent vers les sites officiels des services publics nationaux. Les démarches s'effectuent directement sur ces plateformes sécurisées.
+        </p>
+      </div>
+    </div>
+
+    <!-- Catégories -->
+    <section class="py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="space-y-16">
+          {categories.map((category) => (
+            <div id={category.id}>
+              <div class="flex items-center gap-3 mb-2">
+                <h2 class="text-2xl font-bold text-gray-900">
+                  {category.title}
+                </h2>
+                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.colorClasses}`}>
+                  {category.services.length} {category.services.length > 1 ? 'services' : 'service'}
+                </span>
+              </div>
+              <p class="text-gray-600 mb-8">{category.description}</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.services.map((service) => (
+                  <a
+                    href={service.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group flex items-start gap-4 bg-white rounded-lg border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-primary/50 transition-all"
+                  >
+                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                      <svg class="w-5 h-5 text-gray-600 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d={service.iconPaths} />
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-1.5">
+                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                          {service.title}
+                        </h3>
+                        <svg class="w-4 h-4 text-gray-400 group-hover:text-primary flex-shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                        <span class="sr-only">(ouvre un nouveau site)</span>
+                      </div>
+                      <p class="text-sm text-gray-500 mt-1 leading-relaxed">
+                        {service.description}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>

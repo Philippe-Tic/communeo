@@ -493,6 +493,73 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAssociationAssociation extends Struct.CollectionTypeSchema {
+  collectionName: 'associations';
+  info: {
+    description: 'Annuaire des associations de la commune';
+    displayName: 'Association';
+    pluralName: 'associations';
+    singularName: 'association';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    address: Schema.Attribute.Text;
+    category: Schema.Attribute.Enumeration<
+      ['sport', 'culture', 'social', 'environnement', 'education', 'autre']
+    > &
+      Schema.Attribute.Required;
+    contact_email: Schema.Attribute.Email;
+    contact_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    contact_phone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::association.association'
+    > &
+      Schema.Attribute.Private;
+    logo: Schema.Attribute.Media<'images'>;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    reviewed_at: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    status: Schema.Attribute.Enumeration<['pending', 'published', 'rejected']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    submission_source: Schema.Attribute.Enumeration<['manual', 'public_form']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'manual'>;
+    submitted_by_email: Schema.Attribute.Email;
+    submitted_by_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    website: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+  };
+}
+
 export interface ApiContactSubmissionContactSubmission
   extends Struct.CollectionTypeSchema {
   collectionName: 'contact_submissions';
@@ -816,6 +883,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     accessibilite: Schema.Attribute.Component<'legal.accessibilite', false>;
     address: Schema.Attribute.Text;
     articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
+    associations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::association.association'
+    >;
     colors: Schema.Attribute.JSON;
     contact_mail: Schema.Attribute.Email & Schema.Attribute.Required;
     contact_phone: Schema.Attribute.String;
@@ -1470,6 +1541,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::article.article': ApiArticleArticle;
+      'api::association.association': ApiAssociationAssociation;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;

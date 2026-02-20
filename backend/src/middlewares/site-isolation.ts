@@ -221,6 +221,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'contact-submissions': 'api::contact-submission.contact-submission',
       'official-documents': 'api::official-document.official-document',
       'team-members': 'api::team-member.team-member',
+      'associations': 'api::association.association',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

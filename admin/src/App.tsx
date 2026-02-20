@@ -26,6 +26,9 @@ import { OfficialDocuments } from './pages/OfficialDocuments'
 import { TeamMembers } from './pages/TeamMembers'
 import { TeamMemberDetail } from './pages/TeamMemberDetail'
 import { CreateTeamMember, EditTeamMember } from './pages/TeamMemberForm'
+import { Associations } from './pages/Associations'
+import { AssociationDetail } from './pages/AssociationDetail'
+import { CreateAssociation, EditAssociation } from './pages/AssociationForm'
 import { Compliance } from './pages/Compliance'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
@@ -307,6 +310,51 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditTeamMember />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Associations routes */}
+          <Route
+            path="/associations"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Associations />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/associations/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateAssociation />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/associations/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <AssociationDetail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/associations/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditAssociation />
                 </MainLayout>
               </ProtectedRoute>
             }

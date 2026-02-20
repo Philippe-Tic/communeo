@@ -9,6 +9,7 @@ export * from './useContactSubmissions'
 export * from './useOfficialDocuments'
 export * from './useSites'
 export * from './useTeamMembers'
+export * from './useAssociations'
 
 // Re-export commonly used types
 export type { ApiError } from '../../services/apiClient'

@@ -127,6 +127,13 @@ export default async ({ strapi }) => {
       { action: 'api::team-member.team-member.update', enabled: true },
       { action: 'api::team-member.team-member.delete', enabled: true },
 
+      // Associations
+      { action: 'api::association.association.find', enabled: true },
+      { action: 'api::association.association.findOne', enabled: true },
+      { action: 'api::association.association.create', enabled: true },
+      { action: 'api::association.association.update', enabled: true },
+      { action: 'api::association.association.delete', enabled: true },
+
       // Upload (needed for file uploads)
       { action: 'plugin::upload.content-api.upload', enabled: true },
       { action: 'plugin::upload.content-api.find', enabled: true },
@@ -182,6 +189,7 @@ export default async ({ strapi }) => {
     if (publicRole) {
       const publicPermissions = [
         { action: 'api::contact-submission.contact-submission.publicCreate', enabled: true },
+        { action: 'api::association.association.publicCreate', enabled: true },
       ];
 
       for (const permission of publicPermissions) {

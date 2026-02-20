@@ -168,6 +168,18 @@ const isActive = (pagePath: string) =>
             Équipe municipale
           </a>
 
+          <a
+            href="/associations"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/associations')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/associations') ? 'page' : undefined}
+          >
+            Associations
+          </a>
+
           {siteConfig?.open_data_enabled && (
             <a
               href="/open-data"
@@ -300,6 +312,18 @@ const isActive = (pagePath: string) =>
         role="menuitem"
       >
         Équipe municipale
+      </a>
+
+      <a
+        href="/associations"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/associations')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Associations
       </a>
 
       {siteConfig?.open_data_enabled && (

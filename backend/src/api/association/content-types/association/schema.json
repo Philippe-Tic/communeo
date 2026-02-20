@@ -1,0 +1,91 @@
+{
+  "kind": "collectionType",
+  "collectionName": "associations",
+  "info": {
+    "singularName": "association",
+    "pluralName": "associations",
+    "displayName": "Association",
+    "description": "Annuaire des associations de la commune"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "text",
+      "required": false
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["sport", "culture", "social", "environnement", "education", "autre"],
+      "required": true
+    },
+    "contact_name": {
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    "contact_email": {
+      "type": "email",
+      "required": false
+    },
+    "contact_phone": {
+      "type": "string",
+      "maxLength": 20,
+      "required": false
+    },
+    "website": {
+      "type": "string",
+      "maxLength": 500,
+      "required": false
+    },
+    "address": {
+      "type": "text",
+      "required": false
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "required": false
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "published", "rejected"],
+      "default": "pending",
+      "required": true
+    },
+    "submission_source": {
+      "type": "enumeration",
+      "enum": ["manual", "public_form"],
+      "default": "manual",
+      "required": true
+    },
+    "submitted_by_name": {
+      "type": "string",
+      "maxLength": 100,
+      "required": false
+    },
+    "submitted_by_email": {
+      "type": "email",
+      "required": false
+    },
+    "reviewed_at": {
+      "type": "datetime",
+      "required": false
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "associations",
+      "required": true
+    }
+  }
+}

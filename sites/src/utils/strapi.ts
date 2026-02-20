@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, OfficialDocument, TeamMember, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, StrapiCollectionResponse
 } from '../types/strapi';
 
 // Configuration depuis les variables d'environnement
@@ -359,6 +359,23 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<TeamMember>>(url);
+  return response?.data ?? [];
+}
+
+/**
+ * Récupère les associations publiées
+ */
+export async function getAssociations(): Promise<Association[]> {
+  const url = buildStrapiUrl('associations', {
+    filters: {
+      status: { $eq: 'published' }
+    },
+    populate: ['logo', 'site'],
+    sort: ['name:asc'],
+    pagination: { pageSize: 500 }
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<Association>>(url);
   return response?.data ?? [];
 }
 

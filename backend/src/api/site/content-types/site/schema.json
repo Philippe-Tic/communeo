@@ -131,6 +131,12 @@
       "target": "api::team-member.team-member",
       "mappedBy": "site"
     },
+    "associations": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::association.association",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

@@ -232,6 +232,26 @@ export interface TeamMember {
   updatedAt: string;
 }
 
+// Associations - Strapi v5
+export interface Association {
+  id: number;
+  documentId: string;
+  name: string;
+  description?: string;
+  category: 'sport' | 'culture' | 'social' | 'environnement' | 'education' | 'autre';
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  website?: string;
+  address?: string;
+  logo?: StrapiMedia;
+  status: 'pending' | 'published' | 'rejected';
+  submission_source: 'manual' | 'public_form';
+  site: StrapiData<Site> | Site;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Types utilitaires
 export type SiteData = Site;
 export type PageData = Page;

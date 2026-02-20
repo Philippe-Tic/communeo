@@ -74,6 +74,14 @@ export interface InfosPratiques {
   contact_form_intro?: string;
 }
 
+export interface DemarchesIdentite {
+  id?: number;
+  has_dispositif_recueil?: boolean;
+  appointment_url?: string;
+  appointment_provider?: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre';
+  remise_titre_info?: string;
+}
+
 // Configuration du site (mairie) - Strapi v5
 export interface Site {
   id: number;
@@ -87,6 +95,7 @@ export interface Site {
   rgpd?: RGPD;
   accessibilite?: Accessibilite;
   infos_pratiques?: InfosPratiques;
+  demarches_identite?: DemarchesIdentite;
   contact_mail: string;
   contact_phone?: string;
   address?: string;

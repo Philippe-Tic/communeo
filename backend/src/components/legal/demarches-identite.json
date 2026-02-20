@@ -1,0 +1,24 @@
+{
+  "collectionName": "components_legal_demarches_identite",
+  "info": {
+    "displayName": "Démarches identité",
+    "description": "Configuration CNI et Passeport"
+  },
+  "attributes": {
+    "has_dispositif_recueil": {
+      "type": "boolean",
+      "default": false
+    },
+    "appointment_url": {
+      "type": "string"
+    },
+    "appointment_provider": {
+      "type": "enumeration",
+      "enum": ["synbird", "ants-rdv", "rdv-service-public", "autre"],
+      "default": "ants-rdv"
+    },
+    "remise_titre_info": {
+      "type": "text"
+    }
+  }
+}

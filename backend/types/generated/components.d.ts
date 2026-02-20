@@ -17,6 +17,24 @@ export interface LegalAccessibilite extends Struct.ComponentSchema {
   };
 }
 
+export interface LegalDemarchesIdentite extends Struct.ComponentSchema {
+  collectionName: 'components_legal_demarches_identite';
+  info: {
+    description: 'Configuration CNI et Passeport';
+    displayName: 'D\u00E9marches identit\u00E9';
+  };
+  attributes: {
+    appointment_provider: Schema.Attribute.Enumeration<
+      ['synbird', 'ants-rdv', 'rdv-service-public', 'autre']
+    > &
+      Schema.Attribute.DefaultTo<'ants-rdv'>;
+    appointment_url: Schema.Attribute.String;
+    has_dispositif_recueil: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    remise_titre_info: Schema.Attribute.Text;
+  };
+}
+
 export interface LegalInfosPratiques extends Struct.ComponentSchema {
   collectionName: 'components_legal_infos_pratiques';
   info: {
@@ -66,6 +84,7 @@ declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
       'legal.accessibilite': LegalAccessibilite;
+      'legal.demarches-identite': LegalDemarchesIdentite;
       'legal.infos-pratiques': LegalInfosPratiques;
       'legal.mentions-legales': LegalMentionsLegales;
       'legal.rgpd': LegalRgpd;

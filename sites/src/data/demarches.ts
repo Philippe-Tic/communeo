@@ -1,3 +1,18 @@
+export const documentsCNI = [
+  { label: 'Formulaire de pré-demande ANTS (imprimé)', url: 'https://ants.gouv.fr/' },
+  { label: "Photos d'identité conformes (normes OACI)" },
+  { label: "Justificatif de domicile de moins d'un an" },
+  { label: "Ancien titre d'identité (si renouvellement)" },
+];
+
+export const documentsPasseport = [
+  { label: 'Formulaire de pré-demande ANTS (imprimé)', url: 'https://ants.gouv.fr/' },
+  { label: "Photos d'identité conformes (normes OACI)" },
+  { label: "Justificatif de domicile de moins d'un an" },
+  { label: 'Timbre fiscal (86\u00A0\u20AC adulte / 17\u00A0\u20AC -15 ans / 42\u00A0\u20AC 15-17 ans)', url: 'https://timbres.impots.gouv.fr/' },
+  { label: 'Ancien passeport (si renouvellement)' },
+];
+
 export interface DemarcheService {
   title: string;
   description: string;

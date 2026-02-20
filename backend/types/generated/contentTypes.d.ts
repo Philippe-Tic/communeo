@@ -898,6 +898,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     custom_domain: Schema.Attribute.String;
+    demarches_identite: Schema.Attribute.Component<
+      'legal.demarches-identite',
+      false
+    >;
     deployments: Schema.Attribute.Relation<
       'oneToMany',
       'api::deployment.deployment'

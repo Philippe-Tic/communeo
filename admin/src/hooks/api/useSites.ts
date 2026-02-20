@@ -37,6 +37,14 @@ export interface InfosPratiques {
   contact_form_intro?: string
 }
 
+export interface DemarchesIdentite {
+  id?: number
+  has_dispositif_recueil?: boolean
+  appointment_url?: string
+  appointment_provider?: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre'
+  remise_titre_info?: string
+}
+
 export interface Site {
   id: number
   documentId: string
@@ -60,6 +68,7 @@ export interface Site {
   rgpd?: RGPD
   accessibilite?: Accessibilite
   infos_pratiques?: InfosPratiques
+  demarches_identite?: DemarchesIdentite
   // Open Data
   open_data_enabled?: boolean
   open_data_url?: string
@@ -84,6 +93,7 @@ export interface CreateSiteData {
   rgpd?: Partial<Omit<RGPD, 'id'>>
   accessibilite?: Partial<Omit<Accessibilite, 'id'>>
   infos_pratiques?: Partial<Omit<InfosPratiques, 'id'>>
+  demarches_identite?: Partial<Omit<DemarchesIdentite, 'id'>>
   // Open Data
   open_data_enabled?: boolean
   open_data_url?: string

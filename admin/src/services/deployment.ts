@@ -6,6 +6,7 @@ export interface Deployment {
   documentId: string
   deployment_id: string
   status: 'building' | 'ready' | 'error'
+  createdAt: string
   triggered_by: {
     id: number
     first_name: string

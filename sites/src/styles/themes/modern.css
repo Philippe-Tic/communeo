@@ -1,0 +1,59 @@
+/* Modern theme: sans-serif, bold hero, rounded corners, gradients */
+.theme-modern {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.theme-modern h1,
+.theme-modern h2,
+.theme-modern h3 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+.theme-modern .hero-section {
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.12), rgba(var(--color-secondary), 0.08));
+}
+
+.theme-modern .card {
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.theme-modern .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.theme-modern .nav-link.active {
+  background-color: rgb(var(--color-primary));
+  color: white;
+  border-radius: 0.5rem;
+}
+
+.theme-modern .section-title {
+  font-size: 2rem;
+}
+
+.theme-modern .btn-cta {
+  background: linear-gradient(135deg, rgb(var(--color-primary)), rgb(var(--color-secondary)));
+  border-radius: 9999px;
+  padding: 0.75rem 2rem;
+  font-weight: 600;
+  color: white;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.theme-modern .btn-cta:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.theme-modern .footer {
+  background: linear-gradient(135deg, #111827, #1f2937);
+}
+
+.theme-modern .badge {
+  border-radius: 9999px;
+}

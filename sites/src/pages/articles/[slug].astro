@@ -4,6 +4,8 @@ import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Section from '../../components/Section.astro';
 import { getArticles, getArticleBySlug, getStrapiImageUrl, getSiteConfig, formatDate } from '../../utils/strapi';
 
 export async function getStaticPaths() {
@@ -106,24 +108,10 @@ const articleJsonLd = JSON.stringify({
   <script type="application/ld+json" set:html={articleJsonLd} />
 
   <main id="main-content">
-    <!-- Breadcrumb -->
-    <nav class="bg-gray-50 border-b border-gray-200 py-4" aria-label="Fil d'ariane">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ol class="flex items-center space-x-2 text-sm">
-          <li>
-            <a href="/" class="text-gray-500 hover:text-primary transition-colors">Accueil</a>
-          </li>
-          <li class="text-gray-500">/</li>
-          <li>
-            <a href="/articles" class="text-gray-500 hover:text-primary transition-colors">Actualités</a>
-          </li>
-          <li class="text-gray-500">/</li>
-          <li class="text-gray-900 font-medium" aria-current="page">
-            {attributes.title}
-          </li>
-        </ol>
-      </div>
-    </nav>
+    <Breadcrumb items={[
+      { label: 'Actualités', href: '/articles' },
+      { label: attributes.title }
+    ]} />
 
     <!-- Article principal -->
     <article class="py-12">
@@ -233,12 +221,7 @@ const articleJsonLd = JSON.stringify({
 
     <!-- Articles suggérés -->
     {suggestedArticles.length > 0 && (
-      <section class="py-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Autres actualités
-          </h2>
-
+      <Section title="Autres actualités" bg="gray">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {suggestedArticles.map((suggestedArticle) => (
               <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
@@ -291,8 +274,7 @@ const articleJsonLd = JSON.stringify({
               Voir toutes les actualités
             </a>
           </div>
-        </div>
-      </section>
+      </Section>
     )}
   </main>
 
@@ -300,82 +282,12 @@ const articleJsonLd = JSON.stringify({
 </Layout>
 
 <style>
-  /* Styles pour le contenu riche */
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-    color: rgb(var(--color-primary));
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-  }
-
-  .prose h1:first-child,
-  .prose h2:first-child,
-  .prose h3:first-child {
-    margin-top: 0;
-  }
-
-  .prose a {
-    color: rgb(var(--color-secondary));
-    text-decoration: underline;
-  }
-
-  .prose a:hover {
-    color: rgb(var(--color-primary));
-  }
-
-  .prose p {
-    margin-bottom: 1em;
-    line-height: 1.7;
-  }
-
-  .prose ul, .prose ol {
-    margin: 1em 0;
-    padding-left: 1.5em;
-  }
-
-  .prose li {
-    margin-bottom: 0.5em;
-  }
-
-  .prose blockquote {
-    border-left: 4px solid rgb(var(--color-secondary));
-    padding-left: 1em;
-    margin: 1.5em 0;
-    font-style: italic;
-    color: #6b7280;
-  }
-
-  .prose img {
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    margin: 1.5em auto;
-  }
-
-  /* Limiter le texte à 2 lignes pour les suggestions */
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Styles pour l'impression */
+  /* Article-specific print styles */
   @media print {
-    .skip-link,
-    nav,
     .share-btn,
     .copy-url-btn,
-    .print-btn,
-    footer {
+    .print-btn {
       display: none !important;
-    }
-
-    .prose {
-      font-size: 12pt;
-      line-height: 1.4;
-    }
-
-    .prose h1, .prose h2, .prose h3 {
-      color: black;
     }
   }
 </style>

@@ -3,6 +3,10 @@ import type { Site } from '../types/strapi';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
 import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import '../styles/prose.css';
+import '../styles/themes/classic.css';
+import '../styles/themes/modern.css';
+import '../styles/themes/accessible.css';
 
 const strapiUrl = strapiBaseUrl;
 
@@ -149,20 +153,7 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
         top: 6px;
       }
 
-      /* Styles pour les différents thèmes */
-      .theme-classic {
-        font-family: Georgia, 'Times New Roman', serif;
-      }
-
-      .theme-modern {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      }
-
-      .theme-accessible {
-        font-family: Arial, sans-serif;
-        font-size: 18px;
-        line-height: 1.6;
-      }
+      /* Theme-specific styles imported from CSS files */
     </style>
 
     <CookieBanner />

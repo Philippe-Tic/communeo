@@ -2,8 +2,8 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
-import { Building2, Calendar, File, FileArchive, FileText, Globe, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react'
-import React from 'react'
+import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react'
+import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 interface NavItem {
@@ -15,12 +15,14 @@ interface NavItem {
 
 interface NavGroup {
   label: string
+  key: string
   items: NavItem[]
 }
 
 const navGroups: NavGroup[] = [
   {
     label: 'Contenu',
+    key: 'content',
     items: [
       { name: 'Articles', path: '/articles', icon: FileText },
       { name: 'Pages', path: '/pages', icon: File },
@@ -31,6 +33,7 @@ const navGroups: NavGroup[] = [
   },
   {
     label: 'Communauté',
+    key: 'community',
     items: [
       { name: 'Messages', path: '/messages', icon: Mail, badgeKey: 'messages' },
       { name: 'Équipe', path: '/team-members', icon: Users },
@@ -39,6 +42,7 @@ const navGroups: NavGroup[] = [
   },
   {
     label: 'Paramètres',
+    key: 'settings',
     items: [
       { name: 'Site', path: '/site', icon: Settings },
       { name: 'Conformité', path: '/compliance', icon: ShieldCheck },
@@ -63,6 +67,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate()
   const { data: messagesCount } = useContactSubmissionsCount()
   const { data: pendingAssociationsCount } = usePendingAssociationsCount()
+
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
+
+  const toggleGroup = (key: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) {
+        next.delete(key)
+      } else {
+        next.add(key)
+      }
+      return next
+    })
+  }
 
   const badgeCounts: Record<string, number | undefined> = {
     messages: messagesCount,
@@ -141,17 +159,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <span>Tableau de bord</span>
         </button>
 
-        {/* Grouped navigation */}
-        {navGroups.map((group) => (
-          <div key={group.label} className="mt-4">
-            <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {group.label}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {group.items.map(renderNavButton)}
+        {/* Grouped navigation with collapsible sections */}
+        {navGroups.map((group) => {
+          const isCollapsed = collapsedGroups.has(group.key)
+          return (
+            <div key={group.key} className="mt-3">
+              <button
+                type="button"
+                onClick={() => toggleGroup(group.key)}
+                className="mb-1 flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {group.label}
+                <ChevronDown
+                  className={cn(
+                    'h-3 w-3 transition-transform',
+                    isCollapsed && '-rotate-90'
+                  )}
+                />
+              </button>
+              {!isCollapsed && (
+                <div className="flex flex-col gap-0.5">
+                  {group.items.map(renderNavButton)}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

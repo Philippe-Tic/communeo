@@ -81,6 +81,15 @@ export interface PagesResponse {
   }
 }
 
+// parent_page and child_pages are injected by the backend controller (self-referencing relations)
+const PAGE_POPULATE_PARAMS = [
+  'populate[site][fields][0]=id',
+  'populate[site][fields][1]=name',
+  'populate[site][fields][2]=slug',
+  'populate[featured_image][fields][0]=url',
+  'populate[featured_image][fields][1]=alternativeText',
+].join('&')
+
 // Query keys
 export const PAGES_QUERY_KEYS = {
   all: ['pages'] as const,
@@ -129,13 +138,10 @@ export const usePages = (params: {
     queryParams.append('sort', 'menu_order:asc')
   }
 
-  // Always populate relations
-  queryParams.append('populate', '*')
-
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.list(params),
     queryFn: async (): Promise<PagesResponse> => {
-      const url = `/api/pages?${queryParams.toString()}`
+      const url = `/api/pages?${queryParams.toString()}&${PAGE_POPULATE_PARAMS}`
       return apiClient.get<PagesResponse>(url)
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -146,7 +152,7 @@ export const usePage = (id: string) => {
   return useQuery({
     queryKey: PAGES_QUERY_KEYS.detail(id),
     queryFn: async (): Promise<Page> => {
-      const url = `/api/pages/${id}?populate=*`
+      const url = `/api/pages/${id}?${PAGE_POPULATE_PARAMS}`
       const response = await apiClient.get<{ data: Page }>(url)
       return response.data
     },
@@ -161,10 +167,9 @@ export const usePagesHierarchy = (siteId?: number) => {
     queryFn: async (): Promise<Page[]> => {
       const queryParams = new URLSearchParams()
       if (siteId) queryParams.append('filters[site][documentId][$eq]', siteId.toString())
-      queryParams.append('populate', '*')
       queryParams.append('sort', 'menu_order:asc')
 
-      const url = `/api/pages?${queryParams.toString()}`
+      const url = `/api/pages?${queryParams.toString()}&${PAGE_POPULATE_PARAMS}`
       const response = await apiClient.get<PagesResponse>(url)
       return response.data
     },

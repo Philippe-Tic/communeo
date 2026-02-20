@@ -3,6 +3,8 @@ import type { Page } from '../types/strapi';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import StrapiImage from '../components/StrapiImage.astro';
 import { getPages, getPageBySlug, getPagePath, buildBreadcrumbs } from '../utils/strapi';
 
@@ -49,6 +51,10 @@ if (!page) {
 
 const attributes = page;
 const breadcrumbs = buildBreadcrumbs(page, allPages);
+const breadcrumbItems = breadcrumbs.map((crumb, i) => ({
+  label: crumb.title,
+  ...(i < breadcrumbs.length - 1 ? { href: crumb.path } : {})
+}));
 const siteOrigin = Astro.site?.toString()?.replace(/\/$/, '') || Astro.url.origin;
 
 // JSON-LD BreadcrumbList
@@ -79,41 +85,11 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
   <Navigation />
 
   <main id="main-content">
-    {breadcrumbs.length > 0 && (
-      <nav aria-label="Fil d'Ariane" class="bg-gray-50 border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <ol class="flex items-center gap-2 text-sm text-gray-600">
-            <li><a href="/" class="hover:text-primary transition-colors">Accueil</a></li>
-            {breadcrumbs.map((crumb, i) => (
-              <>
-                <li aria-hidden="true">/</li>
-                {i < breadcrumbs.length - 1
-                  ? <li><a href={crumb.path} class="hover:text-primary transition-colors">{crumb.title}</a></li>
-                  : <li aria-current="page" class="font-medium text-gray-900">{crumb.title}</li>
-                }
-              </>
-            ))}
-          </ol>
-        </div>
-      </nav>
+    {breadcrumbItems.length > 0 && (
+      <Breadcrumb items={breadcrumbItems} />
     )}
 
-    <!-- Header de la page -->
-    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">
-            {attributes.title}
-          </h1>
-
-          {attributes.meta_description && (
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-              {attributes.meta_description}
-            </p>
-          )}
-        </div>
-      </div>
-    </header>
+    <Hero title={attributes.title} subtitle={attributes.meta_description} />
 
     <!-- Contenu principal -->
     <section class="py-12">
@@ -177,72 +153,4 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
   <Footer />
 </Layout>
 
-<style>
-  /* Styles pour le contenu riche */
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-    color: rgb(var(--color-primary));
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-  }
-
-  .prose h1:first-child,
-  .prose h2:first-child,
-  .prose h3:first-child {
-    margin-top: 0;
-  }
-
-  .prose a {
-    color: rgb(var(--color-secondary));
-    text-decoration: underline;
-  }
-
-  .prose a:hover {
-    color: rgb(var(--color-primary));
-  }
-
-  .prose p {
-    margin-bottom: 1em;
-    line-height: 1.7;
-  }
-
-  .prose ul, .prose ol {
-    margin: 1em 0;
-    padding-left: 1.5em;
-  }
-
-  .prose li {
-    margin-bottom: 0.5em;
-  }
-
-  .prose blockquote {
-    border-left: 4px solid rgb(var(--color-secondary));
-    padding-left: 1em;
-    margin: 1.5em 0;
-    font-style: italic;
-    color: #6b7280;
-  }
-
-  .prose img {
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    margin: 1.5em auto;
-  }
-
-  .prose table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.5em 0;
-  }
-
-  .prose th,
-  .prose td {
-    border: 1px solid #e5e7eb;
-    padding: 0.75em;
-    text-align: left;
-  }
-
-  .prose th {
-    background-color: #f9fafb;
-    font-weight: bold;
-  }
-</style>
+<!-- Prose styles imported globally via Layout -->

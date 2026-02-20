@@ -1,0 +1,58 @@
+/* Classic theme: serif fonts, traditional layout, subtle borders */
+.theme-classic {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.theme-classic h1,
+.theme-classic h2,
+.theme-classic h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
+}
+
+.theme-classic .hero-section {
+  background: linear-gradient(135deg, rgba(var(--color-primary), 0.05), rgba(var(--color-primary), 0.02));
+  border-bottom: 3px solid rgb(var(--color-primary));
+}
+
+.theme-classic .card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+  box-shadow: none;
+}
+
+.theme-classic .card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.theme-classic .nav-link.active {
+  border-bottom: 3px solid rgb(var(--color-primary));
+  background: transparent;
+  color: rgb(var(--color-primary));
+}
+
+.theme-classic .section-title {
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.theme-classic .section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3rem;
+  height: 2px;
+  background-color: rgb(var(--color-primary));
+}
+
+.theme-classic .footer {
+  background-color: #1f2937;
+  border-top: 3px solid rgb(var(--color-primary));
+}
+
+.theme-classic .prose blockquote {
+  border-left-width: 3px;
+  font-family: Georgia, 'Times New Roman', serif;
+}

@@ -1,16 +1,19 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
 interface FormSectionProps {
   title: string
   children: React.ReactNode
-  gap?: number
 }
 
 export function FormSection({ title, children }: FormSectionProps) {
   return (
-    <div>
-      <h3 className="mb-4 text-lg font-semibold">{title}</h3>
-      <div className="space-y-4">
-        {children}
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-4">{children}</div>
+      </CardContent>
+    </Card>
   )
 }

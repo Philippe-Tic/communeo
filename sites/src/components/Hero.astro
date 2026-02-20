@@ -1,0 +1,25 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  centered?: boolean;
+}
+
+const { title, subtitle, centered = true } = Astro.props;
+---
+
+<header class="hero-section bg-gradient-to-br from-primary/10 to-secondary/10 py-12 lg:py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class={centered ? 'text-center' : ''}>
+      <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+        {title}
+      </h1>
+      {subtitle && (
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          {subtitle}
+        </p>
+      )}
+      <slot />
+    </div>
+  </div>
+</header>

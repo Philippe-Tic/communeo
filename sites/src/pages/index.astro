@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import StrapiImage from '../components/StrapiImage.astro';
+import Section from '../components/Section.astro';
 import {
   getHomepage,
   getFeaturedArticles,
@@ -91,14 +92,7 @@ try {
 
     <!-- Articles mis en avant -->
     {featuredArticles.length > 0 && (
-      <section class="py-12 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Actualités</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">
-              Restez informés des dernières actualités et annonces de votre mairie.
-            </p>
-          </div>
+      <Section title="Actualités" subtitle="Restez informés des dernières actualités et annonces de votre mairie.">
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredArticles.map((article) => (
@@ -170,20 +164,12 @@ try {
               Voir toutes les actualités
             </a>
           </div>
-        </div>
-      </section>
+      </Section>
     )}
 
     <!-- Événements à venir -->
     {upcomingEvents.length > 0 && (
-      <section class="py-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Événements à venir</h2>
-            <p class="text-gray-600 max-w-2xl mx-auto">
-              Découvrez les prochains événements organisés par votre mairie.
-            </p>
-          </div>
+      <Section title="Événements à venir" subtitle="Découvrez les prochains événements organisés par votre mairie." bg="gray">
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {upcomingEvents.map((event) => (
@@ -263,8 +249,7 @@ try {
               Voir tous les événements
             </a>
           </div>
-        </div>
-      </section>
+      </Section>
     )}
 
     <!-- Section d'absence de contenu -->
@@ -290,45 +275,4 @@ try {
   <Footer />
 </Layout>
 
-<style>
-  /* Styles pour limiter le texte à 3 lignes */
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Styles pour le contenu riche */
-  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-    color: rgb(var(--color-primary));
-    margin-top: 1.5em;
-    margin-bottom: 0.5em;
-  }
-
-  .prose a {
-    color: rgb(var(--color-secondary));
-    text-decoration: underline;
-  }
-
-  .prose a:hover {
-    color: rgb(var(--color-primary));
-  }
-
-  .prose p {
-    margin-bottom: 1em;
-    line-height: 1.7;
-  }
-
-  .prose ul, .prose ol {
-    margin: 1em 0;
-    padding-left: 1.5em;
-  }
-
-  .prose blockquote {
-    border-left: 4px solid rgb(var(--color-secondary));
-    padding-left: 1em;
-    margin: 1.5em 0;
-    font-style: italic;
-  }
-</style>
+<!-- Prose styles imported globally via Layout -->

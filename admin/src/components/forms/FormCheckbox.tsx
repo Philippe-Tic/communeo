@@ -1,30 +1,33 @@
 import { Label } from '@/components/ui/label'
-import { forwardRef } from 'react'
+import { Switch } from '@/components/ui/switch'
 
 interface FormCheckboxProps {
   label: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
   error?: string
+  description?: string
 }
 
-export const FormCheckbox = forwardRef<HTMLInputElement, FormCheckboxProps>(
-  ({ label, error, ...props }, ref) => {
-    return (
-      <div>
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            ref={ref}
-            className="h-4 w-4 rounded border-input"
-            {...(props as any)}
-          />
-          <Label className="font-medium">{label}</Label>
+export function FormCheckbox({
+  label,
+  checked,
+  onCheckedChange,
+  error,
+  description,
+}: FormCheckboxProps) {
+  return (
+    <div>
+      <div className="flex items-center gap-3">
+        <Switch checked={checked} onCheckedChange={onCheckedChange} />
+        <div>
+          <Label className="cursor-pointer font-medium">{label}</Label>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
         </div>
-        {error && (
-          <p className="mt-1 text-sm text-destructive">{error}</p>
-        )}
       </div>
-    )
-  }
-)
-
-FormCheckbox.displayName = 'FormCheckbox'
+      {error && <p className="mt-1 text-sm text-destructive">{error}</p>}
+    </div>
+  )
+}

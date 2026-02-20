@@ -14,92 +14,144 @@ const currentYear = new Date().getFullYear();
 const accessibilityLevel = siteConfig?.accessibilite?.accessibility_level || 'non-conforme';
 ---
 
-<footer class="bg-gray-900 text-white py-12" role="contentinfo" aria-label="Pied de page">
+<footer class="footer bg-gray-900 text-white" role="contentinfo" aria-label="Pied de page">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-      <!-- Colonne 1 - Coordonnées -->
+    <!-- Main footer content -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
+      <!-- Column 1 - Contact -->
       <div>
         <h2 class="text-lg font-semibold text-white mb-4">
           {siteConfig?.name || 'Votre mairie'}
         </h2>
-        <address class="not-italic text-gray-400 space-y-2">
+        <address class="not-italic text-gray-400 space-y-2 text-sm">
           {siteConfig?.address && (
             <p>{siteConfig.address}</p>
           )}
           {siteConfig?.contact_phone && (
             <p>
-              <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-primary transition-colors">
+              <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-white transition-colors">
                 {siteConfig.contact_phone}
               </a>
             </p>
           )}
           {siteConfig?.contact_mail && (
             <p>
-              <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-primary transition-colors">
+              <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-white transition-colors">
                 {siteConfig.contact_mail}
               </a>
             </p>
           )}
         </address>
+        {siteConfig?.infos_pratiques?.opening_hours && (
+          <div class="mt-4">
+            <h3 class="text-sm font-semibold text-gray-300 mb-1">Horaires d'ouverture</h3>
+            <p class="text-sm text-gray-400">{siteConfig.infos_pratiques.opening_hours}</p>
+          </div>
+        )}
       </div>
 
-      <!-- Colonne 2 - Liens légaux -->
+      <!-- Column 2 - Navigation -->
       <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Informations légales</h2>
-        <nav aria-label="Liens légaux">
-          <ul class="space-y-2 text-gray-400">
+        <h2 class="text-lg font-semibold text-white mb-4">Navigation</h2>
+        <nav aria-label="Navigation du pied de page">
+          <ul class="space-y-2 text-sm text-gray-400">
             <li>
-              <a href="/mentions-legales" class="hover:text-primary transition-colors">
-                Mentions légales
-              </a>
+              <a href="/" class="hover:text-white transition-colors">Accueil</a>
             </li>
             <li>
-              <a href="/politique-confidentialite" class="hover:text-primary transition-colors">
-                Politique de confidentialité
-              </a>
+              <a href="/articles" class="hover:text-white transition-colors">Actualités</a>
             </li>
             <li>
-              <a href="/accessibilite" class="hover:text-primary transition-colors">
-                Accessibilité
-              </a>
+              <a href="/evenements" class="hover:text-white transition-colors">Événements</a>
             </li>
             <li>
-              <a href="#" data-cookie-settings class="hover:text-primary transition-colors">
-                Gestion des cookies
-              </a>
+              <a href="/documents" class="hover:text-white transition-colors">Documents</a>
             </li>
             <li>
-              <a href="/exercice-droits" class="hover:text-primary transition-colors">
-                Exercice des droits RGPD
-              </a>
+              <a href="/equipe-municipale" class="hover:text-white transition-colors">Équipe municipale</a>
             </li>
             <li>
-              <a href="/documents" class="hover:text-primary transition-colors">
-                Documents officiels
-              </a>
+              <a href="/associations" class="hover:text-white transition-colors">Associations</a>
             </li>
-            {siteConfig?.open_data_enabled && (
-              <li>
-                <a href="/open-data" class="hover:text-primary transition-colors">
-                  Open Data
-                </a>
-              </li>
-            )}
             <li>
-              <a href="/contact" class="hover:text-primary transition-colors">
-                Nous contacter
-              </a>
+              <a href="/demarches" class="hover:text-white transition-colors">Démarches</a>
+            </li>
+            <li>
+              <a href="/contact" class="hover:text-white transition-colors">Nous contacter</a>
             </li>
           </ul>
         </nav>
       </div>
+
+      <!-- Column 3 - Legal -->
+      <div>
+        <h2 class="text-lg font-semibold text-white mb-4">Informations légales</h2>
+        <nav aria-label="Liens légaux">
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li>
+              <a href="/mentions-legales" class="hover:text-white transition-colors">
+                Mentions légales
+              </a>
+            </li>
+            <li>
+              <a href="/politique-confidentialite" class="hover:text-white transition-colors">
+                Politique de confidentialité
+              </a>
+            </li>
+            <li>
+              <a href="/accessibilite" class="hover:text-white transition-colors">
+                Accessibilité
+              </a>
+            </li>
+            <li>
+              <a href="#" data-cookie-settings class="hover:text-white transition-colors">
+                Gestion des cookies
+              </a>
+            </li>
+            <li>
+              <a href="/exercice-droits" class="hover:text-white transition-colors">
+                Exercice des droits RGPD
+              </a>
+            </li>
+            {siteConfig?.open_data_enabled && (
+              <li>
+                <a href="/open-data" class="hover:text-white transition-colors">
+                  Open Data
+                </a>
+              </li>
+            )}
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Column 4 - Services rapides -->
+      <div>
+        <h2 class="text-lg font-semibold text-white mb-4">Services</h2>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li>
+            <a href="/demarches" class="hover:text-white transition-colors">
+              Démarches en ligne
+            </a>
+          </li>
+          <li>
+            <a href="/documents" class="hover:text-white transition-colors">
+              Documents officiels
+            </a>
+          </li>
+          <li>
+            <a href="/contact" class="hover:text-white transition-colors">
+              Contact et réclamations
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <!-- Barre inférieure -->
-    <div class="border-t border-gray-800 pt-8">
-      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+    <!-- Bottom bar -->
+    <div class="border-t border-gray-800 py-6">
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-500">
         <p>&copy; {currentYear} {siteConfig?.name || 'Votre mairie'}. Tous droits réservés.</p>
-        <p>Accessibilité : {accessibilityLevel}</p>
+        <p>Accessibilité : <span class="font-medium text-gray-400">{accessibilityLevel}</span></p>
       </div>
     </div>
   </div>

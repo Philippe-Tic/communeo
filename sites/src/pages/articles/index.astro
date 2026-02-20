@@ -3,6 +3,8 @@ import type { Article } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
+import Hero from '../../components/Hero.astro';
+import Section from '../../components/Section.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
 import { getArticles, formatDate } from '../../utils/strapi';
 
@@ -44,19 +46,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
   <Navigation />
 
   <main id="main-content">
-    <!-- Header -->
-    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">
-            Actualités
-          </h1>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-            Restez informés des dernières actualités et annonces de votre mairie
-          </p>
-        </div>
-      </div>
-    </header>
+    <Hero title="Actualités" subtitle="Restez informés des dernières actualités et annonces de votre mairie" />
 
     <!-- Filtres de catégories -->
     <section class="py-6 bg-white border-b border-gray-200">
@@ -82,8 +72,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
     </section>
 
     <!-- Liste des articles -->
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <Section>
         {articles.length > 0 ? (
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map((article) => (
@@ -163,22 +152,13 @@ const articlesByCategory = articles.reduce((acc, article) => {
             </p>
           </div>
         )}
-      </div>
-    </section>
+    </Section>
   </main>
 
   <Footer />
 </Layout>
 
 <style>
-  /* Styles pour limiter le texte à 3 lignes */
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
   /* Styles pour les filtres actifs */
   .filter-btn.active {
     background-color: rgb(var(--color-primary));

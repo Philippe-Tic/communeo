@@ -1,6 +1,7 @@
 ---
 import type { Site } from '../types/strapi';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
+import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 
 const strapiUrl = strapiBaseUrl;
@@ -34,16 +35,19 @@ const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?
 const socialImage = image ? getStrapiImageUrl(image) :
   (siteConfig?.logo?.data ? getStrapiImageUrl(siteConfig.logo.data.url) : '');
 
-// JSON-LD Organization
+const siteUrl = Astro.site?.toString() || Astro.url.origin;
+
+// JSON-LD Organization + CivicStructure
 const organizationJsonLd = siteConfig ? JSON.stringify({
   "@context": "https://schema.org",
-  "@type": "GovernmentOrganization",
+  "@type": ["GovernmentOrganization", "CivicStructure"],
   "name": siteConfig.name,
-  "url": Astro.site?.toString() || Astro.url.origin,
+  "url": siteUrl,
   ...(siteConfig.address && { "address": { "@type": "PostalAddress", "streetAddress": siteConfig.address } }),
   ...(siteConfig.contact_phone && { "telephone": siteConfig.contact_phone }),
   ...(siteConfig.contact_mail && { "email": siteConfig.contact_mail }),
-  ...(siteConfig.logo?.data && { "logo": getStrapiImageUrl(siteConfig.logo.data.url) })
+  ...(siteConfig.logo?.data && { "logo": getStrapiImageUrl(siteConfig.logo.data.url) }),
+  ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": siteConfig.infos_pratiques.opening_hours }),
 }) : null;
 
 ---
@@ -71,6 +75,8 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
+    <meta property="og:locale" content="fr_FR" />
+    {siteConfig?.name && <meta property="og:site_name" content={siteConfig.name} />}
     {socialImage && <meta property="og:image" content={socialImage} />}
 
     <!-- Twitter -->
@@ -97,6 +103,7 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
     </style>
   </head>
   <body class={`theme-${siteConfig?.theme || 'modern'} min-h-screen bg-gray-50`}>
+    <AlertBanner />
     <slot />
 
     <!-- Script pour l'accessibilité clavier -->

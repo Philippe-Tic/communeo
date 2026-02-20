@@ -153,6 +153,10 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
         <PageHeader
           title={isEditing ? 'Modifier la page' : 'Créer une nouvelle page'}
           actions={[{ label: 'Retour', onClick: () => navigate('/pages'), variant: 'outline' }]}
+          breadcrumbs={[
+            { label: 'Pages', href: '/pages' },
+            { label: isEditing ? 'Modifier' : 'Nouvelle' },
+          ]}
         />
 
         <form onSubmit={handleSubmit(onSubmit)}>

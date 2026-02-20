@@ -261,6 +261,21 @@ export interface Association {
   updatedAt: string;
 }
 
+export interface Alerte {
+  id: number;
+  documentId: string;
+  title: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical';
+  active: boolean;
+  display_from?: string;
+  display_until?: string;
+  link_url?: string;
+  link_label?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Types utilitaires
 export type SiteData = Site;
 export type PageData = Page;

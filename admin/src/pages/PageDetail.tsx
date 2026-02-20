@@ -78,6 +78,10 @@ export function PageDetail() {
           title={page.title}
           subtitle={`/${page.slug}`}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Pages', href: '/pages' },
+            { label: page.title },
+          ]}
         />
 
         <div className="rounded-md border bg-card p-6">

@@ -140,6 +140,10 @@ export function AssociationDetail() {
           title={association.name}
           subtitle={CATEGORY_LABELS[association.category]}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Associations', href: '/associations' },
+            { label: association.name },
+          ]}
         />
 
         {/* Badges */}

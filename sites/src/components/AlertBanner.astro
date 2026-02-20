@@ -1,0 +1,54 @@
+---
+import { getActiveAlerts } from '../utils/strapi';
+
+let alerts: Awaited<ReturnType<typeof getActiveAlerts>> = [];
+try {
+  alerts = await getActiveAlerts();
+} catch (error) {
+  console.error('Erreur lors de la récupération des alertes:', error);
+}
+
+const severityStyles = {
+  info: {
+    bg: 'bg-blue-600',
+    text: 'text-white',
+    icon: 'ℹ️',
+  },
+  warning: {
+    bg: 'bg-orange-500',
+    text: 'text-white',
+    icon: '⚠️',
+  },
+  critical: {
+    bg: 'bg-red-600',
+    text: 'text-white',
+    icon: '🚨',
+  },
+};
+---
+
+{alerts.length > 0 && (
+  <div role="alert" aria-live="assertive">
+    {alerts.map((alert) => {
+      const style = severityStyles[alert.severity] || severityStyles.info;
+      return (
+        <div class={`${style.bg} ${style.text} px-4 py-3`}>
+          <div class="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm font-medium">
+            <span aria-hidden="true">{style.icon}</span>
+            <span class="font-bold">{alert.title}</span>
+            <span class="hidden sm:inline">—</span>
+            <span class="hidden sm:inline">{alert.message}</span>
+            {alert.link_url && (
+              <a
+                href={alert.link_url}
+                class="ml-2 underline hover:no-underline font-semibold"
+              >
+                {alert.link_label || 'En savoir plus'}
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+)}

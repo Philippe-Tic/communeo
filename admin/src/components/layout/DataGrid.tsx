@@ -1,4 +1,5 @@
-import { EmptyState, ErrorState, LoadingSpinner } from '../common'
+import { Skeleton } from '@/components/ui/skeleton'
+import { EmptyState, ErrorState } from '../common'
 
 interface DataGridProps<T> {
   data: T[]
@@ -15,6 +16,25 @@ interface DataGridProps<T> {
     lg?: number
   }
   gap?: number
+  skeletonCount?: number
+}
+
+function CardSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 rounded-md border bg-card p-4">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-5 w-20" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+      </div>
+      <Skeleton className="h-5 w-3/4" />
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-2/3" />
+      <div className="mt-2 flex gap-2">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-16" />
+      </div>
+    </div>
+  )
 }
 
 export function DataGrid<T>({
@@ -26,9 +46,16 @@ export function DataGrid<T>({
   emptyDescription,
   emptyActionLabel,
   onEmptyAction,
+  skeletonCount = 6,
 }: DataGridProps<T>) {
   if (isLoading) {
-    return <LoadingSpinner />
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: skeletonCount }).map((_, i) => (
+          <CardSkeleton key={i} />
+        ))}
+      </div>
+    )
   }
 
   if (error) {

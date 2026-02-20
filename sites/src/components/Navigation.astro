@@ -244,37 +244,69 @@ const isActive = (pagePath: string) =>
       {menuTree.map((page) => {
         const pagePath = '/' + getPagePath(page, menuPages);
         const active = isActive(pagePath);
-        return (
-          <>
-            <a
-              href={pagePath}
-              class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                active
-                  ? 'bg-primary text-white'
-                  : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
-              }`}
-              role="menuitem"
-            >
-              {page.title}
-            </a>
-            {page.children.map((child) => {
-              const childPath = '/' + getPagePath(child, menuPages);
-              const childActive = currentPath === childPath;
-              return (
-                <a
-                  href={childPath}
-                  class={`block pl-8 pr-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    childActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-primary'
-                  }`}
-                  role="menuitem"
-                >
-                  {child.title}
-                </a>
-              );
-            })}
-          </>
+        const hasChildren = page.children.length > 0;
+        const childActive = hasChildren && page.children.some(child => currentPath === '/' + getPagePath(child, menuPages));
+        return hasChildren ? (
+          <div class="mobile-submenu-group">
+            <div class="flex items-center">
+              <a
+                href={pagePath}
+                class={`flex-1 block px-3 py-2 rounded-l-md text-base font-medium transition-colors ${
+                  active || childActive
+                    ? 'bg-primary text-white'
+                    : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+                }`}
+                role="menuitem"
+              >
+                {page.title}
+              </a>
+              <button
+                type="button"
+                class={`mobile-submenu-toggle px-3 py-2 rounded-r-md text-base transition-colors ${
+                  active || childActive
+                    ? 'bg-primary/80 text-white'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-primary'
+                }`}
+                aria-expanded={childActive ? 'true' : 'false'}
+                aria-label={`Sous-pages de ${page.title}`}
+              >
+                <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+            </div>
+            <div class={`mobile-submenu pl-4 space-y-0.5 overflow-hidden transition-all ${childActive ? '' : 'hidden'}`}>
+              {page.children.map((child) => {
+                const childPath = '/' + getPagePath(child, menuPages);
+                const isChildActive = currentPath === childPath;
+                return (
+                  <a
+                    href={childPath}
+                    class={`block pl-4 pr-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isChildActive
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-primary'
+                    }`}
+                    role="menuitem"
+                  >
+                    {child.title}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <a
+            href={pagePath}
+            class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+              active
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            role="menuitem"
+          >
+            {page.title}
+          </a>
         );
       })}
 
@@ -407,5 +439,25 @@ const isActive = (pagePath: string) =>
         });
       });
     }
+
+    // Mobile sub-menu toggles
+    const toggleButtons = document.querySelectorAll('.mobile-submenu-toggle');
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const group = btn.closest('.mobile-submenu-group');
+        if (!group) return;
+        const submenu = group.querySelector('.mobile-submenu');
+        const chevron = btn.querySelector('svg');
+        const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+
+        if (submenu) {
+          submenu.classList.toggle('hidden');
+        }
+        if (chevron) {
+          chevron.style.transform = isExpanded ? '' : 'rotate(180deg)';
+        }
+        btn.setAttribute('aria-expanded', (!isExpanded).toString());
+      });
+    });
   });
 </script>

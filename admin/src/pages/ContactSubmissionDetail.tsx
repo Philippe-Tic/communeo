@@ -153,6 +153,10 @@ export function ContactSubmissionDetail() {
           title={submission.reference_number}
           subtitle={submission.subject}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Messages', href: '/messages' },
+            { label: submission.reference_number },
+          ]}
         />
 
         {/* Info cards */}

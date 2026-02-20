@@ -134,6 +134,10 @@ export function EventDetail() {
           title={event.title}
           subtitle={`/${event.slug}`}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Événements', href: '/events' },
+            { label: event.title },
+          ]}
         />
 
         <div className="rounded-md border bg-card p-6">

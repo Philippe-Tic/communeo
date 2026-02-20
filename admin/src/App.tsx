@@ -33,6 +33,8 @@ import { Compliance } from './pages/Compliance'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
+import { Alertes } from './pages/Alertes'
+import { AlerteForm } from './pages/AlerteForm'
 
 function App() {
   return (
@@ -355,6 +357,40 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditAssociation />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Alertes routes */}
+          <Route
+            path="/alertes"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Alertes />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/alertes/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <AlerteForm />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/alertes/:documentId/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <AlerteForm />
                 </MainLayout>
               </ProtectedRoute>
             }

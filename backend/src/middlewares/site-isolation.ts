@@ -222,6 +222,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'official-documents': 'api::official-document.official-document',
       'team-members': 'api::team-member.team-member',
       'associations': 'api::association.association',
+      'alertes': 'api::alerte.alerte',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

@@ -127,6 +127,10 @@ export function ArticleDetail() {
           title={article.title}
           subtitle={`/${article.slug}`}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Articles', href: '/articles' },
+            { label: article.title },
+          ]}
         />
 
         <div className="rounded-md border bg-card p-6">

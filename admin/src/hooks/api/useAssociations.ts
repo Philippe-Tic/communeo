@@ -179,6 +179,18 @@ export const useUpdateAssociation = () => {
   })
 }
 
+export const usePendingAssociationsCount = () => {
+  return useQuery({
+    queryKey: [...ASSOCIATIONS_QUERY_KEYS.all, 'pending-count'] as const,
+    queryFn: async (): Promise<number> => {
+      const url = `/api/associations?filters[status][$eq]=pending&pagination[pageSize]=1`
+      const response = await apiClient.get<AssociationsResponse>(url)
+      return response.meta.pagination.total
+    },
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
 export const useDeleteAssociation = () => {
   const queryClient = useQueryClient()
 

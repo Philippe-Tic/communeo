@@ -126,6 +126,10 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
         <PageHeader
           title={isEditing ? 'Modifier l\'article' : 'Créer un nouvel article'}
           actions={[{ label: 'Retour', onClick: () => navigate('/articles'), variant: 'outline' }]}
+          breadcrumbs={[
+            { label: 'Articles', href: '/articles' },
+            { label: isEditing ? 'Modifier' : 'Nouveau' },
+          ]}
         />
 
         <form onSubmit={handleSubmit(onSubmit)}>

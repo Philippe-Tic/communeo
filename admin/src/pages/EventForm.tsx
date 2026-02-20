@@ -169,6 +169,10 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
         <PageHeader
           title={isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement'}
           actions={[{ label: 'Retour', onClick: () => navigate('/events'), variant: 'outline' }]}
+          breadcrumbs={[
+            { label: 'Événements', href: '/events' },
+            { label: isEditing ? 'Modifier' : 'Nouveau' },
+          ]}
         />
 
         <form onSubmit={handleSubmit(onSubmit)}>

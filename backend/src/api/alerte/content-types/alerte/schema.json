@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "alertes",
+  "info": {
+    "singularName": "alerte",
+    "pluralName": "alertes",
+    "displayName": "Alerte",
+    "description": "Alertes et bandeaux d'urgence affichés en haut du site"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "message": {
+      "type": "text",
+      "required": true,
+      "maxLength": 500
+    },
+    "severity": {
+      "type": "enumeration",
+      "enum": ["info", "warning", "critical"],
+      "default": "info",
+      "required": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "display_from": {
+      "type": "datetime"
+    },
+    "display_until": {
+      "type": "datetime"
+    },
+    "link_url": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "link_label": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "alertes",
+      "required": true
+    }
+  }
+}

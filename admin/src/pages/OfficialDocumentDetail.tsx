@@ -153,6 +153,10 @@ export function OfficialDocumentDetail() {
           title={doc.title}
           subtitle={`/${doc.slug}`}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Documents', href: '/documents' },
+            { label: doc.title },
+          ]}
         />
 
         <div className="rounded-md border bg-card p-6">

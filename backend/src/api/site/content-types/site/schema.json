@@ -137,6 +137,12 @@
       "target": "api::association.association",
       "mappedBy": "site"
     },
+    "alertes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::alerte.alerte",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

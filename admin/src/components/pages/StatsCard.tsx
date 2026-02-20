@@ -1,8 +1,11 @@
+import { Skeleton } from '@/components/ui/skeleton'
+
 interface StatsCardProps {
   label: string
   value: string | number
   color: string
   icon?: React.ReactNode
+  isLoading?: boolean
 }
 
 const COLOR_MAP: Record<string, { text: string; icon: string }> = {
@@ -13,7 +16,7 @@ const COLOR_MAP: Record<string, { text: string; icon: string }> = {
   orange: { text: 'text-orange-600 dark:text-orange-400', icon: 'text-orange-500' },
 }
 
-export function StatsCard({ label, value, color, icon }: StatsCardProps) {
+export function StatsCard({ label, value, color, icon, isLoading }: StatsCardProps) {
   const colors = COLOR_MAP[color] || COLOR_MAP.blue
 
   return (
@@ -23,7 +26,11 @@ export function StatsCard({ label, value, color, icon }: StatsCardProps) {
           <div className={colors.icon}>{icon}</div>
         )}
         <div className="space-y-1">
-          <p className={`text-3xl font-bold leading-none ${colors.text}`}>{value}</p>
+          {isLoading ? (
+            <Skeleton className="h-9 w-16" />
+          ) : (
+            <p className={`text-3xl font-bold leading-none ${colors.text}`}>{value}</p>
+          )}
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
         </div>
       </div>

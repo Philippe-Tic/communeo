@@ -386,6 +386,10 @@ export const SiteConfigEdit = () => {
           <PageHeader
             title="Modifier la configuration"
             subtitle="Paramètres du site"
+            breadcrumbs={[
+              { label: 'Site', href: '/site' },
+              { label: 'Modifier' },
+            ]}
             actions={[
               {
                 label: "Annuler",

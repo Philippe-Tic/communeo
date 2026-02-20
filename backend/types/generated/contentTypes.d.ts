@@ -430,6 +430,62 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAlerteAlerte extends Struct.CollectionTypeSchema {
+  collectionName: 'alertes';
+  info: {
+    description: "Alertes et bandeaux d'urgence affich\u00E9s en haut du site";
+    displayName: 'Alerte';
+    pluralName: 'alertes';
+    singularName: 'alerte';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    active: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    display_from: Schema.Attribute.DateTime;
+    display_until: Schema.Attribute.DateTime;
+    link_label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    link_url: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::alerte.alerte'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    severity: Schema.Attribute.Enumeration<['info', 'warning', 'critical']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'info'>;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
   collectionName: 'articles';
   info: {
@@ -882,6 +938,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
   attributes: {
     accessibilite: Schema.Attribute.Component<'legal.accessibilite', false>;
     address: Schema.Attribute.Text;
+    alertes: Schema.Attribute.Relation<'oneToMany', 'api::alerte.alerte'>;
     articles: Schema.Attribute.Relation<'oneToMany', 'api::article.article'>;
     associations: Schema.Attribute.Relation<
       'oneToMany',
@@ -1544,6 +1601,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::alerte.alerte': ApiAlerteAlerte;
       'api::article.article': ApiArticleArticle;
       'api::association.association': ApiAssociationAssociation;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;

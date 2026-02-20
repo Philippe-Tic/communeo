@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, StrapiCollectionResponse
 } from '../types/strapi';
 
 // Configuration depuis les variables d'environnement
@@ -377,6 +377,28 @@ export async function getAssociations(): Promise<Association[]> {
 
   const response = await strapiRequest<StrapiCollectionResponse<Association>>(url);
   return response?.data ?? [];
+}
+
+/**
+ * Récupère les alertes actives pour le site
+ */
+export async function getActiveAlerts(): Promise<Alerte[]> {
+  const url = buildStrapiUrl('alertes', {
+    filters: {
+      active: { $eq: 'true' },
+    },
+    sort: 'severity:desc,createdAt:desc',
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<Alerte>>(url);
+  if (!response?.data) return [];
+
+  // Filter out alerts outside their display window
+  return response.data.filter(alert => {
+    if (alert.display_from && new Date(alert.display_from) > new Date()) return false;
+    if (alert.display_until && new Date(alert.display_until) < new Date()) return false;
+    return true;
+  });
 }
 
 /**

@@ -134,6 +134,13 @@ export default async ({ strapi }) => {
       { action: 'api::association.association.update', enabled: true },
       { action: 'api::association.association.delete', enabled: true },
 
+      // Alertes
+      { action: 'api::alerte.alerte.find', enabled: true },
+      { action: 'api::alerte.alerte.findOne', enabled: true },
+      { action: 'api::alerte.alerte.create', enabled: true },
+      { action: 'api::alerte.alerte.update', enabled: true },
+      { action: 'api::alerte.alerte.delete', enabled: true },
+
       // Upload (needed for file uploads)
       { action: 'plugin::upload.content-api.upload', enabled: true },
       { action: 'plugin::upload.content-api.find', enabled: true },

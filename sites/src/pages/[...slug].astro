@@ -49,6 +49,22 @@ if (!page) {
 
 const attributes = page;
 const breadcrumbs = buildBreadcrumbs(page, allPages);
+const siteOrigin = Astro.site?.toString()?.replace(/\/$/, '') || Astro.url.origin;
+
+// JSON-LD BreadcrumbList
+const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": siteOrigin },
+    ...breadcrumbs.map((crumb, i) => ({
+      "@type": "ListItem",
+      "position": i + 2,
+      "name": crumb.title,
+      ...(i < breadcrumbs.length - 1 ? { "item": `${siteOrigin}${crumb.path}` } : {})
+    }))
+  ]
+}) : null;
 ---
 
 <Layout
@@ -57,6 +73,8 @@ const breadcrumbs = buildBreadcrumbs(page, allPages);
   image={attributes.featured_image?.data?.url}
 >
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  {breadcrumbJsonLd && <script type="application/ld+json" set:html={breadcrumbJsonLd} />}
 
   <Navigation />
 

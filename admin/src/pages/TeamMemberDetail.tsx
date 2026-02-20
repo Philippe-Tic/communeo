@@ -78,6 +78,10 @@ export function TeamMemberDetail() {
           title={`${member.first_name} ${member.last_name}`}
           subtitle={ROLE_LABELS[member.role]}
           actions={headerActions}
+          breadcrumbs={[
+            { label: 'Équipe', href: '/team-members' },
+            { label: `${member.first_name} ${member.last_name}` },
+          ]}
         />
 
         <div className="rounded-md border bg-card p-6">

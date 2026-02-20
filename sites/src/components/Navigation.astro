@@ -156,6 +156,18 @@ const isActive = (pagePath: string) =>
             Documents
           </a>
 
+          <a
+            href="/equipe-municipale"
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              currentPath.startsWith('/equipe-municipale')
+                ? 'bg-primary text-white'
+                : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+            }`}
+            aria-current={currentPath.startsWith('/equipe-municipale') ? 'page' : undefined}
+          >
+            Équipe municipale
+          </a>
+
           {siteConfig?.open_data_enabled && (
             <a
               href="/open-data"
@@ -276,6 +288,18 @@ const isActive = (pagePath: string) =>
         role="menuitem"
       >
         Documents
+      </a>
+
+      <a
+        href="/equipe-municipale"
+        class={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+          currentPath.startsWith('/equipe-municipale')
+            ? 'bg-primary text-white'
+            : 'text-gray-900 hover:bg-gray-100 hover:text-primary'
+        }`}
+        role="menuitem"
+      >
+        Équipe municipale
       </a>
 
       {siteConfig?.open_data_enabled && (

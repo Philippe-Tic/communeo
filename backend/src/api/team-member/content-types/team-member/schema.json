@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "team_members",
+  "info": {
+    "singularName": "team-member",
+    "pluralName": "team-members",
+    "displayName": "Team Member",
+    "description": "Municipal team members"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "first_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "last_name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": ["maire", "adjoint", "conseiller", "dgs", "agent"],
+      "required": true
+    },
+    "delegation": {
+      "type": "string",
+      "maxLength": 200,
+      "required": false
+    },
+    "bio": {
+      "type": "text",
+      "required": false
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "required": false
+    },
+    "display_order": {
+      "type": "integer",
+      "default": 0
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "team_members",
+      "required": true
+    }
+  }
+}

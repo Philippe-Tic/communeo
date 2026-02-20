@@ -120,6 +120,13 @@ export default async ({ strapi }) => {
       { action: 'api::official-document.official-document.update', enabled: true },
       { action: 'api::official-document.official-document.delete', enabled: true },
 
+      // Team Members
+      { action: 'api::team-member.team-member.find', enabled: true },
+      { action: 'api::team-member.team-member.findOne', enabled: true },
+      { action: 'api::team-member.team-member.create', enabled: true },
+      { action: 'api::team-member.team-member.update', enabled: true },
+      { action: 'api::team-member.team-member.delete', enabled: true },
+
       // Upload (needed for file uploads)
       { action: 'plugin::upload.content-api.upload', enabled: true },
       { action: 'plugin::upload.content-api.find', enabled: true },

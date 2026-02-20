@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, OfficialDocument, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, TeamMember, StrapiCollectionResponse
 } from '../types/strapi';
 
 // Configuration depuis les variables d'environnement
@@ -347,6 +347,19 @@ export async function getOfficialDocumentBySlug(slug: string): Promise<OfficialD
   const response = await strapiRequest<StrapiCollectionResponse<OfficialDocument>>(url);
   if (!response?.data) return null;
   return response.data.length > 0 ? response.data[0] : null;
+}
+
+/**
+ * Récupère les membres de l'équipe municipale
+ */
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  const url = buildStrapiUrl('team-members', {
+    populate: ['photo', 'site'],
+    sort: ['display_order:asc', 'last_name:asc']
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<TeamMember>>(url);
+  return response?.data ?? [];
 }
 
 /**

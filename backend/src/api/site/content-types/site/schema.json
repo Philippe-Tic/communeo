@@ -125,6 +125,12 @@
       "target": "api::official-document.official-document",
       "mappedBy": "site"
     },
+    "team_members": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::team-member.team-member",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

@@ -220,6 +220,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'evenements': 'api::evenement.evenement',
       'contact-submissions': 'api::contact-submission.contact-submission',
       'official-documents': 'api::official-document.official-document',
+      'team-members': 'api::team-member.team-member',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

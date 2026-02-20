@@ -23,6 +23,9 @@ import { ContactSubmissions } from './pages/ContactSubmissions'
 import { OfficialDocumentDetail } from './pages/OfficialDocumentDetail'
 import { CreateOfficialDocument, EditOfficialDocument } from './pages/OfficialDocumentForm'
 import { OfficialDocuments } from './pages/OfficialDocuments'
+import { TeamMembers } from './pages/TeamMembers'
+import { TeamMemberDetail } from './pages/TeamMemberDetail'
+import { CreateTeamMember, EditTeamMember } from './pages/TeamMemberForm'
 import { Compliance } from './pages/Compliance'
 import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
@@ -259,6 +262,51 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditOfficialDocument />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Team members routes */}
+          <Route
+            path="/team-members"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <TeamMembers />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/team-members/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateTeamMember />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/team-members/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <TeamMemberDetail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/team-members/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditTeamMember />
                 </MainLayout>
               </ProtectedRoute>
             }

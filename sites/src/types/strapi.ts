@@ -216,6 +216,22 @@ export interface OfficialDocument {
   updatedAt: string;
 }
 
+// Membres de l'équipe municipale - Strapi v5
+export interface TeamMember {
+  id: number;
+  documentId: string;
+  first_name: string;
+  last_name: string;
+  role: 'maire' | 'adjoint' | 'conseiller' | 'dgs' | 'agent';
+  delegation?: string;
+  bio?: string;
+  photo?: StrapiMedia;
+  display_order: number;
+  site: StrapiData<Site> | Site;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Types utilitaires
 export type SiteData = Site;
 export type PageData = Page;

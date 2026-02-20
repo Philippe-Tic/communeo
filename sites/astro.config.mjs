@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
+import sitemap from '@astrojs/sitemap';
 import dotenv from 'dotenv';
 
 // Charger le fichier .env
@@ -12,7 +13,12 @@ const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN || '';
 
 export default defineConfig({
-  integrations: [tailwind()],
+  integrations: [
+    tailwind(),
+    sitemap({
+      filter: (page) => !page.endsWith('/robots.txt'),
+    }),
+  ],
 
   // Configuration du site basée sur le slug
   site: `https://${SITE_SLUG}.monservice.fr`,

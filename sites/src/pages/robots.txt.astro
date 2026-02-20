@@ -1,0 +1,8 @@
+---
+const sitemapUrl = new URL('/sitemap-index.xml', Astro.site).href;
+const body = `User-agent: *
+Allow: /
+
+Sitemap: ${sitemapUrl}`;
+---
+{body}

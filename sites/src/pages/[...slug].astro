@@ -106,6 +106,10 @@ const breadcrumbs = buildBreadcrumbs(page, allPages);
                   src={getStrapiImageUrl(attributes.featured_image.data.url)}
                   alt={attributes.featured_image.data.alternativeText || attributes.title}
                   class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                  fetchpriority="high"
+                  decoding="async"
+                  width={attributes.featured_image.data.width || 800}
+                  height={attributes.featured_image.data.height || 384}
                 />
               </div>
             )}

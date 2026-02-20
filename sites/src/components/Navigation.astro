@@ -41,6 +41,9 @@ const isActive = (pagePath: string) =>
               src={getStrapiImageUrl(siteConfig.logo.data.url)}
               alt={siteConfig.logo.data.alternativeText || `Logo ${siteConfig.name}`}
               class="h-10 w-auto"
+              width="40"
+              height="40"
+              decoding="async"
             />
           )}
           <span class="font-bold text-xl">{siteConfig?.name}</span>

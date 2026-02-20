@@ -51,6 +51,10 @@ try {
                       src={getStrapiImageUrl(event.image.data.url)}
                       alt={event.image.data.alternativeText || event.title}
                       class="w-full h-48 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width="400"
+                      height="192"
                     />
                   </div>
                 )}

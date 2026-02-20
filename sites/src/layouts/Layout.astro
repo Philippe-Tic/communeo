@@ -1,7 +1,9 @@
 ---
 import type { Site } from '../types/strapi';
-import { getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
 import CookieBanner from '../components/CookieBanner.astro';
+
+const strapiUrl = strapiBaseUrl;
 
 export interface Props {
   title?: string;
@@ -32,20 +34,36 @@ const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?
 const socialImage = image ? getStrapiImageUrl(image) :
   (siteConfig?.logo?.data ? getStrapiImageUrl(siteConfig.logo.data.url) : '');
 
+// JSON-LD Organization
+const organizationJsonLd = siteConfig ? JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "GovernmentOrganization",
+  "name": siteConfig.name,
+  "url": Astro.site?.toString() || Astro.url.origin,
+  ...(siteConfig.address && { "address": { "@type": "PostalAddress", "streetAddress": siteConfig.address } }),
+  ...(siteConfig.contact_phone && { "telephone": siteConfig.contact_phone }),
+  ...(siteConfig.contact_mail && { "email": siteConfig.contact_mail }),
+  ...(siteConfig.logo?.data && { "logo": getStrapiImageUrl(siteConfig.logo.data.url) })
+}) : null;
+
 ---
 
 <!doctype html>
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
+    <!-- Preconnect to Strapi for faster image loading -->
+    <link rel="preconnect" href={strapiUrl} crossorigin />
+    <link rel="dns-prefetch" href={strapiUrl} />
+
     <!-- SEO -->
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={Astro.url} />
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph / Facebook -->
@@ -61,6 +79,11 @@ const socialImage = image ? getStrapiImageUrl(image) :
     <meta property="twitter:title" content={fullTitle} />
     <meta property="twitter:description" content={description} />
     {socialImage && <meta property="twitter:image" content={socialImage} />}
+
+    <!-- JSON-LD Organization -->
+    {organizationJsonLd && (
+      <script type="application/ld+json" set:html={organizationJsonLd} />
+    )}
 
     <!-- Couleurs du thème en CSS custom properties -->
     <style define:vars={{

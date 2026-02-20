@@ -4,6 +4,7 @@ import type {
 
 // Configuration depuis les variables d'environnement
 const STRAPI_URL = import.meta.env.STRAPI_URL || 'http://localhost:1337';
+export { STRAPI_URL as strapiBaseUrl };
 const STRAPI_TOKEN = import.meta.env.STRAPI_TOKEN || '';
 const SITE_DOCUMENT_ID = import.meta.env.SITE_DOCUMENT_ID || ''; // Utilisation du documentId au lieu de l'id numérique
 

@@ -58,6 +58,10 @@ try {
                     src={getStrapiImageUrl(homepage.featured_image.data.url)}
                     alt={homepage.featured_image.data.alternativeText || homepage.title}
                     class="w-full h-64 object-cover rounded-lg shadow-lg"
+                    fetchpriority="high"
+                    decoding="async"
+                    width="800"
+                    height="256"
                   />
                 </div>
               )}
@@ -75,6 +79,10 @@ try {
                   src={getStrapiImageUrl(homepage.featured_image.data.url)}
                   alt={homepage.featured_image.data.alternativeText || homepage.title}
                   class="w-full h-96 object-cover rounded-lg shadow-xl"
+                  fetchpriority="high"
+                  decoding="async"
+                  width="800"
+                  height="384"
                 />
               </div>
             )}
@@ -103,6 +111,10 @@ try {
                       src={getStrapiImageUrl(article.image.data.url)}
                       alt={article.image.data.alternativeText || article.title}
                       class="w-full h-48 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width="400"
+                      height="192"
                     />
                   </div>
                 )}
@@ -186,6 +198,10 @@ try {
                       src={getStrapiImageUrl(event.image.data.url)}
                       alt={event.image.data.alternativeText || event.title}
                       class="w-full h-48 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width="400"
+                      height="192"
                     />
                   </div>
                 )}

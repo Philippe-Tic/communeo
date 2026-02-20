@@ -805,6 +805,56 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
+  collectionName: 'media_items';
+  info: {
+    description: 'Biblioth\u00E8que de m\u00E9dias avec isolation par site';
+    displayName: 'Media Item';
+    pluralName: 'media-items';
+    singularName: 'media-item';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    alt_text: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    caption: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    file: Schema.Attribute.Media<'images' | 'files' | 'videos'> &
+      Schema.Attribute.Required;
+    folder: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }> &
+      Schema.Attribute.DefaultTo<'general'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::media-item.media-item'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOfficialDocumentOfficialDocument
   extends Struct.CollectionTypeSchema {
   collectionName: 'official_documents';
@@ -980,6 +1030,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> &
       Schema.Attribute.Private;
     logo: Schema.Attribute.Media<'images'>;
+    media_items: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::media-item.media-item'
+    >;
     mentions_legales: Schema.Attribute.Component<
       'legal.mentions-legales',
       false
@@ -1607,6 +1661,7 @@ declare module '@strapi/strapi' {
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
+      'api::media-item.media-item': ApiMediaItemMediaItem;
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
       'api::site.site': ApiSiteSite;

@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../components/common'
@@ -12,7 +12,8 @@ import { FormSection } from '../components/forms/FormSection'
 import { FormSelect } from '../components/forms/FormSelect'
 import { RichTextEditor } from '../components/forms/RichTextEditor'
 import { PageHeader } from '../components/layout'
-import { ContentPreview } from '../components/preview/ContentPreview'
+import { SitePreview } from '../components/preview/SitePreview'
+import { PreviewToolbar } from '../components/preview/PreviewToolbar'
 import { useCreateEvent, useEvent, useUpdateEvent, type Event } from '../hooks/api/useEvents'
 import { toaster } from '../lib/toaster'
 
@@ -46,7 +47,17 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
   const { id } = useParams<{ id: string }>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
-  const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit')
+  const previewRef = useRef<HTMLDivElement>(null)
+  const [previewWidth, setPreviewWidth] = useState(0)
+
+  useEffect(() => {
+    if (!showPreview || !previewRef.current) return
+    const observer = new ResizeObserver((entries) => {
+      setPreviewWidth(entries[0].contentRect.width)
+    })
+    observer.observe(previewRef.current)
+    return () => observer.disconnect()
+  }, [showPreview])
 
   const createEventMutation = useCreateEvent()
   const updateEventMutation = useUpdateEvent()
@@ -150,17 +161,18 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
   }
 
   return (
-    <div className={showPreview ? 'mx-auto max-w-7xl' : 'mx-auto max-w-4xl'}>
+    <div className={showPreview ? 'mx-auto max-w-[1600px]' : 'mx-auto max-w-4xl'}>
       <div className="flex flex-col gap-6">
         <PageHeader
           title={isEditing ? 'Modifier l\'événement' : 'Créer un nouvel événement'}
-          actions={[
+          actions={showPreview ? [] : [
             {
-              label: showPreview ? 'Masquer l\'aperçu' : 'Aperçu',
-              onClick: () => setShowPreview(!showPreview),
-              variant: showPreview ? 'solid' : 'outline',
+              label: 'Aperçu',
+              onClick: () => setShowPreview(true),
+              variant: 'outline' as const,
+              className: 'hidden lg:inline-flex',
             },
-            { label: 'Retour', onClick: () => navigate('/events'), variant: 'outline' },
+            { label: 'Retour', onClick: () => navigate('/events'), variant: 'outline' as const },
           ]}
           breadcrumbs={[
             { label: 'Événements', href: '/events' },
@@ -168,19 +180,8 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
           ]}
         />
 
-        {showPreview && (
-          <div className="flex gap-1 rounded-lg bg-muted p-1 lg:hidden">
-            <button type="button" onClick={() => setMobileTab('edit')} className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${mobileTab === 'edit' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}>
-              Éditer
-            </button>
-            <button type="button" onClick={() => setMobileTab('preview')} className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${mobileTab === 'preview' ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}>
-              Aperçu
-            </button>
-          </div>
-        )}
-
         <div className={showPreview ? 'flex gap-6' : ''}>
-          <div className={showPreview ? `flex-[3] ${mobileTab === 'preview' ? 'hidden lg:block' : ''}` : ''}>
+          <div className={showPreview ? 'flex-[2]' : ''}>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 <FormSection title="Informations générales">
@@ -332,8 +333,20 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
           </div>
 
           {showPreview && (
-            <div className={`sticky top-4 flex-[2] self-start ${mobileTab === 'edit' ? 'hidden lg:block' : ''}`}>
-              <ContentPreview html={watchedDescription} title={watchedTitle} type="event" className="max-h-[calc(100vh-8rem)]" />
+            <div ref={previewRef} className="flex-[3]">
+              <div
+                className="fixed top-[104px] bottom-4"
+                style={previewWidth > 0 ? { width: `${previewWidth}px` } : undefined}
+              >
+                <PreviewToolbar
+                  actions={<>
+                    <Button variant="outline" size="sm" onClick={() => setShowPreview(false)}>Masquer l'aperçu</Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/events')}>Retour</Button>
+                  </>}
+                >
+                  <SitePreview content={watchedDescription} title={watchedTitle} contentType="event" />
+                </PreviewToolbar>
+              </div>
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
-import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react'
+import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react'
 import React, { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -29,6 +29,7 @@ const navGroups: NavGroup[] = [
       { name: 'Événements', path: '/events', icon: Calendar },
       { name: 'Documents', path: '/documents', icon: FileArchive },
       { name: 'Alertes', path: '/alertes', icon: Megaphone },
+      { name: 'Médiathèque', path: '/media', icon: ImageIcon },
     ],
   },
   {

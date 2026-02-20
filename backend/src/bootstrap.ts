@@ -141,6 +141,14 @@ export default async ({ strapi }) => {
       { action: 'api::alerte.alerte.update', enabled: true },
       { action: 'api::alerte.alerte.delete', enabled: true },
 
+      // Media Items
+      { action: 'api::media-item.media-item.find', enabled: true },
+      { action: 'api::media-item.media-item.findOne', enabled: true },
+      { action: 'api::media-item.media-item.create', enabled: true },
+      { action: 'api::media-item.media-item.update', enabled: true },
+      { action: 'api::media-item.media-item.delete', enabled: true },
+      { action: 'api::media-item.media-item.upload', enabled: true },
+
       // Upload (needed for file uploads)
       { action: 'plugin::upload.content-api.upload', enabled: true },
       { action: 'plugin::upload.content-api.find', enabled: true },

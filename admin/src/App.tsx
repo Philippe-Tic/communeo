@@ -35,6 +35,7 @@ import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
 import { Alertes } from './pages/Alertes'
 import { AlerteForm } from './pages/AlerteForm'
+import { MediaLibrary } from './pages/MediaLibrary'
 
 function App() {
   return (
@@ -391,6 +392,18 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <AlerteForm />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Media library route */}
+          <Route
+            path="/media"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <MediaLibrary />
                 </MainLayout>
               </ProtectedRoute>
             }

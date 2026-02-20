@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { uploadFile, type StrapiMedia } from '@/hooks/api/useOfficialDocuments'
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
+import { MediaPickerDialog } from './MediaPickerDialog'
+import { FolderOpen, ImagePlus, Loader2, Trash2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 
 interface ImagePickerProps {
@@ -16,6 +17,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 export function ImagePicker({ value, onChange, error, className }: ImagePickerProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const imageUrl = value?.url
@@ -50,35 +52,115 @@ export function ImagePicker({ value, onChange, error, className }: ImagePickerPr
     if (file) handleFile(file)
   }
 
+  const handlePickerSelect = (media: { url: string; alt: string; name: string }) => {
+    onChange({
+      id: 0,
+      documentId: '',
+      name: media.name,
+      url: media.url,
+      mime: 'image/jpeg',
+      size: 0,
+      ext: '',
+    })
+  }
+
   if (imageUrl && !uploading) {
     return (
-      <div className={cn('relative group', className)}>
-        <img
-          src={imageUrl}
-          alt={value?.name || ''}
-          className={cn(
-            'h-48 w-full rounded-lg border object-cover',
-            error && 'border-destructive'
-          )}
-        />
-        <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={() => inputRef.current?.click()}
-          >
-            Remplacer
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="destructive"
-            onClick={() => onChange(null)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+      <>
+        <div className={cn('relative group', className)}>
+          <img
+            src={imageUrl}
+            alt={value?.name || ''}
+            className={cn(
+              'h-48 w-full rounded-lg border object-cover',
+              error && 'border-destructive'
+            )}
+          />
+          <div className="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => inputRef.current?.click()}
+            >
+              Remplacer
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={() => setPickerOpen(true)}
+            >
+              <FolderOpen className="mr-1 h-3.5 w-3.5" />
+              Bibliothèque
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="destructive"
+              onClick={() => onChange(null)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleInputChange}
+          />
         </div>
+        <MediaPickerDialog
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={handlePickerSelect}
+          accept="image"
+        />
+      </>
+    )
+  }
+
+  return (
+    <>
+      <div
+        className={cn(
+          'flex h-48 flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed transition-colors',
+          dragOver
+            ? 'border-primary bg-primary/5'
+            : 'border-input hover:border-primary/50',
+          error && 'border-destructive',
+          className
+        )}
+        onDragOver={(e) => {
+          e.preventDefault()
+          setDragOver(true)
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={handleDrop}
+      >
+        {uploading ? (
+          <>
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Envoi en cours...</p>
+          </>
+        ) : (
+          <>
+            <ImagePlus className="h-8 w-8 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Glissez une image ici
+            </p>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+                Choisir un fichier
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={() => setPickerOpen(true)}>
+                <FolderOpen className="mr-1 h-3.5 w-3.5" />
+                Bibliothèque
+              </Button>
+            </div>
+          </>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -87,47 +169,12 @@ export function ImagePicker({ value, onChange, error, className }: ImagePickerPr
           onChange={handleInputChange}
         />
       </div>
-    )
-  }
-
-  return (
-    <div
-      className={cn(
-        'flex h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed transition-colors',
-        dragOver
-          ? 'border-primary bg-primary/5'
-          : 'border-input hover:border-primary/50',
-        error && 'border-destructive',
-        className
-      )}
-      onClick={() => !uploading && inputRef.current?.click()}
-      onDragOver={(e) => {
-        e.preventDefault()
-        setDragOver(true)
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
-    >
-      {uploading ? (
-        <>
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Envoi en cours...</p>
-        </>
-      ) : (
-        <>
-          <ImagePlus className="h-8 w-8 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">
-            Cliquez ou glissez une image
-          </p>
-        </>
-      )}
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleInputChange}
+      <MediaPickerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={handlePickerSelect}
+        accept="image"
       />
-    </div>
+    </>
   )
 }

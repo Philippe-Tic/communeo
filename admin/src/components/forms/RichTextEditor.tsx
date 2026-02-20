@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { MediaPickerDialog } from './MediaPickerDialog'
 import { cn } from '@/lib/utils'
 import Color from '@tiptap/extension-color'
 import Image from '@tiptap/extension-image'
@@ -105,9 +106,7 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkUrl, setLinkUrl] = useState('')
-  const [imageDialogOpen, setImageDialogOpen] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
-  const [imageAlt, setImageAlt] = useState('')
+  const [imagePickerOpen, setImagePickerOpen] = useState(false)
   const [ctaDialogOpen, setCtaDialogOpen] = useState(false)
   const [ctaUrl, setCtaUrl] = useState('')
   const [ctaLabel, setCtaLabel] = useState('')
@@ -203,19 +202,12 @@ export function RichTextEditor({
     setLinkUrl('')
   }
 
-  const openImageDialog = () => {
-    setImageUrl('')
-    setImageAlt('')
-    setImageDialogOpen(true)
+  const openImagePicker = () => {
+    setImagePickerOpen(true)
   }
 
-  const confirmImage = () => {
-    if (imageUrl) {
-      editor.chain().focus().setImage({ src: imageUrl, alt: imageAlt }).run()
-    }
-    setImageDialogOpen(false)
-    setImageUrl('')
-    setImageAlt('')
+  const handleImageSelected = (media: { url: string; alt: string }) => {
+    editor.chain().focus().setImage({ src: media.url, alt: media.alt }).run()
   }
 
   const openCtaDialog = () => {
@@ -411,7 +403,7 @@ export function RichTextEditor({
               <ToolbarSeparator />
 
               {/* Image */}
-              <ToolbarButton onClick={openImageDialog} title="Image">
+              <ToolbarButton onClick={openImagePicker} title="Image">
                 <ImageIcon className="h-4 w-4" />
               </ToolbarButton>
 
@@ -504,45 +496,15 @@ export function RichTextEditor({
         </DialogContent>
       </Dialog>
 
-      {/* Image Dialog */}
+      {/* Image Picker Dialog */}
       {isFull && (
-        <Dialog open={imageDialogOpen} onOpenChange={setImageDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Insérer une image</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 py-4">
-              <div>
-                <Label className="mb-2">URL de l'image</Label>
-                <Input
-                  placeholder="https://..."
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label className="mb-2">Texte alternatif</Label>
-                <Input
-                  placeholder="Description de l'image"
-                  value={imageAlt}
-                  onChange={(e) => setImageAlt(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && confirmImage()}
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setImageDialogOpen(false)}
-              >
-                Annuler
-              </Button>
-              <Button onClick={confirmImage} disabled={!imageUrl}>
-                Insérer
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <MediaPickerDialog
+          open={imagePickerOpen}
+          onOpenChange={setImagePickerOpen}
+          onSelect={handleImageSelected}
+          accept="image"
+          showUrlTab
+        />
       )}
 
       {/* CTA Dialog */}

@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "media_items",
+  "info": {
+    "singularName": "media-item",
+    "pluralName": "media-items",
+    "displayName": "Media Item",
+    "description": "Bibliothèque de médias avec isolation par site"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255
+    },
+    "alt_text": {
+      "type": "string",
+      "maxLength": 255
+    },
+    "caption": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "folder": {
+      "type": "string",
+      "default": "general",
+      "maxLength": 100
+    },
+    "file": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": ["images", "files", "videos"]
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "media_items",
+      "required": true
+    }
+  }
+}

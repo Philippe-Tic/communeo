@@ -9,6 +9,7 @@ interface PageHeaderAction {
   variant?: 'solid' | 'outline' | 'ghost'
   colorScheme?: string
   loading?: boolean
+  className?: string
 }
 
 interface BreadcrumbItem {
@@ -69,7 +70,8 @@ export function PageHeader({ title, subtitle, actions = [], breadcrumbs }: PageH
                   action.colorScheme === 'red' && action.variant === 'outline' && 'border-destructive text-destructive hover:bg-destructive/10',
                   action.colorScheme === 'red' && action.variant !== 'outline' && 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
                   action.colorScheme === 'orange' && 'border-orange-500 text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950',
-                  action.colorScheme === 'gray' && action.variant === 'outline' && 'border-border text-muted-foreground'
+                  action.colorScheme === 'gray' && action.variant === 'outline' && 'border-border text-muted-foreground',
+                  action.className
                 )}
               >
                 {action.loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

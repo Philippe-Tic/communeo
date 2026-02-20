@@ -143,6 +143,12 @@
       "target": "api::alerte.alerte",
       "mappedBy": "site"
     },
+    "media_items": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::media-item.media-item",
+      "mappedBy": "site"
+    },
     "mentions_legales": {
       "type": "component",
       "component": "legal.mentions-legales",

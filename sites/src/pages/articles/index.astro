@@ -3,7 +3,8 @@ import type { Article } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
-import { getArticles, getStrapiImageUrl, formatDate } from '../../utils/strapi';
+import StrapiImage from '../../components/StrapiImage.astro';
+import { getArticles, formatDate } from '../../utils/strapi';
 
 // Récupération de tous les articles
 let articles: Article[] = [];
@@ -92,14 +93,12 @@ const articlesByCategory = articles.reduce((acc, article) => {
               >
                 {article.image?.data && (
                   <div class="aspect-w-16 aspect-h-9">
-                    <img
-                      src={getStrapiImageUrl(article.image.data.url)}
-                      alt={article.image.data.alternativeText || article.title}
+                    <StrapiImage
+                      image={article.image.data}
+                      alt={article.title}
+                      width={400}
+                      height={192}
                       class="w-full h-48 object-cover"
-                      loading="lazy"
-                      decoding="async"
-                      width="400"
-                      height="192"
                     />
                   </div>
                 )}

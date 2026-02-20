@@ -1,0 +1,43 @@
+---
+import { Image } from 'astro:assets';
+import { getStrapiImageUrl } from '../utils/strapi';
+
+interface Props {
+  image: { url: string; alternativeText?: string };
+  alt?: string;
+  width: number;
+  height: number;
+  class?: string;
+  priority?: boolean;
+  widths?: number[];
+  sizes?: string;
+}
+
+const {
+  image,
+  alt,
+  width,
+  height,
+  class: className,
+  priority = false,
+  widths,
+  sizes,
+} = Astro.props;
+
+const src = getStrapiImageUrl(image.url);
+const altText = alt || image.alternativeText || '';
+---
+
+<Image
+  src={src}
+  alt={altText}
+  width={width}
+  height={height}
+  class={className}
+  format="webp"
+  quality={80}
+  loading={priority ? 'eager' : 'lazy'}
+  decoding={priority ? 'sync' : 'async'}
+  {...(priority ? { fetchpriority: 'high' } : {})}
+  {...(widths ? { widths, sizes } : {})}
+/>

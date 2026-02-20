@@ -3,11 +3,11 @@ import type { Page, Article, Event } from '../types/strapi';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import StrapiImage from '../components/StrapiImage.astro';
 import {
   getHomepage,
   getFeaturedArticles,
   getUpcomingEvents,
-  getStrapiImageUrl,
   formatDate
 } from '../utils/strapi';
 
@@ -54,14 +54,13 @@ try {
 
               {homepage.featured_image?.data && (
                 <div class="lg:hidden mb-6">
-                  <img
-                    src={getStrapiImageUrl(homepage.featured_image.data.url)}
-                    alt={homepage.featured_image.data.alternativeText || homepage.title}
+                  <StrapiImage
+                    image={homepage.featured_image.data}
+                    alt={homepage.title}
+                    width={800}
+                    height={256}
                     class="w-full h-64 object-cover rounded-lg shadow-lg"
-                    fetchpriority="high"
-                    decoding="async"
-                    width="800"
-                    height="256"
+                    priority
                   />
                 </div>
               )}
@@ -75,14 +74,13 @@ try {
 
             {homepage.featured_image?.data && (
               <div class="hidden lg:block">
-                <img
-                  src={getStrapiImageUrl(homepage.featured_image.data.url)}
-                  alt={homepage.featured_image.data.alternativeText || homepage.title}
+                <StrapiImage
+                  image={homepage.featured_image.data}
+                  alt={homepage.title}
+                  width={800}
+                  height={384}
                   class="w-full h-96 object-cover rounded-lg shadow-xl"
-                  fetchpriority="high"
-                  decoding="async"
-                  width="800"
-                  height="384"
+                  priority
                 />
               </div>
             )}
@@ -107,14 +105,12 @@ try {
               <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {article.image?.data && (
                   <div class="aspect-w-16 aspect-h-9">
-                    <img
-                      src={getStrapiImageUrl(article.image.data.url)}
-                      alt={article.image.data.alternativeText || article.title}
+                    <StrapiImage
+                      image={article.image.data}
+                      alt={article.title}
+                      width={400}
+                      height={192}
                       class="w-full h-48 object-cover"
-                      loading="lazy"
-                      decoding="async"
-                      width="400"
-                      height="192"
                     />
                   </div>
                 )}
@@ -194,14 +190,12 @@ try {
               <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 {event.image?.data && (
                   <div class="aspect-w-16 aspect-h-9">
-                    <img
-                      src={getStrapiImageUrl(event.image.data.url)}
-                      alt={event.image.data.alternativeText || event.title}
+                    <StrapiImage
+                      image={event.image.data}
+                      alt={event.title}
+                      width={400}
+                      height={192}
                       class="w-full h-48 object-cover"
-                      loading="lazy"
-                      decoding="async"
-                      width="400"
-                      height="192"
                     />
                   </div>
                 )}

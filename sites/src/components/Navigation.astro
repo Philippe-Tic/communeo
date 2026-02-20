@@ -1,6 +1,7 @@
 ---
 import type { Page, Site } from '../types/strapi';
-import { getMenuPages, getSiteConfig, getStrapiImageUrl, getPagePath } from '../utils/strapi';
+import { getMenuPages, getSiteConfig, getPagePath } from '../utils/strapi';
+import StrapiImage from './StrapiImage.astro';
 
 // Récupération des pages du menu et de la configuration du site
 let menuPages: Page[] = [];
@@ -37,13 +38,13 @@ const isActive = (pagePath: string) =>
       <div class="flex items-center">
         <a href="/" class="flex items-center space-x-3 text-gray-900 hover:text-primary transition-colors">
           {siteConfig?.logo?.data && (
-            <img
-              src={getStrapiImageUrl(siteConfig.logo.data.url)}
-              alt={siteConfig.logo.data.alternativeText || `Logo ${siteConfig.name}`}
+            <StrapiImage
+              image={siteConfig.logo.data}
+              alt={`Logo ${siteConfig.name}`}
+              width={40}
+              height={40}
               class="h-10 w-auto"
-              width="40"
-              height="40"
-              decoding="async"
+              priority
             />
           )}
           <span class="font-bold text-xl">{siteConfig?.name}</span>

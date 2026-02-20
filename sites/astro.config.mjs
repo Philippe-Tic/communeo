@@ -11,8 +11,13 @@ const SITE_SLUG = process.env.SITE_SLUG || 'default';
 const SITE_DOCUMENT_ID = process.env.SITE_DOCUMENT_ID || '';
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN || '';
+const strapiHostname = new URL(STRAPI_URL).hostname;
 
 export default defineConfig({
+  image: {
+    domains: [strapiHostname],
+  },
+
   integrations: [
     tailwind(),
     sitemap({

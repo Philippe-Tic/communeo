@@ -3,7 +3,8 @@ import type { Page } from '../types/strapi';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
-import { getPages, getPageBySlug, getStrapiImageUrl, getPagePath, buildBreadcrumbs } from '../utils/strapi';
+import StrapiImage from '../components/StrapiImage.astro';
+import { getPages, getPageBySlug, getPagePath, buildBreadcrumbs } from '../utils/strapi';
 
 export async function getStaticPaths() {
   try {
@@ -102,14 +103,13 @@ const breadcrumbs = buildBreadcrumbs(page, allPages);
         <div class="max-w-4xl mx-auto">
             {attributes.featured_image?.data && (
               <div class="mb-8">
-                <img
-                  src={getStrapiImageUrl(attributes.featured_image.data.url)}
-                  alt={attributes.featured_image.data.alternativeText || attributes.title}
-                  class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-                  fetchpriority="high"
-                  decoding="async"
+                <StrapiImage
+                  image={attributes.featured_image.data}
+                  alt={attributes.title}
                   width={attributes.featured_image.data.width || 800}
                   height={attributes.featured_image.data.height || 384}
+                  class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+                  priority
                 />
               </div>
             )}

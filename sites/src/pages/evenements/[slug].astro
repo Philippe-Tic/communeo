@@ -3,6 +3,7 @@ import type { Event } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
+import StrapiImage from '../../components/StrapiImage.astro';
 import { getEvents, getEventBySlug, getStrapiImageUrl, getSiteConfig, formatDate } from '../../utils/strapi';
 
 export async function getStaticPaths() {
@@ -196,14 +197,13 @@ const eventJsonLd = JSON.stringify({
         <!-- Image principale -->
         {attributes.image?.data && (
           <div class="mb-8">
-            <img
-              src={getStrapiImageUrl(attributes.image.data.url)}
-              alt={attributes.image.data.alternativeText || attributes.title}
-              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-              fetchpriority="high"
-              decoding="async"
+            <StrapiImage
+              image={attributes.image.data}
+              alt={attributes.title}
               width={attributes.image.data.width || 800}
               height={attributes.image.data.height || 384}
+              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+              priority
             />
           </div>
         )}

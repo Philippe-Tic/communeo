@@ -154,12 +154,13 @@ export const useSites = (params: {
 
 export const useSite = (documentId: string) => {
   return useQuery({
-    queryKey: SITES_QUERY_KEYS.current(),
+    queryKey: [...SITES_QUERY_KEYS.current(), documentId],
     queryFn: async (): Promise<Site> => {
       const url = `/api/sites/${documentId}?populate=*`
       const response = await apiClient.get<{ data: Site }>(url)
       return response.data
     },
+    enabled: !!documentId,
     staleTime: 1000 * 60 * 10, // 10 minutes (current site changes less frequently)
   })
 }

@@ -49,21 +49,21 @@ const articlesByCategory = articles.reduce((acc, article) => {
     <Hero title="Actualités" subtitle="Restez informés des dernières actualités et annonces de votre mairie" />
 
     <!-- Filtres de catégories -->
-    <section class="py-6 bg-white border-b border-gray-200">
+    <section class="py-5 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-wrap gap-2 justify-center">
           {categories.map((category) => (
             <button
               type="button"
-              class="filter-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary"
+              class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200 text-gray-600 hover:bg-primary hover:text-white hover:border-primary"
               data-category={category.key}
             >
               {category.label}
               {category.key !== 'all' && articlesByCategory[category.key] && (
-                <span class="ml-1 text-xs">({articlesByCategory[category.key].length})</span>
+                <span class="ml-1 text-xs opacity-70">({articlesByCategory[category.key].length})</span>
               )}
               {category.key === 'all' && (
-                <span class="ml-1 text-xs">({articles.length})</span>
+                <span class="ml-1 text-xs opacity-70">({articles.length})</span>
               )}
             </button>
           ))}
@@ -74,27 +74,23 @@ const articlesByCategory = articles.reduce((acc, article) => {
     <!-- Liste des articles -->
     <Section>
         {articles.length > 0 ? (
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article) => (
               <article
-                class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow article-card"
+                class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all article-card"
                 data-category={article.category}
               >
                 {article.image?.data && (
-                  <div class="aspect-w-16 aspect-h-9">
+                  <div class="relative aspect-[16/9] overflow-hidden">
                     <StrapiImage
                       image={article.image.data}
                       alt={article.title}
                       width={400}
-                      height={192}
-                      class="w-full h-48 object-cover"
+                      height={225}
+                      class="w-full h-full object-cover"
                     />
-                  </div>
-                )}
-
-                <div class="p-6">
-                  <div class="flex items-center justify-between mb-3">
-                    <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    <span class={`absolute top-3 left-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       article.category === 'emergency' ? 'bg-red-100 text-red-800' :
                       article.category === 'news' ? 'bg-blue-100 text-blue-800' :
                       article.category === 'event' ? 'bg-green-100 text-green-800' :
@@ -105,25 +101,26 @@ const articlesByCategory = articles.reduce((acc, article) => {
                        article.category === 'event' ? 'Événement' :
                        'Information'}
                     </span>
-
                     {article.featured && (
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        ⭐ À la une
+                      <span class="absolute top-3 right-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        À la une
                       </span>
                     )}
                   </div>
+                )}
 
-                  {article.publication_date && (
-                    <time class="text-sm text-gray-500 mb-3 block" datetime={article.publication_date}>
-                      {formatDate(article.publication_date)}
-                    </time>
-                  )}
-
-                  <h2 class="text-xl font-semibold text-gray-900 mb-3">
+                <div class="p-5">
+                  <h2 class="text-lg font-bold text-gray-900 mb-2">
                     <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors">
                       {article.title}
                     </a>
                   </h2>
+
+                  {article.publication_date && (
+                    <time class="text-sm text-gray-400 block mb-3" datetime={article.publication_date}>
+                      {formatDate(article.publication_date)}
+                    </time>
+                  )}
 
                   {article.summary && (
                     <p class="text-gray-600 text-sm line-clamp-3 mb-4">
@@ -133,10 +130,10 @@ const articlesByCategory = articles.reduce((acc, article) => {
 
                   <a
                     href={`/articles/${article.slug}`}
-                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm"
+                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm group/link"
                   >
                     Lire la suite
-                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                   </a>

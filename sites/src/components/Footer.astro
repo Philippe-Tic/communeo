@@ -1,6 +1,7 @@
 ---
 import type { Site } from '../types/strapi';
 import { getSiteConfig } from '../utils/strapi';
+import StrapiImage from './StrapiImage.astro';
 
 let siteConfig: Site | null = null;
 
@@ -14,136 +15,148 @@ const currentYear = new Date().getFullYear();
 const accessibilityLevel = siteConfig?.accessibilite?.accessibility_level || 'non-conforme';
 ---
 
-<footer class="footer bg-gray-900 text-white" role="contentinfo" aria-label="Pied de page">
+<footer class="border-t-4 border-primary bg-gray-900 text-white" role="contentinfo" aria-label="Pied de page">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Logo + description -->
+    <div class="pt-12 pb-8 border-b border-gray-800">
+      <div class="flex items-center gap-4 mb-4">
+        {siteConfig?.logo?.data && (
+          <StrapiImage
+            image={siteConfig.logo.data}
+            alt={`Logo ${siteConfig.name}`}
+            width={48}
+            height={48}
+            class="h-12 w-auto brightness-0 invert"
+          />
+        )}
+        <div>
+          <h2 class="text-xl font-bold text-white">{siteConfig?.name || 'Votre mairie'}</h2>
+          {siteConfig?.address && (
+            <p class="text-sm text-gray-400">{siteConfig.address}</p>
+          )}
+        </div>
+      </div>
+    </div>
+
     <!-- Main footer content -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 py-10">
       <!-- Column 1 - Contact -->
       <div>
-        <h2 class="text-lg font-semibold text-white mb-4">
-          {siteConfig?.name || 'Votre mairie'}
-        </h2>
-        <address class="not-italic text-gray-400 space-y-2 text-sm">
-          {siteConfig?.address && (
-            <p>{siteConfig.address}</p>
-          )}
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Contact</h3>
+        <address class="not-italic text-gray-400 space-y-3 text-sm">
           {siteConfig?.contact_phone && (
-            <p>
+            <p class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+              </svg>
               <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-white transition-colors">
                 {siteConfig.contact_phone}
               </a>
             </p>
           )}
           {siteConfig?.contact_mail && (
-            <p>
+            <p class="flex items-center gap-2.5">
+              <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
               <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-white transition-colors">
                 {siteConfig.contact_mail}
               </a>
             </p>
           )}
+          {siteConfig?.infos_pratiques?.opening_hours && (
+            <p class="flex items-start gap-2.5">
+              <svg class="w-4 h-4 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{siteConfig.infos_pratiques.opening_hours}</span>
+            </p>
+          )}
         </address>
-        {siteConfig?.infos_pratiques?.opening_hours && (
-          <div class="mt-4">
-            <h3 class="text-sm font-semibold text-gray-300 mb-1">Horaires d'ouverture</h3>
-            <p class="text-sm text-gray-400">{siteConfig.infos_pratiques.opening_hours}</p>
-          </div>
-        )}
       </div>
 
       <!-- Column 2 - Navigation -->
       <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Navigation</h2>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Navigation</h3>
         <nav aria-label="Navigation du pied de page">
-          <ul class="space-y-2 text-sm text-gray-400">
+          <ul class="space-y-2.5 text-sm text-gray-400">
             <li>
-              <a href="/" class="hover:text-white transition-colors">Accueil</a>
+              <a href="/" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Accueil</a>
             </li>
             <li>
-              <a href="/articles" class="hover:text-white transition-colors">Actualités</a>
+              <a href="/articles" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Actualités</a>
             </li>
             <li>
-              <a href="/evenements" class="hover:text-white transition-colors">Événements</a>
+              <a href="/evenements" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Événements</a>
             </li>
             <li>
-              <a href="/documents" class="hover:text-white transition-colors">Documents</a>
+              <a href="/equipe-municipale" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Équipe municipale</a>
             </li>
             <li>
-              <a href="/equipe-municipale" class="hover:text-white transition-colors">Équipe municipale</a>
+              <a href="/associations" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Associations</a>
             </li>
             <li>
-              <a href="/associations" class="hover:text-white transition-colors">Associations</a>
-            </li>
-            <li>
-              <a href="/demarches" class="hover:text-white transition-colors">Démarches</a>
-            </li>
-            <li>
-              <a href="/contact" class="hover:text-white transition-colors">Nous contacter</a>
+              <a href="/contact" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Nous contacter</a>
             </li>
           </ul>
         </nav>
       </div>
 
-      <!-- Column 3 - Legal -->
+      <!-- Column 3 - Services -->
       <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Informations légales</h2>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Services</h3>
+        <ul class="space-y-2.5 text-sm text-gray-400">
+          <li>
+            <a href="/demarches" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Démarches en ligne</a>
+          </li>
+          <li>
+            <a href="/documents" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Documents officiels</a>
+          </li>
+          <li>
+            <a href="/contact" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">Contact et réclamations</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Column 4 - Legal -->
+      <div>
+        <h3 class="text-sm font-semibold text-white uppercase tracking-wider mb-4">Informations légales</h3>
         <nav aria-label="Liens légaux">
-          <ul class="space-y-2 text-sm text-gray-400">
+          <ul class="space-y-2.5 text-sm text-gray-400">
             <li>
-              <a href="/mentions-legales" class="hover:text-white transition-colors">
+              <a href="/mentions-legales" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                 Mentions légales
               </a>
             </li>
             <li>
-              <a href="/politique-confidentialite" class="hover:text-white transition-colors">
+              <a href="/politique-confidentialite" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                 Politique de confidentialité
               </a>
             </li>
             <li>
-              <a href="/accessibilite" class="hover:text-white transition-colors">
+              <a href="/accessibilite" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                 Accessibilité
               </a>
             </li>
             <li>
-              <a href="#" data-cookie-settings class="hover:text-white transition-colors">
+              <a href="#" data-cookie-settings class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                 Gestion des cookies
               </a>
             </li>
             <li>
-              <a href="/exercice-droits" class="hover:text-white transition-colors">
+              <a href="/exercice-droits" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                 Exercice des droits RGPD
               </a>
             </li>
             {siteConfig?.open_data_enabled && (
               <li>
-                <a href="/open-data" class="hover:text-white transition-colors">
+                <a href="/open-data" class="hover:text-white hover:translate-x-0.5 transition-all inline-block">
                   Open Data
                 </a>
               </li>
             )}
           </ul>
         </nav>
-      </div>
-
-      <!-- Column 4 - Services rapides -->
-      <div>
-        <h2 class="text-lg font-semibold text-white mb-4">Services</h2>
-        <ul class="space-y-2 text-sm text-gray-400">
-          <li>
-            <a href="/demarches" class="hover:text-white transition-colors">
-              Démarches en ligne
-            </a>
-          </li>
-          <li>
-            <a href="/documents" class="hover:text-white transition-colors">
-              Documents officiels
-            </a>
-          </li>
-          <li>
-            <a href="/contact" class="hover:text-white transition-colors">
-              Contact et réclamations
-            </a>
-          </li>
-        </ul>
       </div>
     </div>
 

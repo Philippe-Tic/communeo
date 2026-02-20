@@ -3,10 +3,8 @@ import type { Site } from '../types/strapi';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
 import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
+import '../styles/fonts.css';
 import '../styles/prose.css';
-import '../styles/themes/classic.css';
-import '../styles/themes/modern.css';
-import '../styles/themes/accessible.css';
 
 const strapiUrl = strapiBaseUrl;
 
@@ -106,7 +104,7 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
       }
     </style>
   </head>
-  <body class={`theme-${siteConfig?.theme || 'modern'} min-h-screen bg-gray-50`}>
+  <body class="font-sans min-h-screen bg-gray-50">
     <AlertBanner />
     <slot />
 

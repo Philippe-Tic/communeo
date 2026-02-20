@@ -3,21 +3,23 @@ interface Props {
   title?: string;
   subtitle?: string;
   bg?: 'white' | 'gray' | 'gradient';
+  compact?: boolean;
   class?: string;
 }
 
-const { title, subtitle, bg = 'white', class: className } = Astro.props;
+const { title, subtitle, bg = 'white', compact = false, class: className } = Astro.props;
 
 const bgClass = bg === 'gray' ? 'bg-gray-50' : bg === 'gradient' ? 'bg-gradient-to-br from-primary/5 to-secondary/5' : 'bg-white';
+const paddingClass = compact ? 'py-8 lg:py-10' : 'py-12 lg:py-16';
 ---
 
-<section class={`py-12 lg:py-16 ${bgClass} ${className || ''}`}>
+<section class={`${paddingClass} ${bgClass} ${className || ''}`}>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     {title && (
-      <div class="text-center mb-10">
-        <h2 class="section-title text-3xl font-bold text-gray-900 mb-3">{title}</h2>
+      <div class="mb-10">
+        <h2 class="section-title text-2xl sm:text-3xl font-bold text-gray-900 border-l-4 border-primary pl-4 mb-2">{title}</h2>
         {subtitle && (
-          <p class="text-gray-600 max-w-2xl mx-auto">{subtitle}</p>
+          <p class="text-gray-600 pl-5">{subtitle}</p>
         )}
       </div>
     )}

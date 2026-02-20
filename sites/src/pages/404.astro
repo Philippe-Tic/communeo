@@ -13,10 +13,13 @@ import Footer from '../components/Footer.astro';
 
   <Navigation />
 
-  <main id="main-content" class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="max-w-md w-full text-center px-4">
+  <main id="main-content" class="min-h-[60vh] flex items-center justify-center bg-gray-50">
+    <div class="max-w-lg w-full text-center px-4 py-16">
       <div class="mb-8">
-        <h1 class="text-9xl font-bold text-primary mb-4">404</h1>
+        <svg class="mx-auto w-24 h-24 text-primary/30 mb-6" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        </svg>
+        <h1 class="text-7xl font-bold text-primary mb-4">404</h1>
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">
           Page non trouvée
         </h2>
@@ -28,30 +31,37 @@ import Footer from '../components/Footer.astro';
       <div class="space-y-4">
         <a
           href="/"
-          class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+          class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
         >
-          🏠 Retour à l'accueil
+          Retour à l'accueil
         </a>
 
-        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+        <div class="flex flex-col sm:flex-row gap-2 justify-center pt-2">
           <a
             href="/articles"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
           >
-            📰 Actualités
+            Actualités
           </a>
           <a
             href="/evenements"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
           >
-            📅 Événements
+            Événements
+          </a>
+          <a
+            href="/contact"
+            class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
+          >
+            Contact
           </a>
         </div>
       </div>
 
-      <div class="mt-12 text-sm text-gray-500">
+      <div class="mt-12 text-sm text-gray-400">
         <p>
-          Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à contacter votre mairie.
+          Si vous pensez qu'il s'agit d'une erreur, n'hésitez pas à
+          <a href="/contact" class="text-primary hover:text-primary/80 underline underline-offset-2">contacter votre mairie</a>.
         </p>
       </div>
     </div>

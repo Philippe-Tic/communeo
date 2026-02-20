@@ -113,12 +113,26 @@ const articleJsonLd = JSON.stringify({
       { label: attributes.title }
     ]} />
 
+    <!-- Image hero pleine largeur -->
+    {attributes.image?.data && (
+      <div class="w-full h-64 sm:h-80 md:h-96 overflow-hidden">
+        <StrapiImage
+          image={attributes.image.data}
+          alt={attributes.title}
+          width={attributes.image.data.width || 1200}
+          height={attributes.image.data.height || 600}
+          class="w-full h-full object-cover"
+          priority
+        />
+      </div>
+    )}
+
     <!-- Article principal -->
     <article class="py-12">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header de l'article -->
         <header class="mb-8">
-          <div class="flex items-center space-x-3 mb-4">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
             <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
               attributes.category === 'emergency' ? 'bg-red-100 text-red-800' :
               attributes.category === 'news' ? 'bg-blue-100 text-blue-800' :
@@ -133,12 +147,12 @@ const articleJsonLd = JSON.stringify({
 
             {attributes.featured && (
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                ⭐ À la une
+                À la une
               </span>
             )}
           </div>
 
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             {attributes.title}
           </h1>
 
@@ -148,36 +162,29 @@ const articleJsonLd = JSON.stringify({
             </p>
           )}
 
-          <div class="flex items-center space-x-4 text-sm text-gray-500">
+          <div class="flex items-center gap-4 text-sm text-gray-400">
             {attributes.publication_date && (
-              <time datetime={attributes.publication_date}>
-                📅 Publié le {formatDate(attributes.publication_date)}
+              <time datetime={attributes.publication_date} class="flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                </svg>
+                Publié le {formatDate(attributes.publication_date)}
               </time>
             )}
 
-            <time datetime={attributes.updatedAt}>
-              ✏️ Mis à jour le {formatDate(attributes.updatedAt)}
+            <time datetime={attributes.updatedAt} class="flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              Mis à jour le {formatDate(attributes.updatedAt)}
             </time>
           </div>
         </header>
 
-        <!-- Image principale -->
-        {attributes.image?.data && (
-          <div class="mb-8">
-            <StrapiImage
-              image={attributes.image.data}
-              alt={attributes.title}
-              width={attributes.image.data.width || 800}
-              height={attributes.image.data.height || 384}
-              class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-              priority
-            />
-            {attributes.image.data.alternativeText && (
-              <p class="text-sm text-gray-500 mt-2 text-center italic">
-                {attributes.image.data.alternativeText}
-              </p>
-            )}
-          </div>
+        {attributes.image?.data?.alternativeText && (
+          <p class="text-sm text-gray-400 -mt-4 mb-6 italic text-center">
+            {attributes.image.data.alternativeText}
+          </p>
         )}
 
         <!-- Contenu de l'article -->
@@ -190,29 +197,38 @@ const articleJsonLd = JSON.stringify({
         <!-- Actions de partage -->
         <div class="mt-12 pt-8 border-t border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Partager cet article</h3>
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center gap-3">
             <button
               type="button"
-              class="share-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              class="share-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
               data-url={Astro.url.href}
               data-title={attributes.title}
             >
-              📧 Par email
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              Par email
             </button>
 
             <button
               type="button"
-              class="copy-url-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              class="copy-url-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
               data-url={Astro.url.href}
             >
-              🔗 Copier le lien
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-1.03a4.5 4.5 0 00-1.242-7.244l-4.5-4.5a4.5 4.5 0 00-6.364 6.364L5.04 8.588" />
+              </svg>
+              Copier le lien
             </button>
 
             <button
               type="button"
-              class="print-btn inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              class="print-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
             >
-              🖨️ Imprimer
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m0 0a48.09 48.09 0 018.5 0" />
+              </svg>
+              Imprimer
             </button>
           </div>
         </div>
@@ -224,21 +240,21 @@ const articleJsonLd = JSON.stringify({
       <Section title="Autres actualités" bg="gray">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {suggestedArticles.map((suggestedArticle) => (
-              <article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+              <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all flex flex-row md:flex-col">
                 {suggestedArticle.image?.data && (
-                  <div class="aspect-w-16 aspect-h-9">
+                  <div class="w-32 md:w-full flex-shrink-0">
                     <StrapiImage
                       image={suggestedArticle.image.data}
                       alt={suggestedArticle.title}
                       width={400}
-                      height={128}
-                      class="w-full h-32 object-cover"
+                      height={200}
+                      class="w-full h-full md:h-40 object-cover"
                     />
                   </div>
                 )}
 
-                <div class="p-4">
-                  <span class={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mb-2 ${
+                <div class="p-4 flex-1">
+                  <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-2 ${
                     suggestedArticle.category === 'emergency' ? 'bg-red-100 text-red-800' :
                     suggestedArticle.category === 'news' ? 'bg-blue-100 text-blue-800' :
                     suggestedArticle.category === 'event' ? 'bg-green-100 text-green-800' :
@@ -257,7 +273,7 @@ const articleJsonLd = JSON.stringify({
                   </h3>
 
                   {suggestedArticle.publication_date && (
-                    <time class="text-xs text-gray-500" datetime={suggestedArticle.publication_date}>
+                    <time class="text-xs text-gray-400" datetime={suggestedArticle.publication_date}>
                       {formatDate(suggestedArticle.publication_date)}
                     </time>
                   )}
@@ -269,7 +285,7 @@ const articleJsonLd = JSON.stringify({
           <div class="text-center mt-8">
             <a
               href="/articles"
-              class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary/90 transition-colors"
+              class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
             >
               Voir toutes les actualités
             </a>
@@ -315,10 +331,10 @@ const articleJsonLd = JSON.stringify({
         try {
           await navigator.clipboard.writeText(url);
           // Feedback visuel
-          const originalText = copyBtn.textContent || '🔗 Copier le lien';
-          copyBtn.textContent = '✅ Lien copié !';
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Copié !';
           setTimeout(() => {
-            copyBtn.textContent = originalText;
+            copyBtn.innerHTML = originalHTML;
           }, 2000);
         } catch (err) {
           console.error('Erreur lors de la copie :', err);
@@ -330,10 +346,10 @@ const articleJsonLd = JSON.stringify({
           document.execCommand('copy');
           document.body.removeChild(textArea);
 
-          const originalText = copyBtn.textContent || '🔗 Copier le lien';
-          copyBtn.textContent = '✅ Lien copié !';
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg> Copié !';
           setTimeout(() => {
-            copyBtn.textContent = originalText;
+            copyBtn.innerHTML = originalHTML;
           }, 2000);
         }
       });

@@ -1,9 +1,10 @@
-/* Shared prose styles for rich content across all Astro pages */
+/* Prose styles — Typographie institutionnelle */
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
   color: rgb(var(--color-primary));
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+  font-weight: 500;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
 }
 
 .prose h1:first-child,
@@ -13,17 +14,21 @@
 }
 
 .prose a {
-  color: rgb(var(--color-secondary));
+  color: rgb(var(--color-primary));
   text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .prose a:hover {
-  color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary) / 0.8);
+  text-decoration-thickness: 2px;
 }
 
 .prose p {
-  margin-bottom: 1em;
-  line-height: 1.7;
+  margin-bottom: 1.25em;
+  line-height: 1.8;
+  max-width: 70ch;
 }
 
 .prose ul, .prose ol {
@@ -33,18 +38,21 @@
 
 .prose li {
   margin-bottom: 0.5em;
+  line-height: 1.7;
 }
 
 .prose blockquote {
-  border-left: 4px solid rgb(var(--color-secondary));
-  padding-left: 1em;
+  border-left: 4px solid rgb(var(--color-primary));
+  background-color: rgb(var(--color-primary) / 0.05);
+  padding: 1em 1.5em;
   margin: 1.5em 0;
   font-style: italic;
-  color: #6b7280;
+  color: #4b5563;
+  border-radius: 0 0.5rem 0.5rem 0;
 }
 
 .prose img {
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   margin: 1.5em auto;
   max-width: 100%;
@@ -60,13 +68,14 @@
 .prose th,
 .prose td {
   border: 1px solid #e5e7eb;
-  padding: 0.75em;
+  padding: 0.75em 1em;
   text-align: left;
 }
 
 .prose th {
-  background-color: #f9fafb;
-  font-weight: bold;
+  background-color: rgb(var(--color-primary) / 0.05);
+  font-weight: 500;
+  color: #1f2937;
 }
 
 .prose hr {
@@ -90,6 +99,13 @@
 .prose .btn-primary:hover {
   opacity: 0.9;
   color: white;
+}
+
+/* Prose institutionnel — centrage lecture optimale */
+.prose-institutional {
+  max-width: 70ch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Utility classes */

@@ -82,13 +82,13 @@ function getDocumentFamily(docType: string): string {
 
   <main id="main-content">
     <!-- Header -->
-    <header class="bg-gradient-to-br from-primary/10 to-secondary/10 py-12">
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
-          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Documents officiels
           </h1>
-          <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
             Consultez et téléchargez les documents publics de votre commune
           </p>
         </div>
@@ -96,7 +96,7 @@ function getDocumentFamily(docType: string): string {
     </header>
 
     <!-- Filtres -->
-    <section class="py-6 bg-white border-b border-gray-200">
+    <section class="py-5 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Filtre année -->
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
@@ -126,7 +126,7 @@ function getDocumentFamily(docType: string): string {
             return count > 0 || family.key === 'all' ? (
               <button
                 type="button"
-                class={`family-btn px-4 py-2 rounded-full text-sm font-medium transition-colors border ${
+                class={`family-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                   isBudgetHighlighted
                     ? 'border-amber-500 bg-amber-50 text-amber-800 hover:bg-primary hover:text-white hover:border-primary'
                     : 'border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary'

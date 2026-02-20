@@ -1,25 +1,55 @@
 ---
+import StrapiImage from './StrapiImage.astro';
+
 interface Props {
   title: string;
   subtitle?: string;
   centered?: boolean;
+  image?: { url: string; alternativeText?: string } | null;
 }
 
-const { title, subtitle, centered = true } = Astro.props;
+const { title, subtitle, centered = true, image } = Astro.props;
 ---
 
-<header class="hero-section bg-gradient-to-br from-primary/10 to-secondary/10 py-12 lg:py-16">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class={centered ? 'text-center' : ''}>
-      <h1 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-        {title}
-      </h1>
-      {subtitle && (
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-          {subtitle}
-        </p>
-      )}
-      <slot />
+{image ? (
+  <header class="relative h-[70vh] min-h-[500px] overflow-hidden">
+    <StrapiImage
+      image={image}
+      alt={title}
+      width={1920}
+      height={1080}
+      class="absolute inset-0 w-full h-full object-cover"
+      priority
+    />
+    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+    <div class="relative z-10 flex items-end h-full pb-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="text-white max-w-2xl animate-slide-up">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+            {title}
+          </h1>
+          {subtitle && (
+            <p class="text-lg sm:text-xl text-white/90 mb-8">{subtitle}</p>
+          )}
+          <slot />
+        </div>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
+) : (
+  <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class={`${centered ? 'text-center' : ''} animate-fade-in`}>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+          {title}
+        </h1>
+        {subtitle && (
+          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
+            {subtitle}
+          </p>
+        )}
+        <slot />
+      </div>
+    </div>
+  </header>
+)}

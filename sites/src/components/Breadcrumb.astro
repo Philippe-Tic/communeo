@@ -11,13 +11,22 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<nav class="bg-gray-50 border-b border-gray-200 py-3" aria-label="Fil d'ariane">
+<nav class="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-3" aria-label="Fil d'ariane">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <ol class="flex items-center gap-2 text-sm text-gray-600 flex-wrap">
-      <li><a href="/" class="hover:text-primary transition-colors">Accueil</a></li>
+    <ol class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+      <li>
+        <a href="/" class="hover:text-primary transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+          </svg>
+          Accueil
+        </a>
+      </li>
       {items.map((item, i) => (
         <>
-          <li aria-hidden="true" class="text-gray-400">/</li>
+          <li aria-hidden="true" class="text-gray-300">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </li>
           {item.href && i < items.length - 1 ? (
             <li><a href={item.href} class="hover:text-primary transition-colors">{item.label}</a></li>
           ) : (

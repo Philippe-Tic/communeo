@@ -99,11 +99,11 @@ const eventJsonLd = JSON.stringify({
 
     <!-- Événement principal -->
     <article class="py-12">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header de l'événement -->
         <header class="mb-8">
-          <div class="flex items-center space-x-3 mb-4">
-            <span class={`badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <span class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
               attributes.category === 'cultural' ? 'bg-purple-100 text-purple-800' :
               attributes.category === 'sport' ? 'bg-green-100 text-green-800' :
               attributes.category === 'meeting' ? 'bg-blue-100 text-blue-800' :
@@ -118,12 +118,12 @@ const eventJsonLd = JSON.stringify({
             </span>
           </div>
 
-          <h1 class="text-4xl font-bold text-gray-900 mb-6">
+          <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
             {attributes.title}
           </h1>
 
           <!-- Informations pratiques -->
-          <div class="bg-gray-50 rounded-lg p-6 mb-6">
+          <div class="bg-gray-50 rounded-xl border border-gray-100 p-6 mb-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Informations pratiques</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="flex items-center space-x-3">

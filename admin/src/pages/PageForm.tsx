@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner } from '../components/common'
-import { FormCheckbox } from '../components/forms/FormCheckbox'
 import { FormSection } from '../components/forms/FormSection'
 import { FormSelect } from '../components/forms/FormSelect'
 import { RichTextEditor } from '../components/forms/RichTextEditor'
@@ -24,7 +23,6 @@ interface PageFormData {
   seo_keywords: string
   meta_description: string
   status: 'draft' | 'published' | 'archived'
-  is_homepage: boolean
   parent_id?: string
   menu_order: number
   template: string
@@ -42,7 +40,6 @@ const getDefaultValues = (data?: Page): PageFormData => ({
   seo_keywords: data?.seo_keywords ?? data?.title ?? '',
   meta_description: data?.meta_description ?? '',
   status: data?.status ?? 'draft',
-  is_homepage: data?.is_homepage ?? false,
   parent_id: data?.parent_page?.documentId ?? '',
   menu_order: data?.menu_order ?? 0,
   template: data?.template ?? 'default',
@@ -75,14 +72,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
 
   const watchedTitle = watch('title')
   const watchedContent = watch('content')
-  const watchedIsHomepage = watch('is_homepage')
-  const watchedParentId = watch('parent_id')
-
-  useEffect(() => {
-    if (watchedParentId) {
-      setValue('is_homepage', false)
-    }
-  }, [watchedParentId, setValue])
 
   useEffect(() => {
     if (watchedTitle && !isEditing) {
@@ -111,10 +100,10 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
         parent_page: parent_id || null,
       }
       if (isEditing && id) {
-        await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'homepage' | 'about' | 'services' })
+        await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'about' | 'services' })
         toaster.create({ title: 'Page mise à jour', description: 'La page a été mise à jour avec succès.', type: 'success', duration: 3000 })
       } else {
-        await createPageMutation.mutateAsync({ ...apiData, template: apiData.template as 'default' | 'homepage' | 'about' | 'services' })
+        await createPageMutation.mutateAsync({ ...apiData, template: apiData.template as 'default' | 'about' | 'services' })
         toaster.create({ title: 'Page créée', description: 'La page a été créée avec succès.', type: 'success', duration: 3000 })
       }
       navigate('/pages')
@@ -237,7 +226,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                         onValueChange={field.onChange}
                         options={[
                           { value: 'default', label: 'Par défaut' },
-                          { value: 'homepage', label: "Page d'accueil" },
                           { value: 'about', label: 'À propos' },
                           { value: 'services', label: 'Services' },
                         ]}
@@ -245,27 +233,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                     )}
                   />
 
-                  {!watchedParentId && (
-                    <>
-                      <Controller
-                        name="is_homepage"
-                        control={control}
-                        render={({ field }) => (
-                          <FormCheckbox
-                            label="Page d'accueil"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        )}
-                      />
-
-                      {watchedIsHomepage && (
-                        <div className="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950">
-                          <p className="text-blue-700 dark:text-blue-300">Cette page sera définie comme page d'accueil du site.</p>
-                        </div>
-                      )}
-                    </>
-                  )}
                 </FormSection>
 
                 <FormSection title="SEO">

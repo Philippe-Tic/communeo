@@ -1,5 +1,175 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface HomepageHomepageConfig extends Struct.ComponentSchema {
+  collectionName: 'components_homepage_homepage_configs';
+  info: {
+    description: "Configuration compl\u00E8te de la page d'accueil du site";
+    displayName: "Configuration page d'accueil";
+  };
+  attributes: {
+    articles_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 6;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<3>;
+    associations_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 12;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<6>;
+    content: Schema.Attribute.RichText;
+    events_count: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 6;
+          min: 1;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<3>;
+    hero_cta_primary_label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    hero_cta_primary_url: Schema.Attribute.String;
+    hero_cta_secondary_label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    hero_cta_secondary_url: Schema.Attribute.String;
+    hero_image: Schema.Attribute.Media<'images'>;
+    hero_subtitle: Schema.Attribute.Text;
+    hero_title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    key_figures: Schema.Attribute.Component<'homepage.key-figure', true>;
+    mayor_word_content: Schema.Attribute.RichText;
+    mayor_word_title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    meta_description: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 160;
+      }>;
+    partners: Schema.Attribute.Component<'homepage.partner', true>;
+    quick_links: Schema.Attribute.Component<'homepage.quick-link', true>;
+    show_articles: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    show_associations: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_events: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    show_key_figures: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_mayor_word: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    show_quick_links: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<true>;
+  };
+}
+
+export interface HomepageKeyFigure extends Struct.ComponentSchema {
+  collectionName: 'components_homepage_key_figures';
+  info: {
+    description: "Chiffre cl\u00E9 pour la page d'accueil";
+    displayName: 'Chiffre cl\u00E9';
+  };
+  attributes: {
+    icon: Schema.Attribute.Enumeration<
+      [
+        'users',
+        'map',
+        'building',
+        'calendar',
+        'heart',
+        'book',
+        'globe',
+        'shield',
+        'tree',
+        'star',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'users'>;
+    label: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    value: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+  };
+}
+
+export interface HomepagePartner extends Struct.ComponentSchema {
+  collectionName: 'components_homepage_partners';
+  info: {
+    description: "Partenaire affich\u00E9 sur la page d'accueil";
+    displayName: 'Partenaire';
+  };
+  attributes: {
+    logo: Schema.Attribute.Media<'images'>;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    url: Schema.Attribute.String;
+  };
+}
+
+export interface HomepageQuickLink extends Struct.ComponentSchema {
+  collectionName: 'components_homepage_quick_links';
+  info: {
+    description: "Lien d'acc\u00E8s rapide pour la page d'accueil";
+    displayName: 'Lien rapide';
+  };
+  attributes: {
+    description: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    icon: Schema.Attribute.Enumeration<
+      [
+        'document',
+        'identity',
+        'folder',
+        'mail',
+        'alert',
+        'clock',
+        'phone',
+        'map',
+        'calendar',
+        'users',
+        'building',
+        'heart',
+        'info',
+        'shield',
+        'book',
+        'globe',
+      ]
+    > &
+      Schema.Attribute.DefaultTo<'document'>;
+    label: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface LegalAccessibilite extends Struct.ComponentSchema {
   collectionName: 'components_legal_accessibilite';
   info: {
@@ -83,6 +253,10 @@ export interface LegalRgpd extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'homepage.homepage-config': HomepageHomepageConfig;
+      'homepage.key-figure': HomepageKeyFigure;
+      'homepage.partner': HomepagePartner;
+      'homepage.quick-link': HomepageQuickLink;
       'legal.accessibilite': LegalAccessibilite;
       'legal.demarches-identite': LegalDemarchesIdentite;
       'legal.infos-pratiques': LegalInfosPratiques;

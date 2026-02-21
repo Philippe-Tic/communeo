@@ -254,7 +254,6 @@ export default async ({ strapi }) => {
           template: 'default',
           menu_order: 0,
           show_in_menu: true,
-          is_homepage: false,
         },
       });
       console.log('✅ Bootstrap - Created test page:', testPage.documentId);

@@ -30,7 +30,7 @@ npm run dev
 
 Avant de déployer, le site doit avoir au minimum :
 - Un **Site** créé (nom, slug, email de contact)
-- Au moins une **Page** avec `is_homepage: true` et `status: published`
+- La **page d'accueil configurée** dans l'onglet "Page d'accueil" de la configuration du site
 - Un **utilisateur** assigné au site
 
 ---
@@ -42,7 +42,7 @@ Avant de déployer, le site doit avoir au minimum :
 3. Aller dans **Configuration du site** et vérifier :
    - Nom du site renseigné
    - Email de contact renseigné
-   - Au moins une page d'accueil publiée
+   - Page d'accueil configurée (onglet "Page d'accueil")
 
 ---
 
@@ -143,7 +143,7 @@ SITE_DOCUMENT_ID=<uuid> SITE_SLUG=<slug> STRAPI_URL=http://localhost:1337 npm ru
 → Le `SITE_DOCUMENT_ID` ne correspond à aucun site dans Strapi. Vérifier dans l'admin Strapi natif que le site existe.
 
 ### "No published homepage found"
-→ Créer une page avec `is_homepage: true` et `status: published` dans l'admin.
+→ Configurer la page d'accueil dans l'onglet "Page d'accueil" de la configuration du site.
 
 ### Le site est en ligne mais les pages sont vides
 → Vérifier que `STRAPI_PUBLIC_URL` dans `.env` est accessible depuis le process de build. En local : `http://localhost:1337`. En production : l'URL publique du backend.

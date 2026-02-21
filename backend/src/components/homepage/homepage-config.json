@@ -1,0 +1,111 @@
+{
+  "collectionName": "components_homepage_homepage_configs",
+  "info": {
+    "displayName": "Configuration page d'accueil",
+    "description": "Configuration complète de la page d'accueil du site"
+  },
+  "attributes": {
+    "hero_title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "hero_subtitle": {
+      "type": "text"
+    },
+    "hero_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "hero_cta_primary_label": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "hero_cta_primary_url": {
+      "type": "string"
+    },
+    "hero_cta_secondary_label": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "hero_cta_secondary_url": {
+      "type": "string"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "meta_description": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "show_quick_links": {
+      "type": "boolean",
+      "default": true
+    },
+    "quick_links": {
+      "type": "component",
+      "repeatable": true,
+      "component": "homepage.quick-link"
+    },
+    "show_mayor_word": {
+      "type": "boolean",
+      "default": false
+    },
+    "mayor_word_title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "mayor_word_content": {
+      "type": "richtext"
+    },
+    "show_articles": {
+      "type": "boolean",
+      "default": true
+    },
+    "articles_count": {
+      "type": "integer",
+      "min": 1,
+      "max": 6,
+      "default": 3
+    },
+    "show_events": {
+      "type": "boolean",
+      "default": true
+    },
+    "events_count": {
+      "type": "integer",
+      "min": 1,
+      "max": 6,
+      "default": 3
+    },
+    "show_key_figures": {
+      "type": "boolean",
+      "default": false
+    },
+    "key_figures": {
+      "type": "component",
+      "repeatable": true,
+      "component": "homepage.key-figure"
+    },
+    "show_associations": {
+      "type": "boolean",
+      "default": false
+    },
+    "associations_count": {
+      "type": "integer",
+      "min": 1,
+      "max": 12,
+      "default": 6
+    },
+    "show_partners": {
+      "type": "boolean",
+      "default": false
+    },
+    "partners": {
+      "type": "component",
+      "repeatable": true,
+      "component": "homepage.partner"
+    }
+  }
+}

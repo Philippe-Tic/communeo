@@ -51,16 +51,12 @@
     },
     "template": {
       "type": "enumeration",
-      "enum": ["default", "homepage", "about", "services"],
+      "enum": ["default", "about", "services"],
       "default": "default"
     },
     "seo_keywords": {
       "type": "string",
       "maxLength": 255
-    },
-    "is_homepage": {
-      "type": "boolean",
-      "default": false
     },
     "parent_page": {
       "type": "relation",

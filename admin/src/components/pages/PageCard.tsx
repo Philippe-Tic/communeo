@@ -59,9 +59,6 @@ export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
 
         <div className="flex items-center justify-between">
           <StatusBadge status={page.status} />
-          {page.is_homepage && (
-            <span className="text-xs font-medium text-primary">Page d'accueil</span>
-          )}
         </div>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">

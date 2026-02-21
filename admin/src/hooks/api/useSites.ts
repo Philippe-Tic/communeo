@@ -45,6 +45,60 @@ export interface DemarchesIdentite {
   remise_titre_info?: string
 }
 
+// Types — Homepage config
+export type QuickLinkIcon = 'document' | 'identity' | 'folder' | 'mail' | 'alert' | 'clock' | 'phone' | 'map' | 'calendar' | 'users' | 'building' | 'heart' | 'info' | 'shield' | 'book' | 'globe'
+export type KeyFigureIcon = 'users' | 'map' | 'building' | 'calendar' | 'heart' | 'book' | 'globe' | 'shield' | 'tree' | 'star'
+
+export interface HomepageQuickLink {
+  id?: number
+  label: string
+  url: string
+  description?: string
+  icon?: QuickLinkIcon
+}
+
+export interface HomepageKeyFigure {
+  id?: number
+  value: string
+  label: string
+  icon?: KeyFigureIcon
+}
+
+export interface HomepagePartner {
+  id?: number
+  name: string
+  logo?: { id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null
+  url?: string
+}
+
+export interface HomepageConfig {
+  id?: number
+  hero_title?: string
+  hero_subtitle?: string
+  hero_image?: { id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null
+  hero_cta_primary_label?: string
+  hero_cta_primary_url?: string
+  hero_cta_secondary_label?: string
+  hero_cta_secondary_url?: string
+  content?: string
+  meta_description?: string
+  show_quick_links?: boolean
+  quick_links?: HomepageQuickLink[]
+  show_mayor_word?: boolean
+  mayor_word_title?: string
+  mayor_word_content?: string
+  show_articles?: boolean
+  articles_count?: number
+  show_events?: boolean
+  events_count?: number
+  show_key_figures?: boolean
+  key_figures?: HomepageKeyFigure[]
+  show_associations?: boolean
+  associations_count?: number
+  show_partners?: boolean
+  partners?: HomepagePartner[]
+}
+
 export interface Site {
   id: number
   documentId: string
@@ -73,6 +127,8 @@ export interface Site {
   open_data_enabled?: boolean
   open_data_url?: string
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
+  // Homepage
+  homepage?: HomepageConfig
   // Relations
   pages?: any[]
   articles?: any[]
@@ -98,6 +154,8 @@ export interface CreateSiteData {
   open_data_enabled?: boolean
   open_data_url?: string
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
+  // Homepage
+  homepage?: Partial<Omit<HomepageConfig, 'id'>>
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {
@@ -166,7 +224,19 @@ export const useSite = (documentId: string) => {
   return useQuery({
     queryKey: [...SITES_QUERY_KEYS.current(), documentId],
     queryFn: async (): Promise<Site> => {
-      const url = `/api/sites/${documentId}?populate=*`
+      const params = new URLSearchParams()
+      // Populate fields with 'true' (not '*' which causes Strapi v5 to recurse into media internal relations like logo.related)
+      params.append('populate[logo]', 'true')
+      params.append('populate[mentions_legales]', 'true')
+      params.append('populate[rgpd]', 'true')
+      params.append('populate[accessibilite]', 'true')
+      params.append('populate[infos_pratiques]', 'true')
+      params.append('populate[demarches_identite]', 'true')
+      params.append('populate[homepage][populate][hero_image]', 'true')
+      params.append('populate[homepage][populate][quick_links]', 'true')
+      params.append('populate[homepage][populate][key_figures]', 'true')
+      params.append('populate[homepage][populate][partners][populate][logo]', 'true')
+      const url = `/api/sites/${documentId}?${params.toString()}`
       const response = await apiClient.get<{ data: Site }>(url)
       return response.data
     },

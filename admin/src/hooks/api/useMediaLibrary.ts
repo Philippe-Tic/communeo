@@ -1,18 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
-// Types
-export interface StrapiMedia {
-  id: number
-  documentId: string
-  name: string
-  url: string
-  mime: string
-  size: number
-  ext: string
-  width?: number
-  height?: number
-}
+import type { StrapiMedia } from './useOfficialDocuments'
+export type { StrapiMedia }
 
 export interface MediaItem {
   id: number

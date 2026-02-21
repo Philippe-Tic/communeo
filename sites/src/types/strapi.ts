@@ -82,6 +82,57 @@ export interface DemarchesIdentite {
   remise_titre_info?: string;
 }
 
+// Homepage config components
+export interface HomepageQuickLink {
+  id?: number;
+  label: string;
+  url: string;
+  description?: string;
+  icon?: 'document' | 'identity' | 'folder' | 'mail' | 'alert' | 'clock' | 'phone' | 'map' | 'calendar' | 'users' | 'building' | 'heart' | 'info' | 'shield' | 'book' | 'globe';
+}
+
+export interface HomepageKeyFigure {
+  id?: number;
+  value: string;
+  label: string;
+  icon?: 'users' | 'map' | 'building' | 'calendar' | 'heart' | 'book' | 'globe' | 'shield' | 'tree' | 'star';
+}
+
+export interface HomepagePartner {
+  id?: number;
+  name: string;
+  logo?: StrapiMedia | null;
+  url?: string;
+}
+
+export interface HomepageConfig {
+  id?: number;
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_image?: StrapiMedia | null;
+  hero_cta_primary_label?: string;
+  hero_cta_primary_url?: string;
+  hero_cta_secondary_label?: string;
+  hero_cta_secondary_url?: string;
+  content?: string;
+  meta_description?: string;
+  show_quick_links?: boolean;
+  quick_links?: HomepageQuickLink[];
+  show_mayor_word?: boolean;
+  mayor_word_title?: string;
+  mayor_word_content?: string;
+  show_articles?: boolean;
+  articles_count?: number;
+  show_events?: boolean;
+  events_count?: number;
+  show_key_figures?: boolean;
+  key_figures?: HomepageKeyFigure[];
+  show_associations?: boolean;
+  associations_count?: number;
+  show_partners?: boolean;
+  partners?: HomepagePartner[];
+}
+
 // Configuration du site (mairie) - Strapi v5
 export interface Site {
   id: number;
@@ -103,6 +154,8 @@ export interface Site {
   open_data_enabled?: boolean;
   open_data_url?: string;
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none';
+  // Homepage
+  homepage?: HomepageConfig;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
@@ -120,8 +173,7 @@ export interface Page {
   featured_image?: MediaAttribute;
   menu_order: number;
   show_in_menu: boolean;
-  template: 'default' | 'homepage' | 'about' | 'services';
-  is_homepage: boolean;
+  template: 'default' | 'about' | 'services';
   parent_page?: Page | null;
   child_pages?: Page[];
   site: StrapiData<Site> | Site;  // Relation (peut être peuplée ou non)

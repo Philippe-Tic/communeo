@@ -1,0 +1,27 @@
+{
+  "collectionName": "components_homepage_quick_links",
+  "info": {
+    "displayName": "Lien rapide",
+    "description": "Lien d'accès rapide pour la page d'accueil"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "icon": {
+      "type": "enumeration",
+      "enum": ["document", "identity", "folder", "mail", "alert", "clock", "phone", "map", "calendar", "users", "building", "heart", "info", "shield", "book", "globe"],
+      "default": "document"
+    }
+  }
+}

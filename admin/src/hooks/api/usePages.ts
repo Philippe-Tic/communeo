@@ -45,9 +45,8 @@ export interface Page {
   }>
   menu_order?: number
   show_in_menu?: boolean
-  is_homepage?: boolean
   seo_keywords?: string
-  template?: 'default' | 'homepage' | 'about' | 'services'
+  template?: 'default' | 'about' | 'services'
 }
 
 export interface CreatePageData {
@@ -59,9 +58,8 @@ export interface CreatePageData {
   parent_page?: string | null
   menu_order?: number
   show_in_menu?: boolean
-  is_homepage?: boolean
   seo_keywords?: string
-  template?: 'default' | 'homepage' | 'about' | 'services'
+  template?: 'default' | 'about' | 'services'
   site?: string
 }
 
@@ -265,26 +263,6 @@ export const useUnpublishPage = () => {
       queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
 
       // Invalidate pages list to refetch
-      queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
-    },
-  })
-}
-
-export const useSetHomepage = () => {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (id: number): Promise<Page> => {
-      const response = await apiClient.put<{ data: Page }>(`/api/pages/${id}`, {
-        data: { is_homepage: true }
-      })
-      return response.data
-    },
-    onSuccess: (data) => {
-      // Update the specific page in cache
-      queryClient.setQueryData(PAGES_QUERY_KEYS.detail(data.documentId), data)
-
-      // Invalidate pages list to refetch (other pages will have is_homepage: false)
       queryClient.invalidateQueries({ queryKey: PAGES_QUERY_KEYS.lists() })
     },
   })

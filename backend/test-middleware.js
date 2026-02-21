@@ -47,7 +47,6 @@ async function testMiddleware() {
         template: 'default',
         menu_order: 0,
         show_in_menu: true,
-        is_homepage: false,
         // Ne pas spécifier de site - le middleware devrait l'ajouter automatiquement
       }
     };

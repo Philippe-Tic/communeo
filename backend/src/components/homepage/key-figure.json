@@ -1,0 +1,24 @@
+{
+  "collectionName": "components_homepage_key_figures",
+  "info": {
+    "displayName": "Chiffre clé",
+    "description": "Chiffre clé pour la page d'accueil"
+  },
+  "attributes": {
+    "value": {
+      "type": "string",
+      "required": true,
+      "maxLength": 20
+    },
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 60
+    },
+    "icon": {
+      "type": "enumeration",
+      "enum": ["users", "map", "building", "calendar", "heart", "book", "globe", "shield", "tree", "star"],
+      "default": "users"
+    }
+  }
+}

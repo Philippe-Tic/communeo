@@ -32,7 +32,16 @@ function getFileIcon(mime: string) {
 interface MediaPickerDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSelect: (media: { url: string; alt: string; name: string }) => void
+  onSelect: (media: {
+    url: string
+    alt: string
+    name: string
+    fileId?: number
+    documentId?: string
+    mime?: string
+    size?: number
+    ext?: string
+  }) => void
   accept?: 'image' | 'video' | 'file' | 'all'
   /** Show external URL tab */
   showUrlTab?: boolean
@@ -90,6 +99,11 @@ export function MediaPickerDialog({
       url: getMediaUrl(selected.file.url),
       alt: selected.alt_text || selected.name,
       name: selected.name,
+      fileId: selected.file.id,
+      documentId: selected.file.documentId,
+      mime: selected.file.mime,
+      size: selected.file.size,
+      ext: selected.file.ext,
     })
     resetAndClose()
   }

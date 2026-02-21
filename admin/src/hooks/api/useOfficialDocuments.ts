@@ -9,6 +9,8 @@ export interface StrapiMedia {
   mime: string
   size: number
   ext: string
+  width?: number
+  height?: number
 }
 
 export interface OfficialDocument {

@@ -3,15 +3,49 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertCircle, Loader2, Wand2 } from 'lucide-react'
+import { AlertCircle, Loader2, Plus, Trash2, Wand2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
+import { ImagePicker } from '../components/forms/ImagePicker'
 import { RichTextEditor } from '../components/forms/RichTextEditor'
 import { PageHeader } from '../components/layout'
-import { useSite, useUpdateSite, type UpdateSiteData } from '../hooks/api/useSites'
+import { useSite, useUpdateSite, type UpdateSiteData, type HomepageQuickLink, type HomepageKeyFigure, type HomepagePartner, type QuickLinkIcon, type KeyFigureIcon } from '../hooks/api/useSites'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
 import { toaster } from '../lib/toaster'
+
+// Labels français pour les icônes
+const QUICK_LINK_ICON_OPTIONS: { value: QuickLinkIcon; label: string }[] = [
+  { value: 'document', label: 'Document' },
+  { value: 'identity', label: 'Identité' },
+  { value: 'folder', label: 'Dossier' },
+  { value: 'mail', label: 'Courrier' },
+  { value: 'alert', label: 'Alerte' },
+  { value: 'clock', label: 'Horloge' },
+  { value: 'phone', label: 'Téléphone' },
+  { value: 'map', label: 'Carte' },
+  { value: 'calendar', label: 'Calendrier' },
+  { value: 'users', label: 'Personnes' },
+  { value: 'building', label: 'Bâtiment' },
+  { value: 'heart', label: 'Coeur' },
+  { value: 'info', label: 'Information' },
+  { value: 'shield', label: 'Bouclier' },
+  { value: 'book', label: 'Livre' },
+  { value: 'globe', label: 'Globe' },
+]
+
+const KEY_FIGURE_ICON_OPTIONS: { value: KeyFigureIcon; label: string }[] = [
+  { value: 'users', label: 'Personnes' },
+  { value: 'map', label: 'Carte' },
+  { value: 'building', label: 'Bâtiment' },
+  { value: 'calendar', label: 'Calendrier' },
+  { value: 'heart', label: 'Coeur' },
+  { value: 'book', label: 'Livre' },
+  { value: 'globe', label: 'Globe' },
+  { value: 'shield', label: 'Bouclier' },
+  { value: 'tree', label: 'Arbre' },
+  { value: 'star', label: 'Étoile' },
+]
 
 // RGPD template
 const RGPD_TEMPLATE = `<h2>Politique de confidentialité</h2>
@@ -73,6 +107,7 @@ const TAB_FIELDS: Record<string, string[]> = {
   info: ['opening_hours'],
   opendata: [],
   demarches: ['appointment_url'],
+  homepage: [],
 }
 
 export const SiteConfigEdit = () => {
@@ -122,7 +157,33 @@ export const SiteConfigEdit = () => {
     appointment_url: '',
     appointment_provider: 'ants-rdv' as 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre',
     remise_titre_info: '',
+    // Homepage
+    homepage_content: '',
+    homepage_meta_description: '',
+    hero_title: '',
+    hero_subtitle: '',
+    hero_cta_primary_label: '',
+    hero_cta_primary_url: '',
+    hero_cta_secondary_label: '',
+    hero_cta_secondary_url: '',
+    show_quick_links: true,
+    show_mayor_word: false,
+    mayor_word_title: '',
+    mayor_word_content: '',
+    show_articles: true,
+    articles_count: '3',
+    show_events: true,
+    events_count: '3',
+    show_key_figures: false,
+    show_associations: false,
+    associations_count: '6',
+    show_partners: false,
   })
+
+  const [heroImage, setHeroImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
+  const [quickLinks, setQuickLinks] = React.useState<HomepageQuickLink[]>([])
+  const [keyFigures, setKeyFigures] = React.useState<HomepageKeyFigure[]>([])
+  const [partners, setPartners] = React.useState<HomepagePartner[]>([])
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [isDirty, setIsDirty] = React.useState(false)
@@ -169,7 +230,32 @@ export const SiteConfigEdit = () => {
         appointment_url: site.demarches_identite?.appointment_url || '',
         appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv',
         remise_titre_info: site.demarches_identite?.remise_titre_info || '',
+        // Homepage
+        homepage_content: site.homepage?.content || '',
+        homepage_meta_description: site.homepage?.meta_description || '',
+        hero_title: site.homepage?.hero_title || '',
+        hero_subtitle: site.homepage?.hero_subtitle || '',
+        hero_cta_primary_label: site.homepage?.hero_cta_primary_label || '',
+        hero_cta_primary_url: site.homepage?.hero_cta_primary_url || '',
+        hero_cta_secondary_label: site.homepage?.hero_cta_secondary_label || '',
+        hero_cta_secondary_url: site.homepage?.hero_cta_secondary_url || '',
+        show_quick_links: site.homepage?.show_quick_links ?? true,
+        show_mayor_word: site.homepage?.show_mayor_word ?? false,
+        mayor_word_title: site.homepage?.mayor_word_title || '',
+        mayor_word_content: site.homepage?.mayor_word_content || '',
+        show_articles: site.homepage?.show_articles ?? true,
+        articles_count: (site.homepage?.articles_count ?? 3).toString(),
+        show_events: site.homepage?.show_events ?? true,
+        events_count: (site.homepage?.events_count ?? 3).toString(),
+        show_key_figures: site.homepage?.show_key_figures ?? false,
+        show_associations: site.homepage?.show_associations ?? false,
+        associations_count: (site.homepage?.associations_count ?? 6).toString(),
+        show_partners: site.homepage?.show_partners ?? false,
       })
+      setHeroImage(site.homepage?.hero_image || null)
+      setQuickLinks(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
+      setKeyFigures(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
+      setPartners(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
     }
   }, [site])
 
@@ -342,6 +428,35 @@ export const SiteConfigEdit = () => {
         appointment_provider: formData.appointment_provider,
         remise_titre_info: formData.remise_titre_info || undefined,
       },
+      homepage: {
+        content: formData.homepage_content || undefined,
+        meta_description: formData.homepage_meta_description || undefined,
+        hero_title: formData.hero_title || undefined,
+        hero_subtitle: formData.hero_subtitle || undefined,
+        hero_image: heroImage?.id ? heroImage.id : undefined,
+        hero_cta_primary_label: formData.hero_cta_primary_label || undefined,
+        hero_cta_primary_url: formData.hero_cta_primary_url || undefined,
+        hero_cta_secondary_label: formData.hero_cta_secondary_label || undefined,
+        hero_cta_secondary_url: formData.hero_cta_secondary_url || undefined,
+        show_quick_links: formData.show_quick_links,
+        quick_links: quickLinks.map(({ id: _id, ...rest }) => rest),
+        show_mayor_word: formData.show_mayor_word,
+        mayor_word_title: formData.mayor_word_title || undefined,
+        mayor_word_content: formData.mayor_word_content || undefined,
+        show_articles: formData.show_articles,
+        articles_count: Number(formData.articles_count) || 3,
+        show_events: formData.show_events,
+        events_count: Number(formData.events_count) || 3,
+        show_key_figures: formData.show_key_figures,
+        key_figures: keyFigures.map(({ id: _id, ...rest }) => rest),
+        show_associations: formData.show_associations,
+        associations_count: Number(formData.associations_count) || 6,
+        show_partners: formData.show_partners,
+        partners: partners.map(({ id: _id, logo, ...rest }) => ({
+          ...rest,
+          logo: logo?.id ? logo.id : undefined,
+        })),
+      } as any,
     }
 
     updateSite(updateData, {
@@ -437,6 +552,10 @@ export const SiteConfigEdit = () => {
               <TabsTrigger value="demarches" className="gap-1.5">
                 Démarches
                 {tabHasErrors('demarches') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
+              </TabsTrigger>
+              <TabsTrigger value="homepage" className="gap-1.5">
+                Page d'accueil
+                {tabHasErrors('homepage') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
               </TabsTrigger>
             </TabsList>
 
@@ -993,6 +1112,575 @@ export const SiteConfigEdit = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Onglet 8 — Page d'accueil */}
+            <TabsContent value="homepage">
+              <div className="flex flex-col gap-6">
+                {/* Hero */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-lg font-semibold text-foreground">Hero</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Bannière principale affichée en haut de la page d'accueil.
+                    </p>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <Label className="mb-2">Titre Hero</Label>
+                        <Input
+                          value={formData.hero_title}
+                          onChange={(e) => handleInputChange('hero_title', e.target.value)}
+                          placeholder="Bienvenue à..."
+                          maxLength={120}
+                        />
+                      </div>
+                      <div>
+                        <Label className="mb-2">Sous-titre</Label>
+                        <Textarea
+                          value={formData.hero_subtitle}
+                          onChange={(e) => handleInputChange('hero_subtitle', e.target.value)}
+                          placeholder="Au service des habitants..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="mb-2">Image de fond</Label>
+                      <ImagePicker
+                        value={heroImage}
+                        onChange={(media) => { setHeroImage(media); setIsDirty(true) }}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="flex flex-col gap-3">
+                        <Label className="font-medium">Bouton principal (CTA)</Label>
+                        <Input
+                          value={formData.hero_cta_primary_label}
+                          onChange={(e) => handleInputChange('hero_cta_primary_label', e.target.value)}
+                          placeholder="Libellé (ex: Découvrir)"
+                          maxLength={50}
+                        />
+                        <Input
+                          value={formData.hero_cta_primary_url}
+                          onChange={(e) => handleInputChange('hero_cta_primary_url', e.target.value)}
+                          placeholder="URL (ex: /articles)"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <Label className="font-medium">Bouton secondaire (CTA)</Label>
+                        <Input
+                          value={formData.hero_cta_secondary_label}
+                          onChange={(e) => handleInputChange('hero_cta_secondary_label', e.target.value)}
+                          placeholder="Libellé (ex: Nous contacter)"
+                          maxLength={50}
+                        />
+                        <Input
+                          value={formData.hero_cta_secondary_url}
+                          onChange={(e) => handleInputChange('hero_cta_secondary_url', e.target.value)}
+                          placeholder="URL (ex: /contact)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contenu éditorial + SEO */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-lg font-semibold text-foreground">Contenu éditorial</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Contenu libre affiché sur la page d'accueil, sous les accès rapides.
+                    </p>
+                    <div>
+                      <Label className="mb-2">Contenu</Label>
+                      <RichTextEditor
+                        variant="full"
+                        value={formData.homepage_content}
+                        onChange={(value) => handleInputChange('homepage_content', value)}
+                        placeholder="Bienvenue sur le site de votre commune..."
+                      />
+                    </div>
+                    <div>
+                      <Label className="mb-2">Meta description SEO</Label>
+                      <Input
+                        value={formData.homepage_meta_description}
+                        onChange={(e) => handleInputChange('homepage_meta_description', e.target.value)}
+                        placeholder="Description pour les moteurs de recherche (max 160 caractères)"
+                        maxLength={160}
+                      />
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {formData.homepage_meta_description.length}/160 caractères
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Accès rapides */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Accès rapides</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_quick_links}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_quick_links: !prev.show_quick_links }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_quick_links ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_quick_links ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_quick_links && (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Liens rapides affichés sous le hero. Si aucun n'est configuré, des liens par défaut seront utilisés.
+                        </p>
+                        {quickLinks.map((link, index) => (
+                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4">
+                              <Input
+                                value={link.label}
+                                onChange={(e) => {
+                                  const updated = [...quickLinks]
+                                  updated[index] = { ...updated[index], label: e.target.value }
+                                  setQuickLinks(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="Libellé"
+                                maxLength={50}
+                              />
+                              <Input
+                                value={link.url}
+                                onChange={(e) => {
+                                  const updated = [...quickLinks]
+                                  updated[index] = { ...updated[index], url: e.target.value }
+                                  setQuickLinks(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="URL (ex: /demarches)"
+                              />
+                              <select
+                                value={link.icon || 'document'}
+                                onChange={(e) => {
+                                  const updated = [...quickLinks]
+                                  updated[index] = { ...updated[index], icon: e.target.value as QuickLinkIcon }
+                                  setQuickLinks(updated)
+                                  setIsDirty(true)
+                                }}
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                {QUICK_LINK_ICON_OPTIONS.map(opt => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                              </select>
+                              <Input
+                                value={link.description || ''}
+                                onChange={(e) => {
+                                  const updated = [...quickLinks]
+                                  updated[index] = { ...updated[index], description: e.target.value }
+                                  setQuickLinks(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="Description (optionnel)"
+                                maxLength={100}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setQuickLinks(quickLinks.filter((_, i) => i !== index))
+                                setIsDirty(true)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setQuickLinks([...quickLinks, { label: '', url: '', icon: 'document' }])
+                            setIsDirty(true)
+                          }}
+                        >
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
+                          Ajouter un lien rapide
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mot du maire */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Mot du Maire</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_mayor_word}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_mayor_word: !prev.show_mayor_word }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_mayor_word ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_mayor_word ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_mayor_word && (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          La photo du maire est automatiquement récupérée depuis les membres de l'équipe (rôle "Maire").
+                        </p>
+                        <div>
+                          <Label className="mb-2">Titre de la section</Label>
+                          <Input
+                            value={formData.mayor_word_title}
+                            onChange={(e) => handleInputChange('mayor_word_title', e.target.value)}
+                            placeholder="Le mot du Maire"
+                            maxLength={120}
+                          />
+                        </div>
+                        <div>
+                          <Label className="mb-2">Contenu</Label>
+                          <RichTextEditor
+                            value={formData.mayor_word_content}
+                            onChange={(value) => handleInputChange('mayor_word_content', value)}
+                            placeholder="Chères concitoyennes, chers concitoyens..."
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actualités */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Actualités</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_articles}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_articles: !prev.show_articles }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_articles ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_articles ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_articles && (
+                      <div>
+                        <Label className="mb-2">Nombre d'articles affichés</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={6}
+                          value={formData.articles_count}
+                          onChange={(e) => handleInputChange('articles_count', e.target.value)}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Articles mis en avant affichés sur la page d'accueil (1 à 6)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Événements */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Événements</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_events}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_events: !prev.show_events }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_events ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_events ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_events && (
+                      <div>
+                        <Label className="mb-2">Nombre d'événements affichés</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={6}
+                          value={formData.events_count}
+                          onChange={(e) => handleInputChange('events_count', e.target.value)}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Prochains événements affichés sur la page d'accueil (1 à 6)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chiffres clés */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Chiffres clés</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_key_figures}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_key_figures: !prev.show_key_figures }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_key_figures ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_key_figures ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_key_figures && (
+                      <>
+                        {keyFigures.map((figure, index) => (
+                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
+                              <Input
+                                value={figure.value}
+                                onChange={(e) => {
+                                  const updated = [...keyFigures]
+                                  updated[index] = { ...updated[index], value: e.target.value }
+                                  setKeyFigures(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="Valeur (ex: 12 500)"
+                                maxLength={20}
+                              />
+                              <Input
+                                value={figure.label}
+                                onChange={(e) => {
+                                  const updated = [...keyFigures]
+                                  updated[index] = { ...updated[index], label: e.target.value }
+                                  setKeyFigures(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="Label (ex: Habitants)"
+                                maxLength={60}
+                              />
+                              <select
+                                value={figure.icon || 'users'}
+                                onChange={(e) => {
+                                  const updated = [...keyFigures]
+                                  updated[index] = { ...updated[index], icon: e.target.value as KeyFigureIcon }
+                                  setKeyFigures(updated)
+                                  setIsDirty(true)
+                                }}
+                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                              >
+                                {KEY_FIGURE_ICON_OPTIONS.map(opt => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setKeyFigures(keyFigures.filter((_, i) => i !== index))
+                                setIsDirty(true)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setKeyFigures([...keyFigures, { value: '', label: '', icon: 'users' }])
+                            setIsDirty(true)
+                          }}
+                        >
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
+                          Ajouter un chiffre clé
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Associations */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Associations</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_associations}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_associations: !prev.show_associations }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_associations ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_associations ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_associations && (
+                      <div>
+                        <Label className="mb-2">Nombre d'associations affichées</Label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={12}
+                          value={formData.associations_count}
+                          onChange={(e) => handleInputChange('associations_count', e.target.value)}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Associations publiées affichées sur la page d'accueil (1 à 12)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Partenaires */}
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-lg font-semibold text-foreground">Partenaires</h2>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={formData.show_partners}
+                          onClick={() => {
+                            setFormData(prev => ({ ...prev, show_partners: !prev.show_partners }))
+                            setIsDirty(true)
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                            formData.show_partners ? 'bg-primary' : 'bg-input'
+                          }`}
+                        >
+                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_partners ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                        <Label>Afficher</Label>
+                      </div>
+                    </div>
+                    {formData.show_partners && (
+                      <>
+                        {partners.map((partner, index) => (
+                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
+                              <Input
+                                value={partner.name}
+                                onChange={(e) => {
+                                  const updated = [...partners]
+                                  updated[index] = { ...updated[index], name: e.target.value }
+                                  setPartners(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="Nom du partenaire"
+                                maxLength={100}
+                              />
+                              <Input
+                                value={partner.url || ''}
+                                onChange={(e) => {
+                                  const updated = [...partners]
+                                  updated[index] = { ...updated[index], url: e.target.value }
+                                  setPartners(updated)
+                                  setIsDirty(true)
+                                }}
+                                placeholder="URL du site web"
+                              />
+                              <ImagePicker
+                                value={partner.logo || null}
+                                onChange={(media) => {
+                                  const updated = [...partners]
+                                  updated[index] = { ...updated[index], logo: media }
+                                  setPartners(updated)
+                                  setIsDirty(true)
+                                }}
+                                className="h-24"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setPartners(partners.filter((_, i) => i !== index))
+                                setIsDirty(true)
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setPartners([...partners, { name: '', url: '' }])
+                            setIsDirty(true)
+                          }}
+                        >
+                          <Plus className="mr-1.5 h-3.5 w-3.5" />
+                          Ajouter un partenaire
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </TabsContent>

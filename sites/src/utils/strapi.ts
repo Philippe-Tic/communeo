@@ -105,13 +105,24 @@ export async function getSiteConfig(): Promise<Site> {
     return createDefaultSite();
   }
 
-  // Rechercher le site par documentId
-  const url = buildStrapiUrl('sites', {
+  // Rechercher le site par documentId avec named populate (using 'true' to avoid Strapi v5 recursing into media internal relations)
+  const baseUrl = buildStrapiUrl('sites', {
     filters: {
       documentId: { $eq: SITE_DOCUMENT_ID }
-    },
-    populate: ['logo', 'mentions_legales', 'rgpd', 'accessibilite', 'infos_pratiques', 'demarches_identite']
+    }
   });
+  const urlObj = new URL(baseUrl);
+  urlObj.searchParams.set('populate[logo]', 'true');
+  urlObj.searchParams.set('populate[mentions_legales]', 'true');
+  urlObj.searchParams.set('populate[rgpd]', 'true');
+  urlObj.searchParams.set('populate[accessibilite]', 'true');
+  urlObj.searchParams.set('populate[infos_pratiques]', 'true');
+  urlObj.searchParams.set('populate[demarches_identite]', 'true');
+  urlObj.searchParams.set('populate[homepage][populate][hero_image]', 'true');
+  urlObj.searchParams.set('populate[homepage][populate][quick_links]', 'true');
+  urlObj.searchParams.set('populate[homepage][populate][key_figures]', 'true');
+  urlObj.searchParams.set('populate[homepage][populate][partners][populate][logo]', 'true');
+  const url = urlObj.toString();
 
   const response = await strapiRequest<StrapiCollectionResponse<Site>>(url);
 
@@ -145,23 +156,6 @@ function createDefaultSite(): Site {
     updatedAt: new Date().toISOString(),
     publishedAt: new Date().toISOString()
   };
-}
-
-/**
- * Récupère la page d'accueil (page avec is_homepage=true)
- */
-export async function getHomepage(): Promise<Page | null> {
-  const url = buildStrapiUrl('pages', {
-    filters: {
-      status: { $eq: 'published' },
-      is_homepage: { $eq: true }
-    },
-    populate: ['featured_image', 'site', 'parent_page']
-  });
-
-  const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
-  if (!response?.data) return null;
-  return response.data.length > 0 ? response.data[0] : null;
 }
 
 /**
@@ -399,6 +393,40 @@ export async function getActiveAlerts(): Promise<Alerte[]> {
     if (alert.display_until && new Date(alert.display_until) < new Date()) return false;
     return true;
   });
+}
+
+/**
+ * Récupère le maire (premier team_member avec role=maire)
+ */
+export async function getMayor(): Promise<TeamMember | null> {
+  const url = buildStrapiUrl('team-members', {
+    filters: {
+      role: { $eq: 'maire' }
+    },
+    populate: ['photo', 'site'],
+    pagination: { pageSize: 1 }
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<TeamMember>>(url);
+  if (!response?.data || response.data.length === 0) return null;
+  return response.data[0];
+}
+
+/**
+ * Récupère les associations publiées avec une limite
+ */
+export async function getPublishedAssociations(limit: number = 6): Promise<Association[]> {
+  const url = buildStrapiUrl('associations', {
+    filters: {
+      status: { $eq: 'published' }
+    },
+    populate: ['logo', 'site'],
+    sort: ['name:asc'],
+    pagination: { pageSize: limit }
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<Association>>(url);
+  return response?.data ?? [];
 }
 
 /**

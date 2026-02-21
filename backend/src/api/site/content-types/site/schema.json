@@ -185,6 +185,11 @@
       "type": "enumeration",
       "enum": ["data-gouv-fr", "opendatasoft", "custom", "none"],
       "default": "none"
+    },
+    "homepage": {
+      "type": "component",
+      "component": "homepage.homepage-config",
+      "required": false
     }
   }
 }

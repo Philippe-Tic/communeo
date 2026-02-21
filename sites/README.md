@@ -157,7 +157,7 @@ interface Site {
 
 Tous les content types incluent une relation obligatoire `site` :
 
-- **Pages** : `show_in_menu`, `is_homepage`, `template`
+- **Pages** : `show_in_menu`, `template`
 - **Articles** : `category`, `featured`, `publication_date`
 - **Événements** : `start_date`, `location`, `registration_required`
 
@@ -181,7 +181,7 @@ GET /api/evenements?filters[site][id][$eq]=1&filters[start_date][$gte]=2025-01-1
 
 ### Page d'accueil
 
-- Détection automatique via `is_homepage=true`
+- Configurée via l'onglet "Page d'accueil" dans la configuration du site
 - Affichage des articles mis en avant
 - Liste des événements à venir
 

@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_homepage_partners",
+  "info": {
+    "displayName": "Partenaire",
+    "description": "Partenaire affiché sur la page d'accueil"
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "url": {
+      "type": "string"
+    }
+  }
+}

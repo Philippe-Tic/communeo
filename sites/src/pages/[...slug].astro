@@ -13,7 +13,6 @@ export async function getStaticPaths() {
     const pages = await getPages();
 
     return pages
-      .filter(page => !page.is_homepage) // Exclure la page d'accueil
       .map(page => ({
         params: { slug: getPagePath(page, pages) },
         props: { page, allPages: pages }

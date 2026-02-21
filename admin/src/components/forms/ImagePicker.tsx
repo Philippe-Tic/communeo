@@ -52,27 +52,36 @@ export function ImagePicker({ value, onChange, error, className }: ImagePickerPr
     if (file) handleFile(file)
   }
 
-  const handlePickerSelect = (media: { url: string; alt: string; name: string }) => {
+  const handlePickerSelect = (media: {
+    url: string
+    alt: string
+    name: string
+    fileId?: number
+    documentId?: string
+    mime?: string
+    size?: number
+    ext?: string
+  }) => {
     onChange({
-      id: 0,
-      documentId: '',
+      id: media.fileId ?? 0,
+      documentId: media.documentId ?? '',
       name: media.name,
       url: media.url,
-      mime: 'image/jpeg',
-      size: 0,
-      ext: '',
+      mime: media.mime ?? 'image/jpeg',
+      size: media.size ?? 0,
+      ext: media.ext ?? '',
     })
   }
 
   if (imageUrl && !uploading) {
     return (
       <>
-        <div className={cn('relative group', className)}>
+        <div className={cn('relative group h-48 overflow-hidden', className)}>
           <img
             src={imageUrl}
             alt={value?.name || ''}
             className={cn(
-              'h-48 w-full rounded-lg border object-cover',
+              'h-full w-full rounded-lg border object-cover',
               error && 'border-destructive'
             )}
           />

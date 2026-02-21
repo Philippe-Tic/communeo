@@ -937,7 +937,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     featured_image: Schema.Attribute.Media<'images'>;
-    is_homepage: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> &
       Schema.Attribute.Private;
@@ -959,9 +958,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'draft'>;
-    template: Schema.Attribute.Enumeration<
-      ['default', 'homepage', 'about', 'services']
-    > &
+    template: Schema.Attribute.Enumeration<['default', 'about', 'services']> &
       Schema.Attribute.DefaultTo<'default'>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -1024,6 +1021,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::evenement.evenement'
     >;
+    homepage: Schema.Attribute.Component<'homepage.homepage-config', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;

@@ -129,11 +129,6 @@ export function PageDetail() {
                 <p className="text-sm text-muted-foreground">
                   Template: {page.template}
                 </p>
-                {page.is_homepage && (
-                  <p className="text-sm font-medium text-primary">
-                    ✓ Page d'accueil
-                  </p>
-                )}
               </div>
             </div>
           </div>

@@ -158,6 +158,7 @@ export interface Page {
   menu_order: number;
   show_in_menu: boolean;
   template: 'default' | 'about' | 'services';
+  scheduled_at?: string;
   parent_page?: Page | null;
   child_pages?: Page[];
   site: StrapiData<Site> | Site;  // Relation (peut être peuplée ou non)
@@ -181,6 +182,7 @@ export interface Article {
   author?: string;
   featured: boolean;
   meta_description?: string;
+  scheduled_at?: string;
   view_count?: number;
   site: StrapiData<Site> | Site;  // Relation (peut être peuplée ou non)
   createdAt: string;

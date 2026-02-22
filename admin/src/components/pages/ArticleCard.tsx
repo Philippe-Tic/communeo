@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Download, Eye, MoreVertical, Pencil, Star, Trash2, Upload } from 'lucide-react'
+import { Clock, Download, Eye, MoreVertical, Pencil, Star, Trash2, Upload } from 'lucide-react'
 import type { Article } from '../../hooks/api/useArticles'
 import { StatusBadge } from '../common'
 
@@ -36,6 +36,7 @@ export const ArticleCard = ({
   article, onEdit, onView, onDelete, onToggleFeatured, onPublish, onUnpublish
 }: ArticleCardProps) => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR')
+  const isScheduled = article.scheduled_at && new Date(article.scheduled_at) > new Date()
 
   return (
     <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
@@ -47,6 +48,11 @@ export const ArticleCard = ({
             <Badge className={CATEGORY_COLORS[article.category] || ''}>
               {CATEGORY_LABELS[article.category] || article.category}
             </Badge>
+            {isScheduled && (
+              <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                <Clock className="mr-1 inline h-3 w-3" /> Programmé
+              </Badge>
+            )}
             {article.featured && (
               <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                 <Star className="mr-1 inline h-3 w-3" /> À la une
@@ -113,6 +119,7 @@ export const ArticleCard = ({
           </div>
           <p>Créé: {formatDate(article.createdAt)}</p>
           {article.publication_date && <p>Publié: {formatDate(article.publication_date)}</p>}
+          {isScheduled && <p>Programmé: {new Date(article.scheduled_at!).toLocaleString('fr-FR')}</p>}
         </div>
       </div>
     </div>

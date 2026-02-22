@@ -21,6 +21,7 @@ export interface Article {
   author?: string
   featured: boolean
   meta_description?: string
+  scheduled_at?: string
   view_count: number
   createdAt: string
   updatedAt: string
@@ -41,6 +42,7 @@ export interface CreateArticleData {
   author?: string
   featured?: boolean
   meta_description?: string
+  scheduled_at?: string | null
 }
 
 export interface UpdateArticleData extends Partial<CreateArticleData> {

@@ -27,6 +27,7 @@ interface ArticleFormData {
   category: 'news' | 'event' | 'information' | 'emergency'
   author: string
   featured: boolean
+  scheduled_at: string
 }
 
 interface ArticleFormProps {
@@ -65,11 +66,13 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
       category: 'news',
       author: '',
       featured: false,
+      scheduled_at: '',
     },
   })
 
   const watchedTitle = watch('title')
   const watchedContent = watch('content')
+  const watchedStatus = watch('status')
 
   useEffect(() => {
     if (watchedTitle && !isEditing) {
@@ -93,6 +96,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
         category: initialData.category,
         author: initialData.author || '',
         featured: initialData.featured,
+        scheduled_at: initialData.scheduled_at ? initialData.scheduled_at.slice(0, 16) : '',
       })
     }
   }, [initialData, reset])
@@ -101,12 +105,13 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
+      const scheduledAt = data.scheduled_at ? new Date(data.scheduled_at).toISOString() : null
       if (isEditing && id) {
-        const updateData = { id, ...data, status: data.status === 'archived' ? 'draft' as const : data.status }
+        const updateData = { id, ...data, scheduled_at: scheduledAt, status: data.status === 'archived' ? 'draft' as const : data.status }
         await updateArticleMutation.mutateAsync(updateData)
         toaster.create({ title: 'Article mis à jour', description: 'L\'article a été mis à jour avec succès.', type: 'success', duration: 3000 })
       } else {
-        const createData = { ...data, status: data.status === 'archived' ? 'draft' as const : data.status }
+        const createData = { ...data, scheduled_at: scheduledAt, status: data.status === 'archived' ? 'draft' as const : data.status }
         await createArticleMutation.mutateAsync(createData)
         toaster.create({ title: 'Article créé', description: 'L\'article a été créé avec succès.', type: 'success', duration: 3000 })
       }
@@ -210,6 +215,16 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                       />
                     )}
                   />
+
+                  {watchedStatus === 'published' && (
+                    <div>
+                      <Label className="mb-2">Publication programmée</Label>
+                      <Input type="datetime-local" {...register('scheduled_at')} />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Laisser vide pour publier immédiatement. Définir une date future pour programmer la publication.
+                      </p>
+                    </div>
+                  )}
 
                   <div>
                     <Label className="mb-2">Auteur</Label>

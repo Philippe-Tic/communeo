@@ -2,6 +2,24 @@ import type {
   Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, StrapiCollectionResponse
 } from '../types/strapi';
 
+/**
+ * Filtre les contenus dont scheduled_at est dans le futur (publication programmée).
+ * Les contenus sans scheduled_at ou avec une date passée sont conservés.
+ */
+function filterScheduled<T extends { scheduled_at?: string }>(items: T[]): T[] {
+  const now = new Date();
+  return items.filter(item => !item.scheduled_at || new Date(item.scheduled_at) <= now);
+}
+
+/**
+ * Vérifie si un contenu unique est déjà publié (scheduled_at dans le passé ou absent).
+ */
+function isPublished<T extends { scheduled_at?: string }>(item: T | null): boolean {
+  if (!item) return false;
+  if (!item.scheduled_at) return true;
+  return new Date(item.scheduled_at) <= new Date();
+}
+
 // Configuration depuis les variables d'environnement
 const STRAPI_URL = import.meta.env.STRAPI_URL || 'http://localhost:1337';
 export { STRAPI_URL as strapiBaseUrl };
@@ -172,7 +190,7 @@ export async function getPages(): Promise<Page[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
-  return response?.data ?? [];
+  return filterScheduled(response?.data ?? []);
 }
 
 /**
@@ -189,7 +207,7 @@ export async function getMenuPages(): Promise<Page[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
-  return response?.data ?? [];
+  return filterScheduled(response?.data ?? []);
 }
 
 /**
@@ -206,7 +224,8 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
   if (!response?.data) return null;
-  return response.data.length > 0 ? response.data[0] : null;
+  const page = response.data.length > 0 ? response.data[0] : null;
+  return isPublished(page) ? page : null;
 }
 
 /**
@@ -223,7 +242,7 @@ export async function getArticles(limit?: number): Promise<Article[]> {
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
-  return response?.data ?? [];
+  return filterScheduled(response?.data ?? []);
 }
 
 /**
@@ -241,7 +260,7 @@ export async function getFeaturedArticles(limit: number = 3): Promise<Article[]>
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
-  return response?.data ?? [];
+  return filterScheduled(response?.data ?? []);
 }
 
 /**
@@ -258,7 +277,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
 
   const response = await strapiRequest<StrapiCollectionResponse<Article>>(url);
   if (!response?.data) return null;
-  return response.data.length > 0 ? response.data[0] : null;
+  const article = response.data.length > 0 ? response.data[0] : null;
+  return isPublished(article) ? article : null;
 }
 
 /**

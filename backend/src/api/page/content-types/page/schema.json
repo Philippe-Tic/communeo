@@ -54,6 +54,9 @@
       "enum": ["default", "about", "services"],
       "default": "default"
     },
+    "scheduled_at": {
+      "type": "datetime"
+    },
     "seo_keywords": {
       "type": "string",
       "maxLength": 255

@@ -68,6 +68,9 @@
       "maxLength": 160,
       "required": false
     },
+    "scheduled_at": {
+      "type": "datetime"
+    },
     "view_count": {
       "type": "integer",
       "default": 0

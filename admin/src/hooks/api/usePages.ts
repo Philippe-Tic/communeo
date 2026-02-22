@@ -16,6 +16,7 @@ export interface Page {
     caption?: string
   }
   status: 'draft' | 'published' | 'archived'
+  scheduled_at?: string
   publishedAt?: string
   createdAt: string
   updatedAt: string
@@ -60,6 +61,7 @@ export interface CreatePageData {
   show_in_menu?: boolean
   seo_keywords?: string
   template?: 'default' | 'about' | 'services'
+  scheduled_at?: string | null
   site?: string
 }
 

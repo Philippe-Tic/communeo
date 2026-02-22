@@ -23,6 +23,7 @@ interface PageFormData {
   seo_keywords: string
   meta_description: string
   status: 'draft' | 'published' | 'archived'
+  scheduled_at: string
   parent_id?: string
   menu_order: number
   template: string
@@ -40,6 +41,7 @@ const getDefaultValues = (data?: Page): PageFormData => ({
   seo_keywords: data?.seo_keywords ?? data?.title ?? '',
   meta_description: data?.meta_description ?? '',
   status: data?.status ?? 'draft',
+  scheduled_at: data?.scheduled_at ? data.scheduled_at.slice(0, 16) : '',
   parent_id: data?.parent_page?.documentId ?? '',
   menu_order: data?.menu_order ?? 0,
   template: data?.template ?? 'default',
@@ -72,6 +74,7 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
 
   const watchedTitle = watch('title')
   const watchedContent = watch('content')
+  const watchedStatus = watch('status')
 
   useEffect(() => {
     if (watchedTitle && !isEditing) {
@@ -94,9 +97,10 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
-      const { parent_id, ...formData } = data
+      const { parent_id, scheduled_at, ...formData } = data
       const apiData = {
         ...formData,
+        scheduled_at: scheduled_at ? new Date(scheduled_at).toISOString() : null,
         parent_page: parent_id || null,
       }
       if (isEditing && id) {
@@ -197,6 +201,16 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                       />
                     )}
                   />
+
+                  {watchedStatus === 'published' && (
+                    <div>
+                      <Label className="mb-2">Publication programmée</Label>
+                      <Input type="datetime-local" {...register('scheduled_at')} />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Laisser vide pour publier immédiatement. Définir une date future pour programmer la publication.
+                      </p>
+                    </div>
+                  )}
 
                   <Controller
                     name="parent_id"

@@ -59,7 +59,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
 
   <script type="application/ld+json" set:html={breadcrumbJsonLd} />
 
-  <main id="main-content">
+  <main id="main-content" data-pagefind-body>
     <Breadcrumb items={[
       { label: 'Actualités' }
     ]} />

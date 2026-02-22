@@ -83,7 +83,7 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
 
   <Navigation />
 
-  <main id="main-content">
+  <main id="main-content" data-pagefind-body>
     {breadcrumbItems.length > 0 && (
       <Breadcrumb items={breadcrumbItems} />
     )}

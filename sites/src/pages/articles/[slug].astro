@@ -112,7 +112,7 @@ const articleJsonLd = JSON.stringify({
   <script type="application/ld+json" set:html={breadcrumbJsonLd} />
   <script type="application/ld+json" set:html={articleJsonLd} />
 
-  <main id="main-content">
+  <main id="main-content" data-pagefind-body>
     <Breadcrumb items={[
       { label: 'Actualités', href: '/articles' },
       { label: attributes.title }

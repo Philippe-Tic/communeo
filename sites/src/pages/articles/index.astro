@@ -27,6 +27,17 @@ const categories = [
   { key: 'emergency', label: 'Urgences' }
 ];
 
+// JSON-LD BreadcrumbList
+const siteOrigin = Astro.site?.toString()?.replace(/\/$/, '') || Astro.url.origin;
+const breadcrumbJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": siteOrigin },
+    { "@type": "ListItem", "position": 2, "name": "Actualités" }
+  ]
+});
+
 // Grouper les articles par catégorie
 const articlesByCategory = articles.reduce((acc, article) => {
   const category = article.category;
@@ -45,6 +56,8 @@ const articlesByCategory = articles.reduce((acc, article) => {
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
   <Navigation />
+
+  <script type="application/ld+json" set:html={breadcrumbJsonLd} />
 
   <main id="main-content">
     <Breadcrumb items={[
@@ -92,6 +105,8 @@ const articlesByCategory = articles.reduce((acc, article) => {
                       alt={article.title}
                       width={400}
                       height={225}
+                      widths={[320, 400, 640, 800]}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       class="w-full h-full object-cover"
                     />
                     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

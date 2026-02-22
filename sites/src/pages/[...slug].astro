@@ -101,6 +101,8 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
                   alt={attributes.title}
                   width={attributes.featured_image.width || 800}
                   height={attributes.featured_image.height || 384}
+                  widths={[640, 1024, 1440, 1920]}
+                  sizes="100vw"
                   class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
                   priority
                 />

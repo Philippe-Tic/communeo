@@ -191,6 +191,8 @@ const eventJsonLd = JSON.stringify({
               alt={attributes.title}
               width={attributes.image.width || 800}
               height={attributes.image.height || 384}
+              widths={[640, 1024, 1440, 1920]}
+              sizes="100vw"
               class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
               priority
             />

@@ -126,6 +126,8 @@ const articleJsonLd = JSON.stringify({
           alt={attributes.title}
           width={attributes.image.width || 1200}
           height={attributes.image.height || 600}
+          widths={[640, 1024, 1440, 1920]}
+          sizes="100vw"
           class="w-full h-full object-cover"
           priority
         />
@@ -253,6 +255,8 @@ const articleJsonLd = JSON.stringify({
                       alt={suggestedArticle.title}
                       width={400}
                       height={200}
+                      widths={[320, 400, 640, 800]}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       class="w-full h-full md:h-40 object-cover"
                     />
                   </div>

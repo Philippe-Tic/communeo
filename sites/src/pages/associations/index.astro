@@ -103,6 +103,8 @@ const categories = [...new Set(associations.map(a => a.category))].sort();
                         alt={`Logo ${association.name}`}
                         width={200}
                         height={150}
+                        widths={[200, 300]}
+                        sizes="(max-width: 640px) 50vw, 200px"
                         class="max-h-full max-w-full object-contain"
                       />
                     </div>

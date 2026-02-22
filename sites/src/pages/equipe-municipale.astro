@@ -98,6 +98,8 @@ const membersByRole = ROLE_ORDER
                             alt={`${member.first_name} ${member.last_name}`}
                             width={400}
                             height={400}
+                            widths={[200, 400]}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                             class={`w-full h-64 object-cover ${group.role === 'maire' ? 'rounded-b-none' : ''}`}
                           />
                         </div>

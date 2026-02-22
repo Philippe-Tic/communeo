@@ -112,6 +112,12 @@ export interface Site {
     alternativeText?: string
     caption?: string
   }
+  favicon?: {
+    id: number
+    url: string
+    alternativeText?: string
+    caption?: string
+  }
   contact_mail: string
   contact_phone?: string
   address?: string
@@ -141,6 +147,7 @@ export interface CreateSiteData {
   theme?: 'classique' | 'moderne' | 'accessible'
   colors?: any
   logo?: number
+  favicon?: number
   contact_mail: string
   contact_phone?: string
   address?: string
@@ -227,6 +234,7 @@ export const useSite = (documentId: string) => {
       const params = new URLSearchParams()
       // Populate fields with 'true' (not '*' which causes Strapi v5 to recurse into media internal relations like logo.related)
       params.append('populate[logo]', 'true')
+      params.append('populate[favicon]', 'true')
       params.append('populate[mentions_legales]', 'true')
       params.append('populate[rgpd]', 'true')
       params.append('populate[accessibilite]', 'true')

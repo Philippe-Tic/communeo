@@ -38,6 +38,12 @@
       "required": false,
       "allowedTypes": ["images"]
     },
+    "favicon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
     "contact_mail": {
       "type": "email",
       "required": true

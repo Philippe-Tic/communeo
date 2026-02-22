@@ -33,6 +33,20 @@ function getRdvLabel(provider?: string): string {
 
 const rdvLabel = getRdvLabel(di?.appointment_provider);
 
+// JSON-LD FAQPage
+const faqJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": categories.map((cat) => ({
+    "@type": "Question",
+    "name": `Quelles démarches ${cat.title.toLowerCase()} puis-je effectuer en ligne ?`,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": `${cat.description} Services disponibles : ${cat.services.map(s => s.title).join(', ')}.`
+    }
+  }))
+});
+
 const steps = [
   {
     num: 1,
@@ -72,6 +86,9 @@ const steps = [
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
   <Navigation />
+
+  <!-- JSON-LD FAQPage -->
+  <script type="application/ld+json" set:html={faqJsonLd} />
 
   <main id="main-content">
     <!-- Header -->

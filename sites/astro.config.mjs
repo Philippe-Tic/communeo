@@ -28,6 +28,8 @@ export default defineConfig({
   // Configuration du site basée sur le slug
   site: `https://${SITE_SLUG}.monservice.fr`,
   base: '/',
+  trailingSlash: 'never',
+  prefetch: true,
 
   // Mode hybride pour la génération statique avec possibilité d'opt-in
   output: 'static',

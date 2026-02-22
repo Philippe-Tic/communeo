@@ -84,12 +84,12 @@ const articleJsonLd = JSON.stringify({
   ...(attributes.meta_description || attributes.summary ? { "description": attributes.meta_description || attributes.summary } : {}),
   ...(attributes.publication_date ? { "datePublished": attributes.publication_date } : {}),
   "dateModified": attributes.updatedAt,
-  ...(attributes.image?.data ? { "image": getStrapiImageUrl(attributes.image.data.url) } : {}),
+  ...(attributes.image ? { "image": getStrapiImageUrl(attributes.image.url) } : {}),
   ...(attributes.author ? { "author": { "@type": "Person", "name": attributes.author } } : {}),
   ...(siteConfig ? { "publisher": {
     "@type": "Organization",
     "name": siteConfig.name,
-    ...(siteConfig.logo?.data ? { "logo": { "@type": "ImageObject", "url": getStrapiImageUrl(siteConfig.logo.data.url) } } : {})
+    ...(siteConfig.logo ? { "logo": { "@type": "ImageObject", "url": getStrapiImageUrl(siteConfig.logo.url) } } : {})
   }} : {})
 });
 ---
@@ -97,7 +97,12 @@ const articleJsonLd = JSON.stringify({
 <Layout
   title={attributes.title}
   description={attributes.meta_description || attributes.summary || `${attributes.title} - Actualité de votre mairie`}
-  image={attributes.image?.data?.url}
+  image={attributes.image?.url}
+  ogType="article"
+  ogArticleMeta={{
+    publishedTime: attributes.publication_date || undefined,
+    modifiedTime: attributes.updatedAt,
+  }}
 >
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
@@ -114,13 +119,13 @@ const articleJsonLd = JSON.stringify({
     ]} />
 
     <!-- Image hero pleine largeur -->
-    {attributes.image?.data && (
+    {attributes.image && (
       <div class="w-full h-64 sm:h-80 md:h-96 overflow-hidden">
         <StrapiImage
-          image={attributes.image.data}
+          image={attributes.image}
           alt={attributes.title}
-          width={attributes.image.data.width || 1200}
-          height={attributes.image.data.height || 600}
+          width={attributes.image.width || 1200}
+          height={attributes.image.height || 600}
           class="w-full h-full object-cover"
           priority
         />
@@ -181,9 +186,9 @@ const articleJsonLd = JSON.stringify({
           </div>
         </header>
 
-        {attributes.image?.data?.alternativeText && (
+        {attributes.image?.alternativeText && (
           <p class="text-sm text-gray-400 -mt-4 mb-6 italic text-center">
-            {attributes.image.data.alternativeText}
+            {attributes.image.alternativeText}
           </p>
         )}
 
@@ -241,10 +246,10 @@ const articleJsonLd = JSON.stringify({
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {suggestedArticles.map((suggestedArticle) => (
               <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all flex flex-row md:flex-col">
-                {suggestedArticle.image?.data && (
+                {suggestedArticle.image && (
                   <div class="w-32 md:w-full flex-shrink-0">
                     <StrapiImage
-                      image={suggestedArticle.image.data}
+                      image={suggestedArticle.image}
                       alt={suggestedArticle.title}
                       width={400}
                       height={200}

@@ -11,6 +11,7 @@ interface Props {
   priority?: boolean;
   widths?: number[];
   sizes?: string;
+  format?: 'webp' | 'avif';
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   priority = false,
   widths,
   sizes,
+  format = 'avif',
 } = Astro.props;
 
 const src = getStrapiImageUrl(image.url);
@@ -34,7 +36,7 @@ const altText = alt || image.alternativeText || '';
   width={width}
   height={height}
   class={className}
-  format="webp"
+  format={format}
   quality={80}
   loading={priority ? 'eager' : 'lazy'}
   decoding={priority ? 'sync' : 'async'}

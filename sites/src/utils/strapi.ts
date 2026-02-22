@@ -113,6 +113,7 @@ export async function getSiteConfig(): Promise<Site> {
   });
   const urlObj = new URL(baseUrl);
   urlObj.searchParams.set('populate[logo]', 'true');
+  urlObj.searchParams.set('populate[favicon]', 'true');
   urlObj.searchParams.set('populate[mentions_legales]', 'true');
   urlObj.searchParams.set('populate[rgpd]', 'true');
   urlObj.searchParams.set('populate[accessibilite]', 'true');

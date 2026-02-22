@@ -71,8 +71,10 @@ const eventJsonLd = JSON.stringify({
   "name": attributes.title,
   "startDate": attributes.start_date,
   ...(attributes.end_date ? { "endDate": attributes.end_date } : {}),
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   ...(attributes.description ? { "description": attributes.description.substring(0, 300) } : {}),
-  ...(attributes.image?.data ? { "image": getStrapiImageUrl(attributes.image.data.url) } : {}),
+  ...(attributes.image ? { "image": getStrapiImageUrl(attributes.image.url) } : {}),
   ...(attributes.location ? { "location": { "@type": "Place", "name": attributes.location, ...(attributes.address ? { "address": attributes.address } : {}) } } : {}),
   ...(siteConfig ? { "organizer": { "@type": "Organization", "name": siteConfig.name, ...(siteConfig.contact_mail ? { "email": siteConfig.contact_mail } : {}) } } : {})
 });
@@ -81,7 +83,7 @@ const eventJsonLd = JSON.stringify({
 <Layout
   title={attributes.title}
   description={attributes.description || `${attributes.title} - Événement de votre mairie`}
-  image={attributes.image?.data?.url}
+  image={attributes.image?.url}
 >
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
@@ -182,13 +184,13 @@ const eventJsonLd = JSON.stringify({
         </header>
 
         <!-- Image principale -->
-        {attributes.image?.data && (
+        {attributes.image && (
           <div class="mb-8">
             <StrapiImage
-              image={attributes.image.data}
+              image={attributes.image}
               alt={attributes.title}
-              width={attributes.image.data.width || 800}
-              height={attributes.image.data.height || 384}
+              width={attributes.image.width || 800}
+              height={attributes.image.height || 384}
               class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
               priority
             />

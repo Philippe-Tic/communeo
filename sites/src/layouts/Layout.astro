@@ -1,5 +1,6 @@
 ---
 import type { Site } from '../types/strapi';
+import { getImage } from 'astro:assets';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
 import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
@@ -13,6 +14,11 @@ export interface Props {
   description?: string;
   image?: string;
   noIndex?: boolean;
+  ogType?: 'website' | 'article';
+  ogArticleMeta?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+  };
 }
 
 // Récupération de la configuration du site
@@ -23,21 +29,43 @@ try {
   console.error('Erreur lors de la récupération de la configuration du site:', error);
 }
 
+// Résoudre l'image source : favicon > logo > null
+const faviconSrc = siteConfig?.favicon?.url
+  ? getStrapiImageUrl(siteConfig.favicon.url)
+  : siteConfig?.logo?.url
+    ? getStrapiImageUrl(siteConfig.logo.url)
+    : null;
+
+// Traiter les favicons aux tailles nécessaires (Astro cache entre les pages)
+let favicon32: Awaited<ReturnType<typeof getImage>> | undefined;
+let favicon16: Awaited<ReturnType<typeof getImage>> | undefined;
+let appleTouchIcon: Awaited<ReturnType<typeof getImage>> | undefined;
+
+if (faviconSrc) {
+  [favicon32, favicon16, appleTouchIcon] = await Promise.all([
+    getImage({ src: faviconSrc, width: 32, height: 32, format: 'png' }),
+    getImage({ src: faviconSrc, width: 16, height: 16, format: 'png' }),
+    getImage({ src: faviconSrc, width: 180, height: 180, format: 'png' }),
+  ]);
+}
+
 const {
   title = siteConfig?.name || 'Site de la mairie',
   description = `Site officiel de la ${siteConfig?.name || 'mairie'}`,
   image,
-  noIndex = false
+  noIndex = false,
+  ogType = 'website',
+  ogArticleMeta,
 } = Astro.props;
 
 // Construction de l'URL complète pour le titre
 const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?.name}`;
 
-// URL de l'image pour les réseaux sociaux
-const socialImage = image ? getStrapiImageUrl(image) :
-  (siteConfig?.logo?.data ? getStrapiImageUrl(siteConfig.logo.data.url) : '');
-
 const siteUrl = Astro.site?.toString() || Astro.url.origin;
+
+// URL de l'image pour les réseaux sociaux (fallback: logo du site, puis image OG par défaut)
+const socialImage = image ? getStrapiImageUrl(image) :
+  (siteConfig?.logo ? getStrapiImageUrl(siteConfig.logo.url) : new URL('/og-default.png', siteUrl).toString());
 
 // JSON-LD Organization + CivicStructure
 const organizationJsonLd = siteConfig ? JSON.stringify({
@@ -48,8 +76,21 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
   ...(siteConfig.address && { "address": { "@type": "PostalAddress", "streetAddress": siteConfig.address } }),
   ...(siteConfig.contact_phone && { "telephone": siteConfig.contact_phone }),
   ...(siteConfig.contact_mail && { "email": siteConfig.contact_mail }),
-  ...(siteConfig.logo?.data && { "logo": getStrapiImageUrl(siteConfig.logo.data.url) }),
+  ...(siteConfig.logo && { "logo": getStrapiImageUrl(siteConfig.logo.url) }),
   ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": siteConfig.infos_pratiques.opening_hours }),
+}) : null;
+
+// JSON-LD WebSite + SearchAction
+const websiteJsonLd = siteConfig ? JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": siteConfig.name,
+  "url": siteUrl,
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": `${siteUrl}/articles?q={search_term_string}`,
+    "query-input": "required name=search_term_string"
+  }
 }) : null;
 
 ---
@@ -59,12 +100,30 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
+    {favicon32 ? (
+      <>
+        <link rel="icon" type="image/png" sizes="32x32" href={favicon32.src} />
+        <link rel="icon" type="image/png" sizes="16x16" href={favicon16!.src} />
+        <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon!.src} />
+      </>
+    ) : (
+      <>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      </>
+    )}
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content={`rgb(${siteConfig?.colors?.primaryRgb || '59 130 246'})`} />
+
+    <!-- Preload critical fonts -->
+    <link rel="preload" href="/fonts/Marianne-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Marianne-Bold.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- Preconnect to Strapi for faster image loading -->
     <link rel="preconnect" href={strapiUrl} crossorigin />
     <link rel="dns-prefetch" href={strapiUrl} />
+
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title={`${siteConfig?.name || 'Mairie'} - Actualités`} href={new URL('/rss.xml', siteUrl).toString()} />
 
     <!-- SEO -->
     <title>{fullTitle}</title>
@@ -73,13 +132,17 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
     {noIndex && <meta name="robots" content="noindex, nofollow" />}
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={Astro.url} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:locale" content="fr_FR" />
     {siteConfig?.name && <meta property="og:site_name" content={siteConfig.name} />}
     {socialImage && <meta property="og:image" content={socialImage} />}
+    {socialImage && <meta property="og:image:width" content="1200" />}
+    {socialImage && <meta property="og:image:height" content="630" />}
+    {ogArticleMeta?.publishedTime && <meta property="article:published_time" content={ogArticleMeta.publishedTime} />}
+    {ogArticleMeta?.modifiedTime && <meta property="article:modified_time" content={ogArticleMeta.modifiedTime} />}
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
@@ -91,6 +154,11 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
     <!-- JSON-LD Organization -->
     {organizationJsonLd && (
       <script type="application/ld+json" set:html={organizationJsonLd} />
+    )}
+
+    <!-- JSON-LD WebSite -->
+    {websiteJsonLd && (
+      <script type="application/ld+json" set:html={websiteJsonLd} />
     )}
 
     <!-- Couleurs du thème en CSS custom properties -->
@@ -108,31 +176,16 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
     <AlertBanner />
     <slot />
 
-    <!-- Script pour l'accessibilité clavier -->
-    <script>
-      // Amélioration de l'accessibilité pour la navigation au clavier
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-          document.body.classList.add('keyboard-navigation');
-        }
-      });
-
-      document.addEventListener('mousedown', () => {
-        document.body.classList.remove('keyboard-navigation');
-      });
-    </script>
-
     <!-- Styles pour l'accessibilité -->
     <style is:global>
-      /* Focus visible uniquement pour la navigation clavier */
-      .keyboard-navigation *:focus {
-        outline: 2px solid rgb(var(--color-secondary));
-        outline-offset: 2px;
-      }
-
-      /* Masquer l'outline par défaut sauf pour la navigation clavier */
+      /* Focus visible — outline natif pour navigation clavier uniquement */
       *:focus {
         outline: none;
+      }
+
+      *:focus-visible {
+        outline: 2px solid rgb(var(--color-secondary));
+        outline-offset: 2px;
       }
 
       /* Skip link pour l'accessibilité */
@@ -147,11 +200,9 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
         transition: top 0.3s;
       }
 
-      .skip-link:focus {
+      .skip-link:focus-visible {
         top: 6px;
       }
-
-      /* Theme-specific styles imported from CSS files */
     </style>
 
     <CookieBanner />

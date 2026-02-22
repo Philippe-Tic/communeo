@@ -1,20 +1,3 @@
-// Types pour les médias Strapi v5 (format wrappé legacy)
-export interface MediaAttribute {
-  data?: {
-    id: number;
-    documentId: string;
-    name: string;
-    url: string;
-    alternativeText?: string;
-    width?: number;
-    height?: number;
-    size: number;
-    mime: string;
-    createdAt: string;
-    updatedAt: string;
-  } | null;
-}
-
 // Média Strapi v5 format plat (retourné par populate)
 export interface StrapiMedia {
   id: number;
@@ -141,7 +124,8 @@ export interface Site {
   slug: string;            // "lyon"
   theme: 'classique' | 'moderne' | 'accessible';
   colors?: any;            // JSON field
-  logo?: MediaAttribute;
+  logo?: StrapiMedia | null;
+  favicon?: StrapiMedia | null;
   mentions_legales?: MentionsLegales;
   rgpd?: RGPD;
   accessibilite?: Accessibilite;
@@ -170,7 +154,7 @@ export interface Page {
   content: string;         // Rich text HTML
   status: 'draft' | 'published' | 'archived';
   meta_description?: string;
-  featured_image?: MediaAttribute;
+  featured_image?: StrapiMedia | null;
   menu_order: number;
   show_in_menu: boolean;
   template: 'default' | 'about' | 'services';
@@ -190,7 +174,7 @@ export interface Article {
   slug: string;
   content: string;
   status: 'draft' | 'published' | 'archived';
-  image?: MediaAttribute;
+  image?: StrapiMedia | null;
   publication_date?: string;
   summary?: string;
   category: 'news' | 'event' | 'information' | 'emergency';
@@ -214,7 +198,7 @@ export interface Event {
   start_date: string;
   end_date?: string;
   location?: string;
-  image?: MediaAttribute;
+  image?: StrapiMedia | null;
   price: string;
   external_link?: string;
   category: 'cultural' | 'sport' | 'meeting' | 'celebration' | 'workshop' | 'conference';

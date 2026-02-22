@@ -180,6 +180,8 @@ export const SiteConfigEdit = () => {
     show_partners: false,
   })
 
+  const [logoImage, setLogoImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
+  const [faviconImage, setFaviconImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
   const [heroImage, setHeroImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
   const [quickLinks, setQuickLinks] = React.useState<HomepageQuickLink[]>([])
   const [keyFigures, setKeyFigures] = React.useState<HomepageKeyFigure[]>([])
@@ -252,6 +254,8 @@ export const SiteConfigEdit = () => {
         associations_count: (site.homepage?.associations_count ?? 6).toString(),
         show_partners: site.homepage?.show_partners ?? false,
       })
+      setLogoImage(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
+      setFaviconImage(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
       setHeroImage(site.homepage?.hero_image || null)
       setQuickLinks(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
       setKeyFigures(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
@@ -392,6 +396,8 @@ export const SiteConfigEdit = () => {
       contact_phone: formData.contact_phone || undefined,
       address: formData.address || undefined,
       colors: parsedColors,
+      logo: logoImage?.id || undefined,
+      favicon: faviconImage?.id || undefined,
       mentions_legales: {
         siret: formData.siret || undefined,
         publication_director: formData.publication_director || undefined,
@@ -636,6 +642,36 @@ export const SiteConfigEdit = () => {
                           placeholder="Adresse complète de la mairie"
                           rows={3}
                         />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Identité visuelle
+                    </h2>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div>
+                        <Label className="mb-2">Logo</Label>
+                        <ImagePicker
+                          value={logoImage}
+                          onChange={(media) => { setLogoImage(media); setIsDirty(true) }}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Logo affiché dans le header du site public
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="mb-2">Favicon</Label>
+                        <ImagePicker
+                          value={faviconImage}
+                          onChange={(media) => { setFaviconImage(media); setIsDirty(true) }}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Image carrée recommandée (512x512px minimum). Utilisé comme icône du navigateur et PWA. Si absent, le logo sera utilisé.
+                        </p>
                       </div>
                     </div>
                   </div>

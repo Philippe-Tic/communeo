@@ -20,9 +20,9 @@ const accessibilityLevel = siteConfig?.accessibilite?.accessibility_level || 'no
     <!-- Logo + description -->
     <div class="pt-12 pb-8 border-b border-gray-800">
       <div class="flex items-center gap-4 mb-4">
-        {siteConfig?.logo?.data && (
+        {siteConfig?.logo && (
           <StrapiImage
-            image={siteConfig.logo.data}
+            image={siteConfig.logo}
             alt={`Logo ${siteConfig.name}`}
             width={48}
             height={48}

@@ -13,7 +13,6 @@ import {
   getMayor,
   getPublishedAssociations,
   formatDate,
-  getStrapiImageUrl
 } from '../utils/strapi';
 
 // Récupération des données principales
@@ -208,13 +207,15 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {featuredArticles.map((article) => (
             <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-              {article.image?.data && (
+              {article.image && (
                 <div class="relative aspect-[16/9] overflow-hidden">
                   <StrapiImage
-                    image={article.image.data}
+                    image={article.image}
                     alt={article.title}
                     width={400}
                     height={225}
+                    widths={[320, 400, 640]}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     class="w-full h-full object-cover"
                   />
                   <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
@@ -431,13 +432,13 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           <h2 class="text-lg font-semibold text-gray-500 text-center mb-8">Nos partenaires</h2>
           <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12">
             {hp.partners.map((partner) => {
-              const logoUrl = partner.logo ? getStrapiImageUrl(partner.logo.url) : null;
-              const content = logoUrl ? (
-                <img
-                  src={logoUrl}
+              const content = partner.logo ? (
+                <StrapiImage
+                  image={partner.logo}
                   alt={partner.name}
+                  width={160}
+                  height={48}
                   class="h-12 max-w-[160px] object-contain grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100"
-                  loading="lazy"
                 />
               ) : (
                 <span class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">{partner.name}</span>

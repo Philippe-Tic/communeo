@@ -1021,6 +1021,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::evenement.evenement'
     >;
+    favicon: Schema.Attribute.Media<'images'>;
     homepage: Schema.Attribute.Component<'homepage.homepage-config', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_url: Schema.Attribute.String;

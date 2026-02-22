@@ -75,9 +75,9 @@ const isActive = (pagePath: string) =>
       <!-- Logo et nom de la mairie -->
       <div class="flex items-center">
         <a href="/" class="flex items-center space-x-3 text-gray-900 hover:text-primary transition-colors">
-          {siteConfig?.logo?.data && (
+          {siteConfig?.logo && (
             <StrapiImage
-              image={siteConfig.logo.data}
+              image={siteConfig.logo}
               alt={`Logo ${siteConfig.name}`}
               width={40}
               height={40}

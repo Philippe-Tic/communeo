@@ -6,6 +6,7 @@ import Footer from '../../components/Footer.astro';
 import Hero from '../../components/Hero.astro';
 import Section from '../../components/Section.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getArticles, formatDate } from '../../utils/strapi';
 
 // Récupération de tous les articles
@@ -46,6 +47,10 @@ const articlesByCategory = articles.reduce((acc, article) => {
   <Navigation />
 
   <main id="main-content">
+    <Breadcrumb items={[
+      { label: 'Actualités' }
+    ]} />
+
     <Hero title="Actualités" subtitle="Restez informés des dernières actualités et annonces de votre mairie" />
 
     <!-- Filtres de catégories -->
@@ -80,10 +85,10 @@ const articlesByCategory = articles.reduce((acc, article) => {
                 class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all article-card"
                 data-category={article.category}
               >
-                {article.image?.data && (
+                {article.image && (
                   <div class="relative aspect-[16/9] overflow-hidden">
                     <StrapiImage
-                      image={article.image.data}
+                      image={article.image}
                       alt={article.title}
                       width={400}
                       height={225}

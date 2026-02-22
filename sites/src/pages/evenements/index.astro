@@ -6,6 +6,7 @@ import Footer from '../../components/Footer.astro';
 import Hero from '../../components/Hero.astro';
 import Section from '../../components/Section.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getEvents, formatDate } from '../../utils/strapi';
 
 // Récupération de tous les événements
@@ -27,6 +28,10 @@ try {
   <Navigation />
 
   <main id="main-content">
+    <Breadcrumb items={[
+      { label: 'Événements' }
+    ]} />
+
     <Hero title="Événements" subtitle="Découvrez tous les événements organisés par votre mairie" />
 
     <!-- Liste des événements -->
@@ -39,10 +44,10 @@ try {
               const month = eventDate.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase();
               return (
                 <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                  {event.image?.data && (
+                  {event.image && (
                     <div class="relative aspect-[16/9] overflow-hidden">
                       <StrapiImage
-                        image={event.image.data}
+                        image={event.image}
                         alt={event.title}
                         width={400}
                         height={225}
@@ -78,7 +83,7 @@ try {
                       </a>
                     </h2>
 
-                    {!event.image?.data && (
+                    {!event.image && (
                       <div class="text-sm text-gray-500 mb-2">
                         <time datetime={event.start_date}>
                           {formatDate(event.start_date)}

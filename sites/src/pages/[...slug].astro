@@ -75,7 +75,7 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
 <Layout
   title={attributes.title}
   description={attributes.meta_description || `${attributes.title} - Page officielle`}
-  image={attributes.featured_image?.data?.url}
+  image={attributes.featured_image?.url}
 >
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
@@ -94,13 +94,13 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
     <section class="py-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-3xl mx-auto">
-            {attributes.featured_image?.data && (
+            {attributes.featured_image && (
               <div class="mb-8">
                 <StrapiImage
-                  image={attributes.featured_image.data}
+                  image={attributes.featured_image}
                   alt={attributes.title}
-                  width={attributes.featured_image.data.width || 800}
-                  height={attributes.featured_image.data.height || 384}
+                  width={attributes.featured_image.width || 800}
+                  height={attributes.featured_image.height || 384}
                   class="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
                   priority
                 />

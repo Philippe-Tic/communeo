@@ -2,9 +2,10 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
-import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, Users, X, type LucideIcon } from 'lucide-react'
-import React, { useState } from 'react'
+import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useUserRole } from '@/hooks/useUser'
 
 interface NavItem {
   name: string
@@ -19,39 +20,45 @@ interface NavGroup {
   items: NavItem[]
 }
 
-const navGroups: NavGroup[] = [
-  {
-    label: 'Contenu',
-    key: 'content',
-    items: [
-      { name: 'Articles', path: '/articles', icon: FileText },
-      { name: 'Pages', path: '/pages', icon: File },
-      { name: 'Événements', path: '/events', icon: Calendar },
-      { name: 'Documents', path: '/documents', icon: FileArchive },
-      { name: 'Alertes', path: '/alertes', icon: Megaphone },
-      { name: 'Médiathèque', path: '/media', icon: ImageIcon },
-    ],
-  },
-  {
-    label: 'Communauté',
-    key: 'community',
-    items: [
-      { name: 'Messages', path: '/messages', icon: Mail, badgeKey: 'messages' },
-      { name: 'Équipe', path: '/team-members', icon: Users },
-      { name: 'Associations', path: '/associations', icon: Building2, badgeKey: 'associations' },
-    ],
-  },
-  {
-    label: 'Paramètres',
-    key: 'settings',
-    items: [
-      { name: 'Site', path: '/site', icon: Settings },
-      { name: 'Conformité', path: '/compliance', icon: ShieldCheck },
-      { name: 'Déploiement', path: '/deployment', icon: Rocket },
-      { name: 'Domaines', path: '/domain', icon: Globe },
-    ],
-  },
-]
+function buildNavGroups(canManageUsers: boolean): NavGroup[] {
+  const settingsItems: NavItem[] = [
+    { name: 'Site', path: '/site', icon: Settings },
+    { name: 'Conformité', path: '/compliance', icon: ShieldCheck },
+    { name: 'Déploiement', path: '/deployment', icon: Rocket },
+    { name: 'Domaines', path: '/domain', icon: Globe },
+  ]
+  if (canManageUsers) {
+    settingsItems.push({ name: 'Utilisateurs', path: '/users', icon: UserCog })
+  }
+  return [
+    {
+      label: 'Contenu',
+      key: 'content',
+      items: [
+        { name: 'Articles', path: '/articles', icon: FileText },
+        { name: 'Pages', path: '/pages', icon: File },
+        { name: 'Événements', path: '/events', icon: Calendar },
+        { name: 'Documents', path: '/documents', icon: FileArchive },
+        { name: 'Alertes', path: '/alertes', icon: Megaphone },
+        { name: 'Médiathèque', path: '/media', icon: ImageIcon },
+      ],
+    },
+    {
+      label: 'Communauté',
+      key: 'community',
+      items: [
+        { name: 'Messages', path: '/messages', icon: Mail, badgeKey: 'messages' },
+        { name: 'Équipe', path: '/team-members', icon: Users },
+        { name: 'Associations', path: '/associations', icon: Building2, badgeKey: 'associations' },
+      ],
+    },
+    {
+      label: 'Paramètres',
+      key: 'settings',
+      items: settingsItems,
+    },
+  ]
+}
 
 interface SidebarProps {
   isOpen?: boolean
@@ -68,6 +75,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate()
   const { data: messagesCount } = useContactSubmissionsCount()
   const { data: pendingAssociationsCount } = usePendingAssociationsCount()
+  const { isMayor, isDeputy } = useUserRole()
+  const navGroups = useMemo(() => buildNavGroups(isMayor || isDeputy), [isMayor, isDeputy])
 
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 

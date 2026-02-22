@@ -36,6 +36,9 @@ import { SiteManagement } from './pages/SiteManagement'
 import { Alertes } from './pages/Alertes'
 import { AlerteForm } from './pages/AlerteForm'
 import { MediaLibrary } from './pages/MediaLibrary'
+import { Users } from './pages/Users'
+import { CreateUser, EditUser } from './pages/UserForm'
+import { UserDetail } from './pages/UserDetail'
 
 function App() {
   return (
@@ -392,6 +395,51 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <AlerteForm />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Users routes */}
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Users />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/users/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateUser />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/users/:id"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <UserDetail />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/users/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditUser />
                 </MainLayout>
               </ProtectedRoute>
             }

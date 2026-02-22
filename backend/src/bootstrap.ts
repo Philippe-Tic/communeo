@@ -160,6 +160,13 @@ export default async ({ strapi }) => {
       { action: 'api::deployment.deployment.status', enabled: true },
       { action: 'api::deployment.deployment.check', enabled: true },
       { action: 'api::deployment.deployment.debug', enabled: true },
+
+      // User Management (custom actions)
+      { action: 'api::user-management.user-management.find', enabled: true },
+      { action: 'api::user-management.user-management.findOne', enabled: true },
+      { action: 'api::user-management.user-management.create', enabled: true },
+      { action: 'api::user-management.user-management.update', enabled: true },
+      { action: 'api::user-management.user-management.delete', enabled: true },
     ];
 
     // Appliquer les permissions

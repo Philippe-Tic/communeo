@@ -172,6 +172,29 @@ export const SiteConfig = () => {
           </div>
         )}
 
+        {/* Déploiement automatique */}
+        <div className="rounded-lg border bg-card p-6 shadow-sm">
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-foreground">
+              Déploiement automatique
+            </h2>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm font-medium text-muted-foreground">Statut</p>
+                <Badge variant={site.auto_deploy_enabled ? 'default' : 'secondary'}>
+                  {site.auto_deploy_enabled ? 'Activé' : 'Désactivé'}
+                </Badge>
+              </div>
+              {site.auto_deploy_enabled && (
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-sm font-medium text-muted-foreground">Délai</p>
+                  <p className="text-lg">{site.auto_deploy_delay || 300} secondes</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Informations système */}
         <div className="rounded-lg border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-4">

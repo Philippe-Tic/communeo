@@ -135,6 +135,9 @@ export interface Site {
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
   // Homepage
   homepage?: HomepageConfig
+  // Auto-deploy
+  auto_deploy_enabled?: boolean
+  auto_deploy_delay?: number
   // Relations
   pages?: any[]
   articles?: any[]
@@ -163,6 +166,9 @@ export interface CreateSiteData {
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
   // Homepage
   homepage?: Partial<Omit<HomepageConfig, 'id'>>
+  // Auto-deploy
+  auto_deploy_enabled?: boolean
+  auto_deploy_delay?: number
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {

@@ -157,6 +157,9 @@ export const SiteConfigEdit = () => {
     appointment_url: '',
     appointment_provider: 'ants-rdv' as 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre',
     remise_titre_info: '',
+    // Auto-deploy
+    auto_deploy_enabled: false,
+    auto_deploy_delay: '300',
     // Homepage
     homepage_content: '',
     homepage_meta_description: '',
@@ -232,6 +235,9 @@ export const SiteConfigEdit = () => {
         appointment_url: site.demarches_identite?.appointment_url || '',
         appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv',
         remise_titre_info: site.demarches_identite?.remise_titre_info || '',
+        // Auto-deploy
+        auto_deploy_enabled: site.auto_deploy_enabled || false,
+        auto_deploy_delay: (site.auto_deploy_delay ?? 300).toString(),
         // Homepage
         homepage_content: site.homepage?.content || '',
         homepage_meta_description: site.homepage?.meta_description || '',
@@ -434,6 +440,8 @@ export const SiteConfigEdit = () => {
         appointment_provider: formData.appointment_provider,
         remise_titre_info: formData.remise_titre_info || undefined,
       },
+      auto_deploy_enabled: formData.auto_deploy_enabled,
+      auto_deploy_delay: Number(formData.auto_deploy_delay) || 300,
       homepage: {
         content: formData.homepage_content || undefined,
         meta_description: formData.homepage_meta_description || undefined,
@@ -698,6 +706,55 @@ export const SiteConfigEdit = () => {
                         <p className="mt-1 text-sm text-destructive">{errors.colors}</p>
                       )}
                     </div>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Déploiement automatique
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Déclenche automatiquement un rebuild du site public lorsque du contenu est modifié (articles, pages, événements, documents, alertes).
+                    </p>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={formData.auto_deploy_enabled}
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, auto_deploy_enabled: !prev.auto_deploy_enabled }))
+                          setIsDirty(true)
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                          formData.auto_deploy_enabled ? 'bg-primary' : 'bg-input'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${
+                            formData.auto_deploy_enabled ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                      <Label>Activer le déploiement automatique</Label>
+                    </div>
+
+                    {formData.auto_deploy_enabled && (
+                      <div className="max-w-xs">
+                        <Label className="mb-2">Délai avant déploiement (secondes)</Label>
+                        <Input
+                          type="number"
+                          min={60}
+                          max={3600}
+                          value={formData.auto_deploy_delay}
+                          onChange={(e) => handleInputChange('auto_deploy_delay', e.target.value)}
+                        />
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Temps d'attente après la dernière modification avant de lancer le rebuild (60 à 3600 secondes)
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

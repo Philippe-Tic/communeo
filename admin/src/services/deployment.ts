@@ -12,7 +12,7 @@ export interface Deployment {
     first_name: string
     last_name: string
     email: string
-  }
+  } | null
   build_time?: number
   error_message?: string
   deployment_url?: string

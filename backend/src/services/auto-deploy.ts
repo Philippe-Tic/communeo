@@ -16,7 +16,7 @@ class AutoDeployService {
     try {
       // Look up the site to check auto-deploy settings
       const sites = await strapi.entityService.findMany('api::site.site', {
-        filters: { documentId: siteDocumentId },
+        filters: { documentId: siteDocumentId } as any,
       });
 
       const site = Array.isArray(sites) ? sites[0] : sites;
@@ -41,7 +41,7 @@ class AutoDeployService {
             filters: {
               site: { documentId: siteDocumentId },
               status: 'building',
-            },
+            } as any,
           });
 
           if (activeDeployments && activeDeployments.length > 0) {
@@ -50,7 +50,7 @@ class AutoDeployService {
           }
 
           console.log(`🚀 [AUTO-DEPLOY] Triggering deploy for "${siteSlug}"`);
-          await deploymentService.buildAndDeploy(siteDocumentId, siteSlug, 'auto-deploy');
+          await deploymentService.buildAndDeploy(siteDocumentId, siteSlug);
           console.log(`✅ [AUTO-DEPLOY] Deploy completed for "${siteSlug}"`);
         } catch (error) {
           console.error(`❌ [AUTO-DEPLOY] Deploy failed for "${siteSlug}":`, error);

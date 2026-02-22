@@ -22,76 +22,86 @@ import Breadcrumb from '../components/Breadcrumb.astro';
   </main>
 
   <Footer />
-</Layout>
 
-<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
 
-<script>
-  async function initPagefind() {
-    // @ts-ignore - Pagefind UI is loaded from the built assets
-    const { PagefindUI } = await import('/pagefind/pagefind-ui.js');
+  <script is:inline>
+    async function initPagefind() {
+      try {
+        const { PagefindUI } = await import('/pagefind/pagefind-ui.js');
 
-    new PagefindUI({
-      element: '#search',
-      showSubResults: true,
-      showImages: true,
-      translations: {
-        placeholder: 'Rechercher sur le site...',
-        zero_results: 'Aucun résultat pour « [SEARCH_TERM] »',
-        many_results: '[COUNT] résultats pour « [SEARCH_TERM] »',
-        one_result: '1 résultat pour « [SEARCH_TERM] »',
-        alt_search: 'Aucun résultat pour « [SEARCH_TERM] ». Résultats pour [DIFFERENT_TERM] :',
-        search_suggestion: 'Aucun résultat pour « [SEARCH_TERM] ». Essayez :',
-        searching: 'Recherche en cours...',
-      },
-    });
+        new PagefindUI({
+          element: '#search',
+          showSubResults: true,
+          showImages: true,
+          translations: {
+            placeholder: 'Rechercher sur le site...',
+            zero_results: 'Aucun résultat pour « [SEARCH_TERM] »',
+            many_results: '[COUNT] résultats pour « [SEARCH_TERM] »',
+            one_result: '1 résultat pour « [SEARCH_TERM] »',
+            alt_search: 'Aucun résultat pour « [SEARCH_TERM] ». Résultats pour [DIFFERENT_TERM] :',
+            search_suggestion: 'Aucun résultat pour « [SEARCH_TERM] ». Essayez :',
+            searching: 'Recherche en cours...',
+          },
+        });
 
-    // Pre-fill with ?q= parameter
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get('q');
-    if (query) {
-      const input = document.querySelector<HTMLInputElement>('#search input');
-      if (input) {
-        input.value = query;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
+        // Pre-fill with ?q= parameter
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get('q');
+        if (query) {
+          const input = document.querySelector('#search input');
+          if (input) {
+            input.value = query;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      } catch (error) {
+        console.error('Pagefind failed to load:', error);
+        var searchEl = document.getElementById('search');
+        if (searchEl) {
+          searchEl.innerHTML =
+            '<p style="color:#6b7280;text-align:center;padding:2rem 0;">' +
+            'La recherche n\u2019est pas disponible pour le moment. ' +
+            'Veuillez réessayer ultérieurement.</p>';
+        }
       }
     }
-  }
 
-  // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initPagefind);
-  } else {
-    initPagefind();
-  }
-</script>
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPagefind);
+    } else {
+      initPagefind();
+    }
+  </script>
 
-<style is:global>
-  /* Override Pagefind UI styles to match the site theme */
-  :root {
-    --pagefind-ui-scale: 1;
-    --pagefind-ui-primary: rgb(var(--color-primary));
-    --pagefind-ui-text: #1f2937;
-    --pagefind-ui-background: #ffffff;
-    --pagefind-ui-border: #e5e7eb;
-    --pagefind-ui-tag: #f3f4f6;
-    --pagefind-ui-border-width: 1px;
-    --pagefind-ui-border-radius: 0.5rem;
-    --pagefind-ui-image-border-radius: 0.5rem;
-    --pagefind-ui-image-box-ratio: 3 / 2;
-    --pagefind-ui-font: inherit;
-  }
+  <style is:global>
+    /* Override Pagefind UI styles to match the site theme */
+    :root {
+      --pagefind-ui-scale: 1;
+      --pagefind-ui-primary: rgb(var(--color-primary));
+      --pagefind-ui-text: #1f2937;
+      --pagefind-ui-background: #ffffff;
+      --pagefind-ui-border: #e5e7eb;
+      --pagefind-ui-tag: #f3f4f6;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 0.5rem;
+      --pagefind-ui-image-border-radius: 0.5rem;
+      --pagefind-ui-image-box-ratio: 3 / 2;
+      --pagefind-ui-font: inherit;
+    }
 
-  .pagefind-ui__search-input {
-    font-size: 1rem !important;
-    padding: 0.75rem 1rem !important;
-  }
+    .pagefind-ui__search-input {
+      font-size: 1rem !important;
+      padding: 0.75rem 1rem !important;
+    }
 
-  .pagefind-ui__result-link {
-    color: rgb(var(--color-primary)) !important;
-  }
+    .pagefind-ui__result-link {
+      color: rgb(var(--color-primary)) !important;
+    }
 
-  .pagefind-ui__result-link:hover {
-    text-decoration: underline !important;
-  }
-</style>
+    .pagefind-ui__result-link:hover {
+      text-decoration: underline !important;
+    }
+  </style>
+</Layout>

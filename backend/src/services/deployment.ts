@@ -58,7 +58,7 @@ class DeploymentService {
   /**
    * Déploie un site complet : build + upload vers Netlify
    */
-  async buildAndDeploy(siteId: string, siteSlug: string, userId: string): Promise<DeploymentResult> {
+  async buildAndDeploy(siteId: string, siteSlug: string, userId?: string): Promise<DeploymentResult> {
     const startTime = Date.now();
     let tempBuildDir: string | undefined;
     let zipPath: string | undefined;
@@ -153,7 +153,7 @@ class DeploymentService {
             site: siteIdForRelation,
             deployment_id: deployment.id,
             status: 'building',
-            triggered_by: userId,
+            ...(userId ? { triggered_by: userId } : {}),
             deployment_url: deployment.deploy_url,
             triggered_at: new Date()
           }
@@ -227,7 +227,7 @@ class DeploymentService {
               site: siteIdForRelation,
               deployment_id: `error-${Date.now()}`,
               status: 'error',
-              triggered_by: userId,
+              ...(userId ? { triggered_by: userId } : {}),
               build_time: buildTime,
               error_message: error.message,
               triggered_at: new Date(),
@@ -340,7 +340,21 @@ class DeploymentService {
         if (buildError.stderr) {
           console.error(`📋 [BUILD] STDERR:\n${buildError.stderr}`);
         }
-        throw new Error(`Build failed: ${buildError.message}\n${buildError.stderr || buildError.stdout || ''}`);
+        throw new Error(`Astro build failed: ${buildError.message}\n${buildError.stderr || buildError.stdout || ''}`);
+      }
+
+      // 3b. Run Pagefind indexing (separate try/catch for clearer error reporting)
+      try {
+        console.log(`🔍 [BUILD] Running Pagefind indexing...`);
+        await execAsync('npx pagefind --site dist', {
+          cwd: tempBuildDir,
+          env: buildEnv,
+          maxBuffer: 10 * 1024 * 1024
+        });
+        console.log(`✅ [BUILD] Pagefind indexing completed`);
+      } catch (pagefindError: any) {
+        console.warn(`⚠️ [BUILD] Pagefind indexing failed (non-blocking): ${pagefindError.message}`);
+        // Pagefind failure is non-blocking — the site works without search
       }
 
       const distPath = path.join(tempBuildDir, 'dist');

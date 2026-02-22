@@ -400,7 +400,7 @@ export async function getAssociations(): Promise<Association[]> {
 export async function getActiveAlerts(): Promise<Alerte[]> {
   const url = buildStrapiUrl('alertes', {
     filters: {
-      active: { $eq: 'true' },
+      active: { $eq: true },
     },
     sort: 'severity:desc,createdAt:desc',
   });

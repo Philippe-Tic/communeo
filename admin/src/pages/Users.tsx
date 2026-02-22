@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ConfirmDialog } from '../components/common'
 import { FilterPanel, PageHeader } from '../components/layout'
-import { useUsers, useDeleteUser, ROLE_LABELS, ROLE_COLORS, type SiteUser } from '../hooks/api/useUsers'
+import { useUsers, useDeleteUser, USER_ROLE_LABELS, USER_ROLE_COLORS, type SiteUser } from '../hooks/api/useUsers'
 import { toaster } from '../lib/toaster'
 
 export const Users = () => {
@@ -91,8 +91,8 @@ export const Users = () => {
                     </td>
                     <td className="hidden px-4 py-3 text-sm text-muted-foreground sm:table-cell">{user.email}</td>
                     <td className="px-4 py-3">
-                      <Badge className={ROLE_COLORS[user.municipality_role] || ''}>
-                        {ROLE_LABELS[user.municipality_role] || user.municipality_role}
+                      <Badge className={USER_ROLE_COLORS[user.municipality_role] || ''}>
+                        {USER_ROLE_LABELS[user.municipality_role] || user.municipality_role}
                       </Badge>
                     </td>
                     <td className="hidden px-4 py-3 md:table-cell">

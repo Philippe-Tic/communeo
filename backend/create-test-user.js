@@ -69,7 +69,8 @@ const TEST_PAGES = [
   {
     title: 'Accueil',
     slug: 'accueil',
-    template: 'default',
+    template: 'homepage',
+    is_homepage: true,
     status: 'published',
     show_in_menu: true,
     menu_order: 0,
@@ -81,6 +82,7 @@ const TEST_PAGES = [
     title: 'Mentions légales',
     slug: 'mentions-legales',
     template: 'default',
+    is_homepage: false,
     status: 'published',
     show_in_menu: false,
     menu_order: 99,
@@ -91,7 +93,8 @@ const TEST_PAGES = [
   {
     title: 'Contact',
     slug: 'contact',
-    template: 'default',
+    template: 'contact',
+    is_homepage: false,
     status: 'published',
     show_in_menu: true,
     menu_order: 10,

@@ -525,6 +525,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       }>;
     publication_date: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;
+    scheduled_at: Schema.Attribute.DateTime;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
       Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> &
@@ -732,8 +733,7 @@ export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
     triggered_by: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.user'
-    > &
-      Schema.Attribute.Required;
+    >;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -947,6 +947,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       }>;
     parent_page: Schema.Attribute.Relation<'manyToOne', 'api::page.page'>;
     publishedAt: Schema.Attribute.DateTime;
+    scheduled_at: Schema.Attribute.DateTime;
     seo_keywords: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 255;
@@ -991,6 +992,17 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::association.association'
     >;
+    auto_deploy_delay: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 3600;
+          min: 60;
+        },
+        number
+      > &
+      Schema.Attribute.DefaultTo<300>;
+    auto_deploy_enabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     colors: Schema.Attribute.JSON;
     contact_mail: Schema.Attribute.Email & Schema.Attribute.Required;
     contact_phone: Schema.Attribute.String;

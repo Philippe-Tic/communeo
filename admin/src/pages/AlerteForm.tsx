@@ -18,7 +18,7 @@ import { toaster } from '../lib/toaster'
 
 export const AlerteForm = () => {
   const navigate = useNavigate()
-  const { documentId } = useParams<{ documentId: string }>()
+  const { id: documentId } = useParams<{ id: string }>()
   const isEdit = !!documentId
 
   const { data: alerte } = useAlerte(documentId || '')

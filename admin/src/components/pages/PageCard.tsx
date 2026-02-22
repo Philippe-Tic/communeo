@@ -5,7 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Eye, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Clock, Eye, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { Page } from '../../hooks/api/usePages'
 import { StatusBadge } from '../common'
 
@@ -17,6 +18,7 @@ interface PageCardProps {
 }
 
 export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
+  const isScheduled = page.scheduled_at && new Date(page.scheduled_at) > new Date()
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text
     return text.substring(0, maxLength) + '...'
@@ -57,8 +59,13 @@ export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
           {truncateText(page.content.replace(/<[^>]*>/g, '') || 'Aucun contenu', 100)}
         </p>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
           <StatusBadge status={page.status} />
+          {isScheduled && (
+            <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+              <Clock className="mr-1 inline h-3 w-3" /> Programmé
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">

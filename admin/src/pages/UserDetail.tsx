@@ -1,10 +1,9 @@
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ConfirmDialog, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
-import { useUser, useDeleteUser, ROLE_LABELS, ROLE_COLORS } from '../hooks/api/useUsers'
+import { useUser, useDeleteUser, USER_ROLE_LABELS, USER_ROLE_COLORS } from '../hooks/api/useUsers'
 import { toaster } from '../lib/toaster'
 
 export const UserDetail = () => {
@@ -42,7 +41,7 @@ export const UserDetail = () => {
           title={`${user.first_name} ${user.last_name}`}
           actions={[
             { label: 'Modifier', onClick: () => navigate(`/users/${user.id}/edit`) },
-            { label: 'Supprimer', onClick: () => setShowDeleteDialog(true), variant: 'destructive' as const },
+            { label: 'Supprimer', onClick: () => setShowDeleteDialog(true), variant: 'outline' as const, colorScheme: 'red' },
             { label: 'Retour', onClick: () => navigate('/users'), variant: 'outline' as const },
           ]}
           breadcrumbs={[
@@ -77,8 +76,8 @@ export const UserDetail = () => {
             )}
             <div>
               <p className="text-sm text-muted-foreground">Rôle</p>
-              <Badge className={ROLE_COLORS[user.municipality_role] || ''}>
-                {ROLE_LABELS[user.municipality_role] || user.municipality_role}
+              <Badge className={USER_ROLE_COLORS[user.municipality_role] || ''}>
+                {USER_ROLE_LABELS[user.municipality_role] || user.municipality_role}
               </Badge>
             </div>
             <div>

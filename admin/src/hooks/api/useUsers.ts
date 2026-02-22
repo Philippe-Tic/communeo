@@ -45,14 +45,14 @@ export interface UpdateUserData {
   active?: boolean
 }
 
-export const ROLE_LABELS: Record<string, string> = {
+export const USER_ROLE_LABELS: Record<string, string> = {
   mayor: 'Maire',
   deputy: 'Adjoint',
   secretary: 'Secrétaire',
   editor: 'Rédacteur',
 }
 
-export const ROLE_COLORS: Record<string, string> = {
+export const USER_ROLE_COLORS: Record<string, string> = {
   mayor: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   deputy: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   secretary: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',

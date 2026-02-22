@@ -127,7 +127,9 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {deployment.triggered_by.first_name} {deployment.triggered_by.last_name}
+                        {deployment.triggered_by
+                          ? `${deployment.triggered_by.first_name} ${deployment.triggered_by.last_name}`
+                          : 'Auto-deploy'}
                       </TableCell>
                       <TableCell className="text-sm">
                         {formatDistanceToNow(new Date(deployment.triggered_at), { addSuffix: true, locale: fr })}

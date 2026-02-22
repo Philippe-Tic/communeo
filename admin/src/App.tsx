@@ -390,7 +390,7 @@ function App() {
           />
 
           <Route
-            path="/alertes/:documentId/edit"
+            path="/alertes/:id/edit"
             element={
               <ProtectedRoute>
                 <MainLayout>

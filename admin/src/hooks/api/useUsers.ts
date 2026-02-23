@@ -8,7 +8,7 @@ export interface SiteUser {
   first_name: string
   last_name: string
   phone?: string
-  municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
+  municipality_role: 'admin' | 'editor'
   active: boolean
   confirmed: boolean
   blocked: boolean
@@ -25,11 +25,10 @@ export interface SiteUser {
 export interface CreateUserData {
   username: string
   email: string
-  password: string
   first_name: string
   last_name: string
   phone?: string
-  municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
+  municipality_role: 'admin' | 'editor'
   active?: boolean
 }
 
@@ -37,25 +36,20 @@ export interface UpdateUserData {
   id: number
   username?: string
   email?: string
-  password?: string
   first_name?: string
   last_name?: string
   phone?: string
-  municipality_role?: 'mayor' | 'deputy' | 'secretary' | 'editor'
+  municipality_role?: 'admin' | 'editor'
   active?: boolean
 }
 
 export const USER_ROLE_LABELS: Record<string, string> = {
-  mayor: 'Maire',
-  deputy: 'Adjoint',
-  secretary: 'Secrétaire',
+  admin: 'Administrateur',
   editor: 'Rédacteur',
 }
 
 export const USER_ROLE_COLORS: Record<string, string> = {
-  mayor: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  deputy: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  secretary: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
   editor: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
 }
 
@@ -142,6 +136,41 @@ export const useDeleteUser = () => {
     onSuccess: (_, id) => {
       queryClient.removeQueries({ queryKey: USERS_QUERY_KEYS.detail(id) })
       queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEYS.lists() })
+    },
+  })
+}
+
+export const useResendInvitation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: number): Promise<{ ok: boolean }> => {
+      return apiClient.post<{ ok: boolean }>(`/api/user-management/${id}/resend-invitation`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEYS.lists() })
+    },
+  })
+}
+
+export const useAdminResetPassword = () => {
+  return useMutation({
+    mutationFn: async (id: number): Promise<{ ok: boolean }> => {
+      return apiClient.post<{ ok: boolean }>(`/api/user-management/${id}/reset-password`)
+    },
+  })
+}
+
+export interface AcceptInvitationData {
+  token: string
+  password: string
+  passwordConfirmation: string
+}
+
+export const useAcceptInvitation = () => {
+  return useMutation({
+    mutationFn: async (data: AcceptInvitationData): Promise<{ ok: boolean }> => {
+      return apiClient.postWithoutAuth<{ ok: boolean }>('/api/user-management/accept-invitation', data)
     },
   })
 }

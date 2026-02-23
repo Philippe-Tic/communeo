@@ -1,9 +1,10 @@
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ConfirmDialog, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
-import { useUser, useDeleteUser, USER_ROLE_LABELS, USER_ROLE_COLORS } from '../hooks/api/useUsers'
+import { useUser, useDeleteUser, useResendInvitation, useAdminResetPassword, USER_ROLE_LABELS, USER_ROLE_COLORS } from '../hooks/api/useUsers'
 import { toaster } from '../lib/toaster'
 
 export const UserDetail = () => {
@@ -11,6 +12,8 @@ export const UserDetail = () => {
   const { id } = useParams<{ id: string }>()
   const { data: user, isLoading, error } = useUser(Number(id) || 0)
   const deleteMutation = useDeleteUser()
+  const resendMutation = useResendInvitation()
+  const resetMutation = useAdminResetPassword()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   if (isLoading) return <LoadingSpinner message="Chargement de l'utilisateur..." />
@@ -29,6 +32,24 @@ export const UserDetail = () => {
       navigate('/users')
     } catch (error: any) {
       toaster.create({ title: 'Erreur', description: error?.message || 'Impossible de supprimer.', type: 'error', duration: 5000 })
+    }
+  }
+
+  const handleResendInvitation = async () => {
+    try {
+      await resendMutation.mutateAsync(user.id)
+      toaster.create({ title: 'Invitation renvoyée', description: "Un nouvel email d'invitation a été envoyé.", type: 'success', duration: 3000 })
+    } catch (error: any) {
+      toaster.create({ title: 'Erreur', description: error?.message || "Impossible de renvoyer l'invitation.", type: 'error', duration: 5000 })
+    }
+  }
+
+  const handleResetPassword = async () => {
+    try {
+      await resetMutation.mutateAsync(user.id)
+      toaster.create({ title: 'Email envoyé', description: 'Un email de réinitialisation de mot de passe a été envoyé.', type: 'success', duration: 3000 })
+    } catch (error: any) {
+      toaster.create({ title: 'Erreur', description: error?.message || "Impossible d'envoyer l'email.", type: 'error', duration: 5000 })
     }
   }
 
@@ -82,9 +103,15 @@ export const UserDetail = () => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Statut</p>
-              <Badge variant={user.active ? 'default' : 'secondary'}>
-                {user.active ? 'Actif' : 'Inactif'}
-              </Badge>
+              {user.blocked ? (
+                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                  Invitation en attente
+                </Badge>
+              ) : (
+                <Badge variant={user.active ? 'default' : 'secondary'}>
+                  {user.active ? 'Actif' : 'Inactif'}
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Créé le</p>
@@ -92,6 +119,42 @@ export const UserDetail = () => {
             </div>
           </div>
         </div>
+
+        {user.blocked && (
+          <div className="flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
+            <div>
+              <p className="font-medium text-amber-800 dark:text-amber-200">Invitation en attente</p>
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                Cet utilisateur n'a pas encore activé son compte.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleResendInvitation}
+              disabled={resendMutation.isPending}
+            >
+              {resendMutation.isPending ? 'Envoi...' : "Renvoyer l'invitation"}
+            </Button>
+          </div>
+        )}
+
+        {!user.blocked && (
+          <div className="flex items-center justify-between rounded-md border p-4">
+            <div>
+              <p className="font-medium">Mot de passe</p>
+              <p className="text-sm text-muted-foreground">
+                Envoyer un email pour réinitialiser le mot de passe.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleResetPassword}
+              disabled={resetMutation.isPending}
+            >
+              {resetMutation.isPending ? 'Envoi...' : 'Réinitialiser le mot de passe'}
+            </Button>
+          </div>
+        )}
 
         <ConfirmDialog
           isOpen={showDeleteDialog}

@@ -13,7 +13,7 @@ export interface RegisterCredentials {
   password: string
   first_name: string
   last_name: string
-  municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
+  municipality_role: 'admin' | 'editor'
   site: number // site ID
 }
 
@@ -27,7 +27,7 @@ export interface AuthResponse {
     blocked: boolean
     first_name: string
     last_name: string
-    municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
+    municipality_role: 'admin' | 'editor'
     site: {
       id: number
       documentId: string
@@ -45,7 +45,7 @@ export interface User {
   blocked: boolean
   first_name: string
   last_name: string
-  municipality_role: 'mayor' | 'deputy' | 'secretary' | 'editor'
+  municipality_role: 'admin' | 'editor'
   site: {
     id: number
     documentId: string

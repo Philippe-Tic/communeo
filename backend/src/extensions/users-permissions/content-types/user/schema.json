@@ -74,7 +74,7 @@
     },
     "municipality_role": {
       "type": "enumeration",
-      "enum": ["mayor", "deputy", "secretary", "editor"],
+      "enum": ["admin", "editor"],
       "default": "editor",
       "required": true
     },

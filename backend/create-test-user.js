@@ -62,7 +62,7 @@ const TEST_USER = {
   password: 'Test123!',
   first_name: 'Marie',
   last_name: 'Durand',
-  municipality_role: 'mayor',
+  municipality_role: 'admin',
 };
 
 const TEST_PAGES = [

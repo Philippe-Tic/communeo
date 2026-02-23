@@ -38,9 +38,7 @@ export const Users = () => {
     {
       key: 'role', label: 'Rôle', type: 'select' as const,
       options: [
-        { value: 'mayor', label: 'Maire' },
-        { value: 'deputy', label: 'Adjoint' },
-        { value: 'secretary', label: 'Secrétaire' },
+        { value: 'admin', label: 'Administrateur' },
         { value: 'editor', label: 'Rédacteur' },
       ],
     },
@@ -52,7 +50,7 @@ export const Users = () => {
         <PageHeader
           title="Utilisateurs"
           subtitle="Gérez les utilisateurs de votre site"
-          actions={[{ label: 'Nouvel utilisateur', onClick: () => navigate('/users/new') }]}
+          actions={[{ label: 'Inviter un utilisateur', onClick: () => navigate('/users/new') }]}
         />
 
         <FilterPanel filters={filters} fields={filterFields} onChange={handleFilterChange} />
@@ -64,7 +62,7 @@ export const Users = () => {
           <div className="rounded-md border border-dashed p-8 text-center">
             <p className="text-lg font-medium">Aucun utilisateur trouvé</p>
             <p className="mt-1 text-sm text-muted-foreground">Commencez par créer un utilisateur.</p>
-            <Button className="mt-4" onClick={() => navigate('/users/new')}>Créer un utilisateur</Button>
+            <Button className="mt-4" onClick={() => navigate('/users/new')}>Inviter un utilisateur</Button>
           </div>
         )}
 
@@ -96,9 +94,15 @@ export const Users = () => {
                       </Badge>
                     </td>
                     <td className="hidden px-4 py-3 md:table-cell">
-                      <Badge variant={user.active ? 'default' : 'secondary'}>
-                        {user.active ? 'Actif' : 'Inactif'}
-                      </Badge>
+                      {user.blocked ? (
+                        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                          Invitation en attente
+                        </Badge>
+                      ) : (
+                        <Badge variant={user.active ? 'default' : 'secondary'}>
+                          {user.active ? 'Actif' : 'Inactif'}
+                        </Badge>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">

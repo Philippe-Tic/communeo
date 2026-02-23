@@ -42,7 +42,7 @@ export const SiteConfig = () => {
         {!canEditConfig && (
           <div className="rounded-md border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950">
             <p className="text-sm text-orange-800 dark:text-orange-200">
-              <strong>Information :</strong> Vous pouvez consulter la configuration mais seuls les maires et adjoints peuvent la modifier.
+              <strong>Information :</strong> Vous pouvez consulter la configuration mais seuls les administrateurs peuvent la modifier.
             </p>
           </div>
         )}

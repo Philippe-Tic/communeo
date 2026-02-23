@@ -39,6 +39,7 @@ import { MediaLibrary } from './pages/MediaLibrary'
 import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
 import { UserDetail } from './pages/UserDetail'
+import { AcceptInvitation } from './pages/AcceptInvitation'
 
 function App() {
   return (
@@ -53,6 +54,12 @@ function App() {
                 <LoginForm />
               </div>
             }
+          />
+
+          {/* Public route - Accept Invitation */}
+          <Route
+            path="/accept-invitation"
+            element={<AcceptInvitation />}
           />
 
           {/* Public route - Toast Test */}

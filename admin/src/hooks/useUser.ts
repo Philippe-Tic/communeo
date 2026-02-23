@@ -16,9 +16,7 @@ export const useUserRole = () => {
   return {
     role: user?.municipality_role,
     hasRole,
-    isMayor: hasRole('mayor'),
-    isDeputy: hasRole('deputy'),
-    isSecretary: hasRole('secretary'),
+    isAdmin: hasRole('admin'),
     isEditor: hasRole('editor'),
   }
 }
@@ -56,9 +54,9 @@ export const useCanManageSite = () => {
   const { hasRole } = useUserRole()
   const { siteId } = useUserSite()
 
-  const canManageSite = Boolean(siteId) && (hasRole('mayor') || hasRole('deputy'))
+  const canManageSite = Boolean(siteId) && hasRole('admin')
   const hasSite = Boolean(siteId)
-  const canEditConfig = hasRole('mayor') || hasRole('deputy')
+  const canEditConfig = hasRole('admin')
 
   return {
     canManageSite,

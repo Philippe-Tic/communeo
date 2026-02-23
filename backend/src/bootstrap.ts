@@ -45,7 +45,7 @@ export default async ({ strapi }) => {
       try {
         // In Strapi v5, use the plugin service to hash passwords
         const userService = strapi.plugin('users-permissions').service('user');
-        const hashedPassword = await userService.hashPassword('test123');
+        const hashedPassword = (await userService.ensureHashedPasswords({ password: 'test123' })).password;
         testUser = await strapi.query('plugin::users-permissions.user').create({
           data: {
             username: 'testuser',
@@ -54,8 +54,8 @@ export default async ({ strapi }) => {
             confirmed: true,
             blocked: false,
             role: authenticatedRole.id,
-            site: testSite.documentId,
-            municipality_role: 'editor',
+            site: testSite.id,
+            municipality_role: 'admin',
             first_name: 'Test',
             last_name: 'User',
             active: true,
@@ -70,7 +70,7 @@ export default async ({ strapi }) => {
       await strapi.query('plugin::users-permissions.user').update({
         where: { id: testUser.id },
         data: {
-          site: testSite.documentId,
+          site: testSite.id,
         },
       });
       console.log('✅ Bootstrap - Updated existing test user:', testUser.id);
@@ -167,6 +167,8 @@ export default async ({ strapi }) => {
       { action: 'api::user-management.user-management.create', enabled: true },
       { action: 'api::user-management.user-management.update', enabled: true },
       { action: 'api::user-management.user-management.delete', enabled: true },
+      { action: 'api::user-management.user-management.resendInvitation', enabled: true },
+      { action: 'api::user-management.user-management.resetPassword', enabled: true },
     ];
 
     // Appliquer les permissions
@@ -212,6 +214,7 @@ export default async ({ strapi }) => {
       const publicPermissions = [
         { action: 'api::contact-submission.contact-submission.publicCreate', enabled: true },
         { action: 'api::association.association.publicCreate', enabled: true },
+        { action: 'api::user-management.user-management.acceptInvitation', enabled: true },
       ];
 
       for (const permission of publicPermissions) {
@@ -243,6 +246,18 @@ export default async ({ strapi }) => {
           console.log(`❌ Bootstrap - Error setting public permission ${permission.action}:`, error.message);
         }
       }
+    }
+
+    // Migrate old roles to new roles (mayor/deputy → admin, secretary → editor)
+    const knex = strapi.db.connection;
+    const migrated = await knex('up_users')
+      .whereIn('municipality_role', ['mayor', 'deputy'])
+      .update({ municipality_role: 'admin' });
+    const migratedSecretary = await knex('up_users')
+      .where('municipality_role', 'secretary')
+      .update({ municipality_role: 'editor' });
+    if (migrated > 0 || migratedSecretary > 0) {
+      console.log(`✅ Bootstrap - Migrated roles: ${migrated} → admin, ${migratedSecretary} → editor`);
     }
 
     // Créer quelques pages de test

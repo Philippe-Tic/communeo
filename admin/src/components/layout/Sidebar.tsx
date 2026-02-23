@@ -75,8 +75,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate()
   const { data: messagesCount } = useContactSubmissionsCount()
   const { data: pendingAssociationsCount } = usePendingAssociationsCount()
-  const { isMayor, isDeputy } = useUserRole()
-  const navGroups = useMemo(() => buildNavGroups(isMayor || isDeputy), [isMayor, isDeputy])
+  const { isAdmin } = useUserRole()
+  const navGroups = useMemo(() => buildNavGroups(isAdmin), [isAdmin])
 
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 

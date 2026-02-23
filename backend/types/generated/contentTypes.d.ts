@@ -1623,9 +1623,7 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
-    municipality_role: Schema.Attribute.Enumeration<
-      ['mayor', 'deputy', 'secretary', 'editor']
-    > &
+    municipality_role: Schema.Attribute.Enumeration<['admin', 'editor']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'editor'>;
     password: Schema.Attribute.Password &

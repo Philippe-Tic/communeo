@@ -31,9 +31,11 @@ class ApiClient {
     // Request interceptor to add auth token
     this.instance.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('auth_token')
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
+        if (!(config as any)._skipAuth) {
+          const token = localStorage.getItem('auth_token')
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+          }
         }
         return config
       },
@@ -95,11 +97,8 @@ class ApiClient {
   async postWithoutAuth<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.instance.post(url, data, {
       ...config,
-      headers: {
-        ...config?.headers,
-        Authorization: undefined, // Remove auth header
-      },
-    })
+      _skipAuth: true,
+    } as any)
     return response.data
   }
 

@@ -2,7 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ConfirmDialog, LoadingSpinner } from '../components/common'
+import { ConfirmDialog, LoadingSpinner, NotFoundBanner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useUser, useDeleteUser, useResendInvitation, useAdminResetPassword, USER_ROLE_LABELS, USER_ROLE_COLORS } from '../hooks/api/useUsers'
 import { toaster } from '../lib/toaster'
@@ -18,11 +18,7 @@ export const UserDetail = () => {
 
   if (isLoading) return <LoadingSpinner message="Chargement de l'utilisateur..." />
   if (error || !user) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Utilisateur non trouvé</p>
-      </div>
-    )
+    return <NotFoundBanner message="Utilisateur non trouvé" />
   }
 
   const handleDelete = async () => {

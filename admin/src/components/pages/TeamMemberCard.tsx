@@ -1,15 +1,8 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ChevronDown, ChevronUp, Eye, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { TeamMember } from '../../hooks/api/useTeamMembers'
 import { ROLE_COLORS, ROLE_LABELS } from '../../hooks/api/useTeamMembers'
+import { CardActionsMenu, CategoryBadge } from '../common'
 
 interface TeamMemberCardProps {
   member: TeamMember
@@ -26,13 +19,11 @@ export const TeamMemberCard = ({
   member, onEdit, onView, onDelete, onMoveUp, onMoveDown, isFirst, isLast
 }: TeamMemberCardProps) => {
   return (
-    <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="glass-card flex h-full flex-col rounded-xl p-4">
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">
-          <Badge className={ROLE_COLORS[member.role] || ''}>
-            {ROLE_LABELS[member.role] || member.role}
-          </Badge>
+          <CategoryBadge value={member.role} labels={ROLE_LABELS} colors={ROLE_COLORS} />
 
           <div className="flex items-center gap-1">
             {onMoveUp && !isFirst && (
@@ -46,25 +37,11 @@ export const TeamMemberCard = ({
               </Button>
             )}
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(member)}>
-                  <Pencil className="mr-2 h-4 w-4" /> Modifier
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onView(member)}>
-                  <Eye className="mr-2 h-4 w-4" /> Voir
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onDelete(member)} className="text-destructive focus:text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CardActionsMenu
+              onEdit={() => onEdit(member)}
+              onView={() => onView(member)}
+              onDelete={() => onDelete(member)}
+            />
           </div>
         </div>
       </div>

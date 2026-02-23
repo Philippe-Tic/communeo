@@ -40,7 +40,7 @@ export function PageHeader({ title, subtitle, actions = [], breadcrumbs }: PageH
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="font-medium text-foreground">{crumb.label}</span>
+                <span className="font-medium text-indigo-600 dark:text-indigo-400">{crumb.label}</span>
               )}
             </span>
           ))}
@@ -49,7 +49,7 @@ export function PageHeader({ title, subtitle, actions = [], breadcrumbs }: PageH
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold">{title}</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
           {subtitle && (
             <p className="text-muted-foreground">{subtitle}</p>
           )}

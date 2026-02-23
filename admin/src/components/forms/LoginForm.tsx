@@ -44,17 +44,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <div className="mx-auto w-full max-w-[450px] px-4 sm:px-0">
-      <div className="rounded-lg border bg-card p-6 shadow-lg md:p-8">
+      <div className="glass-card rounded-2xl p-6 md:p-8">
         <div className="space-y-5 md:space-y-6">
           <div className="text-center">
-            <h1 className="mb-2 text-xl font-bold md:text-2xl">Connexion</h1>
+            <h1 className="mb-2 bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-xl font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-2xl">
+              Connexion
+            </h1>
             <p className="text-sm text-muted-foreground md:text-base">
               Connectez-vous à votre espace d'administration
             </p>
           </div>
 
           {error && (
-            <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
@@ -98,7 +100,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
             <Button
               type="submit"
-              className="mt-2 w-full"
+              className="mt-2 w-full bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-md hover:from-indigo-700 hover:to-indigo-600 dark:from-indigo-600 dark:to-indigo-500"
               disabled={isSubmitting || loading}
             >
               {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

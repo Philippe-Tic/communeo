@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useTeamMember, useDeleteTeamMember, ROLE_COLORS, ROLE_LABELS } from '../hooks/api/useTeamMembers'
+import { formatDate } from '@/lib/format'
 import { toaster } from '../lib/toaster'
 
 export function TeamMemberDetail() {
@@ -129,10 +130,10 @@ export function TeamMemberDetail() {
                   Ordre d'affichage : {member.display_order}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Créé le : {new Date(member.createdAt).toLocaleDateString('fr-FR')}
+                  Créé le : {formatDate(member.createdAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Modifié le : {new Date(member.updatedAt).toLocaleDateString('fr-FR')}
+                  Modifié le : {formatDate(member.updatedAt)}
                 </p>
               </div>
             </div>

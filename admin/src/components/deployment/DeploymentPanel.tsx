@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { DEPLOYMENT_STATUS_COLORS } from '@/lib/constants/deployment-types'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Loader2, RefreshCw } from 'lucide-react'
@@ -11,12 +12,6 @@ import { useDeployment } from '../../hooks/useDeployment'
 
 interface DeploymentPanelProps {
   className?: string
-}
-
-const STATUS_COLORS: Record<string, string> = {
-  building: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  ready: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  error: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 }
 
 const STATUS_ICONS: Record<string, string> = {
@@ -56,7 +51,7 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                 <p className="font-medium">État actuel</p>
                 {currentDeployment ? (
                   <div className="flex items-center gap-2">
-                    <Badge className={STATUS_COLORS[currentDeployment.status] || ''}>
+                    <Badge className={DEPLOYMENT_STATUS_COLORS[currentDeployment.status] || ''}>
                       {STATUS_ICONS[currentDeployment.status] || '○'}{' '}
                       {currentDeployment.status === 'building' && 'En cours de déploiement'}
                       {currentDeployment.status === 'ready' && 'Site en ligne'}
@@ -119,7 +114,7 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                   {deployments.slice(0, 5).map((deployment) => (
                     <TableRow key={deployment.id}>
                       <TableCell>
-                        <Badge className={STATUS_COLORS[deployment.status] || ''}>
+                        <Badge className={DEPLOYMENT_STATUS_COLORS[deployment.status] || ''}>
                           {STATUS_ICONS[deployment.status] || '○'}{' '}
                           {deployment.status === 'building' && 'En cours'}
                           {deployment.status === 'ready' && 'Réussi'}

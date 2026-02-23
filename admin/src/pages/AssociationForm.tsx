@@ -2,11 +2,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ASSOCIATION_CATEGORY_OPTIONS } from '@/lib/constants/association-types'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
+import { FormSection, FormSelect } from '../components/forms'
 import { PageHeader } from '../components/layout'
 import {
   uploadFile,
@@ -34,8 +36,6 @@ interface AssociationFormProps {
   initialData?: Association
 }
 
-const selectClassName = 'w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-
 export function AssociationForm({ isEditing = false, initialData }: AssociationFormProps) {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
@@ -46,7 +46,7 @@ export function AssociationForm({ isEditing = false, initialData }: AssociationF
   const createMutation = useCreateAssociation()
   const updateMutation = useUpdateAssociation()
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<AssociationFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, control } = useForm<AssociationFormData>({
     defaultValues: {
       name: '',
       category: 'autre',
@@ -162,132 +162,118 @@ export function AssociationForm({ isEditing = false, initialData }: AssociationF
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">
-            {/* Informations générales */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Informations générales</h2>
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-2">Nom de l'association *</Label>
-                    <Input
-                      placeholder="Nom de l'association"
-                      {...register('name', { required: 'Le nom est requis' })}
-                    />
-                    {errors.name && (
-                      <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Catégorie *</Label>
-                    <select
-                      {...register('category', { required: 'La catégorie est requise' })}
-                      className={selectClassName}
-                    >
-                      <option value="sport">Sport</option>
-                      <option value="culture">Culture</option>
-                      <option value="social">Social</option>
-                      <option value="environnement">Environnement</option>
-                      <option value="education">Éducation</option>
-                      <option value="autre">Autre</option>
-                    </select>
-                    {errors.category && (
-                      <p className="mt-1 text-sm text-destructive">{errors.category.message}</p>
-                    )}
-                  </div>
-                </div>
-
+            <FormSection title="Informations générales">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <Label className="mb-2">Description</Label>
-                  <Textarea
-                    placeholder="Description de l'association..."
-                    rows={4}
-                    {...register('description')}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Contact</h2>
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-2">Personne de contact</Label>
-                    <Input
-                      placeholder="Nom du contact"
-                      {...register('contact_name')}
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Email de contact</Label>
-                    <Input
-                      type="email"
-                      placeholder="email@example.com"
-                      {...register('contact_email')}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-2">Téléphone</Label>
-                    <Input
-                      placeholder="01 23 45 67 89"
-                      {...register('contact_phone')}
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Site web</Label>
-                    <Input
-                      placeholder="https://www.example.com"
-                      {...register('website')}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-2">Adresse</Label>
-                  <Textarea
-                    placeholder="Adresse de l'association"
-                    rows={2}
-                    {...register('address')}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Logo */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Logo</h2>
-              <div className="flex flex-col gap-4">
-                {logoPreview && (
-                  <div>
-                    <img
-                      src={logoPreview}
-                      alt="Aperçu"
-                      className="h-24 w-24 rounded-md object-contain"
-                    />
-                  </div>
-                )}
-                <div>
-                  <Label className="mb-2">Logo de l'association</Label>
+                  <Label className="mb-2">Nom de l'association *</Label>
                   <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
+                    placeholder="Nom de l'association"
+                    {...register('name', { required: 'Le nom est requis' })}
                   />
-                  {isEditing && initialData?.logo && !logoFile && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Logo actuel conservé. Sélectionnez un fichier pour le remplacer.
-                    </p>
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
                   )}
                 </div>
+
+                <Controller
+                  name="category"
+                  control={control}
+                  rules={{ required: 'La catégorie est requise' }}
+                  render={({ field }) => (
+                    <FormSelect
+                      label="Catégorie"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={ASSOCIATION_CATEGORY_OPTIONS}
+                      required
+                      error={errors.category?.message}
+                    />
+                  )}
+                />
               </div>
-            </div>
+
+              <div>
+                <Label className="mb-2">Description</Label>
+                <Textarea
+                  placeholder="Description de l'association..."
+                  rows={4}
+                  {...register('description')}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Contact">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="mb-2">Personne de contact</Label>
+                  <Input
+                    placeholder="Nom du contact"
+                    {...register('contact_name')}
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2">Email de contact</Label>
+                  <Input
+                    type="email"
+                    placeholder="email@example.com"
+                    {...register('contact_email')}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="mb-2">Téléphone</Label>
+                  <Input
+                    placeholder="01 23 45 67 89"
+                    {...register('contact_phone')}
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2">Site web</Label>
+                  <Input
+                    placeholder="https://www.example.com"
+                    {...register('website')}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2">Adresse</Label>
+                <Textarea
+                  placeholder="Adresse de l'association"
+                  rows={2}
+                  {...register('address')}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Logo">
+              {logoPreview && (
+                <div>
+                  <img
+                    src={logoPreview}
+                    alt="Aperçu"
+                    className="h-24 w-24 rounded-md object-contain"
+                  />
+                </div>
+              )}
+              <div>
+                <Label className="mb-2">Logo de l'association</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                />
+                {isEditing && initialData?.logo && !logoFile && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Logo actuel conservé. Sélectionnez un fichier pour le remplacer.
+                  </p>
+                )}
+              </div>
+            </FormSection>
 
             {/* Actions */}
             <div className="flex justify-end gap-3">
@@ -319,11 +305,7 @@ export function EditAssociation() {
   }
 
   if (error || !association) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Association non trouvée</p>
-      </div>
-    )
+    return <NotFoundBanner message="Association non trouvée" />
   }
 
   return <AssociationForm isEditing={true} initialData={association} />

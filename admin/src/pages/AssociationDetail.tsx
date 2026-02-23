@@ -12,6 +12,7 @@ import {
   CATEGORY_LABELS,
   STATUS_CONFIG,
 } from '../hooks/api/useAssociations'
+import { formatDate } from '@/lib/format'
 import { toaster } from '../lib/toaster'
 
 export function AssociationDetail() {
@@ -229,14 +230,14 @@ export function AssociationDetail() {
               <p className="mb-2 font-medium text-muted-foreground">Informations</p>
               <div className="flex flex-col items-start gap-2">
                 <p className="text-sm text-muted-foreground">
-                  Créé le : {new Date(association.createdAt).toLocaleDateString('fr-FR')}
+                  Créé le : {formatDate(association.createdAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Modifié le : {new Date(association.updatedAt).toLocaleDateString('fr-FR')}
+                  Modifié le : {formatDate(association.updatedAt)}
                 </p>
                 {association.reviewed_at && (
                   <p className="text-sm text-muted-foreground">
-                    Examiné le : {new Date(association.reviewed_at).toLocaleDateString('fr-FR')}
+                    Examiné le : {formatDate(association.reviewed_at)}
                   </p>
                 )}
               </div>

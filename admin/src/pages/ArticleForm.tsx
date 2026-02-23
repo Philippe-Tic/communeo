@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
 import { FormCheckbox } from '../components/forms/FormCheckbox'
 import { FormSection } from '../components/forms/FormSection'
 import { FormSelect } from '../components/forms/FormSelect'
@@ -296,11 +296,7 @@ export function EditArticle() {
 
   if (isLoading) return <LoadingSpinner message="Chargement de l'article..." />
   if (error || !article) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Article non trouvé</p>
-      </div>
-    )
+    return <NotFoundBanner message="Article non trouvé" />
   }
   return <ArticleForm isEditing={true} initialData={article} />
 }

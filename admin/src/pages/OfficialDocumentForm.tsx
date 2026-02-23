@@ -2,11 +2,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { CONTENT_STATUS_OPTIONS } from '@/lib/constants/status-types'
+import { DOCUMENT_TYPE_OPTIONS } from '@/lib/official-document-types'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
+import { FormSection, FormSelect } from '../components/forms'
 import { PageHeader } from '../components/layout'
 import {
   uploadFile,
@@ -15,7 +18,6 @@ import {
   useUpdateOfficialDocument,
   type OfficialDocument,
 } from '../hooks/api/useOfficialDocuments'
-import { DOCUMENT_TYPE_OPTIONS } from '../lib/official-document-types'
 import { toaster } from '../lib/toaster'
 
 interface OfficialDocumentFormData {
@@ -35,8 +37,6 @@ interface OfficialDocumentFormProps {
   initialData?: OfficialDocument
 }
 
-const selectClassName = 'w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-
 export function OfficialDocumentForm({ isEditing = false, initialData }: OfficialDocumentFormProps) {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
@@ -49,7 +49,7 @@ export function OfficialDocumentForm({ isEditing = false, initialData }: Officia
   const createMutation = useCreateOfficialDocument()
   const updateMutation = useUpdateOfficialDocument()
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch, reset } = useForm<OfficialDocumentFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue, watch, reset, control } = useForm<OfficialDocumentFormData>({
     defaultValues: {
       title: '',
       slug: '',
@@ -193,162 +193,152 @@ export function OfficialDocumentForm({ isEditing = false, initialData }: Officia
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">
-            {/* Informations */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Informations</h2>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <Label className="mb-2">Titre *</Label>
-                  <Input
-                    placeholder="Titre du document"
-                    {...register('title', { required: 'Le titre est requis' })}
+            <FormSection title="Informations">
+              <div>
+                <Label className="mb-2">Titre *</Label>
+                <Input
+                  placeholder="Titre du document"
+                  {...register('title', { required: 'Le titre est requis' })}
+                />
+                {errors.title && (
+                  <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="mb-2">Slug *</Label>
+                <Input
+                  placeholder="slug-du-document"
+                  {...register('slug', { required: 'Le slug est requis' })}
+                />
+                {errors.slug && (
+                  <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="mb-2">Description</Label>
+                <Textarea
+                  placeholder="Description du document"
+                  rows={3}
+                  {...register('description')}
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2">Numéro de référence</Label>
+                <Input
+                  placeholder="Ex: DEL-2024-042"
+                  {...register('reference_number')}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Classification">
+              <Controller
+                name="document_type"
+                control={control}
+                rules={{ required: 'Le type est requis' }}
+                render={({ field }) => (
+                  <FormSelect
+                    label="Type de document"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={DOCUMENT_TYPE_OPTIONS}
+                    required
+                    error={errors.document_type?.message}
                   />
-                  {errors.title && (
-                    <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>
+                )}
+              />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <Label className="mb-2">Année *</Label>
+                  <Input
+                    type="number"
+                    {...register('year', {
+                      required: "L'année est requise",
+                      valueAsNumber: true,
+                      min: { value: 1900, message: 'Année invalide' },
+                      max: { value: 2100, message: 'Année invalide' },
+                    })}
+                  />
+                  {errors.year && (
+                    <p className="mt-1 text-sm text-destructive">{errors.year.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <Label className="mb-2">Slug *</Label>
+                  <Label className="mb-2">Date du document *</Label>
                   <Input
-                    placeholder="slug-du-document"
-                    {...register('slug', { required: 'Le slug est requis' })}
+                    type="date"
+                    {...register('document_date', { required: 'La date est requise' })}
                   />
-                  {errors.slug && (
-                    <p className="mt-1 text-sm text-destructive">{errors.slug.message}</p>
+                  {errors.document_date && (
+                    <p className="mt-1 text-sm text-destructive">{errors.document_date.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <Label className="mb-2">Description</Label>
-                  <Textarea
-                    placeholder="Description du document"
-                    rows={3}
-                    {...register('description')}
-                  />
-                </div>
-
-                <div>
-                  <Label className="mb-2">Numéro de référence</Label>
+                  <Label className="mb-2">Date de session</Label>
                   <Input
-                    placeholder="Ex: DEL-2024-042"
-                    {...register('reference_number')}
+                    type="date"
+                    {...register('session_date')}
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Classification */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Classification</h2>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <Label className="mb-2">Type de document *</Label>
-                  <select
-                    {...register('document_type', { required: 'Le type est requis' })}
-                    className={selectClassName}
-                  >
-                    {DOCUMENT_TYPE_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  {errors.document_type && (
-                    <p className="mt-1 text-sm text-destructive">{errors.document_type.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  <div>
-                    <Label className="mb-2">Année *</Label>
-                    <Input
-                      type="number"
-                      {...register('year', {
-                        required: "L'année est requise",
-                        valueAsNumber: true,
-                        min: { value: 1900, message: 'Année invalide' },
-                        max: { value: 2100, message: 'Année invalide' },
-                      })}
-                    />
-                    {errors.year && (
-                      <p className="mt-1 text-sm text-destructive">{errors.year.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Date du document *</Label>
-                    <Input
-                      type="date"
-                      {...register('document_date', { required: 'La date est requise' })}
-                    />
-                    {errors.document_date && (
-                      <p className="mt-1 text-sm text-destructive">{errors.document_date.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Date de session</Label>
-                    <Input
-                      type="date"
-                      {...register('session_date')}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="mb-2">Statut</Label>
-                  <select
-                    {...register('status')}
-                    className={selectClassName}
-                  >
-                    <option value="draft">Brouillon</option>
-                    <option value="published">Publié</option>
-                    <option value="archived">Archivé</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Fichiers */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Fichiers</h2>
-              <div className="flex flex-col gap-4">
-                <div>
-                  <Label className="mb-2">Document principal (PDF) {!isEditing && '*'}</Label>
-                  <Input
-                    ref={mainFileRef}
-                    type="file"
-                    accept=".pdf,application/pdf"
-                    onChange={(e) => setMainFile(e.target.files?.[0] || null)}
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <FormSelect
+                    label="Statut"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={CONTENT_STATUS_OPTIONS}
                   />
-                  {isEditing && initialData?.file && !mainFile && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Fichier actuel : {initialData.file.name}
-                    </p>
-                  )}
-                </div>
+                )}
+              />
+            </FormSection>
 
-                <div>
-                  <Label className="mb-2">Annexes (optionnel)</Label>
-                  <Input
-                    ref={additionalFilesRef}
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
-                    onChange={(e) => setAdditionalFiles(Array.from(e.target.files || []))}
-                  />
-                  {additionalFiles.length > 0 && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {additionalFiles.length} fichier{additionalFiles.length > 1 ? 's' : ''} sélectionné{additionalFiles.length > 1 ? 's' : ''}
-                    </p>
-                  )}
-                  {isEditing && initialData?.additional_files && initialData.additional_files.length > 0 && additionalFiles.length === 0 && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {initialData.additional_files.length} annexe{initialData.additional_files.length > 1 ? 's' : ''} actuelle{initialData.additional_files.length > 1 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
+            <FormSection title="Fichiers">
+              <div>
+                <Label className="mb-2">Document principal (PDF) {!isEditing && '*'}</Label>
+                <Input
+                  ref={mainFileRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => setMainFile(e.target.files?.[0] || null)}
+                />
+                {isEditing && initialData?.file && !mainFile && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Fichier actuel : {initialData.file.name}
+                  </p>
+                )}
               </div>
-            </div>
+
+              <div>
+                <Label className="mb-2">Annexes (optionnel)</Label>
+                <Input
+                  ref={additionalFilesRef}
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*"
+                  onChange={(e) => setAdditionalFiles(Array.from(e.target.files || []))}
+                />
+                {additionalFiles.length > 0 && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {additionalFiles.length} fichier{additionalFiles.length > 1 ? 's' : ''} sélectionné{additionalFiles.length > 1 ? 's' : ''}
+                  </p>
+                )}
+                {isEditing && initialData?.additional_files && initialData.additional_files.length > 0 && additionalFiles.length === 0 && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {initialData.additional_files.length} annexe{initialData.additional_files.length > 1 ? 's' : ''} actuelle{initialData.additional_files.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </FormSection>
 
             {/* Actions */}
             <div className="flex justify-end gap-3">
@@ -380,11 +370,7 @@ export function EditOfficialDocument() {
   }
 
   if (error || !document) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Document non trouvé</p>
-      </div>
-    )
+    return <NotFoundBanner message="Document non trouvé" />
   }
 
   return <OfficialDocumentForm isEditing={true} initialData={document} />

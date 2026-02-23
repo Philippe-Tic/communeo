@@ -1,24 +1,12 @@
 import { Badge } from '@/components/ui/badge'
+import { ARTICLE_CATEGORY_COLORS, ARTICLE_CATEGORY_LABELS } from '@/lib/constants/article-types'
+import { formatDate } from '@/lib/format'
 import { Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
+import { CategoryBadge, ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useArticle, useDeleteArticle, useToggleArticleFeatured } from '../hooks/api/useArticles'
 import { toaster } from '../lib/toaster'
-
-const CATEGORY_COLORS: Record<string, string> = {
-  news: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  event: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  information: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  emergency: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  news: 'Actualité',
-  event: 'Événement',
-  information: 'Information',
-  emergency: 'Urgence',
-}
 
 export function ArticleDetail() {
   const { id } = useParams<{ id: string }>()
@@ -138,9 +126,7 @@ export function ArticleDetail() {
             {/* Status and badges */}
             <div className="flex flex-wrap gap-2">
               <StatusBadge status={article.status} />
-              <Badge className={CATEGORY_COLORS[article.category] || ''}>
-                {CATEGORY_LABELS[article.category] || article.category}
-              </Badge>
+              <CategoryBadge value={article.category} labels={ARTICLE_CATEGORY_LABELS} colors={ARTICLE_CATEGORY_COLORS} />
               {article.featured && (
                 <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                   <Star className="mr-1 inline h-3 w-3" /> À la une
@@ -208,14 +194,14 @@ export function ArticleDetail() {
                   Vues: {article.view_count}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Créé le: {new Date(article.createdAt).toLocaleDateString('fr-FR')}
+                  Créé le: {formatDate(article.createdAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Modifié le: {new Date(article.updatedAt).toLocaleDateString('fr-FR')}
+                  Modifié le: {formatDate(article.updatedAt)}
                 </p>
                 {article.publication_date && (
                   <p className="text-sm text-muted-foreground">
-                    Publié le: {new Date(article.publication_date).toLocaleDateString('fr-FR')}
+                    Publié le: {formatDate(article.publication_date)}
                   </p>
                 )}
               </div>

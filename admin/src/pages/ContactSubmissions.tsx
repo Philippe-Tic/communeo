@@ -1,4 +1,6 @@
 import { Badge } from '@/components/ui/badge'
+import { CONTACT_CATEGORY_LABELS, CONTACT_CATEGORY_OPTIONS, CONTACT_STATUS_CONFIG, CONTACT_STATUS_OPTIONS } from '@/lib/constants/contact-types'
+import { formatDate } from '@/lib/format'
 import { Clock, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -10,23 +12,6 @@ import {
   type ContactSubmission,
 } from '../hooks/api/useContactSubmissions'
 import { toaster } from '../lib/toaster'
-
-const STATUS_CONFIG: Record<string, { className: string; label: string }> = {
-  received: { className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', label: 'Reçu' },
-  in_progress: { className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', label: 'En cours' },
-  resolved: { className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', label: 'Résolu' },
-  closed: { className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', label: 'Fermé' },
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: 'Général',
-  urbanisme: 'Urbanisme',
-  'etat-civil': 'État civil',
-  voirie: 'Voirie',
-  associations: 'Associations',
-  rgpd: 'RGPD',
-  autre: 'Autre',
-}
 
 export const ContactSubmissions = () => {
   const navigate = useNavigate()
@@ -85,26 +70,13 @@ export const ContactSubmissions = () => {
       key: 'status',
       label: 'Statut',
       type: 'select' as const,
-      options: [
-        { value: 'received', label: 'Reçu' },
-        { value: 'in_progress', label: 'En cours' },
-        { value: 'resolved', label: 'Résolu' },
-        { value: 'closed', label: 'Fermé' },
-      ],
+      options: CONTACT_STATUS_OPTIONS,
     },
     {
       key: 'category',
       label: 'Catégorie',
       type: 'select' as const,
-      options: [
-        { value: 'general', label: 'Général' },
-        { value: 'urbanisme', label: 'Urbanisme' },
-        { value: 'etat-civil', label: 'État civil' },
-        { value: 'voirie', label: 'Voirie' },
-        { value: 'associations', label: 'Associations' },
-        { value: 'rgpd', label: 'RGPD' },
-        { value: 'autre', label: 'Autre' },
-      ],
+      options: CONTACT_CATEGORY_OPTIONS,
     },
   ]
 
@@ -152,7 +124,7 @@ export const ContactSubmissions = () => {
               </thead>
               <tbody className="divide-y">
                 {submissions.map((submission) => {
-                  const statusConfig = STATUS_CONFIG[submission.status] || STATUS_CONFIG.received
+                  const statusConfig = CONTACT_STATUS_CONFIG[submission.status] || CONTACT_STATUS_CONFIG.received
                   return (
                     <tr
                       key={submission.documentId}
@@ -177,7 +149,7 @@ export const ContactSubmissions = () => {
                       </td>
                       <td className="hidden px-4 py-3 lg:table-cell">
                         <span className="text-xs text-muted-foreground">
-                          {CATEGORY_LABELS[submission.category] || submission.category}
+                          {CONTACT_CATEGORY_LABELS[submission.category] || submission.category}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -189,7 +161,7 @@ export const ContactSubmissions = () => {
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           <span className="text-xs">
-                            {new Date(submission.createdAt).toLocaleDateString('fr-FR')}
+                            {formatDate(submission.createdAt)}
                           </span>
                         </div>
                       </td>

@@ -58,11 +58,7 @@ export const ALERTES_QUERY_KEYS = {
   detail: (documentId: string) => [...ALERTES_QUERY_KEYS.details(), documentId] as const,
 }
 
-export const SEVERITY_CONFIG: Record<AlerteSeverity, { className: string; label: string }> = {
-  info: { className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', label: 'Information' },
-  warning: { className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', label: 'Avertissement' },
-  critical: { className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', label: 'Critique' },
-}
+export { ALERTE_SEVERITY_CONFIG as SEVERITY_CONFIG } from '../../lib/constants/alerte-types'
 
 export const useAlertes = (params: {
   page?: number

@@ -2,9 +2,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useSite } from '@/hooks/api/useSites'
 import { useUserSite } from '@/hooks/useUser'
+import { formatDate } from '@/lib/format'
 import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Clock, File, FileText, Mail, MapPin, Rocket, XCircle } from 'lucide-react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
-import { PageHeader } from '../components/layout'
+import { PageHeader, SectionHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
 import { useArticles, type Article } from '../hooks/api/useArticles'
 import { useEvents, useUpcomingEvents } from '../hooks/api/useEvents'
@@ -94,7 +95,7 @@ export const Dashboard = () => {
   // Deployment status
   const deploymentStatusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
     building: { label: 'En cours', color: 'text-blue-600 dark:text-blue-400', icon: <Clock className="h-4 w-4 animate-spin" /> },
-    ready: { label: 'Succès', color: 'text-green-600 dark:text-green-400', icon: <CheckCircle2 className="h-4 w-4" /> },
+    ready: { label: 'Succès', color: 'text-emerald-600 dark:text-emerald-400', icon: <CheckCircle2 className="h-4 w-4" /> },
     error: { label: 'Échec', color: 'text-red-600 dark:text-red-400', icon: <XCircle className="h-4 w-4" /> },
   }
 
@@ -132,7 +133,7 @@ export const Dashboard = () => {
           ].filter(Boolean) as string[]
           if (missing.length === 0) return null
           return (
-            <div className="flex items-start gap-3 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950/30">
+            <div className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50/80 p-4 backdrop-blur-sm dark:border-orange-800 dark:bg-orange-950/30">
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
               <div className="text-sm">
                 <p className="font-medium text-orange-800 dark:text-orange-300">
@@ -178,17 +179,17 @@ export const Dashboard = () => {
 
             <div className="flex flex-wrap gap-4">
               <RouterLink to="/articles/new">
-                <Button size="sm">
+                <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-indigo-600">
                   Nouvel article
                 </Button>
               </RouterLink>
               <RouterLink to="/events/new">
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" className="backdrop-blur-sm">
                   Nouvel événement
                 </Button>
               </RouterLink>
               <RouterLink to="/pages/new">
-                <Button size="sm" variant="outline">
+                <Button size="sm" variant="outline" className="backdrop-blur-sm">
                   Nouvelle page
                 </Button>
               </RouterLink>
@@ -196,27 +197,23 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="h-px bg-border" />
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
         {/* Two-column layout: Messages + Deployment/Conformity */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Unread Messages */}
-          <div className="rounded-lg border bg-card p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                <Mail className="h-4 w-4 text-orange-500" />
-                Messages non lus
-                {(messagesCount ?? 0) > 0 && (
+          <div className="glass-card rounded-xl p-5">
+            <div className="mb-4">
+              <SectionHeader
+                title="Messages non lus"
+                linkTo="/messages"
+                icon={<Mail className="h-4 w-4 text-orange-500" />}
+                badge={(messagesCount ?? 0) > 0 ? (
                   <Badge variant="default" className="ml-1 h-5 min-w-5 px-1.5 text-[10px]">
                     {messagesCount}
                   </Badge>
-                )}
-              </h3>
-              <RouterLink to="/messages">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  Voir tout <ChevronRight className="ml-1 h-3 w-3" />
-                </Button>
-              </RouterLink>
+                ) : undefined}
+              />
             </div>
             {unreadMessages.length > 0 ? (
               <div className="flex flex-col gap-2">
@@ -224,15 +221,15 @@ export const Dashboard = () => {
                   <button
                     key={msg.documentId}
                     onClick={() => navigate(`/messages/${msg.documentId}`)}
-                    className="flex items-start gap-3 rounded-md p-2.5 text-left transition-colors hover:bg-accent"
+                    className="flex items-start gap-3 rounded-lg p-2.5 text-left transition-colors hover:bg-white/50 dark:hover:bg-white/[0.06]"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-700 dark:bg-orange-900 dark:text-orange-300">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-500 text-xs font-bold text-white">
                       {msg.first_name?.charAt(0)}{msg.last_name?.charAt(0)}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium">{msg.subject}</p>
                       <p className="text-xs text-muted-foreground">
-                        {msg.first_name} {msg.last_name} &middot; {new Date(msg.createdAt).toLocaleDateString('fr-FR')}
+                        {msg.first_name} {msg.last_name} &middot; {formatDate(msg.createdAt)}
                       </p>
                     </div>
                   </button>
@@ -248,17 +245,14 @@ export const Dashboard = () => {
           {/* Right column: Deployment + Conformity */}
           <div className="flex flex-col gap-6">
             {/* Last Deployment */}
-            <div className="rounded-lg border bg-card p-5">
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                  <Rocket className="h-4 w-4 text-blue-500" />
-                  Dernier déploiement
-                </h3>
-                <RouterLink to="/deployment">
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    Gérer <ChevronRight className="ml-1 h-3 w-3" />
-                  </Button>
-                </RouterLink>
+            <div className="glass-card rounded-xl p-5">
+              <div className="mb-3">
+                <SectionHeader
+                  title="Dernier déploiement"
+                  linkTo="/deployment"
+                  linkLabel="Gérer"
+                  icon={<Rocket className="h-4 w-4 text-indigo-500" />}
+                />
               </div>
               {currentDeployment ? (
                 <div className="flex items-center gap-3">
@@ -283,21 +277,14 @@ export const Dashboard = () => {
 
             {/* Conformity Progress */}
             {conformityTotal > 0 && (
-              <div className="rounded-lg border bg-card p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-base font-semibold text-foreground">
-                    Conformité légale
-                  </h3>
-                  <RouterLink to="/compliance">
-                    <Button variant="ghost" size="sm" className="text-xs">
-                      Détails <ChevronRight className="ml-1 h-3 w-3" />
-                    </Button>
-                  </RouterLink>
+              <div className="glass-card rounded-xl p-5">
+                <div className="mb-3">
+                  <SectionHeader title="Conformité légale" linkTo="/compliance" linkLabel="Détails" />
                 </div>
                 <div className="mb-2 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-green-500 transition-all"
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400 transition-all"
                       style={{ width: `${conformityPercent}%` }}
                     />
                   </div>
@@ -310,7 +297,7 @@ export const Dashboard = () => {
                     <Badge
                       key={check.label}
                       variant={check.ok ? 'secondary' : 'outline'}
-                      className={check.ok ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'}
+                      className={check.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'}
                     >
                       {check.ok ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
                       {check.label}
@@ -324,9 +311,9 @@ export const Dashboard = () => {
             {(pendingAssociationsCount ?? 0) > 0 && (
               <button
                 onClick={() => navigate('/associations')}
-                className="flex items-center gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-left transition-colors hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/30 dark:hover:bg-yellow-950/50"
+                className="flex items-center gap-3 rounded-xl border border-yellow-200 bg-yellow-50/80 p-4 text-left backdrop-blur-sm transition-colors hover:bg-yellow-100 dark:border-yellow-800 dark:bg-yellow-950/30 dark:hover:bg-yellow-950/50"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 text-sm font-bold text-white">
                   {pendingAssociationsCount}
                 </div>
                 <div>
@@ -343,31 +330,22 @@ export const Dashboard = () => {
         {/* Upcoming Events */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <>
-            <div className="h-px bg-border" />
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
             <div>
               <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Prochains événements
-                  </h3>
-                  <RouterLink to="/events">
-                    <Button variant="ghost" size="sm">
-                      Voir tout
-                    </Button>
-                  </RouterLink>
-                </div>
+                <SectionHeader title="Prochains événements" linkTo="/events" />
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   {upcomingEvents.map((event) => (
                     <button
                       key={event.documentId}
                       onClick={() => navigate(`/events/${event.documentId}`)}
-                      className="flex items-start gap-3 rounded-lg border bg-card p-4 text-left transition-shadow hover:shadow-md"
+                      className="glass-card flex items-start gap-3 rounded-xl p-4 text-left"
                     >
-                      <div className="flex shrink-0 flex-col items-center rounded-md bg-primary/10 px-3 py-1.5 text-primary">
+                      <div className="flex shrink-0 flex-col items-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 px-3 py-1.5 text-white shadow-sm">
                         <span className="text-lg font-bold leading-tight">
                           {new Date(event.start_date).getDate()}
                         </span>
-                        <span className="text-[10px] font-medium uppercase">
+                        <span className="text-[10px] font-medium uppercase opacity-90">
                           {new Date(event.start_date).toLocaleDateString('fr-FR', { month: 'short' })}
                         </span>
                       </div>
@@ -390,22 +368,13 @@ export const Dashboard = () => {
           </>
         )}
 
-        <div className="h-px bg-border" />
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
         {/* Recent Articles */}
         {recentArticles.length > 0 && (
           <div>
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Articles récents
-                </h3>
-                <RouterLink to="/articles">
-                  <Button variant="ghost" size="sm">
-                    Voir tout
-                  </Button>
-                </RouterLink>
-              </div>
+              <SectionHeader title="Articles récents" linkTo="/articles" />
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {recentArticles.map((article) => (
@@ -429,7 +398,7 @@ export const Dashboard = () => {
               Aucun article publié pour le moment
             </p>
             <RouterLink to="/articles/new">
-              <Button size="sm">
+              <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-indigo-600">
                 Créer votre premier article
               </Button>
             </RouterLink>

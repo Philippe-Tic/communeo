@@ -34,7 +34,7 @@ import { SiteConfig } from './pages/SiteConfig'
 import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
 import { Alertes } from './pages/Alertes'
-import { AlerteForm } from './pages/AlerteForm'
+import { CreateAlerte, EditAlerte } from './pages/AlerteForm'
 import { MediaLibrary } from './pages/MediaLibrary'
 import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
@@ -390,7 +390,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout>
-                  <AlerteForm />
+                  <CreateAlerte />
                 </MainLayout>
               </ProtectedRoute>
             }
@@ -401,7 +401,7 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout>
-                  <AlerteForm />
+                  <EditAlerte />
                 </MainLayout>
               </ProtectedRoute>
             }

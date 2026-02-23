@@ -21,7 +21,7 @@ interface DataGridProps<T> {
 
 function CardSkeleton() {
   return (
-    <div className="flex flex-col gap-3 rounded-md border bg-card p-4">
+    <div className="glass-card flex flex-col gap-3 rounded-xl p-4">
       <div className="flex items-center justify-between">
         <Skeleton className="h-5 w-20" />
         <Skeleton className="h-8 w-8 rounded-md" />

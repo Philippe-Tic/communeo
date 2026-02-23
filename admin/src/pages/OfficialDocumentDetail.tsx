@@ -9,6 +9,7 @@ import {
   usePublishOfficialDocument,
   useArchiveOfficialDocument,
 } from '../hooks/api/useOfficialDocuments'
+import { formatDate } from '@/lib/format'
 import { DOCUMENT_TYPE_COLORS, DOCUMENT_TYPE_LABELS } from '../lib/official-document-types'
 import { toaster } from '../lib/toaster'
 
@@ -100,8 +101,6 @@ export function OfficialDocumentDetail() {
       />
     )
   }
-
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR')
 
   const fileUrl = doc.file?.url?.startsWith('http')
     ? doc.file.url

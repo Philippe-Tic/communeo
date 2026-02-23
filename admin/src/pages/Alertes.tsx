@@ -2,9 +2,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ConfirmDialog } from '../components/common'
+import { ConfirmDialog, EmptyState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   useAlertes,
   useDeleteAlerte,
@@ -12,6 +11,7 @@ import {
   SEVERITY_CONFIG,
   type Alerte,
 } from '../hooks/api/useAlertes'
+import { formatDate } from '@/lib/format'
 import { toaster } from '../lib/toaster'
 import { AlertTriangle, Info, Megaphone, Pencil, Power, PowerOff, Trash2 } from 'lucide-react'
 
@@ -90,29 +90,15 @@ export const Alertes = () => {
         />
 
         {isLoading ? (
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 rounded-lg border bg-card p-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-1/3" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-                <Skeleton className="h-8 w-20" />
-              </div>
-            ))}
-          </div>
+          <LoadingSpinner message="Chargement des alertes..." />
         ) : alertes.length === 0 ? (
-          <div className="py-12 text-center">
-            <Megaphone className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="mb-2 text-lg font-medium text-foreground">Aucune alerte</p>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Créez des alertes pour afficher des bandeaux d'urgence sur votre site (météo, inondations, etc.)
-            </p>
-            <Button onClick={() => navigate('/alertes/new')}>
-              Créer une alerte
-            </Button>
-          </div>
+          <EmptyState
+            title="Aucune alerte"
+            description="Créez des alertes pour afficher des bandeaux d'urgence sur votre site (météo, inondations, etc.)"
+            icon={<Megaphone className="h-7 w-7" />}
+            actionLabel="Créer une alerte"
+            onAction={() => navigate('/alertes/new')}
+          />
         ) : (
           <div className="flex flex-col gap-3">
             {alertes.map((alerte) => {
@@ -145,8 +131,8 @@ export const Alertes = () => {
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">{alerte.message}</p>
                     {(alerte.display_from || alerte.display_until) && (
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {alerte.display_from && `Du ${new Date(alerte.display_from).toLocaleDateString('fr-FR')}`}
-                        {alerte.display_until && ` au ${new Date(alerte.display_until).toLocaleDateString('fr-FR')}`}
+                        {alerte.display_from && `Du ${formatDate(alerte.display_from)}`}
+                        {alerte.display_until && ` au ${formatDate(alerte.display_until)}`}
                       </p>
                     )}
                   </div>

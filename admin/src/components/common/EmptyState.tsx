@@ -19,9 +19,11 @@ export function EmptyState({
     <div className="p-8 text-center">
       <div className="flex flex-col items-center gap-4">
         {icon && (
-          <div className="text-4xl text-muted-foreground">{icon}</div>
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-3xl text-indigo-400 dark:from-indigo-900/40 dark:to-indigo-800/20 dark:text-indigo-400">
+            {icon}
+          </div>
         )}
-        <p className="text-lg font-medium text-muted-foreground">{title}</p>
+        <p className="text-lg font-semibold text-foreground/80">{title}</p>
         {description && (
           <p className="max-w-md text-muted-foreground">{description}</p>
         )}

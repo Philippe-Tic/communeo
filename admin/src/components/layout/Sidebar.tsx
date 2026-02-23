@@ -115,10 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         key={item.path}
         onClick={() => handleNavClick(item.path)}
         className={cn(
-          'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors',
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all',
           active
-            ? 'bg-primary font-semibold text-primary-foreground'
-            : 'text-foreground hover:bg-accent'
+            ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
+            : 'text-foreground hover:bg-white/60 dark:hover:bg-white/[0.06]'
         )}
       >
         {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
@@ -138,16 +138,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div
       className={cn(
-        'fixed overflow-y-auto bg-muted/50 transition-[left] duration-300 ease-in-out',
+        'fixed overflow-y-auto backdrop-blur-xl transition-[left] duration-300 ease-in-out',
         variant === 'sidebar'
-          ? 'top-[72px] left-0 h-[calc(100vh-72px)] w-[250px] border-r'
-          : 'top-0 left-0 z-[1100] h-screen w-[280px] shadow-xl md:w-[250px]',
+          ? 'top-[72px] left-0 h-[calc(100vh-72px)] w-[250px] border-r border-white/20 bg-white/60 dark:border-white/[0.08] dark:bg-slate-900/50'
+          : 'top-0 left-0 z-[1100] h-screen w-[280px] bg-white/70 shadow-xl dark:bg-slate-900/60 md:w-[250px]',
         variant === 'drawer' && !isOpen && '-left-full'
       )}
     >
       {variant === 'drawer' && (
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="font-bold text-primary">Admin CMS</h2>
+          <h2 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300">Admin CMS</h2>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-accent">
             <X className="h-5 w-5" />
           </button>
@@ -159,10 +159,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button
           onClick={() => handleNavClick('/dashboard')}
           className={cn(
-            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors',
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all',
             isActive('/dashboard')
-              ? 'bg-primary font-semibold text-primary-foreground'
-              : 'text-foreground hover:bg-accent'
+              ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
+              : 'text-foreground hover:bg-white/60 dark:hover:bg-white/[0.06]'
           )}
         >
           <LayoutDashboard className="h-4 w-4 shrink-0" />
@@ -177,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={() => toggleGroup(group.key)}
-                className="mb-1 flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                className="mb-1 flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-indigo-400/70 hover:text-indigo-500 dark:text-indigo-400/50 dark:hover:text-indigo-400 transition-colors"
               >
                 {group.label}
                 <ChevronDown

@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useDeletePage, usePage } from '../hooks/api/usePages'
+import { formatDate } from '@/lib/format'
 import { toaster } from '../lib/toaster'
 
 export function PageDetail() {
@@ -118,10 +119,10 @@ export function PageDetail() {
               </p>
               <div className="flex flex-col items-start gap-2">
                 <p className="text-sm text-muted-foreground">
-                  Créé le: {new Date(page.createdAt).toLocaleDateString('fr-FR')}
+                  Créé le: {formatDate(page.createdAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Modifié le: {new Date(page.updatedAt).toLocaleDateString('fr-FR')}
+                  Modifié le: {formatDate(page.updatedAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Ordre du menu: {page.menu_order}

@@ -43,15 +43,7 @@ export interface UpdateUserData {
   active?: boolean
 }
 
-export const USER_ROLE_LABELS: Record<string, string> = {
-  admin: 'Administrateur',
-  editor: 'Rédacteur',
-}
-
-export const USER_ROLE_COLORS: Record<string, string> = {
-  admin: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  editor: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
-}
+export { USER_ROLE_LABELS, USER_ROLE_COLORS } from '../../lib/constants/user-types'
 
 export const USERS_QUERY_KEYS = {
   all: ['users'] as const,

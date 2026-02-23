@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
 import { FormSection } from '../components/forms/FormSection'
 import { FormSelect } from '../components/forms/FormSelect'
 import { RichTextEditor } from '../components/forms/RichTextEditor'
@@ -305,11 +305,7 @@ export function EditPage() {
 
   if (isLoading) return <LoadingSpinner message="Chargement de la page..." />
   if (error || !page) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Page non trouvée</p>
-      </div>
-    )
+    return <NotFoundBanner message="Page non trouvée" />
   }
   return <PageForm isEditing={true} initialData={page} />
 }

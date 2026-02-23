@@ -1,15 +1,9 @@
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Eye, Mail, MoreVertical, Pencil, Trash2, UserCircle } from 'lucide-react'
+import { formatDate } from '@/lib/format'
+import { Mail, UserCircle } from 'lucide-react'
 import type { Association } from '../../hooks/api/useAssociations'
 import { CATEGORY_COLORS, CATEGORY_LABELS, STATUS_CONFIG } from '../../hooks/api/useAssociations'
+import { CardActionsMenu, CategoryBadge } from '../common'
 
 interface AssociationCardProps {
   association: Association
@@ -24,38 +18,22 @@ export const AssociationCard = ({
   const statusConfig = STATUS_CONFIG[association.status]
 
   return (
-    <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="glass-card flex h-full flex-col rounded-xl p-4">
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">
           <div className="flex flex-wrap gap-1.5">
-            <Badge className={CATEGORY_COLORS[association.category] || ''}>
-              {CATEGORY_LABELS[association.category] || association.category}
-            </Badge>
+            <CategoryBadge value={association.category} labels={CATEGORY_LABELS} colors={CATEGORY_COLORS} />
             <Badge className={statusConfig.className}>
               {statusConfig.label}
             </Badge>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onView(association)}>
-                <Eye className="mr-2 h-4 w-4" /> Voir
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(association)}>
-                <Pencil className="mr-2 h-4 w-4" /> Modifier
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(association)} className="text-destructive focus:text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CardActionsMenu
+            onView={() => onView(association)}
+            onEdit={() => onEdit(association)}
+            onDelete={() => onDelete(association)}
+          />
         </div>
       </div>
 
@@ -88,7 +66,7 @@ export const AssociationCard = ({
 
       {/* Footer */}
       <div className="mt-auto pt-3 text-xs text-muted-foreground">
-        <p>Créé le {new Date(association.createdAt).toLocaleDateString('fr-FR')}</p>
+        <p>Créé le {formatDate(association.createdAt)}</p>
       </div>
     </div>
   )

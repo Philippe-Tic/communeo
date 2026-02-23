@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b bg-card px-4 py-3 shadow-sm md:px-6">
+    <header className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-white/20 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-slate-900/60 md:px-6">
       {/* Left side */}
       <div className="flex items-center gap-3">
         <button
@@ -32,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <Menu className="h-5 w-5" />
         </button>
 
-        <h1 className="text-lg font-bold text-primary md:text-xl">Admin CMS</h1>
+        <h1 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-lg font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-xl">Admin CMS</h1>
       </div>
 
       {/* Right side */}
@@ -44,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         )}
 
         {/* Dark mode toggle */}
-        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Changer le thème">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Changer le thème" className="rounded-full">
           {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </Button>
 
@@ -52,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-md p-2 hover:bg-accent">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 text-sm font-bold text-white ring-2 ring-indigo-200 dark:from-indigo-500 dark:to-indigo-400 dark:ring-indigo-800">
                   {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
                 </div>
                 <div className="hidden text-left sm:block">
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 font-bold text-white dark:from-indigo-500 dark:to-indigo-400">
                     {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
                   </div>
                   <div>

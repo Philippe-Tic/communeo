@@ -1,5 +1,14 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { CONTACT_CATEGORY_LABELS, CONTACT_STATUS_CONFIG, CONTACT_STATUS_OPTIONS } from '@/lib/constants/contact-types'
+import { formatDateTime } from '@/lib/format'
 import { Calendar, Clock, Mail, Phone, Tag, User } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -11,23 +20,6 @@ import {
   useUpdateContactSubmission,
 } from '../hooks/api/useContactSubmissions'
 import { toaster } from '../lib/toaster'
-
-const STATUS_CONFIG: Record<string, { className: string; label: string }> = {
-  received: { className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200', label: 'Reçu' },
-  in_progress: { className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', label: 'En cours' },
-  resolved: { className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', label: 'Résolu' },
-  closed: { className: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', label: 'Fermé' },
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  general: 'Général',
-  urbanisme: 'Urbanisme',
-  'etat-civil': 'État civil',
-  voirie: 'Voirie',
-  associations: 'Associations',
-  rgpd: 'RGPD',
-  autre: 'Autre',
-}
 
 export function ContactSubmissionDetail() {
   const { id } = useParams<{ id: string }>()
@@ -50,7 +42,7 @@ export function ContactSubmissionDetail() {
       })
       toaster.create({
         title: 'Statut mis à jour',
-        description: `Le statut a été changé en "${STATUS_CONFIG[newStatus]?.label || newStatus}".`,
+        description: `Le statut a été changé en "${CONTACT_STATUS_CONFIG[newStatus]?.label || newStatus}".`,
         type: 'success',
         duration: 3000,
       })
@@ -128,7 +120,7 @@ export function ContactSubmissionDetail() {
     )
   }
 
-  const statusConfig = STATUS_CONFIG[submission.status] || STATUS_CONFIG.received
+  const statusConfig = CONTACT_STATUS_CONFIG[submission.status] || CONTACT_STATUS_CONFIG.received
 
   const headerActions = [
     {
@@ -190,11 +182,11 @@ export function ContactSubmissionDetail() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <Tag className="h-4 w-4 text-muted-foreground" />
-                <span>{CATEGORY_LABELS[submission.category] || submission.category}</span>
+                <span>{CONTACT_CATEGORY_LABELS[submission.category] || submission.category}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>Reçu le {new Date(submission.createdAt).toLocaleString('fr-FR')}</span>
+                <span>Reçu le {formatDateTime(submission.createdAt)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
@@ -208,16 +200,21 @@ export function ContactSubmissionDetail() {
         <div className="rounded-md border bg-card p-5">
           <h3 className="mb-3 text-sm font-medium text-muted-foreground">Changer le statut</h3>
           <div className="flex items-center gap-3">
-            <select
+            <Select
               value={selectedStatus || submission.status}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              onValueChange={(value) => setSelectedStatus(value)}
             >
-              <option value="received">Reçu</option>
-              <option value="in_progress">En cours</option>
-              <option value="resolved">Résolu</option>
-              <option value="closed">Fermé</option>
-            </select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CONTACT_STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button
               size="sm"
               disabled={(!selectedStatus || selectedStatus === submission.status) || updateMutation.isPending}
@@ -243,7 +240,7 @@ export function ContactSubmissionDetail() {
               Réponse envoyée
               {submission.responded_at && (
                 <span className="ml-2 font-normal text-green-600 dark:text-green-400">
-                  le {new Date(submission.responded_at).toLocaleString('fr-FR')}
+                  le {formatDateTime(submission.responded_at)}
                 </span>
               )}
             </h3>

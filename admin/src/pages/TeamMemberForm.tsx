@@ -2,11 +2,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { TEAM_MEMBER_ROLE_OPTIONS } from '@/lib/constants/team-member-types'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
+import { FormSection, FormSelect } from '../components/forms'
 import { PageHeader } from '../components/layout'
 import {
   uploadFile,
@@ -32,8 +34,6 @@ interface TeamMemberFormProps {
   initialData?: TeamMember
 }
 
-const selectClassName = 'w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
-
 export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFormProps) {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
@@ -44,7 +44,7 @@ export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFor
   const createMutation = useCreateTeamMember()
   const updateMutation = useUpdateTeamMember()
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<TeamMemberFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, control } = useForm<TeamMemberFormData>({
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -152,104 +152,93 @@ export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFor
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-6">
-            {/* Identité */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Identité</h2>
-              <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-2">Prénom *</Label>
-                    <Input
-                      placeholder="Prénom"
-                      {...register('first_name', { required: 'Le prénom est requis' })}
-                    />
-                    {errors.first_name && (
-                      <p className="mt-1 text-sm text-destructive">{errors.first_name.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Nom *</Label>
-                    <Input
-                      placeholder="Nom"
-                      {...register('last_name', { required: 'Le nom est requis' })}
-                    />
-                    {errors.last_name && (
-                      <p className="mt-1 text-sm text-destructive">{errors.last_name.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="mb-2">Rôle *</Label>
-                    <select
-                      {...register('role', { required: 'Le rôle est requis' })}
-                      className={selectClassName}
-                    >
-                      <option value="maire">Maire</option>
-                      <option value="adjoint">Adjoint(e)</option>
-                      <option value="conseiller">Conseiller(e)</option>
-                      <option value="dgs">DGS</option>
-                      <option value="agent">Agent</option>
-                    </select>
-                    {errors.role && (
-                      <p className="mt-1 text-sm text-destructive">{errors.role.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Délégation</Label>
-                    <Input
-                      placeholder="Ex: Urbanisme et travaux"
-                      {...register('delegation')}
-                    />
-                  </div>
-                </div>
-
+            <FormSection title="Identité">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <Label className="mb-2">Biographie</Label>
-                  <Textarea
-                    placeholder="Biographie du membre..."
-                    rows={4}
-                    {...register('bio')}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Photo */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Photo</h2>
-              <div className="flex flex-col gap-4">
-                {photoPreview && (
-                  <div>
-                    <img
-                      src={photoPreview}
-                      alt="Aperçu"
-                      className="h-32 w-32 rounded-md object-cover"
-                    />
-                  </div>
-                )}
-                <div>
-                  <Label className="mb-2">Photo du membre</Label>
+                  <Label className="mb-2">Prénom *</Label>
                   <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoChange}
+                    placeholder="Prénom"
+                    {...register('first_name', { required: 'Le prénom est requis' })}
                   />
-                  {isEditing && initialData?.photo && !photoFile && (
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Photo actuelle conservée. Sélectionnez un fichier pour la remplacer.
-                    </p>
+                  {errors.first_name && (
+                    <p className="mt-1 text-sm text-destructive">{errors.first_name.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label className="mb-2">Nom *</Label>
+                  <Input
+                    placeholder="Nom"
+                    {...register('last_name', { required: 'Le nom est requis' })}
+                  />
+                  {errors.last_name && (
+                    <p className="mt-1 text-sm text-destructive">{errors.last_name.message}</p>
                   )}
                 </div>
               </div>
-            </div>
 
-            {/* Ordre */}
-            <div>
-              <h2 className="mb-4 text-lg font-semibold">Affichage</h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Controller
+                  name="role"
+                  control={control}
+                  rules={{ required: 'Le rôle est requis' }}
+                  render={({ field }) => (
+                    <FormSelect
+                      label="Rôle"
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={TEAM_MEMBER_ROLE_OPTIONS}
+                      required
+                      error={errors.role?.message}
+                    />
+                  )}
+                />
+
+                <div>
+                  <Label className="mb-2">Délégation</Label>
+                  <Input
+                    placeholder="Ex: Urbanisme et travaux"
+                    {...register('delegation')}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2">Biographie</Label>
+                <Textarea
+                  placeholder="Biographie du membre..."
+                  rows={4}
+                  {...register('bio')}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Photo">
+              {photoPreview && (
+                <div>
+                  <img
+                    src={photoPreview}
+                    alt="Aperçu"
+                    className="h-32 w-32 rounded-md object-cover"
+                  />
+                </div>
+              )}
+              <div>
+                <Label className="mb-2">Photo du membre</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                />
+                {isEditing && initialData?.photo && !photoFile && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Photo actuelle conservée. Sélectionnez un fichier pour la remplacer.
+                  </p>
+                )}
+              </div>
+            </FormSection>
+
+            <FormSection title="Affichage">
               <div>
                 <Label className="mb-2">Ordre d'affichage</Label>
                 <Input
@@ -260,7 +249,7 @@ export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFor
                   Les membres sont triés par ordre croissant (0 = premier affiché)
                 </p>
               </div>
-            </div>
+            </FormSection>
 
             {/* Actions */}
             <div className="flex justify-end gap-3">
@@ -292,11 +281,7 @@ export function EditTeamMember() {
   }
 
   if (error || !member) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Membre non trouvé</p>
-      </div>
-    )
+    return <NotFoundBanner message="Membre non trouvé" />
   }
 
   return <TeamMemberForm isEditing={true} initialData={member} />

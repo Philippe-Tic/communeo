@@ -1,14 +1,9 @@
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, Copy, Eye, MapPin, MoreVertical, Pencil, Star, Trash2 } from 'lucide-react'
+import { EVENT_CATEGORY_COLORS, EVENT_CATEGORY_LABELS } from '@/lib/constants/event-types'
+import { formatDate, formatDateTime, stripHtml } from '@/lib/format'
+import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, Copy, MapPin, Star } from 'lucide-react'
 import type { Event } from '../../hooks/api/useEvents'
+import { CardActionsMenu, CategoryBadge } from '../common'
 
 interface EventCardProps {
   event: Event
@@ -19,36 +14,32 @@ interface EventCardProps {
   onDuplicate?: (event: Event) => void
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  cultural: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  sport: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  meeting: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  celebration: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  workshop: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
-  conference: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  cultural: 'Culturel', sport: 'Sport', meeting: 'Réunion',
-  celebration: 'Célébration', workshop: 'Atelier', conference: 'Conférence',
-}
-
 export const EventCard = ({
   event, onEdit, onView, onDelete, onToggleFeatured, onDuplicate
 }: EventCardProps) => {
-  const formatDateTime = (dateString: string) => new Date(dateString).toLocaleString('fr-FR')
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR')
-
   const isUpcoming = new Date(event.start_date) > new Date()
   const isPast = new Date(event.end_date || event.start_date) < new Date()
 
+  const extraActions = [
+    ...(onToggleFeatured ? [{
+      label: event.featured ? 'Retirer de la une' : 'Mettre à la une',
+      icon: <Star className="h-4 w-4" />,
+      onClick: () => onToggleFeatured(event),
+    }] : []),
+    ...(onDuplicate ? [{
+      label: 'Dupliquer',
+      icon: <Copy className="h-4 w-4" />,
+      onClick: () => onDuplicate(event),
+    }] : []),
+  ]
+
   return (
-    <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="glass-card flex h-full flex-col rounded-xl p-4">
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">
           <div className="flex flex-wrap gap-2">
-            <Badge className={CATEGORY_COLORS[event.category] || ''}>{CATEGORY_LABELS[event.category] || event.category}</Badge>
+            <CategoryBadge value={event.category} labels={EVENT_CATEGORY_LABELS} colors={EVENT_CATEGORY_COLORS} />
             {event.featured && (
               <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                 <Star className="mr-1 inline h-3 w-3" /> À la une
@@ -71,36 +62,12 @@ export const EventCard = ({
             )}
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(event)}>
-                <Pencil className="mr-2 h-4 w-4" /> Modifier
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onView(event)}>
-                <Eye className="mr-2 h-4 w-4" /> Voir
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {onToggleFeatured && (
-                <DropdownMenuItem onClick={() => onToggleFeatured(event)}>
-                  <Star className="mr-2 h-4 w-4" /> {event.featured ? 'Retirer de la une' : 'Mettre à la une'}
-                </DropdownMenuItem>
-              )}
-              {onDuplicate && (
-                <DropdownMenuItem onClick={() => onDuplicate(event)}>
-                  <Copy className="mr-2 h-4 w-4" /> Dupliquer
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(event)} className="text-destructive focus:text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CardActionsMenu
+            onEdit={() => onEdit(event)}
+            onView={() => onView(event)}
+            onDelete={() => onDelete(event)}
+            extraActions={extraActions}
+          />
         </div>
         <h3 className="text-lg font-semibold leading-tight">{event.title}</h3>
       </div>
@@ -136,7 +103,7 @@ export const EventCard = ({
         </div>
 
         <p className="text-sm leading-relaxed text-muted-foreground">
-          {event.description.replace(/<[^>]*>/g, '').substring(0, 150)}...
+          {stripHtml(event.description).substring(0, 150)}...
         </p>
 
         <div className="mt-auto space-y-1 text-xs text-muted-foreground">

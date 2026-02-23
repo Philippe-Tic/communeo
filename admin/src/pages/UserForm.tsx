@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoadingSpinner } from '../components/common'
+import { LoadingSpinner, NotFoundBanner } from '../components/common'
 import { FormCheckbox } from '../components/forms/FormCheckbox'
 import { FormSection } from '../components/forms/FormSection'
 import { FormSelect } from '../components/forms/FormSelect'
@@ -238,11 +238,7 @@ export function EditUser() {
 
   if (isLoading) return <LoadingSpinner message="Chargement de l'utilisateur..." />
   if (error || !user) {
-    return (
-      <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4">
-        <p className="text-destructive">Utilisateur non trouvé</p>
-      </div>
-    )
+    return <NotFoundBanner message="Utilisateur non trouvé" />
   }
   return <UserForm key={user.id} isEditing initialData={user} />
 }

@@ -1,28 +1,12 @@
 import { Badge } from '@/components/ui/badge'
+import { EVENT_CATEGORY_COLORS, EVENT_CATEGORY_LABELS } from '@/lib/constants/event-types'
+import { formatDate, formatDateTime } from '@/lib/format'
 import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, ExternalLink, Home, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ErrorState, LoadingSpinner } from '../components/common'
+import { CategoryBadge, ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useDeleteEvent, useEvent, useToggleEventFeatured } from '../hooks/api/useEvents'
 import { toaster } from '../lib/toaster'
-
-const CATEGORY_COLORS: Record<string, string> = {
-  cultural: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-  sport: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  meeting: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  celebration: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-  workshop: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200',
-  conference: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  cultural: 'Culturel',
-  sport: 'Sport',
-  meeting: 'Réunion',
-  celebration: 'Célébration',
-  workshop: 'Atelier',
-  conference: 'Conférence',
-}
 
 export function EventDetail() {
   const { id } = useParams<{ id: string }>()
@@ -144,9 +128,7 @@ export function EventDetail() {
           <div className="flex flex-col gap-6">
             {/* Status and badges */}
             <div className="flex flex-wrap gap-2">
-              <Badge className={CATEGORY_COLORS[event.category] || ''}>
-                {CATEGORY_LABELS[event.category] || event.category}
-              </Badge>
+              <CategoryBadge value={event.category} labels={EVENT_CATEGORY_LABELS} colors={EVENT_CATEGORY_COLORS} />
               {event.featured && (
                 <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
                   <Star className="mr-1 inline h-3 w-3" /> À la une
@@ -190,12 +172,12 @@ export function EventDetail() {
               </p>
               <div className="flex flex-col items-start gap-3">
                 <p className="flex items-center gap-1.5 font-medium text-primary">
-                  <Calendar className="h-4 w-4" /> Début: {new Date(event.start_date).toLocaleString('fr-FR')}
+                  <Calendar className="h-4 w-4" /> Début: {formatDateTime(event.start_date)}
                 </p>
 
                 {event.end_date && (
                   <p className="flex items-center gap-1.5 text-muted-foreground">
-                    <ArrowRight className="h-4 w-4" /> Fin: {new Date(event.end_date).toLocaleString('fr-FR')}
+                    <ArrowRight className="h-4 w-4" /> Fin: {formatDateTime(event.end_date)}
                   </p>
                 )}
 
@@ -258,7 +240,7 @@ export function EventDetail() {
                 )}
                 {event.registration_deadline && (
                   <p className="text-sm text-muted-foreground">
-                    Date limite d'inscription: {new Date(event.registration_deadline).toLocaleDateString('fr-FR')}
+                    Date limite d'inscription: {formatDate(event.registration_deadline)}
                   </p>
                 )}
                 {event.external_link && (
@@ -269,10 +251,10 @@ export function EventDetail() {
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  Créé le: {new Date(event.createdAt).toLocaleDateString('fr-FR')}
+                  Créé le: {formatDate(event.createdAt)}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Modifié le: {new Date(event.updatedAt).toLocaleDateString('fr-FR')}
+                  Modifié le: {formatDate(event.updatedAt)}
                 </p>
               </div>
             </div>

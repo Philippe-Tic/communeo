@@ -1,4 +1,11 @@
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface FilterOption {
   label: string
@@ -30,7 +37,7 @@ export function FilterPanel({
   onChange,
 }: FilterPanelProps) {
   return (
-    <div className="rounded-md border bg-card p-4">
+    <div className="glass-card rounded-xl p-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         {fields.map((field) => (
           <div key={field.key}>
@@ -38,18 +45,22 @@ export function FilterPanel({
               {field.label}
             </label>
             {field.type === 'select' && field.options ? (
-              <select
-                value={filters[field.key] || ''}
-                onChange={(e) => onChange(field.key, e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              <Select
+                value={filters[field.key] || 'all'}
+                onValueChange={(value) => onChange(field.key, value === 'all' ? '' : value)}
               >
-                <option value="">{field.placeholder || `Tous les ${field.label.toLowerCase()}`}</option>
-                {field.options.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={field.placeholder || `Tous les ${field.label.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{field.placeholder || `Tous les ${field.label.toLowerCase()}`}</SelectItem>
+                  {field.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             ) : (
               <Input
                 placeholder={field.placeholder || `Rechercher par ${field.label.toLowerCase()}...`}

@@ -10,7 +10,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 dark:from-slate-950 dark:via-indigo-950/20 dark:to-slate-900">
       <Header
         onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />
@@ -30,7 +30,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="min-h-screen bg-card pt-[88px] transition-[margin-left] duration-300 ease-in-out md:ml-[250px] md:px-6 md:pb-6 md:pt-[96px] px-4 pb-4">
+      <div className="min-h-screen pt-[88px] transition-[margin-left] duration-300 ease-in-out md:ml-[250px] md:px-6 md:pb-6 md:pt-[96px] px-4 pb-4">
         {children}
       </div>
     </div>

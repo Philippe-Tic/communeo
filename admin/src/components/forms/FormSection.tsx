@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface FormSectionProps {
   title: string
@@ -7,13 +7,14 @@ interface FormSectionProps {
 
 export function FormSection({ title, children }: FormSectionProps) {
   return (
-    <Card>
-      <CardHeader>
+    <div className="glass-card overflow-hidden rounded-xl pb-6">
+      <div className="h-1 bg-gradient-to-r from-indigo-500 to-indigo-400" />
+      <CardHeader className="pt-5">
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">{children}</div>
       </CardContent>
-    </Card>
+    </div>
   )
 }

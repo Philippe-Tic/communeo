@@ -1,16 +1,8 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Archive, Eye, FileText, MoreVertical, Pencil, Trash2, Upload } from 'lucide-react'
+import { DOCUMENT_TYPE_COLORS, DOCUMENT_TYPE_LABELS } from '@/lib/official-document-types'
+import { formatDate } from '@/lib/format'
+import { Archive, FileText, Upload } from 'lucide-react'
 import type { OfficialDocument } from '../../hooks/api/useOfficialDocuments'
-import { DOCUMENT_TYPE_COLORS, DOCUMENT_TYPE_LABELS } from '../../lib/official-document-types'
-import { StatusBadge } from '../common'
+import { CardActionsMenu, CategoryBadge, StatusBadge } from '../common'
 
 interface OfficialDocumentCardProps {
   document: OfficialDocument
@@ -24,50 +16,35 @@ interface OfficialDocumentCardProps {
 export const OfficialDocumentCard = ({
   document: doc, onEdit, onView, onDelete, onPublish, onArchive
 }: OfficialDocumentCardProps) => {
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR')
+  const extraActions = [
+    ...(onPublish && doc.status !== 'published' ? [{
+      label: 'Publier',
+      icon: <Upload className="h-4 w-4" />,
+      onClick: () => onPublish(doc),
+    }] : []),
+    ...(onArchive && doc.status !== 'archived' ? [{
+      label: 'Archiver',
+      icon: <Archive className="h-4 w-4" />,
+      onClick: () => onArchive(doc),
+    }] : []),
+  ]
 
   return (
-    <div className="flex h-full flex-col rounded-md border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="glass-card flex h-full flex-col rounded-xl p-4">
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">
           <div className="flex flex-wrap gap-2">
             <StatusBadge status={doc.status} />
-            <Badge className={DOCUMENT_TYPE_COLORS[doc.document_type] || ''}>
-              {DOCUMENT_TYPE_LABELS[doc.document_type] || doc.document_type}
-            </Badge>
+            <CategoryBadge value={doc.document_type} labels={DOCUMENT_TYPE_LABELS} colors={DOCUMENT_TYPE_COLORS} />
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onView(doc)}>
-                <Eye className="mr-2 h-4 w-4" /> Voir
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(doc)}>
-                <Pencil className="mr-2 h-4 w-4" /> Modifier
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {onPublish && doc.status !== 'published' && (
-                <DropdownMenuItem onClick={() => onPublish(doc)}>
-                  <Upload className="mr-2 h-4 w-4" /> Publier
-                </DropdownMenuItem>
-              )}
-              {onArchive && doc.status !== 'archived' && (
-                <DropdownMenuItem onClick={() => onArchive(doc)}>
-                  <Archive className="mr-2 h-4 w-4" /> Archiver
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onDelete(doc)} className="text-destructive focus:text-destructive">
-                <Trash2 className="mr-2 h-4 w-4" /> Supprimer
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CardActionsMenu
+            onView={() => onView(doc)}
+            onEdit={() => onEdit(doc)}
+            onDelete={() => onDelete(doc)}
+            extraActions={extraActions}
+          />
         </div>
         <h3 className="text-lg font-semibold leading-tight">{doc.title}</h3>
       </div>

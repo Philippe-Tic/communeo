@@ -290,10 +290,10 @@ class DeploymentService {
       await this.copyDirectory(this.sitesPath, tempBuildDir);
       console.log(`✅ [BUILD] Sources copied from ${this.sitesPath}`);
 
-      // 2. Installer les dépendances
+      // 2. Installer les dépendances (--include=dev pour pagefind et autres outils de build)
       console.log(`📦 [BUILD] Step 2: Installing dependencies...`);
       try {
-        await execAsync('npm ci --production=false', {
+        await execAsync('npm ci --include=dev', {
           cwd: tempBuildDir,
           maxBuffer: 10 * 1024 * 1024
         });
@@ -343,18 +343,22 @@ class DeploymentService {
         throw new Error(`Astro build failed: ${buildError.message}\n${buildError.stderr || buildError.stdout || ''}`);
       }
 
-      // 3b. Run Pagefind indexing (separate try/catch for clearer error reporting)
+      // 3b. Run Pagefind indexing
+      console.log(`🔍 [BUILD] Running Pagefind indexing...`);
       try {
-        console.log(`🔍 [BUILD] Running Pagefind indexing...`);
-        await execAsync('npx pagefind --site dist', {
+        const { stdout: pagefindOutput } = await execAsync('npx pagefind --site dist', {
           cwd: tempBuildDir,
           env: buildEnv,
           maxBuffer: 10 * 1024 * 1024
         });
+        console.log(`📋 [BUILD] Pagefind output:\n${pagefindOutput}`);
         console.log(`✅ [BUILD] Pagefind indexing completed`);
       } catch (pagefindError: any) {
-        console.warn(`⚠️ [BUILD] Pagefind indexing failed (non-blocking): ${pagefindError.message}`);
-        // Pagefind failure is non-blocking — the site works without search
+        console.error(`❌ [BUILD] Pagefind indexing failed: ${pagefindError.message}`);
+        if (pagefindError.stderr) {
+          console.error(`📋 [BUILD] Pagefind STDERR:\n${pagefindError.stderr}`);
+        }
+        throw new Error(`Pagefind indexing failed: ${pagefindError.message}`);
       }
 
       const distPath = path.join(tempBuildDir, 'dist');
@@ -446,14 +450,19 @@ class DeploymentService {
   }
 
   /**
-   * Copie récursive d'un dossier
+   * Copie récursive d'un dossier (exclut node_modules, dist, .astro qui sont régénérés)
    */
+  private static EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.astro']);
+
   async copyDirectory(source: string, destination: string): Promise<void> {
     await fs.promises.mkdir(destination, { recursive: true });
 
     const items = await fs.promises.readdir(source);
 
     for (const item of items) {
+      if (DeploymentService.EXCLUDED_DIRS.has(item)) {
+        continue;
+      }
       const sourcePath = path.join(source, item);
       const destPath = path.join(destination, item);
       const stat = await fs.promises.stat(sourcePath);

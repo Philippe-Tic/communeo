@@ -5,11 +5,6 @@ import { PageHeader } from '../components/layout'
 import { useSite } from '../hooks/api/useSites'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
 
-const THEME_COLORS: Record<string, string> = {
-  moderne: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  accessible: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-}
-
 export const SiteConfig = () => {
   const { site: userSite } = useUserSite()
   const { canEditConfig, hasSite } = useCanManageSite()
@@ -71,15 +66,6 @@ export const SiteConfig = () => {
                 <p className="text-lg">
                   {site.slug}
                 </p>
-              </div>
-
-              <div className="flex flex-col items-start gap-2">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Thème
-                </p>
-                <Badge className={THEME_COLORS[site.theme] || ''}>
-                  {site.theme}
-                </Badge>
               </div>
 
               <div className="flex flex-col items-start gap-2">

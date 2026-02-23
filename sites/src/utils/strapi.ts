@@ -162,7 +162,6 @@ function createDefaultSite(): Site {
     documentId: SITE_DOCUMENT_ID || 'default',
     name: 'Mairie',
     slug: 'default',
-    theme: 'classique',
     colors: {
       primary: '#1f2937',
       secondary: '#3b82f6',

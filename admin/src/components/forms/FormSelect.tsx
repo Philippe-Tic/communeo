@@ -20,6 +20,7 @@ interface FormSelectProps {
   placeholder?: string
   required?: boolean
   error?: string
+  description?: string
 }
 
 export function FormSelect({
@@ -30,6 +31,7 @@ export function FormSelect({
   placeholder,
   required,
   error,
+  description,
 }: FormSelectProps) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -49,6 +51,7 @@ export function FormSelect({
           ))}
         </SelectContent>
       </Select>
+      {description && <p className="text-sm text-muted-foreground">{description}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   )

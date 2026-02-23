@@ -4,7 +4,6 @@ import { useUserSite } from './useUser'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 
 export interface SitePreviewConfig {
-  theme: 'classique' | 'moderne' | 'accessible'
   primaryColor: string
   secondaryColor: string
   siteName: string
@@ -37,12 +36,8 @@ export function useSitePreviewConfig(): {
       : `${API_URL}${site.logo.url}`
     : null
 
-  // Map Strapi theme names to CSS class names
-  const theme = site.theme || 'classique'
-
   return {
     config: {
-      theme,
       primaryColor,
       secondaryColor,
       siteName: site.name,

@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertCircle, Loader2, Plus, Trash2, Wand2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
+import { FormSelect } from '../components/forms/FormSelect'
 import { ImagePicker } from '../components/forms/ImagePicker'
 import { RichTextEditor } from '../components/forms/RichTextEditor'
 import { PageHeader } from '../components/layout'
@@ -120,7 +122,6 @@ export const SiteConfigEdit = () => {
   const [formData, setFormData] = React.useState({
     // Informations générales
     name: '',
-    theme: 'classique' as 'classique' | 'moderne' | 'accessible',
     contact_mail: '',
     contact_phone: '',
     address: '',
@@ -198,7 +199,6 @@ export const SiteConfigEdit = () => {
     if (site) {
       setFormData({
         name: site.name,
-        theme: site.theme,
         contact_mail: site.contact_mail,
         contact_phone: site.contact_phone || '',
         address: site.address || '',
@@ -397,7 +397,6 @@ export const SiteConfigEdit = () => {
     const updateData: UpdateSiteData = {
       documentId: site.documentId,
       name: formData.name,
-      theme: formData.theme,
       contact_mail: formData.contact_mail,
       contact_phone: formData.contact_phone || undefined,
       address: formData.address || undefined,
@@ -604,19 +603,6 @@ export const SiteConfigEdit = () => {
                         <p className="mt-1 text-sm text-muted-foreground">
                           Le slug ne peut pas être modifié
                         </p>
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Thème</Label>
-                        <select
-                          value={formData.theme}
-                          onChange={(e) => handleInputChange('theme', e.target.value)}
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                          <option value="classique">Classique</option>
-                          <option value="moderne">Moderne</option>
-                          <option value="accessible">Accessible</option>
-                        </select>
                       </div>
 
                       <div>
@@ -943,22 +929,19 @@ export const SiteConfigEdit = () => {
                     Accessibilité
                   </h2>
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <Label className="mb-2">Niveau de conformité <span className="text-destructive">*</span></Label>
-                      <select
-                        value={formData.accessibility_level}
-                        onChange={(e) => handleInputChange('accessibility_level', e.target.value)}
-                        className={`w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${errors.accessibility_level ? 'border-destructive' : 'border-input'}`}
-                      >
-                        <option value="">— Sélectionner —</option>
-                        <option value="non-conforme">Non conforme</option>
-                        <option value="partiellement-conforme">Partiellement conforme</option>
-                        <option value="conforme">Conforme</option>
-                      </select>
-                      {errors.accessibility_level && (
-                        <p className="mt-1 text-sm text-destructive">{errors.accessibility_level}</p>
-                      )}
-                    </div>
+                    <FormSelect
+                      label="Niveau de conformité"
+                      value={formData.accessibility_level}
+                      onValueChange={(v) => handleInputChange('accessibility_level', v)}
+                      options={[
+                        { value: 'non-conforme', label: 'Non conforme' },
+                        { value: 'partiellement-conforme', label: 'Partiellement conforme' },
+                        { value: 'conforme', label: 'Conforme' },
+                      ]}
+                      placeholder="— Sélectionner —"
+                      required
+                      error={errors.accessibility_level}
+                    />
 
                     <div>
                       <Label className="mb-2">URL du schéma pluriannuel</Label>
@@ -1085,22 +1068,18 @@ export const SiteConfigEdit = () => {
 
                   {formData.open_data_enabled && (
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <Label className="mb-2">Plateforme Open Data</Label>
-                        <select
-                          value={formData.open_data_platform}
-                          onChange={(e) => handleInputChange('open_data_platform', e.target.value)}
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        >
-                          <option value="none">Aucune</option>
-                          <option value="data-gouv-fr">data.gouv.fr</option>
-                          <option value="opendatasoft">OpenDataSoft</option>
-                          <option value="custom">Autre plateforme</option>
-                        </select>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Plateforme sur laquelle vos données sont publiées
-                        </p>
-                      </div>
+                      <FormSelect
+                        label="Plateforme Open Data"
+                        value={formData.open_data_platform}
+                        onValueChange={(v) => handleInputChange('open_data_platform', v)}
+                        options={[
+                          { value: 'none', label: 'Aucune' },
+                          { value: 'data-gouv-fr', label: 'data.gouv.fr' },
+                          { value: 'opendatasoft', label: 'OpenDataSoft' },
+                          { value: 'custom', label: 'Autre plateforme' },
+                        ]}
+                        description="Plateforme sur laquelle vos données sont publiées"
+                      />
 
                       <div>
                         <Label className="mb-2">URL du portail Open Data</Label>
@@ -1156,22 +1135,18 @@ export const SiteConfigEdit = () => {
                   {formData.has_dispositif_recueil && (
                     <div className="flex flex-col gap-6">
                       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div>
-                          <Label className="mb-2">Plateforme de rendez-vous</Label>
-                          <select
-                            value={formData.appointment_provider}
-                            onChange={(e) => handleInputChange('appointment_provider', e.target.value)}
-                            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          >
-                            <option value="ants-rdv">ANTS RDV</option>
-                            <option value="synbird">Synbird</option>
-                            <option value="rdv-service-public">rdv-service-public.fr</option>
-                            <option value="autre">Autre</option>
-                          </select>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Service utilisé pour la prise de rendez-vous en ligne
-                          </p>
-                        </div>
+                        <FormSelect
+                          label="Plateforme de rendez-vous"
+                          value={formData.appointment_provider}
+                          onValueChange={(v) => handleInputChange('appointment_provider', v)}
+                          options={[
+                            { value: 'ants-rdv', label: 'ANTS RDV' },
+                            { value: 'synbird', label: 'Synbird' },
+                            { value: 'rdv-service-public', label: 'rdv-service-public.fr' },
+                            { value: 'autre', label: 'Autre' },
+                          ]}
+                          description="Service utilisé pour la prise de rendez-vous en ligne"
+                        />
 
                         <div>
                           <Label className="mb-2">URL de prise de rendez-vous</Label>
@@ -1362,20 +1337,24 @@ export const SiteConfigEdit = () => {
                                 }}
                                 placeholder="URL (ex: /demarches)"
                               />
-                              <select
+                              <Select
                                 value={link.icon || 'document'}
-                                onChange={(e) => {
+                                onValueChange={(v) => {
                                   const updated = [...quickLinks]
-                                  updated[index] = { ...updated[index], icon: e.target.value as QuickLinkIcon }
+                                  updated[index] = { ...updated[index], icon: v as QuickLinkIcon }
                                   setQuickLinks(updated)
                                   setIsDirty(true)
                                 }}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                               >
-                                {QUICK_LINK_ICON_OPTIONS.map(opt => (
-                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                              </select>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {QUICK_LINK_ICON_OPTIONS.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               <Input
                                 value={link.description || ''}
                                 onChange={(e) => {
@@ -1600,20 +1579,24 @@ export const SiteConfigEdit = () => {
                                 placeholder="Label (ex: Habitants)"
                                 maxLength={60}
                               />
-                              <select
+                              <Select
                                 value={figure.icon || 'users'}
-                                onChange={(e) => {
+                                onValueChange={(v) => {
                                   const updated = [...keyFigures]
-                                  updated[index] = { ...updated[index], icon: e.target.value as KeyFigureIcon }
+                                  updated[index] = { ...updated[index], icon: v as KeyFigureIcon }
                                   setKeyFigures(updated)
                                   setIsDirty(true)
                                 }}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                               >
-                                {KEY_FIGURE_ICON_OPTIONS.map(opt => (
-                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                ))}
-                              </select>
+                                <SelectTrigger className="w-full">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {KEY_FIGURE_ICON_OPTIONS.map(opt => (
+                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                             <Button
                               type="button"

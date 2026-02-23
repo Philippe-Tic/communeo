@@ -23,12 +23,6 @@
       "targetField": "name",
       "required": true
     },
-    "theme": {
-      "type": "enumeration",
-      "enum": ["classique", "moderne", "accessible"],
-      "default": "classique",
-      "required": true
-    },
     "colors": {
       "type": "json"
     },

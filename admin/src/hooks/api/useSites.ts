@@ -104,7 +104,6 @@ export interface Site {
   documentId: string
   name: string
   slug: string
-  theme: 'classique' | 'moderne' | 'accessible'
   colors?: any // JSON field
   logo?: {
     id: number
@@ -147,7 +146,6 @@ export interface Site {
 export interface CreateSiteData {
   name: string
   slug?: string
-  theme?: 'classique' | 'moderne' | 'accessible'
   colors?: any
   logo?: number
   favicon?: number

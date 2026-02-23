@@ -4,6 +4,7 @@ import { EmptyState, ErrorState } from '../common'
 interface DataGridProps<T> {
   data: T[]
   renderItem: (item: T, index: number) => React.ReactNode
+  keyExtractor?: (item: T) => string | number
   isLoading?: boolean
   error?: boolean
   emptyTitle?: string
@@ -40,6 +41,7 @@ function CardSkeleton() {
 export function DataGrid<T>({
   data,
   renderItem,
+  keyExtractor,
   isLoading = false,
   error = false,
   emptyTitle = 'Aucun élément trouvé',
@@ -76,7 +78,7 @@ export function DataGrid<T>({
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {data.map((item, index) => (
-        <div key={index}>
+        <div key={keyExtractor ? keyExtractor(item) : index}>
           {renderItem(item, index)}
         </div>
       ))}

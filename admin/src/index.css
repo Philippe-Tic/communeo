@@ -133,30 +133,25 @@
 
 /* Glassmorphism utilities */
 .glass {
-  background: oklch(1 0 0 / 60%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: oklch(1 0 0 / 85%);
   border: 1px solid oklch(1 0 0 / 20%);
 }
 .dark .glass {
-  background: oklch(0.18 0.02 265 / 50%);
+  background: oklch(0.18 0.02 265 / 80%);
   border: 1px solid oklch(1 0 0 / 8%);
 }
 
 .glass-card {
-  background: oklch(1 0 0 / 70%);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: oklch(1 0 0 / 85%);
   border: 1px solid oklch(0.90 0.01 265 / 40%);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease;
 }
 .glass-card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
 }
 .dark .glass-card {
-  background: oklch(0.18 0.02 265 / 60%);
+  background: oklch(0.18 0.02 265 / 80%);
   border: 1px solid oklch(1 0 0 / 8%);
 }
 

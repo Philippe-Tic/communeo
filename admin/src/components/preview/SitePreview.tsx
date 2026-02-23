@@ -30,7 +30,7 @@ export function SitePreview({ title, content, contentType, subtitle }: SitePrevi
 
   return (
     <div
-      className={`site-preview min-h-full h-full theme-${config.theme}`}
+      className="site-preview min-h-full h-full"
       style={cssVars}
     >
       <PreviewNavigation

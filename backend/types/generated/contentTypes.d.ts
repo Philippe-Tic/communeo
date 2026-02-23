@@ -1081,11 +1081,6 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       'oneToMany',
       'api::team-member.team-member'
     >;
-    theme: Schema.Attribute.Enumeration<
-      ['classique', 'moderne', 'accessible']
-    > &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'classique'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

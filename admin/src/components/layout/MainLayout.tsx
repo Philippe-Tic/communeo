@@ -30,7 +30,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main Content */}
-      <div className="min-h-screen pt-[88px] transition-[margin-left] duration-300 ease-in-out md:ml-[250px] md:px-6 md:pb-6 md:pt-[96px] px-4 pb-4">
+      <div className="min-h-screen pt-[88px] md:ml-[250px] md:px-6 md:pb-6 md:pt-[96px] px-4 pb-4">
         {children}
       </div>
     </div>

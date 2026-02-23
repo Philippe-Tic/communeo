@@ -122,7 +122,6 @@ export interface Site {
   documentId: string;
   name: string;            // "Mairie de Lyon"
   slug: string;            // "lyon"
-  theme: 'classique' | 'moderne' | 'accessible';
   colors?: any;            // JSON field
   logo?: StrapiMedia | null;
   favicon?: StrapiMedia | null;

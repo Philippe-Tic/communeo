@@ -115,10 +115,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         key={item.path}
         onClick={() => handleNavClick(item.path)}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all',
+          'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
           active
             ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
-            : 'text-foreground hover:bg-white/60 dark:hover:bg-white/[0.06]'
+            : 'text-foreground hover:bg-accent dark:hover:bg-accent/50'
         )}
       >
         {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
@@ -138,11 +138,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarContent = (
     <div
       className={cn(
-        'fixed overflow-y-auto backdrop-blur-xl transition-[left] duration-300 ease-in-out',
+        'fixed left-0 overflow-y-auto transition-transform duration-300 ease-in-out',
         variant === 'sidebar'
-          ? 'top-[72px] left-0 h-[calc(100vh-72px)] w-[250px] border-r border-white/20 bg-white/60 dark:border-white/[0.08] dark:bg-slate-900/50'
-          : 'top-0 left-0 z-[1100] h-screen w-[280px] bg-white/70 shadow-xl dark:bg-slate-900/60 md:w-[250px]',
-        variant === 'drawer' && !isOpen && '-left-full'
+          ? 'top-[72px] h-[calc(100vh-72px)] w-[250px] border-r border-white/20 bg-white/95 dark:border-white/[0.08] dark:bg-slate-900/95'
+          : 'top-0 z-[1100] h-screen w-[280px] bg-white/95 shadow-xl dark:bg-slate-900/95 md:w-[250px]',
+        variant === 'drawer' && !isOpen && '-translate-x-full'
       )}
     >
       {variant === 'drawer' && (
@@ -159,10 +159,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button
           onClick={() => handleNavClick('/dashboard')}
           className={cn(
-            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-all',
+            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
             isActive('/dashboard')
               ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
-              : 'text-foreground hover:bg-white/60 dark:hover:bg-white/[0.06]'
+              : 'text-foreground hover:bg-accent dark:hover:bg-accent/50'
           )}
         >
           <LayoutDashboard className="h-4 w-4 shrink-0" />

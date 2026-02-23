@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { theme, toggleTheme } = useTheme()
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-white/20 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-xl dark:border-white/[0.08] dark:bg-slate-900/60 md:px-6">
+    <header className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-white/20 bg-white/95 px-4 py-3 shadow-sm dark:border-white/[0.08] dark:bg-slate-900/95 md:px-6">
       {/* Left side */}
       <div className="flex items-center gap-3">
         <button

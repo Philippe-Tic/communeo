@@ -50,6 +50,7 @@ export default async ({ strapi }) => {
             username: 'testuser',
             email: 'test@example.com',
             password: hashedPassword,
+            provider: 'local',
             confirmed: true,
             blocked: false,
             role: authenticatedRole.id,

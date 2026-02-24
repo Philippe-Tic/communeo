@@ -98,8 +98,8 @@ function getDocumentFamily(docType: string): string {
     <!-- Filtres -->
     <section class="py-5 bg-white border-b border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Filtre année -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap items-center gap-3 justify-center">
+          <!-- Filtre année -->
           <div class="flex items-center gap-2">
             <label for="year-filter" class="text-sm font-medium text-gray-700">Année :</label>
             <select
@@ -113,13 +113,7 @@ function getDocumentFamily(docType: string): string {
             </select>
           </div>
 
-          <p class="text-sm text-gray-500">
-            <span id="visible-count">{documents.length}</span> document{documents.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-
-        <!-- Onglets par famille -->
-        <div class="flex flex-wrap gap-2 justify-center">
+          <!-- Onglets par famille -->
           {families.map((family) => {
             const count = countByFamily(family.types);
             const isBudgetHighlighted = highlightBudget && family.key === 'budget';
@@ -159,11 +153,6 @@ function getDocumentFamily(docType: string): string {
               >
                 <!-- Mobile: stack vertical -->
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                  <!-- Badge type -->
-                  <span class={`inline-flex items-center self-start px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${typeColors[doc.document_type] || 'bg-gray-100 text-gray-800'}`}>
-                    {typeLabels[doc.document_type] || doc.document_type}
-                  </span>
-
                   <!-- Titre + ref -->
                   <div class="flex-1 min-w-0">
                     <a
@@ -176,6 +165,11 @@ function getDocumentFamily(docType: string): string {
                       <span class="text-xs text-gray-400 ml-2">Ref. {doc.reference_number}</span>
                     )}
                   </div>
+
+                  <!-- Badge type -->
+                  <span class={`inline-flex items-center self-start sm:self-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${typeColors[doc.document_type] || 'bg-gray-100 text-gray-800'}`}>
+                    {typeLabels[doc.document_type] || doc.document_type}
+                  </span>
 
                   <!-- Date -->
                   <time
@@ -251,7 +245,6 @@ function getDocumentFamily(docType: string): string {
     const familyButtons = document.querySelectorAll('.family-btn');
     const docRows = document.querySelectorAll('.doc-row');
     const yearFilter = document.getElementById('year-filter') as HTMLSelectElement;
-    const visibleCount = document.getElementById('visible-count');
     const noResults = document.getElementById('no-results');
     const docList = document.getElementById('documents-list');
 
@@ -281,10 +274,6 @@ function getDocumentFamily(docType: string): string {
           row.classList.add('hidden');
         }
       });
-
-      if (visibleCount) {
-        visibleCount.textContent = String(count);
-      }
 
       // Afficher/masquer empty state
       if (noResults && docList) {

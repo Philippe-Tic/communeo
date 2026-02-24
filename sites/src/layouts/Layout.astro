@@ -174,12 +174,17 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
       }
     </style>
   </head>
-  <body class="font-sans min-h-screen bg-gray-50">
+  <body class="font-sans min-h-screen bg-gray-50 flex flex-col">
     <AlertBanner />
     <slot />
 
     <!-- Styles pour l'accessibilité -->
     <style is:global>
+      /* Sticky footer — main prend l'espace restant */
+      main {
+        flex: 1 0 auto;
+      }
+
       /* Focus visible — outline natif pour navigation clavier uniquement */
       *:focus {
         outline: none;

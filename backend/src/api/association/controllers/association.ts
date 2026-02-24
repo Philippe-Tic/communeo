@@ -5,12 +5,31 @@
 import { factories } from '@strapi/strapi';
 
 const VALID_CATEGORIES = ['sport', 'culture', 'social', 'environnement', 'education', 'autre'];
+const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2 Mo
+const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 export default factories.createCoreController('api::association.association', ({ strapi }) => ({
   async publicCreate(ctx) {
-    const { data } = ctx.request.body;
+    // Support both JSON and multipart form data
+    let data: any;
+    let logoFile: any = null;
 
-    if (!data) {
+    if (typeof ctx.request.body?.data === 'string') {
+      // Multipart: data is JSON-stringified
+      try {
+        data = JSON.parse(ctx.request.body.data);
+      } catch {
+        return ctx.badRequest('Invalid JSON in data field');
+      }
+      // File comes from ctx.request.files
+      const files = ctx.request.files;
+      if (files && files['files.logo']) {
+        logoFile = files['files.logo'];
+      }
+    } else if (ctx.request.body?.data) {
+      // Classic JSON body
+      data = ctx.request.body.data;
+    } else {
       return ctx.badRequest('Missing data');
     }
 
@@ -49,6 +68,16 @@ export default factories.createCoreController('api::association.association', ({
       return ctx.badRequest('Site introuvable');
     }
 
+    // Validate logo file if present
+    if (logoFile) {
+      if (!ALLOWED_MIME_TYPES.includes(logoFile.mimetype)) {
+        return ctx.badRequest('Type de fichier non autorisé. Formats acceptés : PNG, JPEG, WebP.');
+      }
+      if (logoFile.size > MAX_LOGO_SIZE) {
+        return ctx.badRequest('Le fichier est trop volumineux. Taille maximum : 2 Mo.');
+      }
+    }
+
     // Create the association
     const entry = await strapi.entityService.create('api::association.association', {
       data: {
@@ -67,6 +96,23 @@ export default factories.createCoreController('api::association.association', ({
         site: sites[0].documentId,
       },
     });
+
+    // Upload logo if present and link to the association
+    if (logoFile) {
+      try {
+        await strapi.plugin('upload').service('upload').upload({
+          data: {
+            ref: 'api::association.association',
+            refId: entry.id,
+            field: 'logo',
+          },
+          files: logoFile,
+        });
+      } catch (err) {
+        // Log but don't fail the whole request — association is already created
+        strapi.log.error('Failed to upload association logo:', err);
+      }
+    }
 
     ctx.status = 201;
     return {

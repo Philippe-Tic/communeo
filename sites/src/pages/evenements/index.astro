@@ -56,7 +56,7 @@ const breadcrumbJsonLd = JSON.stringify({
               const day = eventDate.getDate();
               const month = eventDate.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase();
               return (
-                <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                <article class="relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
                   {event.image && (
                     <div class="relative aspect-[16/9] overflow-hidden">
                       <StrapiImage
@@ -93,7 +93,7 @@ const breadcrumbJsonLd = JSON.stringify({
                     </span>
 
                     <h2 class="text-lg font-bold text-gray-900 mb-2">
-                      <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors">
+                      <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors card-link">
                         {event.title}
                       </a>
                     </h2>
@@ -122,15 +122,6 @@ const breadcrumbJsonLd = JSON.stringify({
                       </p>
                     )}
 
-                    <a
-                      href={`/evenements/${event.slug}`}
-                      class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm group/link"
-                    >
-                      En savoir plus
-                      <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                      </svg>
-                    </a>
                   </div>
                 </article>
               );
@@ -149,3 +140,12 @@ const breadcrumbJsonLd = JSON.stringify({
 
   <Footer />
 </Layout>
+
+<style>
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+</style>

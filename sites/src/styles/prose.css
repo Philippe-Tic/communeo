@@ -86,7 +86,7 @@
 
 /* CTA Button styling in prose content */
 .prose .btn-primary {
-  display: inline-block;
+  display: inline-flex;
   padding: 0.625em 1.5em;
   background-color: rgb(var(--color-primary));
   color: white;

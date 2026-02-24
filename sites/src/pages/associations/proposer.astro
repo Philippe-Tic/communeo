@@ -73,6 +73,16 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
                     class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     placeholder="Décrivez brièvement les activités de l'association..."></textarea>
                 </div>
+
+                <div>
+                  <label for="logo" class="block text-sm font-medium text-gray-700 mb-1">Logo de l'association (optionnel)</label>
+                  <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp"
+                    class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary file:mr-3 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-sm file:font-medium file:text-primary" />
+                  <p class="mt-1 text-xs text-gray-500">PNG, JPEG ou WebP. 2 Mo maximum.</p>
+                  <div id="logo-preview" class="hidden mt-2">
+                    <img id="logo-preview-img" src="" alt="Aperçu du logo" class="h-20 w-20 object-contain rounded-md border border-gray-200" />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -184,6 +194,33 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
     const form = document.getElementById('association-form');
     if (!form) return;
 
+    // Logo preview
+    const logoInput = document.getElementById('logo');
+    const logoPreview = document.getElementById('logo-preview');
+    const logoPreviewImg = document.getElementById('logo-preview-img');
+
+    if (logoInput) {
+      logoInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          if (file.size > 2 * 1024 * 1024) {
+            alert('Le fichier est trop volumineux. Taille maximum : 2 Mo.');
+            this.value = '';
+            logoPreview.classList.add('hidden');
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            logoPreviewImg.src = e.target.result;
+            logoPreview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        } else {
+          logoPreview.classList.add('hidden');
+        }
+      });
+    }
+
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -209,19 +246,19 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
       }
 
       // Collect form data
-      const formData = new FormData(form);
+      const rawFormData = new FormData(form);
       const data = {
-        name: formData.get('name'),
-        category: formData.get('category'),
-        description: formData.get('description') || undefined,
-        contact_name: formData.get('contact_name') || undefined,
-        contact_email: formData.get('contact_email') || undefined,
-        contact_phone: formData.get('contact_phone') || undefined,
-        website: formData.get('website') || undefined,
-        address: formData.get('address') || undefined,
-        submitted_by_name: formData.get('submitted_by_name'),
-        submitted_by_email: formData.get('submitted_by_email'),
-        site: formData.get('site'),
+        name: rawFormData.get('name'),
+        category: rawFormData.get('category'),
+        description: rawFormData.get('description') || undefined,
+        contact_name: rawFormData.get('contact_name') || undefined,
+        contact_email: rawFormData.get('contact_email') || undefined,
+        contact_phone: rawFormData.get('contact_phone') || undefined,
+        website: rawFormData.get('website') || undefined,
+        address: rawFormData.get('address') || undefined,
+        submitted_by_name: rawFormData.get('submitted_by_name'),
+        submitted_by_email: rawFormData.get('submitted_by_email'),
+        site: rawFormData.get('site'),
       };
 
       // Client-side validation
@@ -238,16 +275,30 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
         return;
       }
 
+      // Check logo size
+      const logoFile = logoInput && logoInput.files[0];
+      if (logoFile && logoFile.size > 2 * 1024 * 1024) {
+        errorDiv.textContent = 'Le logo est trop volumineux. Taille maximum : 2 Mo.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
       // Submit
       errorDiv.classList.add('hidden');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Envoi en cours...';
 
       try {
+        // Build FormData for multipart upload
+        const sendFormData = new FormData();
+        sendFormData.append('data', JSON.stringify(data));
+        if (logoFile) {
+          sendFormData.append('files.logo', logoFile);
+        }
+
         const response = await fetch(`${strapiUrl}/api/associations/public`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data }),
+          body: sendFormData,
         });
 
         if (!response.ok) {

@@ -95,7 +95,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((article) => (
               <article
-                class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all article-card"
+                class="relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all article-card"
                 data-category={article.category}
               >
                 {article.image && (
@@ -131,7 +131,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
 
                 <div class="p-5">
                   <h2 class="text-lg font-bold text-gray-900 mb-2">
-                    <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors">
+                    <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors card-link">
                       {article.title}
                     </a>
                   </h2>
@@ -148,15 +148,6 @@ const articlesByCategory = articles.reduce((acc, article) => {
                     </p>
                   )}
 
-                  <a
-                    href={`/articles/${article.slug}`}
-                    class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm group/link"
-                  >
-                    Lire la suite
-                    <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                  </a>
                 </div>
               </article>
             ))}
@@ -190,6 +181,13 @@ const articlesByCategory = articles.reduce((acc, article) => {
 
   .article-card {
     transition: opacity 0.3s ease-in-out;
+  }
+
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
   }
 </style>
 

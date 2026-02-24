@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { EVENT_CATEGORY_COLORS, EVENT_CATEGORY_LABELS } from '@/lib/constants/event-types'
 import { formatDate, formatDateTime } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, ExternalLink, Home, MapPin, Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CategoryBadge, ErrorState, LoadingSpinner } from '../components/common'
@@ -158,7 +159,7 @@ export function EventDetail() {
                   Image
                 </p>
                 <img
-                  src={event.image.url}
+                  src={getMediaUrl(event.image.url)}
                   alt={event.image.alternativeText || event.title}
                   className="max-h-[300px] rounded-md object-cover"
                 />

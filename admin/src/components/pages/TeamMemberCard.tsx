@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { getMediaUrl } from '@/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import type { TeamMember } from '../../hooks/api/useTeamMembers'
 import { ROLE_COLORS, ROLE_LABELS } from '../../hooks/api/useTeamMembers'
@@ -50,7 +51,7 @@ export const TeamMemberCard = ({
       {member.photo && (
         <div
           className="mb-3 h-[120px] w-full rounded-md bg-muted bg-cover bg-center"
-          style={{ backgroundImage: `url(${member.photo.url})` }}
+          style={{ backgroundImage: `url(${getMediaUrl(member.photo.url)})` }}
         />
       )}
 

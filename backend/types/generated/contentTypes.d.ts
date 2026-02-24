@@ -693,6 +693,48 @@ export interface ApiContactSubmissionContactSubmission
   };
 }
 
+export interface ApiContentBlockContentBlock
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'content_blocks';
+  info: {
+    description: "Blocs de contenu r\u00E9utilisables dans l'\u00E9diteur";
+    displayName: 'Content Block';
+    pluralName: 'content-blocks';
+    singularName: 'content-block';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    category: Schema.Attribute.Enumeration<
+      ['header', 'footer', 'sidebar', 'content', 'cta', 'other']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'content'>;
+    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::content-block.content-block'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
   collectionName: 'deployments';
   info: {
@@ -1055,6 +1097,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
+    navigation_config: Schema.Attribute.JSON;
     netlify_site_id: Schema.Attribute.String &
       Schema.Attribute.Private &
       Schema.Attribute.Unique;
@@ -1076,6 +1119,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    social_links: Schema.Attribute.Component<'social.social-link', true>;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     team_members: Schema.Attribute.Relation<
       'oneToMany',
@@ -1663,6 +1707,7 @@ declare module '@strapi/strapi' {
       'api::article.article': ApiArticleArticle;
       'api::association.association': ApiAssociationAssociation;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
+      'api::content-block.content-block': ApiContentBlockContentBlock;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::media-item.media-item': ApiMediaItemMediaItem;

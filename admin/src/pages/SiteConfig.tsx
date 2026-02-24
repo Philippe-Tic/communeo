@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
+import { getMediaUrl } from '@/lib/utils'
 import { useSite } from '../hooks/api/useSites'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
 
@@ -129,7 +130,7 @@ export const SiteConfig = () => {
 
               <div>
                 <img
-                  src={site.logo.url}
+                  src={getMediaUrl(site.logo.url)}
                   alt={site.logo.alternativeText || `Logo de ${site.name}`}
                   className="max-h-[200px] rounded-md object-contain"
                 />

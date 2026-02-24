@@ -18,6 +18,7 @@ import {
   type Association,
   type AssociationCategory,
 } from '../hooks/api/useAssociations'
+import { getMediaUrl } from '@/lib/utils'
 import { toaster } from '../lib/toaster'
 
 interface AssociationFormData {
@@ -72,7 +73,7 @@ export function AssociationForm({ isEditing = false, initialData }: AssociationF
         address: initialData.address || '',
       })
       if (initialData.logo) {
-        setLogoPreview(initialData.logo.url)
+        setLogoPreview(getMediaUrl(initialData.logo.url))
       }
     }
   }, [initialData, reset])

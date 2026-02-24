@@ -116,6 +116,29 @@ export interface HomepageConfig {
   partners?: HomepagePartner[];
 }
 
+// Réseaux sociaux
+export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube' | 'tiktok' | 'autre';
+
+export interface SocialLink {
+  id?: number;
+  platform: SocialPlatform;
+  url: string;
+  label?: string;
+  icon?: StrapiMedia | null;
+}
+
+// Navigation configurable
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data';
+
+export interface NavigationItem {
+  id: string;
+  type: 'section' | 'page';
+  key?: SectionKey;
+  pageDocumentId?: string;
+  label?: string;
+  enabled: boolean;
+}
+
 // Configuration du site (mairie) - Strapi v5
 export interface Site {
   id: number;
@@ -139,6 +162,10 @@ export interface Site {
   open_data_platform?: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none';
   // Homepage
   homepage?: HomepageConfig;
+  // Navigation
+  navigation_config?: NavigationItem[];
+  // Réseaux sociaux
+  social_links?: SocialLink[];
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

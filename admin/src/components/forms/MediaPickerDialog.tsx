@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
+import { cn, getMediaUrl } from '@/lib/utils'
 import {
   useMediaItems,
   useUploadMedia,
@@ -16,12 +16,6 @@ import {
 } from '@/hooks/api/useMediaLibrary'
 import { toaster } from '@/lib/toaster'
 import { FileText, Film, Image, Loader2, Search, Upload } from 'lucide-react'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
-
-function getMediaUrl(url: string) {
-  return url.startsWith('http') ? url : `${API_URL}${url}`
-}
 
 function getFileIcon(mime: string) {
   if (mime.startsWith('image/')) return Image

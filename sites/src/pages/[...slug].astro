@@ -7,6 +7,8 @@ import Hero from '../components/Hero.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import StrapiImage from '../components/StrapiImage.astro';
 import { getPages, getPageBySlug, getPagePath, buildBreadcrumbs } from '../utils/strapi';
+import { addHeadingIds } from '../utils/toc';
+import TableOfContents from '../components/TableOfContents.astro';
 
 export async function getStaticPaths() {
   try {
@@ -49,6 +51,7 @@ if (!page) {
 }
 
 const attributes = page;
+const { html: processedContent, toc } = addHeadingIds(attributes.content || '');
 const breadcrumbs = buildBreadcrumbs(page, allPages);
 const breadcrumbItems = breadcrumbs.map((crumb, i) => ({
   label: crumb.title,
@@ -109,9 +112,11 @@ const breadcrumbJsonLd = breadcrumbs.length > 0 ? JSON.stringify({
               </div>
             )}
 
+            <TableOfContents items={toc} />
+
             <div
               class="prose prose-lg max-w-none"
-              set:html={attributes.content}
+              set:html={processedContent}
             >
             </div>
 

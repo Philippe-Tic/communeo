@@ -10,9 +10,11 @@ import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { FormSelect } from '../components/forms/FormSelect'
 import { ImagePicker } from '../components/forms/ImagePicker'
-import { RichTextEditor } from '../components/forms/RichTextEditor'
+import { RichTextEditor } from '../components/editor'
+import { NavigationEditor } from '../components/navigation'
 import { PageHeader } from '../components/layout'
-import { useSite, useUpdateSite, type UpdateSiteData, type HomepageQuickLink, type HomepageKeyFigure, type HomepagePartner, type QuickLinkIcon, type KeyFigureIcon } from '../hooks/api/useSites'
+import { useSite, useUpdateSite, type UpdateSiteData, type NavigationItem, type HomepageQuickLink, type HomepageKeyFigure, type HomepagePartner, type QuickLinkIcon, type KeyFigureIcon, type SocialLink, type SocialPlatform } from '../hooks/api/useSites'
+import { usePages } from '../hooks/api/usePages'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
 import { toaster } from '../lib/toaster'
 
@@ -47,6 +49,16 @@ const KEY_FIGURE_ICON_OPTIONS: { value: KeyFigureIcon; label: string }[] = [
   { value: 'shield', label: 'Bouclier' },
   { value: 'tree', label: 'Arbre' },
   { value: 'star', label: 'Étoile' },
+]
+
+const SOCIAL_PLATFORM_OPTIONS: { value: SocialPlatform; label: string }[] = [
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'x', label: 'X (Twitter)' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'autre', label: 'Autre' },
 ]
 
 // RGPD template
@@ -110,6 +122,8 @@ const TAB_FIELDS: Record<string, string[]> = {
   opendata: [],
   demarches: ['appointment_url'],
   homepage: [],
+  navigation: [],
+  social: [],
 }
 
 export const SiteConfigEdit = () => {
@@ -190,6 +204,10 @@ export const SiteConfigEdit = () => {
   const [quickLinks, setQuickLinks] = React.useState<HomepageQuickLink[]>([])
   const [keyFigures, setKeyFigures] = React.useState<HomepageKeyFigure[]>([])
   const [partners, setPartners] = React.useState<HomepagePartner[]>([])
+  const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([])
+  const [socialLinks, setSocialLinks] = React.useState<SocialLink[]>([])
+
+  const { data: pagesData } = usePages({ status: 'published', pageSize: 100 })
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [isDirty, setIsDirty] = React.useState(false)
@@ -266,6 +284,8 @@ export const SiteConfigEdit = () => {
       setQuickLinks(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
       setKeyFigures(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
       setPartners(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
+      setNavigationItems(site.navigation_config || [])
+      setSocialLinks(site.social_links?.map(({ id: _id, ...rest }) => rest) || [])
     }
   }, [site])
 
@@ -441,6 +461,11 @@ export const SiteConfigEdit = () => {
       },
       auto_deploy_enabled: formData.auto_deploy_enabled,
       auto_deploy_delay: Number(formData.auto_deploy_delay) || 300,
+      navigation_config: navigationItems.length > 0 ? navigationItems : undefined,
+      social_links: socialLinks.map(({ id: _id, icon, ...rest }) => ({
+        ...rest,
+        icon: icon?.id ? icon.id : undefined,
+      })),
       homepage: {
         content: formData.homepage_content || undefined,
         meta_description: formData.homepage_meta_description || undefined,
@@ -569,6 +594,14 @@ export const SiteConfigEdit = () => {
               <TabsTrigger value="homepage" className="gap-1.5">
                 Page d'accueil
                 {tabHasErrors('homepage') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
+              </TabsTrigger>
+              <TabsTrigger value="navigation" className="gap-1.5">
+                Navigation
+                {tabHasErrors('navigation') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
+              </TabsTrigger>
+              <TabsTrigger value="social" className="gap-1.5">
+                Réseaux sociaux
+                {tabHasErrors('social') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
               </TabsTrigger>
             </TabsList>
 
@@ -1755,6 +1788,154 @@ export const SiteConfigEdit = () => {
                           Ajouter un partenaire
                         </Button>
                       </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Onglet 9 — Navigation */}
+            <TabsContent value="navigation">
+              <div className="flex flex-col gap-6">
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold mb-4">Menu principal</h3>
+                  <NavigationEditor
+                    items={navigationItems}
+                    onChange={(items) => {
+                      setNavigationItems(items)
+                      setIsDirty(true)
+                    }}
+                    pages={pagesData?.data || []}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Onglet 10 — Réseaux sociaux */}
+            <TabsContent value="social">
+              <div className="flex flex-col gap-6">
+                <div className="rounded-lg border bg-card p-6 shadow-sm">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-lg font-semibold text-foreground">Réseaux sociaux</h2>
+                        <p className="text-sm text-muted-foreground">Liens vers vos réseaux sociaux affichés dans le pied de page du site</p>
+                      </div>
+                      {socialLinks.length < 8 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSocialLinks(prev => [...prev, { platform: 'facebook', url: '' }])
+                            setIsDirty(true)
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Ajouter
+                        </Button>
+                      )}
+                    </div>
+
+                    {socialLinks.length === 0 ? (
+                      <p className="text-sm text-muted-foreground italic py-4 text-center">
+                        Aucun réseau social configuré. Cliquez sur "Ajouter" pour commencer.
+                      </p>
+                    ) : (
+                      <div className="flex flex-col gap-4">
+                        {socialLinks.map((link, index) => (
+                          <div key={index} className="rounded-md border p-4 flex flex-col gap-3">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 flex-1">
+                                <div>
+                                  <Label className="mb-2">Plateforme</Label>
+                                  <Select
+                                    value={link.platform}
+                                    onValueChange={(value: SocialPlatform) => {
+                                      setSocialLinks(prev => prev.map((l, i) =>
+                                        i === index ? { ...l, platform: value, ...(value !== 'autre' ? { label: undefined, icon: null } : {}) } : l
+                                      ))
+                                      setIsDirty(true)
+                                    }}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {SOCIAL_PLATFORM_OPTIONS.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div>
+                                  <Label className="mb-2">URL <span className="text-destructive">*</span></Label>
+                                  <Input
+                                    value={link.url}
+                                    onChange={(e) => {
+                                      setSocialLinks(prev => prev.map((l, i) =>
+                                        i === index ? { ...l, url: e.target.value } : l
+                                      ))
+                                      setIsDirty(true)
+                                    }}
+                                    placeholder="https://..."
+                                  />
+                                  {link.url && !link.url.startsWith('https://') && (
+                                    <p className="text-xs text-destructive mt-1">L'URL doit commencer par https://</p>
+                                  )}
+                                </div>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive mt-6"
+                                onClick={() => {
+                                  setSocialLinks(prev => prev.filter((_, i) => i !== index))
+                                  setIsDirty(true)
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+
+                            {link.platform === 'autre' && (
+                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                  <Label className="mb-2">Label <span className="text-destructive">*</span></Label>
+                                  <Input
+                                    value={link.label || ''}
+                                    onChange={(e) => {
+                                      setSocialLinks(prev => prev.map((l, i) =>
+                                        i === index ? { ...l, label: e.target.value } : l
+                                      ))
+                                      setIsDirty(true)
+                                    }}
+                                    placeholder="Nom du réseau"
+                                    maxLength={50}
+                                  />
+                                  {link.platform === 'autre' && !link.label?.trim() && (
+                                    <p className="text-xs text-destructive mt-1">Le label est requis pour une plateforme personnalisée</p>
+                                  )}
+                                </div>
+                                <div>
+                                  <Label className="mb-2">Icône personnalisée</Label>
+                                  <ImagePicker
+                                    value={link.icon || null}
+                                    onChange={(img) => {
+                                      setSocialLinks(prev => prev.map((l, i) =>
+                                        i === index ? { ...l, icon: img } : l
+                                      ))
+                                      setIsDirty(true)
+                                    }}
+                                    label="Icône"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

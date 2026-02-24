@@ -200,6 +200,14 @@
       "default": 300,
       "min": 60,
       "max": 3600
+    },
+    "navigation_config": {
+      "type": "json"
+    },
+    "social_links": {
+      "type": "component",
+      "repeatable": true,
+      "component": "social.social-link"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { ARTICLE_CATEGORY_COLORS, ARTICLE_CATEGORY_LABELS } from '@/lib/constants/article-types'
 import { formatDate } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { Star } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { CategoryBadge, ErrorState, LoadingSpinner, StatusBadge } from '../components/common'
@@ -141,7 +142,7 @@ export function ArticleDetail() {
                   Image à la une
                 </p>
                 <img
-                  src={article.image.url}
+                  src={getMediaUrl(article.image.url)}
                   alt={article.image.alternativeText || article.title}
                   className="max-h-[300px] rounded-md object-cover"
                 />

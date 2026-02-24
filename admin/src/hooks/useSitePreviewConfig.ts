@@ -1,7 +1,6 @@
+import { getMediaUrl } from '@/lib/utils'
 import { useSite } from './api/useSites'
 import { useUserSite } from './useUser'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 
 export interface SitePreviewConfig {
   primaryColor: string
@@ -30,11 +29,7 @@ export function useSitePreviewConfig(): {
   const primaryColor = colors.primary || DEFAULT_COLORS.primary
   const secondaryColor = colors.secondary || DEFAULT_COLORS.secondary
 
-  const logoUrl = site.logo?.url
-    ? site.logo.url.startsWith('http')
-      ? site.logo.url
-      : `${API_URL}${site.logo.url}`
-    : null
+  const logoUrl = site.logo?.url ? getMediaUrl(site.logo.url) : null
 
   return {
     config: {

@@ -224,6 +224,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'associations': 'api::association.association',
       'alertes': 'api::alerte.alerte',
       'media-items': 'api::media-item.media-item',
+      'content-blocks': 'api::content-block.content-block',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

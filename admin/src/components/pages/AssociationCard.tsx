@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { formatDate } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { Mail, UserCircle } from 'lucide-react'
 import type { Association } from '../../hooks/api/useAssociations'
 import { CATEGORY_COLORS, CATEGORY_LABELS, STATUS_CONFIG } from '../../hooks/api/useAssociations'
@@ -41,7 +42,7 @@ export const AssociationCard = ({
       {association.logo && (
         <div
           className="mb-3 h-[80px] w-full rounded-md bg-muted bg-contain bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${association.logo.url})` }}
+          style={{ backgroundImage: `url(${getMediaUrl(association.logo.url)})` }}
         />
       )}
 

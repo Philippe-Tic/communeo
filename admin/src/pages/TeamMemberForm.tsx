@@ -18,6 +18,7 @@ import {
   type TeamMember,
   type TeamMemberRole,
 } from '../hooks/api/useTeamMembers'
+import { getMediaUrl } from '@/lib/utils'
 import { toaster } from '../lib/toaster'
 
 interface TeamMemberFormData {
@@ -66,7 +67,7 @@ export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFor
         display_order: initialData.display_order,
       })
       if (initialData.photo) {
-        setPhotoPreview(initialData.photo.url)
+        setPhotoPreview(getMediaUrl(initialData.photo.url))
       }
     }
   }, [initialData, reset])

@@ -250,6 +250,26 @@ export interface LegalRgpd extends Struct.ComponentSchema {
   };
 }
 
+export interface SocialSocialLink extends Struct.ComponentSchema {
+  collectionName: 'components_social_social_links';
+  info: {
+    description: 'Lien vers un r\u00E9seau social avec ic\u00F4ne';
+    displayName: 'Lien r\u00E9seau social';
+  };
+  attributes: {
+    icon: Schema.Attribute.Media<'images'>;
+    label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    platform: Schema.Attribute.Enumeration<
+      ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre']
+    > &
+      Schema.Attribute.Required;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
@@ -262,6 +282,7 @@ declare module '@strapi/strapi' {
       'legal.infos-pratiques': LegalInfosPratiques;
       'legal.mentions-legales': LegalMentionsLegales;
       'legal.rgpd': LegalRgpd;
+      'social.social-link': SocialSocialLink;
     }
   }
 }

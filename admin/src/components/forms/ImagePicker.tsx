@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn, getMediaUrl } from '@/lib/utils'
 import { uploadFile, type StrapiMedia } from '@/hooks/api/useOfficialDocuments'
 import { MediaPickerDialog } from './MediaPickerDialog'
 import { FolderOpen, ImagePlus, Loader2, Trash2 } from 'lucide-react'
@@ -12,19 +12,13 @@ interface ImagePickerProps {
   className?: string
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337'
-
 export function ImagePicker({ value, onChange, error, className }: ImagePickerProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const imageUrl = value?.url
-    ? value.url.startsWith('http')
-      ? value.url
-      : `${API_URL}${value.url}`
-    : null
+  const imageUrl = value?.url ? getMediaUrl(value.url) : null
 
   const handleFile = async (file: File) => {
     if (!file.type.startsWith('image/')) return

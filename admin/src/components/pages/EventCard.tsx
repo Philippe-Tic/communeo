@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { EVENT_CATEGORY_COLORS, EVENT_CATEGORY_LABELS } from '@/lib/constants/event-types'
 import { formatDate, formatDateTime, stripHtml } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { ArrowRight, Banknote, Calendar, CalendarCheck, ClipboardList, Clock, Copy, MapPin, Star } from 'lucide-react'
 import type { Event } from '../../hooks/api/useEvents'
 import { CardActionsMenu, CategoryBadge } from '../common'
@@ -77,7 +78,7 @@ export const EventCard = ({
         {event.image && (
           <div
             className="h-[120px] w-full rounded-md bg-muted bg-cover bg-center"
-            style={{ backgroundImage: `url(${event.image.url})` }}
+            style={{ backgroundImage: `url(${getMediaUrl(event.image.url)})` }}
           />
         )}
 

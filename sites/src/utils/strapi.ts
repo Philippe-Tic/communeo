@@ -141,6 +141,7 @@ export async function getSiteConfig(): Promise<Site> {
   urlObj.searchParams.set('populate[homepage][populate][quick_links]', 'true');
   urlObj.searchParams.set('populate[homepage][populate][key_figures]', 'true');
   urlObj.searchParams.set('populate[homepage][populate][partners][populate][logo]', 'true');
+  urlObj.searchParams.set('populate[social_links][populate][icon]', 'true');
   const url = urlObj.toString();
 
   const response = await strapiRequest<StrapiCollectionResponse<Site>>(url);

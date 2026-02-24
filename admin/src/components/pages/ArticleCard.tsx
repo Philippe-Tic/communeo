@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { ARTICLE_CATEGORY_COLORS, ARTICLE_CATEGORY_LABELS } from '@/lib/constants/article-types'
 import { formatDate } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { Clock, Download, Star, Upload } from 'lucide-react'
 import type { Article } from '../../hooks/api/useArticles'
 import { CardActionsMenu, CategoryBadge, StatusBadge } from '../common'
@@ -73,7 +74,7 @@ export const ArticleCard = ({
         {article.image && (
           <div
             className="h-[120px] w-full rounded-md bg-muted bg-cover bg-center"
-            style={{ backgroundImage: `url(${article.image.url})` }}
+            style={{ backgroundImage: `url(${getMediaUrl(article.image.url)})` }}
           />
         )}
 

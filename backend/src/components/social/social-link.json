@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_social_social_links",
+  "info": {
+    "displayName": "Lien réseau social",
+    "description": "Lien vers un réseau social avec icône"
+  },
+  "attributes": {
+    "platform": {
+      "type": "enumeration",
+      "enum": ["facebook", "instagram", "linkedin", "x", "youtube", "tiktok", "autre"],
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}

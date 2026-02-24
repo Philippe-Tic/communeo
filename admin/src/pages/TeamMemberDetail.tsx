@@ -4,6 +4,7 @@ import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { useTeamMember, useDeleteTeamMember, ROLE_COLORS, ROLE_LABELS } from '../hooks/api/useTeamMembers'
 import { formatDate } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { toaster } from '../lib/toaster'
 
 export function TeamMemberDetail() {
@@ -99,7 +100,7 @@ export function TeamMemberDetail() {
               <div>
                 <p className="mb-2 font-medium text-muted-foreground">Photo</p>
                 <img
-                  src={member.photo.url}
+                  src={getMediaUrl(member.photo.url)}
                   alt={`${member.first_name} ${member.last_name}`}
                   className="max-h-[300px] rounded-md object-cover"
                 />

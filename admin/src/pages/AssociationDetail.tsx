@@ -13,6 +13,7 @@ import {
   STATUS_CONFIG,
 } from '../hooks/api/useAssociations'
 import { formatDate } from '@/lib/format'
+import { getMediaUrl } from '@/lib/utils'
 import { toaster } from '../lib/toaster'
 
 export function AssociationDetail() {
@@ -167,7 +168,7 @@ export function AssociationDetail() {
               <div>
                 <p className="mb-2 font-medium text-muted-foreground">Logo</p>
                 <img
-                  src={association.logo.url}
+                  src={getMediaUrl(association.logo.url)}
                   alt={association.name}
                   className="max-h-[200px] rounded-md object-contain"
                 />

@@ -1,0 +1,16 @@
+import type { SectionKey } from '../types/strapi';
+
+export interface SectionMeta {
+  defaultLabel: string;
+  url: string;
+}
+
+export const SECTION_MAP: Record<SectionKey, SectionMeta> = {
+  'articles':     { defaultLabel: 'Actualités',        url: '/articles' },
+  'evenements':   { defaultLabel: 'Événements',        url: '/evenements' },
+  'documents':    { defaultLabel: 'Documents',         url: '/documents' },
+  'equipe':       { defaultLabel: 'Équipe municipale', url: '/equipe-municipale' },
+  'associations': { defaultLabel: 'Associations',      url: '/associations' },
+  'demarches':    { defaultLabel: 'Démarches',         url: '/demarches' },
+  'open-data':    { defaultLabel: 'Open Data',         url: '/open-data' },
+};

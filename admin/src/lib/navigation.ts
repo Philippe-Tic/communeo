@@ -1,0 +1,29 @@
+import type { NavigationItem, SectionKey } from '../hooks/api/useSites'
+
+export interface SectionDefinition {
+  key: SectionKey
+  defaultLabel: string
+  url: string
+  icon: string // lucide icon name
+}
+
+export const PREDEFINED_SECTIONS: SectionDefinition[] = [
+  { key: 'articles',     defaultLabel: 'Actualités',        url: '/articles',          icon: 'newspaper' },
+  { key: 'evenements',   defaultLabel: 'Événements',        url: '/evenements',        icon: 'calendar' },
+  { key: 'documents',    defaultLabel: 'Documents',         url: '/documents',         icon: 'file-text' },
+  { key: 'equipe',       defaultLabel: 'Équipe municipale', url: '/equipe-municipale', icon: 'users' },
+  { key: 'associations', defaultLabel: 'Associations',      url: '/associations',      icon: 'heart-handshake' },
+  { key: 'demarches',    defaultLabel: 'Démarches',         url: '/demarches',         icon: 'clipboard-list' },
+  { key: 'open-data',    defaultLabel: 'Open Data',         url: '/open-data',         icon: 'database' },
+]
+
+export const getSectionDefinition = (key: SectionKey): SectionDefinition | undefined =>
+  PREDEFINED_SECTIONS.find(s => s.key === key)
+
+export const getDefaultNavigationConfig = (): NavigationItem[] =>
+  PREDEFINED_SECTIONS.map(section => ({
+    id: crypto.randomUUID(),
+    type: 'section' as const,
+    key: section.key,
+    enabled: true,
+  }))

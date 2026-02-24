@@ -1,6 +1,29 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
+// Types — Navigation configurable
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data'
+
+export interface NavigationItem {
+  id: string              // UUID pour le drag & drop
+  type: 'section' | 'page'
+  key?: SectionKey        // Clé section (si type=section)
+  pageDocumentId?: string // DocumentId page (si type=page)
+  label?: string          // Label custom (undefined = défaut)
+  enabled: boolean        // Toggle visibilité
+}
+
+// Types — Réseaux sociaux
+export type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube' | 'tiktok' | 'autre'
+
+export interface SocialLink {
+  id?: number
+  platform: SocialPlatform
+  url: string
+  label?: string
+  icon?: { id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null
+}
+
 // Types — Composants légaux Strapi
 export interface MentionsLegales {
   id?: number
@@ -137,6 +160,10 @@ export interface Site {
   // Auto-deploy
   auto_deploy_enabled?: boolean
   auto_deploy_delay?: number
+  // Navigation
+  navigation_config?: NavigationItem[]
+  // Réseaux sociaux
+  social_links?: SocialLink[]
   // Relations
   pages?: any[]
   articles?: any[]
@@ -167,6 +194,10 @@ export interface CreateSiteData {
   // Auto-deploy
   auto_deploy_enabled?: boolean
   auto_deploy_delay?: number
+  // Navigation
+  navigation_config?: NavigationItem[]
+  // Réseaux sociaux
+  social_links?: Partial<Omit<SocialLink, 'id'>>[]
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {
@@ -248,6 +279,7 @@ export const useSite = (documentId: string) => {
       params.append('populate[homepage][populate][quick_links]', 'true')
       params.append('populate[homepage][populate][key_figures]', 'true')
       params.append('populate[homepage][populate][partners][populate][logo]', 'true')
+      params.append('populate[social_links][populate][icon]', 'true')
       const url = `/api/sites/${documentId}?${params.toString()}`
       const response = await apiClient.get<{ data: Site }>(url)
       return response.data

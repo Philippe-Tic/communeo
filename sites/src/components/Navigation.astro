@@ -1,6 +1,7 @@
 ---
-import type { Page, Site } from '../types/strapi';
+import type { Page, Site, NavigationItem, SectionKey } from '../types/strapi';
 import { getMenuPages, getSiteConfig, getPagePath } from '../utils/strapi';
+import { SECTION_MAP } from '../utils/navigation';
 import StrapiImage from './StrapiImage.astro';
 
 // Récupération des pages du menu et de la configuration du site
@@ -19,16 +20,95 @@ try {
 // URL actuelle pour la navigation active
 const currentPath = Astro.url.pathname;
 
-// Construire l'arbre du menu : pages racines avec leurs enfants
-const rootPages = menuPages.filter(p => !p.parent_page);
-const menuTree = rootPages.map(page => ({
-  ...page,
-  children: menuPages.filter(p => p.parent_page?.documentId === page.documentId)
-}));
-
 // Un lien est actif si le path courant correspond ou est un sous-path
 const isActive = (pagePath: string) =>
   currentPath === pagePath || currentPath.startsWith(pagePath + '/');
+
+// --- Types pour le menu unifié ---
+interface NavMenuLink {
+  href: string;
+  label: string;
+  children?: NavMenuLink[];
+}
+
+// --- Build menu links from navigation_config or fallback ---
+const navConfig = siteConfig?.navigation_config;
+
+function buildConfiguredMenu(config: NavigationItem[]): NavMenuLink[] {
+  const links: NavMenuLink[] = [];
+
+  for (const item of config) {
+    if (!item.enabled) continue;
+
+    if (item.type === 'section' && item.key) {
+      const meta = SECTION_MAP[item.key];
+      if (!meta) continue;
+      // Skip open-data if not enabled and no custom label override
+      if (item.key === 'open-data' && !siteConfig?.open_data_enabled && !item.label) continue;
+      links.push({
+        href: meta.url,
+        label: item.label || meta.defaultLabel,
+      });
+    } else if (item.type === 'page' && item.pageDocumentId) {
+      const page = menuPages.find(p => p.documentId === item.pageDocumentId);
+      if (!page) continue; // Page supprimée ou non publiée → ignorer
+      const pagePath = '/' + getPagePath(page, menuPages);
+      const children = menuPages
+        .filter(p => p.parent_page?.documentId === page.documentId)
+        .map(child => ({
+          href: '/' + getPagePath(child, menuPages),
+          label: child.title,
+        }));
+      links.push({
+        href: pagePath,
+        label: item.label || page.title,
+        children: children.length > 0 ? children : undefined,
+      });
+    }
+  }
+
+  return links;
+}
+
+function buildFallbackMenu(): NavMenuLink[] {
+  const links: NavMenuLink[] = [];
+
+  // Pages dynamiques (show_in_menu + menu_order)
+  const rootPages = menuPages.filter(p => !p.parent_page);
+  for (const page of rootPages) {
+    const pagePath = '/' + getPagePath(page, menuPages);
+    const children = menuPages
+      .filter(p => p.parent_page?.documentId === page.documentId)
+      .map(child => ({
+        href: '/' + getPagePath(child, menuPages),
+        label: child.title,
+      }));
+    links.push({
+      href: pagePath,
+      label: page.title,
+      children: children.length > 0 ? children : undefined,
+    });
+  }
+
+  // Sections hardcodées
+  links.push({ href: '/articles', label: 'Actualités' });
+  links.push({ href: '/evenements', label: 'Événements' });
+  links.push({ href: '/documents', label: 'Documents' });
+  links.push({ href: '/equipe-municipale', label: 'Équipe' });
+  links.push({ href: '/associations', label: 'Associations' });
+  links.push({ href: '/demarches', label: 'Démarches' });
+
+  if (siteConfig?.open_data_enabled) {
+    links.push({ href: '/open-data', label: 'Open Data' });
+  }
+
+  return links;
+}
+
+const menuLinks: NavMenuLink[] =
+  navConfig && navConfig.length > 0
+    ? buildConfiguredMenu(navConfig)
+    : buildFallbackMenu();
 ---
 
 <!-- TopBar -->
@@ -104,13 +184,12 @@ const isActive = (pagePath: string) =>
             Accueil
           </a>
 
-          {menuTree.map((page) => {
-            const pagePath = '/' + getPagePath(page, menuPages);
-            const active = isActive(pagePath);
-            return page.children.length > 0 ? (
+          {menuLinks.map((link) => {
+            const active = isActive(link.href);
+            return link.children && link.children.length > 0 ? (
               <div class="relative group">
                 <a
-                  href={pagePath}
+                  href={link.href}
                   class={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
                     active
                       ? 'border-primary text-primary'
@@ -118,19 +197,18 @@ const isActive = (pagePath: string) =>
                   }`}
                   aria-current={active ? 'page' : undefined}
                 >
-                  {page.title}
+                  {link.label}
                   <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                   </svg>
                 </a>
                 <div class="absolute left-0 top-full hidden group-hover:block group-focus-within:block min-w-48 z-50 pt-1">
                   <div class="bg-white/95 backdrop-blur-md rounded-lg shadow-xl border border-gray-100 p-2">
-                    {page.children.map((child) => {
-                      const childPath = '/' + getPagePath(child, menuPages);
-                      const childActive = currentPath === childPath;
+                    {link.children.map((child) => {
+                      const childActive = currentPath === child.href;
                       return (
                         <a
-                          href={childPath}
+                          href={child.href}
                           class={`block px-3 py-2 text-sm rounded-md transition-colors ${
                             childActive
                               ? 'bg-primary/10 text-primary font-medium'
@@ -138,7 +216,7 @@ const isActive = (pagePath: string) =>
                           }`}
                           aria-current={childActive ? 'page' : undefined}
                         >
-                          {child.title}
+                          {child.label}
                         </a>
                       );
                     })}
@@ -147,7 +225,7 @@ const isActive = (pagePath: string) =>
               </div>
             ) : (
               <a
-                href={pagePath}
+                href={link.href}
                 class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
                   active
                     ? 'border-primary text-primary'
@@ -155,96 +233,10 @@ const isActive = (pagePath: string) =>
                 }`}
                 aria-current={active ? 'page' : undefined}
               >
-                {page.title}
+                {link.label}
               </a>
             );
           })}
-
-          <a
-            href="/articles"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/articles')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/articles') ? 'page' : undefined}
-          >
-            Actualités
-          </a>
-
-          <a
-            href="/evenements"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/evenements')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/evenements') ? 'page' : undefined}
-          >
-            Événements
-          </a>
-
-          <a
-            href="/documents"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/documents')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/documents') ? 'page' : undefined}
-          >
-            Documents
-          </a>
-
-          <a
-            href="/equipe-municipale"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/equipe-municipale')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/equipe-municipale') ? 'page' : undefined}
-          >
-            Équipe
-          </a>
-
-          <a
-            href="/associations"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/associations')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/associations') ? 'page' : undefined}
-          >
-            Associations
-          </a>
-
-          <a
-            href="/demarches"
-            class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-              currentPath.startsWith('/demarches')
-                ? 'border-primary text-primary'
-                : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-            }`}
-            aria-current={currentPath.startsWith('/demarches') ? 'page' : undefined}
-          >
-            Démarches
-          </a>
-
-          {siteConfig?.open_data_enabled && (
-            <a
-              href="/open-data"
-              class={`px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-                currentPath.startsWith('/open-data')
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-gray-700 hover:text-primary hover:border-primary/30'
-              }`}
-              aria-current={currentPath.startsWith('/open-data') ? 'page' : undefined}
-            >
-              Open Data
-            </a>
-          )}
 
           <a
             href="/recherche"
@@ -316,16 +308,15 @@ const isActive = (pagePath: string) =>
         Accueil
       </a>
 
-      {menuTree.map((page) => {
-        const pagePath = '/' + getPagePath(page, menuPages);
-        const active = isActive(pagePath);
-        const hasChildren = page.children.length > 0;
-        const childActive = hasChildren && page.children.some(child => currentPath === '/' + getPagePath(child, menuPages));
+      {menuLinks.map((link) => {
+        const active = isActive(link.href);
+        const hasChildren = link.children && link.children.length > 0;
+        const childActive = hasChildren && link.children!.some(child => currentPath === child.href);
         return hasChildren ? (
           <div class="mobile-submenu-group">
             <div class="flex items-center">
               <a
-                href={pagePath}
+                href={link.href}
                 class={`flex-1 block px-3 py-2.5 rounded-l-lg text-base font-medium transition-colors ${
                   active || childActive
                     ? 'bg-primary/10 text-primary'
@@ -333,7 +324,7 @@ const isActive = (pagePath: string) =>
                 }`}
                 role="menuitem"
               >
-                {page.title}
+                {link.label}
               </a>
               <button
                 type="button"
@@ -343,7 +334,7 @@ const isActive = (pagePath: string) =>
                     : 'text-gray-500 hover:bg-gray-50 hover:text-primary'
                 }`}
                 aria-expanded={childActive ? 'true' : 'false'}
-                aria-label={`Sous-pages de ${page.title}`}
+                aria-label={`Sous-pages de ${link.label}`}
               >
                 <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -351,12 +342,11 @@ const isActive = (pagePath: string) =>
               </button>
             </div>
             <div class={`mobile-submenu pl-4 space-y-0.5 overflow-hidden transition-all ${childActive ? '' : 'hidden'}`}>
-              {page.children.map((child) => {
-                const childPath = '/' + getPagePath(child, menuPages);
-                const isChildActive = currentPath === childPath;
+              {link.children!.map((child) => {
+                const isChildActive = currentPath === child.href;
                 return (
                   <a
-                    href={childPath}
+                    href={child.href}
                     class={`block pl-4 pr-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       isChildActive
                         ? 'bg-primary/10 text-primary'
@@ -364,7 +354,7 @@ const isActive = (pagePath: string) =>
                     }`}
                     role="menuitem"
                   >
-                    {child.title}
+                    {child.label}
                   </a>
                 );
               })}
@@ -372,7 +362,7 @@ const isActive = (pagePath: string) =>
           </div>
         ) : (
           <a
-            href={pagePath}
+            href={link.href}
             class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
               active
                 ? 'bg-primary/10 text-primary'
@@ -380,96 +370,10 @@ const isActive = (pagePath: string) =>
             }`}
             role="menuitem"
           >
-            {page.title}
+            {link.label}
           </a>
         );
       })}
-
-      <a
-        href="/articles"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/articles')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Actualités
-      </a>
-
-      <a
-        href="/evenements"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/evenements')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Événements
-      </a>
-
-      <a
-        href="/documents"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/documents')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Documents
-      </a>
-
-      <a
-        href="/equipe-municipale"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/equipe-municipale')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Équipe municipale
-      </a>
-
-      <a
-        href="/associations"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/associations')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Associations
-      </a>
-
-      <a
-        href="/demarches"
-        class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-          currentPath.startsWith('/demarches')
-            ? 'bg-primary/10 text-primary'
-            : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-        }`}
-        role="menuitem"
-      >
-        Démarches
-      </a>
-
-      {siteConfig?.open_data_enabled && (
-        <a
-          href="/open-data"
-          class={`block px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
-            currentPath.startsWith('/open-data')
-              ? 'bg-primary/10 text-primary'
-              : 'text-gray-900 hover:bg-gray-50 hover:text-primary'
-          }`}
-          role="menuitem"
-        >
-          Open Data
-        </a>
-      )}
 
       <a
         href="/recherche"

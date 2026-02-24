@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoadingSpinner, NotFoundBanner } from '../components/common'
@@ -44,33 +44,18 @@ export function AlerteForm({ isEditing = false, initialData }: AlerteFormProps) 
   const createMutation = useCreateAlerte()
   const updateMutation = useUpdateAlerte()
 
-  const { register, handleSubmit, formState: { errors }, reset, control } = useForm<AlerteFormData>({
+  const { register, handleSubmit, formState: { errors }, control } = useForm<AlerteFormData>({
     defaultValues: {
-      title: '',
-      message: '',
-      severity: 'info',
-      active: false,
-      display_from: '',
-      display_until: '',
-      link_url: '',
-      link_label: '',
+      title: initialData?.title || '',
+      message: initialData?.message || '',
+      severity: initialData?.severity || 'info',
+      active: initialData?.active ?? false,
+      display_from: initialData?.display_from ? initialData.display_from.slice(0, 16) : '',
+      display_until: initialData?.display_until ? initialData.display_until.slice(0, 16) : '',
+      link_url: initialData?.link_url || '',
+      link_label: initialData?.link_label || '',
     },
   })
-
-  useEffect(() => {
-    if (initialData) {
-      reset({
-        title: initialData.title,
-        message: initialData.message,
-        severity: initialData.severity,
-        active: initialData.active,
-        display_from: initialData.display_from ? initialData.display_from.slice(0, 16) : '',
-        display_until: initialData.display_until ? initialData.display_until.slice(0, 16) : '',
-        link_url: initialData.link_url || '',
-        link_label: initialData.link_label || '',
-      })
-    }
-  }, [initialData, reset])
 
   const onSubmit = async (data: AlerteFormData) => {
     if (isSubmitting) return

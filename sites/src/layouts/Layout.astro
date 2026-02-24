@@ -51,12 +51,14 @@ if (faviconSrc) {
 
 const {
   title = siteConfig?.name || 'Site de la mairie',
-  description = `Site officiel de la ${siteConfig?.name || 'mairie'}`,
+  description: rawDescription,
   image,
   noIndex = false,
   ogType = 'website',
   ogArticleMeta,
 } = Astro.props;
+
+const description = rawDescription || `Site officiel de la ${siteConfig?.name || 'mairie'}`;
 
 // Construction de l'URL complète pour le titre
 const fullTitle = title === siteConfig?.name ? title : `${title} - ${siteConfig?.name}`;

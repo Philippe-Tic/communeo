@@ -129,7 +129,7 @@ export const useRegister = () => {
 export const useForgotPassword = () => {
   return useMutation({
     mutationFn: async (email: string): Promise<{ ok: boolean }> => {
-      return apiClient.postWithoutAuth<{ ok: boolean }>('/api/auth/forgot-password', { email })
+      return apiClient.postWithoutAuth<{ ok: boolean }>('/api/user-management/forgot-password', { email })
     },
   })
 }

@@ -74,7 +74,76 @@ async function sendPasswordResetEmail(email: string, firstName: string, token: s
   });
 }
 
+async function getAuthenticatedUserBasic(ctx) {
+  const user = ctx.state.user;
+  if (!user) {
+    ctx.throw(401, 'Not authenticated');
+  }
+
+  const fullUser = await strapi.query('plugin::users-permissions.user').findOne({
+    where: { id: user.id },
+    populate: ['site'],
+  });
+
+  if (!fullUser?.site) {
+    ctx.throw(403, 'No site assigned');
+  }
+
+  return fullUser;
+}
+
 export default {
+  /**
+   * Self-service endpoint — update own profile.
+   * PUT /api/user-management/me
+   */
+  async updateMe(ctx) {
+    const currentUser = await getAuthenticatedUserBasic(ctx);
+    const data = ctx.request.body?.data || ctx.request.body;
+
+    const updateData: Record<string, any> = {};
+    if (data.first_name !== undefined) updateData.first_name = data.first_name;
+    if (data.last_name !== undefined) updateData.last_name = data.last_name;
+    if (data.phone !== undefined) updateData.phone = data.phone;
+
+    const updatedUser = await strapi.query('plugin::users-permissions.user').update({
+      where: { id: currentUser.id },
+      data: updateData,
+      populate: ['site'],
+    });
+
+    const { password, resetPasswordToken, confirmationToken, ...sanitized } = updatedUser;
+    ctx.body = { data: sanitized };
+  },
+
+  /**
+   * Self-service endpoint — request password reset for self.
+   * POST /api/user-management/me/reset-password
+   */
+  async requestPasswordReset(ctx) {
+    const currentUser = await getAuthenticatedUserBasic(ctx);
+
+    if (currentUser.blocked) {
+      ctx.throw(400, "Votre compte n'est pas encore activé.");
+    }
+
+    const newToken = generateInvitationToken();
+
+    await strapi.query('plugin::users-permissions.user').update({
+      where: { id: currentUser.id },
+      data: { resetPasswordToken: newToken },
+    });
+
+    try {
+      await sendPasswordResetEmail(currentUser.email, currentUser.first_name, newToken, currentUser.site.name);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+      ctx.throw(500, "Erreur lors de l'envoi de l'email");
+    }
+
+    ctx.body = { ok: true };
+  },
+
   async find(ctx) {
     const currentUser = await getAuthenticatedUser(ctx);
     const siteDocumentId = currentUser.site.documentId;
@@ -257,6 +326,48 @@ export default {
 
     await strapi.query('plugin::users-permissions.user').delete({ where: { id } });
     ctx.body = { data: { id: Number(id) } };
+  },
+
+  /**
+   * Public endpoint — request a password reset email.
+   * POST /api/user-management/forgot-password
+   */
+  async forgotPassword(ctx) {
+    const { email } = ctx.request.body;
+
+    if (!email) {
+      // Always return ok to avoid revealing info
+      ctx.body = { ok: true };
+      return;
+    }
+
+    const user = await strapi.query('plugin::users-permissions.user').findOne({
+      where: { email },
+      populate: ['site'],
+    });
+
+    // Always return ok regardless of whether user exists
+    if (!user || user.blocked) {
+      ctx.body = { ok: true };
+      return;
+    }
+
+    const newToken = generateInvitationToken();
+
+    await strapi.query('plugin::users-permissions.user').update({
+      where: { id: user.id },
+      data: { resetPasswordToken: newToken },
+    });
+
+    const siteName = user.site?.name || 'CMS Mairies';
+
+    try {
+      await sendPasswordResetEmail(user.email, user.first_name, newToken, siteName);
+    } catch (emailError) {
+      console.error('Failed to send password reset email:', emailError);
+    }
+
+    ctx.body = { ok: true };
   },
 
   /**

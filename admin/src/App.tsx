@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ToastTest } from './components/ToastTest'
 import { LoginForm } from './components/forms/LoginForm'
@@ -40,6 +40,17 @@ import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
 import { UserDetail } from './pages/UserDetail'
 import { AcceptInvitation } from './pages/AcceptInvitation'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { Profile } from './pages/Profile'
+
+function LoginPage() {
+  const navigate = useNavigate()
+  return (
+    <div className="flex min-h-screen items-center bg-background">
+      <LoginForm onForgotPassword={() => navigate('/forgot-password')} />
+    </div>
+  )
+}
 
 function App() {
   return (
@@ -47,14 +58,10 @@ function App() {
       <UserProvider>
         <Routes>
           {/* Public route - Login */}
-          <Route
-            path="/login"
-            element={
-              <div className="flex min-h-screen items-center bg-background">
-                <LoginForm />
-              </div>
-            }
-          />
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* Public route - Forgot Password */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           {/* Public route - Accept Invitation */}
           <Route
@@ -471,6 +478,18 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <Compliance />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <Profile />
                 </MainLayout>
               </ProtectedRoute>
             }

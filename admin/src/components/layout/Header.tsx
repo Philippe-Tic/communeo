@@ -8,8 +8,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/hooks/useTheme'
-import { LogOut, Menu, Moon, Sun } from 'lucide-react'
+import { LogOut, Menu, Moon, Sun, User } from 'lucide-react'
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 interface HeaderProps {
@@ -19,6 +20,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-white/20 bg-white/95 px-4 py-3 shadow-sm dark:border-white/[0.08] dark:bg-slate-900/95 md:px-6">
@@ -79,6 +81,10 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               </DropdownMenuItem>
               <DropdownMenuItem disabled>
                 <span className="text-muted-foreground">Site:</span>&nbsp;{user.site?.name}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <User className="mr-2 h-4 w-4" />
+                Mon profil
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">

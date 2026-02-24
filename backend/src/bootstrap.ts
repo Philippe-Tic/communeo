@@ -168,6 +168,8 @@ export default async ({ strapi }) => {
       { action: 'api::user-management.user-management.delete', enabled: true },
       { action: 'api::user-management.user-management.resendInvitation', enabled: true },
       { action: 'api::user-management.user-management.resetPassword', enabled: true },
+      { action: 'api::user-management.user-management.updateMe', enabled: true },
+      { action: 'api::user-management.user-management.requestPasswordReset', enabled: true },
     ];
 
     // Appliquer les permissions

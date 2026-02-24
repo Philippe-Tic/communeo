@@ -2,6 +2,16 @@ export default {
   routes: [
     {
       method: 'POST',
+      path: '/user-management/forgot-password',
+      handler: 'user-management.forgotPassword',
+      config: {
+        auth: false,
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'POST',
       path: '/user-management/accept-invitation',
       handler: 'user-management.acceptInvitation',
       config: {
@@ -9,6 +19,18 @@ export default {
         policies: [],
         middlewares: [],
       },
+    },
+    {
+      method: 'PUT',
+      path: '/user-management/me',
+      handler: 'user-management.updateMe',
+      config: { policies: [], middlewares: [] },
+    },
+    {
+      method: 'POST',
+      path: '/user-management/me/reset-password',
+      handler: 'user-management.requestPasswordReset',
+      config: { policies: [], middlewares: [] },
     },
     {
       method: 'GET',

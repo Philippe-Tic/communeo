@@ -15,7 +15,7 @@ export function PageCard({ page, onEdit, onView, onDelete }: PageCardProps) {
   const isScheduled = page.scheduled_at && new Date(page.scheduled_at) > new Date()
 
   return (
-    <div className="glass-card relative rounded-xl p-4">
+    <div className="glass-card relative cursor-pointer rounded-xl p-4" onClick={() => onView(page)}>
       <div className="flex flex-col gap-3">
         <div className="flex items-start justify-between">
           <div className="flex-1 space-y-1">

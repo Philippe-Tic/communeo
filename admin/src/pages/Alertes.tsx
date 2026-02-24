@@ -109,7 +109,8 @@ export const Alertes = () => {
               return (
                 <div
                   key={alerte.documentId}
-                  className={`flex items-center gap-4 rounded-lg border bg-card p-4 transition-shadow hover:shadow-md ${!alerte.active ? 'opacity-60' : ''}`}
+                  className={`flex cursor-pointer items-center gap-4 rounded-lg border bg-card p-4 transition-shadow hover:shadow-md ${!alerte.active ? 'opacity-60' : ''}`}
+                  onClick={() => navigate(`/alertes/${alerte.documentId}/edit`)}
                 >
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${severityConfig.className}`}>
                     <SeverityIcon className="h-5 w-5" />
@@ -142,7 +143,7 @@ export const Alertes = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => handleToggleActive(alerte)}
+                      onClick={(e) => { e.stopPropagation(); handleToggleActive(alerte) }}
                       title={alerte.active ? 'Désactiver' : 'Activer'}
                     >
                       {alerte.active ? <PowerOff className="h-4 w-4" /> : <Power className="h-4 w-4" />}
@@ -151,7 +152,7 @@ export const Alertes = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => navigate(`/alertes/${alerte.documentId}/edit`)}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/alertes/${alerte.documentId}/edit`) }}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -159,7 +160,7 @@ export const Alertes = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => setAlerteToDelete(alerte)}
+                      onClick={(e) => { e.stopPropagation(); setAlerteToDelete(alerte) }}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

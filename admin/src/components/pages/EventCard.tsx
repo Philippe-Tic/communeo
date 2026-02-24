@@ -35,7 +35,7 @@ export const EventCard = ({
   ]
 
   return (
-    <div className="glass-card flex h-full flex-col rounded-xl p-4">
+    <div className="glass-card flex h-full cursor-pointer flex-col rounded-xl p-4" onClick={() => onView(event)}>
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">

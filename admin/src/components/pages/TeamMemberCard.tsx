@@ -20,7 +20,7 @@ export const TeamMemberCard = ({
   member, onEdit, onView, onDelete, onMoveUp, onMoveDown, isFirst, isLast
 }: TeamMemberCardProps) => {
   return (
-    <div className="glass-card flex h-full flex-col rounded-xl p-4">
+    <div className="glass-card flex h-full cursor-pointer flex-col rounded-xl p-4" onClick={() => onView(member)}>
       {/* Header */}
       <div className="mb-3 space-y-2">
         <div className="flex items-start justify-between">
@@ -28,12 +28,12 @@ export const TeamMemberCard = ({
 
           <div className="flex items-center gap-1">
             {onMoveUp && !isFirst && (
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onMoveUp(member)} title="Monter">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onMoveUp(member) }} title="Monter">
                 <ChevronUp className="h-4 w-4" />
               </Button>
             )}
             {onMoveDown && !isLast && (
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onMoveDown(member)} title="Descendre">
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); onMoveDown(member) }} title="Descendre">
                 <ChevronDown className="h-4 w-4" />
               </Button>
             )}

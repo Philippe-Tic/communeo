@@ -1,21 +1,24 @@
 import apiClient from './apiClient'
 
 // Types
+export interface DnsInstruction {
+  type: 'A' | 'CNAME'
+  name: string
+  displayName: string
+  value: string
+  purpose: string
+  description: string
+}
+
 export interface DomainConfigResponse {
   success: boolean
   domain: string
-  verificationToken: string
+  domainType: 'apex' | 'subdomain'
+  netlifyUrl: string
   dnsInstructions: {
-    txtRecord: {
-      name: string
-      value: string
-      instructions: string
-    }
-    cnameRecord: {
-      name: string
-      value: string
-      instructions: string
-    }
+    isApex: boolean
+    baseDomain: string
+    records: DnsInstruction[]
   }
   message: string
 }
@@ -26,6 +29,7 @@ export interface VerificationResponse {
   message: string
   sslProvisioning?: boolean
   error?: string
+  hint?: string
 }
 
 export interface RemovalResponse {
@@ -39,12 +43,17 @@ export interface DomainStatus {
   hasCustomDomain: boolean
   customDomain: string | null
   domainStatus: 'pending' | 'verified' | 'error'
-  planType: 'basic' | 'premium'
+  domainType: 'apex' | 'subdomain' | null
+  netlifyUrl: string | null
+  dnsInstructions: {
+    isApex: boolean
+    baseDomain?: string
+    records: DnsInstruction[]
+  } | null
   liveUrl: string | null
   sslEnabled: boolean
   sslStatus: any
   domainConfiguredAt: string | null
-  verificationToken: string | null
 }
 
 export interface DomainDiagnostic {

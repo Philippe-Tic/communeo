@@ -1069,6 +1069,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       ['pending', 'verified', 'error']
     > &
       Schema.Attribute.DefaultTo<'pending'>;
+    domain_type: Schema.Attribute.Enumeration<['apex', 'subdomain']>;
     domain_verification_token: Schema.Attribute.String &
       Schema.Attribute.Private;
     evenements: Schema.Attribute.Relation<

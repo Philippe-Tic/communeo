@@ -160,6 +160,13 @@ export default async ({ strapi }) => {
       { action: 'api::deployment.deployment.check', enabled: true },
       { action: 'api::deployment.deployment.debug', enabled: true },
 
+      // Domain (custom actions)
+      { action: 'api::domain.domain.configure', enabled: true },
+      { action: 'api::domain.domain.verify', enabled: true },
+      { action: 'api::domain.domain.remove', enabled: true },
+      { action: 'api::domain.domain.status', enabled: true },
+      { action: 'api::domain.domain.diagnostic', enabled: true },
+
       // User Management (custom actions)
       { action: 'api::user-management.user-management.find', enabled: true },
       { action: 'api::user-management.user-management.findOne', enabled: true },

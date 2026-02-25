@@ -236,6 +236,16 @@ async function setupPermissions(adminToken) {
     permissions['api::deployment'].controllers['deployment'][action] = { enabled: true, policy: '' };
   }
 
+  // Domain custom actions
+  const domainActions = ['configure', 'verify', 'remove', 'status', 'diagnostic'];
+  if (!permissions['api::domain']) permissions['api::domain'] = { controllers: {} };
+  if (!permissions['api::domain'].controllers) permissions['api::domain'].controllers = {};
+  if (!permissions['api::domain'].controllers['domain'])
+    permissions['api::domain'].controllers['domain'] = {};
+  for (const action of domainActions) {
+    permissions['api::domain'].controllers['domain'][action] = { enabled: true, policy: '' };
+  }
+
   await axios.put(
     `${STRAPI_URL}/users-permissions/roles/${authRole.id}`,
     { permissions },

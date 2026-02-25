@@ -4,6 +4,7 @@
 
 import domainService from '../../../services/domain';
 import domainValidationService from '../../../services/domain-validation';
+import netlifyService from '../../../services/netlify';
 
 export default {
   /**
@@ -12,10 +13,21 @@ export default {
    */
   async configure(ctx) {
     try {
-      const user = ctx.state.user;
+      let user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!user.site) {
+        const completeUser = await strapi.entityService.findOne(
+          'plugin::users-permissions.user',
+          user.id,
+          { populate: ['site'] }
+        );
+        if (completeUser && (completeUser as any).site) {
+          user = completeUser;
+        }
       }
 
       if (!user.site) {
@@ -47,9 +59,10 @@ export default {
       ctx.body = {
         success: true,
         domain: config.domain,
-        verificationToken: config.verificationToken,
+        domainType: config.domainType,
+        netlifyUrl: config.netlifyUrl,
         dnsInstructions: config.dnsInstructions,
-        message: 'Domaine configuré avec succès. Veuillez configurer les enregistrements DNS.'
+        message: 'Domaine enregistré sur Netlify. Veuillez configurer le pointage DNS.'
       };
 
     } catch (error: any) {
@@ -64,10 +77,21 @@ export default {
    */
   async verify(ctx) {
     try {
-      const user = ctx.state.user;
+      let user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!user.site) {
+        const completeUser = await strapi.entityService.findOne(
+          'plugin::users-permissions.user',
+          user.id,
+          { populate: ['site'] }
+        );
+        if (completeUser && (completeUser as any).site) {
+          user = completeUser;
+        }
       }
 
       if (!user.site) {
@@ -87,11 +111,13 @@ export default {
           sslProvisioning: true
         };
       } else {
-        ctx.badRequest({
+        // Retourner 200 avec success: false + hint pour distinguer "pas encore prêt" de "erreur réelle"
+        ctx.body = {
           success: false,
           message: 'Vérification du domaine échouée',
-          error: result.error
-        });
+          error: result.error,
+          hint: result.hint || 'La propagation DNS peut prendre jusqu\'à 48 heures. Si vous venez de configurer vos enregistrements DNS, réessayez plus tard.'
+        };
       }
 
     } catch (error: any) {
@@ -106,10 +132,21 @@ export default {
    */
   async remove(ctx) {
     try {
-      const user = ctx.state.user;
+      let user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!user.site) {
+        const completeUser = await strapi.entityService.findOne(
+          'plugin::users-permissions.user',
+          user.id,
+          { populate: ['site'] }
+        );
+        if (completeUser && (completeUser as any).site) {
+          user = completeUser;
+        }
       }
 
       if (!user.site) {
@@ -146,10 +183,21 @@ export default {
    */
   async status(ctx) {
     try {
-      const user = ctx.state.user;
+      let user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!user.site) {
+        const completeUser = await strapi.entityService.findOne(
+          'plugin::users-permissions.user',
+          user.id,
+          { populate: ['site'] }
+        );
+        if (completeUser && (completeUser as any).site) {
+          user = completeUser;
+        }
       }
 
       if (!user.site) {
@@ -158,14 +206,18 @@ export default {
 
       const siteId = user.site.documentId || user.site.id;
 
-      // Récupérer les infos du site
-      const site = await strapi.entityService.findOne('api::site.site', siteId);
+      // Récupérer les infos du site - utiliser findMany avec filtre documentId pour Strapi v5
+      const sites = await strapi.entityService.findMany('api::site.site', {
+        filters: { documentId: siteId } as any
+      });
+      const site = sites && sites.length > 0 ? sites[0] : null;
 
       if (!site) {
         return ctx.notFound('Site non trouvé');
       }
 
       const hasCustomDomain = !!(site as any).custom_domain;
+      const domainType = (site as any).domain_type || null;
       let sslStatus = null;
 
       // Récupérer le statut SSL si domaine configuré et site Netlify existe
@@ -177,16 +229,44 @@ export default {
         }
       }
 
+      // Récupérer l'URL Netlify pour les domaines en pending
+      let netlifyUrl: string | null = null;
+      let dnsInstructions: any = null;
+
+      if (hasCustomDomain && (site as any).domain_status === 'pending') {
+        // Construire l'URL Netlify
+        if ((site as any).netlify_site_id) {
+          try {
+            const netlifySite = await netlifyService.getSite((site as any).netlify_site_id);
+            netlifyUrl = `${netlifySite.name}.netlify.app`;
+          } catch {
+            // fallback
+          }
+        }
+        if (!netlifyUrl && (site as any).slug) {
+          netlifyUrl = `${(site as any).slug}-mairie.netlify.app`;
+        }
+
+        // Reconstruire les instructions DNS pour l'UI
+        if (netlifyUrl) {
+          dnsInstructions = domainService.generateDnsInstructions(
+            (site as any).custom_domain,
+            netlifyUrl
+          );
+        }
+      }
+
       ctx.body = {
         hasCustomDomain,
         customDomain: (site as any).custom_domain || null,
         domainStatus: (site as any).domain_status || 'pending',
-        planType: (site as any).plan_type || 'basic',
+        domainType,
+        netlifyUrl,
+        dnsInstructions,
         liveUrl: (site as any).live_url || null,
         sslEnabled: (site as any).ssl_enabled !== false,
         sslStatus,
-        domainConfiguredAt: (site as any).domain_configured_at || null,
-        verificationToken: hasCustomDomain ? (site as any).domain_verification_token : null
+        domainConfiguredAt: (site as any).domain_configured_at || null
       };
 
     } catch (error: any) {

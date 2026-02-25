@@ -26,7 +26,7 @@ export default defineConfig({
   ],
 
   // Configuration du site basée sur le slug
-  site: `https://${SITE_SLUG}.monservice.fr`,
+  site: process.env.SITE_URL || `https://${SITE_SLUG}-mairie.netlify.app`,
   base: '/',
   trailingSlash: 'never',
   prefetch: true,

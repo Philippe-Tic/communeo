@@ -61,12 +61,17 @@
     "custom_domain": {
       "type": "string",
       "required": false,
-      "regex": "^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\\.[a-zA-Z]{2,}$"
+      "regex": "^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}$"
     },
     "domain_status": {
       "type": "enumeration",
       "enum": ["pending", "verified", "error"],
       "default": "pending",
+      "required": false
+    },
+    "domain_type": {
+      "type": "enumeration",
+      "enum": ["apex", "subdomain"],
       "required": false
     },
     "domain_verification_token": {

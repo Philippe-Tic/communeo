@@ -244,12 +244,26 @@ class NetlifyService {
    * Ajoute un domaine personnalisé à un site Netlify
    */
   async addDomainToNetlify(netlifyId: string, domain: string): Promise<NetlifyDomain> {
-    strapi.log.info(`Adding domain ${domain} to Netlify site ${netlifyId}`);
+    const body = { custom_domain: domain };
 
-    return this.apiRequest(`/sites/${netlifyId}/domains`, {
-      method: 'POST',
-      body: JSON.stringify({ domain })
+    strapi.log.info(`[DOMAIN] PATCH /sites/${netlifyId} body: ${JSON.stringify(body)}`);
+
+    const site = await this.apiRequest(`/sites/${netlifyId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body)
     });
+
+    strapi.log.info(`[DOMAIN] Netlify response custom_domain: ${site.custom_domain}`);
+
+    // Détecter le rejet silencieux : Netlify retourne 200 OK mais custom_domain reste null
+    if (!site.custom_domain || site.custom_domain !== domain) {
+      throw new Error(
+        `Netlify a rejeté le domaine ${domain} (réponse: custom_domain=${site.custom_domain}). ` +
+        `Le domaine est peut-être déjà associé à un autre compte Netlify.`
+      );
+    }
+
+    return { hostname: site.custom_domain };
   }
 
   /**
@@ -258,8 +272,42 @@ class NetlifyService {
   async removeDomainFromNetlify(netlifyId: string, domain: string): Promise<void> {
     strapi.log.info(`Removing domain ${domain} from Netlify site ${netlifyId}`);
 
-    await this.apiRequest(`/sites/${netlifyId}/domains/${domain}`, {
-      method: 'DELETE'
+    await this.apiRequest(`/sites/${netlifyId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ custom_domain: null })
+    });
+  }
+
+  /**
+   * Ajoute un alias de domaine (ex: www variant) à un site Netlify
+   */
+  async addDomainAlias(netlifyId: string, alias: string): Promise<void> {
+    strapi.log.info(`Adding domain alias ${alias} to Netlify site ${netlifyId}`);
+
+    const site = await this.getSite(netlifyId);
+    const currentAliases: string[] = (site as any).domain_aliases || [];
+
+    if (!currentAliases.includes(alias)) {
+      await this.apiRequest(`/sites/${netlifyId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ domain_aliases: [...currentAliases, alias] })
+      });
+    }
+  }
+
+  /**
+   * Supprime un alias de domaine d'un site Netlify
+   */
+  async removeDomainAlias(netlifyId: string, alias: string): Promise<void> {
+    strapi.log.info(`Removing domain alias ${alias} from Netlify site ${netlifyId}`);
+
+    const site = await this.getSite(netlifyId);
+    const currentAliases: string[] = (site as any).domain_aliases || [];
+    const filtered = currentAliases.filter(a => a !== alias);
+
+    await this.apiRequest(`/sites/${netlifyId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ domain_aliases: filtered })
     });
   }
 

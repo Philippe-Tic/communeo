@@ -4,50 +4,93 @@
 
 import { promisify } from 'util';
 import dns from 'dns';
-import crypto from 'crypto';
 import netlifyService from './netlify';
 
-const resolveTxt = promisify(dns.resolveTxt);
 const resolveCname = promisify(dns.resolveCname);
+const resolve4 = promisify(dns.resolve4);
+
+const NETLIFY_LB_IP = '75.2.60.5';
+
+export interface DnsInstruction {
+  type: 'A' | 'CNAME';
+  name: string;
+  displayName: string;
+  value: string;
+  purpose: string;
+  description: string;
+}
 
 interface DomainValidationResult {
   isValid: boolean;
-  txtRecordValid: boolean;
-  cnameValid: boolean;
+  dnsRecordValid: boolean;
   errors: string[];
   warnings: string[];
 }
 
 interface DomainConfiguration {
   domain: string;
-  verificationToken: string;
+  domainType: 'apex' | 'subdomain';
+  netlifyUrl: string;
   dnsInstructions: {
-    txtRecord: {
-      name: string;
-      value: string;
-      instructions: string;
-    };
-    cnameRecord: {
-      name: string;
-      value: string;
-      instructions: string;
-    };
+    isApex: boolean;
+    baseDomain: string;
+    records: DnsInstruction[];
   };
 }
 
 class DomainService {
-  private readonly TXT_RECORD_PREFIX = '_netlify-cms-verification';
   private readonly NETLIFY_DNS_TARGET = 'netlify.app';
 
   /**
-   * Génère un token de vérification unique
+   * Trouve un site par documentId (Strapi v5 : findOne attend un id numérique)
    */
-  generateVerificationToken(): string {
-    return crypto.randomBytes(32).toString('hex');
+  private async findSiteByDocumentId(siteId: string) {
+    const sites = await strapi.entityService.findMany('api::site.site', {
+      filters: { documentId: siteId } as any
+    });
+    return sites && sites.length > 0 ? sites[0] : null;
   }
 
   /**
-   * Configure un domaine personnalisé pour un site
+   * Détecte si un domaine est un apex (exactement 2 labels : domaine.tld)
+   */
+  isApexDomain(domain: string): boolean {
+    const labels = domain.split('.');
+    return labels.length === 2;
+  }
+
+  /**
+   * Récupère l'URL Netlify concrète d'un site (ex: lyon-mairie.netlify.app)
+   */
+  private async getNetlifyUrl(siteId: string): Promise<string> {
+    const site = await this.findSiteByDocumentId(siteId);
+    if (!site) {
+      return this.NETLIFY_DNS_TARGET;
+    }
+
+    // Essayer de récupérer l'URL depuis Netlify
+    if ((site as any).netlify_site_id) {
+      try {
+        const netlifySite = await netlifyService.getSite((site as any).netlify_site_id);
+        // Toujours utiliser le nom Netlify (pas netlifySite.url qui retourne
+        // le custom domain après PATCH)
+        return `${netlifySite.name}.netlify.app`;
+      } catch (error) {
+        strapi.log.warn('Could not fetch Netlify URL, using default target');
+      }
+    }
+
+    // Fallback : utiliser le slug pour construire l'URL
+    if ((site as any).slug) {
+      return `${(site as any).slug}-mairie.netlify.app`;
+    }
+
+    return this.NETLIFY_DNS_TARGET;
+  }
+
+  /**
+   * Configure un domaine personnalisé pour un site.
+   * Enregistre immédiatement le domaine sur Netlify (pas de vérification TXT maison).
    */
   async configureDomain(siteId: string, customDomain: string): Promise<DomainConfiguration> {
     try {
@@ -64,26 +107,53 @@ class DomainService {
         throw new Error('Ce domaine est déjà utilisé par un autre site');
       }
 
-      // 3. Générer un token de vérification
-      const verificationToken = this.generateVerificationToken();
+      // 3. Détecter le type de domaine
+      const domainType = this.isApexDomain(customDomain) ? 'apex' : 'subdomain';
 
-      // 4. Mettre à jour le site en base
-      await strapi.entityService.update('api::site.site', siteId, {
+      // 4. Récupérer le site en base
+      const site = await this.findSiteByDocumentId(siteId);
+      if (!site) {
+        throw new Error('Site non trouvé');
+      }
+
+      // 5. Vérifier que le site a été déployé sur Netlify
+      if (!(site as any).netlify_site_id) {
+        throw new Error('Le site doit être déployé sur Netlify avant de configurer un domaine personnalisé');
+      }
+
+      // 6. Enregistrer immédiatement le domaine sur Netlify
+      await netlifyService.addDomainToNetlify((site as any).netlify_site_id, customDomain);
+
+      // 6b. Ajouter l'alias www pour les apex domains
+      if (domainType === 'apex') {
+        try {
+          await netlifyService.addDomainAlias((site as any).netlify_site_id, `www.${customDomain}`);
+        } catch (wwwError) {
+          strapi.log.warn(`Could not add www variant for ${customDomain}:`, wwwError);
+        }
+      }
+
+      // 7. Récupérer l'URL Netlify concrète
+      const netlifyUrl = await this.getNetlifyUrl(siteId);
+
+      // 8. Mettre à jour le site en base
+      await strapi.entityService.update('api::site.site', site.id, {
         data: {
           custom_domain: customDomain,
-          domain_verification_token: verificationToken,
-          domain_status: 'pending'
+          domain_status: 'pending',
+          domain_type: domainType
         } as any
       });
 
-      // 5. Préparer les instructions DNS
-      const dnsInstructions = this.generateDnsInstructions(customDomain, verificationToken);
+      // 9. Préparer les instructions DNS (CNAME/A uniquement)
+      const dnsInstructions = this.generateDnsInstructions(customDomain, netlifyUrl);
 
-      strapi.log.info(`Domain configuration prepared for ${customDomain}`);
+      strapi.log.info(`Domain ${customDomain} registered on Netlify and saved (type: ${domainType})`);
 
       return {
         domain: customDomain,
-        verificationToken,
+        domainType,
+        netlifyUrl,
         dnsInstructions
       };
 
@@ -94,43 +164,41 @@ class DomainService {
   }
 
   /**
-   * Vérifie la propriété d'un domaine via DNS
+   * Vérifie le pointage DNS d'un domaine (CNAME/A uniquement, pas de TXT)
    */
-  async verifyDomainOwnership(domain: string, token: string): Promise<DomainValidationResult> {
+  async verifyDomainRouting(domain: string): Promise<DomainValidationResult> {
     const result: DomainValidationResult = {
       isValid: false,
-      txtRecordValid: false,
-      cnameValid: false,
+      dnsRecordValid: false,
       errors: [],
       warnings: []
     };
 
     try {
-      strapi.log.info(`Verifying domain ownership for ${domain}`);
+      strapi.log.info(`Verifying DNS routing for ${domain}`);
 
-      // 1. Vérifier l'enregistrement TXT
-      const txtValid = await this.checkTxtRecord(domain, token);
-      result.txtRecordValid = txtValid;
+      const isApex = this.isApexDomain(domain);
+      let dnsValid = false;
 
-      if (!txtValid) {
-        result.errors.push('Enregistrement TXT de vérification non trouvé ou incorrect');
+      if (isApex) {
+        dnsValid = await this.checkApexDnsRecord(domain);
+        if (!dnsValid) {
+          result.errors.push(`Enregistrement A non configuré ou ne pointe pas vers ${NETLIFY_LB_IP}`);
+        }
+      } else {
+        dnsValid = await this.checkCnameRecord(domain);
+        if (!dnsValid) {
+          result.errors.push('Enregistrement CNAME non configuré ou incorrect');
+        }
       }
 
-      // 2. Vérifier l'enregistrement CNAME
-      const cnameValid = await this.checkCnameRecord(domain);
-      result.cnameValid = cnameValid;
-
-      if (!cnameValid) {
-        result.errors.push('Enregistrement CNAME non configuré ou incorrect');
-      }
-
-      // 3. Validation globale
-      result.isValid = txtValid && cnameValid;
+      result.dnsRecordValid = dnsValid;
+      result.isValid = dnsValid;
 
       if (result.isValid) {
-        strapi.log.info(`Domain ${domain} verified successfully`);
+        strapi.log.info(`Domain ${domain} DNS routing verified successfully`);
       } else {
-        strapi.log.warn(`Domain ${domain} verification failed:`, result.errors);
+        strapi.log.warn(`Domain ${domain} DNS routing verification failed: ${JSON.stringify(result.errors)}`);
       }
 
       return result;
@@ -143,37 +211,13 @@ class DomainService {
   }
 
   /**
-   * Vérifie l'enregistrement TXT de vérification
-   */
-  async checkTxtRecord(domain: string, expectedToken: string): Promise<boolean> {
-    try {
-      const txtRecordName = `${this.TXT_RECORD_PREFIX}.${domain}`;
-      const records = await resolveTxt(txtRecordName);
-
-      // Rechercher notre token dans les enregistrements TXT
-      for (const record of records) {
-        const recordValue = Array.isArray(record) ? record.join('') : record;
-        if (recordValue === expectedToken) {
-          return true;
-        }
-      }
-
-      return false;
-
-    } catch (error: any) {
-      if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
-        return false; // Enregistrement TXT non trouvé
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Vérifie l'enregistrement CNAME
+   * Vérifie l'enregistrement CNAME (pour les sous-domaines)
    */
   async checkCnameRecord(domain: string): Promise<boolean> {
     try {
+      strapi.log.info(`[DOMAIN] CNAME lookup: ${domain}`);
       const records = await resolveCname(domain);
+      strapi.log.info(`[DOMAIN] CNAME records found: ${JSON.stringify(records)}, expected suffix: ${this.NETLIFY_DNS_TARGET}`);
 
       // Vérifier si le CNAME pointe vers Netlify
       for (const record of records) {
@@ -186,43 +230,67 @@ class DomainService {
 
     } catch (error: any) {
       if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
-        return false; // Enregistrement CNAME non trouvé
+        strapi.log.info(`[DOMAIN] CNAME lookup failed: ${error.code} for ${domain}`);
+        return false;
       }
       throw error;
     }
   }
 
   /**
-   * Active un domaine personnalisé après vérification
+   * Vérifie le A record pour un apex domain
    */
-  async activateCustomDomain(siteId: string): Promise<{ success: boolean; url?: string; error?: string }> {
+  async checkApexDnsRecord(domain: string): Promise<boolean> {
     try {
-      // 1. Récupérer les infos du site
-      const site = await strapi.entityService.findOne('api::site.site', siteId);
+      const records = await resolve4(domain);
 
-      if (!site || !(site as any).custom_domain || !(site as any).domain_verification_token) {
-        throw new Error('Site ou domaine non configuré');
+      for (const record of records) {
+        if (record === NETLIFY_LB_IP) {
+          return true;
+        }
       }
 
-      // 2. Vérifier la propriété du domaine
-      const validation = await this.verifyDomainOwnership((site as any).custom_domain, (site as any).domain_verification_token);
+      return false;
+
+    } catch (error: any) {
+      if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Active un domaine personnalisé après vérification du pointage DNS.
+   * Le domaine est déjà enregistré sur Netlify (fait dans configureDomain).
+   */
+  async activateCustomDomain(siteId: string): Promise<{ success: boolean; url?: string; error?: string; hint?: string }> {
+    const site = await this.findSiteByDocumentId(siteId);
+
+    if (!site || !(site as any).custom_domain) {
+      return { success: false, error: 'Site ou domaine non configuré' };
+    }
+
+    try {
+      const domain = (site as any).custom_domain;
+
+      strapi.log.info(`[DOMAIN] Verifying DNS routing for ${domain}`);
+
+      // 1. Vérifier le pointage DNS (CNAME/A uniquement)
+      const validation = await this.verifyDomainRouting(domain);
 
       if (!validation.isValid) {
         return {
           success: false,
-          error: validation.errors.join(', ')
+          error: validation.errors.join(', '),
+          hint: 'La propagation DNS peut prendre jusqu\'à 48 heures. Si vous venez de configurer vos enregistrements DNS, réessayez plus tard.'
         };
       }
 
-      // 3. Ajouter le domaine à Netlify
-      if ((site as any).netlify_site_id) {
-        await netlifyService.addDomainToNetlify((site as any).netlify_site_id, (site as any).custom_domain);
-      }
+      // 2. Mettre à jour le site en base
+      const customUrl = `https://${domain}`;
 
-      // 4. Mettre à jour le site en base
-      const customUrl = `https://${(site as any).custom_domain}`;
-
-      await strapi.entityService.update('api::site.site', siteId, {
+      await strapi.entityService.update('api::site.site', site.id, {
         data: {
           domain_status: 'verified',
           live_url: customUrl,
@@ -230,17 +298,18 @@ class DomainService {
         } as any
       });
 
-      // 5. Provisionner le SSL
+      // 3. Provisionner le SSL
       if ((site as any).netlify_site_id) {
         try {
           await netlifyService.provisionSSL((site as any).netlify_site_id);
+          // Activer force_ssl pour rediriger .netlify.app → custom domain
+          await netlifyService.updateSite((site as any).netlify_site_id, { force_ssl: true });
         } catch (sslError) {
-          strapi.log.warn(`SSL provisioning failed for ${(site as any).custom_domain}:`, sslError);
-          // Ne pas faire échouer toute l'opération pour un problème SSL
+          strapi.log.warn(`SSL provisioning failed for ${domain}:`, sslError);
         }
       }
 
-      strapi.log.info(`Custom domain ${(site as any).custom_domain} activated successfully`);
+      strapi.log.info(`Custom domain ${domain} activated successfully`);
 
       return {
         success: true,
@@ -251,7 +320,7 @@ class DomainService {
       strapi.log.error(`Error activating custom domain:`, error);
 
       // Marquer le domaine en erreur
-      await strapi.entityService.update('api::site.site', siteId, {
+      await strapi.entityService.update('api::site.site', site.id, {
         data: {
           domain_status: 'error'
         } as any
@@ -270,19 +339,28 @@ class DomainService {
   async removeDomain(siteId: string): Promise<{ success: boolean; defaultUrl?: string; error?: string }> {
     try {
       // 1. Récupérer les infos du site
-      const site = await strapi.entityService.findOne('api::site.site', siteId);
+      const site = await this.findSiteByDocumentId(siteId);
 
       if (!site) {
         throw new Error('Site non trouvé');
       }
 
+      const domain = (site as any).custom_domain;
+
       // 2. Supprimer de Netlify si configuré
-      if ((site as any).netlify_site_id && (site as any).custom_domain) {
+      if ((site as any).netlify_site_id && domain) {
         try {
-          await netlifyService.removeDomainFromNetlify((site as any).netlify_site_id, (site as any).custom_domain);
+          await netlifyService.removeDomainFromNetlify((site as any).netlify_site_id, domain);
         } catch (netlifyError) {
           strapi.log.warn(`Failed to remove domain from Netlify:`, netlifyError);
-          // Continuer même si la suppression Netlify échoue
+        }
+
+        if (this.isApexDomain(domain)) {
+          try {
+            await netlifyService.removeDomainAlias((site as any).netlify_site_id, `www.${domain}`);
+          } catch (wwwError) {
+            strapi.log.warn(`Failed to remove www variant from Netlify:`, wwwError);
+          }
         }
       }
 
@@ -298,11 +376,11 @@ class DomainService {
       }
 
       // 4. Reset en base
-      await strapi.entityService.update('api::site.site', siteId, {
+      await strapi.entityService.update('api::site.site', site.id, {
         data: {
           custom_domain: null,
-          domain_verification_token: null,
           domain_status: 'pending',
+          domain_type: null,
           domain_configured_at: null,
           live_url: defaultUrl
         } as any
@@ -325,10 +403,10 @@ class DomainService {
   }
 
   /**
-   * Valide le format d'un domaine
+   * Valide le format d'un domaine (accepte apex et sous-domaines)
    */
   validateDomainFormat(domain: string): boolean {
-    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+    const domainRegex = /^([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
     return domainRegex.test(domain);
   }
 
@@ -339,7 +417,7 @@ class DomainService {
     const filters: any = { custom_domain: domain };
 
     if (excludeSiteId) {
-      filters.id = { $ne: excludeSiteId };
+      filters.documentId = { $ne: excludeSiteId };
     }
 
     const existingSites = await strapi.entityService.findMany('api::site.site', {
@@ -350,21 +428,69 @@ class DomainService {
   }
 
   /**
-   * Génère les instructions DNS pour un domaine
+   * Extrait le domaine de base (les 2 derniers labels : ex. philippechevreul.com)
    */
-  generateDnsInstructions(domain: string, verificationToken: string) {
-    return {
-      txtRecord: {
-        name: `${this.TXT_RECORD_PREFIX}.${domain}`,
-        value: verificationToken,
-        instructions: `Ajoutez un enregistrement TXT avec le nom "${this.TXT_RECORD_PREFIX}.${domain}" et la valeur "${verificationToken}" dans votre zone DNS.`
-      },
-      cnameRecord: {
+  private getBaseDomain(domain: string): string {
+    const labels = domain.split('.');
+    return labels.slice(-2).join('.');
+  }
+
+  /**
+   * Retourne le nom d'hôte à saisir chez le fournisseur DNS.
+   * Retire le suffixe du domaine de base, retourne '@' pour un apex.
+   */
+  private getDisplayName(fullName: string, baseDomain: string): string {
+    if (fullName === baseDomain) {
+      return '@';
+    }
+    const suffix = `.${baseDomain}`;
+    if (fullName.endsWith(suffix)) {
+      return fullName.slice(0, -suffix.length);
+    }
+    return fullName;
+  }
+
+  /**
+   * Génère les instructions DNS pour un domaine (CNAME/A uniquement, pas de TXT)
+   */
+  generateDnsInstructions(domain: string, netlifyUrl: string): { isApex: boolean; baseDomain: string; records: DnsInstruction[] } {
+    const isApex = this.isApexDomain(domain);
+    const baseDomain = this.getBaseDomain(domain);
+    const records: DnsInstruction[] = [];
+
+    if (isApex) {
+      // Apex domain : A record + CNAME www
+      records.push({
+        type: 'A',
         name: domain,
-        value: this.NETLIFY_DNS_TARGET,
-        instructions: `Ajoutez un enregistrement CNAME avec le nom "${domain}" pointant vers "${this.NETLIFY_DNS_TARGET}" dans votre zone DNS.`
-      }
-    };
+        displayName: this.getDisplayName(domain, baseDomain),
+        value: NETLIFY_LB_IP,
+        purpose: 'Pointage du domaine',
+        description: `Redirige ${domain} vers le serveur d'hébergement`
+      });
+
+      const wwwName = `www.${domain}`;
+      records.push({
+        type: 'CNAME',
+        name: wwwName,
+        displayName: this.getDisplayName(wwwName, baseDomain),
+        value: netlifyUrl,
+        purpose: 'Redirection www',
+        description: `Permet à www.${domain} de fonctionner également`
+      });
+    } else {
+      // Subdomain : CNAME
+      records.push({
+        type: 'CNAME',
+        name: domain,
+        displayName: this.getDisplayName(domain, baseDomain),
+        value: netlifyUrl,
+        purpose: 'Pointage du domaine',
+        description: `Redirige ${domain} vers le serveur d'hébergement`
+      });
+    }
+
+    return { isApex, baseDomain, records };
   }
 
   /**

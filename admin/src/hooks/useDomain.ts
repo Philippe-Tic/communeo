@@ -60,10 +60,10 @@ export const useDomain = () => {
         })
       } else {
         toaster.create({
-          title: 'Vérification échouée',
-          description: data.error || 'La vérification du domaine a échoué',
-          type: 'error',
-          duration: 8000,
+          title: 'Vérification en attente',
+          description: data.hint || data.error || 'La vérification du domaine a échoué. La propagation DNS peut prendre jusqu\'à 48h.',
+          type: 'warning',
+          duration: 10000,
         })
       }
 
@@ -117,8 +117,9 @@ export const useDomain = () => {
   const domainStatus = domainStatusQuery.data
   const hasCustomDomain = domainStatus?.hasCustomDomain || false
   const isConfigured = domainStatus?.domainStatus === 'verified'
-  const isPending = domainStatus?.domainStatus === 'pending'
+  const isPending = domainStatus?.domainStatus === 'pending' && hasCustomDomain
   const hasError = domainStatus?.domainStatus === 'error'
+  const domainType = domainStatus?.domainType || null
   const isLoading = domainStatusQuery.isLoading ||
                    configureDomainMutation.isPending ||
                    verifyDomainMutation.isPending ||
@@ -131,6 +132,7 @@ export const useDomain = () => {
     isConfigured,
     isPending,
     hasError,
+    domainType,
     isLoading,
 
     // État des queries

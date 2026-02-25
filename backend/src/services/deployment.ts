@@ -100,7 +100,7 @@ class DeploymentService {
         console.log(`✅ [DEPLOYMENT] Netlify site created: ${netlifyId}`);
 
         // Mettre à jour le site avec l'ID Netlify
-        await strapi.entityService.update('api::site.site', siteId, {
+        await strapi.entityService.update('api::site.site', site.id, {
           data: {
             netlify_site_id: netlifyId,
             live_url: netlifyResult.url
@@ -114,7 +114,10 @@ class DeploymentService {
 
       // 3. Build le site Astro
       console.log(`🏗️ [DEPLOYMENT] Step 3: Building Astro site...`);
-      const buildResult = await this.buildSite(siteId, (site as any).slug);
+      const customDomain = (site as any).custom_domain
+        ? { domain: (site as any).custom_domain, verified: (site as any).domain_status === 'verified' }
+        : undefined;
+      const buildResult = await this.buildSite(siteId, (site as any).slug, (site as any).live_url, customDomain);
       if (!buildResult.success) {
         console.error(`❌ [DEPLOYMENT] Build failed: ${buildResult.error}`);
         throw new Error(buildResult.error || 'Build failed');
@@ -277,7 +280,7 @@ class DeploymentService {
   /**
    * Build un site Astro avec les variables d'environnement appropriées
    */
-  async buildSite(siteId: string, siteSlug: string): Promise<BuildResult> {
+  async buildSite(siteId: string, siteSlug: string, liveUrl?: string, customDomain?: { domain: string; verified: boolean }): Promise<BuildResult> {
     const startTime = Date.now();
     const tempBuildDir = path.join(this.tempDir, `build-${siteSlug}-${Date.now()}`);
 
@@ -311,6 +314,7 @@ class DeploymentService {
         SITE_SLUG: siteSlug,
         STRAPI_URL: process.env.STRAPI_PUBLIC_URL || 'http://localhost:1337',
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
+        SITE_URL: liveUrl || `https://${siteSlug}-mairie.netlify.app`,
         NODE_ENV: 'production'
       };
 
@@ -397,6 +401,14 @@ class DeploymentService {
         }
       } catch (error) {
         console.warn(`⚠️ [BUILD] Could not analyze dist contents:`, error);
+      }
+
+      // Générer _redirects pour rediriger .netlify.app → custom domain
+      if (customDomain?.verified && customDomain.domain) {
+        const redirectsContent = `# Redirect netlify subdomain to primary custom domain\nhttps://${siteSlug}-mairie.netlify.app/* https://${customDomain.domain}/:splat 301!\n`;
+        const redirectsPath = path.join(distPath, '_redirects');
+        fs.writeFileSync(redirectsPath, redirectsContent, 'utf8');
+        console.log(`✅ [BUILD] _redirects generated: ${siteSlug}-mairie.netlify.app → ${customDomain.domain}`);
       }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);

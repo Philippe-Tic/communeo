@@ -1,3 +1,11 @@
 .mcp.json
 .DS_Store
 .claude/
+
+# Production secrets
+.env
+.env.local
+!.env.production
+
+# Backups
+backups/

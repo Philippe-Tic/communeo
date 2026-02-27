@@ -14,65 +14,70 @@ export default async ({ strapi }) => {
 
     console.log('✅ Bootstrap - Found authenticated role:', authenticatedRole.id);
 
-    // Créer un site de test s'il n'existe pas
-    let testSite = await strapi.entityService.findMany('api::site.site', {
-      filters: { slug: 'test-site' },
-    });
-
-    if (!testSite || testSite.length === 0) {
-      testSite = await strapi.entityService.create('api::site.site', {
-        data: {
-          name: 'Test Site',
-          slug: 'test-site',
-          contact_mail: 'test@example.com',
-          contact_phone: '0123456789',
-          address: '123 Test Street',
-        },
+    // --- Données de test : uniquement en développement ---
+    if (process.env.NODE_ENV !== 'production') {
+      // Créer un site de test s'il n'existe pas
+      let testSite = await strapi.entityService.findMany('api::site.site', {
+        filters: { slug: 'test-site' },
       });
-      console.log('✅ Bootstrap - Created test site:', testSite.documentId);
-    } else {
-      testSite = testSite[0];
-      console.log('✅ Bootstrap - Found existing test site:', testSite.documentId);
-    }
 
-    // Créer un utilisateur de test s'il n'existe pas
-    let testUser = await strapi.query('plugin::users-permissions.user').findOne({
-      where: { email: 'test@example.com' },
-    });
-
-    if (!testUser) {
-      try {
-        // In Strapi v5, use the plugin service to hash passwords
-        const userService = strapi.plugin('users-permissions').service('user');
-        const hashedPassword = (await userService.ensureHashedPasswords({ password: 'test123' })).password;
-        testUser = await strapi.query('plugin::users-permissions.user').create({
+      if (!testSite || testSite.length === 0) {
+        testSite = await strapi.entityService.create('api::site.site', {
           data: {
-            username: 'testuser',
-            email: 'test@example.com',
-            password: hashedPassword,
-            confirmed: true,
-            blocked: false,
-            role: authenticatedRole.id,
-            site: testSite.id,
-            municipality_role: 'admin',
-            first_name: 'Test',
-            last_name: 'User',
-            active: true,
+            name: 'Test Site',
+            slug: 'test-site',
+            contact_mail: 'test@example.com',
+            contact_phone: '0123456789',
+            address: '123 Test Street',
           },
         });
-        console.log('✅ Bootstrap - Created test user:', testUser.id);
-      } catch (error) {
-        console.log('⚠️ Bootstrap - Could not create test user:', error.message);
+        console.log('✅ Bootstrap - Created test site:', testSite.documentId);
+      } else {
+        testSite = testSite[0];
+        console.log('✅ Bootstrap - Found existing test site:', testSite.documentId);
+      }
+
+      // Créer un utilisateur de test s'il n'existe pas
+      let testUser = await strapi.query('plugin::users-permissions.user').findOne({
+        where: { email: 'test@example.com' },
+      });
+
+      if (!testUser) {
+        try {
+          // In Strapi v5, use the plugin service to hash passwords
+          const userService = strapi.plugin('users-permissions').service('user');
+          const hashedPassword = (await userService.ensureHashedPasswords({ password: 'test123' })).password;
+          testUser = await strapi.query('plugin::users-permissions.user').create({
+            data: {
+              username: 'testuser',
+              email: 'test@example.com',
+              password: hashedPassword,
+              confirmed: true,
+              blocked: false,
+              role: authenticatedRole.id,
+              site: testSite.id,
+              municipality_role: 'admin',
+              first_name: 'Test',
+              last_name: 'User',
+              active: true,
+            },
+          });
+          console.log('✅ Bootstrap - Created test user:', testUser.id);
+        } catch (error) {
+          console.log('⚠️ Bootstrap - Could not create test user:', error.message);
+        }
+      } else {
+        // Mettre à jour l'utilisateur existant avec le site
+        await strapi.query('plugin::users-permissions.user').update({
+          where: { id: testUser.id },
+          data: {
+            site: testSite.id,
+          },
+        });
+        console.log('✅ Bootstrap - Updated existing test user:', testUser.id);
       }
     } else {
-      // Mettre à jour l'utilisateur existant avec le site
-      await strapi.query('plugin::users-permissions.user').update({
-        where: { id: testUser.id },
-        data: {
-          site: testSite.id,
-        },
-      });
-      console.log('✅ Bootstrap - Updated existing test user:', testUser.id);
+      console.log('ℹ️ Bootstrap - Production mode: skipping test data creation');
     }
 
     // Définir les permissions à accorder
@@ -268,25 +273,34 @@ export default async ({ strapi }) => {
       console.log(`✅ Bootstrap - Migrated roles: ${migrated} → admin, ${migratedSecretary} → editor`);
     }
 
-    // Créer quelques pages de test
-    const existingPages = await strapi.entityService.findMany('api::page.page', {
-      filters: { site: { documentId: testSite.documentId } },
-    });
-
-    if (!existingPages || existingPages.length === 0) {
-      const testPage = await strapi.entityService.create('api::page.page', {
-        data: {
-          title: 'Page de test',
-          slug: 'page-de-test',
-          content: 'Contenu de la page de test',
-          status: 'published',
-          site: testSite.documentId,
-          template: 'default',
-          menu_order: 0,
-          show_in_menu: true,
-        },
+    // Créer quelques pages de test (uniquement en développement)
+    if (process.env.NODE_ENV !== 'production') {
+      const testSiteForPages = await strapi.entityService.findMany('api::site.site', {
+        filters: { slug: 'test-site' },
       });
-      console.log('✅ Bootstrap - Created test page:', testPage.documentId);
+      const testSite = testSiteForPages?.[0];
+
+      if (testSite) {
+        const existingPages = await strapi.entityService.findMany('api::page.page', {
+          filters: { site: { documentId: testSite.documentId } },
+        });
+
+        if (!existingPages || existingPages.length === 0) {
+          const testPage = await strapi.entityService.create('api::page.page', {
+            data: {
+              title: 'Page de test',
+              slug: 'page-de-test',
+              content: 'Contenu de la page de test',
+              status: 'published',
+              site: testSite.documentId,
+              template: 'default',
+              menu_order: 0,
+              show_in_menu: true,
+            },
+          });
+          console.log('✅ Bootstrap - Created test page:', testPage.documentId);
+        }
+      }
     }
 
     console.log('🎉 Bootstrap - Permissions setup completed!');

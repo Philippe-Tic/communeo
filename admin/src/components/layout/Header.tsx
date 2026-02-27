@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <Menu className="h-5 w-5" />
         </button>
 
-        <h1 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-lg font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-xl">Admin CMS</h1>
+        <h1 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-lg font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-xl">Communeo</h1>
       </div>
 
       {/* Right side */}

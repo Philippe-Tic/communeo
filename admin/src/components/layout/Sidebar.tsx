@@ -147,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {variant === 'drawer' && (
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300">Admin CMS</h2>
+          <h2 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300">Communeo</h2>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-accent">
             <X className="h-5 w-5" />
           </button>

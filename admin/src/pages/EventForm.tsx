@@ -109,7 +109,7 @@ export function EventForm({ isEditing = false, initialData }: EventFormProps) {
         address: initialData.address || '',
         price: initialData.price || '',
         external_link: initialData.external_link || '',
-        category: initialData.category,
+        category: initialData.category || 'cultural',
         organizer: initialData.organizer || '',
         contact_email: initialData.contact_email || '',
         contact_phone: initialData.contact_phone || '',

@@ -140,8 +140,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={cn(
         'fixed left-0 overflow-y-auto transition-transform duration-300 ease-in-out',
         variant === 'sidebar'
-          ? 'top-[72px] h-[calc(100vh-72px)] w-[250px] border-r border-white/20 bg-white/95 dark:border-white/[0.08] dark:bg-slate-900/95'
-          : 'top-0 z-[1100] h-screen w-[280px] bg-white/95 shadow-xl dark:bg-slate-900/95 md:w-[250px]',
+          ? 'top-[72px] h-[calc(100vh-72px)] w-[250px] border-r border-white/20 bg-[#F8F6F2]/95 dark:border-white/[0.08] dark:bg-slate-900/95'
+          : 'top-0 z-[1100] h-screen w-[280px] bg-[#F8F6F2]/95 shadow-xl dark:bg-slate-900/95 md:w-[250px]',
         variant === 'drawer' && !isOpen && '-translate-x-full'
       )}
     >

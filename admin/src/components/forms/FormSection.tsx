@@ -8,7 +8,7 @@ interface FormSectionProps {
 export function FormSection({ title, children }: FormSectionProps) {
   return (
     <div className="glass-card overflow-hidden rounded-xl pb-6">
-      <div className="h-1 rounded-t-xl bg-gradient-to-r from-indigo-500 to-indigo-400" />
+      <div className="h-1 rounded-t-xl bg-gradient-to-r from-brand-700 to-brand-600" />
       <CardHeader className="pt-5">
         <CardTitle>{title}</CardTitle>
       </CardHeader>

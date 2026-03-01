@@ -33,7 +33,7 @@ export function DomainStepIndicator({ currentStep }: DomainStepIndicatorProps) {
               ) : (
                 <div className={`flex h-5 w-5 items-center justify-center rounded-full text-xs font-medium ${
                   isCurrent
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-brand-800 text-white'
                     : 'bg-muted text-muted-foreground'
                 }`}>
                   {index + 1}
@@ -45,7 +45,7 @@ export function DomainStepIndicator({ currentStep }: DomainStepIndicatorProps) {
                   isCompleted
                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                     : isCurrent
-                      ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
+                      ? 'bg-brand-100 text-brand-800 dark:bg-brand-900 dark:text-brand-200'
                       : ''
                 }
               >

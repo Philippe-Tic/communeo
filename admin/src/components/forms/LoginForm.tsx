@@ -47,7 +47,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <div className="glass-card rounded-2xl p-6 md:p-8">
         <div className="space-y-5 md:space-y-6">
           <div className="text-center">
-            <h1 className="mb-2 bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-xl font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-2xl">
+            <h1 className="mb-2 bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-xl font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-2xl">
               Connexion
             </h1>
             <p className="text-sm text-muted-foreground md:text-base">
@@ -100,7 +100,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
             <Button
               type="submit"
-              className="mt-2 w-full bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-md hover:from-indigo-700 hover:to-indigo-600 dark:from-indigo-600 dark:to-indigo-500"
+              className="mt-2 w-full bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-md hover:from-brand-900 hover:to-brand-800 dark:from-brand-600 dark:to-brand-500"
               disabled={isSubmitting || loading}
             >
               {(isSubmitting || loading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

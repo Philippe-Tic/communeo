@@ -11,7 +11,7 @@ interface StatsCardProps {
 const COLOR_MAP: Record<string, { text: string; iconBg: string; iconText: string }> = {
   blue: { text: 'text-blue-600 dark:text-blue-400', iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600', iconText: 'text-white' },
   green: { text: 'text-emerald-600 dark:text-emerald-400', iconBg: 'bg-gradient-to-br from-emerald-500 to-emerald-600', iconText: 'text-white' },
-  purple: { text: 'text-indigo-600 dark:text-indigo-400', iconBg: 'bg-gradient-to-br from-indigo-500 to-indigo-600', iconText: 'text-white' },
+  purple: { text: 'text-brand-600 dark:text-brand-400', iconBg: 'bg-gradient-to-br from-brand-500 to-brand-600', iconText: 'text-white' },
   red: { text: 'text-red-600 dark:text-red-400', iconBg: 'bg-gradient-to-br from-red-500 to-red-600', iconText: 'text-white' },
   orange: { text: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-gradient-to-br from-orange-500 to-orange-600', iconText: 'text-white' },
 }

@@ -33,13 +33,13 @@ export const ForgotPassword = () => {
           <div className="glass-card rounded-2xl p-6 md:p-8">
             <div className="flex flex-col items-center gap-4 text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500" />
-              <h1 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-xl font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-2xl">
+              <h1 className="bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-xl font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-2xl">
                 Email envoyé
               </h1>
               <p className="text-sm text-muted-foreground md:text-base">
                 Si un compte existe avec cet email, vous recevrez un lien de réinitialisation dans quelques minutes.
               </p>
-              <Button className="mt-2 bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-md hover:from-indigo-700 hover:to-indigo-600 dark:from-indigo-600 dark:to-indigo-500" onClick={() => navigate('/login')}>
+              <Button className="mt-2 bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-md hover:from-brand-900 hover:to-brand-800 dark:from-brand-600 dark:to-brand-500" onClick={() => navigate('/login')}>
                 Retour à la connexion
               </Button>
             </div>
@@ -55,7 +55,7 @@ export const ForgotPassword = () => {
         <div className="glass-card rounded-2xl p-6 md:p-8">
           <div className="space-y-5 md:space-y-6">
             <div className="text-center">
-              <h1 className="mb-2 bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-xl font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-2xl">
+              <h1 className="mb-2 bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-xl font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-2xl">
                 Mot de passe oublié
               </h1>
               <p className="text-sm text-muted-foreground md:text-base">
@@ -84,7 +84,7 @@ export const ForgotPassword = () => {
 
               <Button
                 type="submit"
-                className="mt-2 w-full bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-md hover:from-indigo-700 hover:to-indigo-600 dark:from-indigo-600 dark:to-indigo-500"
+                className="mt-2 w-full bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-md hover:from-brand-900 hover:to-brand-800 dark:from-brand-600 dark:to-brand-500"
                 disabled={isSubmitting || forgotMutation.isPending}
               >
                 {(isSubmitting || forgotMutation.isPending) && (

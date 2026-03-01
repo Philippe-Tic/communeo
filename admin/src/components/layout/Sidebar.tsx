@@ -117,7 +117,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
           active
-            ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
+            ? 'bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm dark:from-brand-600 dark:to-brand-500'
             : 'text-foreground hover:bg-accent dark:hover:bg-accent/50'
         )}
       >
@@ -147,7 +147,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {variant === 'drawer' && (
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300">Communeo</h2>
+          <h2 className="bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300">Communeo</h2>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-accent">
             <X className="h-5 w-5" />
           </button>
@@ -161,7 +161,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={cn(
             'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
             isActive('/dashboard')
-              ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm dark:from-indigo-600 dark:to-indigo-500'
+              ? 'bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm dark:from-brand-600 dark:to-brand-500'
               : 'text-foreground hover:bg-accent dark:hover:bg-accent/50'
           )}
         >
@@ -177,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 type="button"
                 onClick={() => toggleGroup(group.key)}
-                className="mb-1 flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-indigo-400/70 hover:text-indigo-500 dark:text-indigo-400/50 dark:hover:text-indigo-400 transition-colors"
+                className="mb-1 flex w-full items-center justify-between px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-brand-400/70 hover:text-brand-500 dark:text-brand-400/50 dark:hover:text-brand-400 transition-colors"
               >
                 {group.label}
                 <ChevronDown

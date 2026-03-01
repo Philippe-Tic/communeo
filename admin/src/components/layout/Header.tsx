@@ -34,7 +34,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <Menu className="h-5 w-5" />
         </button>
 
-        <h1 className="bg-gradient-to-r from-indigo-600 to-indigo-500 bg-clip-text text-lg font-extrabold text-transparent dark:from-indigo-400 dark:to-indigo-300 md:text-xl">Communeo</h1>
+        <h1 className="bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-lg font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-xl">Communeo</h1>
       </div>
 
       {/* Right side */}
@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 rounded-md p-2 hover:bg-accent">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 text-sm font-bold text-white ring-2 ring-indigo-200 dark:from-indigo-500 dark:to-indigo-400 dark:ring-indigo-800">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-800 to-brand-700 text-sm font-bold text-white ring-2 ring-brand-200 dark:from-brand-500 dark:to-brand-400 dark:ring-brand-800">
                   {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
                 </div>
                 <div className="hidden text-left sm:block">
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-indigo-500 font-bold text-white dark:from-indigo-500 dark:to-indigo-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-brand-800 to-brand-700 font-bold text-white dark:from-brand-500 dark:to-brand-400">
                     {user.first_name?.charAt(0)}{user.last_name?.charAt(0)}
                   </div>
                   <div>

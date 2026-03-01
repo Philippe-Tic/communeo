@@ -10,7 +10,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-slate-100 dark:from-slate-950 dark:via-indigo-950/20 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-[#F0EDE5] via-white/30 to-[#E8E4DC] dark:from-slate-950 dark:via-brand-900/20 dark:to-slate-900">
       <Header
         onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       />

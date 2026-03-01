@@ -179,7 +179,7 @@ export const Dashboard = () => {
 
             <div className="flex flex-wrap gap-4">
               <RouterLink to="/articles/new">
-                <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-indigo-600">
+                <Button size="sm" className="bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm hover:from-brand-900 hover:to-brand-800">
                   Nouvel article
                 </Button>
               </RouterLink>
@@ -251,7 +251,7 @@ export const Dashboard = () => {
                   title="Dernier déploiement"
                   linkTo="/deployment"
                   linkLabel="Gérer"
-                  icon={<Rocket className="h-4 w-4 text-indigo-500" />}
+                  icon={<Rocket className="h-4 w-4 text-brand-500" />}
                 />
               </div>
               {currentDeployment ? (
@@ -284,7 +284,7 @@ export const Dashboard = () => {
                 <div className="mb-2 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400 transition-all"
+                      className="h-full rounded-full bg-gradient-to-r from-brand-700 to-brand-600 transition-all"
                       style={{ width: `${conformityPercent}%` }}
                     />
                   </div>
@@ -341,7 +341,7 @@ export const Dashboard = () => {
                       onClick={() => navigate(`/events/${event.documentId}`)}
                       className="glass-card flex items-start gap-3 rounded-xl p-4 text-left"
                     >
-                      <div className="flex shrink-0 flex-col items-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 px-3 py-1.5 text-white shadow-sm">
+                      <div className="flex shrink-0 flex-col items-center rounded-lg bg-gradient-to-br from-brand-700 to-brand-800 px-3 py-1.5 text-white shadow-sm">
                         <span className="text-lg font-bold leading-tight">
                           {new Date(event.start_date).getDate()}
                         </span>
@@ -398,7 +398,7 @@ export const Dashboard = () => {
               Aucun article publié pour le moment
             </p>
             <RouterLink to="/articles/new">
-              <Button size="sm" className="bg-gradient-to-r from-indigo-600 to-indigo-500 font-semibold text-white shadow-sm hover:from-indigo-700 hover:to-indigo-600">
+              <Button size="sm" className="bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm hover:from-brand-900 hover:to-brand-800">
                 Créer votre premier article
               </Button>
             </RouterLink>

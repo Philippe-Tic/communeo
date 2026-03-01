@@ -40,7 +40,7 @@ export function PageHeader({ title, subtitle, actions = [], breadcrumbs }: PageH
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="font-medium text-indigo-600 dark:text-indigo-400">{crumb.label}</span>
+                <span className="font-medium text-brand-700 dark:text-brand-400">{crumb.label}</span>
               )}
             </span>
           ))}

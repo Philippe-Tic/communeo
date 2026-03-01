@@ -19,7 +19,7 @@ export function EmptyState({
     <div className="p-8 text-center">
       <div className="flex flex-col items-center gap-4">
         {icon && (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-3xl text-indigo-400 dark:from-indigo-900/40 dark:to-indigo-800/20 dark:text-indigo-400">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-50 text-3xl text-brand-400 dark:from-brand-900/40 dark:to-brand-800/20 dark:text-brand-400">
             {icon}
           </div>
         )}

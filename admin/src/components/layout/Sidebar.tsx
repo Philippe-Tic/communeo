@@ -4,7 +4,7 @@ import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
 import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useUserRole } from '@/hooks/useUser'
 
 interface NavItem {
@@ -147,7 +147,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     >
       {variant === 'drawer' && (
         <div className="flex items-center justify-between border-b p-4">
-          <h2 className="bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300">Communeo</h2>
+          <Link to="/dashboard" onClick={onClose}>
+            <span
+              className="inline-block h-5 bg-brand-800 dark:bg-brand-300"
+              style={{
+                aspectRatio: '538 / 70',
+                maskImage: 'url(/green-logo.svg)',
+                maskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskImage: 'url(/green-logo.svg)',
+                WebkitMaskSize: 'contain',
+                WebkitMaskRepeat: 'no-repeat',
+              }}
+              role="img"
+              aria-label="Communeo"
+            />
+          </Link>
           <button onClick={onClose} className="rounded-md p-1 hover:bg-accent">
             <X className="h-5 w-5" />
           </button>

@@ -47,6 +47,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <div className="glass-card rounded-2xl p-6 md:p-8">
         <div className="space-y-5 md:space-y-6">
           <div className="text-center">
+            <span
+              className="mx-auto mb-6 inline-block h-10 bg-brand-800 dark:bg-brand-300"
+              style={{
+                aspectRatio: '538 / 70',
+                maskImage: 'url(/green-logo.svg)',
+                maskSize: 'contain',
+                maskRepeat: 'no-repeat',
+                WebkitMaskImage: 'url(/green-logo.svg)',
+                WebkitMaskSize: 'contain',
+                WebkitMaskRepeat: 'no-repeat',
+              }}
+              role="img"
+              aria-label="Communeo"
+            />
             <h1 className="mb-2 bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-xl font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-2xl">
               Connexion
             </h1>

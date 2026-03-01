@@ -10,7 +10,7 @@ import {
 import { useTheme } from '@/hooks/useTheme'
 import { LogOut, Menu, Moon, Sun, User } from 'lucide-react'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 
 interface HeaderProps {
@@ -34,7 +34,22 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <Menu className="h-5 w-5" />
         </button>
 
-        <h1 className="bg-gradient-to-r from-brand-800 to-brand-700 bg-clip-text text-lg font-extrabold text-transparent dark:from-brand-400 dark:to-brand-300 md:text-xl">Communeo</h1>
+        <Link to="/dashboard">
+          <span
+            className="inline-block h-6 bg-brand-800 dark:bg-brand-300 md:h-7"
+            style={{
+              aspectRatio: '538 / 70',
+              maskImage: 'url(/green-logo.svg)',
+              maskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskImage: 'url(/green-logo.svg)',
+              WebkitMaskSize: 'contain',
+              WebkitMaskRepeat: 'no-repeat',
+            }}
+            role="img"
+            aria-label="Communeo"
+          />
+        </Link>
       </div>
 
       {/* Right side */}

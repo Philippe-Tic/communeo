@@ -43,13 +43,8 @@ services:
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
-      SMTP_SECURE: ${SMTP_SECURE:-false}
-      SMTP_DEFAULT_FROM: ${SMTP_DEFAULT_FROM}
-      SMTP_DEFAULT_REPLY_TO: ${SMTP_DEFAULT_FROM}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_DEFAULT_FROM: ${EMAIL_DEFAULT_FROM:-noreply@communeo.fr}
       ADMIN_URL: https://${DOMAIN}
       DOMAIN: ${DOMAIN}
       # Seed initial admin (first boot only, optional)

@@ -18,7 +18,7 @@
     "@sensinum/strapi-plugin-mcp": "^1.1.0",
     "@strapi/plugin-cloud": "5.36.0",
     "@strapi/plugin-users-permissions": "5.36.0",
-    "@strapi/provider-email-nodemailer": "^5.36.1",
+    "strapi-provider-email-resend": "file:src/providers/strapi-provider-email-resend",
     "@strapi/strapi": "5.36.0",
     "archiver": "^7.0.1",
     "better-sqlite3": "12.6.2",

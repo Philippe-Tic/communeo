@@ -1,0 +1,7 @@
+{
+  "name": "strapi-provider-email-resend",
+  "version": "1.0.0",
+  "description": "Resend HTTP API email provider for Strapi 5",
+  "main": "index.js",
+  "license": "MIT"
+}

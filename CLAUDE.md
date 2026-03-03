@@ -61,7 +61,7 @@ npm run type-check # Astro type checking only
 ## Environment Variables
 
 ### Backend
-- `NETLIFY_ACCESS_TOKEN` — Netlify API token for deployments
+- `NETLIFY_TOKEN` — Netlify API token for deployments
 - `STRAPI_PUBLIC_URL` — Public URL of Strapi (used during site builds)
 - `STRAPI_API_TOKEN` — API token for Strapi access from build process
 

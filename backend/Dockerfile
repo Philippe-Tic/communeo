@@ -14,7 +14,7 @@ RUN npm run build
 # --- Production stage ---
 FROM node:22-alpine
 
-RUN apk add --no-cache vips-dev
+RUN apk add --no-cache vips
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

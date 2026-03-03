@@ -51,6 +51,11 @@ services:
       SMTP_DEFAULT_FROM: ${SMTP_DEFAULT_FROM}
       SMTP_DEFAULT_REPLY_TO: ${SMTP_DEFAULT_FROM}
       DOMAIN: ${DOMAIN}
+      # Seed initial admin (first boot only, optional)
+      SEED_SITE_NAME: ${SEED_SITE_NAME:-}
+      SEED_SITE_SLUG: ${SEED_SITE_SLUG:-}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
       - ./sites:/sites:ro

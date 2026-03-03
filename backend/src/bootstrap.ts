@@ -78,6 +78,61 @@ export default async ({ strapi }) => {
       }
     } else {
       console.log('ℹ️ Bootstrap - Production mode: skipping test data creation');
+
+      // --- Seed production : premier admin ---
+      const userCount = await strapi.query('plugin::users-permissions.user').count();
+      if (userCount === 0) {
+        console.log('🌱 Bootstrap - No users found, creating initial admin...');
+
+        const siteName = process.env.SEED_SITE_NAME || 'Ma Commune';
+        const siteSlug = process.env.SEED_SITE_SLUG || 'ma-commune';
+        const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@communeo.fr';
+        const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe123!';
+
+        let seedSites = await strapi.entityService.findMany('api::site.site', {
+          filters: { slug: siteSlug },
+        });
+
+        let seedSite;
+        if (!seedSites || seedSites.length === 0) {
+          seedSite = await strapi.entityService.create('api::site.site', {
+            data: {
+              name: siteName,
+              slug: siteSlug,
+              contact_mail: adminEmail,
+              contact_phone: '',
+              address: '',
+            },
+          });
+          console.log('✅ Bootstrap - Created seed site:', seedSite.documentId);
+        } else {
+          seedSite = seedSites[0];
+        }
+
+        try {
+          const userService = strapi.plugin('users-permissions').service('user');
+          const hashedPassword = (await userService.ensureHashedPasswords({ password: adminPassword })).password;
+          const admin = await strapi.query('plugin::users-permissions.user').create({
+            data: {
+              username: adminEmail,
+              email: adminEmail,
+              password: hashedPassword,
+              confirmed: true,
+              blocked: false,
+              role: authenticatedRole.id,
+              site: seedSite.id,
+              municipality_role: 'admin',
+              first_name: 'Admin',
+              last_name: siteName,
+              active: true,
+            },
+          });
+          console.log('✅ Bootstrap - Created seed admin:', admin.email);
+          console.log('⚠️  IMPORTANT: Change the default password immediately!');
+        } catch (error) {
+          console.log('❌ Bootstrap - Could not create seed admin:', error.message);
+        }
+      }
     }
 
     // Définir les permissions à accorder

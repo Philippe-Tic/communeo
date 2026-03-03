@@ -156,17 +156,17 @@ git push
 ssh deploy@IP_DU_VPS
 
 # Créer le répertoire cible (appartient à deploy, pas à root)
-sudo mkdir -p /opt/cms-mairies
-sudo chown deploy:deploy /opt/cms-mairies
+sudo mkdir -p /opt/communeo
+sudo chown deploy:deploy /opt/communeo
 
-git clone https://github.com/TON_USER/cms-mairies.git /opt/cms-mairies
-cd /opt/cms-mairies
+git clone https://github.com/TON_USER/cms-mairies.git /opt/communeo
+cd /opt/communeo
 ```
 
 ### 3.2 Générer les secrets et créer le .env
 
 ```bash
-cd /opt/cms-mairies
+cd /opt/communeo
 
 # Générer tous les secrets d'un coup
 echo "# --- Secrets générés ---"
@@ -198,13 +198,13 @@ Remplir le `.env` avec :
 
 ```bash
 # Depuis ta machine locale (après avoir fait le build en Phase 2.1)
-scp -r admin/dist deploy@IP_DU_VPS:/opt/cms-mairies/admin/dist
+scp -r admin/dist deploy@IP_DU_VPS:/opt/communeo/admin/dist
 ```
 
 Alternative — builder directement sur le VPS (nécessite Node.js installé) :
 
 ```bash
-cd /opt/cms-mairies/admin
+cd /opt/communeo/admin
 npm ci
 VITE_API_URL=https://cms.tondomaine.fr npm run build
 ```
@@ -214,7 +214,7 @@ VITE_API_URL=https://cms.tondomaine.fr npm run build
 Avant de lancer tout docker-compose, il faut obtenir le certificat SSL. On lance Nginx temporairement en HTTP uniquement.
 
 ```bash
-cd /opt/cms-mairies
+cd /opt/communeo
 
 # Créer une config Nginx temporaire (HTTP uniquement pour le challenge ACME)
 mkdir -p nginx/conf.d-init
@@ -248,8 +248,8 @@ docker run --rm \
   certbot/certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
-    -d cms.tondomaine.fr \
-    --email ton@email.fr \
+    -d app.communeo.fr \
+    --email contact@communeo.fr \
     --agree-tos \
     --no-eff-email
 
@@ -280,7 +280,7 @@ docker volume rm cms-certbot-webroot cms-certbot-certs
 ### 3.5 Lancer l'application
 
 ```bash
-cd /opt/cms-mairies
+cd /opt/communeo
 docker compose up -d
 ```
 
@@ -296,11 +296,27 @@ docker compose ps
 
 Attendre que Strapi soit prêt (peut prendre 30-60 secondes au premier démarrage, le temps de créer les tables dans PostgreSQL).
 
-### 3.6 Créer le premier super-admin Strapi
+### 3.6 Créer le premier admin du dashboard
 
-Accéder au panel d'admin Strapi : `https://cms.tondomaine.fr/admin`
+Au premier démarrage, si aucun utilisateur n'existe, Strapi crée automatiquement un site + admin via le seed bootstrap.
 
-Strapi affiche un formulaire de création du premier compte super-admin au premier démarrage. Remplir avec tes identifiants.
+**Configurer le `.env` avant le premier `docker compose up`** (optionnel — des valeurs par défaut sont utilisées sinon) :
+
+```bash
+# Seed initial admin (first boot uniquement)
+SEED_SITE_NAME=Ma Commune
+SEED_SITE_SLUG=ma-commune
+SEED_ADMIN_EMAIL=admin@communeo.fr
+SEED_ADMIN_PASSWORD=ChangeMe123!
+```
+
+Après le démarrage, vérifier dans les logs :
+```bash
+docker compose logs strapi | grep "seed"
+# Doit afficher : "Created seed site" et "Created seed admin"
+```
+
+Se connecter sur `https://app.communeo.fr/login` avec les identifiants configurés, puis **changer le mot de passe immédiatement**.
 
 ### 3.7 Créer un API Token
 
@@ -315,7 +331,7 @@ Dans le panel admin Strapi :
 Mettre à jour le `.env` sur le serveur :
 
 ```bash
-nano /opt/cms-mairies/.env
+nano /opt/communeo/.env
 # Remplir STRAPI_API_TOKEN=le_token_copié
 ```
 
@@ -347,7 +363,7 @@ Chez ton registrar DNS, ajouter les enregistrements DKIM/SPF/DMARC fournis par R
 ### 4.3 Mettre à jour le .env
 
 ```bash
-nano /opt/cms-mairies/.env
+nano /opt/communeo/.env
 # Remplir les variables SMTP_*
 ```
 
@@ -380,16 +396,16 @@ docker compose restart strapi
 
 ```bash
 # Créer le dossier de backups
-sudo mkdir -p /opt/cms-mairies/backups
-sudo chown deploy:deploy /opt/cms-mairies/backups
+sudo mkdir -p /opt/communeo/backups
+sudo chown deploy:deploy /opt/communeo/backups
 
 # Tester le backup manuellement
-/opt/cms-mairies/scripts/backup.sh
+/opt/communeo/scripts/backup.sh
 
 # Ajouter au cron (tous les jours à 3h)
 crontab -e
 # Ajouter cette ligne :
-0 3 * * * /opt/cms-mairies/scripts/backup.sh >> /var/log/cms-backup.log 2>&1
+0 3 * * * /opt/communeo/scripts/backup.sh >> /var/log/cms-backup.log 2>&1
 ```
 
 ### 6.2 Monitoring
@@ -413,7 +429,7 @@ Configurer [UptimeRobot](https://uptimerobot.com/) (gratuit, 5 min d'intervalle)
 ### Mettre à jour le code
 
 ```bash
-cd /opt/cms-mairies
+cd /opt/communeo
 git pull
 
 # Rebuilder l'admin SPA si le frontend a changé
@@ -445,11 +461,11 @@ docker compose restart nginx
 
 ```bash
 # Restaurer la base de données
-gunzip -c /opt/cms-mairies/backups/db_YYYYMMDD_HHMMSS.sql.gz | \
+gunzip -c /opt/communeo/backups/db_YYYYMMDD_HHMMSS.sql.gz | \
   docker compose exec -T postgres psql -U strapi strapi
 
 # Restaurer les uploads
-docker compose cp /opt/cms-mairies/backups/uploads_YYYYMMDD_HHMMSS.tar.gz strapi:/tmp/
+docker compose cp /opt/communeo/backups/uploads_YYYYMMDD_HHMMSS.tar.gz strapi:/tmp/
 docker compose exec strapi sh -c "cd /app/public && tar xzf /tmp/uploads_*.tar.gz"
 ```
 

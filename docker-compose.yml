@@ -50,6 +50,7 @@ services:
       SMTP_SECURE: "false"
       SMTP_DEFAULT_FROM: ${SMTP_DEFAULT_FROM}
       SMTP_DEFAULT_REPLY_TO: ${SMTP_DEFAULT_FROM}
+      ADMIN_URL: https://app.${DOMAIN}
       DOMAIN: ${DOMAIN}
       # Seed initial admin (first boot only, optional)
       SEED_SITE_NAME: ${SEED_SITE_NAME:-}

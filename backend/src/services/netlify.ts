@@ -80,7 +80,8 @@ class NetlifyService {
    */
   async findOrCreateSite(siteName: string, siteSlug: string): Promise<NetlifySite> {
     // Utiliser un nom déterministe (sans timestamp)
-    const siteDomainName = `${siteSlug}-mairie`;
+    const envPrefix = process.env.NODE_ENV === 'production' ? '' : 'dev-';
+    const siteDomainName = `${envPrefix}${siteSlug}-mairie`;
 
     console.log(`🔍 [NETLIFY] Looking for existing site: ${siteDomainName}`);
 

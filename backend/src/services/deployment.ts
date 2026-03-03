@@ -312,9 +312,9 @@ class DeploymentService {
         // Variables pour Astro/Strapi
         SITE_DOCUMENT_ID: siteId,  // Le projet Astro s'attend à SITE_DOCUMENT_ID
         SITE_SLUG: siteSlug,
-        STRAPI_URL: process.env.STRAPI_PUBLIC_URL || 'http://localhost:1337',
+        STRAPI_URL: process.env.STRAPI_BUILD_URL || `http://localhost:${process.env.PORT || 1337}`,
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
-        SITE_URL: liveUrl || `https://${siteSlug}-mairie.netlify.app`,
+        SITE_URL: liveUrl || `https://${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`,
         NODE_ENV: 'production'
       };
 
@@ -324,6 +324,25 @@ class DeploymentService {
       console.log(`   STRAPI_URL: ${buildEnv.STRAPI_URL}`);
       console.log(`   STRAPI_TOKEN: ${buildEnv.STRAPI_TOKEN ? '***SET***' : 'NOT_SET'}`);
       console.log(`   NODE_ENV: ${buildEnv.NODE_ENV}`);
+
+      // Pre-build health check: verify Strapi is reachable and site exists
+      if (!buildEnv.STRAPI_TOKEN) {
+        throw new Error('STRAPI_API_TOKEN not set — cannot build site');
+      }
+
+      const checkUrl = `${buildEnv.STRAPI_URL}/api/sites?filters[documentId][$eq]=${siteId}`;
+      console.log(`🔍 [BUILD] Pre-build check: ${checkUrl}`);
+      const check = await fetch(checkUrl, {
+        headers: { 'Authorization': `Bearer ${buildEnv.STRAPI_TOKEN}`, 'Content-Type': 'application/json' }
+      });
+      if (!check.ok) {
+        throw new Error(`Strapi inaccessible at ${buildEnv.STRAPI_URL} (${check.status}). Check STRAPI_BUILD_URL/STRAPI_API_TOKEN.`);
+      }
+      const checkData = await check.json() as { data?: { name: string }[] };
+      if (!checkData.data?.length) {
+        throw new Error(`Site ${siteId} not found via API. Build would produce an empty site.`);
+      }
+      console.log(`✅ [BUILD] Site "${checkData.data[0].name}" accessible via API`);
 
       try {
         console.log(`🚀 [BUILD] Running: npx astro build`);
@@ -405,10 +424,11 @@ class DeploymentService {
 
       // Générer _redirects pour rediriger .netlify.app → custom domain
       if (customDomain?.verified && customDomain.domain) {
-        const redirectsContent = `# Redirect netlify subdomain to primary custom domain\nhttps://${siteSlug}-mairie.netlify.app/* https://${customDomain.domain}/:splat 301!\n`;
+        const netlifySubdomain = `${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`;
+        const redirectsContent = `# Redirect netlify subdomain to primary custom domain\nhttps://${netlifySubdomain}/* https://${customDomain.domain}/:splat 301!\n`;
         const redirectsPath = path.join(distPath, '_redirects');
         fs.writeFileSync(redirectsPath, redirectsContent, 'utf8');
-        console.log(`✅ [BUILD] _redirects generated: ${siteSlug}-mairie.netlify.app → ${customDomain.domain}`);
+        console.log(`✅ [BUILD] _redirects generated: ${netlifySubdomain} → ${customDomain.domain}`);
       }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);

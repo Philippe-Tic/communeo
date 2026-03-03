@@ -105,12 +105,15 @@ async function strapiRequest<T>(url: string): Promise<T | null> {
     const response = await fetch(url, baseConfig);
 
     if (!response.ok) {
-      throw new Error(`Strapi request failed: ${response.status} ${response.statusText}`);
+      const body = await response.text().catch(() => '');
+      console.error(`Strapi ${response.status} ${response.statusText} — ${url}`);
+      if (body) console.error(`   Response: ${body.substring(0, 500)}`);
+      return null;
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Strapi request error:', error);
+    console.error(`Strapi unreachable — ${url}:`, (error as Error).message);
     return null;
   }
 }
@@ -120,6 +123,7 @@ async function strapiRequest<T>(url: string): Promise<T | null> {
  */
 export async function getSiteConfig(): Promise<Site> {
   if (!SITE_DOCUMENT_ID) {
+    console.warn('SITE_DOCUMENT_ID not set — site will be grey/empty');
     return createDefaultSite();
   }
 

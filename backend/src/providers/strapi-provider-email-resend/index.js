@@ -7,7 +7,7 @@ const toArray = (value) => {
 };
 
 module.exports = {
-  init(providerOptions) {
+  init(providerOptions, settings) {
     const apiKey = providerOptions.apiKey;
 
     if (!apiKey) {
@@ -23,14 +23,16 @@ module.exports = {
         const { from, to, cc, bcc, replyTo, subject, text, html } = options;
 
         const body = {
-          from,
+          from: from || settings.defaultFrom,
           to: toArray(to),
           subject,
         };
 
         if (cc) body.cc = toArray(cc);
         if (bcc) body.bcc = toArray(bcc);
-        if (replyTo) body.reply_to = toArray(replyTo);
+        if (replyTo || settings.defaultReplyTo) {
+          body.reply_to = toArray(replyTo || settings.defaultReplyTo);
+        }
         if (text) body.text = text;
         if (html) body.html = html;
 

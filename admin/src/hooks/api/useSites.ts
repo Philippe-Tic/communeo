@@ -197,7 +197,7 @@ export interface CreateSiteData {
   // Navigation
   navigation_config?: NavigationItem[]
   // Réseaux sociaux
-  social_links?: Partial<Omit<SocialLink, 'id'>>[]
+  social_links?: (Partial<Omit<SocialLink, 'id' | 'icon'>> & { icon?: number | null })[]
 }
 
 export interface UpdateSiteData extends Partial<CreateSiteData> {

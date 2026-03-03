@@ -10,6 +10,7 @@ interface ImagePickerProps {
   onChange: (media: StrapiMedia | null) => void
   error?: boolean
   className?: string
+  label?: string
 }
 
 export function ImagePicker({ value, onChange, error, className }: ImagePickerProps) {

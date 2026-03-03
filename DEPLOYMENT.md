@@ -3,7 +3,7 @@
 ## Architecture cible
 
 ```
-Internet → DNS (A record) → [VPS OVH VLE-2 — ~4,20€ HT/mois]
+Internet → DNS (A record) → [VPS Scaleway START-2-S — 6,99€ HT/mois]
                                     │
                                  [Nginx :443]
                                     ├── /             → Admin SPA (React, fichiers statiques)
@@ -24,10 +24,10 @@ Internet → DNS (A record) → [VPS OVH VLE-2 — ~4,20€ HT/mois]
 
 ### 1.1 Créer le serveur
 
-1. Se connecter sur [OVHcloud](https://www.ovhcloud.com/fr/vps/)
-2. Commander un VPS **VLE-2** (2 vCPU, 4 Go RAM, 80 Go SSD) — datacenter disponible (ex: **Madrid**, la latence depuis la France reste excellente ~15-20ms)
+1. Se connecter sur la [console Scaleway](https://console.scaleway.com/)
+2. Créer une instance **START-2-S** (2 vCPU, 2 Go RAM, 30 Go NVMe) — datacenter : **Barcelona** (latence ~10-15 ms depuis la France, UE)
 3. OS : **Ubuntu 24.04**
-4. Ajouter ta clé SSH publique lors de la commande
+4. Ajouter ta clé SSH publique lors de la création
 
 ### 1.2 Sécuriser le serveur
 
@@ -46,15 +46,18 @@ usermod -aG sudo deploy
 mkdir -p /home/deploy/.ssh
 cp ~/.ssh/authorized_keys /home/deploy/.ssh/
 chown -R deploy:deploy /home/deploy/.ssh
-
-# Désactiver l'accès root SSH
-sed -i 's/^PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-systemctl restart sshd
+chmod 700 /home/deploy/.ssh
+chmod 600 /home/deploy/.ssh/authorized_keys
 ```
+
+> **Note** : On désactivera l'accès root SSH **après** avoir installé Docker et configuré le firewall (étape 1.6), pour éviter de se retrouver bloqué en cas de problème.
 
 ### 1.3 Configurer le firewall
 
 ```bash
+# ufw n'est pas préinstallé sur Scaleway Ubuntu 24.04
+sudo apt install ufw -y
+
 # En tant que deploy (ou root avant de couper l'accès)
 sudo ufw allow OpenSSH
 sudo ufw allow 80/tcp
@@ -80,7 +83,33 @@ docker --version
 docker compose version
 ```
 
-### 1.5 Configurer le DNS
+### 1.5 Configurer le swap
+
+Avec 2 Go de RAM, ajouter du swap évite les OOM kills lors des builds Strapi :
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
+
+### 1.6 Désactiver l'accès root SSH
+
+Maintenant que Docker, le firewall et le swap sont en place, on peut sécuriser l'accès SSH.
+
+```bash
+# D'abord, tester la connexion avec l'utilisateur deploy depuis un AUTRE terminal
+ssh deploy@IP_DU_VPS
+# Si ça fonctionne, continuer ci-dessous. Sinon, NE PAS désactiver root !
+
+# Désactiver l'accès root SSH (gère les deux cas : "yes" et "prohibit-password")
+sudo sed -i 's/^PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
+sudo systemctl restart ssh
+```
+
+### 1.7 Configurer le DNS
 
 Chez ton registrar DNS, créer un **enregistrement A** :
 
@@ -126,6 +155,10 @@ git push
 ```bash
 ssh deploy@IP_DU_VPS
 
+# Créer le répertoire cible (appartient à deploy, pas à root)
+sudo mkdir -p /opt/cms-mairies
+sudo chown deploy:deploy /opt/cms-mairies
+
 git clone https://github.com/TON_USER/cms-mairies.git /opt/cms-mairies
 cd /opt/cms-mairies
 ```
@@ -156,24 +189,24 @@ Remplir le `.env` avec :
 - Les secrets générés ci-dessus
 - Ton domaine (`DOMAIN=cms.tondomaine.fr`)
 - Ton token Netlify (`NETLIFY_TOKEN=...`)
-- Les identifiants SMTP Brevo (voir Phase 5)
+- Les identifiants SMTP Resend (voir Phase 4)
 - Laisser `STRAPI_API_TOKEN=` vide pour l'instant (sera rempli à l'étape 3.7)
 
-### 3.3 Builder l'admin SPA sur le VPS
+### 3.3 Copier l'admin SPA sur le VPS
 
-Si tu n'as pas copié `admin/dist/` depuis ta machine locale :
+**Méthode recommandée** — copier le build local (pas besoin de Node.js sur le VPS) :
+
+```bash
+# Depuis ta machine locale (après avoir fait le build en Phase 2.1)
+scp -r admin/dist deploy@IP_DU_VPS:/opt/cms-mairies/admin/dist
+```
+
+Alternative — builder directement sur le VPS (nécessite Node.js installé) :
 
 ```bash
 cd /opt/cms-mairies/admin
 npm ci
 VITE_API_URL=https://cms.tondomaine.fr npm run build
-```
-
-Ou bien copier depuis ta machine locale :
-
-```bash
-# Depuis ta machine locale
-scp -r admin/dist deploy@IP_DU_VPS:/opt/cms-mairies/admin/dist
 ```
 
 ### 3.4 Obtenir le certificat SSL
@@ -294,22 +327,22 @@ docker compose restart strapi
 
 ---
 
-## Phase 4 — Email (Brevo)
+## Phase 4 — Email (Resend)
 
-### 4.1 Créer un compte Brevo
+### 4.1 Configurer Resend
 
-1. S'inscrire sur [brevo.com](https://www.brevo.com/) (tier gratuit = 300 emails/jour)
-2. Aller dans **Settings** > **SMTP & API**
-3. Générer une **clé SMTP**
-4. Noter :
-   - **SMTP_HOST** : `smtp-relay.brevo.com`
+1. Se connecter sur [resend.com](https://resend.com/) (tier gratuit = 100 emails/jour, 3 000/mois)
+2. Aller dans **Settings** > **API Keys**
+3. Créer une **API Key**
+4. Aller dans **SMTP** et noter :
+   - **SMTP_HOST** : `smtp.resend.com`
    - **SMTP_PORT** : `587`
-   - **SMTP_USERNAME** : ton email Brevo
-   - **SMTP_PASSWORD** : la clé SMTP générée
+   - **SMTP_USERNAME** : `resend`
+   - **SMTP_PASSWORD** : ton API Key (commence par `re_`)
 
 ### 4.2 Configurer le DNS pour les emails
 
-Chez ton registrar DNS, ajouter les enregistrements DKIM/SPF fournis par Brevo (dans Settings > Senders & Domains) pour améliorer la délivrabilité.
+Chez ton registrar DNS, ajouter les enregistrements DKIM/SPF/DMARC fournis par Resend (dans **Domains** > **Add Domain**) pour améliorer la délivrabilité. Si tu utilises déjà Resend pour ta landing page, ces enregistrements sont probablement déjà en place.
 
 ### 4.3 Mettre à jour le .env
 
@@ -436,9 +469,9 @@ docker system prune -f   # Nettoyer les images/containers inutilisés
 
 | Service | Coût |
 |---------|------|
-| OVH VPS VLE-2 | ~4,20 € HT/mois (~5,04 € TTC) |
-| Brevo (email) | Gratuit (300 emails/jour) |
+| Scaleway START-2-S | 6,99 € HT/mois (~8,39 € TTC) |
+| Resend (email) | Gratuit (100 emails/jour) |
 | Let's Encrypt (SSL) | Gratuit |
 | UptimeRobot (monitoring) | Gratuit |
 | Netlify (sites municipaux) | Gratuit (tier starter) |
-| **Total** | **~5 €/mois TTC** |
+| **Total** | **~9 €/mois TTC** |

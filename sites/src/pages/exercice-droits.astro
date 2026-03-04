@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import { getSiteConfig } from '../utils/strapi';
 
 const siteConfig = await getSiteConfig();
-const strapiUrl = import.meta.env.STRAPI_URL;
+const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL;
 const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
 ---
 

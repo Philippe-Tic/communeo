@@ -52,6 +52,8 @@ services:
       SEED_SITE_SLUG: ${SEED_SITE_SLUG:-}
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      SEED_SUPER_ADMIN_EMAIL: ${SEED_SUPER_ADMIN_EMAIL:-}
+      SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
       - ./sites:/sites:ro

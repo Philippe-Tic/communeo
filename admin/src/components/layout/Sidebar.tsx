@@ -2,7 +2,8 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
-import { Building2, Calendar, ChevronDown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, Mail, Megaphone, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
+import { useSiteContext } from '@/contexts/SiteContext'
+import { Building2, Calendar, ChevronDown, Crown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, LogOut, Mail, Megaphone, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useUserRole } from '@/hooks/useUser'
@@ -18,6 +19,19 @@ interface NavGroup {
   label: string
   key: string
   items: NavItem[]
+}
+
+function buildSuperAdminNavGroups(): NavGroup[] {
+  return [
+    {
+      label: 'Gestion',
+      key: 'management',
+      items: [
+        { name: 'Mairies', path: '/super-admin/sites', icon: Building2 },
+        { name: 'Utilisateurs', path: '/super-admin/users', icon: Users },
+      ],
+    },
+  ]
 }
 
 function buildNavGroups(canManageUsers: boolean): NavGroup[] {
@@ -75,8 +89,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate()
   const { data: messagesCount } = useContactSubmissionsCount()
   const { data: pendingAssociationsCount } = usePendingAssociationsCount()
-  const { isAdmin } = useUserRole()
-  const navGroups = useMemo(() => buildNavGroups(isAdmin), [isAdmin])
+  const { isAdmin, isSuperAdmin } = useUserRole()
+  const { impersonatedSite, exitSite, isImpersonating } = useSiteContext()
+
+  // Super admin without impersonation sees super admin menu
+  const showSuperAdminMenu = isSuperAdmin && !isImpersonating
+  const navGroups = useMemo(
+    () => showSuperAdminMenu ? buildSuperAdminNavGroups() : buildNavGroups(isAdmin || isSuperAdmin),
+    [isAdmin, isSuperAdmin, showSuperAdminMenu]
+  )
 
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set())
 
@@ -170,18 +191,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <div className="flex flex-col gap-1 p-4">
+        {/* Impersonation banner for super admin */}
+        {isSuperAdmin && isImpersonating && impersonatedSite && (
+          <div className="mb-2 flex items-center justify-between rounded-lg bg-amber-100 px-3 py-2 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+            <span className="truncate">Mairie : {impersonatedSite.name}</span>
+            <button
+              onClick={() => { exitSite(); navigate('/super-admin') }}
+              className="ml-2 shrink-0 rounded p-0.5 hover:bg-amber-200 dark:hover:bg-amber-800"
+              title="Quitter le contexte mairie"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Dashboard - standalone */}
         <button
-          onClick={() => handleNavClick('/dashboard')}
+          onClick={() => handleNavClick(showSuperAdminMenu ? '/super-admin' : '/dashboard')}
           className={cn(
             'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors',
-            isActive('/dashboard')
+            (showSuperAdminMenu ? isActive('/super-admin') : isActive('/dashboard'))
               ? 'bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm dark:from-brand-600 dark:to-brand-500'
               : 'text-foreground hover:bg-accent dark:hover:bg-accent/50'
           )}
         >
-          <LayoutDashboard className="h-4 w-4 shrink-0" />
-          <span>Tableau de bord</span>
+          {showSuperAdminMenu ? <Crown className="h-4 w-4 shrink-0" /> : <LayoutDashboard className="h-4 w-4 shrink-0" />}
+          <span>{showSuperAdminMenu ? 'Dashboard Global' : 'Tableau de bord'}</span>
         </button>
 
         {/* Grouped navigation with collapsible sections */}

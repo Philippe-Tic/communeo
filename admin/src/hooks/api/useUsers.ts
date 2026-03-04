@@ -8,13 +8,13 @@ export interface SiteUser {
   first_name: string
   last_name: string
   phone?: string
-  municipality_role: 'admin' | 'editor'
+  municipality_role: 'super_admin' | 'admin' | 'editor'
   active: boolean
   confirmed: boolean
   blocked: boolean
   createdAt: string
   updatedAt: string
-  site: {
+  site?: {
     id: number
     documentId: string
     name: string
@@ -28,7 +28,7 @@ export interface CreateUserData {
   first_name: string
   last_name: string
   phone?: string
-  municipality_role: 'admin' | 'editor'
+  municipality_role: 'super_admin' | 'admin' | 'editor'
   active?: boolean
 }
 

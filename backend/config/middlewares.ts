@@ -3,7 +3,12 @@ export default [
   'strapi::errors',
   'strapi::security',
   'global::private-network-access',
-  'strapi::cors',
+  {
+    name: 'strapi::cors',
+    config: {
+      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Site-Document-Id'],
+    },
+  },
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',

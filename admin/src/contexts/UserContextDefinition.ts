@@ -8,8 +8,8 @@ export interface UserProfile {
   blocked: boolean
   first_name: string
   last_name: string
-  municipality_role: 'admin' | 'editor'
-  site: {
+  municipality_role: 'super_admin' | 'admin' | 'editor'
+  site?: {
     id: number
     documentId: string
     name: string

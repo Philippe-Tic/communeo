@@ -1,10 +1,14 @@
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
+import { useAuth } from './hooks/useAuth'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { SuperAdminRoute } from './components/SuperAdminRoute'
 import { ToastTest } from './components/ToastTest'
 import { LoginForm } from './components/forms/LoginForm'
 import { MainLayout } from './components/layout/MainLayout'
 import { Toaster } from './components/ui/toaster'
 import { AuthProvider } from './contexts/AuthContext'
+import { SiteProvider } from './contexts/SiteContext'
 import { UserProvider } from './contexts/UserContext'
 import { ArticleDetail } from './pages/ArticleDetail'
 import { CreateArticle, EditArticle } from './pages/ArticleForm'
@@ -42,6 +46,32 @@ import { UserDetail } from './pages/UserDetail'
 import { AcceptInvitation } from './pages/AcceptInvitation'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Profile } from './pages/Profile'
+import { SuperAdminDashboard } from './pages/super-admin/SuperAdminDashboard'
+import { Sites as SuperAdminSites } from './pages/super-admin/Sites'
+import { SiteDetail as SuperAdminSiteDetail } from './pages/super-admin/SiteDetail'
+import { SiteForm as SuperAdminSiteForm } from './pages/super-admin/SiteForm'
+import { SuperAdminUsers } from './pages/super-admin/SuperAdminUsers'
+
+function DefaultRedirect() {
+  const { user, loading, isAuthenticated } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  if (user?.municipality_role === 'super_admin') {
+    return <Navigate to="/super-admin" replace />
+  }
+  return <Navigate to="/dashboard" replace />
+}
 
 function LoginPage() {
   const navigate = useNavigate()
@@ -56,6 +86,7 @@ function App() {
   return (
     <AuthProvider>
       <UserProvider>
+        <SiteProvider>
         <Routes>
           {/* Public route - Login */}
           <Route path="/login" element={<LoginPage />} />
@@ -552,13 +583,66 @@ function App() {
             }
           />
 
+          {/* Super Admin routes */}
+          <Route
+            path="/super-admin"
+            element={
+              <SuperAdminRoute>
+                <MainLayout>
+                  <SuperAdminDashboard />
+                </MainLayout>
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/super-admin/sites"
+            element={
+              <SuperAdminRoute>
+                <MainLayout>
+                  <SuperAdminSites />
+                </MainLayout>
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/super-admin/sites/new"
+            element={
+              <SuperAdminRoute>
+                <MainLayout>
+                  <SuperAdminSiteForm />
+                </MainLayout>
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/super-admin/sites/:id"
+            element={
+              <SuperAdminRoute>
+                <MainLayout>
+                  <SuperAdminSiteDetail />
+                </MainLayout>
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/super-admin/users"
+            element={
+              <SuperAdminRoute>
+                <MainLayout>
+                  <SuperAdminUsers />
+                </MainLayout>
+              </SuperAdminRoute>
+            }
+          />
+
           {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<DefaultRedirect />} />
 
           {/* Catch-all route */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<DefaultRedirect />} />
         </Routes>
         <Toaster />
+        </SiteProvider>
       </UserProvider>
     </AuthProvider>
   )

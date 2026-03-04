@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/hooks/useTheme'
+import { useUserRole } from '@/hooks/useUser'
 import { LogOut, Menu, Moon, Sun, User } from 'lucide-react'
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -20,6 +21,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { isSuperAdmin } = useUserRole()
   const navigate = useNavigate()
 
   return (
@@ -34,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
           <Menu className="h-5 w-5" />
         </button>
 
-        <Link to="/dashboard">
+        <Link to={isSuperAdmin ? '/super-admin' : '/dashboard'}>
           <span
             className="inline-block h-6 bg-brand-800 dark:bg-brand-300 md:h-7"
             style={{

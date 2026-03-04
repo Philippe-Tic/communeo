@@ -1,5 +1,6 @@
 import React from 'react'
 import { UserContext, type UserContextType } from '../contexts/UserContextDefinition'
+import { useSiteContext } from '../contexts/SiteContext'
 
 // Hook to use the UserContext
 export const useUser = (): UserContextType => {
@@ -16,6 +17,7 @@ export const useUserRole = () => {
   return {
     role: user?.municipality_role,
     hasRole,
+    isSuperAdmin: user?.municipality_role === 'super_admin',
     isAdmin: hasRole('admin'),
     isEditor: hasRole('editor'),
   }
@@ -23,12 +25,16 @@ export const useUserRole = () => {
 
 export const useUserSite = () => {
   const { user, belongsToSite } = useUser()
+  const { impersonatedSite, isImpersonating } = useSiteContext()
+
+  const effectiveSite = isImpersonating ? impersonatedSite : user?.site
+
   return {
-    site: user?.site,
+    site: effectiveSite,
     belongsToSite,
-    siteId: user?.site?.id,
-    siteName: user?.site?.name,
-    siteSlug: user?.site?.slug,
+    siteId: effectiveSite?.id,
+    siteName: effectiveSite?.name,
+    siteSlug: effectiveSite?.slug,
   }
 }
 
@@ -51,12 +57,12 @@ export const useUserProfile = () => {
 
 // Hook to check if user can access site configuration
 export const useCanManageSite = () => {
-  const { hasRole } = useUserRole()
+  const { hasRole, isSuperAdmin } = useUserRole()
   const { siteId } = useUserSite()
 
-  const canManageSite = Boolean(siteId) && hasRole('admin')
   const hasSite = Boolean(siteId)
-  const canEditConfig = hasRole('admin')
+  const canManageSite = hasSite && (hasRole('admin') || isSuperAdmin)
+  const canEditConfig = hasRole('admin') || isSuperAdmin
 
   return {
     canManageSite,

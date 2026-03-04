@@ -5,7 +5,7 @@
 
 import crypto from 'crypto';
 
-const ALLOWED_ROLES = ['admin'];
+const ALLOWED_ROLES = ['super_admin', 'admin'];
 const INVITATION_EXPIRY_DAYS = 7;
 
 async function getAuthenticatedUser(ctx) {
@@ -19,12 +19,13 @@ async function getAuthenticatedUser(ctx) {
     populate: ['site'],
   });
 
-  if (!fullUser?.site) {
-    ctx.throw(403, 'No site assigned');
-  }
-
   if (!ALLOWED_ROLES.includes(fullUser.municipality_role)) {
     ctx.throw(403, 'Only admin can manage users');
+  }
+
+  // Super admin doesn't need a site
+  if (fullUser.municipality_role !== 'super_admin' && !fullUser?.site) {
+    ctx.throw(403, 'No site assigned');
   }
 
   return fullUser;
@@ -85,7 +86,8 @@ async function getAuthenticatedUserBasic(ctx) {
     populate: ['site'],
   });
 
-  if (!fullUser?.site) {
+  // Super admin doesn't need a site
+  if (fullUser.municipality_role !== 'super_admin' && !fullUser?.site) {
     ctx.throw(403, 'No site assigned');
   }
 
@@ -146,10 +148,20 @@ export default {
 
   async find(ctx) {
     const currentUser = await getAuthenticatedUser(ctx);
-    const siteDocumentId = currentUser.site.documentId;
+
+    // Super admin can see all users, optionally filtered by site
+    const isSuperAdmin = currentUser.municipality_role === 'super_admin';
+    const siteFilter = ctx.query?.site; // optional site documentId filter
+
+    let where: any = {};
+    if (isSuperAdmin && siteFilter) {
+      where = { site: { documentId: siteFilter } };
+    } else if (!isSuperAdmin) {
+      where = { site: { documentId: currentUser.site.documentId } };
+    }
 
     const users = await strapi.query('plugin::users-permissions.user').findMany({
-      where: { site: { documentId: siteDocumentId } },
+      where,
       populate: ['site'],
     });
 
@@ -170,7 +182,8 @@ export default {
       ctx.throw(404, 'User not found');
     }
 
-    if (user.site?.documentId !== currentUser.site.documentId) {
+    // Super admin can see any user; regular admin only their site's users
+    if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
 
@@ -213,6 +226,28 @@ export default {
       where: { type: 'authenticated' },
     });
 
+    // Determine which site to assign the user to
+    const isSuperAdmin = currentUser.municipality_role === 'super_admin';
+    let targetSiteId: number | null = null;
+    let targetSiteName = 'CMS Mairies';
+
+    if (isSuperAdmin && data.site) {
+      // Super admin specifies which site to assign the user to
+      const targetSites = await strapi.entityService.findMany('api::site.site', {
+        filters: { documentId: { $eq: data.site } } as any,
+      });
+      if (!targetSites || targetSites.length === 0) {
+        ctx.throw(400, 'Site not found');
+      }
+      targetSiteId = targetSites[0].id as number;
+      targetSiteName = targetSites[0].name;
+    } else if (currentUser.site) {
+      targetSiteId = currentUser.site.id;
+      targetSiteName = currentUser.site.name;
+    } else {
+      ctx.throw(400, 'No site specified for user creation');
+    }
+
     let newUser;
     try {
       newUser = await strapi.query('plugin::users-permissions.user').create({
@@ -229,7 +264,7 @@ export default {
           blocked: true, // Blocked until invitation is accepted
           provider: 'local',
           role: authenticatedRole.id,
-          site: currentUser.site.id,
+          site: targetSiteId,
           resetPasswordToken: invitationToken,
         },
         populate: ['site'],
@@ -241,7 +276,7 @@ export default {
 
     // Send invitation email (don't fail creation if email fails)
     try {
-      await sendInvitationEmail(data.email, data.first_name, invitationToken, currentUser.site.name);
+      await sendInvitationEmail(data.email, data.first_name, invitationToken, targetSiteName);
     } catch (emailError) {
       console.error('Failed to send invitation email:', emailError);
     }
@@ -264,7 +299,7 @@ export default {
       ctx.throw(404, 'User not found');
     }
 
-    if (existingUser.site?.documentId !== currentUser.site.documentId) {
+    if (currentUser.municipality_role !== 'super_admin' && existingUser.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
 
@@ -303,7 +338,8 @@ export default {
       ctx.throw(404, 'User not found');
     }
 
-    if (userToDelete.site?.documentId !== currentUser.site.documentId) {
+    // Super admin can delete any user; regular admin only their site's users
+    if (currentUser.municipality_role !== 'super_admin' && userToDelete.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
 
@@ -311,11 +347,11 @@ export default {
       ctx.throw(400, 'Cannot delete yourself');
     }
 
-    // Prevent deleting the last admin
-    if (userToDelete.municipality_role === 'admin') {
+    // Prevent deleting the last admin of a site
+    if (userToDelete.municipality_role === 'admin' && userToDelete.site) {
       const admins = await strapi.query('plugin::users-permissions.user').findMany({
         where: {
-          site: { documentId: currentUser.site.documentId },
+          site: { documentId: userToDelete.site.documentId },
           municipality_role: 'admin',
         },
       });
@@ -440,7 +476,7 @@ export default {
       ctx.throw(404, 'User not found');
     }
 
-    if (user.site?.documentId !== currentUser.site.documentId) {
+    if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
 
@@ -483,7 +519,7 @@ export default {
       ctx.throw(404, 'User not found');
     }
 
-    if (user.site?.documentId !== currentUser.site.documentId) {
+    if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
 

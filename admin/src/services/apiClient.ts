@@ -37,6 +37,18 @@ class ApiClient {
             config.headers.Authorization = `Bearer ${token}`
           }
         }
+
+        // Super admin impersonation: envoyer le site impersoné au backend
+        const impersonatedSite = sessionStorage.getItem('impersonated_site')
+        if (impersonatedSite) {
+          try {
+            const site = JSON.parse(impersonatedSite)
+            if (site?.documentId) {
+              config.headers['X-Site-Document-Id'] = site.documentId
+            }
+          } catch { /* ignore */ }
+        }
+
         return config
       },
       (error) => Promise.reject(error)

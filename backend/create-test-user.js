@@ -20,7 +20,6 @@ const TEST_SITE = {
   contact_mail: 'contact@mairie-bellefontaine.fr',
   contact_phone: '05 63 55 40 12',
   address: '1 Place de la Mairie\n81170 Bellefontaine\nFrance',
-  plan_type: 'premium',
   mentions_legales: {
     siret: '21810032300014',
     publication_director: 'Jean-Pierre Martin',

@@ -1,7 +1,8 @@
 interface StrapiUser {
   id: number;
   documentId: string;
-  site: {
+  municipality_role?: string;
+  site?: {
     id: number;
     documentId: string;
   };
@@ -201,6 +202,37 @@ export default (config: any, { strapi }: { strapi: any }) => {
       return result;
     }
 
+    // Super admin handling
+    if (user.municipality_role === 'super_admin') {
+      const siteDocumentId = ctx.request.headers?.['x-site-document-id'];
+
+      if (!siteDocumentId) {
+        // Pas d'impersonation — bypass total
+        console.log(`🔄 [${requestId}] Skipping middleware: Super admin bypass (no impersonation)`);
+        const result = await next();
+        console.log(`🌐 [${requestId}] === Site Isolation Middleware END (super_admin) === ${Date.now() - startTime}ms`);
+        return result;
+      }
+
+      // Impersonation active — charger le site et appliquer le filtrage
+      console.log(`🔍 [${requestId}] Super admin impersonating site: ${siteDocumentId}`);
+      const sites = await strapi.entityService.findMany('api::site.site', {
+        filters: { documentId: siteDocumentId } as any,
+      });
+
+      if (sites?.length > 0) {
+        (ctx.state as any).impersonatedSite = sites[0];
+        // Construire un objet site minimal avec documentId garanti depuis le header
+        user.site = { id: (sites[0] as any).id, documentId: siteDocumentId } as any;
+        console.log(`✅ [${requestId}] Impersonated site loaded: ${(sites[0] as any).name}, documentId: ${siteDocumentId}`);
+      } else {
+        console.log(`⚠️ [${requestId}] Impersonated site not found, bypassing`);
+        const result = await next();
+        return result;
+      }
+      // Fall through → la logique de filtrage normale s'applique
+    }
+
     if (!user.site) {
       console.log(`🔄 [${requestId}] Skipping middleware: User has no site - User ID: ${user.id}`);
       const result = await next();
@@ -258,6 +290,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
 
     const contentType = contentTypes[pluralApiId];
     const userSiteDocumentId = user.site.documentId;
+    console.log(`🔎 [${requestId}] userSiteDocumentId for filter: "${userSiteDocumentId}" (type: ${typeof userSiteDocumentId})`);
 
     console.log(`🎯 [${requestId}] Content Type: ${contentType}`);
 
@@ -282,7 +315,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
               site: { documentId: { $eq: userSiteDocumentId } }
             };
 
-            console.log(`📝 [${requestId}] After filter - ctx.query:`, JSON.stringify(ctx.query, null, 2));
+            console.log(`📝 [${requestId}] Applied filter:`, JSON.stringify(ctx.query.filters));
             console.log(`📝 [${requestId}] Site filter applied successfully`);
           } else {
             // GET single - verify ownership

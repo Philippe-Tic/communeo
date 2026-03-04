@@ -19,7 +19,7 @@ interface UserFormData {
   first_name: string
   last_name: string
   phone: string
-  municipality_role: 'admin' | 'editor'
+  municipality_role: 'super_admin' | 'admin' | 'editor'
   active: boolean
 }
 

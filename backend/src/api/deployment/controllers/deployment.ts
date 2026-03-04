@@ -4,6 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
+import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 
 export default factories.createCoreController('api::deployment.deployment', ({ strapi }) => ({
   /**
@@ -12,35 +13,25 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
    */
   async trigger(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      // Si l'utilisateur n'a pas de relation site, la récupérer
-      if (!(user as any).site) {
-        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
-          populate: ['site']
-        });
-
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!(user as any).site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = (user as any).site.documentId || (user as any).site.id;
+      const siteId = site.documentId || site.id;
       const userId = user.documentId || user.id;
+      const siteIdForRelation = site.id;
 
       console.log('🔍 Trigger deployment - siteId:', siteId, 'userId:', userId);
-      console.log('🔍 User site object:', (user as any).site);
+      console.log('🔍 User site object:', site);
 
       // Vérifier s'il n'y a pas déjà un déploiement en cours
-      const siteIdForRelation = (user as any).site.id;
       const ongoingDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
           site: siteIdForRelation,
@@ -59,14 +50,14 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         filters: { documentId: siteId } as any
       });
 
-      const site = sites && sites.length > 0 ? sites[0] : null;
+      const siteData = sites && sites.length > 0 ? sites[0] : null;
 
-      console.log('🔍 Site found:', site ? 'YES' : 'NO');
-      if (site) {
-        console.log('🔍 Site details:', { id: (site as any).id, documentId: (site as any).documentId, name: (site as any).name, slug: (site as any).slug });
+      console.log('🔍 Site found:', siteData ? 'YES' : 'NO');
+      if (siteData) {
+        console.log('🔍 Site details:', { id: (siteData as any).id, documentId: (siteData as any).documentId, name: (siteData as any).name, slug: (siteData as any).slug });
       }
 
-      if (!site) {
+      if (!siteData) {
         console.log('❌ Site not found with siteId:', siteId);
         return ctx.notFound('Site non trouvé');
       }
@@ -74,7 +65,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       // Lancer le déploiement en arrière-plan
       console.log('🚀 Launching async deployment process...');
 
-      deploymentService.buildAndDeploy(siteId, (site as any).slug, userId)
+      deploymentService.buildAndDeploy(siteId, (siteData as any).slug, userId)
         .then(result => {
           console.log('✅ Async deployment process completed:', result);
           if (!result.success) {
@@ -110,8 +101,8 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         status: 'building',
         site: {
           id: siteId,
-          name: (site as any).name,
-          slug: (site as any).slug
+          name: (siteData as any).name,
+          slug: (siteData as any).slug
         }
       };
 
@@ -130,7 +121,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
    */
   async status(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       console.log('user', user);
 
@@ -138,31 +129,14 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.unauthorized('Authentification requise');
       }
 
-      // Si l'utilisateur n'a pas de relation site, la récupérer
-      if (!(user as any).site) {
-        console.log('🔍 User missing site relation, fetching complete user...');
-        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
-          populate: ['site']
-        });
-
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-          console.log('✅ Complete user fetched with site test:', (completeUser as any).site);
-        }
-      }
-
-      if (!(user as any).site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = (user as any).site.documentId || (user as any).site.id;
-
-      console.log('🔍 Site ID:', siteId);
+      const siteIdForRelation = site.id;
 
       // 1. Récupérer le statut du dernier déploiement
-      // Utiliser l'ID du site pour la relation, pas le documentId
-      const siteIdForRelation = (user as any).site.id;
-
       const latestDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
           site: siteIdForRelation
@@ -246,31 +220,20 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
   async check(ctx) {
     try {
       const { deploymentId } = ctx.params;
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      // Si l'utilisateur n'a pas de relation site, la récupérer
-      if (!(user as any).site) {
-        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
-          populate: ['site']
-        });
-
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!(user as any).site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = (user as any).site.documentId || (user as any).site.id;
+      const siteIdForRelation = site.id;
 
       // Vérifier que le déploiement appartient au site de l'utilisateur
-      const siteIdForRelation = (user as any).site.id;
       const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
         filters: {
           deployment_id: deploymentId,
@@ -317,24 +280,14 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
    */
   async debug(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      // Récupérer l'utilisateur complet si nécessaire
-      if (!(user as any).site) {
-        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
-          populate: ['site']
-        });
-
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      const siteId = (user as any).site?.documentId || (user as any).site?.id;
+      const site = await getEffectiveSite(ctx);
+      const siteId = site?.documentId || site?.id;
 
       // 1. Variables d'environnement
       const envVars = {
@@ -350,10 +303,10 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         documentId: user.documentId,
         email: user.email,
         municipality_role: user.municipality_role,
-        has_site: !!(user as any).site,
+        has_site: !!site,
         site_id: siteId,
-        site_name: (user as any).site?.name,
-        site_slug: (user as any).site?.slug
+        site_name: site?.name,
+        site_slug: site?.slug
       };
 
       // 3. Déploiements récents

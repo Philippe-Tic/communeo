@@ -17,13 +17,13 @@ const transformUserToUserProfile = (user: User): UserProfile => {
     ...user,
     createdAt: new Date().toISOString(), // Fallback if not provided by API
     updatedAt: new Date().toISOString(), // Fallback if not provided by API
-    site: {
+    site: user.site ? {
       ...user.site,
       theme: undefined, // Will be populated when needed
       contact_mail: undefined,
       contact_phone: undefined,
       address: undefined,
-    }
+    } : undefined,
   }
 }
 

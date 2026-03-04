@@ -79,12 +79,6 @@
       "required": false,
       "private": true
     },
-    "plan_type": {
-      "type": "enumeration",
-      "enum": ["basic", "premium"],
-      "default": "basic",
-      "required": true
-    },
     "domain_configured_at": {
       "type": "datetime",
       "required": false

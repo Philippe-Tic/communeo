@@ -33,7 +33,7 @@ export default [
         return false;
       },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Site-Document-Id'],
       keepHeaderOnError: true,
     },
   },

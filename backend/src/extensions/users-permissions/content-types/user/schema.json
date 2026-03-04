@@ -69,12 +69,11 @@
     "site": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::site.site",
-      "required": true
+      "target": "api::site.site"
     },
     "municipality_role": {
       "type": "enumeration",
-      "enum": ["admin", "editor"],
+      "enum": ["super_admin", "admin", "editor"],
       "default": "editor",
       "required": true
     },

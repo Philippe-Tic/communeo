@@ -1114,9 +1114,6 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'none'>;
     open_data_url: Schema.Attribute.String;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
-    plan_type: Schema.Attribute.Enumeration<['basic', 'premium']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'basic'>;
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
@@ -1663,7 +1660,9 @@ export interface PluginUsersPermissionsUser
       'plugin::users-permissions.user'
     > &
       Schema.Attribute.Private;
-    municipality_role: Schema.Attribute.Enumeration<['admin', 'editor']> &
+    municipality_role: Schema.Attribute.Enumeration<
+      ['super_admin', 'admin', 'editor']
+    > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'editor'>;
     password: Schema.Attribute.Password &
@@ -1679,8 +1678,7 @@ export interface PluginUsersPermissionsUser
       'oneToOne',
       'plugin::users-permissions.role'
     >;
-    site: Schema.Attribute.Relation<'oneToOne', 'api::site.site'> &
-      Schema.Attribute.Required;
+    site: Schema.Attribute.Relation<'oneToOne', 'api::site.site'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

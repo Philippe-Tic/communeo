@@ -5,6 +5,7 @@
 import domainService from '../../../services/domain';
 import domainValidationService from '../../../services/domain-validation';
 import netlifyService from '../../../services/netlify';
+import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 
 export default {
   /**
@@ -13,24 +14,14 @@ export default {
    */
   async configure(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      if (!user.site) {
-        const completeUser = await strapi.entityService.findOne(
-          'plugin::users-permissions.user',
-          user.id,
-          { populate: ['site'] }
-        );
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!user.site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
@@ -40,7 +31,7 @@ export default {
         return ctx.badRequest('Le domaine personnalisé est requis');
       }
 
-      const siteId = user.site.documentId || user.site.id;
+      const siteId = site.documentId || site.id;
 
       // 1. Validation complète du domaine
       const validation = await domainValidationService.validateDomainConfiguration(customDomain, siteId);
@@ -77,28 +68,18 @@ export default {
    */
   async verify(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      if (!user.site) {
-        const completeUser = await strapi.entityService.findOne(
-          'plugin::users-permissions.user',
-          user.id,
-          { populate: ['site'] }
-        );
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!user.site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = user.site.documentId || user.site.id;
+      const siteId = site.documentId || site.id;
 
       // Activer le domaine
       const result = await domainService.activateCustomDomain(siteId);
@@ -132,28 +113,18 @@ export default {
    */
   async remove(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      if (!user.site) {
-        const completeUser = await strapi.entityService.findOne(
-          'plugin::users-permissions.user',
-          user.id,
-          { populate: ['site'] }
-        );
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!user.site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = user.site.documentId || user.site.id;
+      const siteId = site.documentId || site.id;
 
       // Supprimer le domaine
       const result = await domainService.removeDomain(siteId);
@@ -183,47 +154,37 @@ export default {
    */
   async status(ctx) {
     try {
-      let user = ctx.state.user;
+      const user = ctx.state.user;
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
       }
 
-      if (!user.site) {
-        const completeUser = await strapi.entityService.findOne(
-          'plugin::users-permissions.user',
-          user.id,
-          { populate: ['site'] }
-        );
-        if (completeUser && (completeUser as any).site) {
-          user = completeUser;
-        }
-      }
-
-      if (!user.site) {
+      const site = await getEffectiveSite(ctx);
+      if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteId = user.site.documentId || user.site.id;
+      const siteId = site.documentId || site.id;
 
       // Récupérer les infos du site - utiliser findMany avec filtre documentId pour Strapi v5
       const sites = await strapi.entityService.findMany('api::site.site', {
         filters: { documentId: siteId } as any
       });
-      const site = sites && sites.length > 0 ? sites[0] : null;
+      const siteData = sites && sites.length > 0 ? sites[0] : null;
 
-      if (!site) {
+      if (!siteData) {
         return ctx.notFound('Site non trouvé');
       }
 
-      const hasCustomDomain = !!(site as any).custom_domain;
-      const domainType = (site as any).domain_type || null;
+      const hasCustomDomain = !!(siteData as any).custom_domain;
+      const domainType = (siteData as any).domain_type || null;
       let sslStatus = null;
 
       // Récupérer le statut SSL si domaine configuré et site Netlify existe
-      if (hasCustomDomain && (site as any).netlify_site_id && (site as any).domain_status === 'verified') {
+      if (hasCustomDomain && (siteData as any).netlify_site_id && (siteData as any).domain_status === 'verified') {
         try {
-          sslStatus = await domainService.getSSLStatus((site as any).netlify_site_id, (site as any).custom_domain);
+          sslStatus = await domainService.getSSLStatus((siteData as any).netlify_site_id, (siteData as any).custom_domain);
         } catch (error) {
           strapi.log.warn('Could not get SSL status:', error);
         }
@@ -233,24 +194,24 @@ export default {
       let netlifyUrl: string | null = null;
       let dnsInstructions: any = null;
 
-      if (hasCustomDomain && (site as any).domain_status === 'pending') {
+      if (hasCustomDomain && (siteData as any).domain_status === 'pending') {
         // Construire l'URL Netlify
-        if ((site as any).netlify_site_id) {
+        if ((siteData as any).netlify_site_id) {
           try {
-            const netlifySite = await netlifyService.getSite((site as any).netlify_site_id);
+            const netlifySite = await netlifyService.getSite((siteData as any).netlify_site_id);
             netlifyUrl = `${netlifySite.name}.netlify.app`;
           } catch {
             // fallback
           }
         }
-        if (!netlifyUrl && (site as any).slug) {
-          netlifyUrl = `${(site as any).slug}-mairie.netlify.app`;
+        if (!netlifyUrl && (siteData as any).slug) {
+          netlifyUrl = `${(siteData as any).slug}-mairie.netlify.app`;
         }
 
         // Reconstruire les instructions DNS pour l'UI
         if (netlifyUrl) {
           dnsInstructions = domainService.generateDnsInstructions(
-            (site as any).custom_domain,
+            (siteData as any).custom_domain,
             netlifyUrl
           );
         }
@@ -258,15 +219,15 @@ export default {
 
       ctx.body = {
         hasCustomDomain,
-        customDomain: (site as any).custom_domain || null,
-        domainStatus: (site as any).domain_status || 'pending',
+        customDomain: (siteData as any).custom_domain || null,
+        domainStatus: (siteData as any).domain_status || 'pending',
         domainType,
         netlifyUrl,
         dnsInstructions,
-        liveUrl: (site as any).live_url || null,
-        sslEnabled: (site as any).ssl_enabled !== false,
+        liveUrl: (siteData as any).live_url || null,
+        sslEnabled: (siteData as any).ssl_enabled !== false,
         sslStatus,
-        domainConfiguredAt: (site as any).domain_configured_at || null
+        domainConfiguredAt: (siteData as any).domain_configured_at || null
       };
 
     } catch (error: any) {

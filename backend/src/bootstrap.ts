@@ -77,8 +77,75 @@ export default async ({ strapi }) => {
         });
         console.log('✅ Bootstrap - Updated existing test user:', testUser.id);
       }
+
+      // Créer un super admin de test s'il n'existe pas
+      let superAdmin = await strapi.query('plugin::users-permissions.user').findOne({
+        where: { email: 'super@example.com' },
+      });
+
+      if (!superAdmin) {
+        try {
+          const userService = strapi.plugin('users-permissions').service('user');
+          const hashedPassword = (await userService.ensureHashedPasswords({ password: 'super123' })).password;
+          superAdmin = await strapi.query('plugin::users-permissions.user').create({
+            data: {
+              username: 'superadmin',
+              email: 'super@example.com',
+              password: hashedPassword,
+              provider: 'local',
+              confirmed: true,
+              blocked: false,
+              role: authenticatedRole.id,
+              municipality_role: 'super_admin',
+              first_name: 'Super',
+              last_name: 'Admin',
+              active: true,
+            },
+          });
+          console.log('✅ Bootstrap - Created super admin:', superAdmin.id);
+        } catch (error) {
+          console.log('⚠️ Bootstrap - Could not create super admin:', error.message);
+        }
+      } else {
+        console.log('✅ Bootstrap - Found existing super admin:', superAdmin.id);
+      }
     } else {
       console.log('ℹ️ Bootstrap - Production mode: skipping test data creation');
+
+      // --- Seed production : super admin (optionnel via env vars) ---
+      const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL;
+      const superAdminPassword = process.env.SEED_SUPER_ADMIN_PASSWORD;
+
+      if (superAdminEmail && superAdminPassword) {
+        const existingSuperAdmin = await strapi.query('plugin::users-permissions.user').findOne({
+          where: { email: superAdminEmail },
+        });
+
+        if (!existingSuperAdmin) {
+          try {
+            const userService = strapi.plugin('users-permissions').service('user');
+            const hashedPassword = (await userService.ensureHashedPasswords({ password: superAdminPassword })).password;
+            await strapi.query('plugin::users-permissions.user').create({
+              data: {
+                username: superAdminEmail,
+                email: superAdminEmail,
+                password: hashedPassword,
+                provider: 'local',
+                confirmed: true,
+                blocked: false,
+                role: authenticatedRole.id,
+                municipality_role: 'super_admin',
+                first_name: 'Super',
+                last_name: 'Admin',
+                active: true,
+              },
+            });
+            console.log('✅ Bootstrap - Created production super admin:', superAdminEmail);
+          } catch (error) {
+            console.log('❌ Bootstrap - Could not create super admin:', error.message);
+          }
+        }
+      }
 
       // --- Seed production : premier admin ---
       const userCount = await strapi.query('plugin::users-permissions.user').count();
@@ -239,6 +306,14 @@ export default async ({ strapi }) => {
       { action: 'api::user-management.user-management.resetPassword', enabled: true },
       { action: 'api::user-management.user-management.updateMe', enabled: true },
       { action: 'api::user-management.user-management.requestPasswordReset', enabled: true },
+
+      // Site Management (super admin)
+      { action: 'api::site-management.site-management.find', enabled: true },
+      { action: 'api::site-management.site-management.findOne', enabled: true },
+      { action: 'api::site-management.site-management.stats', enabled: true },
+      { action: 'api::site-management.site-management.create', enabled: true },
+      { action: 'api::site-management.site-management.update', enabled: true },
+      { action: 'api::site-management.site-management.delete', enabled: true },
     ];
 
     // Appliquer les permissions

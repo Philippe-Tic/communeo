@@ -360,6 +360,37 @@ export default async ({ strapi }) => {
       }
     }
 
+    // Auto-create API token for builds if not configured
+    if (!process.env.STRAPI_API_TOKEN) {
+      try {
+        const tokenService = strapi.service('admin::api-token');
+        const existingTokens = await strapi.query('admin::api-token').findMany({
+          where: { name: 'Build Token' },
+        });
+
+        if (existingTokens.length === 0) {
+          const token = await tokenService.create({
+            name: 'Build Token',
+            type: 'full-access',
+            lifespan: null,
+            description: 'Auto-generated token for Astro site builds',
+          });
+          console.log('='.repeat(60));
+          console.log('  API TOKEN CREATED FOR BUILDS');
+          console.log('  Add this to your .env file on the VPS:');
+          console.log(`  STRAPI_API_TOKEN=${token.accessKey}`);
+          console.log('  Then restart: docker compose up -d strapi');
+          console.log('='.repeat(60));
+        } else {
+          console.log('ℹ️  Bootstrap - Build Token exists but STRAPI_API_TOKEN env var not set');
+          console.log('   If you lost the token, delete it in Strapi admin and restart to regenerate.');
+        }
+      } catch (error) {
+        console.warn('⚠️  Bootstrap - Could not auto-create API token:', error.message);
+        console.warn('   Create one manually at https://{DOMAIN}/admin > Settings > API Tokens');
+      }
+    }
+
     console.log('🎉 Bootstrap - Permissions setup completed!');
   } catch (error) {
     console.log('❌ Bootstrap - Error during permissions setup:', error);

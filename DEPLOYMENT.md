@@ -308,6 +308,10 @@ SEED_SITE_NAME=Ma Commune
 SEED_SITE_SLUG=ma-commune
 SEED_ADMIN_EMAIL=admin@communeo.fr
 SEED_ADMIN_PASSWORD=ChangeMe123!
+
+# Super admin (optionnel — accès gestion multi-sites)
+SEED_SUPER_ADMIN_EMAIL=superadmin@communeo.fr
+SEED_SUPER_ADMIN_PASSWORD=ChangeMe456!
 ```
 
 Après le démarrage, vérifier dans les logs :

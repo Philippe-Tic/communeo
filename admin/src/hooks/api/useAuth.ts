@@ -27,8 +27,8 @@ export interface AuthResponse {
     blocked: boolean
     first_name: string
     last_name: string
-    municipality_role: 'admin' | 'editor'
-    site: {
+    municipality_role: 'super_admin' | 'admin' | 'editor'
+    site?: {
       id: number
       documentId: string
       name: string
@@ -45,8 +45,8 @@ export interface User {
   blocked: boolean
   first_name: string
   last_name: string
-  municipality_role: 'admin' | 'editor'
-  site: {
+  municipality_role: 'super_admin' | 'admin' | 'editor'
+  site?: {
     id: number
     documentId: string
     name: string

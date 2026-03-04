@@ -161,6 +161,22 @@ docker compose restart nginx
 docker compose exec postgres psql -U strapi strapi
 ```
 
+### Super admin non visible
+
+Si le super admin ne voit pas l'interface `/super-admin` après connexion :
+
+```bash
+# Vérifier le rôle en base
+docker compose exec postgres psql -U strapi strapi -c \
+  "SELECT id, email, municipality_role FROM up_users;"
+
+# Corriger le rôle si nécessaire
+docker compose exec postgres psql -U strapi strapi -c \
+  "UPDATE up_users SET municipality_role = 'super_admin' WHERE email = 'VOTRE_EMAIL';"
+```
+
+Puis se déconnecter et reconnecter dans le dashboard.
+
 ### Rollback rapide
 
 ```bash

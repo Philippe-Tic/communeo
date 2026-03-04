@@ -313,6 +313,7 @@ class DeploymentService {
         SITE_DOCUMENT_ID: siteId,  // Le projet Astro s'attend à SITE_DOCUMENT_ID
         SITE_SLUG: siteSlug,
         STRAPI_URL: process.env.STRAPI_BUILD_URL || `http://localhost:${process.env.PORT || 1337}`,
+        STRAPI_PUBLIC_URL: process.env.STRAPI_PUBLIC_URL || process.env.STRAPI_BUILD_URL || `http://localhost:${process.env.PORT || 1337}`,
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
         SITE_URL: liveUrl || `https://${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`,
         NODE_ENV: 'production'

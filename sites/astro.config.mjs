@@ -11,11 +11,13 @@ const SITE_SLUG = process.env.SITE_SLUG || 'default';
 const SITE_DOCUMENT_ID = process.env.SITE_DOCUMENT_ID || '';
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN || '';
+const STRAPI_PUBLIC_URL = process.env.STRAPI_PUBLIC_URL || STRAPI_URL;
 const strapiHostname = new URL(STRAPI_URL).hostname;
+const strapiPublicHostname = new URL(STRAPI_PUBLIC_URL).hostname;
 
 export default defineConfig({
   image: {
-    domains: [strapiHostname],
+    domains: [strapiHostname, strapiPublicHostname],
   },
 
   integrations: [
@@ -41,6 +43,7 @@ export default defineConfig({
       'import.meta.env.SITE_SLUG': JSON.stringify(SITE_SLUG),
       'import.meta.env.STRAPI_URL': JSON.stringify(STRAPI_URL),
       'import.meta.env.STRAPI_TOKEN': JSON.stringify(STRAPI_TOKEN),
+      'import.meta.env.STRAPI_PUBLIC_URL': JSON.stringify(STRAPI_PUBLIC_URL),
     }
   },
 

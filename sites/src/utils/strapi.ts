@@ -23,6 +23,9 @@ function isPublished<T extends { scheduled_at?: string }>(item: T | null): boole
 // Configuration depuis les variables d'environnement
 const STRAPI_URL = import.meta.env.STRAPI_URL || 'http://localhost:1337';
 export { STRAPI_URL as strapiBaseUrl };
+
+// URL publique pour les liens dans le HTML (documents, og:image, etc.)
+const STRAPI_PUBLIC_URL = import.meta.env.STRAPI_PUBLIC_URL || STRAPI_URL;
 const STRAPI_TOKEN = import.meta.env.STRAPI_TOKEN || '';
 const SITE_DOCUMENT_ID = import.meta.env.SITE_DOCUMENT_ID || ''; // Utilisation du documentId au lieu de l'id numérique
 
@@ -465,8 +468,8 @@ export function getStrapiImageUrl(imageUrl: string): string {
     return imageUrl;
   }
 
-  // Sinon, préfixer avec l'URL de Strapi
-  return `${STRAPI_URL}${imageUrl}`;
+  // Sinon, préfixer avec l'URL publique de Strapi
+  return `${STRAPI_PUBLIC_URL}${imageUrl}`;
 }
 
 /**

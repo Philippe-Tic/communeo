@@ -87,10 +87,8 @@ export const useLogin = () => {
       // Store token
       localStorage.setItem('auth_token', data.jwt)
 
-      // Set user data in cache
-      queryClient.setQueryData(AUTH_QUERY_KEYS.currentUser, data.user)
-
-      // Invalidate to refresh
+      // Don't cache login response — it may lack fields like municipality_role.
+      // Let useCurrentUser fetch /api/users/me with full data instead.
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.currentUser })
     },
     onError: () => {
@@ -112,10 +110,7 @@ export const useRegister = () => {
       // Store token
       localStorage.setItem('auth_token', data.jwt)
 
-      // Set user data in cache
-      queryClient.setQueryData(AUTH_QUERY_KEYS.currentUser, data.user)
-
-      // Invalidate to refresh
+      // Don't cache register response — let useCurrentUser fetch full data.
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.currentUser })
     },
     onError: () => {
@@ -149,10 +144,7 @@ export const useResetPassword = () => {
       // Store token
       localStorage.setItem('auth_token', data.jwt)
 
-      // Set user data in cache
-      queryClient.setQueryData(AUTH_QUERY_KEYS.currentUser, data.user)
-
-      // Invalidate to refresh
+      // Don't cache reset response — let useCurrentUser fetch full data.
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.currentUser })
     },
     onError: () => {

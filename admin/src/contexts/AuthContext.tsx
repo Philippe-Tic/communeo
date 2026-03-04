@@ -41,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [userError, token])
 
-    const login = async (email: string, password: string): Promise<void> => {
+    const login = async (email: string, password: string): Promise<User> => {
     const result = await loginMutation.mutateAsync({
       identifier: email,
       password,
@@ -50,6 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setToken(result.jwt)
 
     // Token is already stored by the mutation's onSuccess
+    return result.user as User
   }
 
   const logout = async () => {

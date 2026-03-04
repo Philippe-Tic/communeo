@@ -10,6 +10,9 @@ interface SuperAdminRouteProps {
 export const SuperAdminRoute: React.FC<SuperAdminRouteProps> = ({ children }) => {
   const { isAuthenticated, loading, user } = useAuth()
 
+  // DEBUG temporaire — à supprimer après résolution
+  console.log('[SuperAdminRoute]', { loading, isAuthenticated, user, role: user?.municipality_role })
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -23,6 +26,7 @@ export const SuperAdminRoute: React.FC<SuperAdminRouteProps> = ({ children }) =>
   }
 
   if (user?.municipality_role !== 'super_admin') {
+    console.log('[SuperAdminRoute] REDIRECT — municipality_role:', user?.municipality_role)
     return <Navigate to="/dashboard" replace />
   }
 

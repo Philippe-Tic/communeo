@@ -33,8 +33,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError('')
-      await login(data.email, data.password)
-      navigate('/dashboard')
+      const user = await login(data.email, data.password)
+      navigate(user.municipality_role === 'super_admin' ? '/super-admin' : '/dashboard')
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Une erreur est survenue lors de la connexion'

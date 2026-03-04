@@ -1,3 +1,10 @@
+// Build dynamic CORS origins
+const corsOrigins: string[] = [`https://${process.env.DOMAIN || 'localhost'}`];
+if (process.env.CORS_ORIGIN) {
+  corsOrigins.push(...process.env.CORS_ORIGIN.split(',').map(s => s.trim()).filter(Boolean));
+}
+const NETLIFY_PATTERN = /^https:\/\/[\w-]+-mairie\.netlify\.app$/;
+
 export default [
   'strapi::logger',
   'strapi::errors',
@@ -18,7 +25,13 @@ export default [
   {
     name: 'strapi::cors',
     config: {
-      origin: [process.env.CORS_ORIGIN || `https://${process.env.DOMAIN || 'localhost'}`],
+      origin: (ctx) => {
+        const requestOrigin = ctx.request.header.origin;
+        if (!requestOrigin) return false;
+        if (corsOrigins.includes(requestOrigin)) return requestOrigin;
+        if (NETLIFY_PATTERN.test(requestOrigin)) return requestOrigin;
+        return false;
+      },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
       keepHeaderOnError: true,

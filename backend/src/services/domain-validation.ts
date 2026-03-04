@@ -225,7 +225,7 @@ class DomainValidationService {
       const filters: any = { custom_domain: domain };
 
       if (excludeSiteId) {
-        filters.id = { $ne: excludeSiteId };
+        filters.documentId = { $ne: excludeSiteId };
       }
 
       const existingSites = await strapi.entityService.findMany('api::site.site', {

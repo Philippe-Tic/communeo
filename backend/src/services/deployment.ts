@@ -157,7 +157,6 @@ class DeploymentService {
             deployment_id: deployment.id,
             status: 'building',
             ...(userId ? { triggered_by: userId } : {}),
-            deployment_url: deployment.deploy_url,
             triggered_at: new Date()
           }
         });

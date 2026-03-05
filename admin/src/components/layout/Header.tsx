@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/hooks/useTheme'
 import { useUserRole } from '@/hooks/useUser'
-import { LogOut, Menu, Moon, Sun, User } from 'lucide-react'
+import { ExternalLink, LogOut, Menu, Moon, Sun, User } from 'lucide-react'
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
@@ -96,9 +96,16 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <DropdownMenuItem disabled>
                 <span className="text-muted-foreground">Email:</span>&nbsp;{user.email}
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <span className="text-muted-foreground">Site:</span>&nbsp;{user.site?.name}
-              </DropdownMenuItem>
+              {user.site?.live_url ? (
+                <DropdownMenuItem onClick={() => window.open(user.site!.live_url!, '_blank', 'noopener,noreferrer')}>
+                  <span className="text-muted-foreground">Site:</span>&nbsp;{user.site?.name}
+                  <ExternalLink className="ml-auto h-3 w-3 text-muted-foreground" />
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem disabled>
+                  <span className="text-muted-foreground">Site:</span>&nbsp;{user.site?.name}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <User className="mr-2 h-4 w-4" />
                 Mon profil

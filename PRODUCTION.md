@@ -37,7 +37,7 @@ docker compose logs -f strapi
 
 ---
 
-## Déployer le frontend (Admin SPA)
+## Deployer le frontend (Admin SPA)
 
 Le build se fait **en local** (pas de Node.js sur le VPS).
 
@@ -45,7 +45,10 @@ Le build se fait **en local** (pas de Node.js sur le VPS).
 # En local
 cd admin
 npm run build
-scp -r dist/ deploy@IP_DU_VPS:/opt/communeo/admin/dist
+
+# IMPORTANT : vider l'ancien build puis copier le CONTENU (dist/*)
+ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/admin/dist/*"
+scp -r dist/* deploy@IP_DU_VPS:/opt/communeo/admin/dist/
 ```
 
 Puis sur le VPS :
@@ -55,6 +58,16 @@ ssh deploy@IP_DU_VPS
 cd /opt/communeo
 docker compose restart nginx
 ```
+
+**Vérifier** que `index.html` pointe sur le bon hash :
+
+```bash
+ssh deploy@IP_DU_VPS "grep 'index-' /opt/communeo/admin/dist/index.html"
+```
+
+Le hash (ex: `index-C9TciKGh.js`) doit correspondre au build local dans `admin/dist/assets/`.
+
+> **Piège scp** : `scp -r dist/ dest/` copie le dossier `dist` **dans** `dest`, donnant `dest/dist/`. Toujours utiliser `dist/*` pour copier le contenu.
 
 > **Note** : Le fichier `admin/.env.production` contient `VITE_API_URL=https://app.communeo.fr`. Vite le charge automatiquement lors de `npm run build`, donc pas besoin de préfixer la commande.
 
@@ -69,7 +82,8 @@ npm run build
 cd ..
 
 # Upload admin + pull code sur le VPS
-scp -r admin/dist/ deploy@IP_DU_VPS:/opt/communeo/admin/dist
+ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/admin/dist/*"
+scp -r admin/dist/* deploy@IP_DU_VPS:/opt/communeo/admin/dist/
 ssh deploy@IP_DU_VPS "cd /opt/communeo && git pull && docker compose build strapi && docker compose up -d"
 ```
 
@@ -186,3 +200,24 @@ git checkout <commit-hash>        # Revenir au commit
 docker compose build strapi
 docker compose up -d
 ```
+
+---
+
+## Incidents résolus
+
+### Super admin redirigé vers /dashboard en prod (2026-03-04)
+
+**Symptôme** : Le super admin fonctionnait en local mais pas en prod. `curl /api/users/me` retournait bien `municipality_role: "super_admin"`, mais le frontend redirigeait vers `/dashboard`.
+
+**Deux causes** :
+
+1. **Cache TanStack Query après login** : `useLogin.onSuccess` appelait `queryClient.setQueryData()` avec la réponse de `/api/auth/local`, qui ne contenait pas `municipality_role`. `SuperAdminRoute` lisait ces données incomplètes et redirigeait immédiatement, avant que le refetch de `/api/users/me` (qui lui contient `municipality_role`) ait le temps de répondre.
+
+2. **Commande `scp` incorrecte** : `scp -r dist/ dest/` crée `dest/dist/` au lieu d'écraser le contenu. Résultat : `index.html` sur le serveur pointait encore sur l'ancien bundle JS, donc les corrections de code n'étaient même pas chargées.
+
+**Fix** :
+- Supprimé `setQueryData` dans `useLogin`, `useRegister`, `useResetPassword` — seul `invalidateQueries` est appelé, forçant un fetch frais de `/api/users/me?populate=site` qui contient toutes les données
+- Ajouté headers `Cache-Control: no-store` sur les réponses API dans nginx (`nginx/templates/default.conf.template`)
+- Corrigé la procédure de déploiement : `rm -rf dist/*` + `scp -r dist/*` (voir section "Déployer le frontend")
+
+**Leçon** : Toujours vérifier le hash dans `index.html` sur le serveur après un déploiement (`grep 'index-' .../index.html`).

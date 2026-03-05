@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DEPLOYMENT_STATUS_COLORS } from '@/lib/constants/deployment-types'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { ExternalLink, Loader2, RefreshCw } from 'lucide-react'
 import React, { useEffect } from 'react'
 import { useDeployment } from '../../hooks/useDeployment'
 
@@ -20,7 +20,7 @@ const STATUS_ICONS: Record<string, string> = {
 
 export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) => {
   const {
-    deployments, currentDeployment, isDeploying, isLoading,
+    deployments, currentDeployment, isDeploying, isLoading, isFetching,
     triggerDeploy, refetch, isTriggering, triggerError, cleanup
   } = useDeployment()
 
@@ -67,8 +67,14 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
                 </Button>
+                {currentDeployment?.site?.live_url && currentDeployment.status === 'ready' && (
+                  <Button variant="outline" onClick={() => window.open(currentDeployment.site.live_url, '_blank', 'noopener,noreferrer')}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Voir le site
+                  </Button>
+                )}
                 <Button onClick={() => triggerDeploy()} disabled={isDeploying || isLoading || isTriggering} className="bg-green-600 text-white hover:bg-green-700">
                   {isTriggering && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   ▶ {isDeploying ? 'Déploiement en cours...' : 'Publier le site'}
@@ -107,7 +113,6 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                     <TableHead>Déclenché par</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Durée</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -130,11 +135,6 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                         {formatDistanceToNow(new Date(deployment.triggered_at), { addSuffix: true, locale: fr })}
                       </TableCell>
                       <TableCell className="text-sm">{formatDuration(deployment.build_time)}</TableCell>
-                      <TableCell>
-                        {deployment.deployment_url && (
-                          <a href={deployment.deployment_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">↗</a>
-                        )}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

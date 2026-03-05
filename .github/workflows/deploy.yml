@@ -52,12 +52,12 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key" \
             dist/ \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/communeo/admin/dist/
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/communeo/admin/dist/
 
       - name: Pull latest code and rebuild
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd ~/communeo
+            cd /opt/communeo
             git pull origin main
             docker compose build strapi
             docker compose up -d

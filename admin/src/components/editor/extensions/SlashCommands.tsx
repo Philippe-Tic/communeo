@@ -276,7 +276,7 @@ export interface SlashCommandsStorage {
   onCtaRequest?: () => void
 }
 
-export const SlashCommands = Extension.create<{}, SlashCommandsStorage>({
+export const SlashCommands = Extension.create<Record<string, never>, SlashCommandsStorage>({
   name: 'slashCommands',
 
   addStorage() {

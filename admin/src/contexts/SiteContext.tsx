@@ -50,6 +50,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useSiteContext = () => {
   const context = useContext(SiteContext)
   if (!context) {

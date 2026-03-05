@@ -15,6 +15,7 @@ export interface UserProfile {
     name: string
     slug: string
     theme?: 'classique' | 'moderne' | 'accessible'
+    live_url?: string
     contact_mail?: string
     contact_phone?: string
     address?: string

@@ -135,6 +135,7 @@ export const useDeployment = () => {
     isLoading,
 
     // État des queries
+    isFetching: deploymentsQuery.isFetching,
     deploymentsQuery,
 
     // Actions

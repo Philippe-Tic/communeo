@@ -14,6 +14,7 @@ export interface User {
     documentId: string
     name: string
     slug: string
+    live_url?: string
   }
 }
 

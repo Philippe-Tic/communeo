@@ -27,7 +27,31 @@ Every content type (Page, Article, Event) has a mandatory `site` relation. The m
 
 ### Deployment Pipeline
 
-Triggered from admin UI → `backend/src/services/deployment.ts` orchestrates: fetches site data, runs Astro build in temp directory with per-site env vars, zips output, uploads to Netlify via `backend/src/services/netlify.ts`. Each municipality gets a separate Netlify site named `{slug}-mairie`.
+Admin UI triggers build → backend orchestrates Astro build per site → zips output → uploads to Netlify. Each municipality gets a separate Netlify site named `{slug}-mairie`.
+
+## Coding Rules
+
+### Language
+- All code, comments, commits, branch names: English
+- French only for user-facing strings (UI labels, toasts, error messages)
+- Commit format: conventional commits — `feat(admin): add page form`
+
+### TypeScript
+- Strict mode. No `any` except Strapi ctx (backend convention)
+- Named exports (no `export default` for components/hooks)
+- Backend services exception: `export default new ServiceClass()`
+- Interfaces for object shapes, types for unions/primitives
+
+### Multi-Tenancy (CRITICAL)
+- Every content type MUST have a `site` manyToOne relation
+- Register plural name in `site-isolation.ts` contentTypes map
+- Site filtering is automatic via middleware — never filter manually in controllers
+
+### Conventions per app
+- Admin: see `admin/AGENTS.md`
+- Backend: see `backend/AGENTS.md`
+- Sites: see `sites/AGENTS.md`
+- Workflows: see `.claude/skills/`
 
 ## Development Commands
 
@@ -73,15 +97,6 @@ npm run type-check # Astro type checking only
 - `SITE_SLUG` — URL slug (e.g., "lyon")
 - `STRAPI_URL` — Strapi API endpoint
 
-## Key Backend Files
-
-- `src/middlewares/site-isolation.ts` — Multi-tenant query filtering (critical)
-- `src/bootstrap.ts` — Creates test site and user on first startup
-- `src/services/deployment.ts` — Build and deploy orchestration
-- `src/services/netlify.ts` — Netlify API client
-- `src/services/domain.ts` / `domain-validation.ts` — Custom domain management
-- `src/api/*/content-types/*/schema.json` — Content type schemas (Page, Article, Event, Site, Domain, Deployment)
-
 ## Content Types
 
 | Type | API ID | Key fields |
@@ -92,15 +107,6 @@ npm run type-check # Astro type checking only
 | Event | `api::evenement.evenement` | title, description, start_date, end_date, location |
 | Domain | `api::domain.domain` | Domain verification and SSL |
 | Deployment | `api::deployment.deployment` | Build status tracking (building/success/failed) |
-
-## Tech Stack Summary
-
-| Layer | Stack |
-|-------|-------|
-| Backend | Strapi 5, TypeScript 5, SQLite/MySQL/PostgreSQL, Knex |
-| Admin | React 19, Vite 7, Tailwind CSS 4, shadcn/ui, TanStack Query 5, React Router 7, Axios |
-| Sites | Astro 4, Tailwind CSS 3, TypeScript 5 |
-| Hosting | Netlify (static sites) |
 
 ## GitHub Project Workflow
 

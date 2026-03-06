@@ -2,6 +2,7 @@
 import type { Site } from '../types/strapi';
 import { getImage } from 'astro:assets';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
+import { computeOnPrimary, computePrimaryText, computeFooterBg } from '../utils/color';
 import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/fonts.css';
@@ -165,12 +166,16 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
 
     <!-- Couleurs du thème en CSS custom properties -->
     <style define:vars={{
-      'color-primary': siteConfig?.colors?.primaryRgb || '59 130 246',  // bleu par défaut
-      'color-secondary': siteConfig?.colors?.secondaryRgb || '16 185 129' // vert par défaut
+      'color-primary': siteConfig?.colors?.primaryRgb || '59 130 246',
+      'color-on-primary': computeOnPrimary(siteConfig?.colors?.primary || '#3b82f6'),
+      'color-primary-text': computePrimaryText(siteConfig?.colors?.primary || '#3b82f6'),
+      'color-footer-bg': computeFooterBg(siteConfig?.colors?.primary || '#3b82f6'),
     }}>
       :root {
         --color-primary: var(--color-primary);
-        --color-secondary: var(--color-secondary);
+        --color-on-primary: var(--color-on-primary);
+        --color-primary-text: var(--color-primary-text);
+        --color-footer-bg: var(--color-footer-bg);
       }
     </style>
   </head>
@@ -191,7 +196,7 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
       }
 
       *:focus-visible {
-        outline: 2px solid rgb(var(--color-secondary));
+        outline: 2px solid rgb(var(--color-primary-text));
         outline-offset: 2px;
       }
 
@@ -201,7 +206,7 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
         top: -40px;
         left: 6px;
         background: rgb(var(--color-primary));
-        color: white;
+        color: rgb(var(--color-on-primary));
         padding: 8px;
         text-decoration: none;
         transition: top 0.3s;

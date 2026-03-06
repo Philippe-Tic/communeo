@@ -172,9 +172,7 @@ function createDefaultSite(): Site {
     slug: 'default',
     colors: {
       primary: '#1f2937',
-      secondary: '#3b82f6',
       primaryRgb: '31 41 55',
-      secondaryRgb: '59 130 246'
     },
     contact_mail: 'contact@mairie.fr',
     address: 'Adresse de la mairie',

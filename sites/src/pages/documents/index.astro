@@ -82,13 +82,13 @@ function getDocumentFamily(docType: string): string {
 
   <main id="main-content" data-pagefind-body>
     <!-- Header -->
-    <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
             Documents officiels
           </h1>
-          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
+          <p class="text-lg sm:text-xl text-on-primary/80 max-w-3xl mx-auto">
             Consultez et téléchargez les documents publics de votre commune
           </p>
         </div>
@@ -122,8 +122,8 @@ function getDocumentFamily(docType: string): string {
                 type="button"
                 class={`family-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                   isBudgetHighlighted
-                    ? 'border-amber-500 bg-amber-50 text-amber-800 hover:bg-primary hover:text-white hover:border-primary'
-                    : 'border-gray-300 text-gray-700 hover:bg-primary hover:text-white hover:border-primary'
+                    ? 'border-amber-500 bg-amber-50 text-amber-800 hover:bg-primary hover:text-on-primary hover:border-primary'
+                    : 'border-gray-300 text-gray-700 hover:bg-primary hover:text-on-primary hover:border-primary'
                 }`}
                 data-family={family.key}
               >
@@ -157,7 +157,7 @@ function getDocumentFamily(docType: string): string {
                   <div class="flex-1 min-w-0">
                     <a
                       href={`/documents/${doc.slug}`}
-                      class="text-gray-900 font-medium hover:text-primary transition-colors line-clamp-1"
+                      class="text-gray-900 font-medium hover:text-primary-text transition-colors line-clamp-1"
                     >
                       {doc.title}
                     </a>
@@ -186,7 +186,7 @@ function getDocumentFamily(docType: string): string {
                       target="_blank"
                       rel="noopener noreferrer"
                       download
-                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap self-start sm:self-center"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-on-primary bg-primary rounded-md hover:bg-primary/90 transition-colors whitespace-nowrap self-start sm:self-center"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -231,7 +231,7 @@ function getDocumentFamily(docType: string): string {
 
   .family-btn.active {
     background-color: rgb(var(--color-primary));
-    color: white;
+    color: rgb(var(--color-on-primary));
     border-color: rgb(var(--color-primary));
   }
 

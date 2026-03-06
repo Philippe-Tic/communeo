@@ -1,18 +1,18 @@
 import { getMediaUrl } from '@/lib/utils'
+import { computeOnPrimaryHex, computePrimaryTextHex, computeFooterBgHex } from '@/lib/color-utils'
 import { useSite } from './api/useSites'
 import { useUserSite } from './useUser'
 
 export interface SitePreviewConfig {
   primaryColor: string
-  secondaryColor: string
+  onPrimaryColor: string
+  primaryTextColor: string
+  footerBgColor: string
   siteName: string
   logoUrl: string | null
 }
 
-const DEFAULT_COLORS = {
-  primary: '#1e40af',
-  secondary: '#0369a1',
-}
+const DEFAULT_PRIMARY = '#1e40af'
 
 export function useSitePreviewConfig(): {
   config: SitePreviewConfig | null
@@ -26,15 +26,16 @@ export function useSitePreviewConfig(): {
   }
 
   const colors = site.colors || {}
-  const primaryColor = colors.primary || DEFAULT_COLORS.primary
-  const secondaryColor = colors.secondary || DEFAULT_COLORS.secondary
+  const primaryColor = colors.primary || DEFAULT_PRIMARY
 
   const logoUrl = site.logo?.url ? getMediaUrl(site.logo.url) : null
 
   return {
     config: {
       primaryColor,
-      secondaryColor,
+      onPrimaryColor: computeOnPrimaryHex(primaryColor),
+      primaryTextColor: computePrimaryTextHex(primaryColor),
+      footerBgColor: computeFooterBgHex(primaryColor),
       siteName: site.name,
       logoUrl,
     },

@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ImagePicker } from '../../forms/ImagePicker'
+import { ThemeColorPicker } from '../ThemeColorPicker'
 import type { GeneralSectionProps } from '../types'
 
 export function GeneralSection({
@@ -119,22 +120,11 @@ export function GeneralSection({
           <h2 className="text-lg font-semibold text-foreground">
             Configuration des couleurs
           </h2>
-          <div>
-            <Label className="mb-2">Couleurs du thème (JSON)</Label>
-            <Textarea
-              value={formData.colors}
-              onChange={(e) => onFieldChange('colors', e.target.value)}
-              placeholder='{"primary": "#3182ce", "secondary": "#2d3748"}'
-              rows={6}
-              className={`font-mono text-sm ${errors.colors ? 'border-destructive' : ''}`}
-            />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Configuration JSON optionnelle pour personnaliser les couleurs du thème
-            </p>
-            {errors.colors && (
-              <p className="mt-1 text-sm text-destructive">{errors.colors}</p>
-            )}
-          </div>
+          <ThemeColorPicker
+            value={formData.colors}
+            onChange={(value) => onFieldChange('colors', value)}
+            error={errors.colors}
+          />
         </div>
       </div>
 

@@ -109,13 +109,13 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
       if (isEditing && id) {
         const updateData = { id, ...data, scheduled_at: scheduledAt, status: data.status === 'archived' ? 'draft' as const : data.status }
         await updateArticleMutation.mutateAsync(updateData)
-        toaster.create({ title: 'Article mis à jour', description: 'L\'article a été mis à jour avec succès.', type: 'success', duration: 3000 })
+        toaster.create({ title: 'Actualité mise à jour', description: 'L\'actualité a été mise à jour avec succès.', type: 'success', duration: 3000 })
       } else {
         const createData = { ...data, scheduled_at: scheduledAt, status: data.status === 'archived' ? 'draft' as const : data.status }
         await createArticleMutation.mutateAsync(createData)
-        toaster.create({ title: 'Article créé', description: 'L\'article a été créé avec succès.', type: 'success', duration: 3000 })
+        toaster.create({ title: 'Actualité créée', description: 'L\'actualité a été créée avec succès.', type: 'success', duration: 3000 })
       }
-      navigate('/articles')
+      navigate('/actualites')
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error)
       toaster.create({ title: 'Erreur', description: 'Une erreur est survenue lors de la sauvegarde.', type: 'error', duration: 5000 })
@@ -128,7 +128,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
     <div className={showPreview ? 'mx-auto max-w-[1600px]' : 'mx-auto max-w-4xl'}>
       <div className="flex flex-col gap-6">
         <PageHeader
-          title={isEditing ? 'Modifier l\'article' : 'Créer un nouvel article'}
+          title={isEditing ? 'Modifier l\'actualité' : 'Créer une nouvelle actualité'}
           actions={showPreview ? [] : [
             {
               label: 'Aperçu',
@@ -136,10 +136,10 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
               variant: 'outline' as const,
               className: 'hidden lg:inline-flex',
             },
-            { label: 'Retour', onClick: () => navigate('/articles'), variant: 'outline' as const },
+            { label: 'Retour', onClick: () => navigate('/actualites'), variant: 'outline' as const },
           ]}
           breadcrumbs={[
-            { label: 'Articles', href: '/articles' },
+            { label: 'Actualités', href: '/actualites' },
             { label: isEditing ? 'Modifier' : 'Nouveau' },
           ]}
         />
@@ -151,7 +151,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                 <FormSection title="Informations de base">
                   <div>
                     <Label className="mb-2">Titre *</Label>
-                    <Input placeholder="Titre de l'article" {...register('title', { required: 'Le titre est requis' })} />
+                    <Input placeholder="Titre de l'actualité" {...register('title', { required: 'Le titre est requis' })} />
                     {errors.title && <p className="mt-1 text-sm text-destructive">{errors.title.message}</p>}
                   </div>
 
@@ -163,7 +163,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
 
                   <div>
                     <Label className="mb-2">Résumé</Label>
-                    <Textarea placeholder="Résumé de l'article" rows={3} {...register('summary')} />
+                    <Textarea placeholder="Résumé de l'actualité" rows={3} {...register('summary')} />
                   </div>
 
                   <div>
@@ -173,7 +173,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                       control={control}
                       rules={{ required: 'Le contenu est requis' }}
                       render={({ field }) => (
-                        <RichTextEditor variant="full" value={field.value} onChange={field.onChange} placeholder="Contenu de l'article" error={!!errors.content} />
+                        <RichTextEditor variant="full" value={field.value} onChange={field.onChange} placeholder="Contenu de l'actualité" error={!!errors.content} />
                       )}
                     />
                     {errors.content && <p className="mt-1 text-sm text-destructive">{errors.content.message}</p>}
@@ -236,7 +236,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                     control={control}
                     render={({ field }) => (
                       <FormCheckbox
-                        label="Article à la une"
+                        label="Actualité à la une"
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
@@ -253,7 +253,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                 </FormSection>
 
                 <div className="flex justify-end gap-3">
-                  <Button variant="outline" type="button" onClick={() => navigate('/articles')}>Annuler</Button>
+                  <Button variant="outline" type="button" onClick={() => navigate('/actualites')}>Annuler</Button>
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isEditing ? 'Mettre à jour' : 'Créer'}
@@ -272,7 +272,7 @@ export function ArticleForm({ isEditing = false, initialData }: ArticleFormProps
                 <PreviewToolbar
                   actions={<>
                     <Button variant="outline" size="sm" onClick={() => setShowPreview(false)}>Masquer l'aperçu</Button>
-                    <Button variant="outline" size="sm" onClick={() => navigate('/articles')}>Retour</Button>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/actualites')}>Retour</Button>
                   </>}
                 >
                   <SitePreview content={watchedContent} title={watchedTitle} contentType="article" />
@@ -294,9 +294,9 @@ export function EditArticle() {
   const { id } = useParams<{ id: string }>()
   const { data: article, isLoading, error } = useArticle(id || '')
 
-  if (isLoading) return <LoadingSpinner message="Chargement de l'article..." />
+  if (isLoading) return <LoadingSpinner message="Chargement de l'actualité..." />
   if (error || !article) {
-    return <NotFoundBanner message="Article non trouvé" />
+    return <NotFoundBanner message="Actualité non trouvée" />
   }
   return <ArticleForm isEditing={true} initialData={article} />
 }

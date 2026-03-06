@@ -49,7 +49,7 @@ function buildNavGroups(canManageUsers: boolean): NavGroup[] {
       label: 'Contenu',
       key: 'content',
       items: [
-        { name: 'Articles', path: '/articles', icon: FileText },
+        { name: 'Actualités', path: '/actualites', icon: FileText },
         { name: 'Pages', path: '/pages', icon: File },
         { name: 'Événements', path: '/events', icon: Calendar },
         { name: 'Documents', path: '/documents', icon: FileArchive },

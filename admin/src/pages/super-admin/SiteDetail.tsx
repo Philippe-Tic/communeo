@@ -66,7 +66,7 @@ export const SiteDetail = () => {
           icon={<File className="h-5 w-5" />}
         />
         <StatsCard
-          label="Articles"
+          label="Actualités"
           value={site._stats?.articles ?? 0}
           color="green"
           icon={<FileText className="h-5 w-5" />}

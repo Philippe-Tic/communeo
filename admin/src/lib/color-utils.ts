@@ -2,6 +2,7 @@ export const DEFAULT_PRIMARY = '#1e40af'
 
 export function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '')
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return [30, 64, 175] // DEFAULT_PRIMARY fallback
   return [
     parseInt(h.substring(0, 2), 16),
     parseInt(h.substring(2, 4), 16),

@@ -122,7 +122,12 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           {heroPrimaryLabel && heroPrimaryUrl && (
             <a
               href={heroPrimaryUrl}
-              class="inline-flex items-center px-6 py-3 bg-primary text-on-primary font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              class:list={[
+                "inline-flex items-center px-6 py-3 font-medium rounded-lg transition-colors",
+                heroImage
+                  ? "bg-white text-gray-900 hover:bg-white/90"
+                  : "bg-on-primary text-primary hover:bg-on-primary/90"
+              ]}
             >
               {heroPrimaryLabel}
             </a>
@@ -130,7 +135,12 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           {heroSecondaryLabel && heroSecondaryUrl && (
             <a
               href={heroSecondaryUrl}
-              class="inline-flex items-center px-6 py-3 border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors"
+              class:list={[
+                "inline-flex items-center px-6 py-3 border-2 font-medium rounded-lg transition-colors",
+                heroImage
+                  ? "border-white text-white hover:bg-white/10"
+                  : "border-on-primary text-on-primary hover:bg-on-primary/10"
+              ]}
             >
               {heroSecondaryLabel}
             </a>

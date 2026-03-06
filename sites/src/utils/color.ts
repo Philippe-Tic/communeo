@@ -2,6 +2,7 @@
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace('#', '')
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return [30, 64, 175] // fallback: #1e40af
   return [
     parseInt(h.substring(0, 2), 16),
     parseInt(h.substring(2, 4), 16),

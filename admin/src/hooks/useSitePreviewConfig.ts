@@ -1,5 +1,5 @@
 import { getMediaUrl } from '@/lib/utils'
-import { computeOnPrimaryHex, computePrimaryTextHex, computeFooterBgHex } from '@/lib/color-utils'
+import { computeOnPrimaryHex, computePrimaryTextHex, computeFooterBgHex, DEFAULT_PRIMARY } from '@/lib/color-utils'
 import { useSite } from './api/useSites'
 import { useUserSite } from './useUser'
 
@@ -11,8 +11,6 @@ export interface SitePreviewConfig {
   siteName: string
   logoUrl: string | null
 }
-
-const DEFAULT_PRIMARY = '#1e40af'
 
 export function useSitePreviewConfig(): {
   config: SitePreviewConfig | null

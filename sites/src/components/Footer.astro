@@ -118,12 +118,10 @@ const socialLinksData = socialLinks.map((link) => {
               </a>
             </p>
           )}
-          {siteConfig?.infos_pratiques?.opening_hours && (() => {
-            const entries = getOpeningHoursEntries(
-              typeof siteConfig.infos_pratiques.opening_hours === 'string'
-                ? (() => { try { return JSON.parse(siteConfig.infos_pratiques.opening_hours); } catch { return null; } })()
-                : siteConfig.infos_pratiques.opening_hours
-            );
+          {(() => {
+            const entries = siteConfig?.infos_pratiques?.opening_hours
+              ? getOpeningHoursEntries(siteConfig.infos_pratiques.opening_hours)
+              : [];
             return entries.length > 0 ? (
               <div class="flex items-start gap-2.5">
                 <svg class="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">

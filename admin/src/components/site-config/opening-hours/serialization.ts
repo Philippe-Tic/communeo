@@ -1,5 +1,9 @@
 import { DAYS, getDefaultWeekSchedule, type DayKey, type DaySchedule, type TimeSlot, type WeekSchedule } from './types'
 
+function isDayKey(key: string): key is DayKey {
+  return (DAYS as readonly string[]).includes(key)
+}
+
 /** "08:30" → "8h30", "12:00" → "12h" */
 export function formatTime(hhmm: string): string {
   const [h, m] = hhmm.split(':')
@@ -94,19 +98,17 @@ export function deserializeToWeekSchedule(jsonString: string): WeekSchedule {
       // Array format: [{ day: "Lundi", hours: "8h30 - 12h" }]
       for (const entry of parsed) {
         if (!entry?.day || !entry?.hours) continue
-        const dayKey = entry.day.toLowerCase() as DayKey
-        if (DAYS.includes(dayKey)) {
-          const result = parseHoursString(String(entry.hours))
-          schedule[dayKey] = { ...result }
+        const dayKey = entry.day.toLowerCase()
+        if (isDayKey(dayKey)) {
+          schedule[dayKey] = { ...parseHoursString(String(entry.hours)) }
         }
       }
     } else if (typeof parsed === 'object') {
       // Object format: { lundi: "8h30 - 12h / 14h - 17h" }
       for (const [key, value] of Object.entries(parsed)) {
-        const dayKey = key.toLowerCase() as DayKey
-        if (DAYS.includes(dayKey)) {
-          const result = parseHoursString(String(value))
-          schedule[dayKey] = { ...result }
+        const dayKey = key.toLowerCase()
+        if (isDayKey(dayKey)) {
+          schedule[dayKey] = { ...parseHoursString(String(value)) }
         }
       }
     }

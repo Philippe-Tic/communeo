@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { DAYS, type DayKey, type DaySchedule, type WeekSchedule } from './types'
 import { deserializeToWeekSchedule, serializeWeekSchedule } from './serialization'
@@ -13,23 +13,26 @@ interface OpeningHoursEditorProps {
 }
 
 export function OpeningHoursEditor({ value, onChange, error, setIsDirty }: OpeningHoursEditorProps) {
-  const [schedule, setSchedule] = useState<WeekSchedule>(() => deserializeToWeekSchedule(value))
-  const isInitRef = useRef(true)
+  // Track last value we serialized ourselves to avoid re-deserializing our own output
+  const lastSerializedRef = useRef<string | null>(null)
+  const [schedule, setSchedule] = useState<WeekSchedule>(() => {
+    lastSerializedRef.current = value
+    return deserializeToWeekSchedule(value)
+  })
 
-  // Re-sync internal state when external value changes (e.g., reset)
-  useEffect(() => {
-    if (isInitRef.current) {
-      isInitRef.current = false
-      return
-    }
+  // Re-sync when parent value changes externally (e.g., form reset)
+  if (value !== lastSerializedRef.current) {
+    lastSerializedRef.current = value
     setSchedule(deserializeToWeekSchedule(value))
-  }, [value])
+  }
 
   const handleChange = useCallback(
     (newSchedule: WeekSchedule) => {
       setSchedule(newSchedule)
       setIsDirty(true)
-      onChange(serializeWeekSchedule(newSchedule))
+      const serialized = serializeWeekSchedule(newSchedule)
+      lastSerializedRef.current = serialized
+      onChange(serialized)
     },
     [onChange, setIsDirty],
   )

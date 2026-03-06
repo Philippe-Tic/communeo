@@ -3,17 +3,27 @@ export interface OpeningHoursEntry {
   hours: string
 }
 
-export function getOpeningHoursEntries(hours: unknown): OpeningHoursEntry[] {
-  if (!hours || typeof hours !== 'object') return []
+function resolveHours(hours: unknown): object | null {
+  if (!hours) return null
+  if (typeof hours === 'string') {
+    try { return JSON.parse(hours) } catch { return null }
+  }
+  if (typeof hours === 'object') return hours as object
+  return null
+}
 
-  if (!Array.isArray(hours)) {
-    return Object.entries(hours as Record<string, unknown>).map(([day, h]) => ({
+export function getOpeningHoursEntries(hours: unknown): OpeningHoursEntry[] {
+  const resolved = resolveHours(hours)
+  if (!resolved) return []
+
+  if (!Array.isArray(resolved)) {
+    return Object.entries(resolved as Record<string, unknown>).map(([day, h]) => ({
       day: day.charAt(0).toUpperCase() + day.slice(1),
       hours: String(h),
     }))
   }
 
-  return (hours as Array<{ day?: string; hours?: string }>)
+  return (resolved as Array<{ day?: string; hours?: string }>)
     .filter((e) => e?.day && e?.hours)
     .map((e) => ({ day: e.day!, hours: e.hours! }))
 }
@@ -40,13 +50,14 @@ function parseTimeFr(str: string): string {
  * e.g. ["Mo 08:30-12:00 14:00-17:00", "Tu 08:30-12:00"]
  */
 export function formatSchemaOrgOpeningHours(hours: unknown): string[] {
-  if (!hours || typeof hours !== 'object') return []
+  const resolved = resolveHours(hours)
+  if (!resolved) return []
 
-  const entries = Array.isArray(hours)
-    ? (hours as Array<{ day?: string; hours?: string }>)
+  const entries = Array.isArray(resolved)
+    ? (resolved as Array<{ day?: string; hours?: string }>)
         .filter((e) => e?.day && e?.hours)
         .map((e) => [e.day!.toLowerCase(), e.hours!] as const)
-    : Object.entries(hours as Record<string, unknown>).map(
+    : Object.entries(resolved as Record<string, unknown>).map(
         ([day, h]) => [day.toLowerCase(), String(h)] as const,
       )
 

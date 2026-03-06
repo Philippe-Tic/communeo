@@ -81,11 +81,7 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
   ...(siteConfig.contact_phone && { "telephone": siteConfig.contact_phone }),
   ...(siteConfig.contact_mail && { "email": siteConfig.contact_mail }),
   ...(siteConfig.logo && { "logo": getStrapiImageUrl(siteConfig.logo.url) }),
-  ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": formatSchemaOrgOpeningHours(
-    typeof siteConfig.infos_pratiques.opening_hours === 'string'
-      ? (() => { try { return JSON.parse(siteConfig.infos_pratiques.opening_hours); } catch { return null; } })()
-      : siteConfig.infos_pratiques.opening_hours
-  ) }),
+  ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": formatSchemaOrgOpeningHours(siteConfig.infos_pratiques.opening_hours) }),
 }) : null;
 
 // JSON-LD WebSite + SearchAction

@@ -1,0 +1,1 @@
+export { OpeningHoursEditor } from './OpeningHoursEditor'

@@ -3,22 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import { getSiteConfig } from '../utils/strapi';
+import { getOpeningHoursEntries } from '../utils/opening-hours';
 import { categories, documentsCNI, documentsPasseport } from '../data/demarches';
 
 const siteConfig = await getSiteConfig();
 const di = siteConfig.demarches_identite;
 const showIdentiteSection = di?.has_dispositif_recueil === true;
-
-function getOpeningHoursEntries(hours: any): Array<{ day: string; hours: string }> {
-  if (!hours || typeof hours !== 'object') return [];
-  if (!Array.isArray(hours)) {
-    return Object.entries(hours).map(([day, h]) => ({
-      day: day.charAt(0).toUpperCase() + day.slice(1),
-      hours: String(h),
-    }));
-  }
-  return hours.filter((e: any) => e?.day && e?.hours).map((e: any) => ({ day: e.day, hours: e.hours }));
-}
 
 const openingHours = getOpeningHoursEntries(siteConfig.infos_pratiques?.opening_hours);
 

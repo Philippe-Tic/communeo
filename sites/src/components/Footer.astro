@@ -1,6 +1,7 @@
 ---
 import type { Site, SocialPlatform } from '../types/strapi';
 import { getSiteConfig, getStrapiImageUrl } from '../utils/strapi';
+import { getOpeningHoursEntries } from '../utils/opening-hours';
 import StrapiImage from './StrapiImage.astro';
 
 let siteConfig: Site | null = null;
@@ -117,14 +118,25 @@ const socialLinksData = socialLinks.map((link) => {
               </a>
             </p>
           )}
-          {siteConfig?.infos_pratiques?.opening_hours && (
-            <p class="flex items-start gap-2.5">
-              <svg class="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{siteConfig.infos_pratiques.opening_hours}</span>
-            </p>
-          )}
+          {siteConfig?.infos_pratiques?.opening_hours && (() => {
+            const entries = getOpeningHoursEntries(
+              typeof siteConfig.infos_pratiques.opening_hours === 'string'
+                ? (() => { try { return JSON.parse(siteConfig.infos_pratiques.opening_hours); } catch { return null; } })()
+                : siteConfig.infos_pratiques.opening_hours
+            );
+            return entries.length > 0 ? (
+              <div class="flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="text-sm">
+                  {entries.map((entry) => (
+                    <p>{entry.day} : {entry.hours}</p>
+                  ))}
+                </div>
+              </div>
+            ) : null;
+          })()}
         </address>
       </div>
 

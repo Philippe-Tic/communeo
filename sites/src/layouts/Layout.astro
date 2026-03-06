@@ -3,6 +3,7 @@ import type { Site } from '../types/strapi';
 import { getImage } from 'astro:assets';
 import { getSiteConfig, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
 import { computeOnPrimary, computePrimaryText, computeFooterBg } from '../utils/color';
+import { formatSchemaOrgOpeningHours } from '../utils/opening-hours';
 import AlertBanner from '../components/AlertBanner.astro';
 import CookieBanner from '../components/CookieBanner.astro';
 import '../styles/fonts.css';
@@ -80,7 +81,11 @@ const organizationJsonLd = siteConfig ? JSON.stringify({
   ...(siteConfig.contact_phone && { "telephone": siteConfig.contact_phone }),
   ...(siteConfig.contact_mail && { "email": siteConfig.contact_mail }),
   ...(siteConfig.logo && { "logo": getStrapiImageUrl(siteConfig.logo.url) }),
-  ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": siteConfig.infos_pratiques.opening_hours }),
+  ...(siteConfig.infos_pratiques?.opening_hours && { "openingHours": formatSchemaOrgOpeningHours(
+    typeof siteConfig.infos_pratiques.opening_hours === 'string'
+      ? (() => { try { return JSON.parse(siteConfig.infos_pratiques.opening_hours); } catch { return null; } })()
+      : siteConfig.infos_pratiques.opening_hours
+  ) }),
 }) : null;
 
 // JSON-LD WebSite + SearchAction

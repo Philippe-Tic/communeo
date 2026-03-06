@@ -1,0 +1,68 @@
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import type { SectionBaseProps } from '../types'
+
+export function InfoSection({
+  formData,
+  onFieldChange,
+  errors,
+}: SectionBaseProps) {
+  return (
+    <div id="section-info">
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-foreground">
+            Informations pratiques
+          </h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <Label className="mb-2">Population</Label>
+              <Input
+                type="number"
+                min="0"
+                value={formData.population}
+                onChange={(e) => onFieldChange('population', e.target.value)}
+                placeholder="Nombre d'habitants"
+                className={errors.population ? 'border-destructive' : ''}
+              />
+              {errors.population && (
+                <p className="mt-1 text-sm text-destructive">{errors.population}</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label className="mb-2">Texte d'introduction de la page Contact</Label>
+            <Textarea
+              value={formData.contact_form_intro}
+              onChange={(e) => onFieldChange('contact_form_intro', e.target.value)}
+              placeholder="Vous pouvez nous contacter en utilisant le formulaire ci-dessous..."
+              rows={4}
+            />
+            <p className="mt-1 text-sm text-muted-foreground">
+              Affiché au-dessus du formulaire sur la page /contact
+            </p>
+          </div>
+
+          <div>
+            <Label className="mb-2">Horaires d'ouverture (JSON)</Label>
+            <Textarea
+              value={formData.opening_hours}
+              onChange={(e) => onFieldChange('opening_hours', e.target.value)}
+              placeholder='{"lundi": "8h30 - 12h / 14h - 17h", "mardi": "8h30 - 12h"}'
+              rows={8}
+              className={`font-mono text-sm ${errors.opening_hours ? 'border-destructive' : ''}`}
+            />
+            <p className="mt-1 text-sm text-muted-foreground">
+              Format JSON décrivant les horaires d'ouverture de la mairie
+            </p>
+            {errors.opening_hours && (
+              <p className="mt-1 text-sm text-destructive">{errors.opening_hours}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,130 +1,34 @@
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
-import { AlertCircle, Loader2, Plus, Trash2, Wand2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ErrorState, LoadingSpinner } from '../components/common'
-import { FormSelect } from '../components/forms/FormSelect'
-import { ImagePicker } from '../components/forms/ImagePicker'
-import { RichTextEditor } from '../components/editor'
-import { NavigationEditor } from '../components/navigation'
 import { PageHeader } from '../components/layout'
-import { useSite, useUpdateSite, type UpdateSiteData, type NavigationItem, type HomepageQuickLink, type HomepageKeyFigure, type HomepagePartner, type QuickLinkIcon, type KeyFigureIcon, type SocialLink, type SocialPlatform } from '../hooks/api/useSites'
+import {
+  GeneralSection,
+  LegalSection,
+  RgpdSection,
+  AccessibilitySection,
+  InfoSection,
+  OpenDataSection,
+  DemarchesSection,
+  HomepageSection,
+  NavigationSection,
+  SocialSection,
+  SiteConfigNav,
+  SiteConfigMobileNav,
+  SECTIONS,
+  SECTION_FIELDS,
+} from '../components/site-config'
+import type { SiteConfigFormData, ImageData } from '../components/site-config'
+import { useSite, useUpdateSite, type UpdateSiteData, type NavigationItem, type HomepageQuickLink, type HomepageKeyFigure, type HomepagePartner, type SocialLink } from '../hooks/api/useSites'
 import { usePages } from '../hooks/api/usePages'
 import { useCanManageSite, useUserSite } from '../hooks/useUser'
+import { useActiveSection } from '../hooks/useActiveSection'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { toaster } from '../lib/toaster'
 
-// Labels français pour les icônes
-const QUICK_LINK_ICON_OPTIONS: { value: QuickLinkIcon; label: string }[] = [
-  { value: 'document', label: 'Document' },
-  { value: 'identity', label: 'Identité' },
-  { value: 'folder', label: 'Dossier' },
-  { value: 'mail', label: 'Courrier' },
-  { value: 'alert', label: 'Alerte' },
-  { value: 'clock', label: 'Horloge' },
-  { value: 'phone', label: 'Téléphone' },
-  { value: 'map', label: 'Carte' },
-  { value: 'calendar', label: 'Calendrier' },
-  { value: 'users', label: 'Personnes' },
-  { value: 'building', label: 'Bâtiment' },
-  { value: 'heart', label: 'Coeur' },
-  { value: 'info', label: 'Information' },
-  { value: 'shield', label: 'Bouclier' },
-  { value: 'book', label: 'Livre' },
-  { value: 'globe', label: 'Globe' },
-]
-
-const KEY_FIGURE_ICON_OPTIONS: { value: KeyFigureIcon; label: string }[] = [
-  { value: 'users', label: 'Personnes' },
-  { value: 'map', label: 'Carte' },
-  { value: 'building', label: 'Bâtiment' },
-  { value: 'calendar', label: 'Calendrier' },
-  { value: 'heart', label: 'Coeur' },
-  { value: 'book', label: 'Livre' },
-  { value: 'globe', label: 'Globe' },
-  { value: 'shield', label: 'Bouclier' },
-  { value: 'tree', label: 'Arbre' },
-  { value: 'star', label: 'Étoile' },
-]
-
-const SOCIAL_PLATFORM_OPTIONS: { value: SocialPlatform; label: string }[] = [
-  { value: 'facebook', label: 'Facebook' },
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'linkedin', label: 'LinkedIn' },
-  { value: 'x', label: 'X (Twitter)' },
-  { value: 'youtube', label: 'YouTube' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'autre', label: 'Autre' },
-]
-
-// RGPD template
-const RGPD_TEMPLATE = `<h2>Politique de confidentialité</h2>
-<p>La commune de <strong>[NOM DE LA COMMUNE]</strong> s'engage à protéger la vie privée des utilisateurs de son site internet, conformément au Règlement Général sur la Protection des Données (RGPD - Règlement UE 2016/679) et à la loi Informatique et Libertés du 6 janvier 1978 modifiée.</p>
-
-<h3>Responsable du traitement</h3>
-<p>Le responsable du traitement des données est la commune de <strong>[NOM DE LA COMMUNE]</strong>, représentée par son Maire.</p>
-
-<h3>Données collectées</h3>
-<p>Dans le cadre de l'utilisation de ce site, les données suivantes peuvent être collectées :</p>
-<ul>
-<li>Données d'identification : nom, prénom, adresse email, numéro de téléphone</li>
-<li>Données de connexion : adresse IP, date et heure de connexion, pages consultées</li>
-<li>Données transmises via les formulaires de contact</li>
-</ul>
-
-<h3>Finalités du traitement</h3>
-<p>Les données personnelles sont collectées pour :</p>
-<ul>
-<li>Répondre aux demandes des usagers via le formulaire de contact</li>
-<li>Assurer le bon fonctionnement et la sécurité du site</li>
-<li>Établir des statistiques de fréquentation anonymisées</li>
-</ul>
-
-<h3>Base légale</h3>
-<p>Le traitement des données repose sur :</p>
-<ul>
-<li>L'exécution d'une mission d'intérêt public (article 6.1.e du RGPD)</li>
-<li>Le consentement de l'utilisateur pour les cookies non essentiels (article 6.1.a du RGPD)</li>
-</ul>
-
-<h3>Durée de conservation</h3>
-<p>Les données personnelles sont conservées pendant une durée n'excédant pas celle nécessaire aux finalités pour lesquelles elles sont collectées, conformément à la réglementation en vigueur.</p>
-
-<h3>Droits des personnes</h3>
-<p>Conformément au RGPD, vous disposez des droits suivants :</p>
-<ul>
-<li>Droit d'accès à vos données personnelles</li>
-<li>Droit de rectification</li>
-<li>Droit à l'effacement</li>
-<li>Droit à la limitation du traitement</li>
-<li>Droit à la portabilité</li>
-<li>Droit d'opposition</li>
-</ul>
-<p>Pour exercer ces droits, contactez le Délégué à la Protection des Données (DPO) aux coordonnées indiquées dans les mentions légales.</p>
-
-<h3>Cookies</h3>
-<p>Ce site utilise des cookies essentiels au fonctionnement du site. Les cookies non essentiels ne sont déposés qu'après recueil de votre consentement via le bandeau cookies.</p>
-
-<h3>Réclamation</h3>
-<p>Si vous estimez que le traitement de vos données constitue une violation du RGPD, vous pouvez introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.</p>`
-
-// Fields belonging to each tab, for error indicators
-const TAB_FIELDS: Record<string, string[]> = {
-  general: ['name', 'contact_mail', 'colors'],
-  legal: ['siret', 'publication_director', 'hebergeur_name'],
-  rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
-  accessibility: ['accessibility_level'],
-  info: ['opening_hours'],
-  opendata: [],
-  demarches: ['appointment_url'],
-  homepage: [],
-  navigation: [],
-  social: [],
-}
+const SECTION_KEYS = SECTIONS.map(s => s.key)
 
 export const SiteConfigEdit = () => {
   const { site: userSite } = useUserSite()
@@ -132,15 +36,15 @@ export const SiteConfigEdit = () => {
   const { data: site, isLoading, error } = useSite(userSite?.documentId || '')
   const { mutate: updateSite, isPending } = useUpdateSite()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
+  const [activeSection, scrollToSection] = useActiveSection(SECTION_KEYS)
 
-  const [formData, setFormData] = React.useState({
-    // Informations générales
+  const [formData, setFormData] = React.useState<SiteConfigFormData>({
     name: '',
     contact_mail: '',
     contact_phone: '',
     address: '',
     colors: '',
-    // Mentions légales
     siret: '',
     publication_director: '',
     publication_director_title: '',
@@ -149,33 +53,26 @@ export const SiteConfigEdit = () => {
     hebergeur_phone: '',
     credits: '',
     mentions_legales_extra: '',
-    // RGPD
     dpo_name: '',
     dpo_email: '',
     dpo_phone: '',
     rgpd_policy: '',
-    // Accessibilité
-    accessibility_level: '' as '' | 'non-conforme' | 'partiellement-conforme' | 'conforme',
+    accessibility_level: '',
     accessibility_declaration: '',
     accessibility_schema_url: '',
     accessibility_action_plan_url: '',
-    // Infos pratiques
     opening_hours: '',
     population: '',
     contact_form_intro: '',
-    // Open Data
     open_data_enabled: false,
     open_data_url: '',
-    open_data_platform: 'none' as 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none',
-    // Démarches identité
+    open_data_platform: 'none',
     has_dispositif_recueil: false,
     appointment_url: '',
-    appointment_provider: 'ants-rdv' as 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre',
+    appointment_provider: 'ants-rdv',
     remise_titre_info: '',
-    // Auto-deploy
     auto_deploy_enabled: false,
     auto_deploy_delay: '300',
-    // Homepage
     homepage_content: '',
     homepage_meta_description: '',
     hero_title: '',
@@ -198,9 +95,9 @@ export const SiteConfigEdit = () => {
     show_partners: false,
   })
 
-  const [logoImage, setLogoImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
-  const [faviconImage, setFaviconImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
-  const [heroImage, setHeroImage] = React.useState<{ id: number; documentId: string; name: string; url: string; mime: string; size: number; ext: string } | null>(null)
+  const [logoImage, setLogoImage] = React.useState<ImageData | null>(null)
+  const [faviconImage, setFaviconImage] = React.useState<ImageData | null>(null)
+  const [heroImage, setHeroImage] = React.useState<ImageData | null>(null)
   const [quickLinks, setQuickLinks] = React.useState<HomepageQuickLink[]>([])
   const [keyFigures, setKeyFigures] = React.useState<HomepageKeyFigure[]>([])
   const [partners, setPartners] = React.useState<HomepagePartner[]>([])
@@ -210,9 +107,9 @@ export const SiteConfigEdit = () => {
   const { data: pagesData } = usePages({ status: 'published', pageSize: 100 })
 
   const [errors, setErrors] = React.useState<Record<string, string>>({})
-  const [isDirty, setIsDirty] = React.useState(false)
+  const [_isDirty, setIsDirty] = React.useState(false)
+  const [formInitialized, setFormInitialized] = React.useState(false)
 
-  // Update form when site data loads
   React.useEffect(() => {
     if (site) {
       setFormData({
@@ -221,7 +118,6 @@ export const SiteConfigEdit = () => {
         contact_phone: site.contact_phone || '',
         address: site.address || '',
         colors: site.colors ? JSON.stringify(site.colors, null, 2) : '',
-        // Mentions légales (composant imbriqué)
         siret: site.mentions_legales?.siret || '',
         publication_director: site.mentions_legales?.publication_director || '',
         publication_director_title: site.mentions_legales?.publication_director_title || '',
@@ -230,33 +126,26 @@ export const SiteConfigEdit = () => {
         hebergeur_phone: site.mentions_legales?.hebergeur_phone || '',
         credits: site.mentions_legales?.credits || '',
         mentions_legales_extra: site.mentions_legales?.mentions_legales_extra || '',
-        // RGPD (composant imbriqué)
         dpo_name: site.rgpd?.dpo_name || '',
         dpo_email: site.rgpd?.dpo_email || '',
         dpo_phone: site.rgpd?.dpo_phone || '',
         rgpd_policy: site.rgpd?.rgpd_policy || '',
-        // Accessibilité (composant imbriqué)
         accessibility_level: site.accessibilite?.accessibility_level || '',
         accessibility_declaration: site.accessibilite?.accessibility_declaration || '',
         accessibility_schema_url: site.accessibilite?.accessibility_schema_url || '',
         accessibility_action_plan_url: site.accessibilite?.accessibility_action_plan_url || '',
-        // Infos pratiques (composant imbriqué)
         opening_hours: site.infos_pratiques?.opening_hours ? JSON.stringify(site.infos_pratiques.opening_hours, null, 2) : '',
         population: site.infos_pratiques?.population?.toString() || '',
         contact_form_intro: site.infos_pratiques?.contact_form_intro || '',
-        // Open Data
         open_data_enabled: site.open_data_enabled || false,
         open_data_url: site.open_data_url || '',
         open_data_platform: site.open_data_platform || 'none',
-        // Démarches identité
         has_dispositif_recueil: site.demarches_identite?.has_dispositif_recueil || false,
         appointment_url: site.demarches_identite?.appointment_url || '',
         appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv',
         remise_titre_info: site.demarches_identite?.remise_titre_info || '',
-        // Auto-deploy
         auto_deploy_enabled: site.auto_deploy_enabled || false,
         auto_deploy_delay: (site.auto_deploy_delay ?? 300).toString(),
-        // Homepage
         homepage_content: site.homepage?.content || '',
         homepage_meta_description: site.homepage?.meta_description || '',
         hero_title: site.homepage?.hero_title || '',
@@ -286,10 +175,10 @@ export const SiteConfigEdit = () => {
       setPartners(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
       setNavigationItems(site.navigation_config || [])
       setSocialLinks(site.social_links?.map(({ id: _id, ...rest }) => rest) || [])
+      setFormInitialized(true)
     }
   }, [site])
 
-  // Check permissions after hooks
   if (!hasSite) {
     return <ErrorState title="Site non trouvé" message="Aucun site associé à votre compte" />
   }
@@ -334,7 +223,6 @@ export const SiteConfigEdit = () => {
       }
     }
 
-    // Mentions légales — required fields
     if (!formData.siret.trim()) {
       newErrors.siret = 'Le SIRET est requis'
     } else if (!/^\d{14}$/.test(formData.siret.replace(/\s/g, ''))) {
@@ -349,7 +237,6 @@ export const SiteConfigEdit = () => {
       newErrors.hebergeur_name = 'Le nom de l\'hébergeur est requis'
     }
 
-    // RGPD — required fields
     if (!formData.dpo_name.trim()) {
       newErrors.dpo_name = 'Le nom du DPO est requis'
     }
@@ -364,12 +251,10 @@ export const SiteConfigEdit = () => {
       newErrors.rgpd_policy = 'La politique de confidentialité est requise (min. 50 caractères)'
     }
 
-    // Accessibilité — required field
     if (!formData.accessibility_level) {
       newErrors.accessibility_level = 'Le niveau d\'accessibilité est requis'
     }
 
-    // Infos pratiques
     if (formData.opening_hours.trim()) {
       try {
         JSON.parse(formData.opening_hours)
@@ -386,8 +271,8 @@ export const SiteConfigEdit = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const tabHasErrors = (tabKey: string) => {
-    const fields = TAB_FIELDS[tabKey] || []
+  const sectionHasErrors = (sectionKey: string) => {
+    const fields = SECTION_FIELDS[sectionKey] || []
     return fields.some(field => !!errors[field])
   }
 
@@ -519,18 +404,43 @@ export const SiteConfigEdit = () => {
   }
 
   const handleCancel = () => {
-    if (isDirty) {
-      if (window.confirm('Vous avez des modifications non sauvegardées. Êtes-vous sûr de vouloir quitter ?')) {
-        navigate('/site')
-      }
-    } else {
-      navigate('/site')
-    }
+    navigate('/site')
   }
 
   if (isLoading) return <LoadingSpinner />
   if (error) return <ErrorState title="Erreur de chargement" message="Impossible de charger la configuration du site" />
   if (!site) return <ErrorState title="Site non trouvé" message="Aucune configuration de site disponible" />
+  if (!formInitialized) return <LoadingSpinner />
+
+  const baseProps = { formData, onFieldChange: handleInputChange, errors, setIsDirty, setFormData }
+  const pages = pagesData?.data || []
+
+  const renderSection = (key: string) => {
+    switch (key) {
+      case 'general':
+        return <GeneralSection {...baseProps} siteSlug={site.slug} logoImage={logoImage} setLogoImage={setLogoImage} faviconImage={faviconImage} setFaviconImage={setFaviconImage} />
+      case 'legal':
+        return <LegalSection {...baseProps} />
+      case 'rgpd':
+        return <RgpdSection {...baseProps} />
+      case 'accessibility':
+        return <AccessibilitySection {...baseProps} />
+      case 'info':
+        return <InfoSection {...baseProps} />
+      case 'opendata':
+        return <OpenDataSection {...baseProps} />
+      case 'demarches':
+        return <DemarchesSection {...baseProps} />
+      case 'homepage':
+        return <HomepageSection {...baseProps} heroImage={heroImage} setHeroImage={setHeroImage} quickLinks={quickLinks} setQuickLinks={setQuickLinks} keyFigures={keyFigures} setKeyFigures={setKeyFigures} partners={partners} setPartners={setPartners} />
+      case 'navigation':
+        return <NavigationSection navigationItems={navigationItems} setNavigationItems={setNavigationItems} setIsDirty={setIsDirty} pages={pages} />
+      case 'social':
+        return <SocialSection socialLinks={socialLinks} setSocialLinks={setSocialLinks} setIsDirty={setIsDirty} />
+      default:
+        return null
+    }
+  }
 
   return (
     <div className="mx-auto w-full">
@@ -561,1389 +471,30 @@ export const SiteConfigEdit = () => {
             ]}
           />
 
-          <Tabs defaultValue="general">
-            <TabsList className="w-full overflow-x-auto">
-              <TabsTrigger value="general" className="gap-1.5">
-                Informations générales
-                {tabHasErrors('general') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="legal" className="gap-1.5">
-                Mentions légales
-                {tabHasErrors('legal') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="rgpd" className="gap-1.5">
-                RGPD
-                {tabHasErrors('rgpd') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="accessibility" className="gap-1.5">
-                Accessibilité
-                {tabHasErrors('accessibility') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="info" className="gap-1.5">
-                Infos pratiques
-                {tabHasErrors('info') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="opendata" className="gap-1.5">
-                Open Data
-                {tabHasErrors('opendata') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="demarches" className="gap-1.5">
-                Démarches
-                {tabHasErrors('demarches') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="homepage" className="gap-1.5">
-                Page d'accueil
-                {tabHasErrors('homepage') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="navigation" className="gap-1.5">
-                Navigation
-                {tabHasErrors('navigation') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-              <TabsTrigger value="social" className="gap-1.5">
-                Réseaux sociaux
-                {tabHasErrors('social') && <AlertCircle className="h-3.5 w-3.5 text-destructive" />}
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Onglet 1 — Informations générales */}
-            <TabsContent value="general">
-              <div className="flex flex-col gap-6">
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Informations générales
-                    </h2>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <Label className="mb-2">Nom du site <span className="text-destructive">*</span></Label>
-                        <Input
-                          value={formData.name}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          className={errors.name ? 'border-destructive' : ''}
-                        />
-                        {errors.name && (
-                          <p className="mt-1 text-sm text-destructive">{errors.name}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Slug</Label>
-                        <Input
-                          value={site.slug}
-                          disabled
-                          className="bg-muted"
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Le slug ne peut pas être modifié
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Email de contact <span className="text-destructive">*</span></Label>
-                        <Input
-                          type="email"
-                          value={formData.contact_mail}
-                          onChange={(e) => handleInputChange('contact_mail', e.target.value)}
-                          className={errors.contact_mail ? 'border-destructive' : ''}
-                        />
-                        {errors.contact_mail && (
-                          <p className="mt-1 text-sm text-destructive">{errors.contact_mail}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Téléphone</Label>
-                        <Input
-                          type="tel"
-                          value={formData.contact_phone}
-                          onChange={(e) => handleInputChange('contact_phone', e.target.value)}
-                          placeholder="Ex: 01 23 45 67 89"
-                        />
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Adresse</Label>
-                        <Textarea
-                          value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          placeholder="Adresse complète de la mairie"
-                          rows={3}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Identité visuelle
-                    </h2>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <Label className="mb-2">Logo</Label>
-                        <ImagePicker
-                          value={logoImage}
-                          onChange={(media) => { setLogoImage(media); setIsDirty(true) }}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Logo affiché dans le header du site public
-                        </p>
-                      </div>
-                      <div>
-                        <Label className="mb-2">Favicon</Label>
-                        <ImagePicker
-                          value={faviconImage}
-                          onChange={(media) => { setFaviconImage(media); setIsDirty(true) }}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Image carrée recommandée (512x512px minimum). Utilisé comme icône du navigateur et PWA. Si absent, le logo sera utilisé.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Configuration des couleurs
-                    </h2>
-                    <div>
-                      <Label className="mb-2">Couleurs du thème (JSON)</Label>
-                      <Textarea
-                        value={formData.colors}
-                        onChange={(e) => handleInputChange('colors', e.target.value)}
-                        placeholder='{"primary": "#3182ce", "secondary": "#2d3748"}'
-                        rows={6}
-                        className={`font-mono text-sm ${errors.colors ? 'border-destructive' : ''}`}
-                      />
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Configuration JSON optionnelle pour personnaliser les couleurs du thème
-                      </p>
-                      {errors.colors && (
-                        <p className="mt-1 text-sm text-destructive">{errors.colors}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Déploiement automatique
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      Déclenche automatiquement un rebuild du site public lorsque du contenu est modifié (articles, pages, événements, documents, alertes).
-                    </p>
-
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={formData.auto_deploy_enabled}
-                        onClick={() => {
-                          setFormData(prev => ({ ...prev, auto_deploy_enabled: !prev.auto_deploy_enabled }))
-                          setIsDirty(true)
-                        }}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                          formData.auto_deploy_enabled ? 'bg-primary' : 'bg-input'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${
-                            formData.auto_deploy_enabled ? 'translate-x-5' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
-                      <Label>Activer le déploiement automatique</Label>
-                    </div>
-
-                    {formData.auto_deploy_enabled && (
-                      <div className="max-w-xs">
-                        <Label className="mb-2">Délai avant déploiement (secondes)</Label>
-                        <Input
-                          type="number"
-                          min={60}
-                          max={3600}
-                          value={formData.auto_deploy_delay}
-                          onChange={(e) => handleInputChange('auto_deploy_delay', e.target.value)}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Temps d'attente après la dernière modification avant de lancer le rebuild (60 à 3600 secondes)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+          {isMobile ? (
+            <SiteConfigMobileNav
+              sections={SECTIONS}
+              sectionHasErrors={sectionHasErrors}
+              renderSection={renderSection}
+            />
+          ) : (
+            <div className="flex gap-6">
+              <SiteConfigNav
+                sections={SECTIONS}
+                activeSection={activeSection}
+                sectionHasErrors={sectionHasErrors}
+                onSectionClick={scrollToSection}
+              />
+              <div className="flex-1 flex flex-col gap-6">
+                {SECTIONS.map(s => (
+                  <React.Fragment key={s.key}>
+                    {renderSection(s.key)}
+                  </React.Fragment>
+                ))}
               </div>
-            </TabsContent>
+            </div>
+          )}
 
-            {/* Onglet 2 — Mentions légales */}
-            <TabsContent value="legal">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Mentions légales
-                  </h2>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <Label className="mb-2">SIRET <span className="text-destructive">*</span></Label>
-                      <Input
-                        value={formData.siret}
-                        onChange={(e) => handleInputChange('siret', e.target.value)}
-                        placeholder="Ex: 123 456 789 00012"
-                        className={errors.siret ? 'border-destructive' : ''}
-                      />
-                      {errors.siret && (
-                        <p className="mt-1 text-sm text-destructive">{errors.siret}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Directeur de publication <span className="text-destructive">*</span></Label>
-                      <Input
-                        value={formData.publication_director}
-                        onChange={(e) => handleInputChange('publication_director', e.target.value)}
-                        placeholder="Nom du directeur de publication"
-                        className={errors.publication_director ? 'border-destructive' : ''}
-                      />
-                      {errors.publication_director && (
-                        <p className="mt-1 text-sm text-destructive">{errors.publication_director}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Titre du directeur de publication</Label>
-                      <Input
-                        value={formData.publication_director_title}
-                        onChange={(e) => handleInputChange('publication_director_title', e.target.value)}
-                        placeholder="Ex: Maire"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Nom de l'hébergeur <span className="text-destructive">*</span></Label>
-                      <Input
-                        value={formData.hebergeur_name}
-                        onChange={(e) => handleInputChange('hebergeur_name', e.target.value)}
-                        placeholder="Ex: Netlify, OVH..."
-                        className={errors.hebergeur_name ? 'border-destructive' : ''}
-                      />
-                      {errors.hebergeur_name && (
-                        <p className="mt-1 text-sm text-destructive">{errors.hebergeur_name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Adresse de l'hébergeur</Label>
-                      <Input
-                        value={formData.hebergeur_address}
-                        onChange={(e) => handleInputChange('hebergeur_address', e.target.value)}
-                        placeholder="Adresse de l'hébergeur"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Téléphone de l'hébergeur</Label>
-                      <Input
-                        type="tel"
-                        value={formData.hebergeur_phone}
-                        onChange={(e) => handleInputChange('hebergeur_phone', e.target.value)}
-                        placeholder="Téléphone de l'hébergeur"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-6 pt-2">
-                    <div>
-                      <Label className="mb-2">Crédits</Label>
-                      <RichTextEditor
-                        value={formData.credits}
-                        onChange={(value) => handleInputChange('credits', value)}
-                        placeholder="Crédits photos, conception..."
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Mentions légales supplémentaires</Label>
-                      <RichTextEditor
-                        value={formData.mentions_legales_extra}
-                        onChange={(value) => handleInputChange('mentions_legales_extra', value)}
-                        placeholder="Informations complémentaires..."
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 3 — RGPD & Confidentialité */}
-            <TabsContent value="rgpd">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    RGPD & Confidentialité
-                  </h2>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <Label className="mb-2">Nom du DPO <span className="text-destructive">*</span></Label>
-                      <Input
-                        value={formData.dpo_name}
-                        onChange={(e) => handleInputChange('dpo_name', e.target.value)}
-                        placeholder="Délégué à la protection des données"
-                        className={errors.dpo_name ? 'border-destructive' : ''}
-                      />
-                      {errors.dpo_name && (
-                        <p className="mt-1 text-sm text-destructive">{errors.dpo_name}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Email du DPO <span className="text-destructive">*</span></Label>
-                      <Input
-                        type="email"
-                        value={formData.dpo_email}
-                        onChange={(e) => handleInputChange('dpo_email', e.target.value)}
-                        placeholder="dpo@mairie.fr"
-                        className={errors.dpo_email ? 'border-destructive' : ''}
-                      />
-                      {errors.dpo_email && (
-                        <p className="mt-1 text-sm text-destructive">{errors.dpo_email}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">Téléphone du DPO</Label>
-                      <Input
-                        type="tel"
-                        value={formData.dpo_phone}
-                        onChange={(e) => handleInputChange('dpo_phone', e.target.value)}
-                        placeholder="Téléphone du DPO"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <div className="mb-2 flex items-center justify-between">
-                      <Label>Politique de confidentialité <span className="text-destructive">*</span></Label>
-                      {!formData.rgpd_policy && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            handleInputChange('rgpd_policy', RGPD_TEMPLATE)
-                          }}
-                        >
-                          <Wand2 className="mr-1.5 h-3.5 w-3.5" />
-                          Charger le modèle
-                        </Button>
-                      )}
-                    </div>
-                    <RichTextEditor
-                      value={formData.rgpd_policy}
-                      onChange={(value) => handleInputChange('rgpd_policy', value)}
-                      placeholder="Décrivez votre politique de confidentialité..."
-                    />
-                    {errors.rgpd_policy && (
-                      <p className="mt-1 text-sm text-destructive">{errors.rgpd_policy}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 4 — Accessibilité */}
-            <TabsContent value="accessibility">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Accessibilité
-                  </h2>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <FormSelect
-                      label="Niveau de conformité"
-                      value={formData.accessibility_level}
-                      onValueChange={(v) => handleInputChange('accessibility_level', v)}
-                      options={[
-                        { value: 'non-conforme', label: 'Non conforme' },
-                        { value: 'partiellement-conforme', label: 'Partiellement conforme' },
-                        { value: 'conforme', label: 'Conforme' },
-                      ]}
-                      placeholder="— Sélectionner —"
-                      required
-                      error={errors.accessibility_level}
-                    />
-
-                    <div>
-                      <Label className="mb-2">URL du schéma pluriannuel</Label>
-                      <Input
-                        type="url"
-                        value={formData.accessibility_schema_url}
-                        onChange={(e) => handleInputChange('accessibility_schema_url', e.target.value)}
-                        placeholder="https://..."
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2">URL du plan d'action</Label>
-                      <Input
-                        type="url"
-                        value={formData.accessibility_action_plan_url}
-                        onChange={(e) => handleInputChange('accessibility_action_plan_url', e.target.value)}
-                        placeholder="https://..."
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <Label className="mb-2">Déclaration d'accessibilité</Label>
-                    <RichTextEditor
-                      value={formData.accessibility_declaration}
-                      onChange={(value) => handleInputChange('accessibility_declaration', value)}
-                      placeholder="Déclaration d'accessibilité du site..."
-                    />
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 5 — Infos pratiques */}
-            <TabsContent value="info">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Informations pratiques
-                  </h2>
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <Label className="mb-2">Population</Label>
-                      <Input
-                        type="number"
-                        min="0"
-                        value={formData.population}
-                        onChange={(e) => handleInputChange('population', e.target.value)}
-                        placeholder="Nombre d'habitants"
-                        className={errors.population ? 'border-destructive' : ''}
-                      />
-                      {errors.population && (
-                        <p className="mt-1 text-sm text-destructive">{errors.population}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Texte d'introduction de la page Contact</Label>
-                    <Textarea
-                      value={formData.contact_form_intro}
-                      onChange={(e) => handleInputChange('contact_form_intro', e.target.value)}
-                      placeholder="Vous pouvez nous contacter en utilisant le formulaire ci-dessous..."
-                      rows={4}
-                    />
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Affiché au-dessus du formulaire sur la page /contact
-                    </p>
-                  </div>
-
-                  <div>
-                    <Label className="mb-2">Horaires d'ouverture (JSON)</Label>
-                    <Textarea
-                      value={formData.opening_hours}
-                      onChange={(e) => handleInputChange('opening_hours', e.target.value)}
-                      placeholder='{"lundi": "8h30 - 12h / 14h - 17h", "mardi": "8h30 - 12h"}'
-                      rows={8}
-                      className={`font-mono text-sm ${errors.opening_hours ? 'border-destructive' : ''}`}
-                    />
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Format JSON décrivant les horaires d'ouverture de la mairie
-                    </p>
-                    {errors.opening_hours && (
-                      <p className="mt-1 text-sm text-destructive">{errors.opening_hours}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 6 — Open Data */}
-            <TabsContent value="opendata">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Open Data
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Les communes de plus de 3 500 habitants ont l'obligation de publier certaines données en open data (Art. L312-1-1 CRPA).
-                  </p>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={formData.open_data_enabled}
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, open_data_enabled: !prev.open_data_enabled }))
-                        setIsDirty(true)
-                      }}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                        formData.open_data_enabled ? 'bg-primary' : 'bg-input'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${
-                          formData.open_data_enabled ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                    <Label>Activer la page Open Data sur le site public</Label>
-                  </div>
-
-                  {formData.open_data_enabled && (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <FormSelect
-                        label="Plateforme Open Data"
-                        value={formData.open_data_platform}
-                        onValueChange={(v) => handleInputChange('open_data_platform', v)}
-                        options={[
-                          { value: 'none', label: 'Aucune' },
-                          { value: 'data-gouv-fr', label: 'data.gouv.fr' },
-                          { value: 'opendatasoft', label: 'OpenDataSoft' },
-                          { value: 'custom', label: 'Autre plateforme' },
-                        ]}
-                        description="Plateforme sur laquelle vos données sont publiées"
-                      />
-
-                      <div>
-                        <Label className="mb-2">URL du portail Open Data</Label>
-                        <Input
-                          type="url"
-                          value={formData.open_data_url}
-                          onChange={(e) => handleInputChange('open_data_url', e.target.value)}
-                          placeholder="https://www.data.gouv.fr/fr/organizations/..."
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Lien direct vers votre page sur la plateforme choisie
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 7 — Démarches identité */}
-            <TabsContent value="demarches">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Démarches CNI & Passeport
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Si votre mairie dispose d'un dispositif de recueil biométrique, activez cette option pour afficher une section dédiée sur la page Démarches du site public.
-                  </p>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={formData.has_dispositif_recueil}
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, has_dispositif_recueil: !prev.has_dispositif_recueil }))
-                        setIsDirty(true)
-                      }}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                        formData.has_dispositif_recueil ? 'bg-primary' : 'bg-input'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${
-                          formData.has_dispositif_recueil ? 'translate-x-5' : 'translate-x-0'
-                        }`}
-                      />
-                    </button>
-                    <Label>Votre mairie dispose d'un dispositif de recueil biométrique</Label>
-                  </div>
-
-                  {formData.has_dispositif_recueil && (
-                    <div className="flex flex-col gap-6">
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <FormSelect
-                          label="Plateforme de rendez-vous"
-                          value={formData.appointment_provider}
-                          onValueChange={(v) => handleInputChange('appointment_provider', v)}
-                          options={[
-                            { value: 'ants-rdv', label: 'ANTS RDV' },
-                            { value: 'synbird', label: 'Synbird' },
-                            { value: 'rdv-service-public', label: 'rdv-service-public.fr' },
-                            { value: 'autre', label: 'Autre' },
-                          ]}
-                          description="Service utilisé pour la prise de rendez-vous en ligne"
-                        />
-
-                        <div>
-                          <Label className="mb-2">URL de prise de rendez-vous</Label>
-                          <Input
-                            type="url"
-                            value={formData.appointment_url}
-                            onChange={(e) => handleInputChange('appointment_url', e.target.value)}
-                            placeholder="https://www.rdv-service-public.fr/..."
-                            className={errors.appointment_url ? 'border-destructive' : ''}
-                          />
-                          {errors.appointment_url && (
-                            <p className="mt-1 text-sm text-destructive">{errors.appointment_url}</p>
-                          )}
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            Lien direct vers la page de prise de rendez-vous
-                          </p>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label className="mb-2">Informations sur la remise du titre</Label>
-                        <Textarea
-                          value={formData.remise_titre_info}
-                          onChange={(e) => handleInputChange('remise_titre_info', e.target.value)}
-                          placeholder="Ex: Le retrait du titre s'effectue en mairie sur rendez-vous, muni d'une pièce d'identité..."
-                          rows={4}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Texte personnalisé affiché dans la section infos pratiques de la page Démarches
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 8 — Page d'accueil */}
-            <TabsContent value="homepage">
-              <div className="flex flex-col gap-6">
-                {/* Hero */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">Hero</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Bannière principale affichée en haut de la page d'accueil.
-                    </p>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div>
-                        <Label className="mb-2">Titre Hero</Label>
-                        <Input
-                          value={formData.hero_title}
-                          onChange={(e) => handleInputChange('hero_title', e.target.value)}
-                          placeholder="Bienvenue à..."
-                          maxLength={120}
-                        />
-                      </div>
-                      <div>
-                        <Label className="mb-2">Sous-titre</Label>
-                        <Textarea
-                          value={formData.hero_subtitle}
-                          onChange={(e) => handleInputChange('hero_subtitle', e.target.value)}
-                          placeholder="Au service des habitants..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="mb-2">Image de fond</Label>
-                      <ImagePicker
-                        value={heroImage}
-                        onChange={(media) => { setHeroImage(media); setIsDirty(true) }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                      <div className="flex flex-col gap-3">
-                        <Label className="font-medium">Bouton principal (CTA)</Label>
-                        <Input
-                          value={formData.hero_cta_primary_label}
-                          onChange={(e) => handleInputChange('hero_cta_primary_label', e.target.value)}
-                          placeholder="Libellé (ex: Découvrir)"
-                          maxLength={50}
-                        />
-                        <Input
-                          value={formData.hero_cta_primary_url}
-                          onChange={(e) => handleInputChange('hero_cta_primary_url', e.target.value)}
-                          placeholder="URL (ex: /articles)"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <Label className="font-medium">Bouton secondaire (CTA)</Label>
-                        <Input
-                          value={formData.hero_cta_secondary_label}
-                          onChange={(e) => handleInputChange('hero_cta_secondary_label', e.target.value)}
-                          placeholder="Libellé (ex: Nous contacter)"
-                          maxLength={50}
-                        />
-                        <Input
-                          value={formData.hero_cta_secondary_url}
-                          onChange={(e) => handleInputChange('hero_cta_secondary_url', e.target.value)}
-                          placeholder="URL (ex: /contact)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contenu éditorial + SEO */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <h2 className="text-lg font-semibold text-foreground">Contenu éditorial</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Contenu libre affiché sur la page d'accueil, sous les accès rapides.
-                    </p>
-                    <div>
-                      <Label className="mb-2">Contenu</Label>
-                      <RichTextEditor
-                        variant="full"
-                        value={formData.homepage_content}
-                        onChange={(value) => handleInputChange('homepage_content', value)}
-                        placeholder="Bienvenue sur le site de votre commune..."
-                      />
-                    </div>
-                    <div>
-                      <Label className="mb-2">Meta description SEO</Label>
-                      <Input
-                        value={formData.homepage_meta_description}
-                        onChange={(e) => handleInputChange('homepage_meta_description', e.target.value)}
-                        placeholder="Description pour les moteurs de recherche (max 160 caractères)"
-                        maxLength={160}
-                      />
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {formData.homepage_meta_description.length}/160 caractères
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Accès rapides */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Accès rapides</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_quick_links}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_quick_links: !prev.show_quick_links }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_quick_links ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_quick_links ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_quick_links && (
-                      <>
-                        <p className="text-sm text-muted-foreground">
-                          Liens rapides affichés sous le hero. Si aucun n'est configuré, des liens par défaut seront utilisés.
-                        </p>
-                        {quickLinks.map((link, index) => (
-                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
-                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4">
-                              <Input
-                                value={link.label}
-                                onChange={(e) => {
-                                  const updated = [...quickLinks]
-                                  updated[index] = { ...updated[index], label: e.target.value }
-                                  setQuickLinks(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="Libellé"
-                                maxLength={50}
-                              />
-                              <Input
-                                value={link.url}
-                                onChange={(e) => {
-                                  const updated = [...quickLinks]
-                                  updated[index] = { ...updated[index], url: e.target.value }
-                                  setQuickLinks(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="URL (ex: /demarches)"
-                              />
-                              <Select
-                                value={link.icon || 'document'}
-                                onValueChange={(v) => {
-                                  const updated = [...quickLinks]
-                                  updated[index] = { ...updated[index], icon: v as QuickLinkIcon }
-                                  setQuickLinks(updated)
-                                  setIsDirty(true)
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {QUICK_LINK_ICON_OPTIONS.map(opt => (
-                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Input
-                                value={link.description || ''}
-                                onChange={(e) => {
-                                  const updated = [...quickLinks]
-                                  updated[index] = { ...updated[index], description: e.target.value }
-                                  setQuickLinks(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="Description (optionnel)"
-                                maxLength={100}
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setQuickLinks(quickLinks.filter((_, i) => i !== index))
-                                setIsDirty(true)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setQuickLinks([...quickLinks, { label: '', url: '', icon: 'document' }])
-                            setIsDirty(true)
-                          }}
-                        >
-                          <Plus className="mr-1.5 h-3.5 w-3.5" />
-                          Ajouter un lien rapide
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Mot du maire */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Mot du Maire</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_mayor_word}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_mayor_word: !prev.show_mayor_word }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_mayor_word ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_mayor_word ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_mayor_word && (
-                      <>
-                        <p className="text-sm text-muted-foreground">
-                          La photo du maire est automatiquement récupérée depuis les membres de l'équipe (rôle "Maire").
-                        </p>
-                        <div>
-                          <Label className="mb-2">Titre de la section</Label>
-                          <Input
-                            value={formData.mayor_word_title}
-                            onChange={(e) => handleInputChange('mayor_word_title', e.target.value)}
-                            placeholder="Le mot du Maire"
-                            maxLength={120}
-                          />
-                        </div>
-                        <div>
-                          <Label className="mb-2">Contenu</Label>
-                          <RichTextEditor
-                            value={formData.mayor_word_content}
-                            onChange={(value) => handleInputChange('mayor_word_content', value)}
-                            placeholder="Chères concitoyennes, chers concitoyens..."
-                          />
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actualités */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Actualités</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_articles}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_articles: !prev.show_articles }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_articles ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_articles ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_articles && (
-                      <div>
-                        <Label className="mb-2">Nombre d'articles affichés</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={6}
-                          value={formData.articles_count}
-                          onChange={(e) => handleInputChange('articles_count', e.target.value)}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Articles mis en avant affichés sur la page d'accueil (1 à 6)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Événements */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Événements</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_events}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_events: !prev.show_events }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_events ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_events ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_events && (
-                      <div>
-                        <Label className="mb-2">Nombre d'événements affichés</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={6}
-                          value={formData.events_count}
-                          onChange={(e) => handleInputChange('events_count', e.target.value)}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Prochains événements affichés sur la page d'accueil (1 à 6)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Chiffres clés */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Chiffres clés</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_key_figures}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_key_figures: !prev.show_key_figures }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_key_figures ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_key_figures ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_key_figures && (
-                      <>
-                        {keyFigures.map((figure, index) => (
-                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
-                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                value={figure.value}
-                                onChange={(e) => {
-                                  const updated = [...keyFigures]
-                                  updated[index] = { ...updated[index], value: e.target.value }
-                                  setKeyFigures(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="Valeur (ex: 12 500)"
-                                maxLength={20}
-                              />
-                              <Input
-                                value={figure.label}
-                                onChange={(e) => {
-                                  const updated = [...keyFigures]
-                                  updated[index] = { ...updated[index], label: e.target.value }
-                                  setKeyFigures(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="Label (ex: Habitants)"
-                                maxLength={60}
-                              />
-                              <Select
-                                value={figure.icon || 'users'}
-                                onValueChange={(v) => {
-                                  const updated = [...keyFigures]
-                                  updated[index] = { ...updated[index], icon: v as KeyFigureIcon }
-                                  setKeyFigures(updated)
-                                  setIsDirty(true)
-                                }}
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {KEY_FIGURE_ICON_OPTIONS.map(opt => (
-                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setKeyFigures(keyFigures.filter((_, i) => i !== index))
-                                setIsDirty(true)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setKeyFigures([...keyFigures, { value: '', label: '', icon: 'users' }])
-                            setIsDirty(true)
-                          }}
-                        >
-                          <Plus className="mr-1.5 h-3.5 w-3.5" />
-                          Ajouter un chiffre clé
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Associations */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Associations</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_associations}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_associations: !prev.show_associations }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_associations ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_associations ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_associations && (
-                      <div>
-                        <Label className="mb-2">Nombre d'associations affichées</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={12}
-                          value={formData.associations_count}
-                          onChange={(e) => handleInputChange('associations_count', e.target.value)}
-                        />
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Associations publiées affichées sur la page d'accueil (1 à 12)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Partenaires */}
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-lg font-semibold text-foreground">Partenaires</h2>
-                      <div className="flex items-center gap-3">
-                        <button
-                          type="button"
-                          role="switch"
-                          aria-checked={formData.show_partners}
-                          onClick={() => {
-                            setFormData(prev => ({ ...prev, show_partners: !prev.show_partners }))
-                            setIsDirty(true)
-                          }}
-                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                            formData.show_partners ? 'bg-primary' : 'bg-input'
-                          }`}
-                        >
-                          <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_partners ? 'translate-x-5' : 'translate-x-0'}`} />
-                        </button>
-                        <Label>Afficher</Label>
-                      </div>
-                    </div>
-                    {formData.show_partners && (
-                      <>
-                        {partners.map((partner, index) => (
-                          <div key={index} className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
-                            <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
-                              <Input
-                                value={partner.name}
-                                onChange={(e) => {
-                                  const updated = [...partners]
-                                  updated[index] = { ...updated[index], name: e.target.value }
-                                  setPartners(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="Nom du partenaire"
-                                maxLength={100}
-                              />
-                              <Input
-                                value={partner.url || ''}
-                                onChange={(e) => {
-                                  const updated = [...partners]
-                                  updated[index] = { ...updated[index], url: e.target.value }
-                                  setPartners(updated)
-                                  setIsDirty(true)
-                                }}
-                                placeholder="URL du site web"
-                              />
-                              <ImagePicker
-                                value={partner.logo || null}
-                                onChange={(media) => {
-                                  const updated = [...partners]
-                                  updated[index] = { ...updated[index], logo: media }
-                                  setPartners(updated)
-                                  setIsDirty(true)
-                                }}
-                                className="h-24"
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setPartners(partners.filter((_, i) => i !== index))
-                                setIsDirty(true)
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        ))}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setPartners([...partners, { name: '', url: '' }])
-                            setIsDirty(true)
-                          }}
-                        >
-                          <Plus className="mr-1.5 h-3.5 w-3.5" />
-                          Ajouter un partenaire
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 9 — Navigation */}
-            <TabsContent value="navigation">
-              <div className="flex flex-col gap-6">
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <h3 className="text-lg font-semibold mb-4">Menu principal</h3>
-                  <NavigationEditor
-                    items={navigationItems}
-                    onChange={(items) => {
-                      setNavigationItems(items)
-                      setIsDirty(true)
-                    }}
-                    pages={pagesData?.data || []}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Onglet 10 — Réseaux sociaux */}
-            <TabsContent value="social">
-              <div className="flex flex-col gap-6">
-                <div className="rounded-lg border bg-card p-6 shadow-sm">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-lg font-semibold text-foreground">Réseaux sociaux</h2>
-                        <p className="text-sm text-muted-foreground">Liens vers vos réseaux sociaux affichés dans le pied de page du site</p>
-                      </div>
-                      {socialLinks.length < 8 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setSocialLinks(prev => [...prev, { platform: 'facebook', url: '' }])
-                            setIsDirty(true)
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Ajouter
-                        </Button>
-                      )}
-                    </div>
-
-                    {socialLinks.length === 0 ? (
-                      <p className="text-sm text-muted-foreground italic py-4 text-center">
-                        Aucun réseau social configuré. Cliquez sur "Ajouter" pour commencer.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-4">
-                        {socialLinks.map((link, index) => (
-                          <div key={index} className="rounded-md border p-4 flex flex-col gap-3">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 flex-1">
-                                <div>
-                                  <Label className="mb-2">Plateforme</Label>
-                                  <Select
-                                    value={link.platform}
-                                    onValueChange={(value: SocialPlatform) => {
-                                      setSocialLinks(prev => prev.map((l, i) =>
-                                        i === index ? { ...l, platform: value, ...(value !== 'autre' ? { label: undefined, icon: null } : {}) } : l
-                                      ))
-                                      setIsDirty(true)
-                                    }}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {SOCIAL_PLATFORM_OPTIONS.map(opt => (
-                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <Label className="mb-2">URL <span className="text-destructive">*</span></Label>
-                                  <Input
-                                    value={link.url}
-                                    onChange={(e) => {
-                                      setSocialLinks(prev => prev.map((l, i) =>
-                                        i === index ? { ...l, url: e.target.value } : l
-                                      ))
-                                      setIsDirty(true)
-                                    }}
-                                    placeholder="https://..."
-                                  />
-                                  {link.url && !link.url.startsWith('https://') && (
-                                    <p className="text-xs text-destructive mt-1">L'URL doit commencer par https://</p>
-                                  )}
-                                </div>
-                              </div>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="text-destructive hover:text-destructive mt-6"
-                                onClick={() => {
-                                  setSocialLinks(prev => prev.filter((_, i) => i !== index))
-                                  setIsDirty(true)
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-
-                            {link.platform === 'autre' && (
-                              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                  <Label className="mb-2">Label <span className="text-destructive">*</span></Label>
-                                  <Input
-                                    value={link.label || ''}
-                                    onChange={(e) => {
-                                      setSocialLinks(prev => prev.map((l, i) =>
-                                        i === index ? { ...l, label: e.target.value } : l
-                                      ))
-                                      setIsDirty(true)
-                                    }}
-                                    placeholder="Nom du réseau"
-                                    maxLength={50}
-                                  />
-                                  {link.platform === 'autre' && !link.label?.trim() && (
-                                    <p className="text-xs text-destructive mt-1">Le label est requis pour une plateforme personnalisée</p>
-                                  )}
-                                </div>
-                                <div>
-                                  <Label className="mb-2">Icône personnalisée</Label>
-                                  <ImagePicker
-                                    value={link.icon || null}
-                                    onChange={(img) => {
-                                      setSocialLinks(prev => prev.map((l, i) =>
-                                        i === index ? { ...l, icon: img } : l
-                                      ))
-                                      setIsDirty(true)
-                                    }}
-                                    label="Icône"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          {/* Actions */}
           <div className="flex justify-end gap-4">
             <Button variant="ghost" type="button" onClick={handleCancel} disabled={isPending}>
               Annuler

@@ -3,21 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
 import { getSiteConfig } from '../utils/strapi';
+import { getOpeningHoursEntries } from '../utils/opening-hours';
 
 const siteConfig = await getSiteConfig();
 const strapiUrl = import.meta.env.STRAPI_PUBLIC_URL;
 const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
-
-function getOpeningHoursEntries(hours: any): Array<{ day: string; hours: string }> {
-  if (!hours || typeof hours !== 'object') return [];
-  if (!Array.isArray(hours)) {
-    return Object.entries(hours).map(([day, h]) => ({
-      day: day.charAt(0).toUpperCase() + day.slice(1),
-      hours: String(h),
-    }));
-  }
-  return hours.filter((e: any) => e?.day && e?.hours).map((e: any) => ({ day: e.day, hours: e.hours }));
-}
 
 const openingHours = getOpeningHoursEntries(siteConfig.infos_pratiques?.opening_hours);
 const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez nous contacter en utilisant le formulaire ci-dessous. Nous nous engageons à traiter votre demande dans les meilleurs délais.';

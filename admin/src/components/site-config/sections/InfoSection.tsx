@@ -1,12 +1,14 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { OpeningHoursEditor } from '../opening-hours'
 import type { SectionBaseProps } from '../types'
 
 export function InfoSection({
   formData,
   onFieldChange,
   errors,
+  setIsDirty,
 }: SectionBaseProps) {
   return (
     <div id="section-info">
@@ -45,22 +47,12 @@ export function InfoSection({
             </p>
           </div>
 
-          <div>
-            <Label className="mb-2">Horaires d'ouverture (JSON)</Label>
-            <Textarea
-              value={formData.opening_hours}
-              onChange={(e) => onFieldChange('opening_hours', e.target.value)}
-              placeholder='{"lundi": "8h30 - 12h / 14h - 17h", "mardi": "8h30 - 12h"}'
-              rows={8}
-              className={`font-mono text-sm ${errors.opening_hours ? 'border-destructive' : ''}`}
-            />
-            <p className="mt-1 text-sm text-muted-foreground">
-              Format JSON décrivant les horaires d'ouverture de la mairie
-            </p>
-            {errors.opening_hours && (
-              <p className="mt-1 text-sm text-destructive">{errors.opening_hours}</p>
-            )}
-          </div>
+          <OpeningHoursEditor
+            value={formData.opening_hours}
+            onChange={(val) => onFieldChange('opening_hours', val)}
+            error={errors.opening_hours}
+            setIsDirty={setIsDirty}
+          />
         </div>
       </div>
     </div>

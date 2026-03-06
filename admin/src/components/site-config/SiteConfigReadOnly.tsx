@@ -168,11 +168,28 @@ export function SiteConfigReadOnly({ site }: SiteConfigReadOnlyProps) {
               )}
             </div>
             {site.infos_pratiques?.opening_hours && (
-              <div>
+              <div className="md:col-span-2">
                 <p className="text-sm font-medium text-muted-foreground mb-2">Horaires d'ouverture</p>
-                <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4 font-mono text-sm">
-                  {JSON.stringify(site.infos_pratiques.opening_hours, null, 2)}
-                </pre>
+                <div className="rounded-md bg-muted/30 p-4 text-sm">
+                  {(() => {
+                    try {
+                      const hours = typeof site.infos_pratiques.opening_hours === 'string'
+                        ? JSON.parse(site.infos_pratiques.opening_hours)
+                        : site.infos_pratiques.opening_hours
+                      if (typeof hours === 'object' && !Array.isArray(hours)) {
+                        return Object.entries(hours).map(([day, h]) => (
+                          <div key={day} className="flex gap-2 py-0.5">
+                            <span className="font-medium capitalize w-24">{day}</span>
+                            <span className="text-muted-foreground">{String(h)}</span>
+                          </div>
+                        ))
+                      }
+                      return <span className="text-muted-foreground italic">Format non reconnu</span>
+                    } catch {
+                      return <span className="text-muted-foreground italic">Format non reconnu</span>
+                    }
+                  })()}
+                </div>
               </div>
             )}
           </div>

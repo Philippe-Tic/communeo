@@ -15,11 +15,11 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
   <Navigation />
 
   <main id="main-content">
-    <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Exercice de vos droits RGPD</h1>
-          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
+          <p class="text-lg sm:text-xl text-on-primary/80 max-w-3xl mx-auto">
             Conformément au RGPD, vous disposez de droits sur vos données personnelles
           </p>
         </div>
@@ -126,14 +126,14 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
                   class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                 <label for="rgpd_form_consent" class="text-sm text-gray-600">
                   Je certifie être la personne concernée par cette demande et j'accepte que mes données soient traitées
-                  conformément à la <a href="/politique-confidentialite" class="text-primary underline hover:text-secondary">politique de confidentialité</a>. <span class="text-red-500">*</span>
+                  conformément à la <a href="/politique-confidentialite" class="text-primary-text underline hover:text-primary-text/80">politique de confidentialité</a>. <span class="text-red-500">*</span>
                 </label>
               </div>
 
               <div id="rgpd-form-error" class="hidden rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700"></div>
 
               <button type="submit" id="rgpd-submit-btn"
-                class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-on-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                 Envoyer ma demande
               </button>
             </form>
@@ -164,7 +164,7 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
           <p class="text-sm text-gray-600">
             Si vous estimez que le traitement de vos données personnelles constitue une violation
             de la réglementation en vigueur, vous pouvez introduire une réclamation auprès de la
-            CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-secondary">www.cnil.fr</a>.
+            CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer" class="text-primary-text underline hover:text-primary-text/80">www.cnil.fr</a>.
           </p>
         </div>
       </div>
@@ -186,12 +186,12 @@ const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID;
   }
 
   .prose a {
-    color: rgb(var(--color-secondary));
+    color: rgb(var(--color-primary-text));
     text-decoration: underline;
   }
 
   .prose a:hover {
-    color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-text));
   }
 
   .prose p {

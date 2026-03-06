@@ -29,11 +29,11 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
   <Navigation />
 
   <main id="main-content">
-    <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Contact</h1>
-          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
+          <p class="text-lg sm:text-xl text-on-primary/80 max-w-3xl mx-auto">
             {introText}
           </p>
         </div>
@@ -111,14 +111,14 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
                   <input type="checkbox" id="rgpd_consent" name="rgpd_consent" required
                     class="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
                   <label for="rgpd_consent" class="text-sm text-gray-600">
-                    J'accepte que mes données soient traitées conformément à la <a href="/politique-confidentialite" class="text-primary underline hover:text-secondary">politique de confidentialité</a>. <span class="text-red-500">*</span>
+                    J'accepte que mes données soient traitées conformément à la <a href="/politique-confidentialite" class="text-primary-text underline hover:text-primary-text/80">politique de confidentialité</a>. <span class="text-red-500">*</span>
                   </label>
                 </div>
 
                 <div id="form-error" class="hidden rounded-md bg-red-50 border border-red-200 p-4 text-sm text-red-700"></div>
 
                 <button type="submit" id="submit-btn"
-                  class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-on-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   Envoyer ma demande
                 </button>
               </form>
@@ -150,7 +150,7 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
             <div class="space-y-4">
               {(siteConfig.name || siteConfig.address) && (
                 <div class="flex items-start space-x-3">
-                  <svg class="w-6 h-6 text-primary mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-6 h-6 text-primary-text mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                   </svg>
@@ -166,13 +166,13 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
 
               {siteConfig.contact_phone && (
                 <div class="flex items-start space-x-3">
-                  <svg class="w-6 h-6 text-primary mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-6 h-6 text-primary-text mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                   </svg>
                   <div>
                     <h3 class="font-semibold text-gray-900">Téléphone</h3>
                     <p class="text-gray-600">
-                      <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-primary transition-colors">
+                      <a href={`tel:${siteConfig.contact_phone.replace(/\s/g, '')}`} class="hover:text-primary-text transition-colors">
                         {siteConfig.contact_phone}
                       </a>
                     </p>
@@ -182,13 +182,13 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
 
               {siteConfig.contact_mail && (
                 <div class="flex items-start space-x-3">
-                  <svg class="w-6 h-6 text-primary mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-6 h-6 text-primary-text mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                   </svg>
                   <div>
                     <h3 class="font-semibold text-gray-900">Email</h3>
                     <p class="text-gray-600">
-                      <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-primary transition-colors">
+                      <a href={`mailto:${siteConfig.contact_mail}`} class="hover:text-primary-text transition-colors">
                         {siteConfig.contact_mail}
                       </a>
                     </p>
@@ -198,7 +198,7 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
 
               {openingHours.length > 0 && (
                 <div class="flex items-start space-x-3">
-                  <svg class="w-6 h-6 text-primary mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-6 h-6 text-primary-text mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   <div>
@@ -240,12 +240,12 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
   }
 
   .prose a {
-    color: rgb(var(--color-secondary));
+    color: rgb(var(--color-primary-text));
     text-decoration: underline;
   }
 
   .prose a:hover {
-    color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-text));
   }
 
   .prose p {

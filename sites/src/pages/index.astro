@@ -122,7 +122,12 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           {heroPrimaryLabel && heroPrimaryUrl && (
             <a
               href={heroPrimaryUrl}
-              class="inline-flex items-center px-6 py-3 bg-white text-primary font-medium rounded-lg hover:bg-white/90 transition-colors"
+              class:list={[
+                "inline-flex items-center px-6 py-3 font-medium rounded-lg transition-colors",
+                heroImage
+                  ? "bg-white text-gray-900 hover:bg-white/90"
+                  : "bg-on-primary text-primary hover:bg-on-primary/90"
+              ]}
             >
               {heroPrimaryLabel}
             </a>
@@ -130,7 +135,12 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           {heroSecondaryLabel && heroSecondaryUrl && (
             <a
               href={heroSecondaryUrl}
-              class="inline-flex items-center px-6 py-3 border-2 border-white text-white font-medium rounded-lg hover:bg-white/10 transition-colors"
+              class:list={[
+                "inline-flex items-center px-6 py-3 border-2 font-medium rounded-lg transition-colors",
+                heroImage
+                  ? "border-white text-white hover:bg-white/10"
+                  : "border-on-primary text-on-primary hover:bg-on-primary/10"
+              ]}
             >
               {heroSecondaryLabel}
             </a>
@@ -149,12 +159,12 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
                 href={link.url}
                 class="flex flex-col items-center gap-2 bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 transition-all text-center group"
               >
-                <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <div class="w-10 h-10 rounded-lg bg-primary-text/10 flex items-center justify-center group-hover:bg-primary-text/20 transition-colors">
+                  <svg class="w-5 h-5 text-primary-text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d={ICON_PATHS[link.icon || 'document'] || ICON_PATHS.document} />
                   </svg>
                 </div>
-                <span class="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">{link.label}</span>
+                <span class="text-sm font-medium text-gray-700 group-hover:text-primary-text transition-colors">{link.label}</span>
               </a>
             ))}
           </div>
@@ -237,7 +247,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
 
               <div class="p-5">
                 <h3 class="text-lg font-bold text-gray-900 mb-2">
-                  <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors">
+                  <a href={`/articles/${article.slug}`} class="hover:text-primary-text transition-colors">
                     {article.title}
                   </a>
                 </h3>
@@ -256,7 +266,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
 
                 <a
                   href={`/articles/${article.slug}`}
-                  class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm group/link"
+                  class="inline-flex items-center text-primary-text hover:text-primary-text/80 font-medium text-sm group/link"
                 >
                   Lire la suite
                   <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,7 +281,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
         <div class="text-center">
           <a
             href="/articles"
-            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
           >
             Voir toutes les actualités
           </a>
@@ -291,9 +301,9 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
               <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all">
                 <div class="flex">
                   {/* Bloc date calendrier */}
-                  <div class="flex-shrink-0 w-20 bg-primary/5 flex flex-col items-center justify-center p-3 border-r border-gray-100">
-                    <span class="text-2xl font-bold text-primary leading-none">{day}</span>
-                    <span class="text-xs font-medium text-primary/70 uppercase mt-1">{month}</span>
+                  <div class="flex-shrink-0 w-20 bg-primary-text/5 flex flex-col items-center justify-center p-3 border-r border-gray-100">
+                    <span class="text-2xl font-bold text-primary-text leading-none">{day}</span>
+                    <span class="text-xs font-medium text-primary-text/70 uppercase mt-1">{month}</span>
                   </div>
                   <div class="flex-1 p-5">
                     <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mb-2 ${
@@ -311,7 +321,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
                     </span>
 
                     <h3 class="text-lg font-bold text-gray-900 mb-2">
-                      <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors">
+                      <a href={`/evenements/${event.slug}`} class="hover:text-primary-text transition-colors">
                         {event.title}
                       </a>
                     </h3>
@@ -328,7 +338,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
 
                     <a
                       href={`/evenements/${event.slug}`}
-                      class="inline-flex items-center text-primary hover:text-primary/80 font-medium text-sm group/link"
+                      class="inline-flex items-center text-primary-text hover:text-primary-text/80 font-medium text-sm group/link"
                     >
                       En savoir plus
                       <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,7 +355,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
         <div class="text-center">
           <a
             href="/evenements"
-            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
           >
             Voir tous les événements
           </a>
@@ -355,16 +365,16 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
 
     <!-- Chiffres clés -->
     {showKeyFigures && hp?.key_figures && hp.key_figures.length > 0 && (
-      <section class="py-12 bg-primary text-white">
+      <section class="py-12 bg-primary text-on-primary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class={`grid grid-cols-2 md:grid-cols-${Math.min(hp.key_figures.length, 4)} gap-8 text-center`}>
             {hp.key_figures.map((figure) => (
               <div class="flex flex-col items-center gap-2">
-                <svg class="w-8 h-8 text-white/70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="w-8 h-8 text-on-primary/70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" d={ICON_PATHS[figure.icon || 'users'] || ICON_PATHS.users} />
                 </svg>
                 <span class="text-3xl sm:text-4xl font-bold">{figure.value}</span>
-                <span class="text-sm sm:text-base text-white/80">{figure.label}</span>
+                <span class="text-sm sm:text-base text-on-primary/80">{figure.label}</span>
               </div>
             ))}
           </div>
@@ -419,7 +429,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
         <div class="text-center">
           <a
             href="/associations"
-            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
           >
             Voir toutes les associations
           </a>
@@ -443,7 +453,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
                   class="h-12 max-w-[160px] object-contain grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100"
                 />
               ) : (
-                <span class="text-sm font-medium text-gray-500 hover:text-primary transition-colors">{partner.name}</span>
+                <span class="text-sm font-medium text-gray-500 hover:text-primary-text transition-colors">{partner.name}</span>
               );
               return partner.url ? (
                 <a href={partner.url} target="_blank" rel="noopener noreferrer" title={partner.name}>

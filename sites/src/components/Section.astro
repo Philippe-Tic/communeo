@@ -9,7 +9,7 @@ interface Props {
 
 const { title, subtitle, bg = 'white', compact = false, class: className } = Astro.props;
 
-const bgClass = bg === 'gray' ? 'bg-gray-50' : bg === 'gradient' ? 'bg-gradient-to-br from-primary/5 to-secondary/5' : 'bg-white';
+const bgClass = bg === 'gray' ? 'bg-gray-50' : bg === 'gradient' ? 'bg-gradient-to-br from-primary/5 to-primary/3' : 'bg-white';
 const paddingClass = compact ? 'py-8 lg:py-10' : 'py-12 lg:py-16';
 ---
 

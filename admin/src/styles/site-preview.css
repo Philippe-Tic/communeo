@@ -2,7 +2,7 @@
  * Site Preview Styles
  * Scoped replica of sites/src/styles/prose.css + themes
  * All selectors scoped under .site-preview
- * Uses CSS custom properties: --preview-color-primary, --preview-color-secondary
+ * Uses CSS custom property: --preview-color-primary
  */
 
 /* === Prose styles (from sites/src/styles/prose.css) === */
@@ -13,7 +13,7 @@
 .site-preview .prose h4,
 .site-preview .prose h5,
 .site-preview .prose h6 {
-  color: var(--preview-color-primary);
+  color: var(--preview-color-primary-text);
   font-weight: 500;
   margin-top: 2em;
   margin-bottom: 0.75em;
@@ -26,7 +26,7 @@
 }
 
 .site-preview .prose a {
-  color: var(--preview-color-primary);
+  color: var(--preview-color-primary-text);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
@@ -101,7 +101,7 @@
   display: inline-flex;
   padding: 0.625em 1.5em;
   background-color: var(--preview-color-primary);
-  color: white;
+  color: var(--preview-color-on-primary);
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none;
@@ -110,7 +110,7 @@
 
 .site-preview .prose .btn-primary:hover {
   opacity: 0.9;
-  color: white;
+  color: var(--preview-color-on-primary);
 }
 
 /* Image block with alignment and captions */
@@ -221,7 +221,7 @@
   line-height: 0.8;
   margin-right: 0.1em;
   font-weight: 700;
-  color: var(--preview-color-primary);
+  color: var(--preview-color-primary-text);
 }
 
 /* Content columns */
@@ -266,17 +266,17 @@
 }
 
 .site-preview.theme-moderne .preview-hero {
-  background: linear-gradient(135deg, color-mix(in srgb, var(--preview-color-primary) 12%, transparent), color-mix(in srgb, var(--preview-color-secondary) 8%, transparent));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--preview-color-primary) 12%, transparent), color-mix(in srgb, var(--preview-color-primary) 8%, transparent));
 }
 
 .site-preview.theme-moderne .preview-nav .nav-link.active {
   background-color: var(--preview-color-primary);
-  color: white;
+  color: var(--preview-color-on-primary);
   border-radius: 0.5rem;
 }
 
 .site-preview.theme-moderne .preview-footer {
-  background: linear-gradient(135deg, #111827, #1f2937);
+  background: linear-gradient(135deg, var(--preview-color-footer-bg, #111827), color-mix(in srgb, var(--preview-color-footer-bg, #111827) 80%, #374151));
 }
 
 /* === Classic theme (from sites/src/styles/themes/classic.css) === */
@@ -300,11 +300,11 @@
 .site-preview.theme-classique .preview-nav .nav-link.active {
   border-bottom: 3px solid var(--preview-color-primary);
   background: transparent;
-  color: var(--preview-color-primary);
+  color: var(--preview-color-primary-text);
 }
 
 .site-preview.theme-classique .preview-footer {
-  background-color: #1f2937;
+  background-color: var(--preview-color-footer-bg, #1f2937);
   border-top: 3px solid var(--preview-color-primary);
 }
 
@@ -350,12 +350,12 @@
 
 .site-preview.theme-accessible .preview-nav .nav-link.active {
   background-color: var(--preview-color-primary);
-  color: white;
+  color: var(--preview-color-on-primary);
   font-weight: 700;
 }
 
 .site-preview.theme-accessible .preview-footer {
-  background-color: #111827;
+  background-color: var(--preview-color-footer-bg, #111827);
   font-size: 1rem;
 }
 
@@ -449,7 +449,7 @@
 }
 
 .site-preview .preview-breadcrumb a {
-  color: var(--preview-color-secondary);
+  color: var(--preview-color-primary-text);
   text-decoration: none;
 }
 
@@ -465,7 +465,7 @@
 }
 
 .site-preview .preview-footer {
-  background-color: #111827;
+  background-color: var(--preview-color-footer-bg, #111827);
   color: white;
   padding: 1.5rem 1rem;
   text-align: center;

@@ -1,7 +1,7 @@
 /* Prose styles — Typographie institutionnelle */
 
 .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
-  color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary-text));
   font-weight: 500;
   margin-top: 2em;
   margin-bottom: 0.75em;
@@ -14,14 +14,14 @@
 }
 
 .prose a {
-  color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary-text));
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
 }
 
 .prose a:hover {
-  color: rgb(var(--color-primary) / 0.8);
+  color: rgb(var(--color-primary-text) / 0.8);
   text-decoration-thickness: 2px;
 }
 
@@ -89,7 +89,7 @@
   display: inline-flex;
   padding: 0.625em 1.5em;
   background-color: rgb(var(--color-primary));
-  color: white;
+  color: rgb(var(--color-on-primary));
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none;
@@ -98,7 +98,7 @@
 
 .prose .btn-primary:hover {
   opacity: 0.9;
-  color: white;
+  color: rgb(var(--color-on-primary));
 }
 
 /* Image block with alignment and captions */
@@ -192,7 +192,7 @@
   line-height: 0.8;
   margin-right: 0.1em;
   font-weight: 700;
-  color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary-text));
 }
 
 /* Content columns */

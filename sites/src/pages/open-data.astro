@@ -32,11 +32,11 @@ if (platform === 'data-gouv-fr') {
   <Navigation />
 
   <main id="main-content" data-pagefind-body>
-    <header class="bg-gradient-to-br from-primary to-primary/80 text-white py-16 lg:py-20">
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">
           <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Open Data</h1>
-          <p class="text-lg sm:text-xl text-white/80 max-w-3xl mx-auto">
+          <p class="text-lg sm:text-xl text-on-primary/80 max-w-3xl mx-auto">
             Données ouvertes de {siteConfig.name}
           </p>
         </div>
@@ -82,7 +82,7 @@ if (platform === 'data-gouv-fr') {
                   href={portalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors no-underline whitespace-nowrap"
+                  class="btn-primary inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-medium rounded-lg hover:bg-primary/90 transition-colors no-underline whitespace-nowrap"
                 >
                   Accéder au portail {portalName}
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -108,7 +108,7 @@ if (platform === 'data-gouv-fr') {
             </p>
             <a
               href="/documents"
-              class="btn-outline inline-flex items-center gap-2 px-6 py-3 border border-primary text-primary font-medium rounded-lg hover:bg-primary/5 transition-colors no-underline"
+              class="btn-outline inline-flex items-center gap-2 px-6 py-3 border border-primary text-primary-text font-medium rounded-lg hover:bg-primary/5 transition-colors no-underline"
             >
               Consulter les documents officiels
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -145,12 +145,12 @@ if (platform === 'data-gouv-fr') {
   }
 
   .prose a {
-    color: rgb(var(--color-secondary));
+    color: rgb(var(--color-primary-text));
     text-decoration: underline;
   }
 
   .prose a:hover {
-    color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-text));
   }
 
   .prose a.no-underline {
@@ -158,21 +158,21 @@ if (platform === 'data-gouv-fr') {
   }
 
   .prose a.btn-primary {
-    color: white;
+    color: rgb(var(--color-on-primary));
     text-decoration: none;
   }
 
   .prose a.btn-primary:hover {
-    color: white;
+    color: rgb(var(--color-on-primary));
   }
 
   .prose a.btn-outline {
-    color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-text));
     text-decoration: none;
   }
 
   .prose a.btn-outline:hover {
-    color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary-text));
   }
 
   .prose p {

@@ -4,9 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Couleurs dynamiques qui seront surchargées par les variables CSS
+        // Couleur dynamique surchargée par la variable CSS
         primary: 'rgb(var(--color-primary) / <alpha-value>)',
-        secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
+        'on-primary': 'rgb(var(--color-on-primary) / <alpha-value>)',
+        'primary-text': 'rgb(var(--color-primary-text) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['Marianne', 'Arial', 'sans-serif'],

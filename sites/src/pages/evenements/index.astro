@@ -71,8 +71,8 @@ const breadcrumbJsonLd = JSON.stringify({
                       <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                       {/* Date badge overlay */}
                       <div class="absolute top-3 left-3 bg-white rounded-lg shadow-sm px-2.5 py-1.5 text-center">
-                        <span class="text-lg font-bold text-primary leading-none block">{day}</span>
-                        <span class="text-[10px] font-medium text-primary/70 uppercase">{month}</span>
+                        <span class="text-lg font-bold text-primary-text leading-none block">{day}</span>
+                        <span class="text-[10px] font-medium text-primary-text/70 uppercase">{month}</span>
                       </div>
                     </div>
                   )}
@@ -93,7 +93,7 @@ const breadcrumbJsonLd = JSON.stringify({
                     </span>
 
                     <h2 class="text-lg font-bold text-gray-900 mb-2">
-                      <a href={`/evenements/${event.slug}`} class="hover:text-primary transition-colors card-link">
+                      <a href={`/evenements/${event.slug}`} class="hover:text-primary-text transition-colors card-link">
                         {event.title}
                       </a>
                     </h2>

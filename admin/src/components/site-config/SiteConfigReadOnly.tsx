@@ -52,13 +52,17 @@ export function SiteConfigReadOnly({ site }: SiteConfigReadOnlyProps) {
           </div>
         )}
 
-        {site.colors && (
+        {site.colors?.primary && (
           <div className="rounded-lg border bg-card p-6 shadow-sm">
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold text-foreground">Configuration des couleurs</h2>
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-md bg-muted p-4 font-mono text-sm">
-                {JSON.stringify(site.colors, null, 2)}
-              </pre>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 shrink-0 rounded-md border" style={{ backgroundColor: site.colors.primary }} />
+                <div>
+                  <p className="text-sm font-medium">Couleur principale</p>
+                  <p className="text-sm text-muted-foreground font-mono">{site.colors.primary}</p>
+                </div>
+              </div>
             </div>
           </div>
         )}

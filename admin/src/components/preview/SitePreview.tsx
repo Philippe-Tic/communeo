@@ -25,7 +25,9 @@ export function SitePreview({ title, content, contentType, subtitle }: SitePrevi
 
   const cssVars = {
     '--preview-color-primary': config.primaryColor,
-    '--preview-color-secondary': config.secondaryColor,
+    '--preview-color-on-primary': config.onPrimaryColor,
+    '--preview-color-primary-text': config.primaryTextColor,
+    '--preview-color-footer-bg': config.footerBgColor,
   } as React.CSSProperties
 
   return (

@@ -73,7 +73,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
           {categories.map((category) => (
             <button
               type="button"
-              class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200 text-gray-600 hover:bg-primary hover:text-white hover:border-primary"
+              class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200 text-gray-600 hover:bg-primary hover:text-on-primary hover:border-primary"
               data-category={category.key}
             >
               {category.label}
@@ -131,7 +131,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
 
                 <div class="p-5">
                   <h2 class="text-lg font-bold text-gray-900 mb-2">
-                    <a href={`/articles/${article.slug}`} class="hover:text-primary transition-colors card-link">
+                    <a href={`/articles/${article.slug}`} class="hover:text-primary-text transition-colors card-link">
                       {article.title}
                     </a>
                   </h2>
@@ -170,7 +170,7 @@ const articlesByCategory = articles.reduce((acc, article) => {
   /* Styles pour les filtres actifs */
   .filter-btn.active {
     background-color: rgb(var(--color-primary));
-    color: white;
+    color: rgb(var(--color-on-primary));
     border-color: rgb(var(--color-primary));
   }
 

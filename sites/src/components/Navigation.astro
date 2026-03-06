@@ -159,13 +159,15 @@ const menuLinks: NavMenuLink[] =
             <StrapiImage
               image={siteConfig.logo}
               alt={`Logo ${siteConfig.name}`}
-              width={40}
-              height={40}
-              class="h-10 w-auto"
+              width={32}
+              height={32}
+              class="h-8 w-auto"
               priority
             />
           )}
-          <span class="font-bold text-lg">{siteConfig?.name}</span>
+          {!siteConfig?.logo && (
+            <span class="font-bold text-lg">{siteConfig?.name}</span>
+          )}
         </a>
       </div>
 

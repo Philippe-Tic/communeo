@@ -56,8 +56,11 @@ function getWeatherInfo(code: number) {
 
 function getDayName(dateStr: string, index: number): string {
   if (index === 0) return "Auj.";
-  const date = new Date(dateStr + 'T00:00:00');
-  return date.toLocaleDateString('fr-FR', { weekday: 'short' }).replace('.', '');
+  const date = new Date(dateStr + 'T12:00:00Z');
+  return new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'short',
+    timeZone: 'Europe/Paris',
+  }).format(date).replace('.', '');
 }
 
 export default function WeatherWidget({ latitude, longitude }: Props) {
@@ -66,9 +69,10 @@ export default function WeatherWidget({ latitude, longitude }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Paris&forecast_days=3`;
 
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error('API error');
         return res.json();
@@ -77,10 +81,14 @@ export default function WeatherWidget({ latitude, longitude }: Props) {
         setData(json);
         setLoading(false);
       })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setError(true);
+          setLoading(false);
+        }
       });
+
+    return () => controller.abort();
   }, [latitude, longitude]);
 
   if (loading) {

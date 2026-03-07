@@ -179,7 +179,7 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
     <!-- Météo locale -->
     {showWeather && latitude && longitude && (
       <Section title="Météo locale" compact>
-        <WeatherWidget client:load latitude={latitude} longitude={longitude} />
+        <WeatherWidget client:visible latitude={latitude} longitude={longitude} />
       </Section>
     )}
 

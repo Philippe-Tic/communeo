@@ -48,7 +48,7 @@ export const Dashboard = () => {
 
   const statsData = [
     {
-      label: 'Articles',
+      label: 'Actualités',
       value: articles.length,
       color: 'blue',
       icon: <FileText className="h-6 w-6" />,
@@ -101,11 +101,11 @@ export const Dashboard = () => {
 
   // Callbacks for article cards
   const handleArticleView = (article: Article) => {
-    navigate(`/articles/${article.documentId}`)
+    navigate(`/actualites/${article.documentId}`)
   }
 
   const handleArticleEdit = (article: Article) => {
-    navigate(`/articles/${article.documentId}/edit`)
+    navigate(`/actualites/${article.documentId}/edit`)
   }
 
   const handleArticleDelete = () => {
@@ -178,9 +178,9 @@ export const Dashboard = () => {
             </div>
 
             <div className="flex flex-wrap gap-4">
-              <RouterLink to="/articles/new">
+              <RouterLink to="/actualites/new">
                 <Button size="sm" className="bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm hover:from-brand-900 hover:to-brand-800">
-                  Nouvel article
+                  Nouvelle actualité
                 </Button>
               </RouterLink>
               <RouterLink to="/events/new">
@@ -374,7 +374,7 @@ export const Dashboard = () => {
         {recentArticles.length > 0 && (
           <div>
             <div className="flex flex-col gap-4">
-              <SectionHeader title="Articles récents" linkTo="/articles" />
+              <SectionHeader title="Actualités récentes" linkTo="/actualites" />
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {recentArticles.map((article) => (
@@ -395,11 +395,11 @@ export const Dashboard = () => {
         {recentArticles.length === 0 && !articlesLoading && (
           <div className="py-8 text-center">
             <p className="mb-4 text-muted-foreground">
-              Aucun article publié pour le moment
+              Aucune actualité publiée pour le moment
             </p>
-            <RouterLink to="/articles/new">
+            <RouterLink to="/actualites/new">
               <Button size="sm" className="bg-gradient-to-r from-brand-800 to-brand-700 font-semibold text-white shadow-sm hover:from-brand-900 hover:to-brand-800">
-                Créer votre premier article
+                Créer votre première actualité
               </Button>
             </RouterLink>
           </div>

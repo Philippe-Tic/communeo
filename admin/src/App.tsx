@@ -118,9 +118,9 @@ function App() {
             }
           />
 
-          {/* Articles routes */}
+          {/* Actualités routes */}
           <Route
-            path="/articles"
+            path="/actualites"
             element={
               <ProtectedRoute>
                 <MainLayout>
@@ -131,7 +131,7 @@ function App() {
           />
 
           <Route
-            path="/articles/new"
+            path="/actualites/new"
             element={
               <ProtectedRoute>
                 <MainLayout>
@@ -142,7 +142,7 @@ function App() {
           />
 
           <Route
-            path="/articles/:id"
+            path="/actualites/:id"
             element={
               <ProtectedRoute>
                 <MainLayout>
@@ -153,7 +153,7 @@ function App() {
           />
 
           <Route
-            path="/articles/:id/edit"
+            path="/actualites/:id/edit"
             element={
               <ProtectedRoute>
                 <MainLayout>

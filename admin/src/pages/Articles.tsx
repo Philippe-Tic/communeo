@@ -47,8 +47,8 @@ export const Articles = () => {
     try {
       await deleteMutation.mutateAsync(articleToDelete.documentId)
       toaster.create({
-        title: 'Article supprimé',
-        description: `L'article "${articleToDelete.title}" a été supprimé avec succès.`,
+        title: 'Actualité supprimée',
+        description: `L'actualité "${articleToDelete.title}" a été supprimée avec succès.`,
         type: 'success',
         duration: 3000,
       })
@@ -68,8 +68,8 @@ export const Articles = () => {
     try {
       await publishMutation.mutateAsync(article.documentId)
       toaster.create({
-        title: 'Article publié',
-        description: `L'article "${article.title}" a été publié avec succès.`,
+        title: 'Actualité publiée',
+        description: `L'actualité "${article.title}" a été publiée avec succès.`,
         type: 'success',
         duration: 3000,
       })
@@ -88,8 +88,8 @@ export const Articles = () => {
     try {
       await unpublishMutation.mutateAsync(article.documentId)
       toaster.create({
-        title: 'Article dépublié',
-        description: `L'article "${article.title}" a été dépublié avec succès.`,
+        title: 'Actualité dépubliée',
+        description: `L'actualité "${article.title}" a été dépubliée avec succès.`,
         type: 'success',
         duration: 3000,
       })
@@ -111,8 +111,8 @@ export const Articles = () => {
         featured: !article.featured
       })
       toaster.create({
-        title: article.featured ? 'Article retiré de la une' : 'Article mis à la une',
-        description: `L'article "${article.title}" a été ${article.featured ? 'retiré de la une' : 'mis à la une'}.`,
+        title: article.featured ? 'Actualité retirée de la une' : 'Actualité mise à la une',
+        description: `L'actualité "${article.title}" a été ${article.featured ? 'retirée de la une' : 'mise à la une'}.`,
         type: 'success',
         duration: 3000,
       })
@@ -136,7 +136,7 @@ export const Articles = () => {
       key: 'search',
       label: 'Recherche',
       type: 'text' as const,
-      placeholder: 'Rechercher un article...'
+      placeholder: 'Rechercher une actualité...'
     },
     {
       key: 'status',
@@ -192,8 +192,8 @@ export const Articles = () => {
 
   const headerActions = [
     {
-      label: 'Nouvel article',
-      onClick: () => navigate('/articles/new'),
+      label: 'Nouvelle actualité',
+      onClick: () => navigate('/actualites/new'),
       colorScheme: 'blue'
     }
   ]
@@ -202,8 +202,8 @@ export const Articles = () => {
     <div>
       <div className="flex flex-col gap-6">
         <PageHeader
-          title="Articles"
-          subtitle="Gérez les articles de votre site"
+          title="Actualités"
+          subtitle="Gérez les actualités de votre site"
           actions={headerActions}
         />
 
@@ -218,8 +218,8 @@ export const Articles = () => {
           renderItem={(article: Article) => (
             <ArticleCard
               article={article}
-              onEdit={(article) => navigate(`/articles/${article.documentId}/edit`)}
-              onView={(article) => navigate(`/articles/${article.documentId}`)}
+              onEdit={(article) => navigate(`/actualites/${article.documentId}/edit`)}
+              onView={(article) => navigate(`/actualites/${article.documentId}`)}
               onDelete={openDeleteDialog}
               onToggleFeatured={handleToggleFeatured}
               onPublish={handlePublishArticle}
@@ -228,10 +228,10 @@ export const Articles = () => {
           )}
           isLoading={isLoading}
           error={!!error}
-          emptyTitle="Aucun article trouvé"
-          emptyDescription="Commencez par créer votre premier article"
-          emptyActionLabel="Créer un article"
-          onEmptyAction={() => navigate('/articles/new')}
+          emptyTitle="Aucune actualité trouvée"
+          emptyDescription="Commencez par créer votre première actualité"
+          emptyActionLabel="Créer une actualité"
+          onEmptyAction={() => navigate('/actualites/new')}
           columns={{ base: 1, md: 2, lg: 3 }}
         />
 
@@ -239,8 +239,8 @@ export const Articles = () => {
           isOpen={!!articleToDelete}
           onClose={() => setArticleToDelete(null)}
           onConfirm={handleDeleteArticle}
-          title="Supprimer l'article"
-          message={`Êtes-vous sûr de vouloir supprimer l'article "${articleToDelete?.title}" ? Cette action est irréversible.`}
+          title="Supprimer l'actualité"
+          message={`Êtes-vous sûr de vouloir supprimer l'actualité "${articleToDelete?.title}" ? Cette action est irréversible.`}
           confirmText="Supprimer"
           cancelText="Annuler"
           isLoading={deleteMutation.isPending}

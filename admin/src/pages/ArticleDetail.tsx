@@ -20,16 +20,16 @@ export function ArticleDetail() {
   const handleDelete = async () => {
     if (!article) return
 
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'article "${article.title}" ?`)) {
+    if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'actualité "${article.title}" ?`)) {
       try {
         await deleteArticleMutation.mutateAsync(article.documentId)
         toaster.create({
-          title: 'Article supprimé',
-          description: `L'article "${article.title}" a été supprimé avec succès.`,
+          title: 'Actualité supprimée',
+          description: `L'actualité "${article.title}" a été supprimée avec succès.`,
           type: 'success',
           duration: 3000,
         })
-        navigate('/articles')
+        navigate('/actualites')
       } catch (error) {
         console.error('Erreur lors de la suppression:', error)
         toaster.create({
@@ -51,8 +51,8 @@ export function ArticleDetail() {
         featured: !article.featured
       })
       toaster.create({
-        title: article.featured ? 'Article retiré de la une' : 'Article mis à la une',
-        description: `L'article "${article.title}" a été ${article.featured ? 'retiré de la une' : 'mis à la une'}.`,
+        title: article.featured ? 'Actualité retirée de la une' : 'Actualité mise à la une',
+        description: `L'actualité "${article.title}" a été ${article.featured ? 'retirée de la une' : 'mise à la une'}.`,
         type: 'success',
         duration: 3000,
       })
@@ -68,14 +68,14 @@ export function ArticleDetail() {
   }
 
   if (isLoading) {
-    return <LoadingSpinner message="Chargement de l'article..." />
+    return <LoadingSpinner message="Chargement de l'actualité..." />
   }
 
   if (error || !article) {
     return (
       <ErrorState
-        title="Article non trouvé"
-        message="L'article que vous recherchez n'existe pas ou n'a pas pu être chargé."
+        title="Actualité non trouvée"
+        message="L'actualité que vous recherchez n'existe pas ou n'a pas pu être chargée."
         onRetry={() => window.location.reload()}
       />
     )
@@ -84,7 +84,7 @@ export function ArticleDetail() {
   const headerActions = [
     {
       label: 'Retour',
-      onClick: () => navigate('/articles'),
+      onClick: () => navigate('/actualites'),
       variant: 'outline' as const,
       colorScheme: 'gray'
     },
@@ -97,7 +97,7 @@ export function ArticleDetail() {
     },
     {
       label: 'Modifier',
-      onClick: () => navigate(`/articles/${article.documentId}/edit`),
+      onClick: () => navigate(`/actualites/${article.documentId}/edit`),
       colorScheme: 'blue'
     },
     {
@@ -117,7 +117,7 @@ export function ArticleDetail() {
           subtitle={`/${article.slug}`}
           actions={headerActions}
           breadcrumbs={[
-            { label: 'Articles', href: '/articles' },
+            { label: 'Actualités', href: '/actualites' },
             { label: article.title },
           ]}
         />

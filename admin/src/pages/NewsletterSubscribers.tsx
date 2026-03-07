@@ -78,14 +78,15 @@ export const NewsletterSubscribers = () => {
       const response = await apiClient.get<any>('/api/newsletter-subscribers?filters[active][$eq]=true&pagination[pageSize]=10000&sort=subscribed_at:desc')
       const subscribers = response.data || []
 
+      const escapeCsv = (v: string) => `"${v.replace(/"/g, '""')}"`;
       const csvRows = [
         ['Email', 'Prénom', 'Nom', 'Date d\'inscription'].join(','),
         ...subscribers.map((s: any) =>
           [
-            `"${s.email}"`,
-            `"${s.first_name || ''}"`,
-            `"${s.last_name || ''}"`,
-            `"${new Date(s.subscribed_at).toLocaleDateString('fr-FR')}"`,
+            escapeCsv(s.email),
+            escapeCsv(s.first_name || ''),
+            escapeCsv(s.last_name || ''),
+            escapeCsv(new Date(s.subscribed_at).toLocaleDateString('fr-FR')),
           ].join(',')
         ),
       ]

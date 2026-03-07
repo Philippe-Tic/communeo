@@ -71,7 +71,7 @@ const breadcrumbJsonLd = JSON.stringify({
   "@type": "BreadcrumbList",
   "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Accueil", "item": siteOrigin },
-    { "@type": "ListItem", "position": 2, "name": "Actualités", "item": `${siteOrigin}/articles` },
+    { "@type": "ListItem", "position": 2, "name": "Actualités", "item": `${siteOrigin}/actualites` },
     { "@type": "ListItem", "position": 3, "name": attributes.title }
   ]
 });
@@ -114,7 +114,7 @@ const articleJsonLd = JSON.stringify({
 
   <main id="main-content" data-pagefind-body>
     <Breadcrumb items={[
-      { label: 'Actualités', href: '/articles' },
+      { label: 'Actualités', href: '/actualites' },
       { label: attributes.title }
     ]} />
 
@@ -208,7 +208,6 @@ const articleJsonLd = JSON.stringify({
             <button
               type="button"
               class="share-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
-              data-url={Astro.url.href}
               data-title={attributes.title}
             >
               <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
@@ -220,7 +219,6 @@ const articleJsonLd = JSON.stringify({
             <button
               type="button"
               class="copy-url-btn inline-flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 hover:border-primary/30 transition-all"
-              data-url={Astro.url.href}
             >
               <svg class="w-4 h-4 shrink-0" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
@@ -276,7 +274,7 @@ const articleJsonLd = JSON.stringify({
                   </span>
 
                   <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">
-                    <a href={`/articles/${suggestedArticle.slug}`} class="hover:text-primary-text transition-colors">
+                    <a href={`/actualites/${suggestedArticle.slug}`} class="hover:text-primary-text transition-colors">
                       {suggestedArticle.title}
                     </a>
                   </h3>
@@ -293,7 +291,7 @@ const articleJsonLd = JSON.stringify({
 
           <div class="text-center mt-8">
             <a
-              href="/articles"
+              href="/actualites"
               class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
             >
               Voir toutes les actualités
@@ -323,7 +321,7 @@ const articleJsonLd = JSON.stringify({
     const shareBtn = document.querySelector('.share-btn');
     if (shareBtn) {
       shareBtn.addEventListener('click', () => {
-        const url = shareBtn.getAttribute('data-url');
+        const url = window.location.href;
         const title = shareBtn.getAttribute('data-title');
         const subject = encodeURIComponent(`${title} - Actualité de votre mairie`);
         const body = encodeURIComponent(`Je vous partage cet article : ${url}`);
@@ -335,7 +333,7 @@ const articleJsonLd = JSON.stringify({
     const copyBtn = document.querySelector('.copy-url-btn') as HTMLButtonElement;
     if (copyBtn) {
       copyBtn.addEventListener('click', async () => {
-        const url = copyBtn.getAttribute('data-url') || '';
+        const url = window.location.href;
 
         try {
           await navigator.clipboard.writeText(url);

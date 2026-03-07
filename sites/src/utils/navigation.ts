@@ -6,7 +6,7 @@ export interface SectionMeta {
 }
 
 export const SECTION_MAP: Record<SectionKey, SectionMeta> = {
-  'articles':     { defaultLabel: 'Actualités',        url: '/articles' },
+  'articles':     { defaultLabel: 'Actualités',        url: '/actualites' },
   'evenements':   { defaultLabel: 'Événements',        url: '/evenements' },
   'documents':    { defaultLabel: 'Documents',         url: '/documents' },
   'equipe':       { defaultLabel: 'Équipe municipale', url: '/equipe-municipale' },

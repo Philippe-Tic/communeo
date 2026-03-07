@@ -14,7 +14,7 @@ export async function GET(context: APIContext) {
       title: article.title,
       pubDate: article.publication_date ? new Date(article.publication_date) : new Date(article.createdAt),
       description: article.summary || article.meta_description || '',
-      link: `/articles/${article.slug}`,
+      link: `/actualites/${article.slug}`,
     })),
     customData: '<language>fr-FR</language>',
   });

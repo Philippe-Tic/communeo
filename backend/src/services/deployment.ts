@@ -314,7 +314,9 @@ class DeploymentService {
         STRAPI_URL: process.env.STRAPI_BUILD_URL || `http://localhost:${process.env.PORT || 1337}`,
         STRAPI_PUBLIC_URL: process.env.STRAPI_PUBLIC_URL || process.env.STRAPI_BUILD_URL || `http://localhost:${process.env.PORT || 1337}`,
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
-        SITE_URL: liveUrl || `https://${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`,
+        SITE_URL: (customDomain?.verified && customDomain.domain)
+          ? `https://${customDomain.domain}`
+          : liveUrl || `https://${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`,
         NODE_ENV: 'production'
       };
 

@@ -13,4 +13,5 @@ export const SECTION_MAP: Record<SectionKey, SectionMeta> = {
   'associations': { defaultLabel: 'Associations',      url: '/associations' },
   'demarches':    { defaultLabel: 'Démarches',         url: '/demarches' },
   'open-data':    { defaultLabel: 'Open Data',         url: '/open-data' },
+  'collecte-dechets': { defaultLabel: 'Collecte des déchets', url: '/collecte-dechets' },
 };

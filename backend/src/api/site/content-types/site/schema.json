@@ -142,6 +142,12 @@
       "target": "api::alerte.alerte",
       "mappedBy": "site"
     },
+    "waste_schedules": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::waste-schedule.waste-schedule",
+      "mappedBy": "site"
+    },
     "media_items": {
       "type": "relation",
       "relation": "oneToMany",

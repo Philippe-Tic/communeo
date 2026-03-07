@@ -39,6 +39,8 @@ import { SiteConfigEdit } from './pages/SiteConfigEdit'
 import { SiteManagement } from './pages/SiteManagement'
 import { Alertes } from './pages/Alertes'
 import { CreateAlerte, EditAlerte } from './pages/AlerteForm'
+import { WasteSchedules } from './pages/WasteSchedules'
+import { CreateWasteSchedule, EditWasteSchedule } from './pages/WasteScheduleForm'
 import { MediaLibrary } from './pages/MediaLibrary'
 import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
@@ -440,6 +442,40 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditAlerte />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Collecte dechets routes */}
+          <Route
+            path="/collecte-dechets"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <WasteSchedules />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/collecte-dechets/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateWasteSchedule />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/collecte-dechets/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditWasteSchedule />
                 </MainLayout>
               </ProtectedRoute>
             }

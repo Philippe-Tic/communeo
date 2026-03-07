@@ -269,6 +269,13 @@ export default async ({ strapi }) => {
       { action: 'api::alerte.alerte.update', enabled: true },
       { action: 'api::alerte.alerte.delete', enabled: true },
 
+      // Waste Schedules
+      { action: 'api::waste-schedule.waste-schedule.find', enabled: true },
+      { action: 'api::waste-schedule.waste-schedule.findOne', enabled: true },
+      { action: 'api::waste-schedule.waste-schedule.create', enabled: true },
+      { action: 'api::waste-schedule.waste-schedule.update', enabled: true },
+      { action: 'api::waste-schedule.waste-schedule.delete', enabled: true },
+
       // Media Items
       { action: 'api::media-item.media-item.find', enabled: true },
       { action: 'api::media-item.media-item.findOne', enabled: true },

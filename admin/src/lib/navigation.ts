@@ -15,6 +15,7 @@ export const PREDEFINED_SECTIONS: SectionDefinition[] = [
   { key: 'associations', defaultLabel: 'Associations',      url: '/associations',      icon: 'heart-handshake' },
   { key: 'demarches',    defaultLabel: 'Démarches',         url: '/demarches',         icon: 'clipboard-list' },
   { key: 'open-data',    defaultLabel: 'Open Data',         url: '/open-data',         icon: 'database' },
+  { key: 'collecte-dechets', defaultLabel: 'Collecte des déchets', url: '/collecte-dechets', icon: 'trash-2' },
 ]
 
 export const getSectionDefinition = (key: SectionKey): SectionDefinition | undefined =>

@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "waste_schedules",
+  "info": {
+    "singularName": "waste-schedule",
+    "pluralName": "waste-schedules",
+    "displayName": "Collecte des dechets",
+    "description": "Planning de collecte des dechets par type et jour"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "waste_type": {
+      "type": "enumeration",
+      "enum": ["ordures-menageres", "tri-selectif", "verre", "dechets-verts", "encombrants"],
+      "required": true
+    },
+    "collection_day": {
+      "type": "enumeration",
+      "enum": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+      "required": true
+    },
+    "frequency": {
+      "type": "enumeration",
+      "enum": ["hebdomadaire", "bimensuel", "mensuel"],
+      "default": "hebdomadaire",
+      "required": true
+    },
+    "start_date": {
+      "type": "date"
+    },
+    "zone": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "notes": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "waste_schedules",
+      "required": true
+    }
+  }
+}

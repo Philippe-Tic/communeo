@@ -630,6 +630,34 @@ export function HomepageSection({
           )}
         </div>
       </div>
+      {/* Collecte des dechets */}
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Collecte des dechets</h2>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.show_waste_collection}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, show_waste_collection: !prev.show_waste_collection }))
+                  setIsDirty(true)
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  formData.show_waste_collection ? 'bg-primary' : 'bg-input'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_waste_collection ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+              <Label>Afficher</Label>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Affiche les prochaines collectes de dechets sur la page d'accueil.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

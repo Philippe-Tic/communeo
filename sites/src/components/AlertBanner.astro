@@ -1,5 +1,7 @@
 ---
 import { getActiveAlerts } from '../utils/strapi';
+import { ALERT_TYPE_CONFIG } from '../utils/alert-types';
+import type { AlerteType } from '../types/strapi';
 
 let alerts: Awaited<ReturnType<typeof getActiveAlerts>> = [];
 try {
@@ -31,10 +33,15 @@ const severityStyles = {
   <div role="alert" aria-live="assertive">
     {alerts.map((alert) => {
       const style = severityStyles[alert.severity] || severityStyles.info;
+      const typeConfig = alert.alert_type ? ALERT_TYPE_CONFIG[alert.alert_type as AlerteType] : null;
+      const displayEmoji = typeConfig ? typeConfig.emoji : style.icon;
       return (
         <div class={`${style.bg} ${style.text} px-4 py-3`}>
           <div class="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm font-medium">
-            <span aria-hidden="true">{style.icon}</span>
+            <span aria-hidden="true">{displayEmoji}</span>
+            {typeConfig && (
+              <span class="rounded bg-white/20 px-1.5 py-0.5 text-xs font-semibold uppercase">{typeConfig.label}</span>
+            )}
             <span class="font-bold">{alert.title}</span>
             <span class="hidden sm:inline">—</span>
             <span class="hidden sm:inline">{alert.message}</span>

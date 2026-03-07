@@ -118,6 +118,7 @@ export interface HomepageConfig {
   partners?: HomepagePartner[];
   show_weather?: boolean;
   show_waste_collection?: boolean;
+  show_disruptions?: boolean;
 }
 
 // Réseaux sociaux
@@ -132,7 +133,7 @@ export interface SocialLink {
 }
 
 // Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets';
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations';
 
 export interface NavigationItem {
   id: string;
@@ -329,6 +330,8 @@ export interface Association {
   updatedAt: string;
 }
 
+export type AlerteType = 'travaux' | 'coupure-eau' | 'coupure-electricite' | 'deviation' | 'intemperie' | 'autre';
+
 export interface Alerte {
   id: number;
   documentId: string;
@@ -340,6 +343,11 @@ export interface Alerte {
   display_until?: string;
   link_url?: string;
   link_label?: string;
+  alert_type?: AlerteType;
+  location?: string;
+  start_date?: string;
+  end_date?: string;
+  affected_area?: string;
   createdAt: string;
   updatedAt: string;
 }

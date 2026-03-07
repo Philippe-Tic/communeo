@@ -97,6 +97,7 @@ export const SiteConfigEdit = () => {
     longitude: '',
     show_weather: false,
     show_waste_collection: false,
+    show_disruptions: false,
   })
 
   const [logoImage, setLogoImage] = React.useState<ImageData | null>(null)
@@ -174,6 +175,7 @@ export const SiteConfigEdit = () => {
         longitude: site.infos_pratiques?.longitude?.toString() || '',
         show_weather: site.homepage?.show_weather ?? false,
         show_waste_collection: site.homepage?.show_waste_collection ?? false,
+        show_disruptions: site.homepage?.show_disruptions ?? false,
       })
       setLogoImage(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
       setFaviconImage(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
@@ -401,6 +403,7 @@ export const SiteConfigEdit = () => {
         show_partners: formData.show_partners,
         show_weather: formData.show_weather,
         show_waste_collection: formData.show_waste_collection,
+        show_disruptions: formData.show_disruptions,
         partners: partners.map(({ id: _id, logo, ...rest }) => ({
           ...rest,
           logo: logo?.id ? logo.id : undefined,

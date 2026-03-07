@@ -8,7 +8,7 @@ export interface SectionDefinition {
 }
 
 export const PREDEFINED_SECTIONS: SectionDefinition[] = [
-  { key: 'articles',     defaultLabel: 'Actualités',        url: '/articles',          icon: 'newspaper' },
+  { key: 'articles',     defaultLabel: 'Actualités',        url: '/actualites',        icon: 'newspaper' },
   { key: 'evenements',   defaultLabel: 'Événements',        url: '/evenements',        icon: 'calendar' },
   { key: 'documents',    defaultLabel: 'Documents',         url: '/documents',         icon: 'file-text' },
   { key: 'equipe',       defaultLabel: 'Équipe municipale', url: '/equipe-municipale', icon: 'users' },

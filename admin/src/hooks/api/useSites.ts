@@ -123,6 +123,7 @@ export interface HomepageConfig {
   show_partners?: boolean
   partners?: HomepagePartner[]
   show_weather?: boolean
+  show_waste_collection?: boolean
 }
 
 export interface Site {

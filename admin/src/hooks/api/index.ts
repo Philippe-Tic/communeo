@@ -13,6 +13,7 @@ export * from './useAssociations'
 export * from './useAlertes'
 export * from './useMediaLibrary'
 export * from './useUsers'
+export * from './useWasteSchedules'
 
 // Re-export commonly used types
 export type { ApiError } from '../../services/apiClient'

@@ -1,0 +1,129 @@
+---
+import type { WasteSchedule } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import { getSiteConfig, getActiveWasteSchedules } from '../utils/strapi';
+import { WASTE_TYPE_CONFIG, FREQUENCY_LABELS, getNextCollectionDates, formatCollectionDate } from '../utils/waste-schedule';
+
+const siteConfig = await getSiteConfig();
+
+let schedules: WasteSchedule[] = [];
+try {
+  schedules = await getActiveWasteSchedules();
+} catch (error) {
+  console.error('Erreur lors de la recuperation des plannings:', error);
+}
+
+// Grouper par type de dechet
+const schedulesByType = schedules.reduce((acc, schedule) => {
+  if (!acc[schedule.waste_type]) {
+    acc[schedule.waste_type] = [];
+  }
+  acc[schedule.waste_type].push(schedule);
+  return acc;
+}, {} as Record<string, WasteSchedule[]>);
+
+const DAY_LABELS: Record<string, string> = {
+  'lundi': 'Lundi',
+  'mardi': 'Mardi',
+  'mercredi': 'Mercredi',
+  'jeudi': 'Jeudi',
+  'vendredi': 'Vendredi',
+  'samedi': 'Samedi',
+  'dimanche': 'Dimanche',
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "GovernmentService",
+  "name": "Collecte des dechets",
+  "serviceType": "Collecte des dechets menagers",
+  "provider": {
+    "@type": "GovernmentOrganization",
+    "name": siteConfig.name,
+  },
+};
+---
+
+<Layout
+  title={`Collecte des dechets - ${siteConfig.name}`}
+  description="Planning de collecte des dechets : jours, frequences et types de dechets collectes dans votre commune."
+>
+  <Navigation />
+
+  <main id="main-content" class="py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb -->
+      <nav class="mb-8" aria-label="Fil d'Ariane">
+        <ol class="flex items-center gap-2 text-sm text-gray-500">
+          <li><a href="/" class="hover:text-primary-text transition-colors">Accueil</a></li>
+          <li aria-hidden="true">/</li>
+          <li class="text-gray-900 font-medium">Collecte des dechets</li>
+        </ol>
+      </nav>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Collecte des dechets</h1>
+      <p class="text-gray-600 mb-10">Retrouvez les jours et frequences de collecte des dechets dans votre commune.</p>
+
+      {Object.keys(schedulesByType).length === 0 ? (
+        <div class="text-center py-16 bg-gray-50 rounded-xl">
+          <p class="text-gray-500 text-lg">Aucun planning de collecte n'est encore configure.</p>
+          <p class="text-gray-400 mt-2">Revenez bientot pour consulter les horaires de collecte.</p>
+        </div>
+      ) : (
+        <div class="flex flex-col gap-8">
+          {Object.entries(schedulesByType).map(([wasteType, typeSchedules]) => {
+            const typeInfo = WASTE_TYPE_CONFIG[wasteType] || WASTE_TYPE_CONFIG['ordures-menageres'];
+            return (
+              <section class={`rounded-xl border ${typeInfo.color} p-6`}>
+                <div class="flex items-center gap-3 mb-6">
+                  <span class="text-3xl" aria-hidden="true">{typeInfo.emoji}</span>
+                  <h2 class="text-xl font-bold">{typeInfo.label}</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {typeSchedules.map((schedule) => {
+                    const nextDates = getNextCollectionDates(schedule, 4);
+                    return (
+                      <div class="bg-white/80 rounded-lg p-4 border border-current/10">
+                        <div class="flex flex-col gap-2">
+                          <div class="flex items-center gap-2">
+                            <span class="font-semibold">{DAY_LABELS[schedule.collection_day]}</span>
+                            <span class="text-sm opacity-75">— {FREQUENCY_LABELS[schedule.frequency]}</span>
+                          </div>
+                          {schedule.zone && (
+                            <p class="text-sm">Zone : <span class="font-medium">{schedule.zone}</span></p>
+                          )}
+                          {schedule.notes && (
+                            <p class="text-sm opacity-75">{schedule.notes}</p>
+                          )}
+                          {nextDates.length > 0 && (
+                            <div class="mt-2">
+                              <p class="text-xs font-medium uppercase tracking-wider opacity-60 mb-1">Prochaines collectes</p>
+                              <div class="flex flex-wrap gap-2">
+                                {nextDates.map((date) => (
+                                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white border capitalize">
+                                    {formatCollectionDate(date)}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </main>
+
+  <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+</Layout>

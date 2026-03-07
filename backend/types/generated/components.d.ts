@@ -74,6 +74,8 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
     show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_quick_links: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
+    show_waste_collection: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     show_weather: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
   };
 }

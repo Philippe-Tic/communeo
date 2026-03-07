@@ -1126,6 +1126,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    waste_schedules: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::waste-schedule.waste-schedule'
+    >;
   };
 }
 
@@ -1177,6 +1181,68 @@ export interface ApiTeamMemberTeamMember extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+  };
+}
+
+export interface ApiWasteScheduleWasteSchedule
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'waste_schedules';
+  info: {
+    description: 'Planning de collecte des dechets par type et jour';
+    displayName: 'Collecte des dechets';
+    pluralName: 'waste-schedules';
+    singularName: 'waste-schedule';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    active: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
+    collection_day: Schema.Attribute.Enumeration<
+      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+    > &
+      Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    frequency: Schema.Attribute.Enumeration<
+      ['hebdomadaire', 'bimensuel', 'mensuel']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'hebdomadaire'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::waste-schedule.waste-schedule'
+    > &
+      Schema.Attribute.Private;
+    notes: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    start_date: Schema.Attribute.Date;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    waste_type: Schema.Attribute.Enumeration<
+      [
+        'ordures-menageres',
+        'tri-selectif',
+        'verre',
+        'dechets-verts',
+        'encombrants',
+      ]
+    > &
+      Schema.Attribute.Required;
+    zone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
   };
 }
 
@@ -1714,6 +1780,7 @@ declare module '@strapi/strapi' {
       'api::page.page': ApiPagePage;
       'api::site.site': ApiSiteSite;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
+      'api::waste-schedule.waste-schedule': ApiWasteScheduleWasteSchedule;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

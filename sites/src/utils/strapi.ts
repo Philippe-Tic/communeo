@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, WasteSchedule, StrapiCollectionResponse
 } from '../types/strapi';
 
 /**
@@ -419,6 +419,21 @@ export async function getActiveAlerts(): Promise<Alerte[]> {
     if (alert.display_until && new Date(alert.display_until) < new Date()) return false;
     return true;
   });
+}
+
+/**
+ * Recupere les plannings de collecte actifs
+ */
+export async function getActiveWasteSchedules(): Promise<WasteSchedule[]> {
+  const url = buildStrapiUrl('waste-schedules', {
+    filters: {
+      active: { $eq: true },
+    },
+    sort: 'waste_type:asc',
+  });
+
+  const response = await strapiRequest<StrapiCollectionResponse<WasteSchedule>>(url);
+  return response?.data ?? [];
 }
 
 /**

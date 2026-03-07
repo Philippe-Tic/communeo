@@ -117,6 +117,7 @@ export interface HomepageConfig {
   show_partners?: boolean;
   partners?: HomepagePartner[];
   show_weather?: boolean;
+  show_waste_collection?: boolean;
 }
 
 // Réseaux sociaux
@@ -339,6 +340,20 @@ export interface Alerte {
   display_until?: string;
   link_url?: string;
   link_label?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WasteSchedule {
+  id: number;
+  documentId: string;
+  waste_type: 'ordures-menageres' | 'tri-selectif' | 'verre' | 'dechets-verts' | 'encombrants';
+  collection_day: 'lundi' | 'mardi' | 'mercredi' | 'jeudi' | 'vendredi' | 'samedi' | 'dimanche';
+  frequency: 'hebdomadaire' | 'bimensuel' | 'mensuel';
+  start_date?: string;
+  zone?: string;
+  notes?: string;
+  active: boolean;
   createdAt: string;
   updatedAt: string;
 }

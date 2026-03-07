@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "newsletter_subscribers",
+  "info": {
+    "singularName": "newsletter-subscriber",
+    "pluralName": "newsletter-subscribers",
+    "displayName": "Newsletter Subscriber"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "first_name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "last_name": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "subscribed_at": {
+      "type": "datetime",
+      "required": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "unsubscribe_token": {
+      "type": "string",
+      "required": true,
+      "private": true
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "newsletter_subscribers",
+      "required": true
+    }
+  }
+}

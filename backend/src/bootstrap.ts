@@ -321,6 +321,14 @@ export default async ({ strapi }) => {
       { action: 'api::site-management.site-management.create', enabled: true },
       { action: 'api::site-management.site-management.update', enabled: true },
       { action: 'api::site-management.site-management.delete', enabled: true },
+
+      // Newsletter Subscribers
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.find', enabled: true },
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.findOne', enabled: true },
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.create', enabled: true },
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.update', enabled: true },
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.delete', enabled: true },
+      { action: 'api::newsletter-subscriber.newsletter-subscriber.stats', enabled: true },
     ];
 
     // Appliquer les permissions
@@ -367,6 +375,8 @@ export default async ({ strapi }) => {
         { action: 'api::contact-submission.contact-submission.publicCreate', enabled: true },
         { action: 'api::association.association.publicCreate', enabled: true },
         { action: 'api::user-management.user-management.acceptInvitation', enabled: true },
+        { action: 'api::newsletter-subscriber.newsletter-subscriber.publicSubscribe', enabled: true },
+        { action: 'api::newsletter-subscriber.newsletter-subscriber.publicUnsubscribe', enabled: true },
       ];
 
       for (const permission of publicPermissions) {

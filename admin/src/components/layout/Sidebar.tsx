@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { usePendingAssociationsCount } from '@/hooks/api/useAssociations'
 import { useContactSubmissionsCount } from '@/hooks/api/useContactSubmissions'
 import { useSiteContext } from '@/contexts/SiteContext'
-import { Building2, Calendar, ChevronDown, Crown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, LogOut, Mail, Megaphone, Recycle, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
+import { Building2, Calendar, ChevronDown, Crown, File, FileArchive, FileText, Globe, ImageIcon, LayoutDashboard, LogOut, Mail, Megaphone, Newspaper, Recycle, Rocket, Settings, ShieldCheck, UserCog, Users, X, type LucideIcon } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useUserRole } from '@/hooks/useUser'
@@ -65,6 +65,7 @@ function buildNavGroups(canManageUsers: boolean): NavGroup[] {
         { name: 'Messages', path: '/messages', icon: Mail, badgeKey: 'messages' },
         { name: 'Équipe', path: '/team-members', icon: Users },
         { name: 'Associations', path: '/associations', icon: Building2, badgeKey: 'associations' },
+        { name: 'Newsletter', path: '/newsletter', icon: Newspaper },
       ],
     },
     {

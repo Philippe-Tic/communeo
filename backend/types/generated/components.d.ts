@@ -73,6 +73,8 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
       Schema.Attribute.DefaultTo<false>;
     show_mayor_word: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    show_newsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_quick_links: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;

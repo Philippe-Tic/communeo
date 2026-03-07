@@ -209,6 +209,12 @@
     "navigation_config": {
       "type": "json"
     },
+    "newsletter_subscribers": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::newsletter-subscriber.newsletter-subscriber",
+      "mappedBy": "site"
+    },
     "social_links": {
       "type": "component",
       "repeatable": true,

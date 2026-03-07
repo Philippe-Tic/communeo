@@ -1,5 +1,6 @@
 ---
 import type { Article, Event, TeamMember, Association, Alerte, HomepageQuickLink, WasteSchedule } from '../types/strapi';
+import NewsletterForm from '../components/NewsletterForm.astro';
 import WeatherWidget from '../components/WeatherWidget';
 import WasteWidget from '../components/WasteWidget.astro';
 import DisruptionsWidget from '../components/DisruptionsWidget.astro';
@@ -101,6 +102,7 @@ const showPartners = hp?.show_partners ?? false;
 const showWeather = hp?.show_weather ?? false;
 const showWasteCollection = hp?.show_waste_collection ?? false;
 const showDisruptions = hp?.show_disruptions ?? false;
+const showNewsletter = hp?.show_newsletter ?? false;
 const latitude = siteConfig.infos_pratiques?.latitude;
 const longitude = siteConfig.infos_pratiques?.longitude;
 
@@ -505,6 +507,11 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           </div>
         </div>
       </section>
+    )}
+
+    <!-- Newsletter -->
+    {showNewsletter && (
+      <NewsletterForm variant="section" />
     )}
 
     <!-- Section d'absence de contenu -->

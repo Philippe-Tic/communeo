@@ -59,7 +59,8 @@ jobs:
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd /opt/communeo
             git pull origin main
-            docker compose build strapi
+            docker compose build strapi --no-cache
+            docker compose up -d strapi --force-recreate
             docker compose up -d
           EOF
 

@@ -34,6 +34,40 @@ export function InfoSection({
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+              <Label className="mb-2">Latitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={formData.latitude}
+                onChange={(e) => onFieldChange('latitude', e.target.value)}
+                placeholder="Ex: 45.764"
+                className={errors.latitude ? 'border-destructive' : ''}
+              />
+              {errors.latitude && (
+                <p className="mt-1 text-sm text-destructive">{errors.latitude}</p>
+              )}
+            </div>
+            <div>
+              <Label className="mb-2">Longitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={formData.longitude}
+                onChange={(e) => onFieldChange('longitude', e.target.value)}
+                placeholder="Ex: 4.8357"
+                className={errors.longitude ? 'border-destructive' : ''}
+              />
+              {errors.longitude && (
+                <p className="mt-1 text-sm text-destructive">{errors.longitude}</p>
+              )}
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Coordonnées GPS de la commune (utilisées pour le widget météo).
+          </p>
+
           <div>
             <Label className="mb-2">Texte d'introduction de la page Contact</Label>
             <Textarea

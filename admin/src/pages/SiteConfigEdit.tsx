@@ -93,6 +93,9 @@ export const SiteConfigEdit = () => {
     show_associations: false,
     associations_count: '6',
     show_partners: false,
+    latitude: '',
+    longitude: '',
+    show_weather: false,
   })
 
   const [logoImage, setLogoImage] = React.useState<ImageData | null>(null)
@@ -166,6 +169,9 @@ export const SiteConfigEdit = () => {
         show_associations: site.homepage?.show_associations ?? false,
         associations_count: (site.homepage?.associations_count ?? 6).toString(),
         show_partners: site.homepage?.show_partners ?? false,
+        latitude: site.infos_pratiques?.latitude?.toString() || '',
+        longitude: site.infos_pratiques?.longitude?.toString() || '',
+        show_weather: site.homepage?.show_weather ?? false,
       })
       setLogoImage(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
       setFaviconImage(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
@@ -267,6 +273,20 @@ export const SiteConfigEdit = () => {
       newErrors.population = 'La population doit être un nombre positif'
     }
 
+    if (formData.latitude) {
+      const lat = Number(formData.latitude)
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        newErrors.latitude = 'La latitude doit être entre -90 et 90'
+      }
+    }
+
+    if (formData.longitude) {
+      const lng = Number(formData.longitude)
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        newErrors.longitude = 'La longitude doit être entre -180 et 180'
+      }
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -334,6 +354,8 @@ export const SiteConfigEdit = () => {
         opening_hours: parsedOpeningHours,
         population: formData.population ? Number(formData.population) : undefined,
         contact_form_intro: formData.contact_form_intro || undefined,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : undefined,
       },
       open_data_enabled: formData.open_data_enabled,
       open_data_url: formData.open_data_url || undefined,
@@ -375,6 +397,7 @@ export const SiteConfigEdit = () => {
         show_associations: formData.show_associations,
         associations_count: Number(formData.associations_count) || 6,
         show_partners: formData.show_partners,
+        show_weather: formData.show_weather,
         partners: partners.map(({ id: _id, logo, ...rest }) => ({
           ...rest,
           logo: logo?.id ? logo.id : undefined,

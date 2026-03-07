@@ -1,5 +1,6 @@
 ---
 import type { Article, Event, TeamMember, Association, HomepageQuickLink } from '../types/strapi';
+import WeatherWidget from '../components/WeatherWidget';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
@@ -87,6 +88,9 @@ const showEvents = hp?.show_events ?? true;
 const showKeyFigures = hp?.show_key_figures ?? false;
 const showAssociations = hp?.show_associations ?? false;
 const showPartners = hp?.show_partners ?? false;
+const showWeather = hp?.show_weather ?? false;
+const latitude = siteConfig.infos_pratiques?.latitude;
+const longitude = siteConfig.infos_pratiques?.longitude;
 
 const quickLinks = (hp?.quick_links && hp.quick_links.length > 0) ? hp.quick_links : defaultQuickLinks;
 
@@ -170,6 +174,13 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
           </div>
         </div>
       </section>
+    )}
+
+    <!-- Météo locale -->
+    {showWeather && latitude && longitude && (
+      <Section title="Météo locale" compact>
+        <WeatherWidget client:load latitude={latitude} longitude={longitude} />
+      </Section>
     )}
 
     <!-- Contenu éditorial -->

@@ -65,6 +65,9 @@ export interface SiteConfigFormData {
   show_associations: boolean
   associations_count: string
   show_partners: boolean
+  latitude: string
+  longitude: string
+  show_weather: boolean
 }
 
 export interface SectionBaseProps {

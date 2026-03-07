@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
+import preact from '@astrojs/preact';
 import dotenv from 'dotenv';
 
 // Charger le fichier .env
@@ -22,6 +23,7 @@ export default defineConfig({
 
   integrations: [
     tailwind(),
+    preact(),
     sitemap({
       filter: (page) => !page.endsWith('/robots.txt'),
     }),

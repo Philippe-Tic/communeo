@@ -99,7 +99,7 @@ export const SECTION_FIELDS: Record<string, string[]> = {
   legal: ['siret', 'publication_director', 'hebergeur_name'],
   rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
   accessibility: ['accessibility_level'],
-  info: ['opening_hours'],
+  info: ['opening_hours', 'latitude', 'longitude'],
   opendata: [],
   demarches: ['appointment_url'],
   homepage: [],

@@ -74,6 +74,7 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
     show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_quick_links: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
+    show_weather: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
   };
 }
 
@@ -213,6 +214,8 @@ export interface LegalInfosPratiques extends Struct.ComponentSchema {
   };
   attributes: {
     contact_form_intro: Schema.Attribute.Text;
+    latitude: Schema.Attribute.Float;
+    longitude: Schema.Attribute.Float;
     opening_hours: Schema.Attribute.JSON;
     population: Schema.Attribute.Integer;
   };

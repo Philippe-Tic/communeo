@@ -597,6 +597,39 @@ export function HomepageSection({
           )}
         </div>
       </div>
+      {/* Météo locale */}
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Météo locale</h2>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.show_weather}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, show_weather: !prev.show_weather }))
+                  setIsDirty(true)
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  formData.show_weather ? 'bg-primary' : 'bg-input'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_weather ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+              <Label>Afficher</Label>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Affiche un widget météo en temps réel sur la page d'accueil (données Open-Meteo).
+          </p>
+          {formData.show_weather && (!formData.latitude || !formData.longitude) && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              Les coordonnées GPS (latitude/longitude) doivent être renseignées dans la section "Infos pratiques" pour que le widget météo s'affiche.
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

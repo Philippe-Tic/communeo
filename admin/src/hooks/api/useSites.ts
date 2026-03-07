@@ -58,6 +58,8 @@ export interface InfosPratiques {
   opening_hours?: any
   population?: number
   contact_form_intro?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface DemarchesIdentite {
@@ -120,6 +122,7 @@ export interface HomepageConfig {
   associations_count?: number
   show_partners?: boolean
   partners?: HomepagePartner[]
+  show_weather?: boolean
 }
 
 export interface Site {

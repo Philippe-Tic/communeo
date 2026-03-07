@@ -132,7 +132,7 @@ export interface SocialLink {
 }
 
 // Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data';
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets';
 
 export interface NavigationItem {
   id: string;

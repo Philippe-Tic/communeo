@@ -20,9 +20,7 @@ services:
         max-file: "3"
 
   strapi:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: communeo-strapi:latest
     restart: unless-stopped
     depends_on:
       postgres:

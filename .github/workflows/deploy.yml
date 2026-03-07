@@ -30,15 +30,39 @@ jobs:
           path: admin/dist/
           retention-days: 1
 
+  build-strapi:
+    name: Build Strapi Docker image
+    needs: build-admin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t communeo-strapi:latest ./backend
+
+      - name: Save Docker image as tarball
+        run: docker save communeo-strapi:latest | gzip > /tmp/communeo-strapi.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strapi-image
+          path: /tmp/communeo-strapi.tar.gz
+          retention-days: 1
+
   deploy:
     name: Deploy to VPS
-    needs: build-admin
+    needs: [build-admin, build-strapi]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: admin-dist
           path: dist/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: strapi-image
+          path: image/
 
       - name: Setup SSH
         run: |
@@ -54,14 +78,21 @@ jobs:
             dist/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/communeo/admin/dist/
 
-      - name: Pull latest code and rebuild
+      - name: Transfer Docker image to VPS
+        run: |
+          scp -i ~/.ssh/deploy_key \
+            image/communeo-strapi.tar.gz \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/communeo-strapi.tar.gz
+
+      - name: Load image and deploy
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            set -e
             cd /opt/communeo
             git pull origin main
-            docker compose build strapi --no-cache
-            docker compose up -d strapi --force-recreate
-            docker compose up -d
+            docker load < /tmp/communeo-strapi.tar.gz
+            rm /tmp/communeo-strapi.tar.gz
+            docker compose up -d --force-recreate
           EOF
 
       - name: Health check

@@ -917,6 +917,52 @@ export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiNewsletterSubscriberNewsletterSubscriber
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'newsletter_subscribers';
+  info: {
+    displayName: 'Newsletter Subscriber';
+    pluralName: 'newsletter-subscribers';
+    singularName: 'newsletter-subscriber';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    active: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    first_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    last_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::newsletter-subscriber.newsletter-subscriber'
+    > &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
+      Schema.Attribute.Required;
+    subscribed_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    unsubscribe_token: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Private;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOfficialDocumentOfficialDocument
   extends Struct.CollectionTypeSchema {
   collectionName: 'official_documents';
@@ -1122,6 +1168,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     netlify_site_id: Schema.Attribute.String &
       Schema.Attribute.Private &
       Schema.Attribute.Unique;
+    newsletter_subscribers: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::newsletter-subscriber.newsletter-subscriber'
+    >;
     official_documents: Schema.Attribute.Relation<
       'oneToMany',
       'api::official-document.official-document'
@@ -1796,6 +1846,7 @@ declare module '@strapi/strapi' {
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::media-item.media-item': ApiMediaItemMediaItem;
+      'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
       'api::site.site': ApiSiteSite;

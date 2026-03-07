@@ -258,6 +258,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'media-items': 'api::media-item.media-item',
       'content-blocks': 'api::content-block.content-block',
       'waste-schedules': 'api::waste-schedule.waste-schedule',
+      'newsletter-subscribers': 'api::newsletter-subscriber.newsletter-subscriber',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

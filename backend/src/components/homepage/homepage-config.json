@@ -118,6 +118,10 @@
     "show_disruptions": {
       "type": "boolean",
       "default": false
+    },
+    "show_newsletter": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

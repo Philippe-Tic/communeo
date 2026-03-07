@@ -17,7 +17,7 @@ export default {
       if (!ctx.uid.startsWith('api::')) return next();
 
       // Exclude deployment and contact-submission
-      const excludedUids = ['api::deployment.deployment', 'api::contact-submission.contact-submission'];
+      const excludedUids = ['api::deployment.deployment', 'api::contact-submission.contact-submission', 'api::newsletter-subscriber.newsletter-subscriber'];
       if (excludedUids.includes(ctx.uid)) return next();
 
       const isSiteItself = ctx.uid === 'api::site.site';

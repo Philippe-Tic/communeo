@@ -686,6 +686,34 @@ export function HomepageSection({
           </p>
         </div>
       </div>
+      {/* Newsletter */}
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Newsletter</h2>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.show_newsletter}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, show_newsletter: !prev.show_newsletter }))
+                  setIsDirty(true)
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  formData.show_newsletter ? 'bg-primary' : 'bg-input'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_newsletter ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+              <Label>Afficher</Label>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Affiche un formulaire d'inscription à la newsletter sur la page d'accueil et dans le pied de page.
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

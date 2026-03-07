@@ -45,6 +45,7 @@ import { MediaLibrary } from './pages/MediaLibrary'
 import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
 import { UserDetail } from './pages/UserDetail'
+import { NewsletterSubscribers } from './pages/NewsletterSubscribers'
 import { AcceptInvitation } from './pages/AcceptInvitation'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { Profile } from './pages/Profile'
@@ -521,6 +522,18 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditUser />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Newsletter route */}
+          <Route
+            path="/newsletter"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <NewsletterSubscribers />
                 </MainLayout>
               </ProtectedRoute>
             }

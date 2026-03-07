@@ -70,6 +70,7 @@ export interface SiteConfigFormData {
   show_weather: boolean
   show_waste_collection: boolean
   show_disruptions: boolean
+  show_newsletter: boolean
 }
 
 export interface SectionBaseProps {

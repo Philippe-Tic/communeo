@@ -1,0 +1,82 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import { getSiteConfig } from '../../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+const token = Astro.url.searchParams.get('token');
+const strapiUrl = import.meta.env.STRAPI_URL;
+
+let success = false;
+let error = false;
+let errorMessage = '';
+
+if (token) {
+  try {
+    const response = await fetch(`${strapiUrl}/api/newsletter-subscribers/unsubscribe?token=${encodeURIComponent(token)}`);
+    if (response.ok) {
+      success = true;
+    } else {
+      error = true;
+      errorMessage = 'Ce lien de désinscription est invalide ou a déjà été utilisé.';
+    }
+  } catch {
+    error = true;
+    errorMessage = 'Une erreur est survenue. Veuillez réessayer plus tard.';
+  }
+} else {
+  error = true;
+  errorMessage = 'Lien de désinscription invalide.';
+}
+---
+
+<Layout title="Désinscription newsletter" description="Désinscription de la newsletter">
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <div class="min-h-[60vh] flex items-center justify-center py-16">
+      <div class="max-w-md mx-auto px-4 text-center">
+        {success ? (
+          <div>
+            <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-3">Désinscription confirmée</h1>
+            <p class="text-gray-600 mb-6">
+              Vous avez été désinscrit de la newsletter. Vous ne recevrez plus d'emails de notre part.
+            </p>
+            <a
+              href="/"
+              class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
+            >
+              Retour à l'accueil
+            </a>
+          </div>
+        ) : (
+          <div>
+            <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-3">Erreur</h1>
+            <p class="text-gray-600 mb-6">{errorMessage}</p>
+            <a
+              href="/"
+              class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
+            >
+              Retour à l'accueil
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

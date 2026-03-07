@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
 export type AlerteSeverity = 'info' | 'warning' | 'critical'
+export type AlerteType = 'travaux' | 'coupure-eau' | 'coupure-electricite' | 'deviation' | 'intemperie' | 'autre'
 
 export interface Alerte {
   id: number
@@ -14,6 +15,11 @@ export interface Alerte {
   display_until?: string
   link_url?: string
   link_label?: string
+  alert_type?: AlerteType
+  location?: string
+  start_date?: string
+  end_date?: string
+  affected_area?: string
   createdAt: string
   updatedAt: string
   site: {
@@ -32,6 +38,11 @@ export interface CreateAlerteData {
   display_until?: string
   link_url?: string
   link_label?: string
+  alert_type?: AlerteType
+  location?: string
+  start_date?: string
+  end_date?: string
+  affected_area?: string
 }
 
 export interface UpdateAlerteData extends Partial<CreateAlerteData> {
@@ -65,6 +76,7 @@ export const useAlertes = (params: {
   pageSize?: number
   severity?: AlerteSeverity
   active?: boolean
+  alert_type?: AlerteType
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 } = {}) => {
@@ -74,6 +86,7 @@ export const useAlertes = (params: {
   if (params.pageSize) queryParams.append('pagination[pageSize]', params.pageSize.toString())
   if (params.severity) queryParams.append('filters[severity][$eq]', params.severity)
   if (params.active !== undefined) queryParams.append('filters[active][$eq]', params.active.toString())
+  if (params.alert_type) queryParams.append('filters[alert_type][$eq]', params.alert_type)
   if (params.sortBy) {
     const sortOrder = params.sortOrder || 'desc'
     queryParams.append('sort', `${params.sortBy}:${sortOrder}`)

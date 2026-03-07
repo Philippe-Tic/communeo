@@ -47,6 +47,24 @@
       "type": "string",
       "maxLength": 100
     },
+    "alert_type": {
+      "type": "enumeration",
+      "enum": ["travaux", "coupure-eau", "coupure-electricite", "deviation", "intemperie", "autre"]
+    },
+    "location": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "start_date": {
+      "type": "date"
+    },
+    "end_date": {
+      "type": "date"
+    },
+    "affected_area": {
+      "type": "text",
+      "maxLength": 500
+    },
     "site": {
       "type": "relation",
       "relation": "manyToOne",

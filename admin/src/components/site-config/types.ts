@@ -69,6 +69,7 @@ export interface SiteConfigFormData {
   longitude: string
   show_weather: boolean
   show_waste_collection: boolean
+  show_disruptions: boolean
 }
 
 export interface SectionBaseProps {

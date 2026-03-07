@@ -1,0 +1,226 @@
+---
+import type { Alerte, AlerteType } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { getActiveAlerts, formatDate } from '../utils/strapi';
+import { ALERT_TYPE_CONFIG, getAlertTypeConfig } from '../utils/alert-types';
+
+let alerts: Alerte[] = [];
+
+try {
+  alerts = await getActiveAlerts();
+} catch (error) {
+  console.error('Erreur lors de la recuperation des alertes:', error);
+}
+
+const severityBorder: Record<string, string> = {
+  info: 'border-l-blue-500',
+  warning: 'border-l-orange-500',
+  critical: 'border-l-red-500',
+};
+
+const alertTypes = [
+  { key: 'all', label: 'Toutes' },
+  ...Object.entries(ALERT_TYPE_CONFIG).map(([key, config]) => ({
+    key,
+    label: `${config.emoji} ${config.label}`,
+  })),
+];
+
+// JSON-LD
+const siteOrigin = Astro.site?.toString()?.replace(/\/$/, '') || Astro.url.origin;
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "GovernmentService",
+  "name": "Perturbations en cours",
+  "url": `${siteOrigin}/perturbations`,
+  "serviceType": "Alert",
+});
+
+const breadcrumbJsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Accueil", "item": siteOrigin },
+    { "@type": "ListItem", "position": 2, "name": "Perturbations" }
+  ]
+});
+---
+
+<Layout
+  title="Perturbations en cours"
+  description="Consultez les perturbations en cours : travaux, coupures, deviations et alertes sur votre commune."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <script type="application/ld+json" set:html={jsonLd} />
+  <script type="application/ld+json" set:html={breadcrumbJsonLd} />
+
+  <main id="main-content" data-pagefind-body>
+    <Breadcrumb items={[
+      { label: 'Perturbations' }
+    ]} />
+
+    <Hero title="Perturbations en cours" subtitle="Travaux, coupures et deviations affectant votre commune" />
+
+    <!-- Filtres par type -->
+    <section class="py-5 bg-white border-b border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap gap-2 justify-center">
+          {alertTypes.map((type) => (
+            <button
+              type="button"
+              class="filter-btn px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-gray-200 text-gray-600 hover:bg-primary hover:text-on-primary hover:border-primary"
+              data-alert-type={type.key}
+            >
+              {type.label}
+              {type.key === 'all' && (
+                <span class="ml-1 text-xs opacity-70">({alerts.length})</span>
+              )}
+              {type.key !== 'all' && (
+                <span class="ml-1 text-xs opacity-70">({alerts.filter(a => a.alert_type === type.key).length})</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <Section>
+      {alerts.length > 0 ? (
+        <div class="flex flex-col gap-4">
+          {alerts.map((alert) => {
+            const typeConfig = getAlertTypeConfig(alert.alert_type);
+            const borderClass = severityBorder[alert.severity] || severityBorder.info;
+            return (
+              <div
+                class={`alert-card rounded-lg border border-l-4 ${borderClass} bg-white p-5 shadow-sm transition-shadow hover:shadow-md`}
+                data-alert-type={alert.alert_type || 'none'}
+              >
+                <div class="flex items-start gap-3">
+                  {typeConfig.emoji && (
+                    <span class="text-2xl mt-0.5" aria-hidden="true">{typeConfig.emoji}</span>
+                  )}
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                      {alert.alert_type && (
+                        <span class={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${typeConfig.classes}`}>
+                          {typeConfig.label}
+                        </span>
+                      )}
+                      <h2 class="text-lg font-bold text-gray-900">{alert.title}</h2>
+                    </div>
+
+                    <p class="text-gray-600 mb-3">{alert.message}</p>
+
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      {alert.location && (
+                        <span class="flex items-center gap-1">
+                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                          </svg>
+                          {alert.location}
+                        </span>
+                      )}
+                      {(alert.start_date || alert.end_date) && (
+                        <span class="flex items-center gap-1">
+                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                          </svg>
+                          {alert.start_date && `Du ${formatDate(alert.start_date)}`}
+                          {alert.end_date && ` au ${formatDate(alert.end_date)}`}
+                        </span>
+                      )}
+                    </div>
+
+                    {alert.affected_area && (
+                      <p class="mt-2 text-sm text-gray-500 italic">
+                        Zone affectee : {alert.affected_area}
+                      </p>
+                    )}
+
+                    {alert.link_url && (
+                      <a
+                        href={alert.link_url}
+                        class="inline-flex items-center mt-3 text-primary-text hover:text-primary-text/80 font-medium text-sm group/link"
+                      >
+                        {alert.link_label || 'En savoir plus'}
+                        <svg class="ml-1 w-4 h-4 transition-transform group-hover/link:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="text-center py-12">
+          <span class="text-4xl mb-4 block" aria-hidden="true">✅</span>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Aucune perturbation en cours</h2>
+          <p class="text-gray-600">
+            Il n'y a actuellement aucune perturbation signalee sur votre commune.
+          </p>
+        </div>
+      )}
+    </Section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .filter-btn.active {
+    background-color: rgb(var(--color-primary));
+    color: rgb(var(--color-on-primary));
+    border-color: rgb(var(--color-primary));
+  }
+
+  .alert-card.hidden {
+    display: none;
+  }
+
+  .alert-card {
+    transition: opacity 0.3s ease-in-out;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const alertCards = document.querySelectorAll('.alert-card');
+
+    const allButton = document.querySelector('[data-alert-type="all"]');
+    if (allButton) {
+      allButton.classList.add('active');
+    }
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const type = button.getAttribute('data-alert-type');
+
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        alertCards.forEach(card => {
+          const cardType = card.getAttribute('data-alert-type');
+
+          if (type === 'all' || cardType === type) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      });
+    });
+  });
+</script>

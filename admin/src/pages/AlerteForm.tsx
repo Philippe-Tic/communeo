@@ -17,7 +17,9 @@ import {
   useUpdateAlerte,
   type Alerte,
   type AlerteSeverity,
+  type AlerteType,
 } from '../hooks/api/useAlertes'
+import { ALERTE_TYPE_OPTIONS } from '../lib/constants/alerte-types'
 import { toaster } from '../lib/toaster'
 
 interface AlerteFormData {
@@ -29,6 +31,11 @@ interface AlerteFormData {
   display_until: string
   link_url: string
   link_label: string
+  alert_type: string
+  location: string
+  start_date: string
+  end_date: string
+  affected_area: string
 }
 
 interface AlerteFormProps {
@@ -54,6 +61,11 @@ export function AlerteForm({ isEditing = false, initialData }: AlerteFormProps) 
       display_until: initialData?.display_until ? initialData.display_until.slice(0, 16) : '',
       link_url: initialData?.link_url || '',
       link_label: initialData?.link_label || '',
+      alert_type: initialData?.alert_type || '',
+      location: initialData?.location || '',
+      start_date: initialData?.start_date || '',
+      end_date: initialData?.end_date || '',
+      affected_area: initialData?.affected_area || '',
     },
   })
 
@@ -70,6 +82,11 @@ export function AlerteForm({ isEditing = false, initialData }: AlerteFormProps) 
         display_until: data.display_until || undefined,
         link_url: data.link_url || undefined,
         link_label: data.link_label || undefined,
+        alert_type: (data.alert_type || undefined) as AlerteType | undefined,
+        location: data.location || undefined,
+        start_date: data.start_date || undefined,
+        end_date: data.end_date || undefined,
+        affected_area: data.affected_area || undefined,
       }
       if (isEditing && id) {
         await updateMutation.mutateAsync({ id, ...submitData })
@@ -154,6 +171,63 @@ export function AlerteForm({ isEditing = false, initialData }: AlerteFormProps) 
                       onCheckedChange={field.onChange}
                     />
                   )}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection title="Type et localisation">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Controller
+                  name="alert_type"
+                  control={control}
+                  render={({ field }) => (
+                    <FormSelect
+                      label="Type d'alerte"
+                      value={field.value || '__none__'}
+                      onValueChange={(v) => field.onChange(v === '__none__' ? '' : v)}
+                      options={[
+                        { value: '__none__', label: 'Non categorise' },
+                        ...ALERTE_TYPE_OPTIONS,
+                      ]}
+                    />
+                  )}
+                />
+
+                <div>
+                  <Label className="mb-2">Localisation</Label>
+                  <Input
+                    placeholder="Ex: Rue de la Mairie, centre-ville"
+                    maxLength={200}
+                    {...register('location')}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <Label className="mb-2">Date de debut</Label>
+                  <Input type="date" {...register('start_date')} />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Date de debut de la perturbation
+                  </p>
+                </div>
+
+                <div>
+                  <Label className="mb-2">Date de fin</Label>
+                  <Input type="date" {...register('end_date')} />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Date de fin prevue
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="mb-2">Zone affectee</Label>
+                <Textarea
+                  placeholder="Decrivez la zone affectee..."
+                  maxLength={500}
+                  rows={2}
+                  {...register('affected_area')}
                 />
               </div>
             </FormSection>

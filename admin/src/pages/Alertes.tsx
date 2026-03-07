@@ -10,10 +10,12 @@ import {
   useUpdateAlerte,
   SEVERITY_CONFIG,
   type Alerte,
+  type AlerteType,
 } from '../hooks/api/useAlertes'
+import { ALERTE_TYPE_CONFIG, ALERTE_TYPE_OPTIONS } from '../lib/constants/alerte-types'
 import { formatDate } from '@/lib/format'
 import { toaster } from '../lib/toaster'
-import { AlertTriangle, Info, Megaphone, Pencil, Power, PowerOff, Trash2 } from 'lucide-react'
+import { AlertTriangle, Info, MapPin, Megaphone, Pencil, Power, PowerOff, Trash2 } from 'lucide-react'
 
 const SEVERITY_ICONS = {
   info: Info,
@@ -24,8 +26,9 @@ const SEVERITY_ICONS = {
 export const Alertes = () => {
   const navigate = useNavigate()
   const [alerteToDelete, setAlerteToDelete] = useState<Alerte | null>(null)
+  const [selectedType, setSelectedType] = useState<AlerteType | undefined>(undefined)
 
-  const { data: alertesData, isLoading } = useAlertes()
+  const { data: alertesData, isLoading } = useAlertes({ alert_type: selectedType })
   const deleteMutation = useDeleteAlerte()
   const updateMutation = useUpdateAlerte()
 
@@ -89,6 +92,29 @@ export const Alertes = () => {
           actions={headerActions}
         />
 
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={selectedType === undefined ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedType(undefined)}
+          >
+            Tous
+          </Button>
+          {ALERTE_TYPE_OPTIONS.map(({ value, label }) => {
+            const config = ALERTE_TYPE_CONFIG[value as AlerteType]
+            return (
+              <Button
+                key={value}
+                variant={selectedType === value ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedType(selectedType === value ? undefined : value as AlerteType)}
+              >
+                {config.emoji} {label}
+              </Button>
+            )
+          })}
+        </div>
+
         {isLoading ? (
           <LoadingSpinner message="Chargement des alertes..." />
         ) : alertes.length === 0 ? (
@@ -119,6 +145,11 @@ export const Alertes = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="truncate font-semibold">{alerte.title}</p>
+                      {alerte.alert_type && (
+                        <Badge className={ALERTE_TYPE_CONFIG[alerte.alert_type].className}>
+                          {ALERTE_TYPE_CONFIG[alerte.alert_type].emoji} {ALERTE_TYPE_CONFIG[alerte.alert_type].label}
+                        </Badge>
+                      )}
                       <Badge className={severityConfig.className}>{severityConfig.label}</Badge>
                       {alerte.active ? (
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Actif</Badge>
@@ -130,6 +161,12 @@ export const Alertes = () => {
                       )}
                     </div>
                     <p className="mt-0.5 truncate text-sm text-muted-foreground">{alerte.message}</p>
+                    {alerte.location && (
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        {alerte.location}
+                      </p>
+                    )}
                     {(alerte.display_from || alerte.display_until) && (
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {alerte.display_from && `Du ${formatDate(alerte.display_from)}`}

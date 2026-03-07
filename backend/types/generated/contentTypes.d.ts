@@ -445,11 +445,26 @@ export interface ApiAlerteAlerte extends Struct.CollectionTypeSchema {
     active: Schema.Attribute.Boolean &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<false>;
+    affected_area: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    alert_type: Schema.Attribute.Enumeration<
+      [
+        'travaux',
+        'coupure-eau',
+        'coupure-electricite',
+        'deviation',
+        'intemperie',
+        'autre',
+      ]
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     display_from: Schema.Attribute.DateTime;
     display_until: Schema.Attribute.DateTime;
+    end_date: Schema.Attribute.Date;
     link_label: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -464,6 +479,10 @@ export interface ApiAlerteAlerte extends Struct.CollectionTypeSchema {
       'api::alerte.alerte'
     > &
       Schema.Attribute.Private;
+    location: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
     message: Schema.Attribute.Text &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -475,6 +494,7 @@ export interface ApiAlerteAlerte extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'info'>;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> &
       Schema.Attribute.Required;
+    start_date: Schema.Attribute.Date;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{

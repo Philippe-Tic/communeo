@@ -114,6 +114,10 @@
     "show_waste_collection": {
       "type": "boolean",
       "default": false
+    },
+    "show_disruptions": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

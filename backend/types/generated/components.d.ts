@@ -66,6 +66,8 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
     show_articles: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     show_associations: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    show_disruptions: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     show_events: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     show_key_figures: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;

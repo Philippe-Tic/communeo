@@ -288,7 +288,7 @@ export function SiteConfigReadOnly({ site }: SiteConfigReadOnlyProps) {
               <div className="flex flex-col gap-2">
                 {site.navigation_config.map((item, i) => (
                   <div key={i} className="rounded-md border bg-muted/30 px-3 py-2 text-sm">
-                    {item.label || item.key} {item.type === 'page' && item.pageDocumentId && <span className="text-muted-foreground">(page)</span>}
+                    {item.label || item.linkKey} {item.type === 'page' && item.pageDocumentId && <span className="text-muted-foreground">(page)</span>} {item.type === 'section' && <span className="text-muted-foreground">(section — {item.children?.length || 0} enfants)</span>}
                   </div>
                 ))}
               </div>

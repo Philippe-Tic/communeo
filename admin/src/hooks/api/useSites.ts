@@ -2,15 +2,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
 // Types — Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine'
+export type LinkKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine'
+
+export type NavigationItemType = 'page' | 'link' | 'section'
 
 export interface NavigationItem {
-  id: string              // UUID pour le drag & drop
-  type: 'section' | 'page'
-  key?: SectionKey        // Clé section (si type=section)
-  pageDocumentId?: string // DocumentId page (si type=page)
-  label?: string          // Label custom (undefined = défaut)
-  enabled: boolean        // Toggle visibilité
+  id: string                    // UUID pour drag-and-drop
+  type: NavigationItemType
+  label?: string                // Label custom (fallback: titre page ou defaultLabel link)
+  enabled: boolean
+  // type='page':
+  pageDocumentId?: string
+  // type='link':
+  linkKey?: LinkKey             // Clé prédéfinie (articles, evenements, etc.)
+  // type='section':
+  children?: NavigationItem[]   // Enfants (pages et/ou links) — uniquement pour sections
 }
 
 // Types — Réseaux sociaux

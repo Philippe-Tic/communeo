@@ -13,7 +13,7 @@ import { RichTextEditor } from '../components/editor'
 import { PageHeader } from '../components/layout'
 import { SitePreview } from '../components/preview/SitePreview'
 import { PreviewToolbar } from '../components/preview/PreviewToolbar'
-import { useCreatePage, usePage, usePages, useUpdatePage, type Page } from '../hooks/api/usePages'
+import { useCreatePage, usePage, useUpdatePage, type Page } from '../hooks/api/usePages'
 import { toaster } from '../lib/toaster'
 
 interface PageFormData {
@@ -24,7 +24,6 @@ interface PageFormData {
   meta_description: string
   status: 'draft' | 'published' | 'archived'
   scheduled_at: string
-  parent_id?: string
   menu_order: number
   template: string
 }
@@ -42,7 +41,6 @@ const getDefaultValues = (data?: Page): PageFormData => ({
   meta_description: data?.meta_description ?? '',
   status: data?.status ?? 'draft',
   scheduled_at: data?.scheduled_at ? data.scheduled_at.slice(0, 16) : '',
-  parent_id: data?.parent_page?.documentId ?? '',
   menu_order: data?.menu_order ?? 0,
   template: data?.template ?? 'default',
 })
@@ -64,7 +62,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
     return () => observer.disconnect()
   }, [showPreview])
 
-  const { data: pagesResponse } = usePages()
   const createPageMutation = useCreatePage()
   const updatePageMutation = useUpdatePage()
 
@@ -97,11 +94,10 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
     if (isSubmitting) return
     setIsSubmitting(true)
     try {
-      const { parent_id, scheduled_at, ...formData } = data
+      const { scheduled_at, ...formData } = data
       const apiData = {
         ...formData,
         scheduled_at: scheduled_at ? new Date(scheduled_at).toISOString() : null,
-        parent_page: parent_id || null,
       }
       if (isEditing && id) {
         await updatePageMutation.mutateAsync({ id, ...apiData, template: apiData.template as 'default' | 'about' | 'services' })
@@ -118,20 +114,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
       setIsSubmitting(false)
     }
   }
-
-  const pages = pagesResponse?.data || []
-  const availableParentPages = pages.filter((page: Page) => {
-    if (isEditing && initialData) return page.documentId !== initialData.documentId
-    return true
-  })
-
-  const parentOptions = [
-    { value: '_none', label: 'Aucune (page racine)' },
-    ...availableParentPages.map((page: Page) => ({
-      value: page.documentId,
-      label: page.title,
-    })),
-  ]
 
   return (
     <div className={showPreview ? 'mx-auto max-w-[1600px]' : 'mx-auto max-w-4xl'}>
@@ -211,19 +193,6 @@ export function PageForm({ isEditing = false, initialData }: PageFormProps) {
                       </p>
                     </div>
                   )}
-
-                  <Controller
-                    name="parent_id"
-                    control={control}
-                    render={({ field }) => (
-                      <FormSelect
-                        label="Page parent"
-                        value={field.value || '_none'}
-                        onValueChange={(v) => field.onChange(v === '_none' ? '' : v)}
-                        options={parentOptions}
-                      />
-                    )}
-                  />
 
                   <div>
                     <Label className="mb-2">Ordre dans le menu</Label>

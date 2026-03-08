@@ -1,11 +1,11 @@
-import type { SectionKey } from '../types/strapi';
+import type { LinkKey } from '../types/strapi';
 
-export interface SectionMeta {
+export interface LinkMeta {
   defaultLabel: string;
   url: string;
 }
 
-export const SECTION_MAP: Record<SectionKey, SectionMeta> = {
+export const LINK_MAP: Record<LinkKey, LinkMeta> = {
   'articles':     { defaultLabel: 'Actualités',        url: '/actualites' },
   'evenements':   { defaultLabel: 'Événements',        url: '/evenements' },
   'documents':    { defaultLabel: 'Documents',         url: '/documents' },

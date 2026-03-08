@@ -144,7 +144,7 @@ export const Dashboard = () => {
                   <Button
                     variant="link"
                     className="h-auto p-0 text-orange-700 underline dark:text-orange-400"
-                    onClick={() => navigate('/site/edit')}
+                    onClick={() => navigate('/site/general')}
                   >
                     Compléter la configuration
                   </Button>

@@ -94,28 +94,15 @@ export const RGPD_TEMPLATE = `<h2>Politique de confidentialité</h2>
 <h3>Réclamation</h3>
 <p>Si vous estimez que le traitement de vos données constitue une violation du RGPD, vous pouvez introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.</p>`
 
-export const SECTION_FIELDS: Record<string, string[]> = {
-  general: ['name', 'contact_mail', 'colors'],
-  legal: ['siret', 'publication_director', 'hebergeur_name'],
-  rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
-  accessibility: ['accessibility_level'],
-  info: ['opening_hours', 'latitude', 'longitude'],
-  opendata: [],
-  demarches: ['appointment_url'],
-  homepage: [],
-  navigation: [],
-  social: [],
-}
-
 export const SECTIONS: SectionConfig[] = [
-  { key: 'general', label: 'Informations générales', icon: Building2 },
-  { key: 'legal', label: 'Mentions légales', icon: Scale },
-  { key: 'rgpd', label: 'RGPD', icon: Shield },
-  { key: 'accessibility', label: 'Accessibilité', icon: Accessibility },
-  { key: 'info', label: 'Infos pratiques', icon: Info },
-  { key: 'opendata', label: 'Open Data', icon: Database },
-  { key: 'demarches', label: 'Démarches', icon: FileText },
-  { key: 'homepage', label: "Page d'accueil", icon: Home },
-  { key: 'navigation', label: 'Navigation', icon: Navigation },
-  { key: 'social', label: 'Réseaux sociaux', icon: Share2 },
+  { key: 'general', label: 'Informations générales', icon: Building2, path: '/site/general' },
+  { key: 'legal', label: 'Mentions légales', icon: Scale, path: '/site/legal' },
+  { key: 'rgpd', label: 'RGPD', icon: Shield, path: '/site/rgpd' },
+  { key: 'accessibility', label: 'Accessibilité', icon: Accessibility, path: '/site/accessibility' },
+  { key: 'info', label: 'Infos pratiques', icon: Info, path: '/site/info' },
+  { key: 'opendata', label: 'Open Data', icon: Database, path: '/site/opendata' },
+  { key: 'demarches', label: 'Démarches', icon: FileText, path: '/site/demarches' },
+  { key: 'homepage', label: "Page d'accueil", icon: Home, path: '/site/homepage' },
+  { key: 'navigation', label: 'Navigation', icon: Navigation, path: '/site/navigation' },
+  { key: 'social', label: 'Réseaux sociaux', icon: Share2, path: '/site/social' },
 ]

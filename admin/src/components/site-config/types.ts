@@ -118,4 +118,5 @@ export interface SectionConfig {
   key: string
   label: string
   icon: React.ComponentType<{ className?: string }>
+  path: string
 }

@@ -34,8 +34,17 @@ import { Associations } from './pages/Associations'
 import { AssociationDetail } from './pages/AssociationDetail'
 import { CreateAssociation, EditAssociation } from './pages/AssociationForm'
 import { Compliance } from './pages/Compliance'
-import { SiteConfig } from './pages/SiteConfig'
-import { SiteConfigEdit } from './pages/SiteConfigEdit'
+import { SiteConfigLayout } from './pages/site-config/SiteConfigLayout'
+import { GeneralSectionPage } from './pages/site-config/GeneralSectionPage'
+import { LegalSectionPage } from './pages/site-config/LegalSectionPage'
+import { RgpdSectionPage } from './pages/site-config/RgpdSectionPage'
+import { AccessibilitySectionPage } from './pages/site-config/AccessibilitySectionPage'
+import { InfoSectionPage } from './pages/site-config/InfoSectionPage'
+import { OpenDataSectionPage } from './pages/site-config/OpenDataSectionPage'
+import { DemarchesSectionPage } from './pages/site-config/DemarchesSectionPage'
+import { HomepageSectionPage } from './pages/site-config/HomepageSectionPage'
+import { NavigationSectionPage } from './pages/site-config/NavigationSectionPage'
+import { SocialSectionPage } from './pages/site-config/SocialSectionPage'
 import { SiteManagement } from './pages/SiteManagement'
 import { Alertes } from './pages/Alertes'
 import { CreateAlerte, EditAlerte } from './pages/AlerteForm'
@@ -617,22 +626,23 @@ function App() {
             element={
               <ProtectedRoute>
                 <MainLayout>
-                  <SiteConfig />
+                  <SiteConfigLayout />
                 </MainLayout>
               </ProtectedRoute>
             }
-          />
-
-          <Route
-            path="/site/edit"
-            element={
-              <ProtectedRoute>
-                <MainLayout>
-                  <SiteConfigEdit />
-                </MainLayout>
-              </ProtectedRoute>
-            }
-          />
+          >
+            <Route index element={<Navigate to="/site/general" replace />} />
+            <Route path="general" element={<GeneralSectionPage />} />
+            <Route path="legal" element={<LegalSectionPage />} />
+            <Route path="rgpd" element={<RgpdSectionPage />} />
+            <Route path="accessibility" element={<AccessibilitySectionPage />} />
+            <Route path="info" element={<InfoSectionPage />} />
+            <Route path="opendata" element={<OpenDataSectionPage />} />
+            <Route path="demarches" element={<DemarchesSectionPage />} />
+            <Route path="homepage" element={<HomepageSectionPage />} />
+            <Route path="navigation" element={<NavigationSectionPage />} />
+            <Route path="social" element={<SocialSectionPage />} />
+          </Route>
 
           {/* Deployment and domain management routes */}
           <Route

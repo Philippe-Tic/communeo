@@ -309,6 +309,13 @@ export const SiteConfigEdit = () => {
 
     if (!site || !validateForm()) return
 
+    // Block save if any section has no children
+    const emptySections = navigationItems.filter(i => i.type === 'section' && (!i.children || i.children.length === 0))
+    if (emptySections.length > 0) {
+      toaster.create({ title: 'Erreur de navigation', description: 'Des sections sont vides. Ajoutez des éléments ou supprimez-les.', type: 'error', duration: 5000 })
+      return
+    }
+
     let parsedColors = null
     if (formData.colors.trim()) {
       try {

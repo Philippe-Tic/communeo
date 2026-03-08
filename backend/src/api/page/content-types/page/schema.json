@@ -61,18 +61,6 @@
       "type": "string",
       "maxLength": 255
     },
-    "parent_page": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::page.page",
-      "inversedBy": "child_pages"
-    },
-    "child_pages": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::page.page",
-      "mappedBy": "parent_page"
-    },
     "site": {
       "type": "relation",
       "relation": "manyToOne",

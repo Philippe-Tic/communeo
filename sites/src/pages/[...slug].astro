@@ -6,7 +6,7 @@ import Footer from '../components/Footer.astro';
 import Hero from '../components/Hero.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import StrapiImage from '../components/StrapiImage.astro';
-import { getPages, getPageBySlug, getPagePath, buildBreadcrumbs } from '../utils/strapi';
+import { getPages, getPageBySlug, buildBreadcrumbs } from '../utils/strapi';
 import { addHeadingIds } from '../utils/toc';
 import TableOfContents from '../components/TableOfContents.astro';
 
@@ -16,8 +16,8 @@ export async function getStaticPaths() {
 
     return pages
       .map(page => ({
-        params: { slug: getPagePath(page, pages) },
-        props: { page, allPages: pages }
+        params: { slug: page.slug },
+        props: { page }
       }));
   } catch (error) {
     console.error('Erreur lors de la récupération des pages:', error);
@@ -27,7 +27,6 @@ export async function getStaticPaths() {
 
 // Récupération de la page depuis les props ou fallback
 let page: Page | null = null;
-let allPages: Page[] = Astro.props.allPages ?? [];
 
 if (Astro.props.page) {
   page = Astro.props.page;
@@ -35,11 +34,7 @@ if (Astro.props.page) {
   // Fallback pour le mode développement
   try {
     const slugParam = Astro.params.slug as string;
-    const lastSegment = slugParam.split('/').pop() || slugParam;
-    page = await getPageBySlug(lastSegment);
-    if (page) {
-      allPages = await getPages();
-    }
+    page = await getPageBySlug(slugParam);
   } catch (error) {
     console.error('Erreur lors de la récupération de la page:', error);
   }
@@ -52,7 +47,7 @@ if (!page) {
 
 const attributes = page;
 const { html: processedContent, toc } = addHeadingIds(attributes.content || '');
-const breadcrumbs = buildBreadcrumbs(page, allPages);
+const breadcrumbs = buildBreadcrumbs(page);
 const breadcrumbItems = breadcrumbs.map((crumb, i) => ({
   label: crumb.title,
   ...(i < breadcrumbs.length - 1 ? { href: crumb.path } : {})

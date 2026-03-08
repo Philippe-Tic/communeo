@@ -87,7 +87,7 @@ npm run type-check # Astro type checking only
 | Type | API ID | Key fields |
 |------|--------|------------|
 | Site | `api::site.site` | name, slug, theme, colors, netlify_site_id, plan_type |
-| Page | `api::page.page` | title, slug, content (richtext), status, template, parent_page |
+| Page | `api::page.page` | title, slug, content (richtext), status, template, menu_order, show_in_menu |
 | Article | `api::article.article` | title, slug, content, status, publication_date, featured, category |
 | Event | `api::evenement.evenement` | title, description, start_date, end_date, location |
 | Domain | `api::domain.domain` | Domain verification and SSL |

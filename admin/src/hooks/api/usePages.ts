@@ -32,18 +32,6 @@ export interface Page {
     name: string
     slug: string
   }
-  parent_page?: {
-    id: number
-    documentId: string
-    title: string
-    slug: string
-  }
-  child_pages?: Array<{
-    id: number
-    documentId: string
-    title: string
-    slug: string
-  }>
   menu_order?: number
   show_in_menu?: boolean
   seo_keywords?: string
@@ -56,7 +44,6 @@ export interface CreatePageData {
   meta_description?: string
   status?: 'draft' | 'published' | 'archived'
   featured_image?: number
-  parent_page?: string | null
   menu_order?: number
   show_in_menu?: boolean
   seo_keywords?: string
@@ -81,7 +68,6 @@ export interface PagesResponse {
   }
 }
 
-// parent_page and child_pages are injected by the backend controller (self-referencing relations)
 const PAGE_POPULATE_PARAMS = [
   'populate[site][fields][0]=id',
   'populate[site][fields][1]=name',
@@ -108,7 +94,6 @@ export const usePages = (params: {
   search?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
-  parent?: number | null
 } = {}) => {
   const queryParams = new URLSearchParams()
 
@@ -119,15 +104,6 @@ export const usePages = (params: {
   // Filters
   if (params.status) queryParams.append('filters[status][$eq]', params.status)
   if (params.search) queryParams.append('filters[title][$containsi]', params.search)
-
-  // Parent page filter
-  if (params.parent !== undefined) {
-    if (params.parent === null) {
-      queryParams.append('filters[parent_page][$null]', 'true')
-    } else {
-      queryParams.append('filters[parent_page][documentId][$eq]', params.parent.toString())
-    }
-  }
 
   // Sorting
   if (params.sortBy) {

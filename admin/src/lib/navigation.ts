@@ -1,13 +1,13 @@
-import type { NavigationItem, SectionKey } from '../hooks/api/useSites'
+import type { NavigationItem, LinkKey } from '../hooks/api/useSites'
 
-export interface SectionDefinition {
-  key: SectionKey
+export interface LinkDefinition {
+  key: LinkKey
   defaultLabel: string
   url: string
   icon: string // lucide icon name
 }
 
-export const PREDEFINED_SECTIONS: SectionDefinition[] = [
+export const PREDEFINED_LINKS: LinkDefinition[] = [
   { key: 'articles',     defaultLabel: 'Actualités',        url: '/actualites',        icon: 'newspaper' },
   { key: 'evenements',   defaultLabel: 'Événements',        url: '/evenements',        icon: 'calendar' },
   { key: 'documents',    defaultLabel: 'Documents',         url: '/documents',         icon: 'file-text' },
@@ -20,25 +20,25 @@ export const PREDEFINED_SECTIONS: SectionDefinition[] = [
   { key: 'cantine',         defaultLabel: 'Cantine scolaire',    url: '/cantine',           icon: 'utensils' },
 ]
 
-export const getSectionDefinition = (key: SectionKey): SectionDefinition | undefined =>
-  PREDEFINED_SECTIONS.find(s => s.key === key)
+export const getLinkDefinition = (key: LinkKey): LinkDefinition | undefined =>
+  PREDEFINED_LINKS.find(l => l.key === key)
 
 export const getDefaultNavigationConfig = (): NavigationItem[] =>
-  PREDEFINED_SECTIONS.map(section => ({
+  PREDEFINED_LINKS.map(link => ({
     id: crypto.randomUUID(),
-    type: 'section' as const,
-    key: section.key,
+    type: 'link' as const,
+    linkKey: link.key,
     enabled: true,
   }))
 
-/** Collect all section keys used across top-level + children */
-export const getAllUsedSectionKeys = (items: NavigationItem[]): Set<SectionKey> => {
-  const keys = new Set<SectionKey>()
+/** Collect all link keys used across top-level + children */
+export const getAllUsedLinkKeys = (items: NavigationItem[]): Set<LinkKey> => {
+  const keys = new Set<LinkKey>()
   for (const item of items) {
-    if (item.type === 'section' && item.key) keys.add(item.key)
+    if (item.type === 'link' && item.linkKey) keys.add(item.linkKey)
     if (item.children) {
       for (const child of item.children) {
-        if (child.type === 'section' && child.key) keys.add(child.key)
+        if (child.type === 'link' && child.linkKey) keys.add(child.linkKey)
       }
     }
   }
@@ -69,13 +69,6 @@ export const removeItemById = (items: NavigationItem[], id: string): NavigationI
     if (!item.children) return item
     const filteredChildren = item.children.filter(c => c.id !== id)
     if (filteredChildren.length === item.children.length) return item
-    return { ...item, children: filteredChildren.length > 0 ? filteredChildren : undefined }
+    return { ...item, children: filteredChildren }
   })
 }
-
-/** Factory to create a NavigationItem with defaults */
-export const createNavigationItem = (overrides: Partial<NavigationItem> & Pick<NavigationItem, 'type'>): NavigationItem => ({
-  id: crypto.randomUUID(),
-  enabled: true,
-  ...overrides,
-})

@@ -1039,7 +1039,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
-    child_pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     content: Schema.Attribute.RichText & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1053,7 +1052,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
       }>;
-    parent_page: Schema.Attribute.Relation<'manyToOne', 'api::page.page'>;
     publishedAt: Schema.Attribute.DateTime;
     scheduled_at: Schema.Attribute.DateTime;
     seo_keywords: Schema.Attribute.String &

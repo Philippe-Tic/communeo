@@ -1,7 +1,7 @@
 ---
-import type { Page, Site, NavigationItem, SectionKey } from '../types/strapi';
-import { getMenuPages, getSiteConfig, getPagePath } from '../utils/strapi';
-import { SECTION_MAP } from '../utils/navigation';
+import type { Page, Site, NavigationItem } from '../types/strapi';
+import { getMenuPages, getSiteConfig } from '../utils/strapi';
+import { LINK_MAP } from '../utils/navigation';
 import StrapiImage from './StrapiImage.astro';
 
 // Récupération des pages du menu et de la configuration du site
@@ -22,7 +22,7 @@ const currentPath = Astro.url.pathname;
 
 // Un lien est actif si le path courant correspond ou est un sous-path
 const isActive = (pagePath: string) =>
-  currentPath === pagePath || currentPath.startsWith(pagePath + '/');
+  pagePath !== '' && (currentPath === pagePath || currentPath.startsWith(pagePath + '/'));
 
 // --- Types pour le menu unifié ---
 interface NavMenuLink {
@@ -31,43 +31,45 @@ interface NavMenuLink {
   children?: NavMenuLink[];
 }
 
-// --- Build menu links from navigation_config or fallback ---
-const navConfig = siteConfig?.navigation_config;
+// --- Resolve a single NavigationItem (page, link, or section) ---
+function resolveItem(item: NavigationItem): NavMenuLink | null {
+  if (!item.enabled) return null;
 
-function buildSingleLink(item: NavigationItem): NavMenuLink | null {
-  if (item.type === 'section' && item.key) {
-    const meta = SECTION_MAP[item.key];
+  if (item.type === 'link' && item.linkKey) {
+    const meta = LINK_MAP[item.linkKey];
     if (!meta) return null;
-    if (item.key === 'open-data' && !siteConfig?.open_data_enabled && !item.label) return null;
+    if (item.linkKey === 'open-data' && !siteConfig?.open_data_enabled && !item.label) return null;
     return { href: meta.url, label: item.label || meta.defaultLabel };
   }
+
   if (item.type === 'page' && item.pageDocumentId) {
     const page = menuPages.find(p => p.documentId === item.pageDocumentId);
     if (!page) return null;
-    return { href: '/' + getPagePath(page, menuPages), label: item.label || page.title };
+    return { href: '/' + page.slug, label: item.label || page.title };
   }
+
+  if (item.type === 'section') {
+    const children: NavMenuLink[] = [];
+    for (const child of item.children || []) {
+      const resolved = resolveItem(child);
+      if (resolved) children.push(resolved);
+    }
+    if (children.length === 0) return null;
+    return { href: '', label: item.label || 'Section', children };
+  }
+
   return null;
 }
 
+// --- Build menu links from navigation_config or fallback ---
+const navConfig = siteConfig?.navigation_config;
+
 function buildConfiguredMenu(config: NavigationItem[]): NavMenuLink[] {
   const links: NavMenuLink[] = [];
-
   for (const item of config) {
-    if (!item.enabled) continue;
-    const link = buildSingleLink(item);
-    if (!link) continue;
-    if (item.children?.length) {
-      const childLinks = item.children
-        .filter(c => c.enabled)
-        .map(c => buildSingleLink(c))
-        .filter((c): c is NavMenuLink => c !== null);
-      if (childLinks.length > 0) {
-        link.children = childLinks;
-      }
-    }
-    links.push(link);
+    const resolved = resolveItem(item);
+    if (resolved) links.push(resolved);
   }
-
   return links;
 }
 
@@ -75,20 +77,8 @@ function buildFallbackMenu(): NavMenuLink[] {
   const links: NavMenuLink[] = [];
 
   // Pages dynamiques (show_in_menu + menu_order)
-  const rootPages = menuPages.filter(p => !p.parent_page);
-  for (const page of rootPages) {
-    const pagePath = '/' + getPagePath(page, menuPages);
-    const children = menuPages
-      .filter(p => p.parent_page?.documentId === page.documentId)
-      .map(child => ({
-        href: '/' + getPagePath(child, menuPages),
-        label: child.title,
-      }));
-    links.push({
-      href: pagePath,
-      label: page.title,
-      children: children.length > 0 ? children : undefined,
-    });
+  for (const page of menuPages) {
+    links.push({ href: '/' + page.slug, label: page.title });
   }
 
   // Sections hardcodées
@@ -190,25 +180,39 @@ const menuLinks: NavMenuLink[] =
 
           {menuLinks.map((link) => {
             const active = isActive(link.href);
-            return link.children && link.children.length > 0 ? (
+            const hasChildren = link.children && link.children.length > 0;
+            const isSection = link.href === '';
+            return hasChildren ? (
               <div class="relative group">
-                <a
-                  href={link.href}
-                  class={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
-                    active
-                      ? 'border-primary text-primary-text'
-                      : 'border-transparent text-gray-700 hover:text-primary-text hover:border-primary/30'
-                  }`}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  {link.label}
-                  <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </a>
+                {isSection ? (
+                  <button
+                    type="button"
+                    class={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors border-b-2 border-transparent text-gray-700 hover:text-primary-text hover:border-primary/30`}
+                  >
+                    {link.label}
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                ) : (
+                  <a
+                    href={link.href}
+                    class={`inline-flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors border-b-2 ${
+                      active
+                        ? 'border-primary text-primary-text'
+                        : 'border-transparent text-gray-700 hover:text-primary-text hover:border-primary/30'
+                    }`}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {link.label}
+                    <svg class="w-3.5 h-3.5 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </a>
+                )}
                 <div class="absolute left-0 top-full hidden group-hover:block group-focus-within:block min-w-48 z-50 pt-1">
                   <div class="bg-white/95 backdrop-blur-md rounded-lg shadow-xl border border-gray-100 p-2">
-                    {link.children.map((child) => {
+                    {link.children!.map((child) => {
                       const childActive = currentPath === child.href;
                       return (
                         <a
@@ -315,35 +319,56 @@ const menuLinks: NavMenuLink[] =
       {menuLinks.map((link) => {
         const active = isActive(link.href);
         const hasChildren = link.children && link.children.length > 0;
+        const isSection = link.href === '';
         const childActive = hasChildren && link.children!.some(child => currentPath === child.href);
         return hasChildren ? (
           <div class="mobile-submenu-group">
             <div class="flex items-center">
-              <a
-                href={link.href}
-                class={`flex-1 block px-3 py-2.5 rounded-l-lg text-base font-medium transition-colors ${
-                  active || childActive
-                    ? 'bg-primary/10 text-primary-text'
-                    : 'text-gray-900 hover:bg-gray-50 hover:text-primary-text'
-                }`}
-                role="menuitem"
-              >
-                {link.label}
-              </a>
-              <button
-                type="button"
-                class={`mobile-submenu-toggle px-3 py-2.5 rounded-r-lg text-base transition-colors ${
-                  active || childActive
-                    ? 'bg-primary/10 text-primary-text'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-primary-text'
-                }`}
-                aria-expanded={childActive ? 'true' : 'false'}
-                aria-label={`Sous-pages de ${link.label}`}
-              >
-                <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              {isSection ? (
+                <button
+                  type="button"
+                  class={`mobile-submenu-toggle flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg text-base font-medium transition-colors ${
+                    childActive
+                      ? 'bg-primary/10 text-primary-text'
+                      : 'text-gray-900 hover:bg-gray-50 hover:text-primary-text'
+                  }`}
+                  aria-expanded={childActive ? 'true' : 'false'}
+                  aria-label={`Sous-menu ${link.label}`}
+                >
+                  {link.label}
+                  <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              ) : (
+                <>
+                  <a
+                    href={link.href}
+                    class={`flex-1 block px-3 py-2.5 rounded-l-lg text-base font-medium transition-colors ${
+                      active || childActive
+                        ? 'bg-primary/10 text-primary-text'
+                        : 'text-gray-900 hover:bg-gray-50 hover:text-primary-text'
+                    }`}
+                    role="menuitem"
+                  >
+                    {link.label}
+                  </a>
+                  <button
+                    type="button"
+                    class={`mobile-submenu-toggle px-3 py-2.5 rounded-r-lg text-base transition-colors ${
+                      active || childActive
+                        ? 'bg-primary/10 text-primary-text'
+                        : 'text-gray-500 hover:bg-gray-50 hover:text-primary-text'
+                    }`}
+                    aria-expanded={childActive ? 'true' : 'false'}
+                    aria-label={`Sous-pages de ${link.label}`}
+                  >
+                    <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
             <div class={`mobile-submenu pl-4 space-y-0.5 overflow-hidden transition-all ${childActive ? '' : 'hidden'}`}>
               {link.children!.map((child) => {

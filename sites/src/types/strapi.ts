@@ -135,15 +135,20 @@ export interface SocialLink {
 }
 
 // Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine';
+export type LinkKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine';
+
+export type NavigationItemType = 'page' | 'link' | 'section';
 
 export interface NavigationItem {
   id: string;
-  type: 'section' | 'page';
-  key?: SectionKey;
-  pageDocumentId?: string;
+  type: NavigationItemType;
   label?: string;
   enabled: boolean;
+  // type='page':
+  pageDocumentId?: string;
+  // type='link':
+  linkKey?: LinkKey;
+  // type='section':
   children?: NavigationItem[];
 }
 
@@ -193,8 +198,6 @@ export interface Page {
   show_in_menu: boolean;
   template: 'default' | 'about' | 'services';
   scheduled_at?: string;
-  parent_page?: Page | null;
-  child_pages?: Page[];
   site: StrapiData<Site> | Site;  // Relation (peut être peuplée ou non)
   createdAt: string;
   updatedAt: string;

@@ -190,7 +190,7 @@ export async function getPages(): Promise<Page[]> {
     filters: {
       status: { $eq: 'published' }
     },
-    populate: ['featured_image', 'site', 'parent_page', 'child_pages'],
+    populate: ['featured_image', 'site'],
     sort: ['menu_order:asc', 'title:asc']
   });
 
@@ -207,7 +207,7 @@ export async function getMenuPages(): Promise<Page[]> {
       status: { $eq: 'published' },
       show_in_menu: { $eq: true }
     },
-    populate: ['site', 'parent_page', 'child_pages'],
+    populate: ['site'],
     sort: ['menu_order:asc', 'title:asc']
   });
 
@@ -224,7 +224,7 @@ export async function getPageBySlug(slug: string): Promise<Page | null> {
       slug: { $eq: slug },
       status: { $eq: 'published' }
     },
-    populate: ['featured_image', 'site', 'parent_page', 'child_pages']
+    populate: ['featured_image', 'site']
   });
 
   const response = await strapiRequest<StrapiCollectionResponse<Page>>(url);
@@ -558,46 +558,18 @@ export function formatDate(dateString: string): string {
 }
 
 /**
- * Construit le chemin hiérarchique complet d'une page en remontant la chaîne des parents.
- * Ex: page "Permis" (parent: "Urbanisme") → "urbanisme/permis"
+ * Retourne le chemin d'une page (slug plat, sans hiérarchie).
  */
-export function getPagePath(page: Page, allPages: Page[]): string {
-  const segments: string[] = [];
-  let current: Page | undefined = page;
-
-  while (current) {
-    segments.unshift(current.slug);
-    if (current.parent_page) {
-      current = allPages.find(p => p.documentId === current!.parent_page?.documentId);
-    } else {
-      current = undefined;
-    }
-  }
-
-  return segments.join('/');
+export function getPagePath(page: Page): string {
+  return page.slug;
 }
 
 /**
  * Construit le fil d'Ariane pour une page.
- * Retourne un tableau [{title, path}] du parent racine jusqu'à la page courante.
+ * Retourne un tableau [{title, path}] — un seul niveau (pas de hiérarchie parent).
  */
-export function buildBreadcrumbs(page: Page, allPages: Page[]): Array<{ title: string; path: string }> {
-  const crumbs: Array<{ title: string; path: string }> = [];
-  let current: Page | undefined = page;
-
-  while (current) {
-    crumbs.unshift({
-      title: current.title,
-      path: '/' + getPagePath(current, allPages),
-    });
-    if (current.parent_page) {
-      current = allPages.find(p => p.documentId === current!.parent_page?.documentId);
-    } else {
-      current = undefined;
-    }
-  }
-
-  return crumbs;
+export function buildBreadcrumbs(page: Page): Array<{ title: string; path: string }> {
+  return [{ title: page.title, path: '/' + page.slug }];
 }
 
 /**

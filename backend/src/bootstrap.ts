@@ -417,8 +417,47 @@ export default async ({ strapi }) => {
       }
     }
 
-    // Migrate old roles to new roles (mayor/deputy → admin, secretary → editor)
+    // Migrate navigation_config: old { type: 'section', key } → { type: 'link', linkKey }
+    // Also clear parent_page from existing pages
     const knex = strapi.db.connection;
+    try {
+      const sitesWithNav = await knex('sites').whereNotNull('navigation_config');
+      for (const site of sitesWithNav) {
+        try {
+          const config = typeof site.navigation_config === 'string'
+            ? JSON.parse(site.navigation_config)
+            : site.navigation_config;
+          if (!Array.isArray(config)) continue;
+          let changed = false;
+          const migrated = config.map((item: any) => {
+            if (item.type === 'section' && item.key && !item.children) {
+              changed = true;
+              const { key, ...rest } = item;
+              return { ...rest, type: 'link', linkKey: key };
+            }
+            return item;
+          });
+          if (changed) {
+            await knex('sites').where('id', site.id).update({
+              navigation_config: JSON.stringify(migrated),
+            });
+            console.log(`✅ Bootstrap - Migrated navigation_config for site ${site.id}`);
+          }
+        } catch {
+          // Skip sites with invalid JSON
+        }
+      }
+      // Clear parent_page relations from pages (only if the link table still exists)
+      const hasTable = await knex.schema.hasTable('pages_parent_page_lnk');
+      if (hasTable) {
+        const count = await knex('pages_parent_page_lnk').del();
+        if (count > 0) console.log(`✅ Bootstrap - Cleared ${count} parent_page links`);
+      }
+    } catch (error) {
+      console.log('⚠️ Bootstrap - Navigation migration skipped:', (error as Error).message);
+    }
+
+    // Migrate old roles to new roles (mayor/deputy → admin, secretary → editor)
     const migrated = await knex('up_users')
       .whereIn('municipality_role', ['mayor', 'deputy'])
       .update({ municipality_role: 'admin' });

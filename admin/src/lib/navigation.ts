@@ -30,3 +30,45 @@ export const getDefaultNavigationConfig = (): NavigationItem[] =>
     linkKey: link.key,
     enabled: true,
   }))
+
+/** Collect all link keys used across top-level + children */
+export const getAllUsedLinkKeys = (items: NavigationItem[]): Set<LinkKey> => {
+  const keys = new Set<LinkKey>()
+  for (const item of items) {
+    if (item.type === 'link' && item.linkKey) keys.add(item.linkKey)
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.type === 'link' && child.linkKey) keys.add(child.linkKey)
+      }
+    }
+  }
+  return keys
+}
+
+/** Collect all page documentIds used across top-level + children */
+export const getAllUsedPageDocIds = (items: NavigationItem[]): Set<string> => {
+  const ids = new Set<string>()
+  for (const item of items) {
+    if (item.type === 'page' && item.pageDocumentId) ids.add(item.pageDocumentId)
+    if (item.children) {
+      for (const child of item.children) {
+        if (child.type === 'page' && child.pageDocumentId) ids.add(child.pageDocumentId)
+      }
+    }
+  }
+  return ids
+}
+
+/** Remove an item by id from top-level or from any parent's children */
+export const removeItemById = (items: NavigationItem[], id: string): NavigationItem[] => {
+  // Try top-level first
+  const filtered = items.filter(item => item.id !== id)
+  if (filtered.length < items.length) return filtered
+  // Search in children
+  return items.map(item => {
+    if (!item.children) return item
+    const filteredChildren = item.children.filter(c => c.id !== id)
+    if (filteredChildren.length === item.children.length) return item
+    return { ...item, children: filteredChildren }
+  })
+}

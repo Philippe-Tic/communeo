@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -25,10 +26,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Link, FileText, Plus, RotateCcw, FolderPlus } from 'lucide-react'
-import { useState } from 'react'
 import type { NavigationItem, LinkKey } from '../../hooks/api/useSites'
 import type { Page } from '../../hooks/api/usePages'
-import { PREDEFINED_LINKS, getDefaultNavigationConfig } from '../../lib/navigation'
+import {
+  PREDEFINED_LINKS,
+  getDefaultNavigationConfig,
+  getAllUsedLinkKeys,
+  getAllUsedPageDocIds,
+  removeItemById,
+} from '../../lib/navigation'
 import { SortableNavigationItem } from './SortableNavigationItem'
 
 interface NavigationEditorProps {
@@ -86,7 +92,7 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
   }
 
   const handleRemove = (id: string) => {
-    onChange(items.filter((item) => item.id !== id))
+    onChange(removeItemById(items, id))
   }
 
   const handleChildRemove = (sectionId: string, childId: string) => {
@@ -182,19 +188,8 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
   }
 
   // --- Computed: available links/pages ---
-  const allUsedLinkKeys = new Set<LinkKey>()
-  const allUsedPageDocIds = new Set<string>()
-
-  for (const item of items) {
-    if (item.type === 'link' && item.linkKey) allUsedLinkKeys.add(item.linkKey)
-    if (item.type === 'page' && item.pageDocumentId) allUsedPageDocIds.add(item.pageDocumentId)
-    if (item.children) {
-      for (const child of item.children) {
-        if (child.type === 'link' && child.linkKey) allUsedLinkKeys.add(child.linkKey)
-        if (child.type === 'page' && child.pageDocumentId) allUsedPageDocIds.add(child.pageDocumentId)
-      }
-    }
-  }
+  const allUsedLinkKeys = getAllUsedLinkKeys(items)
+  const allUsedPageDocIds = getAllUsedPageDocIds(items)
 
   const availableLinks = PREDEFINED_LINKS.filter((l) => !allUsedLinkKeys.has(l.key))
   const availablePages = pages.filter((p) => !allUsedPageDocIds.has(p.documentId))

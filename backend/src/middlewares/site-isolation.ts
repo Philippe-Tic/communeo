@@ -259,6 +259,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       'content-blocks': 'api::content-block.content-block',
       'waste-schedules': 'api::waste-schedule.waste-schedule',
       'newsletter-subscribers': 'api::newsletter-subscriber.newsletter-subscriber',
+      'school-menus': 'api::school-menu.school-menu',
     };
 
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site

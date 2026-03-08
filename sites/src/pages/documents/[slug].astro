@@ -3,6 +3,7 @@ import type { OfficialDocument } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getOfficialDocuments, getOfficialDocumentBySlug, getStrapiImageUrl, formatDate } from '../../utils/strapi';
 
 export async function getStaticPaths() {
@@ -90,28 +91,10 @@ const additionalFiles = Array.isArray(document.additional_files)
   <Navigation />
 
   <main id="main-content" data-pagefind-body>
-    <!-- Breadcrumb -->
-    <nav class="bg-white/50 backdrop-blur-sm border-b border-gray-100 py-3" aria-label="Fil d'ariane">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ol class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
-          <li>
-            <a href="/" class="hover:text-primary-text transition-colors">Accueil</a>
-          </li>
-          <li aria-hidden="true" class="text-gray-300">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-          </li>
-          <li>
-            <a href="/documents" class="hover:text-primary-text transition-colors">Documents</a>
-          </li>
-          <li aria-hidden="true" class="text-gray-300">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-          </li>
-          <li class="text-gray-900 font-medium" aria-current="page">
-            {document.title}
-          </li>
-        </ol>
-      </div>
-    </nav>
+    <Breadcrumb items={[
+      { label: 'Documents', href: '/documents' },
+      { label: document.title }
+    ]} />
 
     <!-- Contenu du document -->
     <article class="py-12">

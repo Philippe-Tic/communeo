@@ -1080,6 +1080,46 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSchoolMenuSchoolMenu extends Struct.CollectionTypeSchema {
+  collectionName: 'school_menus';
+  info: {
+    description: 'Menus de cantine scolaire par semaine';
+    displayName: 'Menu cantine';
+    pluralName: 'school-menus';
+    singularName: 'school-menu';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::school-menu.school-menu'
+    > &
+      Schema.Attribute.Private;
+    meals: Schema.Attribute.Component<'school-menu.meal', true>;
+    menu_image: Schema.Attribute.Media<'images'>;
+    menu_mode: Schema.Attribute.Enumeration<['image', 'manual']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'image'>;
+    menu_pdf: Schema.Attribute.Media<'files'>;
+    publishedAt: Schema.Attribute.DateTime;
+    school_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    week_start: Schema.Attribute.Date & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiSiteSite extends Struct.CollectionTypeSchema {
   collectionName: 'sites';
   info: {
@@ -1186,6 +1226,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
+    school_menus: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::school-menu.school-menu'
+    >;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     social_links: Schema.Attribute.Component<'social.social-link', true>;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
@@ -1849,6 +1893,7 @@ declare module '@strapi/strapi' {
       'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
+      'api::school-menu.school-menu': ApiSchoolMenuSchoolMenu;
       'api::site.site': ApiSiteSite;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
       'api::waste-schedule.waste-schedule': ApiWasteScheduleWasteSchedule;

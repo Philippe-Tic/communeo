@@ -1,0 +1,53 @@
+{
+  "kind": "collectionType",
+  "collectionName": "school_menus",
+  "info": {
+    "singularName": "school-menu",
+    "pluralName": "school-menus",
+    "displayName": "Menu cantine",
+    "description": "Menus de cantine scolaire par semaine"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "week_start": {
+      "type": "date",
+      "required": true
+    },
+    "menu_mode": {
+      "type": "enumeration",
+      "enum": ["image", "manual"],
+      "required": true,
+      "default": "image"
+    },
+    "menu_image": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "menu_pdf": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["files"]
+    },
+    "meals": {
+      "type": "component",
+      "repeatable": true,
+      "component": "school-menu.meal"
+    },
+    "school_name": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site",
+      "inversedBy": "school_menus"
+    }
+  }
+}

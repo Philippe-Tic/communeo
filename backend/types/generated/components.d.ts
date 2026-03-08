@@ -78,6 +78,8 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
     show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_quick_links: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<true>;
+    show_school_menu: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     show_waste_collection: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     show_weather: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -259,6 +261,46 @@ export interface LegalRgpd extends Struct.ComponentSchema {
   };
 }
 
+export interface SchoolMenuMeal extends Struct.ComponentSchema {
+  collectionName: 'components_school_menu_meals';
+  info: {
+    description: "Repas d'une journ\u00E9e de cantine scolaire";
+    displayName: 'Repas';
+  };
+  attributes: {
+    dairy: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    day: Schema.Attribute.Enumeration<
+      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
+    > &
+      Schema.Attribute.Required;
+    dessert: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    labels: Schema.Attribute.JSON;
+    main_course: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    side_dish: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    snack: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    starter: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+  };
+}
+
 export interface SocialSocialLink extends Struct.ComponentSchema {
   collectionName: 'components_social_social_links';
   info: {
@@ -291,6 +333,7 @@ declare module '@strapi/strapi' {
       'legal.infos-pratiques': LegalInfosPratiques;
       'legal.mentions-legales': LegalMentionsLegales;
       'legal.rgpd': LegalRgpd;
+      'school-menu.meal': SchoolMenuMeal;
       'social.social-link': SocialSocialLink;
     }
   }

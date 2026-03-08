@@ -1,5 +1,5 @@
 import type {
-  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, WasteSchedule, StrapiCollectionResponse
+  Site, Page, Article, Event, OfficialDocument, TeamMember, Association, Alerte, WasteSchedule, SchoolMenu, StrapiCollectionResponse
 } from '../types/strapi';
 
 /**
@@ -434,6 +434,45 @@ export async function getActiveWasteSchedules(): Promise<WasteSchedule[]> {
 
   const response = await strapiRequest<StrapiCollectionResponse<WasteSchedule>>(url);
   return response?.data ?? [];
+}
+
+/**
+ * Calcule le lundi de la semaine courante
+ */
+function getCurrentMonday(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(now);
+  monday.setDate(diff);
+  return monday.toISOString().split('T')[0];
+}
+
+/**
+ * Recupere le menu de cantine de la semaine courante
+ */
+export async function getCurrentSchoolMenu(): Promise<SchoolMenu | null> {
+  const weekStart = getCurrentMonday();
+  return getSchoolMenuByWeek(weekStart);
+}
+
+/**
+ * Recupere le menu de cantine d'une semaine donnee
+ */
+export async function getSchoolMenuByWeek(weekStart: string): Promise<SchoolMenu | null> {
+  const baseUrl = buildStrapiUrl('school-menus', {
+    filters: {
+      week_start: { $eq: weekStart },
+    },
+  });
+  const urlObj = new URL(baseUrl);
+  urlObj.searchParams.set('populate[meals]', 'true');
+  urlObj.searchParams.set('populate[menu_image]', 'true');
+  urlObj.searchParams.set('populate[menu_pdf]', 'true');
+
+  const response = await strapiRequest<StrapiCollectionResponse<SchoolMenu>>(urlObj.toString());
+  if (!response?.data || response.data.length === 0) return null;
+  return response.data[0];
 }
 
 /**

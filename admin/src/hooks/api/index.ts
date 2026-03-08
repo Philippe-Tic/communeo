@@ -15,6 +15,7 @@ export * from './useMediaLibrary'
 export * from './useUsers'
 export * from './useWasteSchedules'
 export * from './useNewsletterSubscribers'
+export * from './useSchoolMenus'
 
 // Re-export commonly used types
 export type { ApiError } from '../../services/apiClient'

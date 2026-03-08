@@ -1,0 +1,350 @@
+---
+import type { SchoolMenu, SchoolMenuMeal, MealLabel } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { getSiteConfig, getCurrentSchoolMenu, getStrapiImageUrl, strapiBaseUrl } from '../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+
+let menu: SchoolMenu | null = null;
+try {
+  menu = await getCurrentSchoolMenu();
+} catch (error) {
+  console.error('Erreur lors de la recuperation du menu:', error);
+}
+
+const DAY_LABELS: Record<string, string> = {
+  'lundi': 'Lundi',
+  'mardi': 'Mardi',
+  'mercredi': 'Mercredi',
+  'jeudi': 'Jeudi',
+  'vendredi': 'Vendredi',
+};
+
+const LABEL_CONFIG: Record<MealLabel, { label: string; emoji: string; color: string }> = {
+  'bio': { label: 'Bio', emoji: '🌱', color: 'bg-green-100 text-green-800' },
+  'local': { label: 'Local', emoji: '📍', color: 'bg-blue-100 text-blue-800' },
+  'vegetarien': { label: 'Végétarien', emoji: '🥬', color: 'bg-emerald-100 text-emerald-800' },
+  'fait-maison': { label: 'Fait maison', emoji: '👨‍🍳', color: 'bg-orange-100 text-orange-800' },
+  'aop': { label: 'AOP', emoji: '🏅', color: 'bg-yellow-100 text-yellow-800' },
+};
+
+function formatWeekRange(weekStart: string): string {
+  const monday = new Date(weekStart + 'T00:00:00');
+  const friday = new Date(monday);
+  friday.setDate(friday.getDate() + 4);
+
+  const dayStart = monday.getDate();
+  const dayEnd = friday.getDate();
+  const monthEnd = friday.toLocaleDateString('fr-FR', { month: 'long' });
+  const year = friday.getFullYear();
+
+  if (monday.getMonth() === friday.getMonth()) {
+    return `Semaine du ${dayStart} au ${dayEnd} ${monthEnd} ${year}`;
+  }
+
+  const monthStart = monday.toLocaleDateString('fr-FR', { month: 'long' });
+  return `Semaine du ${dayStart} ${monthStart} au ${dayEnd} ${monthEnd} ${year}`;
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Menu",
+  "name": `Menu cantine scolaire - ${siteConfig.name}`,
+  "description": "Menu de la cantine scolaire de la commune",
+  "provider": {
+    "@type": "GovernmentOrganization",
+    "name": siteConfig.name,
+  },
+};
+---
+
+<Layout
+  title={`Cantine scolaire - ${siteConfig.name}`}
+  description="Consultez les menus de la cantine scolaire de votre commune, semaine par semaine."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content">
+    <Breadcrumb items={[{ label: 'Cantine scolaire' }]} />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Cantine scolaire</h1>
+      <p class="text-gray-600 mb-10">Consultez les menus de la cantine, semaine par semaine.</p>
+
+      <!-- Navigation par semaine -->
+      <div class="flex items-center justify-between rounded-xl border bg-white p-4 mb-8" id="week-nav">
+        <button
+          type="button"
+          id="prev-week"
+          class="flex items-center justify-center w-10 h-10 rounded-lg border hover:bg-gray-50 transition-colors"
+          aria-label="Semaine precedente"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <span id="week-label" class="text-lg font-semibold text-gray-900">
+          {menu ? formatWeekRange(menu.week_start) : formatWeekRange(new Date().toISOString().split('T')[0])}
+        </span>
+
+        <button
+          type="button"
+          id="next-week"
+          class="flex items-center justify-center w-10 h-10 rounded-lg border hover:bg-gray-50 transition-colors"
+          aria-label="Semaine suivante"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenu du menu -->
+      <div id="menu-content">
+        {!menu ? (
+          <div class="text-center py-16 bg-gray-50 rounded-xl">
+            <p class="text-gray-500 text-lg">Aucun menu disponible pour cette semaine.</p>
+            <p class="text-gray-400 mt-2">Revenez bientot pour consulter le menu de la cantine.</p>
+          </div>
+        ) : menu.menu_mode === 'image' ? (
+          <div class="flex flex-col gap-6">
+            {menu.menu_image && (
+              <div class="rounded-xl overflow-hidden border">
+                <img
+                  src={getStrapiImageUrl(menu.menu_image.url)}
+                  alt="Menu de la semaine"
+                  class="w-full"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {menu.menu_pdf && (
+              <div class="flex justify-center">
+                <a
+                  href={getStrapiImageUrl(menu.menu_pdf.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
+                  download
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Telecharger le menu (PDF)
+                </a>
+              </div>
+            )}
+            {menu.school_name && (
+              <p class="text-sm text-gray-500 text-center">{menu.school_name}</p>
+            )}
+          </div>
+        ) : (
+          <div class="flex flex-col gap-6">
+            {menu.school_name && (
+              <p class="text-sm text-gray-500">{menu.school_name}</p>
+            )}
+            <div class="overflow-x-auto rounded-xl border">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-gray-50 border-b">
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Jour</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Entree</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Plat principal</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Accompagnement</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Fromage</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Dessert</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Gouter</th>
+                    <th class="px-4 py-3 text-left font-semibold text-gray-900">Labels</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as const).map((day) => {
+                    const meal = menu!.meals?.find((m: SchoolMenuMeal) => m.day === day);
+                    if (!meal) return null;
+                    return (
+                      <tr class="border-b last:border-0 hover:bg-gray-50/50">
+                        <td class="px-4 py-3 font-semibold text-gray-900">{DAY_LABELS[day]}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.starter || '-'}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{meal.main_course}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.side_dish || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.dairy || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.dessert || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.snack || '-'}</td>
+                        <td class="px-4 py-3">
+                          <div class="flex flex-wrap gap-1">
+                            {(meal.labels || []).map((label: MealLabel) => {
+                              const config = LABEL_CONFIG[label];
+                              if (!config) return null;
+                              return (
+                                <span class={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                                  {config.emoji} {config.label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <script define:vars={{ strapiUrl: strapiBaseUrl, siteDocumentId: import.meta.env.SITE_DOCUMENT_ID || '' }}>
+    const DAY_LABELS = { lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi', vendredi: 'Vendredi' };
+    const LABEL_CONFIG = {
+      bio: { label: 'Bio', emoji: '🌱', color: 'bg-green-100 text-green-800' },
+      local: { label: 'Local', emoji: '📍', color: 'bg-blue-100 text-blue-800' },
+      vegetarien: { label: 'Végétarien', emoji: '🥬', color: 'bg-emerald-100 text-emerald-800' },
+      'fait-maison': { label: 'Fait maison', emoji: '👨‍🍳', color: 'bg-orange-100 text-orange-800' },
+      aop: { label: 'AOP', emoji: '🏅', color: 'bg-yellow-100 text-yellow-800' },
+    };
+
+    function getMonday(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function formatDateISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatWeekRange(weekStart) {
+      const monday = new Date(weekStart + 'T00:00:00');
+      const friday = new Date(monday);
+      friday.setDate(friday.getDate() + 4);
+      const dayStart = monday.getDate();
+      const dayEnd = friday.getDate();
+      const monthEnd = friday.toLocaleDateString('fr-FR', { month: 'long' });
+      const year = friday.getFullYear();
+      if (monday.getMonth() === friday.getMonth()) {
+        return `Semaine du ${dayStart} au ${dayEnd} ${monthEnd} ${year}`;
+      }
+      const monthStart = monday.toLocaleDateString('fr-FR', { month: 'long' });
+      return `Semaine du ${dayStart} ${monthStart} au ${dayEnd} ${monthEnd} ${year}`;
+    }
+
+    function buildImageUrl(url) {
+      if (!url) return '';
+      if (url.startsWith('http')) return url;
+      return `${strapiUrl}${url}`;
+    }
+
+    function renderMenu(menu) {
+      if (!menu) {
+        return `<div class="text-center py-16 bg-gray-50 rounded-xl">
+          <p class="text-gray-500 text-lg">Aucun menu disponible pour cette semaine.</p>
+          <p class="text-gray-400 mt-2">Revenez bientot pour consulter le menu de la cantine.</p>
+        </div>`;
+      }
+
+      if (menu.menu_mode === 'image') {
+        let html = '<div class="flex flex-col gap-6">';
+        if (menu.menu_image) {
+          html += `<div class="rounded-xl overflow-hidden border"><img src="${buildImageUrl(menu.menu_image.url)}" alt="Menu de la semaine" class="w-full" loading="lazy" /></div>`;
+        }
+        if (menu.menu_pdf) {
+          html += `<div class="flex justify-center"><a href="${buildImageUrl(menu.menu_pdf.url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors" download>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Telecharger le menu (PDF)</a></div>`;
+        }
+        if (menu.school_name) {
+          html += `<p class="text-sm text-gray-500 text-center">${menu.school_name}</p>`;
+        }
+        html += '</div>';
+        return html;
+      }
+
+      // Manual mode
+      let html = '<div class="flex flex-col gap-6">';
+      if (menu.school_name) {
+        html += `<p class="text-sm text-gray-500">${menu.school_name}</p>`;
+      }
+      html += '<div class="overflow-x-auto rounded-xl border"><table class="w-full text-sm"><thead><tr class="bg-gray-50 border-b">';
+      ['Jour', 'Entree', 'Plat principal', 'Accompagnement', 'Fromage', 'Dessert', 'Gouter', 'Labels'].forEach(h => {
+        html += `<th class="px-4 py-3 text-left font-semibold text-gray-900">${h}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'].forEach(day => {
+        const meal = (menu.meals || []).find(m => m.day === day);
+        if (!meal) return;
+        const labels = (meal.labels || []).map(l => {
+          const c = LABEL_CONFIG[l];
+          return c ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${c.color}">${c.emoji} ${c.label}</span>` : '';
+        }).join('');
+        html += `<tr class="border-b last:border-0 hover:bg-gray-50/50">
+          <td class="px-4 py-3 font-semibold text-gray-900">${DAY_LABELS[day]}</td>
+          <td class="px-4 py-3 text-gray-700">${meal.starter || '-'}</td>
+          <td class="px-4 py-3 font-medium text-gray-900">${meal.main_course}</td>
+          <td class="px-4 py-3 text-gray-700">${meal.side_dish || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${meal.dairy || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${meal.dessert || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${meal.snack || '-'}</td>
+          <td class="px-4 py-3"><div class="flex flex-wrap gap-1">${labels}</div></td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div></div>';
+      return html;
+    }
+
+    // State
+    let currentMonday = getMonday(new Date());
+
+    const prevBtn = document.getElementById('prev-week');
+    const nextBtn = document.getElementById('next-week');
+    const weekLabel = document.getElementById('week-label');
+    const menuContent = document.getElementById('menu-content');
+
+    async function loadWeek(monday) {
+      const weekStart = formatDateISO(monday);
+      weekLabel.textContent = formatWeekRange(weekStart);
+
+      menuContent.innerHTML = '<div class="text-center py-16"><p class="text-gray-400">Chargement...</p></div>';
+
+      try {
+        const siteFilter = siteDocumentId ? `&filters[site][documentId][$eq]=${siteDocumentId}` : '';
+        const url = `${strapiUrl}/api/school-menus?filters[week_start][$eq]=${weekStart}&populate[meals]=true&populate[menu_image]=true&populate[menu_pdf]=true${siteFilter}`;
+        const response = await fetch(url);
+        const json = await response.json();
+        const menu = json.data && json.data.length > 0 ? json.data[0] : null;
+        menuContent.innerHTML = renderMenu(menu);
+      } catch (e) {
+        menuContent.innerHTML = '<div class="text-center py-16 bg-gray-50 rounded-xl"><p class="text-gray-500">Erreur lors du chargement du menu.</p></div>';
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      currentMonday.setDate(currentMonday.getDate() - 7);
+      loadWeek(currentMonday);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentMonday.setDate(currentMonday.getDate() + 7);
+      loadWeek(currentMonday);
+    });
+  </script>
+</Layout>

@@ -1,0 +1,42 @@
+{
+  "collectionName": "components_school_menu_meals",
+  "info": {
+    "displayName": "Repas",
+    "description": "Repas d'une journée de cantine scolaire"
+  },
+  "attributes": {
+    "day": {
+      "type": "enumeration",
+      "enum": ["lundi", "mardi", "mercredi", "jeudi", "vendredi"],
+      "required": true
+    },
+    "starter": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "main_course": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "side_dish": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "dairy": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "dessert": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "snack": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "labels": {
+      "type": "json"
+    }
+  }
+}

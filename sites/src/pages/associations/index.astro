@@ -3,6 +3,7 @@ import type { Association } from '../../types/strapi';
 import Layout from '../../layouts/Layout.astro';
 import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
 import { getAssociations } from '../../utils/strapi';
 
@@ -45,6 +46,8 @@ const categories = [...new Set(associations.map(a => a.category))].sort();
   <Navigation />
 
   <main id="main-content" data-pagefind-body>
+    <Breadcrumb items={[{ label: 'Associations' }]} />
+
     <!-- Header -->
     <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

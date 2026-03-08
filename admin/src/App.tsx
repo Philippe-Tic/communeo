@@ -41,6 +41,8 @@ import { Alertes } from './pages/Alertes'
 import { CreateAlerte, EditAlerte } from './pages/AlerteForm'
 import { WasteSchedules } from './pages/WasteSchedules'
 import { CreateWasteSchedule, EditWasteSchedule } from './pages/WasteScheduleForm'
+import { SchoolMenus } from './pages/SchoolMenus'
+import { CreateSchoolMenu, EditSchoolMenu } from './pages/SchoolMenuForm'
 import { MediaLibrary } from './pages/MediaLibrary'
 import { Users } from './pages/Users'
 import { CreateUser, EditUser } from './pages/UserForm'
@@ -477,6 +479,40 @@ function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <EditWasteSchedule />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Cantine routes */}
+          <Route
+            path="/cantine"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <SchoolMenus />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/cantine/new"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <CreateSchoolMenu />
+                </MainLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/cantine/:id/edit"
+            element={
+              <ProtectedRoute>
+                <MainLayout>
+                  <EditSchoolMenu />
                 </MainLayout>
               </ProtectedRoute>
             }

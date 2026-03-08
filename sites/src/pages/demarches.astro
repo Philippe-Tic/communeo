@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import { getSiteConfig } from '../utils/strapi';
 import { getOpeningHoursEntries } from '../utils/opening-hours';
 import { categories, documentsCNI, documentsPasseport } from '../data/demarches';
@@ -81,6 +82,8 @@ const steps = [
   <script type="application/ld+json" set:html={faqJsonLd} />
 
   <main id="main-content" data-pagefind-body>
+    <Breadcrumb items={[{ label: 'Démarches' }]} />
+
     <!-- Header -->
     <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

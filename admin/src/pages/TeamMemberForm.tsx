@@ -231,6 +231,9 @@ export function TeamMemberForm({ isEditing = false, initialData }: TeamMemberFor
                   accept="image/*"
                   onChange={handlePhotoChange}
                 />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Format recommandé : portrait 3:4 (400×533 px minimum)
+                </p>
                 {isEditing && initialData?.photo && !photoFile && (
                   <p className="mt-1 text-sm text-muted-foreground">
                     Photo actuelle conservée. Sélectionnez un fichier pour la remplacer.

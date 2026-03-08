@@ -95,15 +95,15 @@ const membersByRole = ROLE_ORDER
                   {group.members.map((member) => (
                     <article class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-primary/30 hover:shadow-lg transition-all">
                       {member.photo && (
-                        <div class="aspect-w-1 aspect-h-1">
+                        <div class="aspect-[3/4] overflow-hidden">
                           <StrapiImage
                             image={member.photo}
                             alt={`${member.first_name} ${member.last_name}`}
                             width={400}
-                            height={400}
+                            height={533}
                             widths={[200, 400]}
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            class={`w-full h-64 object-cover ${group.role === 'maire' ? 'rounded-b-none' : ''}`}
+                            class={`w-full h-full object-cover ${group.role === 'maire' ? 'rounded-b-none' : ''}`}
                           />
                         </div>
                       )}

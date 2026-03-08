@@ -5,13 +5,14 @@ import { DemarchesSection } from '../../components/site-config'
 import { validateDemarches } from '../../components/site-config/validation'
 import { buildDemarchesPayload } from '../../components/site-config/payloads'
 import { useSectionForm } from '../../hooks/useSectionForm'
+import type { SiteConfigFormData } from '../../components/site-config/types'
 import type { Site } from '../../hooks/api/useSites'
 
-function initDemarches(site: Site) {
+function initDemarches(site: Site): Partial<SiteConfigFormData> {
   return {
     has_dispositif_recueil: site.demarches_identite?.has_dispositif_recueil || false,
     appointment_url: site.demarches_identite?.appointment_url || '',
-    appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv' as const,
+    appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv',
     remise_titre_info: site.demarches_identite?.remise_titre_info || '',
   }
 }

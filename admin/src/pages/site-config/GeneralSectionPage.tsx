@@ -25,16 +25,19 @@ export function GeneralSectionPage() {
     initializer: initGeneral,
   })
 
-  const [logoImage, setLogoImage] = React.useState<ImageData | null>(
+  const [logoImage, setLogoImageRaw] = React.useState<ImageData | null>(
     site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null
   )
-  const [faviconImage, setFaviconImage] = React.useState<ImageData | null>(
+  const [faviconImage, setFaviconImageRaw] = React.useState<ImageData | null>(
     site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null
   )
 
+  const setLogoImage = (img: ImageData | null) => { setLogoImageRaw(img); setIsDirty(true) }
+  const setFaviconImage = (img: ImageData | null) => { setFaviconImageRaw(img); setIsDirty(true) }
+
   React.useEffect(() => {
-    setLogoImage(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
-    setFaviconImage(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
+    setLogoImageRaw(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
+    setFaviconImageRaw(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
   }, [site])
 
   const onSubmit = (e: React.FormEvent) => {

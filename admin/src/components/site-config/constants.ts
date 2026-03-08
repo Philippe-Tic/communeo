@@ -94,19 +94,6 @@ export const RGPD_TEMPLATE = `<h2>Politique de confidentialité</h2>
 <h3>Réclamation</h3>
 <p>Si vous estimez que le traitement de vos données constitue une violation du RGPD, vous pouvez introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a>.</p>`
 
-export const SECTION_FIELDS: Record<string, string[]> = {
-  general: ['name', 'contact_mail', 'colors'],
-  legal: ['siret', 'publication_director', 'hebergeur_name'],
-  rgpd: ['dpo_name', 'dpo_email', 'rgpd_policy'],
-  accessibility: ['accessibility_level'],
-  info: ['opening_hours', 'latitude', 'longitude'],
-  opendata: [],
-  demarches: ['appointment_url'],
-  homepage: [],
-  navigation: [],
-  social: [],
-}
-
 export const SECTIONS: SectionConfig[] = [
   { key: 'general', label: 'Informations générales', icon: Building2, path: '/site/general' },
   { key: 'legal', label: 'Mentions légales', icon: Scale, path: '/site/legal' },

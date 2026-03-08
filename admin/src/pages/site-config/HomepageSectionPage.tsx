@@ -43,22 +43,27 @@ export function HomepageSectionPage() {
     initializer: initHomepage,
   })
 
-  const [heroImage, setHeroImage] = React.useState<ImageData | null>(site.homepage?.hero_image || null)
-  const [quickLinks, setQuickLinks] = React.useState<HomepageQuickLink[]>(
+  const [heroImage, setHeroImageRaw] = React.useState<ImageData | null>(site.homepage?.hero_image || null)
+  const [quickLinks, setQuickLinksRaw] = React.useState<HomepageQuickLink[]>(
     site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || []
   )
-  const [keyFigures, setKeyFigures] = React.useState<HomepageKeyFigure[]>(
+  const [keyFigures, setKeyFiguresRaw] = React.useState<HomepageKeyFigure[]>(
     site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || []
   )
-  const [partners, setPartners] = React.useState<HomepagePartner[]>(
+  const [partners, setPartnersRaw] = React.useState<HomepagePartner[]>(
     site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || []
   )
 
+  const setHeroImage = (img: ImageData | null) => { setHeroImageRaw(img); setIsDirty(true) }
+  const setQuickLinks: React.Dispatch<React.SetStateAction<HomepageQuickLink[]>> = (v) => { setQuickLinksRaw(v); setIsDirty(true) }
+  const setKeyFigures: React.Dispatch<React.SetStateAction<HomepageKeyFigure[]>> = (v) => { setKeyFiguresRaw(v); setIsDirty(true) }
+  const setPartners: React.Dispatch<React.SetStateAction<HomepagePartner[]>> = (v) => { setPartnersRaw(v); setIsDirty(true) }
+
   React.useEffect(() => {
-    setHeroImage(site.homepage?.hero_image || null)
-    setQuickLinks(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
-    setKeyFigures(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
-    setPartners(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
+    setHeroImageRaw(site.homepage?.hero_image || null)
+    setQuickLinksRaw(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
+    setKeyFiguresRaw(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
+    setPartnersRaw(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
   }, [site])
 
   const onSubmit = (e: React.FormEvent) => {
@@ -71,10 +76,10 @@ export function HomepageSectionPage() {
 
   const onReset = () => {
     handleReset()
-    setHeroImage(site.homepage?.hero_image || null)
-    setQuickLinks(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
-    setKeyFigures(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
-    setPartners(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
+    setHeroImageRaw(site.homepage?.hero_image || null)
+    setQuickLinksRaw(site.homepage?.quick_links?.map(({ id: _id, ...rest }) => rest) || [])
+    setKeyFiguresRaw(site.homepage?.key_figures?.map(({ id: _id, ...rest }) => rest) || [])
+    setPartnersRaw(site.homepage?.partners?.map(({ id: _id, ...rest }) => rest) || [])
   }
 
   return (

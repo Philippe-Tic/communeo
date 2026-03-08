@@ -5,13 +5,14 @@ import { OpenDataSection } from '../../components/site-config'
 import { validateOpenData } from '../../components/site-config/validation'
 import { buildOpenDataPayload } from '../../components/site-config/payloads'
 import { useSectionForm } from '../../hooks/useSectionForm'
+import type { SiteConfigFormData } from '../../components/site-config/types'
 import type { Site } from '../../hooks/api/useSites'
 
-function initOpenData(site: Site) {
+function initOpenData(site: Site): Partial<SiteConfigFormData> {
   return {
     open_data_enabled: site.open_data_enabled || false,
     open_data_url: site.open_data_url || '',
-    open_data_platform: site.open_data_platform || 'none' as const,
+    open_data_platform: site.open_data_platform || 'none',
   }
 }
 

@@ -5,11 +5,12 @@ import { AccessibilitySection } from '../../components/site-config'
 import { validateAccessibility } from '../../components/site-config/validation'
 import { buildAccessibilityPayload } from '../../components/site-config/payloads'
 import { useSectionForm } from '../../hooks/useSectionForm'
+import type { SiteConfigFormData } from '../../components/site-config/types'
 import type { Site } from '../../hooks/api/useSites'
 
-function initAccessibility(site: Site) {
+function initAccessibility(site: Site): Partial<SiteConfigFormData> {
   return {
-    accessibility_level: site.accessibilite?.accessibility_level || '' as const,
+    accessibility_level: site.accessibilite?.accessibility_level || '',
     accessibility_declaration: site.accessibilite?.accessibility_declaration || '',
     accessibility_schema_url: site.accessibilite?.accessibility_schema_url || '',
     accessibility_action_plan_url: site.accessibilite?.accessibility_action_plan_url || '',

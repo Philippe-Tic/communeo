@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -6,6 +7,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -23,7 +25,14 @@ import {
 import { LayoutGrid, FileText, Plus, RotateCcw } from 'lucide-react'
 import type { NavigationItem, SectionKey } from '../../hooks/api/useSites'
 import type { Page } from '../../hooks/api/usePages'
-import { PREDEFINED_SECTIONS, getDefaultNavigationConfig } from '../../lib/navigation'
+import {
+  PREDEFINED_SECTIONS,
+  getDefaultNavigationConfig,
+  getAllUsedSectionKeys,
+  getAllUsedPageDocIds,
+  removeItemById,
+  createNavigationItem,
+} from '../../lib/navigation'
 import { SortableNavigationItem } from './SortableNavigationItem'
 
 interface NavigationEditorProps {
@@ -33,6 +42,8 @@ interface NavigationEditorProps {
 }
 
 export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorProps) => {
+  const [isDraggingTopLevel, setIsDraggingTopLevel] = useState(false)
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -40,7 +51,12 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
     })
   )
 
+  const handleDragStart = (_event: DragStartEvent) => {
+    setIsDraggingTopLevel(true)
+  }
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setIsDraggingTopLevel(false)
     const { active, over } = event
     if (over && active.id !== over.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id)
@@ -54,45 +70,79 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
   }
 
   const handleRemove = (id: string) => {
-    onChange(items.filter((item) => item.id !== id))
+    onChange(removeItemById(items, id))
   }
 
   const addSection = (key: SectionKey) => {
-    const newItem: NavigationItem = {
-      id: crypto.randomUUID(),
-      type: 'section',
-      key,
-      enabled: true,
-    }
-    onChange([...items, newItem])
+    onChange([...items, createNavigationItem({ type: 'section', key })])
   }
 
   const addPage = (page: Page) => {
-    const newItem: NavigationItem = {
-      id: crypto.randomUUID(),
-      type: 'page',
-      pageDocumentId: page.documentId,
-      enabled: true,
-    }
-    onChange([...items, newItem])
+    onChange([...items, createNavigationItem({ type: 'page', pageDocumentId: page.documentId })])
   }
 
   const handleReset = () => {
     onChange(getDefaultNavigationConfig())
   }
 
-  // Sections not yet in the list
-  const usedSectionKeys = new Set(
-    items.filter((i) => i.type === 'section' && i.key).map((i) => i.key)
-  )
+  // --- Child management callbacks ---
+
+  const handleAddChild = (parentId: string, child: NavigationItem) => {
+    onChange(items.map((item) => {
+      if (item.id !== parentId) return item
+      return { ...item, children: [...(item.children || []), child] }
+    }))
+  }
+
+  const handleRemoveChild = (parentId: string, childId: string) => {
+    onChange(items.map((item) => {
+      if (item.id !== parentId || !item.children) return item
+      const filtered = item.children.filter(c => c.id !== childId)
+      return { ...item, children: filtered.length > 0 ? filtered : undefined }
+    }))
+  }
+
+  const handleReorderChildren = (parentId: string, oldIndex: number, newIndex: number) => {
+    onChange(items.map((item) => {
+      if (item.id !== parentId || !item.children) return item
+      return { ...item, children: arrayMove(item.children, oldIndex, newIndex) }
+    }))
+  }
+
+  const handleUpdateChild = (parentId: string, childId: string, updates: Partial<NavigationItem>) => {
+    onChange(items.map((item) => {
+      if (item.id !== parentId || !item.children) return item
+      return {
+        ...item,
+        children: item.children.map(c => c.id === childId ? { ...c, ...updates } : c),
+      }
+    }))
+  }
+
+  const handlePromoteChild = (parentId: string, childId: string) => {
+    let promotedChild: NavigationItem | undefined
+    const updated = items.map((item) => {
+      if (item.id !== parentId || !item.children) return item
+      promotedChild = item.children.find(c => c.id === childId)
+      const filtered = item.children.filter(c => c.id !== childId)
+      return { ...item, children: filtered.length > 0 ? filtered : undefined }
+    })
+    if (promotedChild) {
+      // Insert right after the parent
+      const parentIndex = updated.findIndex(i => i.id === parentId)
+      const result = [...updated]
+      result.splice(parentIndex + 1, 0, promotedChild)
+      onChange(result)
+    }
+  }
+
+  // Items used across all levels
+  const usedSectionKeys = getAllUsedSectionKeys(items)
   const availableSections = PREDEFINED_SECTIONS.filter(
     (s) => !usedSectionKeys.has(s.key)
   )
 
-  // Pages not yet in the list
-  const usedPageDocIds = new Set(
-    items.filter((i) => i.type === 'page' && i.pageDocumentId).map((i) => i.pageDocumentId)
-  )
+  const usedPageDocIds = getAllUsedPageDocIds(items)
   const availablePages = pages.filter(
     (p) => !usedPageDocIds.has(p.documentId)
   )
@@ -105,7 +155,7 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
       <div className="flex flex-col gap-1">
         <p className="text-sm text-muted-foreground">
           Configurez l'ordre et la visibilité des éléments du menu principal.
-          Glissez-déposez pour réordonner. Les éléments désactivés ne seront pas affichés sur le site.
+          Glissez-déposez pour réordonner. Dépliez un élément pour y ajouter des sous-éléments (1 niveau).
         </p>
       </div>
 
@@ -123,6 +173,7 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
           <SortableContext
@@ -141,6 +192,15 @@ export const NavigationEditor = ({ items, onChange, pages }: NavigationEditorPro
                   }
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  onAddChild={handleAddChild}
+                  onRemoveChild={handleRemoveChild}
+                  onReorderChildren={handleReorderChildren}
+                  onUpdateChild={handleUpdateChild}
+                  onPromoteChild={handlePromoteChild}
+                  availableSections={availableSections}
+                  availablePages={availablePages}
+                  pageTitleMap={pageTitleMap}
+                  isDraggingTopLevel={isDraggingTopLevel}
                 />
               ))}
             </div>

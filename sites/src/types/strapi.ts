@@ -144,6 +144,7 @@ export interface NavigationItem {
   pageDocumentId?: string;
   label?: string;
   enabled: boolean;
+  children?: NavigationItem[];
 }
 
 // Configuration du site (mairie) - Strapi v5

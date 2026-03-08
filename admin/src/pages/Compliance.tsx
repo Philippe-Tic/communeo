@@ -198,7 +198,7 @@ export function Compliance() {
       label: 'Mentions légales',
       status: computeStatus([siretOk, directorOk, hebergeurOk]),
       legalReference: 'Art. 6 LCEN (loi n\u00b02004-575)',
-      fixUrl: '/site/edit',
+      fixUrl: '/site/legal',
       details: [
         { label: 'SIRET', ok: siretOk },
         { label: 'Directeur de publication', ok: directorOk },
@@ -210,7 +210,7 @@ export function Compliance() {
       label: 'Politique RGPD',
       status: rgpdPolicyOk ? 'ok' : rgpdPolicyPartial ? 'partial' : 'missing',
       legalReference: 'RGPD art. 13-14, règlement UE 2016/679',
-      fixUrl: '/site/edit',
+      fixUrl: '/site/rgpd',
       details: [
         { label: 'Politique de confidentialité (min. 50 caractères)', ok: rgpdPolicyOk },
       ],
@@ -220,7 +220,7 @@ export function Compliance() {
       label: 'Délégué à la protection des données (DPO)',
       status: computeStatus([dpoNameOk, dpoEmailOk]),
       legalReference: 'RGPD art. 37-39',
-      fixUrl: '/site/edit',
+      fixUrl: '/site/rgpd',
       details: [
         { label: 'Nom du DPO', ok: dpoNameOk },
         { label: 'Email du DPO', ok: dpoEmailOk },
@@ -231,7 +231,7 @@ export function Compliance() {
       label: 'Accessibilité',
       status: computeStatus([accLevelOk, accDeclarationOk]),
       legalReference: 'Art. 47 loi n\u00b02005-102, RGAA',
-      fixUrl: '/site/edit',
+      fixUrl: '/site/accessibility',
       details: [
         { label: "Niveau d'accessibilité", ok: accLevelOk },
         { label: "Déclaration d'accessibilité", ok: accDeclarationOk },
@@ -256,7 +256,7 @@ export function Compliance() {
       label: 'Contact / Saisine par voie électronique',
       status: contactOk ? 'ok' : 'missing',
       legalReference: 'Art. L112-2-1 CRPA',
-      fixUrl: '/site/edit',
+      fixUrl: '/site/general',
       details: [
         { label: 'Email de contact', ok: contactOk },
       ],
@@ -334,7 +334,7 @@ export function Compliance() {
           title="Conformité légale"
           subtitle="Vérifiez que votre site respecte les obligations légales des collectivités"
         />
-        <Button onClick={() => navigate('/site/edit')}>
+        <Button onClick={() => navigate('/site/general')}>
           <Settings className="mr-1.5 h-4 w-4" />
           Configurer
         </Button>
@@ -382,7 +382,7 @@ export function Compliance() {
               <Button
                 variant="link"
                 className="h-auto p-0 text-orange-700 underline dark:text-orange-400"
-                onClick={() => navigate('/site/edit')}
+                onClick={() => navigate('/site/general')}
               >
                 paramètres du site
               </Button>

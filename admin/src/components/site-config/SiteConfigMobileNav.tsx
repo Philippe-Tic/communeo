@@ -1,41 +1,35 @@
-import { AlertCircle } from 'lucide-react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { SectionConfig } from './types'
 
 interface SiteConfigMobileNavProps {
   sections: SectionConfig[]
-  sectionHasErrors?: (key: string) => boolean
-  renderSection: (key: string) => React.ReactNode
 }
 
-export function SiteConfigMobileNav({
-  sections,
-  sectionHasErrors,
-  renderSection,
-}: SiteConfigMobileNavProps) {
+export function SiteConfigMobileNav({ sections }: SiteConfigMobileNavProps) {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const currentKey = location.pathname.split('/').pop() || 'general'
+  const currentSection = sections.find(s => s.key === currentKey)
+
   return (
-    <Accordion type="single" collapsible defaultValue="general" className="flex flex-col gap-2">
-      {sections.map((section) => {
-        const hasErrors = sectionHasErrors?.(section.key)
-        return (
-          <AccordionItem key={section.key} value={section.key} className="rounded-lg border bg-card shadow-sm">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <div className="flex items-center gap-2.5">
-                <section.icon className="h-4 w-4 shrink-0" />
-                <span>{section.label}</span>
-                {hasErrors && (
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0 text-destructive" />
-                )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent forceMount className="data-[state=closed]:hidden">
-              <div className="px-4 pb-2">
-                {renderSection(section.key)}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )
-      })}
-    </Accordion>
+    <Select value={currentKey} onValueChange={(value) => navigate(`/site/${value}`)}>
+      <SelectTrigger className="w-full">
+        <div className="flex items-center gap-2">
+          {currentSection && <currentSection.icon className="h-4 w-4" />}
+          <SelectValue />
+        </div>
+      </SelectTrigger>
+      <SelectContent>
+        {sections.map((section) => (
+          <SelectItem key={section.key} value={section.key}>
+            <div className="flex items-center gap-2">
+              <section.icon className="h-4 w-4" />
+              <span>{section.label}</span>
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }

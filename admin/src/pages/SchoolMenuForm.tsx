@@ -138,18 +138,28 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
         menuPdfId = uploaded.id
       }
 
-      const submitData: Record<string, unknown> = {
+      const baseData = {
         week_start: data.week_start,
         menu_mode: data.menu_mode,
         school_name: data.school_name || undefined,
       }
 
       if (data.menu_mode === 'image') {
-        if (menuImageId) submitData.menu_image = menuImageId
-        if (menuPdfId) submitData.menu_pdf = menuPdfId
-        submitData.meals = []
+        const submitData: CreateSchoolMenuData = {
+          ...baseData,
+          ...(menuImageId && { menu_image: menuImageId }),
+          ...(menuPdfId && { menu_pdf: menuPdfId }),
+          meals: [],
+        }
+        if (isEditing && id) {
+          await updateMutation.mutateAsync({ id, ...submitData })
+          toaster.create({ title: 'Menu mis a jour', type: 'success', duration: 3000 })
+        } else {
+          await createMutation.mutateAsync(submitData)
+          toaster.create({ title: 'Menu cree', type: 'success', duration: 3000 })
+        }
       } else {
-        submitData.meals = data.meals.map(meal => ({
+        const meals = data.meals.map(meal => ({
           day: meal.day,
           starter: meal.starter || undefined,
           main_course: meal.main_course,
@@ -159,16 +169,13 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
           snack: meal.snack || undefined,
           labels: meal.labels.length > 0 ? meal.labels : undefined,
         }))
-        submitData.menu_image = null
-        submitData.menu_pdf = null
-      }
-
-      if (isEditing && id) {
-        await updateMutation.mutateAsync({ id, ...submitData })
-        toaster.create({ title: 'Menu mis a jour', type: 'success', duration: 3000 })
-      } else {
-        await createMutation.mutateAsync(submitData as CreateSchoolMenuData)
-        toaster.create({ title: 'Menu cree', type: 'success', duration: 3000 })
+        if (isEditing && id) {
+          await updateMutation.mutateAsync({ id, ...baseData, meals, menu_image: undefined, menu_pdf: undefined })
+          toaster.create({ title: 'Menu mis a jour', type: 'success', duration: 3000 })
+        } else {
+          await createMutation.mutateAsync({ ...baseData, meals })
+          toaster.create({ title: 'Menu cree', type: 'success', duration: 3000 })
+        }
       }
 
       navigate('/cantine')

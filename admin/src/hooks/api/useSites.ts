@@ -126,6 +126,7 @@ export interface HomepageConfig {
   show_waste_collection?: boolean
   show_disruptions?: boolean
   show_newsletter?: boolean
+  show_school_menu?: boolean
 }
 
 export interface Site {

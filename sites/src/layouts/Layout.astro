@@ -182,6 +182,7 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
   </head>
   <body class="font-sans min-h-screen bg-gray-50 flex flex-col">
     <AlertBanner />
+    <!-- Pagefind : chaque page doit ajouter data-pagefind-body sur son <main> pour être indexée, ou data-pagefind-ignore pour les pages utilitaires (404, unsubscribe). -->
     <slot />
 
     <!-- Styles pour l'accessibilité -->

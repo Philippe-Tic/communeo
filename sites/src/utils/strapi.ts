@@ -529,6 +529,13 @@ export async function getPublishedAssociations(limit: number = 6): Promise<Assoc
 }
 
 /**
+ * Supprime les balises HTML d'une chaîne
+ */
+export function stripHtmlTags(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
  * Utilitaire pour construire l'URL complète d'une image Strapi
  */
 export function getStrapiImageUrl(imageUrl: string): string {

@@ -1,9 +1,8 @@
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { LoadingSpinner, NotFoundBanner } from '../components/common'
@@ -14,6 +13,7 @@ import {
   useCreateSchoolMenu,
   useUpdateSchoolMenu,
   type SchoolMenu,
+  type CreateSchoolMenuData,
 } from '../hooks/api/useSchoolMenus'
 import { uploadFile } from '../hooks/api/useOfficialDocuments'
 import {
@@ -26,6 +26,7 @@ import {
   type MealLabel,
 } from '../lib/constants/school-menu-types'
 import { getMonday, formatDateISO } from '../lib/utils/week'
+import { getMediaUrl } from '../lib/utils'
 import { toaster } from '../lib/toaster'
 
 interface MealFormData {
@@ -119,8 +120,6 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
     }
   }
 
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337'
-
   const onSubmit = async (data: SchoolMenuFormData) => {
     if (isSubmitting) return
     setIsSubmitting(true)
@@ -139,7 +138,7 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
         menuPdfId = uploaded.id
       }
 
-      const submitData: Record<string, any> = {
+      const submitData: Record<string, unknown> = {
         week_start: data.week_start,
         menu_mode: data.menu_mode,
         school_name: data.school_name || undefined,
@@ -168,12 +167,13 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
         await updateMutation.mutateAsync({ id, ...submitData })
         toaster.create({ title: 'Menu mis a jour', type: 'success', duration: 3000 })
       } else {
-        await createMutation.mutateAsync(submitData as any)
+        await createMutation.mutateAsync(submitData as CreateSchoolMenuData)
         toaster.create({ title: 'Menu cree', type: 'success', duration: 3000 })
       }
 
       navigate('/cantine')
-    } catch {
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du menu:', error)
       toaster.create({
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la sauvegarde.',
@@ -209,8 +209,16 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
                   <Label className="mb-2">Semaine du *</Label>
                   <Input
                     type="date"
-                    {...register('week_start', { required: 'La semaine est requise' })}
-                    onChange={handleWeekStartChange}
+                    {...(() => {
+                      const { onChange, ...rest } = register('week_start', { required: 'La semaine est requise' })
+                      return {
+                        ...rest,
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                          onChange(e)
+                          handleWeekStartChange(e)
+                        },
+                      }
+                    })()}
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
                     La date sera automatiquement ajustee au lundi de la semaine.
@@ -266,7 +274,7 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
                       <div className="mt-2">
                         <p className="text-sm text-muted-foreground">Image actuelle :</p>
                         <img
-                          src={`${apiUrl}${initialData.menu_image.url}`}
+                          src={getMediaUrl(initialData.menu_image.url)}
                           alt="Menu actuel"
                           className="mt-1 max-h-32 rounded border"
                         />
@@ -315,7 +323,7 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
                             <Input
                               placeholder="Plat principal..."
                               maxLength={200}
-                              {...register(`meals.${index}.main_course`, { required: 'Requis' })}
+                              {...register(`meals.${index}.main_course`, { required: menuMode === 'manual' ? 'Requis' : false })}
                             />
                           </div>
                           <div>
@@ -363,6 +371,7 @@ function SchoolMenuForm({ isEditing = false, initialData }: SchoolMenuFormProps)
                                   key={label}
                                   type="button"
                                   onClick={() => toggleLabel(index, label)}
+                                  aria-pressed={isActive}
                                   className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-opacity ${config.className} ${
                                     isActive ? 'opacity-100' : 'opacity-40'
                                   }`}

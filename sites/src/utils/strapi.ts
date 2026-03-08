@@ -476,6 +476,25 @@ export async function getSchoolMenuByWeek(weekStart: string): Promise<SchoolMenu
 }
 
 /**
+ * Recupere les menus de cantine dans une plage de dates (pour pre-fetching statique)
+ */
+export async function getSchoolMenusInRange(startDate: string, endDate: string): Promise<SchoolMenu[]> {
+  const baseUrl = buildStrapiUrl('school-menus', {
+    filters: {
+      week_start: { $gte: startDate, $lte: endDate },
+    },
+    sort: 'week_start:asc',
+  });
+  const urlObj = new URL(baseUrl);
+  urlObj.searchParams.set('populate[meals]', 'true');
+  urlObj.searchParams.set('populate[menu_image]', 'true');
+  urlObj.searchParams.set('populate[menu_pdf]', 'true');
+
+  const response = await strapiRequest<StrapiCollectionResponse<SchoolMenu>>(urlObj.toString());
+  return response?.data ?? [];
+}
+
+/**
  * Récupère le maire (premier team_member avec role=maire)
  */
 export async function getMayor(): Promise<TeamMember | null> {

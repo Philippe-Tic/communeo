@@ -12,6 +12,7 @@ import {
 import { MEAL_LABEL_CONFIG, MEAL_DAY_OPTIONS } from '../lib/constants/school-menu-types'
 import type { MealLabel } from '../lib/constants/school-menu-types'
 import { getMonday, formatWeekRange, formatDateISO } from '../lib/utils/week'
+import { getMediaUrl } from '../lib/utils'
 import { toaster } from '../lib/toaster'
 import { ChevronLeft, ChevronRight, Pencil, Trash2, UtensilsCrossed, Image, List } from 'lucide-react'
 
@@ -20,7 +21,7 @@ export const SchoolMenus = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => getMonday(new Date()))
   const [menuToDelete, setMenuToDelete] = useState<SchoolMenu | null>(null)
 
-  const { data: menusData, isLoading } = useSchoolMenus({ week_start: formatDateISO(currentWeekStart) })
+  const { data: menusData, isLoading, error } = useSchoolMenus({ week_start: formatDateISO(currentWeekStart) })
   const deleteMutation = useDeleteSchoolMenu()
 
   const menus = menusData?.data || []
@@ -56,7 +57,8 @@ export const SchoolMenus = () => {
         duration: 3000,
       })
       setMenuToDelete(null)
-    } catch {
+    } catch (error) {
+      console.error('Erreur lors de la suppression du menu:', error)
       toaster.create({
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la suppression.',
@@ -73,8 +75,6 @@ export const SchoolMenus = () => {
       navigate(`/cantine/new?week=${formatDateISO(currentWeekStart)}`)
     }
   }
-
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337'
 
   return (
     <div>
@@ -93,7 +93,7 @@ export const SchoolMenus = () => {
 
         {/* Navigation par semaine */}
         <div className="flex items-center justify-between rounded-lg border bg-card p-4">
-          <Button variant="ghost" size="icon" onClick={goToPrevWeek}>
+          <Button variant="ghost" size="icon" onClick={goToPrevWeek} aria-label="Semaine precedente">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
@@ -102,13 +102,19 @@ export const SchoolMenus = () => {
               Aujourd'hui
             </Button>
           </div>
-          <Button variant="ghost" size="icon" onClick={goToNextWeek}>
+          <Button variant="ghost" size="icon" onClick={goToNextWeek} aria-label="Semaine suivante">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
 
         {isLoading ? (
           <LoadingSpinner message="Chargement du menu..." />
+        ) : error ? (
+          <EmptyState
+            title="Erreur de chargement"
+            description="Impossible de charger les menus. Veuillez reessayer."
+            icon={<UtensilsCrossed className="h-7 w-7" />}
+          />
         ) : !currentMenu ? (
           <EmptyState
             title="Aucun menu cette semaine"
@@ -144,6 +150,7 @@ export const SchoolMenus = () => {
                   size="icon"
                   className="h-8 w-8"
                   onClick={() => navigate(`/cantine/${currentMenu.documentId}/edit`)}
+                  aria-label="Modifier le menu"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -152,6 +159,7 @@ export const SchoolMenus = () => {
                   size="icon"
                   className="h-8 w-8 text-destructive hover:text-destructive"
                   onClick={() => setMenuToDelete(currentMenu)}
+                  aria-label="Supprimer le menu"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -164,7 +172,7 @@ export const SchoolMenus = () => {
                 {currentMenu.menu_image && (
                   <div className="overflow-hidden rounded-lg border">
                     <img
-                      src={`${apiUrl}${currentMenu.menu_image.url}`}
+                      src={getMediaUrl(currentMenu.menu_image.url)}
                       alt="Menu de la semaine"
                       className="w-full"
                     />
@@ -172,7 +180,7 @@ export const SchoolMenus = () => {
                 )}
                 {currentMenu.menu_pdf && (
                   <a
-                    href={`${apiUrl}${currentMenu.menu_pdf.url}`}
+                    href={getMediaUrl(currentMenu.menu_pdf.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"

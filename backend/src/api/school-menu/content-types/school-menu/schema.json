@@ -47,7 +47,8 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::site.site",
-      "inversedBy": "school_menus"
+      "inversedBy": "school_menus",
+      "required": true
     }
   }
 }

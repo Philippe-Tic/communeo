@@ -93,6 +93,7 @@ jobs:
             docker load < /tmp/communeo-strapi.tar.gz
             rm /tmp/communeo-strapi.tar.gz
             docker compose up -d --force-recreate
+            docker image prune -f
           EOF
 
       - name: Health check

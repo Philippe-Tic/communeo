@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from '../../services/apiClient'
 
 // Types — Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations'
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine'
 
 export interface NavigationItem {
   id: string              // UUID pour le drag & drop
@@ -126,6 +126,7 @@ export interface HomepageConfig {
   show_waste_collection?: boolean
   show_disruptions?: boolean
   show_newsletter?: boolean
+  show_school_menu?: boolean
 }
 
 export interface Site {

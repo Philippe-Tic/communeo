@@ -3,6 +3,7 @@ import type { WasteSchedule } from '../types/strapi';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import { getSiteConfig, getActiveWasteSchedules } from '../utils/strapi';
 import { WASTE_TYPE_CONFIG, FREQUENCY_LABELS, getNextCollectionDates, formatCollectionDate } from '../utils/waste-schedule';
 
@@ -52,17 +53,10 @@ const jsonLd = {
 >
   <Navigation />
 
-  <main id="main-content" class="py-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Breadcrumb -->
-      <nav class="mb-8" aria-label="Fil d'Ariane">
-        <ol class="flex items-center gap-2 text-sm text-gray-500">
-          <li><a href="/" class="hover:text-primary-text transition-colors">Accueil</a></li>
-          <li aria-hidden="true">/</li>
-          <li class="text-gray-900 font-medium">Collecte des dechets</li>
-        </ol>
-      </nav>
+  <main id="main-content">
+    <Breadcrumb items={[{ label: 'Collecte des déchets' }]} />
 
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Collecte des dechets</h1>
       <p class="text-gray-600 mb-10">Retrouvez les jours et frequences de collecte des dechets dans votre commune.</p>
 

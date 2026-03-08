@@ -99,6 +99,7 @@ export const SiteConfigEdit = () => {
     show_waste_collection: false,
     show_disruptions: false,
     show_newsletter: false,
+    show_school_menu: false,
   })
 
   const [logoImage, setLogoImage] = React.useState<ImageData | null>(null)
@@ -178,6 +179,7 @@ export const SiteConfigEdit = () => {
         show_waste_collection: site.homepage?.show_waste_collection ?? false,
         show_disruptions: site.homepage?.show_disruptions ?? false,
         show_newsletter: site.homepage?.show_newsletter ?? false,
+        show_school_menu: site.homepage?.show_school_menu ?? false,
       })
       setLogoImage(site.logo ? { id: site.logo.id, documentId: '', name: '', url: site.logo.url, mime: 'image/png', size: 0, ext: '' } : null)
       setFaviconImage(site.favicon ? { id: site.favicon.id, documentId: '', name: '', url: site.favicon.url, mime: 'image/png', size: 0, ext: '' } : null)
@@ -407,6 +409,7 @@ export const SiteConfigEdit = () => {
         show_waste_collection: formData.show_waste_collection,
         show_disruptions: formData.show_disruptions,
         show_newsletter: formData.show_newsletter,
+        show_school_menu: formData.show_school_menu,
         partners: partners.map(({ id: _id, logo, ...rest }) => ({
           ...rest,
           logo: logo?.id ? logo.id : undefined,

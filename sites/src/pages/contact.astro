@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 import { getSiteConfig } from '../utils/strapi';
 import { getOpeningHoursEntries } from '../utils/opening-hours';
 
@@ -19,6 +20,8 @@ const introText = siteConfig.infos_pratiques?.contact_form_intro || 'Vous pouvez
   <Navigation />
 
   <main id="main-content">
+    <Breadcrumb items={[{ label: 'Contact' }]} />
+
     <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center">

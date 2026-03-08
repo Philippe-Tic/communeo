@@ -122,6 +122,10 @@
     "show_newsletter": {
       "type": "boolean",
       "default": false
+    },
+    "show_school_menu": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

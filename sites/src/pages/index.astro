@@ -1,8 +1,9 @@
 ---
-import type { Article, Event, TeamMember, Association, Alerte, HomepageQuickLink, WasteSchedule } from '../types/strapi';
+import type { Article, Event, TeamMember, Association, Alerte, HomepageQuickLink, WasteSchedule, SchoolMenu } from '../types/strapi';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import WeatherWidget from '../components/WeatherWidget';
 import WasteWidget from '../components/WasteWidget.astro';
+import CanteenWidget from '../components/CanteenWidget.astro';
 import DisruptionsWidget from '../components/DisruptionsWidget.astro';
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
@@ -18,6 +19,7 @@ import {
   getPublishedAssociations,
   getActiveWasteSchedules,
   getActiveAlerts,
+  getCurrentSchoolMenu,
   formatDate,
 } from '../utils/strapi';
 
@@ -32,6 +34,7 @@ let mayor: TeamMember | null = null;
 let associations: Association[] = [];
 let wasteSchedules: WasteSchedule[] = [];
 let disruptionAlerts: Alerte[] = [];
+let schoolMenu: SchoolMenu | null = null;
 
 try {
   const articlesCount = hp?.articles_count ?? 3;
@@ -40,13 +43,14 @@ try {
   const showEvents = hp?.show_events ?? true;
 
   // Fetch data in parallel — conditional fetches only if enabled
-  const [articlesData, eventsData, mayorData, associationsData, wasteSchedulesData, disruptionAlertsData] = await Promise.all([
+  const [articlesData, eventsData, mayorData, associationsData, wasteSchedulesData, disruptionAlertsData, schoolMenuData] = await Promise.all([
     showArticles ? getFeaturedArticles(articlesCount) : Promise.resolve([]),
     showEvents ? getUpcomingEvents(eventsCount) : Promise.resolve([]),
     hp?.show_mayor_word ? getMayor() : Promise.resolve(null),
     hp?.show_associations ? getPublishedAssociations(hp.associations_count ?? 6) : Promise.resolve([]),
     hp?.show_waste_collection ? getActiveWasteSchedules() : Promise.resolve([]),
     hp?.show_disruptions ? getActiveAlerts() : Promise.resolve([]),
+    hp?.show_school_menu ? getCurrentSchoolMenu() : Promise.resolve(null),
   ]);
 
   featuredArticles = articlesData;
@@ -55,6 +59,7 @@ try {
   associations = associationsData;
   wasteSchedules = wasteSchedulesData;
   disruptionAlerts = disruptionAlertsData;
+  schoolMenu = schoolMenuData;
 } catch (error) {
   console.error('Erreur lors de la récupération des données d\'accueil:', error);
 }
@@ -103,6 +108,7 @@ const showWeather = hp?.show_weather ?? false;
 const showWasteCollection = hp?.show_waste_collection ?? false;
 const showDisruptions = hp?.show_disruptions ?? false;
 const showNewsletter = hp?.show_newsletter ?? false;
+const showSchoolMenu = hp?.show_school_menu ?? false;
 const latitude = siteConfig.infos_pratiques?.latitude;
 const longitude = siteConfig.infos_pratiques?.longitude;
 
@@ -201,6 +207,13 @@ const heroSecondaryUrl = hp?.hero_cta_secondary_url || '';
     {showWasteCollection && wasteSchedules.length > 0 && (
       <Section title="Prochaines collectes" compact>
         <WasteWidget schedules={wasteSchedules} />
+      </Section>
+    )}
+
+    <!-- Cantine scolaire -->
+    {showSchoolMenu && schoolMenu && (
+      <Section title="Cantine scolaire" compact>
+        <CanteenWidget menu={schoolMenu} />
       </Section>
     )}
 

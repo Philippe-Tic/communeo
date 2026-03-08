@@ -120,6 +120,7 @@ export interface HomepageConfig {
   show_waste_collection?: boolean;
   show_disruptions?: boolean;
   show_newsletter?: boolean;
+  show_school_menu?: boolean;
 }
 
 // Réseaux sociaux
@@ -134,7 +135,7 @@ export interface SocialLink {
 }
 
 // Navigation configurable
-export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations';
+export type SectionKey = 'articles' | 'evenements' | 'documents' | 'equipe' | 'associations' | 'demarches' | 'open-data' | 'collecte-dechets' | 'perturbations' | 'cantine';
 
 export interface NavigationItem {
   id: string;
@@ -363,6 +364,34 @@ export interface WasteSchedule {
   zone?: string;
   notes?: string;
   active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Menus de cantine scolaire
+export type MealLabel = 'bio' | 'local' | 'vegetarien' | 'fait-maison' | 'aop';
+
+export interface SchoolMenuMeal {
+  id?: number;
+  day: 'lundi' | 'mardi' | 'mercredi' | 'jeudi' | 'vendredi';
+  starter?: string;
+  main_course: string;
+  side_dish?: string;
+  dairy?: string;
+  dessert?: string;
+  snack?: string;
+  labels?: MealLabel[];
+}
+
+export interface SchoolMenu {
+  id: number;
+  documentId: string;
+  week_start: string;
+  menu_mode: 'image' | 'manual';
+  menu_image?: StrapiMedia | null;
+  menu_pdf?: StrapiMedia | null;
+  meals?: SchoolMenuMeal[];
+  school_name?: string;
   createdAt: string;
   updatedAt: string;
 }

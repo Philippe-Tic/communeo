@@ -686,6 +686,34 @@ export function HomepageSection({
           </p>
         </div>
       </div>
+      {/* Cantine scolaire */}
+      <div className="rounded-lg border bg-card p-6 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Cantine scolaire</h2>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.show_school_menu}
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, show_school_menu: !prev.show_school_menu }))
+                  setIsDirty(true)
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                  formData.show_school_menu ? 'bg-primary' : 'bg-input'
+                }`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform ${formData.show_school_menu ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+              <Label>Afficher</Label>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Affiche le menu de cantine de la semaine sur la page d'accueil.
+          </p>
+        </div>
+      </div>
       {/* Newsletter */}
       <div className="rounded-lg border bg-card p-6 shadow-sm">
         <div className="flex flex-col gap-4">

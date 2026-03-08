@@ -1,0 +1,508 @@
+---
+import type { SchoolMenu, SchoolMenuMeal, MealLabel } from '../types/strapi';
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { getSiteConfig, getSchoolMenusInRange, getStrapiImageUrl } from '../utils/strapi';
+
+const siteConfig = await getSiteConfig();
+
+// Calculer la plage de dates pour le pre-fetching (semaine courante ± 4 semaines)
+function getMonday(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function formatISO(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+const currentMonday = getMonday(new Date());
+const rangeStart = new Date(currentMonday);
+rangeStart.setDate(rangeStart.getDate() - 28); // 4 semaines avant
+const rangeEnd = new Date(currentMonday);
+rangeEnd.setDate(rangeEnd.getDate() + 28); // 4 semaines apres
+
+let allMenus: SchoolMenu[] = [];
+try {
+  allMenus = await getSchoolMenusInRange(formatISO(rangeStart), formatISO(rangeEnd));
+} catch (error) {
+  console.error('Erreur lors de la recuperation des menus:', error);
+}
+
+// Serialiser les menus avec les URLs d'images resolues (pour le client-side)
+interface SerializedMenu {
+  week_start: string;
+  menu_mode: string;
+  school_name?: string;
+  menu_image_url?: string;
+  menu_pdf_url?: string;
+  meals?: Array<{
+    day: string;
+    starter?: string;
+    main_course: string;
+    side_dish?: string;
+    dairy?: string;
+    dessert?: string;
+    snack?: string;
+    labels?: string[];
+  }>;
+}
+
+const menusMap: Record<string, SerializedMenu> = {};
+for (const m of allMenus) {
+  menusMap[m.week_start] = {
+    week_start: m.week_start,
+    menu_mode: m.menu_mode,
+    school_name: m.school_name,
+    menu_image_url: m.menu_image ? getStrapiImageUrl(m.menu_image.url) : undefined,
+    menu_pdf_url: m.menu_pdf ? getStrapiImageUrl(m.menu_pdf.url) : undefined,
+    meals: m.meals?.map(meal => ({
+      day: meal.day,
+      starter: meal.starter,
+      main_course: meal.main_course,
+      side_dish: meal.side_dish,
+      dairy: meal.dairy,
+      dessert: meal.dessert,
+      snack: meal.snack,
+      labels: meal.labels as string[] | undefined,
+    })),
+  };
+}
+
+// Menu de la semaine courante (pour le rendu SSR initial)
+const currentWeekStart = formatISO(currentMonday);
+const menu = menusMap[currentWeekStart] || null;
+
+const DAY_LABELS: Record<string, string> = {
+  'lundi': 'Lundi',
+  'mardi': 'Mardi',
+  'mercredi': 'Mercredi',
+  'jeudi': 'Jeudi',
+  'vendredi': 'Vendredi',
+};
+
+const LABEL_CONFIG: Record<string, { label: string; emoji: string; color: string }> = {
+  'bio': { label: 'Bio', emoji: '🌱', color: 'bg-green-100 text-green-800' },
+  'local': { label: 'Local', emoji: '📍', color: 'bg-blue-100 text-blue-800' },
+  'vegetarien': { label: 'Végétarien', emoji: '🥬', color: 'bg-emerald-100 text-emerald-800' },
+  'fait-maison': { label: 'Fait maison', emoji: '👨‍🍳', color: 'bg-orange-100 text-orange-800' },
+  'aop': { label: 'AOP', emoji: '🏅', color: 'bg-yellow-100 text-yellow-800' },
+};
+
+function formatWeekRange(weekStart: string): string {
+  const monday = new Date(weekStart + 'T00:00:00');
+  const friday = new Date(monday);
+  friday.setDate(friday.getDate() + 4);
+
+  const dayStart = monday.getDate();
+  const dayEnd = friday.getDate();
+  const monthEnd = friday.toLocaleDateString('fr-FR', { month: 'long' });
+  const year = friday.getFullYear();
+
+  if (monday.getMonth() === friday.getMonth()) {
+    return `Semaine du ${dayStart} au ${dayEnd} ${monthEnd} ${year}`;
+  }
+
+  const monthStart = monday.toLocaleDateString('fr-FR', { month: 'long' });
+  return `Semaine du ${dayStart} ${monthStart} au ${dayEnd} ${monthEnd} ${year}`;
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": `Menu cantine scolaire - ${siteConfig.name}`,
+  "description": "Consultez les menus de la cantine scolaire de la commune",
+  "provider": {
+    "@type": "GovernmentOrganization",
+    "name": siteConfig.name,
+  },
+  "inLanguage": "fr",
+};
+
+const DAYS = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'] as const;
+---
+
+<Layout
+  title={`Cantine scolaire - ${siteConfig.name}`}
+  description="Consultez les menus de la cantine scolaire de votre commune, semaine par semaine."
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content" data-pagefind-body>
+    <Breadcrumb items={[{ label: 'Cantine scolaire' }]} />
+
+    <header class="bg-gradient-to-br from-primary to-primary/80 text-on-primary py-16 lg:py-20">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Cantine scolaire</h1>
+          <p class="text-lg sm:text-xl text-on-primary/80 max-w-3xl mx-auto">
+            Consultez les menus de la cantine, semaine par semaine.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Navigation par semaine -->
+      <div class="flex items-center justify-between rounded-xl border bg-white p-4 mb-8" id="week-nav">
+        <button
+          type="button"
+          id="prev-week"
+          class="flex items-center justify-center w-10 h-10 rounded-lg border hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:outline-none transition-colors"
+          aria-label="Semaine precedente"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <span id="week-label" class="text-lg font-semibold text-gray-900">
+          {menu ? formatWeekRange(menu.week_start) : formatWeekRange(currentWeekStart)}
+        </span>
+
+        <button
+          type="button"
+          id="next-week"
+          class="flex items-center justify-center w-10 h-10 rounded-lg border hover:bg-gray-50 focus:ring-2 focus:ring-primary focus:outline-none transition-colors"
+          aria-label="Semaine suivante"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenu du menu -->
+      <div id="menu-content" aria-live="polite">
+        {!menu ? (
+          <div class="text-center py-16 bg-gray-50 rounded-xl">
+            <p class="text-gray-500 text-lg">Aucun menu disponible pour cette semaine.</p>
+            <p class="text-gray-400 mt-2">Revenez bientot pour consulter le menu de la cantine.</p>
+          </div>
+        ) : menu.menu_mode === 'image' ? (
+          <div class="flex flex-col gap-6">
+            {menu.menu_image_url && (
+              <div class="rounded-xl overflow-hidden border">
+                <img
+                  src={menu.menu_image_url}
+                  alt="Menu de la semaine"
+                  class="w-full"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {menu.menu_pdf_url && (
+              <div class="flex justify-center">
+                <a
+                  href={menu.menu_pdf_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors"
+                  download
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Telecharger le menu (PDF)
+                </a>
+              </div>
+            )}
+            {menu.school_name && (
+              <p class="text-sm text-gray-500 text-center">{menu.school_name}</p>
+            )}
+          </div>
+        ) : (
+          <div class="flex flex-col gap-6">
+            {menu.school_name && (
+              <p class="text-sm text-gray-500">{menu.school_name}</p>
+            )}
+
+            <!-- Table desktop -->
+            <div class="hidden md:block overflow-x-auto rounded-xl border">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-gray-50 border-b">
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Jour</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Entree</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Plat principal</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Accompagnement</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Fromage</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Dessert</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Gouter</th>
+                    <th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">Labels</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DAYS.map((day) => {
+                    const meal = menu.meals?.find((m) => m.day === day);
+                    if (!meal) return null;
+                    return (
+                      <tr class="border-b last:border-0 hover:bg-gray-50/50">
+                        <td class="px-4 py-3 font-semibold text-gray-900">{DAY_LABELS[day]}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.starter || '-'}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{meal.main_course}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.side_dish || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.dairy || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.dessert || '-'}</td>
+                        <td class="px-4 py-3 text-gray-700">{meal.snack || '-'}</td>
+                        <td class="px-4 py-3">
+                          <div class="flex flex-wrap gap-1">
+                            {(meal.labels || []).map((label: string) => {
+                              const config = LABEL_CONFIG[label];
+                              if (!config) return null;
+                              return (
+                                <span class={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                                  <span aria-hidden="true">{config.emoji}</span> {config.label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Cards mobile -->
+            <div class="md:hidden flex flex-col gap-3">
+              {DAYS.map((day) => {
+                const meal = menu.meals?.find((m) => m.day === day);
+                if (!meal) return null;
+                return (
+                  <div class="rounded-xl border bg-white p-4">
+                    <h3 class="font-semibold text-gray-900 mb-2 pb-2 border-b">{DAY_LABELS[day]}</h3>
+                    <div class="flex flex-col gap-1.5 text-sm">
+                      <div class="flex justify-between">
+                        <span class="text-gray-500">Plat</span>
+                        <span class="font-medium text-gray-900 text-right">{meal.main_course}</span>
+                      </div>
+                      {meal.starter && (
+                        <div class="flex justify-between">
+                          <span class="text-gray-500">Entree</span>
+                          <span class="text-gray-700 text-right">{meal.starter}</span>
+                        </div>
+                      )}
+                      {meal.side_dish && (
+                        <div class="flex justify-between">
+                          <span class="text-gray-500">Accomp.</span>
+                          <span class="text-gray-700 text-right">{meal.side_dish}</span>
+                        </div>
+                      )}
+                      {meal.dairy && (
+                        <div class="flex justify-between">
+                          <span class="text-gray-500">Fromage</span>
+                          <span class="text-gray-700 text-right">{meal.dairy}</span>
+                        </div>
+                      )}
+                      {meal.dessert && (
+                        <div class="flex justify-between">
+                          <span class="text-gray-500">Dessert</span>
+                          <span class="text-gray-700 text-right">{meal.dessert}</span>
+                        </div>
+                      )}
+                      {meal.snack && (
+                        <div class="flex justify-between">
+                          <span class="text-gray-500">Gouter</span>
+                          <span class="text-gray-700 text-right">{meal.snack}</span>
+                        </div>
+                      )}
+                      {meal.labels && meal.labels.length > 0 && (
+                        <div class="flex flex-wrap gap-1 mt-1">
+                          {(meal.labels).map((label: string) => {
+                            const config = LABEL_CONFIG[label];
+                            if (!config) return null;
+                            return (
+                              <span class={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+                                <span aria-hidden="true">{config.emoji}</span> {config.label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <script define:vars={{ prefetchedMenus: menusMap, initialWeekStart: currentWeekStart }}>
+    const DAY_LABELS = { lundi: 'Lundi', mardi: 'Mardi', mercredi: 'Mercredi', jeudi: 'Jeudi', vendredi: 'Vendredi' };
+    const LABEL_CONFIG = {
+      bio: { label: 'Bio', emoji: '🌱', color: 'bg-green-100 text-green-800' },
+      local: { label: 'Local', emoji: '📍', color: 'bg-blue-100 text-blue-800' },
+      vegetarien: { label: 'Végétarien', emoji: '🥬', color: 'bg-emerald-100 text-emerald-800' },
+      'fait-maison': { label: 'Fait maison', emoji: '👨‍🍳', color: 'bg-orange-100 text-orange-800' },
+      aop: { label: 'AOP', emoji: '🏅', color: 'bg-yellow-100 text-yellow-800' },
+    };
+
+    /** Echappe le HTML pour eviter les injections XSS */
+    function esc(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function getMonday(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      d.setDate(diff);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+
+    function formatDateISO(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatWeekRange(weekStart) {
+      const monday = new Date(weekStart + 'T00:00:00');
+      const friday = new Date(monday);
+      friday.setDate(friday.getDate() + 4);
+      const dayStart = monday.getDate();
+      const dayEnd = friday.getDate();
+      const monthEnd = friday.toLocaleDateString('fr-FR', { month: 'long' });
+      const year = friday.getFullYear();
+      if (monday.getMonth() === friday.getMonth()) {
+        return `Semaine du ${dayStart} au ${dayEnd} ${monthEnd} ${year}`;
+      }
+      const monthStart = monday.toLocaleDateString('fr-FR', { month: 'long' });
+      return `Semaine du ${dayStart} ${monthStart} au ${dayEnd} ${monthEnd} ${year}`;
+    }
+
+    function renderMenu(menu) {
+      if (!menu) {
+        return `<div class="text-center py-16 bg-gray-50 rounded-xl">
+          <p class="text-gray-500 text-lg">Aucun menu disponible pour cette semaine.</p>
+          <p class="text-gray-400 mt-2">Revenez bientot pour consulter le menu de la cantine.</p>
+        </div>`;
+      }
+
+      if (menu.menu_mode === 'image') {
+        let html = '<div class="flex flex-col gap-6">';
+        if (menu.menu_image_url) {
+          html += `<div class="rounded-xl overflow-hidden border"><img src="${esc(menu.menu_image_url)}" alt="Menu de la semaine" class="w-full" loading="lazy" /></div>`;
+        }
+        if (menu.menu_pdf_url) {
+          html += `<div class="flex justify-center"><a href="${esc(menu.menu_pdf_url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 text-base font-medium rounded-lg text-on-primary bg-primary hover:bg-primary/90 transition-colors" download>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            Telecharger le menu (PDF)</a></div>`;
+        }
+        if (menu.school_name) {
+          html += `<p class="text-sm text-gray-500 text-center">${esc(menu.school_name)}</p>`;
+        }
+        html += '</div>';
+        return html;
+      }
+
+      // Manual mode
+      let html = '<div class="flex flex-col gap-6">';
+      if (menu.school_name) {
+        html += `<p class="text-sm text-gray-500">${esc(menu.school_name)}</p>`;
+      }
+
+      // Desktop table
+      html += '<div class="hidden md:block overflow-x-auto rounded-xl border"><table class="w-full text-sm"><thead><tr class="bg-gray-50 border-b">';
+      ['Jour', 'Entree', 'Plat principal', 'Accompagnement', 'Fromage', 'Dessert', 'Gouter', 'Labels'].forEach(h => {
+        html += `<th scope="col" class="px-4 py-3 text-left font-semibold text-gray-900">${h}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'].forEach(day => {
+        const meal = (menu.meals || []).find(m => m.day === day);
+        if (!meal) return;
+        const labels = (meal.labels || []).map(l => {
+          const c = LABEL_CONFIG[l];
+          return c ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${c.color}"><span aria-hidden="true">${c.emoji}</span> ${c.label}</span>` : '';
+        }).join('');
+        html += `<tr class="border-b last:border-0 hover:bg-gray-50/50">
+          <td class="px-4 py-3 font-semibold text-gray-900">${esc(DAY_LABELS[day])}</td>
+          <td class="px-4 py-3 text-gray-700">${esc(meal.starter) || '-'}</td>
+          <td class="px-4 py-3 font-medium text-gray-900">${esc(meal.main_course)}</td>
+          <td class="px-4 py-3 text-gray-700">${esc(meal.side_dish) || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${esc(meal.dairy) || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${esc(meal.dessert) || '-'}</td>
+          <td class="px-4 py-3 text-gray-700">${esc(meal.snack) || '-'}</td>
+          <td class="px-4 py-3"><div class="flex flex-wrap gap-1">${labels}</div></td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+
+      // Mobile cards
+      html += '<div class="md:hidden flex flex-col gap-3">';
+      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi'].forEach(day => {
+        const meal = (menu.meals || []).find(m => m.day === day);
+        if (!meal) return;
+        html += `<div class="rounded-xl border bg-white p-4">
+          <h3 class="font-semibold text-gray-900 mb-2 pb-2 border-b">${esc(DAY_LABELS[day])}</h3>
+          <div class="flex flex-col gap-1.5 text-sm">
+            <div class="flex justify-between"><span class="text-gray-500">Plat</span><span class="font-medium text-gray-900 text-right">${esc(meal.main_course)}</span></div>`;
+        if (meal.starter) html += `<div class="flex justify-between"><span class="text-gray-500">Entree</span><span class="text-gray-700 text-right">${esc(meal.starter)}</span></div>`;
+        if (meal.side_dish) html += `<div class="flex justify-between"><span class="text-gray-500">Accomp.</span><span class="text-gray-700 text-right">${esc(meal.side_dish)}</span></div>`;
+        if (meal.dairy) html += `<div class="flex justify-between"><span class="text-gray-500">Fromage</span><span class="text-gray-700 text-right">${esc(meal.dairy)}</span></div>`;
+        if (meal.dessert) html += `<div class="flex justify-between"><span class="text-gray-500">Dessert</span><span class="text-gray-700 text-right">${esc(meal.dessert)}</span></div>`;
+        if (meal.snack) html += `<div class="flex justify-between"><span class="text-gray-500">Gouter</span><span class="text-gray-700 text-right">${esc(meal.snack)}</span></div>`;
+        if (meal.labels && meal.labels.length > 0) {
+          const labels = meal.labels.map(l => {
+            const c = LABEL_CONFIG[l];
+            return c ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-medium ${c.color}"><span aria-hidden="true">${c.emoji}</span> ${c.label}</span>` : '';
+          }).join('');
+          html += `<div class="flex flex-wrap gap-1 mt-1">${labels}</div>`;
+        }
+        html += '</div></div>';
+      });
+      html += '</div>';
+
+      html += '</div>';
+      return html;
+    }
+
+    // State
+    let currentMonday = getMonday(new Date());
+
+    const prevBtn = document.getElementById('prev-week');
+    const nextBtn = document.getElementById('next-week');
+    const weekLabel = document.getElementById('week-label');
+    const menuContent = document.getElementById('menu-content');
+
+    function showWeek(monday) {
+      const weekStart = formatDateISO(monday);
+      weekLabel.textContent = formatWeekRange(weekStart);
+      const menu = prefetchedMenus[weekStart] || null;
+      menuContent.innerHTML = renderMenu(menu);
+    }
+
+    prevBtn.addEventListener('click', () => {
+      currentMonday.setDate(currentMonday.getDate() - 7);
+      showWeek(currentMonday);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      currentMonday.setDate(currentMonday.getDate() + 7);
+      showWeek(currentMonday);
+    });
+  </script>
+</Layout>

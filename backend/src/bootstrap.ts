@@ -276,6 +276,13 @@ export default async ({ strapi }) => {
       { action: 'api::waste-schedule.waste-schedule.update', enabled: true },
       { action: 'api::waste-schedule.waste-schedule.delete', enabled: true },
 
+      // School Menus
+      { action: 'api::school-menu.school-menu.find', enabled: true },
+      { action: 'api::school-menu.school-menu.findOne', enabled: true },
+      { action: 'api::school-menu.school-menu.create', enabled: true },
+      { action: 'api::school-menu.school-menu.update', enabled: true },
+      { action: 'api::school-menu.school-menu.delete', enabled: true },
+
       // Media Items
       { action: 'api::media-item.media-item.find', enabled: true },
       { action: 'api::media-item.media-item.findOne', enabled: true },

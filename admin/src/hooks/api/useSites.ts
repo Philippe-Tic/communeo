@@ -11,6 +11,7 @@ export interface NavigationItem {
   pageDocumentId?: string // DocumentId page (si type=page)
   label?: string          // Label custom (undefined = défaut)
   enabled: boolean        // Toggle visibilité
+  children?: NavigationItem[] // Sous-éléments (1 niveau max)
 }
 
 // Types — Réseaux sociaux

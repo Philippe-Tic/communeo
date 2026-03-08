@@ -34,37 +34,38 @@ interface NavMenuLink {
 // --- Build menu links from navigation_config or fallback ---
 const navConfig = siteConfig?.navigation_config;
 
+function buildSingleLink(item: NavigationItem): NavMenuLink | null {
+  if (item.type === 'section' && item.key) {
+    const meta = SECTION_MAP[item.key];
+    if (!meta) return null;
+    if (item.key === 'open-data' && !siteConfig?.open_data_enabled && !item.label) return null;
+    return { href: meta.url, label: item.label || meta.defaultLabel };
+  }
+  if (item.type === 'page' && item.pageDocumentId) {
+    const page = menuPages.find(p => p.documentId === item.pageDocumentId);
+    if (!page) return null;
+    return { href: '/' + getPagePath(page, menuPages), label: item.label || page.title };
+  }
+  return null;
+}
+
 function buildConfiguredMenu(config: NavigationItem[]): NavMenuLink[] {
   const links: NavMenuLink[] = [];
 
   for (const item of config) {
     if (!item.enabled) continue;
-
-    if (item.type === 'section' && item.key) {
-      const meta = SECTION_MAP[item.key];
-      if (!meta) continue;
-      // Skip open-data if not enabled and no custom label override
-      if (item.key === 'open-data' && !siteConfig?.open_data_enabled && !item.label) continue;
-      links.push({
-        href: meta.url,
-        label: item.label || meta.defaultLabel,
-      });
-    } else if (item.type === 'page' && item.pageDocumentId) {
-      const page = menuPages.find(p => p.documentId === item.pageDocumentId);
-      if (!page) continue; // Page supprimée ou non publiée → ignorer
-      const pagePath = '/' + getPagePath(page, menuPages);
-      const children = menuPages
-        .filter(p => p.parent_page?.documentId === page.documentId)
-        .map(child => ({
-          href: '/' + getPagePath(child, menuPages),
-          label: child.title,
-        }));
-      links.push({
-        href: pagePath,
-        label: item.label || page.title,
-        children: children.length > 0 ? children : undefined,
-      });
+    const link = buildSingleLink(item);
+    if (!link) continue;
+    if (item.children?.length) {
+      const childLinks = item.children
+        .filter(c => c.enabled)
+        .map(c => buildSingleLink(c))
+        .filter((c): c is NavMenuLink => c !== null);
+      if (childLinks.length > 0) {
+        link.children = childLinks;
+      }
     }
+    links.push(link);
   }
 
   return links;

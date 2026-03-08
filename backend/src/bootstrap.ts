@@ -447,8 +447,12 @@ export default async ({ strapi }) => {
           // Skip sites with invalid JSON
         }
       }
-      // Clear parent_page relations from pages
-      await knex('pages_parent_page_lnk').del().catch(() => {});
+      // Clear parent_page relations from pages (only if the link table still exists)
+      const hasTable = await knex.schema.hasTable('pages_parent_page_lnk');
+      if (hasTable) {
+        const count = await knex('pages_parent_page_lnk').del();
+        if (count > 0) console.log(`✅ Bootstrap - Cleared ${count} parent_page links`);
+      }
     } catch (error) {
       console.log('⚠️ Bootstrap - Navigation migration skipped:', (error as Error).message);
     }

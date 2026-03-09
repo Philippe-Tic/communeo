@@ -8,8 +8,11 @@ import FicheReferences from './FicheReferences'
 const STRAPI_URL = (import.meta as any).env.STRAPI_URL as string
 
 function formatDate(iso: string): string {
+  if (!iso) return ''
   try {
-    return new Date(iso).toLocaleDateString('fr-FR', {
+    const date = new Date(iso)
+    if (isNaN(date.getTime())) return ''
+    return date.toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -111,9 +114,11 @@ export default function FicheViewer() {
         {fiche.description && (
           <p class="text-lg text-gray-600 mb-3">{fiche.description}</p>
         )}
-        <time class="text-sm text-gray-500" dateTime={fiche.dateModification}>
-          Mis a jour le {formatDate(fiche.dateModification)}
-        </time>
+        {fiche.dateModification && (
+          <time class="text-sm text-gray-500" dateTime={fiche.dateModification}>
+            Mis a jour le {formatDate(fiche.dateModification)}
+          </time>
+        )}
       </header>
 
       {/* Dossier pere */}

@@ -1,5 +1,8 @@
 /**
  * DILA XML Normalizer — Parse les fiches XML service-public.gouv.fr en JSON typé
+ *
+ * Uses fast-xml-parser with preserveOrder: true to correctly handle mixed content
+ * (text interleaved with inline elements like <MiseEnEvidence>, <LienInterne>, etc.)
  */
 
 import { XMLParser } from 'fast-xml-parser'
@@ -16,26 +19,76 @@ import type {
   DilaServiceInfo,
 } from '../types/comarquage'
 
-// Éléments qui peuvent apparaître plusieurs fois et doivent être forcés en tableau
-const ARRAY_ELEMENTS = [
-  'Chapitre', 'SousChapitre', 'Paragraphe', 'Item', 'Rangee', 'Colonne',
-  'Cas', 'Situation', 'OuSAdresser', 'ServiceEnLigne', 'Reference',
-  'VoirAussi', 'QuestionReponse', 'PourEnSavoirPlus', 'Definition',
-  'SousDossier', 'Fiche', 'FilDAriane', 'Niveau',
-  'BlocCas', 'ANoter', 'Attention', 'ASavoir', 'Exemple', 'Rappel',
-  'Liste', 'Tableau', 'Image', 'Video',
-  'FragmentConditionne', 'Condition',
-  'ItemMenu',
-]
+// ─── preserveOrder helpers ──────────────────────────────────────────
+// With preserveOrder the parser outputs ordered arrays of { tag: children[], ':@': attrs }
+
+/** Find first child node matching a tag */
+function findChild(children: any[], tag: string): any | undefined {
+  if (!Array.isArray(children)) return undefined
+  for (const item of children) {
+    if (item[tag] !== undefined) return item
+  }
+  return undefined
+}
+
+/** Find all child nodes matching a tag */
+function findChildren(children: any[], tag: string): any[] {
+  if (!Array.isArray(children)) return []
+  return children.filter(item => item[tag] !== undefined)
+}
+
+/** Read attributes from a node (':@' key) */
+function getAttrs(node: any): Record<string, string> {
+  return node?.[':@'] || {}
+}
+
+/** Read a single attribute */
+function getAttr(node: any, attr: string): string {
+  return node?.[':@']?.[attr] || ''
+}
+
+/** Recursively extract all text from a children array (whitespace-normalised) */
+function getAllText(children: any[]): string {
+  if (!Array.isArray(children)) return ''
+  const parts: string[] = []
+  for (const item of children) {
+    if (item['#text'] !== undefined) {
+      parts.push(String(item['#text']))
+    } else {
+      const tag = Object.keys(item).find(k => k !== ':@')
+      if (tag && Array.isArray(item[tag])) {
+        parts.push(getAllText(item[tag]))
+      }
+    }
+  }
+  return parts.join('').replace(/\s+/g, ' ').trim()
+}
+
+/** Shortcut: get text of the first child with the given tag */
+function childText(children: any[], tag: string): string {
+  const child = findChild(children, tag)
+  if (!child) return ''
+  return getAllText(child[tag])
+}
+
+// ─── Inline tags ────────────────────────────────────────────────────
+
+const INLINE_TAGS = new Set([
+  'MiseEnEvidence', 'Expression', 'LienExterne', 'LienInterne',
+  'LienIntra', 'Valeur', 'Exposant', 'Tel',
+])
+
+// ─── Parser ─────────────────────────────────────────────────────────
 
 const parser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
-  isArray: (name) => ARRAY_ELEMENTS.includes(name),
-  trimValues: true,
-  // Preserve text content when mixed with child elements
+  preserveOrder: true,
+  trimValues: false,
   textNodeName: '#text',
 })
+
+// ─── Normalizer ─────────────────────────────────────────────────────
 
 class DilaNormalizer {
   /**
@@ -44,55 +97,91 @@ class DilaNormalizer {
   parseFiche(xml: string, fileId: string, audience: DilaAudience): DilaFiche | null {
     const parsed = parser.parse(xml)
 
-    const publication = parsed.Publication || parsed.ServiceComplementaire
-    if (!publication) return null
+    const pubNode = findChild(parsed, 'Publication') || findChild(parsed, 'ServiceComplementaire')
+    if (!pubNode) return null
+    const pubTag = pubNode.Publication ? 'Publication' : 'ServiceComplementaire'
+    const pubChildren: any[] = pubNode[pubTag]
+    const pubAttrs = getAttrs(pubNode)
 
-    const type = publication['@_type'] || publication['@_xsi:type'] || 'unknown'
-    const title = this.textOf(publication.dc?.title) || this.textOf(publication['dc:title']) || this.textOf(publication.Titre) || ''
-    const description = this.textOf(publication.dc?.description) || this.textOf(publication['dc:description']) || ''
-    const dateModification = publication['@_dateModification'] || publication.dc?.date || ''
+    const type = pubAttrs['@_type'] || pubAttrs['@_xsi:type'] || 'unknown'
+    const title = childText(pubChildren, 'dc:title') || childText(pubChildren, 'Titre') || ''
+    const description = childText(pubChildren, 'dc:description') || ''
+
+    // Fix 1: date — handle "modified 2026-03-06" format in dc:date
+    const rawDate = pubAttrs['@_dateModification'] || childText(pubChildren, 'dc:date') || ''
+    const dateModification = rawDate
+      ? (rawDate.match(/\d{4}-\d{2}-\d{2}/)?.[0] || rawDate)
+      : ''
 
     // Thème et sous-thème
-    const theme = this.parseRef(publication.Theme)
-    const sousTheme = this.parseRef(publication.SousTheme)
+    const themeNode = findChild(pubChildren, 'Theme')
+    const theme = themeNode ? this.parseRef(themeNode) : null
+    const sousThemeNode = findChild(pubChildren, 'SousTheme')
+    const sousTheme = sousThemeNode ? this.parseRef(sousThemeNode) : null
 
     // Fil d'Ariane
-    const filDAriane = this.parseFilDAriane(publication.FilDAriane)
+    const filDAriane = this.parseFilDAriane(pubChildren)
 
     // Dossier père
-    let dossierPere = this.parseDossierPere(publication.DossierPere)
+    let dossierPere = this.parseDossierPere(pubChildren)
 
-    // Pour les Dossiers sans DossierPere, construire la structure depuis les SousDossier directs
+    // Pour les Dossiers sans DossierPere, construire depuis SousDossier ou Fiche directs
     if (!dossierPere && (type === 'Dossier' || type === 'Dossier/Sous-dossier')) {
-      const sousDossiers = this.ensureArray(publication.SousDossier || []).map((sd: any) => ({
-        id: sd['@_ID'] || '',
-        title: this.textOf(sd.Titre) || '',
-        fiches: this.ensureArray(sd.Fiche || []).map((f: any) => ({
-          id: f['@_ID'] || f['@_LienPublication'] || '',
-          title: this.textOf(f.Titre) || this.textOf(f) || '',
-        })),
-      }))
-      if (sousDossiers.length > 0) {
+      const sousDossierNodes = findChildren(pubChildren, 'SousDossier')
+      if (sousDossierNodes.length > 0) {
+        const sousDossiers = sousDossierNodes.map((sdNode: any) => {
+          const sdChildren = sdNode.SousDossier
+          const sdAttrs = getAttrs(sdNode)
+          return {
+            id: sdAttrs['@_ID'] || '',
+            title: childText(sdChildren, 'Titre') || '',
+            fiches: findChildren(sdChildren, 'Fiche').map((fNode: any) => ({
+              id: getAttr(fNode, '@_ID') || getAttr(fNode, '@_LienPublication') || getAllText(fNode.Fiche) || '',
+              title: childText(fNode.Fiche, 'Titre') || getAllText(fNode.Fiche) || '',
+            })),
+          }
+        })
         dossierPere = { id: fileId, title, sousDossiers }
+      }
+
+      // Fix 2: Fiches directement sous Publication (ex: N435)
+      if (!dossierPere) {
+        const fichesDirectes = findChildren(pubChildren, 'Fiche')
+        if (fichesDirectes.length > 0) {
+          dossierPere = {
+            id: fileId,
+            title,
+            sousDossiers: [{
+              id: `${fileId}-1`,
+              title,
+              fiches: fichesDirectes.map((fNode: any) => ({
+                id: getAttr(fNode, '@_ID') || getAttr(fNode, '@_LienPublication') || getAllText(fNode.Fiche) || '',
+                title: childText(fNode.Fiche, 'Titre') || getAllText(fNode.Fiche) || '',
+              })),
+            }],
+          }
+        }
       }
     }
 
     // Avertissement
-    const avertissement = publication.Avertissement
-      ? this.parseCallout(publication.Avertissement, 'attention')
+    const avertNode = findChild(pubChildren, 'Avertissement')
+    const avertissement = avertNode
+      ? this.parseCallout(avertNode.Avertissement, 'attention')
       : null
 
     // Introduction
-    const introduction = publication.Introduction
-      ? this.parseContentNodes(publication.Introduction)
-      : []
+    const introNode = findChild(pubChildren, 'Introduction')
+    const introduction = introNode ? this.parseContentNodes(introNode.Introduction) : []
 
     // Contenu principal — peut être dans Texte, Corps, ou directement sous Publication
-    const contentSource = publication.Texte || publication.Corps || publication
+    const texteNode = findChild(pubChildren, 'Texte')
+    const corpsNode = findChild(pubChildren, 'Corps')
+    const contentSource = texteNode ? texteNode.Texte : corpsNode ? corpsNode.Corps : pubChildren
     const content = this.parseContentNodes(contentSource)
 
     // Sections de référence
-    const references = this.parseReferenceSection(publication)
+    const references = this.parseReferenceSection(pubChildren)
 
     return {
       id: fileId,
@@ -117,356 +206,411 @@ class DilaNormalizer {
    */
   parseMenu(xml: string): DilaMenuNode[] {
     const parsed = parser.parse(xml)
-    const menu = parsed.Menu || parsed.Arborescence
-    if (!menu) return []
+    const menuNode = findChild(parsed, 'Menu') || findChild(parsed, 'Arborescence')
+    if (!menuNode) return []
+    const tag = menuNode.Menu ? 'Menu' : 'Arborescence'
+    const menuChildren = menuNode[tag]
 
-    // Le format réel utilise <ItemMenu type="Theme|Sous-theme|Dossier">
-    const items = this.ensureArray(menu.ItemMenu || menu.Theme || menu.Noeud || [])
-    return items.map((t: any) => this.parseMenuNode(t, this.menuNodeType(t)))
+    const items = [
+      ...findChildren(menuChildren, 'ItemMenu'),
+      ...findChildren(menuChildren, 'Theme'),
+      ...findChildren(menuChildren, 'Noeud'),
+    ]
+
+    return items.map(item => {
+      const itemTag = Object.keys(item).find(k => k !== ':@')!
+      return this.parseMenuNode(item[itemTag], getAttrs(item), this.menuNodeType(getAttrs(item)))
+    })
   }
 
-  // ─── Contenu récursif ────────────────────────────────────────────
+  // ─── Contenu récursif (document-order) ─────────────────────────────
 
-  private parseContentNodes(element: any): DilaContentNode[] {
-    if (!element || typeof element === 'string') return []
+  private parseContentNodes(children: any[]): DilaContentNode[] {
+    if (!Array.isArray(children)) return []
 
     const nodes: DilaContentNode[] = []
-    const tagHandlers: Record<string, (items: any[]) => void> = {
-      Chapitre: (items) => items.forEach(c => nodes.push(this.parseChapitre(c))),
-      SousChapitre: (items) => items.forEach(c => nodes.push(this.parseSousChapitre(c))),
-      Paragraphe: (items) => items.forEach(p => nodes.push(this.parseParagraphe(p))),
-      Liste: (items) => items.forEach(l => nodes.push(this.parseListe(l))),
-      Tableau: (items) => items.forEach(t => nodes.push(this.parseTableau(t))),
-      BlocCas: (items) => items.forEach(b => nodes.push(this.parseBlocCas(b))),
-      ANoter: (items) => items.forEach(a => nodes.push(this.parseCallout(a, 'aNoter'))),
-      Attention: (items) => items.forEach(a => nodes.push(this.parseCallout(a, 'attention'))),
-      ASavoir: (items) => items.forEach(a => nodes.push(this.parseCallout(a, 'aSavoir'))),
-      Exemple: (items) => items.forEach(e => nodes.push(this.parseCallout(e, 'exemple'))),
-      Rappel: (items) => items.forEach(r => nodes.push(this.parseCallout(r, 'rappel'))),
-      ListeSituations: (items) => items.forEach(l => nodes.push(this.parseListeSituations(l))),
-      FragmentConditionne: (items) => items.forEach(f => nodes.push(this.parseFragmentConditionne(f))),
-      Image: (items) => items.forEach(i => nodes.push(this.parseImage(i))),
-      Video: (items) => items.forEach(v => nodes.push(this.parseVideo(v))),
-    }
 
-    for (const [tag, handler] of Object.entries(tagHandlers)) {
-      if (element[tag]) {
-        handler(this.ensureArray(element[tag]))
+    for (const item of children) {
+      const tag = Object.keys(item).find(k => k !== ':@')
+      if (!tag) continue
+
+      const content = item[tag]
+      const attrs = getAttrs(item)
+
+      switch (tag) {
+        case 'Chapitre':     nodes.push(this.parseChapitre(content)); break
+        case 'SousChapitre': nodes.push(this.parseSousChapitre(content)); break
+        case 'Paragraphe':   nodes.push(this.parseParagraphe(content)); break
+        case 'Liste':        nodes.push(this.parseListe(content, attrs)); break
+        case 'Tableau':      nodes.push(this.parseTableau(content)); break
+        case 'BlocCas':      nodes.push(this.parseBlocCas(content, attrs)); break
+        case 'ANoter':       nodes.push(this.parseCallout(content, 'aNoter')); break
+        case 'Attention':    nodes.push(this.parseCallout(content, 'attention')); break
+        case 'ASavoir':      nodes.push(this.parseCallout(content, 'aSavoir')); break
+        case 'Exemple':      nodes.push(this.parseCallout(content, 'exemple')); break
+        case 'Rappel':       nodes.push(this.parseCallout(content, 'rappel')); break
+        case 'ListeSituations':    nodes.push(this.parseListeSituations(content)); break
+        case 'FragmentConditionne': nodes.push(this.parseFragmentConditionne(content, attrs)); break
+        case 'Image':        nodes.push(this.parseImage(content, attrs)); break
+        case 'Video':        nodes.push(this.parseVideo(content, attrs)); break
       }
     }
 
     return nodes
   }
 
-  private parseChapitre(obj: any): DilaContentNode {
-    const title = this.textOf(obj.Titre) || ''
-    const children = this.parseContentNodes(obj)
-    return { type: 'chapitre', title, children }
+  private parseChapitre(children: any[]): DilaContentNode {
+    const title = childText(children, 'Titre')
+    return { type: 'chapitre', title, children: this.parseContentNodes(children) }
   }
 
-  private parseSousChapitre(obj: any): DilaContentNode {
-    const title = this.textOf(obj.Titre) || ''
-    const children = this.parseContentNodes(obj)
-    return { type: 'chapitre', title, children }
+  private parseSousChapitre(children: any[]): DilaContentNode {
+    const title = childText(children, 'Titre')
+    return { type: 'chapitre', title, children: this.parseContentNodes(children) }
   }
 
-  private parseParagraphe(obj: any): DilaContentNode {
-    const children = this.parseInlineContent(obj)
-    // Si le paragraphe n'a que du texte simple
-    if (children.length === 0) {
-      const text = this.textOf(obj)
-      return { type: 'paragraphe', text: text || '' }
-    }
-    return { type: 'paragraphe', children }
-  }
+  /**
+   * FIX 3 — Parse un paragraphe en préservant le contenu mixte (texte + inline)
+   *
+   * Avant: fast-xml-parser sans preserveOrder perdait les text nodes intercalés.
+   * Maintenant: on itère les enfants en ordre, créant des nodes 'texte' et inline alternés.
+   */
+  private parseParagraphe(children: any[]): DilaContentNode {
+    if (!Array.isArray(children)) return { type: 'paragraphe', text: '' }
 
-  private parseListe(obj: any): DilaContentNode {
-    const listeType = obj['@_type'] || 'puce'
-    const items = this.ensureArray(obj.Item || [])
-    const children: DilaContentNode[] = items.map((item: any) => {
-      const itemChildren = this.parseContentNodes(item)
-      const inlineChildren = this.parseInlineContent(item)
-      const allChildren = [...itemChildren, ...inlineChildren]
-      if (allChildren.length === 0) {
-        return { type: 'paragraphe', text: this.textOf(item) || '' }
+    const nodes: DilaContentNode[] = []
+
+    for (const item of children) {
+      const tag = Object.keys(item).find(k => k !== ':@')
+      if (!tag) continue
+
+      if (tag === '#text') {
+        const raw = String(item['#text'])
+        if (!raw.trim()) continue
+        // Normalise internal whitespace but keep leading/trailing for inline spacing
+        const text = raw.replace(/\s+/g, ' ')
+        nodes.push({ type: 'texte', text })
+      } else if (INLINE_TAGS.has(tag)) {
+        nodes.push(this.parseInlineTag(tag, item[tag], getAttrs(item)))
+      } else {
+        // Block element inside paragraph (rare) — delegate
+        const blockNodes = this.parseContentNodes([item])
+        nodes.push(...blockNodes)
       }
-      return { type: 'paragraphe', children: allChildren }
-    })
-    return { type: 'liste', attributes: { listeType }, children }
+    }
+
+    // Simple text paragraph
+    if (nodes.length === 0) {
+      return { type: 'paragraphe', text: getAllText(children) || '' }
+    }
+    if (nodes.length === 1 && nodes[0].type === 'texte') {
+      return { type: 'paragraphe', text: (nodes[0].text || '').trim() }
+    }
+    return { type: 'paragraphe', children: nodes }
   }
 
-  private parseTableau(obj: any): DilaContentNode {
-    const titre = this.textOf(obj.Titre) || undefined
-    const rangees = this.ensureArray(obj.Rangee || [])
-    const children: DilaContentNode[] = rangees.map((rangee: any) => {
-      const colonnes = this.ensureArray(rangee.Colonne || [])
-      const cells: DilaContentNode[] = colonnes.map((col: any) => {
-        const cellContent = this.parseContentNodes(col)
-        const inlineContent = this.parseInlineContent(col)
-        const allContent = [...cellContent, ...inlineContent]
-        if (allContent.length === 0) {
-          return { type: 'paragraphe', text: this.textOf(col) || '' }
+  private parseInlineTag(tag: string, children: any[], attrs: Record<string, string>): DilaContentNode {
+    const text = getAllText(children)
+    switch (tag) {
+      case 'MiseEnEvidence':
+        return {
+          type: 'miseEnEvidence',
+          text,
+          attributes: attrs['@_type'] ? { miseEnEvidenceType: attrs['@_type'] } : undefined,
         }
-        return { type: 'paragraphe', children: allContent }
+      case 'Expression':
+        return { type: 'expression', text }
+      case 'LienExterne':
+        return { type: 'lienExterne', text, href: attrs['@_URL'] || '' }
+      case 'LienInterne':
+        return {
+          type: 'lienInterne',
+          text,
+          href: attrs['@_LienPublication'] || '',
+          attributes: { ficheId: attrs['@_LienPublication'] || '' },
+        }
+      case 'LienIntra':
+        return {
+          type: 'lienIntra',
+          text,
+          href: attrs['@_LienID'] || attrs['@_LienPublication'] || '',
+          attributes: { ficheId: attrs['@_LienID'] || attrs['@_LienPublication'] || '' },
+        }
+      case 'Valeur':
+        return { type: 'valeur', text }
+      case 'Exposant':
+        return { type: 'exposant', text }
+      case 'Tel':
+        return { type: 'expression', text }
+      default:
+        return { type: 'texte', text }
+    }
+  }
+
+  private parseListe(children: any[], attrs: Record<string, string>): DilaContentNode {
+    const listeType = attrs['@_type'] || 'puce'
+    const items = findChildren(children, 'Item')
+    const listChildren: DilaContentNode[] = items.map((itemNode: any) => {
+      const itemContent = itemNode.Item
+      const blockNodes = this.parseContentNodes(itemContent)
+      if (blockNodes.length > 0) {
+        return { type: 'element' as const, children: blockNodes }
+      }
+      const para = this.parseParagraphe(itemContent)
+      return { type: 'element' as const, children: [para] }
+    })
+    return { type: 'liste', attributes: { listeType }, children: listChildren }
+  }
+
+  private parseTableau(children: any[]): DilaContentNode {
+    const titre = childText(children, 'Titre') || undefined
+    const rangeeNodes = findChildren(children, 'Rangee')
+    const rows: DilaContentNode[] = rangeeNodes.map((rNode: any) => {
+      const rContent = rNode.Rangee
+      const rAttrs = getAttrs(rNode)
+      const colonneNodes = findChildren(rContent, 'Colonne')
+      const cells: DilaContentNode[] = colonneNodes.map((cNode: any) => {
+        const cContent = cNode.Colonne
+        const blockContent = this.parseContentNodes(cContent)
+        if (blockContent.length > 0) {
+          return { type: 'cellule' as const, children: blockContent }
+        }
+        const para = this.parseParagraphe(cContent)
+        return { type: 'cellule' as const, children: [para] }
       })
-      const isHeader = rangee['@_type'] === 'header'
+      const isHeader = rAttrs['@_type'] === 'header'
       return {
-        type: 'paragraphe' as const,
+        type: 'rangee' as const,
         children: cells,
         attributes: isHeader ? { rowType: 'header' } : undefined,
       }
     })
-    return { type: 'tableau', title: titre, children }
+    return { type: 'tableau', title: titre, children: rows }
   }
 
-  private parseBlocCas(obj: any): DilaContentNode {
-    const affichage = obj['@_affichage'] || 'onglet'
-    const cas = this.ensureArray(obj.Cas || [])
-    const children: DilaContentNode[] = cas.map((c: any) => ({
-      type: 'situation' as const,
-      title: this.textOf(c.Titre) || '',
-      children: this.parseContentNodes(c),
-    }))
-    return { type: 'blocCas', attributes: { affichage }, children }
+  private parseBlocCas(children: any[], attrs: Record<string, string>): DilaContentNode {
+    const affichage = attrs['@_affichage'] || 'onglet'
+    const casNodes = findChildren(children, 'Cas')
+    const casChildren: DilaContentNode[] = casNodes.map((casNode: any) => {
+      const casContent = casNode.Cas
+      const title = childText(casContent, 'Titre')
+      const texteNode = findChild(casContent, 'Texte')
+      const contentChildren = texteNode ? texteNode.Texte : casContent
+      return {
+        type: 'situation' as const,
+        title,
+        children: this.parseContentNodes(contentChildren),
+      }
+    })
+    return { type: 'blocCas', attributes: { affichage }, children: casChildren }
   }
 
-  private parseCallout(obj: any, calloutType: string): DilaContentNode {
-    const titre = this.textOf(obj.Titre) || undefined
-    const children = this.parseContentNodes(obj)
-    // Si pas d'enfants structurés, tenter inline
-    if (children.length === 0) {
-      const inline = this.parseInlineContent(obj)
-      if (inline.length > 0) return { type: calloutType, title: titre, children: inline }
-      const text = this.textOf(obj)
-      if (text) return { type: calloutType, title: titre, text }
+  private parseListeSituations(children: any[]): DilaContentNode {
+    const situationNodes = findChildren(children, 'Situation')
+    const sitChildren: DilaContentNode[] = situationNodes.map((sitNode: any) => {
+      const sitContent = sitNode.Situation
+      const title = childText(sitContent, 'Titre')
+      const texteNode = findChild(sitContent, 'Texte')
+      const contentChildren = texteNode ? texteNode.Texte : sitContent
+      return {
+        type: 'situation' as const,
+        title,
+        children: this.parseContentNodes(contentChildren),
+      }
+    })
+    return { type: 'listeSituations', children: sitChildren }
+  }
+
+  private parseCallout(children: any[], calloutType: string): DilaContentNode {
+    const titre = childText(children, 'Titre') || undefined
+    const contentNodes = this.parseContentNodes(children)
+    if (contentNodes.length === 0) {
+      const para = this.parseParagraphe(children)
+      if (para.text || (para.children && para.children.length > 0)) {
+        return { type: calloutType, title: titre, children: [para] }
+      }
     }
-    return { type: calloutType, title: titre, children }
+    return { type: calloutType, title: titre, children: contentNodes }
   }
 
-  private parseListeSituations(obj: any): DilaContentNode {
-    const situations = this.ensureArray(obj.Situation || [])
-    const children: DilaContentNode[] = situations.map((s: any) => ({
-      type: 'situation' as const,
-      title: this.textOf(s.Titre) || '',
-      children: this.parseContentNodes(s),
-    }))
-    return { type: 'listeSituations', children }
-  }
-
-  private parseFragmentConditionne(obj: any): DilaContentNode {
-    const children = this.parseContentNodes(obj)
+  private parseFragmentConditionne(children: any[], attrs: Record<string, string>): DilaContentNode {
+    const contentNodes = this.parseContentNodes(children)
     const attributes: Record<string, string> = {}
-    if (obj['@_type']) attributes.conditionType = obj['@_type']
-    if (obj['@_variable']) attributes.variable = obj['@_variable']
-    if (obj['@_valeur']) attributes.valeur = obj['@_valeur']
+    if (attrs['@_type']) attributes.conditionType = attrs['@_type']
+    if (attrs['@_variable']) attributes.variable = attrs['@_variable']
+    if (attrs['@_valeur']) attributes.valeur = attrs['@_valeur']
     return {
       type: 'fragmentConditionne',
-      children,
+      children: contentNodes,
       attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
     }
   }
 
-  private parseImage(obj: any): DilaContentNode {
+  private parseImage(children: any[], attrs: Record<string, string>): DilaContentNode {
+    const lienWebNode = findChild(children, 'LienWeb')
+    const lienWebUrl = lienWebNode ? getAttr(lienWebNode, '@_URL') : ''
     return {
       type: 'paragraphe',
       attributes: {
-        src: obj['@_source'] || obj['@_url'] || '',
-        alt: obj['@_alt'] || obj.LienWeb?.['@_URL'] || '',
+        src: attrs['@_source'] || attrs['@_url'] || '',
+        alt: attrs['@_alt'] || lienWebUrl || '',
       },
     }
   }
 
-  private parseVideo(obj: any): DilaContentNode {
+  private parseVideo(children: any[], attrs: Record<string, string>): DilaContentNode {
+    const lienWebNode = findChild(children, 'LienWeb')
+    const lienWebUrl = lienWebNode ? getAttr(lienWebNode, '@_URL') : ''
     return {
       type: 'paragraphe',
       attributes: {
-        videoUrl: obj['@_source'] || obj['@_url'] || obj.LienWeb?.['@_URL'] || '',
-        videoTitle: this.textOf(obj.Titre) || '',
+        videoUrl: attrs['@_source'] || attrs['@_url'] || lienWebUrl || '',
+        videoTitle: childText(children, 'Titre') || '',
       },
     }
   }
 
-  // ─── Inline ──────────────────────────────────────────────────────
+  // ─── Références ───────────────────────────────────────────────────
 
-  private parseInlineContent(element: any): DilaContentNode[] {
-    if (!element || typeof element === 'string') return []
-
-    const nodes: DilaContentNode[] = []
-
-    const inlineTags: Record<string, (item: any) => DilaContentNode> = {
-      MiseEnEvidence: (m) => ({
-        type: 'miseEnEvidence',
-        text: this.textOf(m),
-        attributes: m['@_type'] ? { miseEnEvidenceType: m['@_type'] } : undefined,
-      }),
-      Expression: (e) => ({ type: 'expression', text: this.textOf(e) }),
-      LienExterne: (l) => ({
-        type: 'lienExterne',
-        text: this.textOf(l),
-        href: l['@_URL'] || '',
-      }),
-      LienInterne: (l) => ({
-        type: 'lienInterne',
-        text: this.textOf(l),
-        attributes: { ficheId: l['@_LienPublication'] || '' },
-      }),
-      LienIntra: (l) => ({
-        type: 'lienIntra',
-        text: this.textOf(l),
-        attributes: { ficheId: l['@_LienID'] || l['@_LienPublication'] || '' },
-      }),
-      Valeur: (v) => ({ type: 'valeur', text: this.textOf(v) }),
-      Exposant: (e) => ({ type: 'exposant', text: this.textOf(e) }),
-      Tel: (t) => ({ type: 'expression', text: this.textOf(t) }),
-    }
-
-    for (const [tag, handler] of Object.entries(inlineTags)) {
-      const items = element[tag]
-      if (items == null) continue
-      const arr = Array.isArray(items) ? items : [items]
-      for (const item of arr) {
-        nodes.push(handler(item))
-      }
-    }
-
-    return nodes
-  }
-
-  // ─── Références ──────────────────────────────────────────────────
-
-  private parseReferenceSection(publication: any): DilaReferenceSection {
+  private parseReferenceSection(pubChildren: any[]): DilaReferenceSection {
     return {
-      ouSAdresser: this.ensureArray(publication.OuSAdresser || []).map((o: any) => this.parseServiceInfo(o)),
-      servicesEnLigne: this.ensureArray(publication.ServiceEnLigne || []).map((s: any) => this.parseServiceEnLigne(s)),
-      references: this.ensureArray(publication.Reference || []).map((r: any) => this.parseExternalRef(r)),
-      voirAussi: this.ensureArray(publication.VoirAussi || []).map((v: any) => this.parseRef(v)).filter(Boolean) as DilaRef[],
-      definitions: this.ensureArray(publication.Definition || []).map((d: any) => this.parseDefinition(d)),
-      questionsReponses: this.ensureArray(publication.QuestionReponse || []).map((q: any) => this.parseRef(q)).filter(Boolean) as DilaRef[],
-      pourEnSavoirPlus: this.ensureArray(publication.PourEnSavoirPlus || []).map((p: any) => this.parseExternalRef(p)),
+      ouSAdresser: findChildren(pubChildren, 'OuSAdresser')
+        .map(n => this.parseServiceInfo(n.OuSAdresser, getAttrs(n))),
+      servicesEnLigne: findChildren(pubChildren, 'ServiceEnLigne')
+        .map(n => this.parseServiceEnLigne(n.ServiceEnLigne, getAttrs(n))),
+      references: findChildren(pubChildren, 'Reference')
+        .map(n => this.parseExternalRef(n.Reference, getAttrs(n))),
+      voirAussi: findChildren(pubChildren, 'VoirAussi')
+        .map(n => this.parseRef(n)).filter(Boolean) as DilaRef[],
+      definitions: findChildren(pubChildren, 'Definition')
+        .map(n => this.parseDefinition(n.Definition, getAttrs(n))),
+      questionsReponses: findChildren(pubChildren, 'QuestionReponse')
+        .map(n => this.parseRef(n)).filter(Boolean) as DilaRef[],
+      pourEnSavoirPlus: findChildren(pubChildren, 'PourEnSavoirPlus')
+        .map(n => this.parseExternalRef(n.PourEnSavoirPlus, getAttrs(n))),
     }
   }
 
-  private parseServiceInfo(obj: any): DilaServiceInfo {
+  private parseServiceInfo(children: any[], attrs: Record<string, string>): DilaServiceInfo {
+    const resWebNode = findChild(children, 'RessourceWeb')
+    const resWebAttrs = resWebNode ? getAttrs(resWebNode) : {}
+    const texteNode = findChild(children, 'Texte')
     return {
-      id: obj['@_ID'] || '',
-      title: this.textOf(obj.Titre) || this.textOf(obj) || '',
-      type: obj['@_type'] || '',
-      pivotLocal: obj['@_pivotLocal'] || undefined,
-      url: obj.RessourceWeb?.['@_URL'] || obj['@_URL'] || undefined,
-      texte: obj.Texte ? this.parseContentNodes(obj.Texte) : undefined,
+      id: attrs['@_ID'] || '',
+      title: childText(children, 'Titre') || getAllText(children) || '',
+      type: attrs['@_type'] || '',
+      pivotLocal: attrs['@_pivotLocal'] || undefined,
+      url: resWebAttrs['@_URL'] || attrs['@_URL'] || undefined,
+      texte: texteNode ? this.parseContentNodes(texteNode.Texte) : undefined,
     }
   }
 
-  private parseServiceEnLigne(obj: any): DilaServiceEnLigne {
+  private parseServiceEnLigne(children: any[], attrs: Record<string, string>): DilaServiceEnLigne {
     return {
-      id: obj['@_ID'] || '',
-      title: this.textOf(obj.Titre) || this.textOf(obj) || '',
-      url: obj['@_URL'] || '',
-      type: obj['@_type'] || '',
-      numeroCerfa: obj.NumeroCerfa || obj['@_numeroCerfa'] || undefined,
+      id: attrs['@_ID'] || '',
+      title: childText(children, 'Titre') || getAllText(children) || '',
+      url: attrs['@_URL'] || '',
+      type: attrs['@_type'] || '',
+      numeroCerfa: childText(children, 'NumeroCerfa') || attrs['@_numeroCerfa'] || undefined,
     }
   }
 
-  private parseExternalRef(obj: any): DilaExternalRef {
+  private parseExternalRef(children: any[], attrs: Record<string, string>): DilaExternalRef {
     return {
-      id: obj['@_ID'] || '',
-      title: this.textOf(obj.Titre) || this.textOf(obj) || '',
-      url: obj['@_URL'] || '',
-      source: obj['@_source'] || undefined,
+      id: attrs['@_ID'] || '',
+      title: childText(children, 'Titre') || getAllText(children) || '',
+      url: attrs['@_URL'] || '',
+      source: attrs['@_source'] || undefined,
     }
   }
 
-  private parseDefinition(obj: any): DilaDefinition {
+  private parseDefinition(children: any[], attrs: Record<string, string>): DilaDefinition {
+    const texteNode = findChild(children, 'Texte')
     return {
-      id: obj['@_ID'] || '',
-      term: this.textOf(obj.Terme) || '',
-      texte: obj.Texte ? this.parseContentNodes(obj.Texte) : [],
+      id: attrs['@_ID'] || '',
+      term: childText(children, 'Terme') || '',
+      texte: texteNode ? this.parseContentNodes(texteNode.Texte) : [],
     }
   }
 
-  // ─── Navigation ──────────────────────────────────────────────────
+  // ─── Navigation ───────────────────────────────────────────────────
 
-  private parseMenuNode(obj: any, type: 'theme' | 'sousTheme' | 'dossier'): DilaMenuNode {
-    const id = obj['@_ID'] || ''
-    const title = this.textOf(obj.Titre) || this.textOf(obj.Nom) || ''
-    const children: DilaMenuNode[] = []
+  private parseMenuNode(children: any[], attrs: Record<string, string>, type: 'theme' | 'sousTheme' | 'dossier'): DilaMenuNode {
+    const id = attrs['@_ID'] || ''
+    const title = childText(children, 'Titre') || childText(children, 'Nom') || ''
+    const menuChildren: DilaMenuNode[] = []
 
-    // Enfants via <ItemMenu> (format réel) ou ancien format
-    const childItems = this.ensureArray(obj.ItemMenu || [])
-    for (const child of childItems) {
-      children.push(this.parseMenuNode(child, this.menuNodeType(child)))
+    for (const item of findChildren(children, 'ItemMenu')) {
+      const itemAttrs = getAttrs(item)
+      menuChildren.push(this.parseMenuNode(item.ItemMenu, itemAttrs, this.menuNodeType(itemAttrs)))
     }
 
     // Fallback ancien format
-    const sousThemes = this.ensureArray(obj.SousTheme || obj.Noeud || [])
-    for (const st of sousThemes) {
-      children.push(this.parseMenuNode(st, 'sousTheme'))
+    for (const st of [...findChildren(children, 'SousTheme'), ...findChildren(children, 'Noeud')]) {
+      const stTag = st.SousTheme ? 'SousTheme' : 'Noeud'
+      menuChildren.push(this.parseMenuNode(st[stTag], getAttrs(st), 'sousTheme'))
+    }
+    for (const d of findChildren(children, 'Dossier')) {
+      menuChildren.push(this.parseMenuNode(d.Dossier, getAttrs(d), 'dossier'))
     }
 
-    const dossiers = this.ensureArray(obj.Dossier || [])
-    for (const d of dossiers) {
-      children.push(this.parseMenuNode(d, 'dossier'))
-    }
-
-    return { id, title, type, children }
+    return { id, title, type, children: menuChildren }
   }
 
-  private menuNodeType(obj: any): 'theme' | 'sousTheme' | 'dossier' {
-    const type = obj['@_type'] || ''
+  private menuNodeType(attrs: Record<string, string>): 'theme' | 'sousTheme' | 'dossier' {
+    const type = attrs['@_type'] || ''
     if (type === 'Theme') return 'theme'
     if (type === 'Sous-theme') return 'sousTheme'
     return 'dossier'
   }
 
-  // ─── Utilitaires ─────────────────────────────────────────────────
+  // ─── Utilitaires ──────────────────────────────────────────────────
 
-  private parseRef(obj: any): DilaRef | null {
-    if (!obj) return null
+  private parseRef(node: any): DilaRef | null {
+    if (!node) return null
+    const tag = Object.keys(node).find(k => k !== ':@')
+    if (!tag) return null
+    const attrs = getAttrs(node)
+    const children = node[tag]
     return {
-      id: obj['@_ID'] || obj['@_LienPublication'] || '',
-      title: this.textOf(obj.Titre) || this.textOf(obj) || '',
+      id: attrs['@_ID'] || attrs['@_LienPublication'] || '',
+      title: childText(children, 'Titre') || getAllText(children) || '',
     }
   }
 
-  private parseFilDAriane(obj: any): DilaRef[] {
-    if (!obj) return []
-    const niveaux = this.ensureArray(obj.Niveau || [])
+  private parseFilDAriane(pubChildren: any[]): DilaRef[] {
+    const fadNode = findChild(pubChildren, 'FilDAriane')
+    if (!fadNode) return []
+    const niveaux = findChildren(fadNode.FilDAriane, 'Niveau')
     return niveaux
       .map((n: any) => this.parseRef(n))
       .filter(Boolean) as DilaRef[]
   }
 
-  private parseDossierPere(obj: any): DilaFiche['dossierPere'] {
-    if (!obj) return null
-    const sousDossiers = this.ensureArray(obj.SousDossier || []).map((sd: any) => ({
-      id: sd['@_ID'] || '',
-      title: this.textOf(sd.Titre) || '',
-      fiches: this.ensureArray(sd.Fiche || []).map((f: any) => ({
-        id: f['@_ID'] || f['@_LienPublication'] || '',
-        title: this.textOf(f.Titre) || this.textOf(f) || '',
-      })),
-    }))
+  private parseDossierPere(pubChildren: any[]): DilaFiche['dossierPere'] {
+    const dpNode = findChild(pubChildren, 'DossierPere')
+    if (!dpNode) return null
+    const dpChildren = dpNode.DossierPere
+    const dpAttrs = getAttrs(dpNode)
+
+    const sousDossiers = findChildren(dpChildren, 'SousDossier').map((sdNode: any) => {
+      const sdChildren = sdNode.SousDossier
+      const sdAttrs = getAttrs(sdNode)
+      return {
+        id: sdAttrs['@_ID'] || '',
+        title: childText(sdChildren, 'Titre') || '',
+        fiches: findChildren(sdChildren, 'Fiche').map((fNode: any) => ({
+          id: getAttr(fNode, '@_ID') || getAttr(fNode, '@_LienPublication') || getAllText(fNode.Fiche) || '',
+          title: childText(fNode.Fiche, 'Titre') || getAllText(fNode.Fiche) || '',
+        })),
+      }
+    })
+
     return {
-      id: obj['@_ID'] || '',
-      title: this.textOf(obj.Titre) || '',
+      id: dpAttrs['@_ID'] || '',
+      title: childText(dpChildren, 'Titre') || '',
       sousDossiers,
     }
-  }
-
-  /**
-   * Extrait le texte d'un élément (gère string, objet avec #text, etc.)
-   */
-  private textOf(element: any): string {
-    if (element == null) return ''
-    if (typeof element === 'string') return element.trim()
-    if (typeof element === 'number') return String(element)
-    if (element['#text'] != null) return String(element['#text']).trim()
-    return ''
-  }
-
-  private ensureArray<T>(val: T | T[]): T[] {
-    if (val == null) return []
-    return Array.isArray(val) ? val : [val]
   }
 }
 

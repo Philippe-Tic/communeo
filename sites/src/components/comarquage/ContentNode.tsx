@@ -187,6 +187,13 @@ export default function ContentNode({ node, audience, depth = 0 }: Props) {
       )
 
     case 'fragmentConditionne':
+      if (attributes?.conditionType || attributes?.variable) {
+        return (
+          <div class="my-2 border-l-2 border-gray-200 pl-3">
+            {renderChildren(children, audience, depth)}
+          </div>
+        )
+      }
       return <>{renderChildren(children, audience, depth)}</>
 
     case 'miseEnEvidence':
@@ -209,7 +216,7 @@ export default function ContentNode({ node, audience, depth = 0 }: Props) {
 
     case 'lienInterne':
     case 'lienIntra': {
-      const ficheId = href ? extractFicheId(href) : null
+      const ficheId = href ? extractFicheId(href) : (attributes?.ficheId || null)
       if (ficheId) {
         return (
           <a

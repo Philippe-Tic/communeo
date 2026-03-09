@@ -55,6 +55,9 @@ const labels: Record<string, string> = {
         panels.forEach((panel) => {
           panel.classList.toggle('hidden', panel.dataset.audienceContent !== audience)
         })
+
+        // Notify Preact islands of audience change
+        document.dispatchEvent(new CustomEvent('audience-change', { detail: { audience } }))
       })
     })
   })

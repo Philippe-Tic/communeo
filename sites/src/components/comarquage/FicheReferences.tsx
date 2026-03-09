@@ -1,6 +1,7 @@
 import type { DilaReferenceSection } from '../../utils/comarquage-types'
 import ContentNode from './ContentNode'
 import OrganismCard from './OrganismCard'
+import OrganismMap from './OrganismMap'
 
 interface Props {
   references: DilaReferenceSection
@@ -76,6 +77,7 @@ export default function FicheReferences({ references, audience }: Props) {
               <OrganismCard key={org.id} organism={org} audience={audience} />
             ))}
           </div>
+          <OrganismMap organisms={ouSAdresser} />
         </section>
       )}
 

@@ -9,6 +9,7 @@ import { categories, documentsCNI, documentsPasseport } from '../../data/demarch
 import { getComarquageCategories } from '../../utils/comarquage';
 import CategoryGrid from '../../components/comarquage/CategoryGrid.astro';
 import AudienceSelector from '../../components/comarquage/AudienceSelector.astro';
+import SearchBar from '../../components/comarquage/SearchBar.tsx';
 
 const siteConfig = await getSiteConfig();
 const di = siteConfig.demarches_identite;
@@ -135,6 +136,8 @@ const steps = [
           </p>
 
           {audiences.length > 1 && <AudienceSelector audiences={audiences} />}
+
+          <SearchBar client:load defaultAudience={audiences[0] || 'particuliers'} />
 
           {audiences.includes('particuliers') && particuliersThemes.length > 0 && (
             <div data-audience-content="particuliers">

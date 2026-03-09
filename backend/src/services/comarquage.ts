@@ -15,7 +15,7 @@ import type {
 } from '../types/comarquage'
 import normalizer from './dila-normalizer'
 
-const DILA_BASE_URL = 'https://lecomarquage.service-public.gouv.fr/vdd/3.4'
+const DILA_BASE_URL = 'https://lecomarquage.service-public.fr/vdd/3.4'
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000 // 24h
 
 class ComarquageService {
@@ -168,7 +168,7 @@ class ComarquageService {
 
   private async doDownloadAndExtract(audience: DilaAudience): Promise<void> {
     const audienceSlug = audience === 'particuliers' ? 'part' : 'pro'
-    const zipUrl = `${DILA_BASE_URL}/vos-droits-et-demarches_${audienceSlug}.zip`
+    const zipUrl = `${DILA_BASE_URL}/${audienceSlug}/zip/vosdroits-latest.zip`
     const zipPath = path.join(this.cacheDir, `${audienceSlug}-${Date.now()}.zip`)
     const audienceDir = this.audienceDir(audience)
 

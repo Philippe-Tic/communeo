@@ -18,7 +18,8 @@ function flattenMenuNodes(nodes: DilaMenuNode[], query: string): DilaMenuNode[] 
 
   for (const node of nodes) {
     if (node.title.toLowerCase().includes(lowerQuery)) {
-      results.push(node)
+      // Retourner le nœud sans enfants (résultat plat pour la recherche)
+      results.push({ ...node, children: [] })
     }
     if (node.children?.length) {
       results.push(...flattenMenuNodes(node.children, query))

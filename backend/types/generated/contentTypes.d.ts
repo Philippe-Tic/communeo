@@ -1150,7 +1150,14 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<300>;
     auto_deploy_enabled: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    code_insee: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 5;
+      }>;
     colors: Schema.Attribute.JSON;
+    comarquage_audiences: Schema.Attribute.JSON;
+    comarquage_enabled: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     contact_mail: Schema.Attribute.Email & Schema.Attribute.Required;
     contact_phone: Schema.Attribute.String;
     contact_submissions: Schema.Attribute.Relation<

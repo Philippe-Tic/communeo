@@ -19,7 +19,13 @@ const badgeColors: Record<string, string> = {
 }
 
 export default function SearchResults({ results, audience, query }: Props) {
-  if (results.length === 0) {
+  // Filtrer les nœuds de navigation (sous-thèmes) qui n'ont pas de fichier XML
+  // Seuls les dossiers et thèmes-feuilles ont un fichier XML correspondant
+  const clickableResults = results.filter(
+    (node) => node.type === 'dossier' || node.type === 'theme',
+  )
+
+  if (clickableResults.length === 0) {
     return (
       <div class="mt-6 rounded-xl border border-gray-200 bg-white p-8 shadow-sm text-center">
         <svg
@@ -47,10 +53,10 @@ export default function SearchResults({ results, audience, query }: Props) {
   return (
     <div class="mt-6">
       <p class="text-sm text-gray-600 mb-4">
-        {results.length} résultat{results.length > 1 ? 's' : ''} pour «&nbsp;{query}&nbsp;»
+        {clickableResults.length} résultat{clickableResults.length > 1 ? 's' : ''} pour «&nbsp;{query}&nbsp;»
       </p>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {results.map((node) => (
+        {clickableResults.map((node) => (
           <a
             key={node.id}
             href={`/demarches/fiche?id=${node.id}&audience=${audience}`}

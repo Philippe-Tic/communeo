@@ -25,6 +25,7 @@ const ARRAY_ELEMENTS = [
   'BlocCas', 'ANoter', 'Attention', 'ASavoir', 'Exemple', 'Rappel',
   'Liste', 'Tableau', 'Image', 'Video',
   'FragmentConditionne', 'Condition',
+  'ItemMenu',
 ]
 
 const parser = new XMLParser({
@@ -47,8 +48,8 @@ class DilaNormalizer {
     if (!publication) return null
 
     const type = publication['@_type'] || publication['@_xsi:type'] || 'unknown'
-    const title = this.textOf(publication.dc?.title) || this.textOf(publication.Titre) || ''
-    const description = this.textOf(publication.dc?.description) || ''
+    const title = this.textOf(publication.dc?.title) || this.textOf(publication['dc:title']) || this.textOf(publication.Titre) || ''
+    const description = this.textOf(publication.dc?.description) || this.textOf(publication['dc:description']) || ''
     const dateModification = publication['@_dateModification'] || publication.dc?.date || ''
 
     // Thème et sous-thème
@@ -59,7 +60,22 @@ class DilaNormalizer {
     const filDAriane = this.parseFilDAriane(publication.FilDAriane)
 
     // Dossier père
-    const dossierPere = this.parseDossierPere(publication.DossierPere)
+    let dossierPere = this.parseDossierPere(publication.DossierPere)
+
+    // Pour les Dossiers sans DossierPere, construire la structure depuis les SousDossier directs
+    if (!dossierPere && (type === 'Dossier' || type === 'Dossier/Sous-dossier')) {
+      const sousDossiers = this.ensureArray(publication.SousDossier || []).map((sd: any) => ({
+        id: sd['@_ID'] || '',
+        title: this.textOf(sd.Titre) || '',
+        fiches: this.ensureArray(sd.Fiche || []).map((f: any) => ({
+          id: f['@_ID'] || f['@_LienPublication'] || '',
+          title: this.textOf(f.Titre) || this.textOf(f) || '',
+        })),
+      }))
+      if (sousDossiers.length > 0) {
+        dossierPere = { id: fileId, title, sousDossiers }
+      }
+    }
 
     // Avertissement
     const avertissement = publication.Avertissement
@@ -104,8 +120,9 @@ class DilaNormalizer {
     const menu = parsed.Menu || parsed.Arborescence
     if (!menu) return []
 
-    const themes = this.ensureArray(menu.Theme || menu.Noeud || [])
-    return themes.map((t: any) => this.parseMenuNode(t, 'theme'))
+    // Le format réel utilise <ItemMenu type="Theme|Sous-theme|Dossier">
+    const items = this.ensureArray(menu.ItemMenu || menu.Theme || menu.Noeud || [])
+    return items.map((t: any) => this.parseMenuNode(t, this.menuNodeType(t)))
   }
 
   // ─── Contenu récursif ────────────────────────────────────────────
@@ -374,19 +391,31 @@ class DilaNormalizer {
     const title = this.textOf(obj.Titre) || this.textOf(obj.Nom) || ''
     const children: DilaMenuNode[] = []
 
-    // Sous-thèmes
+    // Enfants via <ItemMenu> (format réel) ou ancien format
+    const childItems = this.ensureArray(obj.ItemMenu || [])
+    for (const child of childItems) {
+      children.push(this.parseMenuNode(child, this.menuNodeType(child)))
+    }
+
+    // Fallback ancien format
     const sousThemes = this.ensureArray(obj.SousTheme || obj.Noeud || [])
     for (const st of sousThemes) {
       children.push(this.parseMenuNode(st, 'sousTheme'))
     }
 
-    // Dossiers
     const dossiers = this.ensureArray(obj.Dossier || [])
     for (const d of dossiers) {
       children.push(this.parseMenuNode(d, 'dossier'))
     }
 
     return { id, title, type, children }
+  }
+
+  private menuNodeType(obj: any): 'theme' | 'sousTheme' | 'dossier' {
+    const type = obj['@_type'] || ''
+    if (type === 'Theme') return 'theme'
+    if (type === 'Sous-theme') return 'sousTheme'
+    return 'dossier'
   }
 
   // ─── Utilitaires ─────────────────────────────────────────────────

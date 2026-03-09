@@ -58,7 +58,7 @@ export default function FicheViewer() {
         return res.json()
       })
       .then(data => {
-        const ficheData = data.fiche || data
+        const ficheData = data.data || data
         setFiche(ficheData)
         document.title = `${ficheData.title} - Fiche pratique`
         setLoading(false)
@@ -159,9 +159,18 @@ export default function FicheViewer() {
       ))}
 
       {/* Contenu principal */}
-      {fiche.content.map((node, i) => (
-        <ContentNode key={`content-${i}`} node={node} audience={fiche.audience} />
-      ))}
+      {fiche.content.length > 0 ? (
+        fiche.content.map((node, i) => (
+          <ContentNode key={`content-${i}`} node={node} audience={fiche.audience} />
+        ))
+      ) : fiche.introduction.length === 0 && !fiche.dossierPere ? (
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r text-gray-700">
+          <p class="font-medium mb-2">Ce dossier regroupe plusieurs fiches pratiques.</p>
+          <p class="text-sm text-gray-600">
+            Consultez les rubriques associees ci-dessous pour trouver l'information recherchee.
+          </p>
+        </div>
+      ) : null}
 
       {/* References */}
       <FicheReferences references={fiche.references} audience={fiche.audience} />

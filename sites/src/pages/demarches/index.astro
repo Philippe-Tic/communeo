@@ -4,29 +4,12 @@ import Navigation from '../../components/Navigation.astro';
 import Footer from '../../components/Footer.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import { getSiteConfig } from '../../utils/strapi';
-import { getOpeningHoursEntries } from '../../utils/opening-hours';
-import { categories, documentsCNI, documentsPasseport } from '../../data/demarches';
 import { getComarquageCategories } from '../../utils/comarquage';
 import CategoryGrid from '../../components/comarquage/CategoryGrid.astro';
 import AudienceSelector from '../../components/comarquage/AudienceSelector.astro';
 import SearchBar from '../../components/comarquage/SearchBar.tsx';
 
 const siteConfig = await getSiteConfig();
-const di = siteConfig.demarches_identite;
-const showIdentiteSection = di?.has_dispositif_recueil === true;
-
-const openingHours = getOpeningHoursEntries(siteConfig.infos_pratiques?.opening_hours);
-
-function getRdvLabel(provider?: string): string {
-  switch (provider) {
-    case 'synbird': return 'Prendre RDV sur Synbird';
-    case 'ants-rdv': return 'Prendre RDV via ANTS';
-    case 'rdv-service-public': return 'Prendre RDV sur rdv-service-public.fr';
-    default: return 'Prendre rendez-vous';
-  }
-}
-
-const rdvLabel = getRdvLabel(di?.appointment_provider);
 
 // Comarquage: fetch categories at build time if enabled
 const comarquageEnabled = siteConfig.comarquage_enabled === true;
@@ -37,63 +20,15 @@ const particuliersThemes = audiences.includes('particuliers')
 const professionnelsThemes = audiences.includes('professionnels')
   ? await getComarquageCategories('professionnels')
   : [];
-
-// JSON-LD FAQPage
-const faqJsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": categories.map((cat) => ({
-    "@type": "Question",
-    "name": `Quelles démarches ${cat.title.toLowerCase()} puis-je effectuer en ligne ?`,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": `${cat.description} Services disponibles : ${cat.services.map(s => s.title).join(', ')}.`
-    }
-  }))
-});
-
-const steps = [
-  {
-    num: 1,
-    title: 'Pré-demande en ligne',
-    description: 'Remplissez votre pré-demande sur le site de l\'ANTS',
-    url: 'https://ants.gouv.fr/',
-    linkLabel: 'Accéder à l\'ANTS',
-    iconPath: 'M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418',
-  },
-  {
-    num: 2,
-    title: 'Rendez-vous',
-    description: 'Prenez rendez-vous en ligne pour le dépôt de votre dossier',
-    url: di?.appointment_url || undefined,
-    linkLabel: rdvLabel,
-    iconPath: 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5',
-  },
-  {
-    num: 3,
-    title: 'Dépôt du dossier',
-    description: 'Présentez-vous en mairie avec vos pièces justificatives',
-    iconPath: 'M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z',
-  },
-  {
-    num: 4,
-    title: 'Retrait du titre',
-    description: 'Retirez votre titre en mairie sous 2 à 4 semaines',
-    iconPath: 'M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
-  },
-];
 ---
 
 <Layout
   title="Démarches en ligne"
-  description="Accédez aux téléservices publics : état civil, carte d'identité, passeport, permis de conduire, carte grise, urbanisme, impôts, aides sociales et santé."
+  description="Accédez aux fiches pratiques de service-public.fr pour vos démarches administratives."
 >
   <a href="#main-content" class="skip-link">Aller au contenu principal</a>
 
   <Navigation />
-
-  <!-- JSON-LD FAQPage -->
-  <script type="application/ld+json" set:html={faqJsonLd} />
 
   <main id="main-content" data-pagefind-body>
     <Breadcrumb items={[{ label: 'Démarches' }]} />
@@ -112,21 +47,9 @@ const steps = [
       </div>
     </header>
 
-    <!-- Note info -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-        <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-        </svg>
-        <p class="text-sm text-blue-800">
-          Ces liens vous dirigent vers les sites officiels des services publics nationaux. Les démarches s'effectuent directement sur ces plateformes sécurisées.
-        </p>
-      </div>
-    </div>
-
     {/* Section Comarquage — conditionnelle */}
     {comarquageEnabled && (particuliersThemes.length > 0 || professionnelsThemes.length > 0) && (
-      <section class="py-12 border-b border-gray-200">
+      <section class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 class="text-2xl font-bold text-gray-900">
             Guichet démarches — service-public.fr
@@ -152,242 +75,6 @@ const steps = [
         </div>
       </section>
     )}
-
-    {/* Section CNI / Passeport — conditionnelle */}
-    {showIdentiteSection && (
-      <section class="py-12 border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="mb-8">
-            <div class="flex items-center gap-3 mb-2">
-              <h2 class="text-2xl font-bold text-gray-900">
-                Carte d'identité & Passeport
-              </h2>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                Service local
-              </span>
-            </div>
-            <p class="text-gray-600">
-              Votre mairie est équipée d'un dispositif de recueil biométrique pour les demandes de carte nationale d'identité et de passeport.
-            </p>
-          </div>
-
-          {/* Stepper */}
-          <div class="mb-10">
-            <div class="hidden md:grid md:grid-cols-4 gap-4">
-              {steps.map((step) => (
-                <div class="relative flex flex-col items-center text-center">
-                  <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-on-primary font-bold text-lg mb-3">
-                    {step.num}
-                  </div>
-                  <h3 class="font-semibold text-gray-900 mb-1">{step.title}</h3>
-                  <p class="text-sm text-gray-500 mb-3">{step.description}</p>
-                  {step.url && (
-                    <a
-                      href={step.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-text hover:text-primary-text/80 transition-colors"
-                    >
-                      {step.linkLabel}
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                      </svg>
-                      <span class="sr-only">(ouvre un nouveau site)</span>
-                    </a>
-                  )}
-                  {!step.url && step.num >= 3 && (
-                    <span class="text-sm text-gray-400">En mairie</span>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile stepper (vertical) */}
-            <div class="md:hidden space-y-6">
-              {steps.map((step) => (
-                <div class="flex gap-4">
-                  <div class="flex flex-col items-center">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-primary text-on-primary font-bold text-sm flex-shrink-0">
-                      {step.num}
-                    </div>
-                    {step.num < 4 && <div class="w-0.5 flex-1 bg-gray-200 mt-2"></div>}
-                  </div>
-                  <div class="pb-4">
-                    <h3 class="font-semibold text-gray-900">{step.title}</h3>
-                    <p class="text-sm text-gray-500 mt-0.5">{step.description}</p>
-                    {step.url && (
-                      <a
-                        href={step.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center gap-1.5 text-sm font-medium text-primary-text hover:text-primary-text/80 mt-2 transition-colors"
-                      >
-                        {step.linkLabel}
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                        </svg>
-                        <span class="sr-only">(ouvre un nouveau site)</span>
-                      </a>
-                    )}
-                    {!step.url && step.num >= 3 && (
-                      <span class="text-sm text-gray-400 mt-1 block">En mairie</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Pièces à fournir */}
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div class="flex items-center gap-2 mb-4">
-                <svg class="w-5 h-5 text-primary-text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
-                </svg>
-                <h3 class="text-lg font-semibold text-gray-900">Carte nationale d'identité</h3>
-              </div>
-              <p class="text-sm text-gray-500 mb-4">Pièces à fournir pour une demande ou un renouvellement :</p>
-              <ul class="space-y-2">
-                {documentsCNI.map((doc) => (
-                  <li class="flex items-start gap-2 text-sm">
-                    <svg class="w-4 h-4 text-primary-text mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                    {doc.url ? (
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer" class="text-primary-text hover:underline">
-                        {doc.label}
-                        <span class="sr-only">(ouvre un nouveau site)</span>
-                      </a>
-                    ) : (
-                      <span class="text-gray-700">{doc.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-              <div class="flex items-center gap-2 mb-4">
-                <svg class="w-5 h-5 text-primary-text" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-                </svg>
-                <h3 class="text-lg font-semibold text-gray-900">Passeport</h3>
-              </div>
-              <p class="text-sm text-gray-500 mb-4">Pièces à fournir pour une demande ou un renouvellement :</p>
-              <ul class="space-y-2">
-                {documentsPasseport.map((doc) => (
-                  <li class="flex items-start gap-2 text-sm">
-                    <svg class="w-4 h-4 text-primary-text mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                    {doc.url ? (
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer" class="text-primary-text hover:underline">
-                        {doc.label}
-                        <span class="sr-only">(ouvre un nouveau site)</span>
-                      </a>
-                    ) : (
-                      <span class="text-gray-700">{doc.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Infos pratiques */}
-          <div class="rounded-lg bg-gray-50 border border-gray-200 p-6">
-            <h3 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-              </svg>
-              Informations pratiques
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-              {siteConfig.address && (
-                <div>
-                  <span class="font-medium text-gray-700">Adresse :</span>
-                  <p class="text-gray-600 whitespace-pre-line">{siteConfig.address}</p>
-                </div>
-              )}
-              {siteConfig.contact_phone && (
-                <div>
-                  <span class="font-medium text-gray-700">Téléphone :</span>
-                  <p class="text-gray-600">{siteConfig.contact_phone}</p>
-                </div>
-              )}
-              {openingHours.length > 0 && (
-                <div>
-                  <span class="font-medium text-gray-700">Horaires :</span>
-                  <ul class="text-gray-600">
-                    {openingHours.map((entry) => (
-                      <li><span class="font-medium">{entry.day} :</span> {entry.hours}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-            {di?.remise_titre_info && (
-              <div class="mt-4 pt-4 border-t border-gray-200">
-                <p class="text-sm text-gray-700 whitespace-pre-line">{di.remise_titre_info}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    )}
-
-    <!-- Catégories -->
-    <section class="py-12">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="space-y-16">
-          {categories.map((category) => (
-            <div id={category.id}>
-              <div class="flex items-center gap-3 mb-2">
-                <h2 class="text-2xl font-bold text-gray-900">
-                  {category.title}
-                </h2>
-                <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${category.colorClasses}`}>
-                  {category.services.length} {category.services.length > 1 ? 'services' : 'service'}
-                </span>
-              </div>
-              <p class="text-gray-600 mb-8">{category.description}</p>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.services.map((service) => (
-                  <a
-                    href={service.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group flex items-start gap-4 bg-white rounded-xl border border-gray-100 p-5 hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 transition-all"
-                  >
-                    <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-100 group-hover:bg-primary-text/10 flex items-center justify-center transition-colors">
-                      <svg class="w-5 h-5 text-gray-600 group-hover:text-primary-text transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d={service.iconPaths} />
-                      </svg>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-1.5">
-                        <h3 class="text-base font-semibold text-gray-900 group-hover:text-primary-text transition-colors">
-                          {service.title}
-                        </h3>
-                        <svg class="w-4 h-4 text-gray-400 group-hover:text-primary-text flex-shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                        </svg>
-                        <span class="sr-only">(ouvre un nouveau site)</span>
-                      </div>
-                      <p class="text-sm text-gray-500 mt-1 leading-relaxed">
-                        {service.description}
-                      </p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
   </main>
 
   <Footer />

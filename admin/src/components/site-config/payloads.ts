@@ -92,12 +92,6 @@ export function buildDemarchesPayload(formData: SiteConfigFormData): SectionPayl
   if (formData.comarquage_audiences_professionnels) audiences.push('professionnels')
 
   return {
-    demarches_identite: {
-      has_dispositif_recueil: formData.has_dispositif_recueil,
-      appointment_url: formData.appointment_url || undefined,
-      appointment_provider: formData.appointment_provider,
-      remise_titre_info: formData.remise_titre_info || undefined,
-    },
     code_insee: formData.code_insee || undefined,
     comarquage_enabled: formData.comarquage_enabled,
     comarquage_audiences: audiences,

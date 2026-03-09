@@ -174,11 +174,6 @@
       "component": "legal.infos-pratiques",
       "required": false
     },
-    "demarches_identite": {
-      "type": "component",
-      "component": "legal.demarches-identite",
-      "required": false
-    },
     "open_data_enabled": {
       "type": "boolean",
       "default": false

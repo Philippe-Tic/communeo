@@ -39,10 +39,6 @@ export interface SiteConfigFormData {
   open_data_enabled: boolean
   open_data_url: string
   open_data_platform: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
-  has_dispositif_recueil: boolean
-  appointment_url: string
-  appointment_provider: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre'
-  remise_titre_info: string
   auto_deploy_enabled: boolean
   auto_deploy_delay: string
   homepage_content: string

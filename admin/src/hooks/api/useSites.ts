@@ -68,14 +68,6 @@ export interface InfosPratiques {
   longitude?: number
 }
 
-export interface DemarchesIdentite {
-  id?: number
-  has_dispositif_recueil?: boolean
-  appointment_url?: string
-  appointment_provider?: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre'
-  remise_titre_info?: string
-}
-
 // Types — Homepage config
 export type QuickLinkIcon = 'document' | 'identity' | 'folder' | 'mail' | 'alert' | 'clock' | 'phone' | 'map' | 'calendar' | 'users' | 'building' | 'heart' | 'info' | 'shield' | 'book' | 'globe'
 export type KeyFigureIcon = 'users' | 'map' | 'building' | 'calendar' | 'heart' | 'book' | 'globe' | 'shield' | 'tree' | 'star'
@@ -163,7 +155,6 @@ export interface Site {
   rgpd?: RGPD
   accessibilite?: Accessibilite
   infos_pratiques?: InfosPratiques
-  demarches_identite?: DemarchesIdentite
   // Open Data
   open_data_enabled?: boolean
   open_data_url?: string
@@ -197,7 +188,6 @@ export interface CreateSiteData {
   rgpd?: Partial<Omit<RGPD, 'id'>>
   accessibilite?: Partial<Omit<Accessibilite, 'id'>>
   infos_pratiques?: Partial<Omit<InfosPratiques, 'id'>>
-  demarches_identite?: Partial<Omit<DemarchesIdentite, 'id'>>
   // Open Data
   open_data_enabled?: boolean
   open_data_url?: string
@@ -287,7 +277,6 @@ export const useSite = (documentId: string) => {
       params.append('populate[rgpd]', 'true')
       params.append('populate[accessibilite]', 'true')
       params.append('populate[infos_pratiques]', 'true')
-      params.append('populate[demarches_identite]', 'true')
       params.append('populate[homepage][populate][hero_image]', 'true')
       params.append('populate[homepage][populate][quick_links]', 'true')
       params.append('populate[homepage][populate][key_figures]', 'true')

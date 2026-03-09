@@ -179,6 +179,10 @@ export interface Site {
   navigation_config?: NavigationItem[];
   // Réseaux sociaux
   social_links?: SocialLink[];
+  // Comarquage
+  code_insee?: string;
+  comarquage_enabled?: boolean;
+  comarquage_audiences?: string[];
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

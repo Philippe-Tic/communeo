@@ -72,6 +72,10 @@ export interface SiteConfigFormData {
   show_disruptions: boolean
   show_newsletter: boolean
   show_school_menu: boolean
+  code_insee: string
+  comarquage_enabled: boolean
+  comarquage_audiences_particuliers: boolean
+  comarquage_audiences_professionnels: boolean
 }
 
 export interface SectionBaseProps {

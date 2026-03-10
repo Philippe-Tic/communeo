@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'preact/hooks'
 import type { DilaMenuNode } from '../../utils/comarquage-types'
 import SearchResults from './SearchResults'
 
-const STRAPI_URL = (import.meta as any).env.STRAPI_URL as string
+const STRAPI_URL = (import.meta as any).env.STRAPI_PUBLIC_URL as string
 
 interface Props {
   defaultAudience: string

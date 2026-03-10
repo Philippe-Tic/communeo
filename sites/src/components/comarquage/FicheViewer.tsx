@@ -5,7 +5,7 @@ import FicheError from './FicheError'
 import ContentNode from './ContentNode'
 import FicheReferences from './FicheReferences'
 
-const STRAPI_URL = (import.meta as any).env.STRAPI_URL as string
+const STRAPI_URL = (import.meta as any).env.STRAPI_PUBLIC_URL as string
 
 function formatDate(iso: string): string {
   if (!iso) return ''

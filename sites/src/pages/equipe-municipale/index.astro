@@ -1,11 +1,12 @@
 ---
-import type { TeamMember } from '../types/strapi';
-import Layout from '../layouts/Layout.astro';
-import Navigation from '../components/Navigation.astro';
-import Footer from '../components/Footer.astro';
-import Breadcrumb from '../components/Breadcrumb.astro';
-import StrapiImage from '../components/StrapiImage.astro';
-import { getTeamMembers } from '../utils/strapi';
+import type { TeamMember } from '../../types/strapi';
+import Layout from '../../layouts/Layout.astro';
+import Navigation from '../../components/Navigation.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import StrapiImage from '../../components/StrapiImage.astro';
+import { getTeamMembers } from '../../utils/strapi';
+import { slugifyUnique } from '../../utils/slugify';
 
 let teamMembers: TeamMember[] = [];
 
@@ -40,6 +41,13 @@ const ROLE_SECTION_TITLES: Record<string, string> = {
   dgs: 'Direction Générale',
   agent: 'Agents municipaux',
 };
+
+// Générer les slugs (même ordre que getStaticPaths de [slug].astro)
+const slugsByDocumentId = new Map<string, string>();
+const usedSlugs = new Set<string>();
+for (const m of teamMembers) {
+  slugsByDocumentId.set(m.documentId, slugifyUnique(`${m.first_name} ${m.last_name}`, usedSlugs));
+}
 
 // Grouper les membres par rôle
 const membersByRole = ROLE_ORDER
@@ -116,7 +124,9 @@ const membersByRole = ROLE_ORDER
                         </span>
 
                         <h3 class="text-xl font-semibold text-gray-900 mb-1">
-                          {member.first_name} {member.last_name}
+                          <a href={`/equipe-municipale/${slugsByDocumentId.get(member.documentId)}`} class="hover:text-primary-text transition-colors">
+                            {member.first_name} {member.last_name}
+                          </a>
                         </h3>
 
                         {member.delegation && (

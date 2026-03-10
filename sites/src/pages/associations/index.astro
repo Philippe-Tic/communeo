@@ -6,6 +6,7 @@ import Footer from '../../components/Footer.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import StrapiImage from '../../components/StrapiImage.astro';
 import { getAssociations } from '../../utils/strapi';
+import { slugifyUnique } from '../../utils/slugify';
 
 let associations: Association[] = [];
 
@@ -32,6 +33,13 @@ const CATEGORY_COLORS: Record<string, string> = {
   education: 'bg-yellow-100 text-yellow-800',
   autre: 'bg-gray-100 text-gray-800',
 };
+
+// Générer les slugs (même ordre que getStaticPaths de [slug].astro)
+const slugsByDocumentId = new Map<string, string>();
+const usedSlugs = new Set<string>();
+for (const a of associations) {
+  slugsByDocumentId.set(a.documentId, slugifyUnique(a.name, usedSlugs));
+}
 
 // Extraire les catégories présentes
 const categories = [...new Set(associations.map(a => a.category))].sort();
@@ -121,7 +129,9 @@ const categories = [...new Set(associations.map(a => a.category))].sort();
                     </span>
 
                     <h2 class="text-xl font-semibold text-gray-900 mb-2">
-                      {association.name}
+                      <a href={`/associations/${slugsByDocumentId.get(association.documentId)}`} class="hover:text-primary-text transition-colors">
+                        {association.name}
+                      </a>
                     </h2>
 
                     {association.description && (

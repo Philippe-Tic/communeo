@@ -220,5 +220,31 @@ const websiteJsonLd = siteConfig ? JSON.stringify({
     </style>
 
     <CookieBanner />
+
+    <!-- Capacitor push notification deep-link handler (only active inside native app) -->
+    <script>
+      if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) {
+        import('@capacitor/push-notifications').then(({ PushNotifications }) => {
+          // When user taps a notification, navigate to the relevant page
+          PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+            const data = notification.notification.data;
+            if (!data?.type) return;
+
+            const routes: Record<string, string> = {
+              article: data.slug ? `/actualites/${data.slug}` : '/actualites',
+              evenement: data.slug ? `/evenements/${data.slug}` : '/evenements',
+              alerte: '/perturbations',
+              'school-menu': '/cantine',
+              'waste-schedule': '/collecte-dechets',
+            };
+
+            const path = routes[data.type];
+            if (path) window.location.href = path;
+          });
+        }).catch(() => {
+          // Not in Capacitor or plugin not available — ignore
+        });
+      }
+    </script>
   </body>
 </html>

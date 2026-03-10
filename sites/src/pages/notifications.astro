@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navigation from '../components/Navigation.astro';
+import Footer from '../components/Footer.astro';
+import Hero from '../components/Hero.astro';
+import Section from '../components/Section.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import NotificationPreferences from '../components/NotificationPreferences.tsx';
+
+const siteDocumentId = import.meta.env.SITE_DOCUMENT_ID || '';
+---
+
+<Layout
+  title="Notifications"
+  description="Configurez vos préférences de notifications push pour recevoir les alertes et actualités de votre mairie."
+  noIndex={true}
+>
+  <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+  <Navigation />
+
+  <main id="main-content" data-pagefind-ignore>
+    <Breadcrumb items={[
+      { label: 'Notifications' }
+    ]} />
+
+    <Hero title="Notifications" subtitle="Choisissez les notifications que vous souhaitez recevoir" />
+
+    <Section>
+      <div class="max-w-lg mx-auto">
+        <NotificationPreferences client:load siteDocumentId={siteDocumentId} />
+      </div>
+    </Section>
+  </main>
+
+  <Footer />
+</Layout>

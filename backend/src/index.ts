@@ -1,5 +1,6 @@
 import bootstrap from './bootstrap';
 import autoDeployService from './services/auto-deploy';
+import pushNotificationService from './services/push-notification';
 
 export default {
   /**
@@ -45,6 +46,19 @@ export default {
         } catch { /* ignore */ }
       }
 
+      // For notifiable content types: fetch previous data before the action (to detect transitions)
+      let previousData: any = null;
+      const notifiableConfig = pushNotificationService.getNotifiableConfig(ctx.uid);
+      if (notifiableConfig && ctx.action === 'update' && ctx.params?.documentId) {
+        try {
+          const entries: any[] = await strapi.entityService.findMany(ctx.uid, {
+            filters: { documentId: ctx.params.documentId } as any,
+            limit: 1,
+          });
+          previousData = entries?.[0] || null;
+        } catch { /* ignore */ }
+      }
+
       const result = await next();
 
       // After the action: resolve siteDocumentId
@@ -68,6 +82,15 @@ export default {
       if (siteDocumentId) {
         console.log(`📝 [AUTO-DEPLOY] Content changed (${ctx.action} on ${ctx.uid})`);
         autoDeployService.scheduleDeployIfEnabled(siteDocumentId);
+
+        // Send push notification if applicable (fire-and-forget)
+        pushNotificationService.notifyIfNeeded({
+          uid: ctx.uid,
+          action: ctx.action,
+          siteDocumentId,
+          result,
+          previousData,
+        });
       }
 
       return result;

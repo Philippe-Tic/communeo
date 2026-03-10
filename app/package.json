@@ -1,0 +1,21 @@
+{
+  "name": "cms-mairies-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application mobile Capacitor pour les mairies",
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
+    "@capacitor/status-bar": "^6.0.0",
+    "@capacitor/preferences": "^6.0.0",
+    "@capacitor-firebase/messaging": "^6.0.0"
+  }
+}

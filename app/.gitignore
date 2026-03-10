@@ -1,0 +1,5 @@
+node_modules/
+android/
+ios/
+firebase/configs/*/google-services.json
+firebase/configs/*/GoogleService-Info.plist

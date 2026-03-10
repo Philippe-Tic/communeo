@@ -32,10 +32,6 @@ export const DEFAULT_FORM_DATA: SiteConfigFormData = {
   open_data_enabled: false,
   open_data_url: '',
   open_data_platform: 'none',
-  has_dispositif_recueil: false,
-  appointment_url: '',
-  appointment_provider: 'ants-rdv',
-  remise_titre_info: '',
   auto_deploy_enabled: false,
   auto_deploy_delay: '300',
   homepage_content: '',
@@ -65,6 +61,10 @@ export const DEFAULT_FORM_DATA: SiteConfigFormData = {
   show_disruptions: false,
   show_newsletter: false,
   show_school_menu: false,
+  code_insee: '',
+  comarquage_enabled: false,
+  comarquage_audiences_particuliers: true,
+  comarquage_audiences_professionnels: false,
 }
 
 export interface SiteConfigOutletContext {

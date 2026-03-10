@@ -59,14 +59,6 @@ export interface InfosPratiques {
   longitude?: number;
 }
 
-export interface DemarchesIdentite {
-  id?: number;
-  has_dispositif_recueil?: boolean;
-  appointment_url?: string;
-  appointment_provider?: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre';
-  remise_titre_info?: string;
-}
-
 // Homepage config components
 export interface HomepageQuickLink {
   id?: number;
@@ -165,7 +157,6 @@ export interface Site {
   rgpd?: RGPD;
   accessibilite?: Accessibilite;
   infos_pratiques?: InfosPratiques;
-  demarches_identite?: DemarchesIdentite;
   contact_mail: string;
   contact_phone?: string;
   address?: string;
@@ -179,6 +170,10 @@ export interface Site {
   navigation_config?: NavigationItem[];
   // Réseaux sociaux
   social_links?: SocialLink[];
+  // Comarquage
+  code_insee?: string;
+  comarquage_enabled?: boolean;
+  comarquage_audiences?: string[];
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;

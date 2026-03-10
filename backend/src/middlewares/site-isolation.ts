@@ -265,7 +265,8 @@ export default (config: any, { strapi }: { strapi: any }) => {
     // Endpoints spéciaux qui nécessitent juste la vérification de la relation site
     const specialEndpoints = [
       'deployment', // /api/deployment/* - toutes les routes de déploiement
-      'domain'      // /api/domain/* - toutes les routes de domaine
+      'domain',     // /api/domain/* - toutes les routes de domaine
+      'comarquage', // /api/comarquage/* - fiches service-public.fr
     ];
 
     // Skip if not a content-type that needs site isolation and not a special endpoint

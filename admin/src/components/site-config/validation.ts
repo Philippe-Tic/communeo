@@ -82,7 +82,13 @@ export function validateInfo(formData: SiteConfigFormData): Record<string, strin
 }
 
 export function validateOpenData(): Record<string, string> { return {} }
-export function validateDemarches(): Record<string, string> { return {} }
+export function validateDemarches(formData: SiteConfigFormData): Record<string, string> {
+  const errors: Record<string, string> = {}
+  if (formData.comarquage_enabled && !formData.code_insee?.match(/^[0-9]{5}$/)) {
+    errors.code_insee = 'Le code INSEE doit contenir 5 chiffres'
+  }
+  return errors
+}
 export function validateHomepage(): Record<string, string> { return {} }
 export function validateNavigation(): Record<string, string> { return {} }
 export function validateSocial(): Record<string, string> { return {} }

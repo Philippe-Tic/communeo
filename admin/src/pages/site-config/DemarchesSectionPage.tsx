@@ -9,11 +9,12 @@ import type { SiteConfigFormData } from '../../components/site-config/types'
 import type { Site } from '../../hooks/api/useSites'
 
 function initDemarches(site: Site): Partial<SiteConfigFormData> {
+  const audiences = (site as any).comarquage_audiences as string[] | null
   return {
-    has_dispositif_recueil: site.demarches_identite?.has_dispositif_recueil || false,
-    appointment_url: site.demarches_identite?.appointment_url || '',
-    appointment_provider: site.demarches_identite?.appointment_provider || 'ants-rdv',
-    remise_titre_info: site.demarches_identite?.remise_titre_info || '',
+    code_insee: (site as any).code_insee || '',
+    comarquage_enabled: (site as any).comarquage_enabled || false,
+    comarquage_audiences_particuliers: audiences ? audiences.includes('particuliers') : true,
+    comarquage_audiences_professionnels: audiences ? audiences.includes('professionnels') : false,
   }
 }
 
@@ -24,7 +25,7 @@ export function DemarchesSectionPage() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newErrors = validateDemarches()
+    const newErrors = validateDemarches(formData)
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
     handleSubmit(buildDemarchesPayload(formData))

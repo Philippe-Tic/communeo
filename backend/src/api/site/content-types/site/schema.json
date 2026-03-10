@@ -174,11 +174,6 @@
       "component": "legal.infos-pratiques",
       "required": false
     },
-    "demarches_identite": {
-      "type": "component",
-      "component": "legal.demarches-identite",
-      "required": false
-    },
     "open_data_enabled": {
       "type": "boolean",
       "default": false
@@ -225,6 +220,18 @@
       "relation": "oneToMany",
       "target": "api::school-menu.school-menu",
       "mappedBy": "site"
+    },
+    "code_insee": {
+      "type": "string",
+      "maxLength": 5,
+      "regex": "^[0-9]{5}$"
+    },
+    "comarquage_enabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "comarquage_audiences": {
+      "type": "json"
     }
   }
 }

@@ -39,10 +39,6 @@ export interface SiteConfigFormData {
   open_data_enabled: boolean
   open_data_url: string
   open_data_platform: 'data-gouv-fr' | 'opendatasoft' | 'custom' | 'none'
-  has_dispositif_recueil: boolean
-  appointment_url: string
-  appointment_provider: 'synbird' | 'ants-rdv' | 'rdv-service-public' | 'autre'
-  remise_titre_info: string
   auto_deploy_enabled: boolean
   auto_deploy_delay: string
   homepage_content: string
@@ -72,6 +68,10 @@ export interface SiteConfigFormData {
   show_disruptions: boolean
   show_newsletter: boolean
   show_school_menu: boolean
+  code_insee: string
+  comarquage_enabled: boolean
+  comarquage_audiences_particuliers: boolean
+  comarquage_audiences_professionnels: boolean
 }
 
 export interface SectionBaseProps {

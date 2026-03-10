@@ -6,6 +6,7 @@ export default [
   {
     name: 'strapi::cors',
     config: {
+      origin: '*',
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Site-Document-Id'],
     },
   },

@@ -143,7 +143,6 @@ export async function getSiteConfig(): Promise<Site> {
   urlObj.searchParams.set('populate[rgpd]', 'true');
   urlObj.searchParams.set('populate[accessibilite]', 'true');
   urlObj.searchParams.set('populate[infos_pratiques]', 'true');
-  urlObj.searchParams.set('populate[demarches_identite]', 'true');
   urlObj.searchParams.set('populate[homepage][populate][hero_image]', 'true');
   urlObj.searchParams.set('populate[homepage][populate][quick_links]', 'true');
   urlObj.searchParams.set('populate[homepage][populate][key_figures]', 'true');

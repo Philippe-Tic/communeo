@@ -329,6 +329,13 @@ export default async ({ strapi }) => {
       { action: 'api::site-management.site-management.update', enabled: true },
       { action: 'api::site-management.site-management.delete', enabled: true },
 
+      // Comarquage (custom actions)
+      { action: 'api::comarquage.comarquage.categories', enabled: true },
+      { action: 'api::comarquage.comarquage.fiche', enabled: true },
+      { action: 'api::comarquage.comarquage.search', enabled: true },
+      { action: 'api::comarquage.comarquage.invalidateCache', enabled: true },
+      { action: 'api::comarquage.comarquage.cacheStatus', enabled: true },
+
       // Newsletter Subscribers
       { action: 'api::newsletter-subscriber.newsletter-subscriber.find', enabled: true },
       { action: 'api::newsletter-subscriber.newsletter-subscriber.findOne', enabled: true },

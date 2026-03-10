@@ -1,9 +1,8 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useSite } from '@/hooks/api/useSites'
-import { useUserSite } from '@/hooks/useUser'
+import { useCompliance } from '@/hooks/useCompliance'
 import { formatDate } from '@/lib/format'
-import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Clock, File, FileText, Mail, MapPin, Rocket, XCircle } from 'lucide-react'
+import { AlertTriangle, ArrowRight, Calendar, CheckCircle2, ChevronRight, Clock, File, FileText, Mail, MapPin, Rocket, ShieldCheck, XCircle } from 'lucide-react'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { PageHeader, SectionHeader } from '../components/layout'
 import { ArticleCard, StatsCard } from '../components/pages'
@@ -18,11 +17,10 @@ import useDeployment from '../hooks/useDeployment'
 export const Dashboard = () => {
   const { fullName, user } = useUser()
   const { firstName } = useUserProfile()
-  const { site: userSite } = useUserSite()
   const navigate = useNavigate()
 
-  // Fetch site data for legal config check
-  const { data: siteData } = useSite(userSite?.documentId || '')
+  // Shared compliance engine
+  const { score: complianceScore, items: complianceItems, criticalMissing, nextAction, isLoading: complianceLoading } = useCompliance()
 
   // Fetch data for stats
   const { data: articlesData, isLoading: articlesLoading } = useArticles()
@@ -77,20 +75,8 @@ export const Dashboard = () => {
     },
   ]
 
-  // Conformity progress
-  const conformityChecks = siteData ? [
-    { label: 'SIRET', ok: !!siteData.mentions_legales?.siret },
-    { label: 'Directeur de publication', ok: !!siteData.mentions_legales?.publication_director },
-    { label: 'Hébergeur', ok: !!siteData.mentions_legales?.hebergeur_name },
-    { label: 'DPO', ok: !!siteData.rgpd?.dpo_name },
-    { label: 'Politique RGPD', ok: typeof siteData.rgpd?.rgpd_policy === 'string' && siteData.rgpd.rgpd_policy.trim().length >= 50 },
-    { label: 'Niveau accessibilité', ok: !!siteData.accessibilite?.accessibility_level },
-    { label: 'Email de contact', ok: !!siteData.contact_mail },
-    { label: 'Adresse', ok: !!siteData.address },
-  ] : []
-  const conformityDone = conformityChecks.filter(c => c.ok).length
-  const conformityTotal = conformityChecks.length
-  const conformityPercent = conformityTotal > 0 ? Math.round((conformityDone / conformityTotal) * 100) : 0
+  const complianceDone = complianceItems.filter(i => i.status === 'ok').length
+  const complianceTotal = complianceItems.length
 
   // Deployment status
   const deploymentStatusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -120,39 +106,30 @@ export const Dashboard = () => {
           subtitle={`Voici un aperçu de votre tableau de bord${user?.site ? ` - ${user.site.name}` : ''}`}
         />
 
-        {/* Legal config incomplete banner */}
-        {siteData && (() => {
-          const ml = siteData.mentions_legales
-          const rgpd = siteData.rgpd
-          const missing = [
-            !ml?.siret && 'SIRET',
-            !ml?.publication_director && 'Directeur de publication',
-            !ml?.hebergeur_name && 'Hébergeur',
-            !rgpd?.dpo_name && 'DPO',
-            !(typeof rgpd?.rgpd_policy === 'string' && rgpd.rgpd_policy.trim().length >= 50) && 'Politique RGPD',
-          ].filter(Boolean) as string[]
-          if (missing.length === 0) return null
-          return (
-            <div className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50/80 p-4 backdrop-blur-sm dark:border-orange-800 dark:bg-orange-950/30">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
-              <div className="text-sm">
-                <p className="font-medium text-orange-800 dark:text-orange-300">
-                  Configuration légale incomplète
-                </p>
+        {/* Legal compliance alert banner */}
+        {!complianceLoading && criticalMissing > 0 && (
+          <div className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50/80 p-4 backdrop-blur-sm dark:border-orange-800 dark:bg-orange-950/30">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-600 dark:text-orange-400" />
+            <div className="flex-1 text-sm">
+              <p className="font-medium text-orange-800 dark:text-orange-300">
+                {criticalMissing} obligation{criticalMissing > 1 ? 's' : ''} critique{criticalMissing > 1 ? 's' : ''} à compléter
+              </p>
+              {nextAction && (
                 <p className="mt-1 text-orange-700 dark:text-orange-400">
-                  Il manque : {missing.join(', ')}.{' '}
-                  <Button
-                    variant="link"
-                    className="h-auto p-0 text-orange-700 underline dark:text-orange-400"
-                    onClick={() => navigate('/site/general')}
-                  >
-                    Compléter la configuration
-                  </Button>
+                  Prochaine étape : {nextAction.label}
                 </p>
-              </div>
+              )}
             </div>
-          )
-        })()}
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-orange-300 text-orange-700 hover:bg-orange-100 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950/50"
+              onClick={() => navigate('/compliance')}
+            >
+              Voir le détail
+            </Button>
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -276,34 +253,58 @@ export const Dashboard = () => {
             </div>
 
             {/* Conformity Progress */}
-            {conformityTotal > 0 && (
+            {complianceTotal > 0 && (
               <div className="glass-card rounded-xl p-5">
                 <div className="mb-3">
-                  <SectionHeader title="Conformité légale" linkTo="/compliance" linkLabel="Détails" />
+                  <SectionHeader
+                    title="Conformité légale"
+                    linkTo="/compliance"
+                    linkLabel="Détails"
+                    icon={<ShieldCheck className="h-4 w-4 text-brand-500" />}
+                  />
                 </div>
-                <div className="mb-2 flex items-center gap-2">
+                <div className="mb-3 flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-brand-700 to-brand-600 transition-all"
-                      style={{ width: `${conformityPercent}%` }}
+                      className={`h-full rounded-full transition-all ${
+                        complianceScore === 100
+                          ? 'bg-green-500'
+                          : 'bg-gradient-to-r from-brand-700 to-brand-600'
+                      }`}
+                      style={{ width: `${complianceScore}%` }}
                     />
                   </div>
                   <span className="text-sm font-medium text-muted-foreground">
-                    {conformityDone}/{conformityTotal}
+                    {complianceDone}/{complianceTotal}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {conformityChecks.map((check) => (
-                    <Badge
-                      key={check.label}
-                      variant={check.ok ? 'secondary' : 'outline'}
-                      className={check.ok ? 'text-emerald-700 dark:text-emerald-400' : 'text-muted-foreground'}
-                    >
-                      {check.ok ? <CheckCircle2 className="mr-1 h-3 w-3" /> : <XCircle className="mr-1 h-3 w-3" />}
-                      {check.label}
-                    </Badge>
-                  ))}
-                </div>
+                {nextAction ? (
+                  <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-muted-foreground">Prochaine action</p>
+                      <p className="text-sm font-semibold">{nextAction.label}</p>
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {nextAction.estimatedTime}
+                      </p>
+                    </div>
+                    {nextAction.fixUrl && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(nextAction.fixUrl!)}
+                      >
+                        Corriger
+                        <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Tout est conforme
+                  </div>
+                )}
               </div>
             )}
 

@@ -1,37 +1,27 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ErrorState, LoadingSpinner } from '../components/common'
 import { PageHeader } from '../components/layout'
 import { StatsCard } from '../components/pages'
-import { useOfficialDocuments } from '@/hooks/api/useOfficialDocuments'
-import { useSite } from '@/hooks/api/useSites'
-import { useUserSite } from '@/hooks/useUser'
+import { useCompliance } from '@/hooks/useCompliance'
+import type { ComplianceItem, CompliancePriority, ComplianceStatus } from '@/lib/compliance'
 import {
   AlertTriangle,
+  ArrowRight,
   CheckCircle2,
+  Clock,
   ExternalLink,
-  Settings,
+  ShieldAlert,
   ShieldCheck,
   XCircle,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-
-type ComplianceStatus = 'ok' | 'partial' | 'missing'
-
-interface ComplianceDetail {
-  label: string
-  ok: boolean
-}
-
-interface ComplianceItem {
-  id: string
-  label: string
-  status: ComplianceStatus
-  legalReference: string
-  fixUrl?: string
-  details: ComplianceDetail[]
-  conditional?: boolean
-}
 
 function getStatusIcon(status: ComplianceStatus) {
   switch (status) {
@@ -41,17 +31,6 @@ function getStatusIcon(status: ComplianceStatus) {
       return <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400" />
     case 'missing':
       return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-  }
-}
-
-function getStatusBadge(status: ComplianceStatus) {
-  switch (status) {
-    case 'ok':
-      return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Conforme</Badge>
-    case 'partial':
-      return <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">Partiel</Badge>
-    case 'missing':
-      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Manquant</Badge>
   }
 }
 
@@ -66,6 +45,28 @@ function getStatusBorderColor(status: ComplianceStatus) {
   }
 }
 
+function PriorityBadge({ priority }: { priority: CompliancePriority }) {
+  switch (priority) {
+    case 'obligatoire':
+      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Obligatoire</Badge>
+    case 'recommandé':
+      return <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Recommandé</Badge>
+    case 'optionnel':
+      return <Badge className="bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400">Optionnel</Badge>
+  }
+}
+
+function StatusBadge({ status }: { status: ComplianceStatus }) {
+  switch (status) {
+    case 'ok':
+      return <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Conforme</Badge>
+    case 'partial':
+      return <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">Partiel</Badge>
+    case 'missing':
+      return <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Manquant</Badge>
+  }
+}
+
 function ComplianceCard({ item }: { item: ComplianceItem }) {
   const navigate = useNavigate()
 
@@ -77,8 +78,11 @@ function ComplianceCard({ item }: { item: ComplianceItem }) {
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-semibold">{item.label}</h3>
-              {getStatusBadge(item.status)}
+              <PriorityBadge priority={item.priority} />
+              <StatusBadge status={item.status} />
             </div>
+
+            <p className="text-sm text-muted-foreground">{item.description}</p>
 
             {item.details.length > 0 && (
               <ul className="space-y-1 text-sm text-muted-foreground">
@@ -95,9 +99,24 @@ function ComplianceCard({ item }: { item: ComplianceItem }) {
               </ul>
             )}
 
-            <p className="text-xs italic text-muted-foreground">
-              {item.legalReference}
-            </p>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {item.estimatedTime}
+              </span>
+              <span className="italic">{item.legalReference}</span>
+              {item.helpUrl && (
+                <a
+                  href={item.helpUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-brand-600 hover:underline dark:text-brand-400"
+                >
+                  En savoir plus
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
@@ -109,7 +128,7 @@ function ComplianceCard({ item }: { item: ComplianceItem }) {
             className="shrink-0"
           >
             Corriger
-            <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
           </Button>
         )}
       </div>
@@ -117,255 +136,107 @@ function ComplianceCard({ item }: { item: ComplianceItem }) {
   )
 }
 
-function isFilled(value: unknown): boolean {
-  if (value === null || value === undefined) return false
-  if (typeof value === 'string') return value.trim().length > 0
-  return true
-}
-
-function computeStatus(checks: boolean[]): ComplianceStatus {
-  const ok = checks.filter(Boolean).length
-  if (ok === checks.length) return 'ok'
-  if (ok > 0) return 'partial'
-  return 'missing'
+function CategoryProgress({ done, total }: { done: number; total: number }) {
+  const percent = total > 0 ? Math.round((done / total) * 100) : 0
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full transition-all ${
+            percent === 100
+              ? 'bg-green-500'
+              : percent > 0
+                ? 'bg-orange-500'
+                : 'bg-red-500'
+          }`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <span className="text-xs text-muted-foreground">
+        {done}/{total}
+      </span>
+    </div>
+  )
 }
 
 export function Compliance() {
   const navigate = useNavigate()
-  const { site: userSite } = useUserSite()
-  const documentId = userSite?.documentId || ''
-
-  const { data: site, isLoading: siteLoading, error: siteError, refetch: refetchSite } = useSite(documentId)
-
-  // Official document queries — one per document type, pageSize: 1
-  const pvQuery = useOfficialDocuments({ document_type: 'pv-conseil-municipal', status: 'published', pageSize: 1 })
-  const deliberationQuery = useOfficialDocuments({ document_type: 'deliberation', status: 'published', pageSize: 1 })
-  const pluQuery = useOfficialDocuments({ document_type: 'plu', status: 'published', pageSize: 1 })
-  const scotQuery = useOfficialDocuments({ document_type: 'scot', status: 'published', pageSize: 1 })
-  const carteQuery = useOfficialDocuments({ document_type: 'carte-communale', status: 'published', pageSize: 1 })
-  const budgetPrimitifQuery = useOfficialDocuments({ document_type: 'budget-primitif', status: 'published', pageSize: 1 })
-  const compteAdminQuery = useOfficialDocuments({ document_type: 'compte-administratif', status: 'published', pageSize: 1 })
-  const robQuery = useOfficialDocuments({ document_type: 'rapport-orientations-budgetaires', status: 'published', pageSize: 1 })
-
-  const isLoading = siteLoading ||
-    pvQuery.isLoading || deliberationQuery.isLoading ||
-    pluQuery.isLoading || scotQuery.isLoading || carteQuery.isLoading ||
-    budgetPrimitifQuery.isLoading || compteAdminQuery.isLoading || robQuery.isLoading
-
-  const hasError = siteError ||
-    pvQuery.error || deliberationQuery.error ||
-    pluQuery.error || scotQuery.error || carteQuery.error ||
-    budgetPrimitifQuery.error || compteAdminQuery.error || robQuery.error
+  const {
+    score,
+    byCategory,
+    nextAction,
+    criticalMissing,
+    populationUnknown,
+    isLoading,
+    error,
+    refetch,
+  } = useCompliance()
 
   if (isLoading) return <LoadingSpinner message="Chargement de la conformité..." />
-  if (hasError || !site) return <ErrorState onRetry={() => refetchSite()} />
+  if (error) return <ErrorState onRetry={() => refetch()} />
 
-  const hasPv = (pvQuery.data?.meta?.pagination?.total ?? 0) > 0
-  const hasDeliberation = (deliberationQuery.data?.meta?.pagination?.total ?? 0) > 0
-  const hasUrbanisme =
-    (pluQuery.data?.meta?.pagination?.total ?? 0) > 0 ||
-    (scotQuery.data?.meta?.pagination?.total ?? 0) > 0 ||
-    (carteQuery.data?.meta?.pagination?.total ?? 0) > 0
-  const hasBudget =
-    (budgetPrimitifQuery.data?.meta?.pagination?.total ?? 0) > 0 ||
-    (compteAdminQuery.data?.meta?.pagination?.total ?? 0) > 0 ||
-    (robQuery.data?.meta?.pagination?.total ?? 0) > 0
+  // Find the first incomplete category with critical items to auto-open
+  const firstIncompleteCategory = byCategory.find(
+    (cat) => cat.items.some((i) => i.status !== 'ok' && i.priority === 'obligatoire')
+  )
+  const defaultOpenCategory = firstIncompleteCategory?.key ?? byCategory[0]?.key
 
-  const ml = site.mentions_legales
-  const rgpd = site.rgpd
-  const acc = site.accessibilite
-  const population = site.infos_pratiques?.population
-
-  // Build compliance items
-  const siretOk = isFilled(ml?.siret)
-  const directorOk = isFilled(ml?.publication_director)
-  const hebergeurOk = isFilled(ml?.hebergeur_name)
-
-  const rgpdPolicyOk = typeof rgpd?.rgpd_policy === 'string' && rgpd.rgpd_policy.trim().length >= 50
-  const rgpdPolicyPartial = typeof rgpd?.rgpd_policy === 'string' && rgpd.rgpd_policy.trim().length > 0 && rgpd.rgpd_policy.trim().length < 50
-
-  const dpoNameOk = isFilled(rgpd?.dpo_name)
-  const dpoEmailOk = isFilled(rgpd?.dpo_email)
-
-  const accLevelOk = isFilled(acc?.accessibility_level)
-  const accDeclarationOk = isFilled(acc?.accessibility_declaration)
-
-  const contactOk = isFilled(site.contact_mail)
-
-  const allItems: ComplianceItem[] = [
-    {
-      id: 'mentions-legales',
-      label: 'Mentions légales',
-      status: computeStatus([siretOk, directorOk, hebergeurOk]),
-      legalReference: 'Art. 6 LCEN (loi n\u00b02004-575)',
-      fixUrl: '/site/legal',
-      details: [
-        { label: 'SIRET', ok: siretOk },
-        { label: 'Directeur de publication', ok: directorOk },
-        { label: 'Hébergeur', ok: hebergeurOk },
-      ],
-    },
-    {
-      id: 'rgpd',
-      label: 'Politique RGPD',
-      status: rgpdPolicyOk ? 'ok' : rgpdPolicyPartial ? 'partial' : 'missing',
-      legalReference: 'RGPD art. 13-14, règlement UE 2016/679',
-      fixUrl: '/site/rgpd',
-      details: [
-        { label: 'Politique de confidentialité (min. 50 caractères)', ok: rgpdPolicyOk },
-      ],
-    },
-    {
-      id: 'dpo',
-      label: 'Délégué à la protection des données (DPO)',
-      status: computeStatus([dpoNameOk, dpoEmailOk]),
-      legalReference: 'RGPD art. 37-39',
-      fixUrl: '/site/rgpd',
-      details: [
-        { label: 'Nom du DPO', ok: dpoNameOk },
-        { label: 'Email du DPO', ok: dpoEmailOk },
-      ],
-    },
-    {
-      id: 'accessibilite',
-      label: 'Accessibilité',
-      status: computeStatus([accLevelOk, accDeclarationOk]),
-      legalReference: 'Art. 47 loi n\u00b02005-102, RGAA',
-      fixUrl: '/site/accessibility',
-      details: [
-        { label: "Niveau d'accessibilité", ok: accLevelOk },
-        { label: "Déclaration d'accessibilité", ok: accDeclarationOk },
-      ],
-    },
-    {
-      id: 'cookies',
-      label: 'Bandeau cookies',
-      status: 'ok',
-      legalReference: 'Directive ePrivacy, recommandations CNIL',
-      details: [],
-    },
-    {
-      id: 'https',
-      label: 'HTTPS',
-      status: 'ok',
-      legalReference: 'RGS, recommandations ANSSI',
-      details: [],
-    },
-    {
-      id: 'contact',
-      label: 'Contact / Saisine par voie électronique',
-      status: contactOk ? 'ok' : 'missing',
-      legalReference: 'Art. L112-2-1 CRPA',
-      fixUrl: '/site/general',
-      details: [
-        { label: 'Email de contact', ok: contactOk },
-      ],
-    },
-    {
-      id: 'pv-conseil',
-      label: 'Procès-verbaux du conseil municipal',
-      status: hasPv ? 'ok' : 'missing',
-      legalReference: 'Art. L2121-25 CGCT',
-      fixUrl: '/documents/new',
-      details: [],
-    },
-    {
-      id: 'deliberations',
-      label: 'Délibérations',
-      status: hasDeliberation ? 'ok' : 'missing',
-      legalReference: 'Art. L2121-24 CGCT',
-      fixUrl: '/documents/new',
-      details: [],
-    },
-    {
-      id: 'urbanisme',
-      label: 'Documents d\'urbanisme',
-      status: hasUrbanisme ? 'ok' : 'missing',
-      legalReference: 'Art. L153-1 Code de l\'urbanisme',
-      fixUrl: '/documents/new',
-      details: [],
-    },
-  ]
-
-  // Conditional items (population > 3500)
-  const showConditional = typeof population === 'number' && population > 3500
-  const populationUnknown = population === null || population === undefined
-
-  if (showConditional) {
-    const openDataChecks = [hasDeliberation, hasPv, hasBudget]
-    const openDataOkCount = openDataChecks.filter(Boolean).length
-
-    allItems.push({
-      id: 'open-data',
-      label: 'Open data (communes > 3 500 hab.)',
-      status: openDataOkCount === openDataChecks.length ? 'ok' : openDataOkCount > 0 ? 'partial' : 'missing',
-      legalReference: 'Art. L312-1-1 CRPA',
-      fixUrl: '/documents',
-      details: [
-        { label: 'Délibérations publiées', ok: hasDeliberation },
-        { label: 'PV du conseil publiés', ok: hasPv },
-        { label: 'Documents budgétaires publiés', ok: hasBudget },
-      ],
-      conditional: true,
-    })
-
-    allItems.push({
-      id: 'budget',
-      label: 'Budget (communes > 3 500 hab.)',
-      status: hasBudget ? 'ok' : 'missing',
-      legalReference: 'Art. L2313-1 CGCT',
-      fixUrl: '/documents/new',
-      details: [],
-      conditional: true,
-    })
-  }
-
-  // Compute scores
-  const okCount = allItems.filter((i) => i.status === 'ok').length
-  const partialCount = allItems.filter((i) => i.status === 'partial').length
-  const missingCount = allItems.filter((i) => i.status === 'missing').length
-  const total = allItems.length
-  const percentage = Math.round(((okCount + partialCount * 0.5) / total) * 100)
+  const totalObligatoire = byCategory.flatMap((c) => c.items).filter((i) => i.priority === 'obligatoire').length
+  const doneObligatoire = totalObligatoire - criticalMissing
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
-          title="Conformité légale"
-          subtitle="Vérifiez que votre site respecte les obligations légales des collectivités"
-        />
-        <Button onClick={() => navigate('/site/general')}>
-          <Settings className="mr-1.5 h-4 w-4" />
-          Configurer
-        </Button>
-      </div>
+      <PageHeader
+        title="Conformité légale"
+        subtitle="Vérifiez que votre site respecte les obligations légales des collectivités"
+      />
 
-      {/* Stats cards */}
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+      {/* Stats cards — 3 columns */}
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
         <StatsCard
           label="Score global"
-          value={`${percentage} %`}
-          color="blue"
+          value={`${score} %`}
+          color={score === 100 ? 'green' : score >= 50 ? 'blue' : 'red'}
           icon={<ShieldCheck className="h-6 w-6" />}
         />
         <StatsCard
-          label="Conforme"
-          value={okCount}
-          color="green"
-          icon={<CheckCircle2 className="h-6 w-6" />}
+          label="Obligations critiques"
+          value={`${doneObligatoire}/${totalObligatoire}`}
+          color={criticalMissing === 0 ? 'green' : 'red'}
+          icon={<ShieldAlert className="h-6 w-6" />}
         />
-        <StatsCard
-          label="Partiel"
-          value={partialCount}
-          color="orange"
-          icon={<AlertTriangle className="h-6 w-6" />}
-        />
-        <StatsCard
-          label="Manquant"
-          value={missingCount}
-          color="red"
-          icon={<XCircle className="h-6 w-6" />}
-        />
+        {nextAction ? (
+          <div className="glass-card flex flex-col justify-between rounded-xl p-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Prochaine action</p>
+              <p className="font-semibold">{nextAction.label}</p>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="h-3.5 w-3.5" />
+                {nextAction.estimatedTime}
+              </p>
+            </div>
+            {nextAction.fixUrl && (
+              <Button
+                size="sm"
+                className="mt-3 w-full"
+                onClick={() => navigate(nextAction.fixUrl!)}
+              >
+                Corriger
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="glass-card flex items-center gap-4 rounded-xl p-6">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white shadow-sm">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-green-600 dark:text-green-400">Tout est conforme</p>
+              <p className="text-sm text-muted-foreground">Votre site respecte toutes les obligations</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Population warning banner */}
@@ -392,12 +263,31 @@ export function Compliance() {
         </div>
       )}
 
-      {/* Compliance cards */}
-      <div className="flex flex-col gap-4">
-        {allItems.map((item) => (
-          <ComplianceCard key={item.id} item={item} />
+      {/* Accordion by category */}
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue={defaultOpenCategory}
+        className="rounded-lg border bg-card shadow-sm"
+      >
+        {byCategory.map((cat) => (
+          <AccordionItem key={cat.key} value={cat.key} className="px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <div className="flex flex-1 items-center justify-between gap-4 pr-2">
+                <span className="text-base font-semibold">{cat.label}</span>
+                <CategoryProgress done={cat.doneCount} total={cat.totalCount} />
+              </div>
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="flex flex-col gap-3 pb-2">
+                {cat.items.map((item) => (
+                  <ComplianceCard key={item.id} item={item} />
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         ))}
-      </div>
+      </Accordion>
     </div>
   )
 }

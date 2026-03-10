@@ -198,6 +198,41 @@ export const usePublishOfficialDocument = () => {
   })
 }
 
+export const useOfficialDocumentCounts = () => {
+  const types = [
+    'pv-conseil-municipal',
+    'deliberation',
+    'plu',
+    'scot',
+    'carte-communale',
+    'budget-primitif',
+    'compte-administratif',
+    'rapport-orientations-budgetaires',
+  ]
+
+  const queryParams = new URLSearchParams()
+  types.forEach((type, i) => {
+    queryParams.append(`filters[document_type][$in][${i}]`, type)
+  })
+  queryParams.append('filters[status][$eq]', 'published')
+  queryParams.append('pagination[pageSize]', '100')
+  queryParams.append('fields[0]', 'document_type')
+
+  return useQuery({
+    queryKey: [...OFFICIAL_DOCUMENTS_QUERY_KEYS.all, 'counts'],
+    queryFn: async (): Promise<Map<string, number>> => {
+      const url = `/api/official-documents?${queryParams.toString()}`
+      const response = await apiClient.get<OfficialDocumentsResponse>(url)
+      const counts = new Map<string, number>()
+      for (const doc of response.data) {
+        counts.set(doc.document_type, (counts.get(doc.document_type) ?? 0) + 1)
+      }
+      return counts
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
 export const useArchiveOfficialDocument = () => {
   const queryClient = useQueryClient()
 

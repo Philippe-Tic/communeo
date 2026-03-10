@@ -81,33 +81,6 @@ export default function FicheViewer() {
 
   return (
     <article>
-      {/* Fil d'Ariane */}
-      <nav aria-label="Fil d'Ariane" class="text-sm text-gray-500 mb-6">
-        <ol class="flex flex-wrap items-center gap-1">
-          <li>
-            <a href="/" class="hover:text-[rgb(var(--color-primary-text))] transition-colors">Accueil</a>
-          </li>
-          <li aria-hidden="true" class="text-gray-400">/</li>
-          <li>
-            <a href="/demarches" class="hover:text-[rgb(var(--color-primary-text))] transition-colors">Demarches</a>
-          </li>
-          {fiche.theme && (
-            <>
-              <li aria-hidden="true" class="text-gray-400">/</li>
-              <li class="text-gray-600">{fiche.theme.title}</li>
-            </>
-          )}
-          {fiche.sousTheme && (
-            <>
-              <li aria-hidden="true" class="text-gray-400">/</li>
-              <li class="text-gray-600">{fiche.sousTheme.title}</li>
-            </>
-          )}
-          <li aria-hidden="true" class="text-gray-400">/</li>
-          <li class="text-gray-900 font-medium truncate max-w-xs">{fiche.title}</li>
-        </ol>
-      </nav>
-
       {/* Header */}
       <header class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-3">{fiche.title}</h1>

@@ -528,7 +528,7 @@ class DilaNormalizer {
     const texteNode = findChild(children, 'Texte')
     return {
       id: attrs['@_ID'] || '',
-      term: childText(children, 'Terme') || '',
+      term: childText(children, 'Titre') || '',
       texte: texteNode ? this.parseContentNodes(texteNode.Texte) : [],
     }
   }

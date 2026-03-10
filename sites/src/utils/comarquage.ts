@@ -10,16 +10,10 @@ export async function getComarquageCategories(audience: Audience): Promise<DilaM
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
   if (STRAPI_TOKEN) headers['Authorization'] = `Bearer ${STRAPI_TOKEN}`
 
-  try {
-    const res = await fetch(url, { headers })
-    if (!res.ok) {
-      console.error(`Comarquage categories ${audience}: ${res.status}`)
-      return []
-    }
-    const json = await res.json()
-    return json.data ?? []
-  } catch (error) {
-    console.error(`Comarquage fetch error:`, (error as Error).message)
-    return []
+  const res = await fetch(url, { headers })
+  if (!res.ok) {
+    throw new Error(`Comarquage categories ${audience}: HTTP ${res.status}`)
   }
+  const json = await res.json()
+  return json.data ?? []
 }

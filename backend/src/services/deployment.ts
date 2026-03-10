@@ -126,6 +126,19 @@ class DeploymentService {
       console.log(`✅ [DEPLOYMENT] Build successful in ${buildResult.buildTime}s`);
       tempBuildDir = buildResult.buildPath!;
 
+      // 3b. Validation post-build : vérifier les pages critiques
+      if ((site as any).comarquage_enabled) {
+        const demarchesIndex = path.join(tempBuildDir, 'demarches', 'index.html');
+        if (!fs.existsSync(demarchesIndex)) {
+          throw new Error('Build validation failed: demarches/index.html missing but comarquage is enabled');
+        }
+        const size = fs.statSync(demarchesIndex).size;
+        if (size < 2000) {
+          throw new Error(`Build validation failed: demarches/index.html too small (${size} bytes), comarquage data likely missing`);
+        }
+        console.log(`✅ [DEPLOYMENT] demarches/index.html validated (${size} bytes)`);
+      }
+
       // 4. Créer le ZIP
       console.log(`📦 [DEPLOYMENT] Step 4: Creating ZIP archive...`);
       zipPath = await this.createZip(tempBuildDir);

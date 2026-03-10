@@ -6,8 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DEPLOYMENT_STATUS_COLORS } from '@/lib/constants/deployment-types'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { ExternalLink, Loader2, RefreshCw } from 'lucide-react'
-import React, { useEffect } from 'react'
+import { ExternalLink, Loader2 } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 import { useDeployment } from '../../hooks/useDeployment'
 
 interface DeploymentPanelProps {
@@ -20,13 +20,34 @@ const STATUS_ICONS: Record<string, string> = {
 
 export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) => {
   const {
-    deployments, currentDeployment, isDeploying, isLoading, isFetching,
-    triggerDeploy, refetch, isTriggering, triggerError, cleanup
+    deployments, currentDeployment, isDeploying, isLoading,
+    triggerDeploy, isTriggering, triggerError, deployStartedAt
   } = useDeployment()
 
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+
+  // Timer pour le temps écoulé pendant le build
   useEffect(() => {
-    return () => { cleanup() }
-  }, [cleanup])
+    if (!isDeploying) {
+      setElapsedSeconds(0)
+      return
+    }
+
+    // Calculer le temps initial depuis triggered_at (gère le refresh mid-build)
+    const triggeredAt =
+      currentDeployment?.status === 'building' && currentDeployment?.triggered_at
+        ? new Date(currentDeployment.triggered_at).getTime()
+        : (deployStartedAt ?? Date.now())
+    const initialElapsed = Math.floor((Date.now() - triggeredAt) / 1000)
+    setElapsedSeconds(Math.max(0, initialElapsed))
+
+    const interval = window.setInterval(() => {
+      const elapsed = Math.floor((Date.now() - triggeredAt) / 1000)
+      setElapsedSeconds(Math.max(0, elapsed))
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [isDeploying, currentDeployment?.triggered_at, currentDeployment?.status, deployStartedAt])
 
   const formatDuration = (seconds?: number) => {
     if (!seconds) return '-'
@@ -34,6 +55,13 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}m ${remainingSeconds}s`
+  }
+
+  const formatElapsed = (seconds: number) => {
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}m ${String(remainingSeconds).padStart(2, '0')}s`
   }
 
   return (
@@ -66,27 +94,27 @@ export const DeploymentPanel: React.FC<DeploymentPanelProps> = ({ className }) =
                 )}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-                  <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                </Button>
                 {currentDeployment?.site?.live_url && currentDeployment.status === 'ready' && (
                   <Button variant="outline" onClick={() => window.open(currentDeployment.site.live_url, '_blank', 'noopener,noreferrer')}>
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Voir le site
                   </Button>
                 )}
-                <Button onClick={() => triggerDeploy()} disabled={isDeploying || isLoading || isTriggering} className="bg-green-600 text-white hover:bg-green-700">
+                <Button onClick={() => triggerDeploy()} disabled={isDeploying || isLoading || isTriggering}>
                   {isTriggering && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  ▶ {isDeploying ? 'Déploiement en cours...' : 'Publier le site'}
+                  {isDeploying ? 'Déploiement en cours...' : 'Publier le site'}
                 </Button>
               </div>
             </div>
 
             {isDeploying && (
               <div>
-                <p className="mb-2 text-sm text-muted-foreground">Déploiement en cours... Cela peut prendre quelques minutes.</p>
-                <div className="h-2 overflow-hidden rounded-full bg-blue-100 dark:bg-blue-900">
-                  <div className="h-full w-full animate-pulse bg-primary" />
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">Déploiement en cours...</p>
+                  <p className="text-sm font-medium tabular-nums text-muted-foreground">{formatElapsed(elapsedSeconds)}</p>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full w-1/3 rounded-full bg-primary animate-[slide_1.5s_ease-in-out_infinite]" />
                 </div>
               </div>
             )}

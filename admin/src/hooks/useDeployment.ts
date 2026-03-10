@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import deploymentService from '../services/deployment'
 import { toaster } from '../lib/toaster'
 
@@ -18,15 +18,62 @@ export const DEPLOYMENT_QUERY_KEYS = {
  */
 export const useDeployment = () => {
   const queryClient = useQueryClient()
-  const pollingIntervalRef = useRef<number | undefined>(undefined)
+  const prevDeployingRef = useRef(false)
+  const [deployStartedAt, setDeployStartedAt] = useState<number | null>(null)
 
   // Query pour récupérer les déploiements
+  // Polling dynamique : 10s pendant un build, 30s sinon
   const deploymentsQuery = useQuery({
     queryKey: DEPLOYMENT_QUERY_KEYS.list({}),
     queryFn: () => deploymentService.getDeployments(),
-    staleTime: 1000 * 60 * 2, // 2 minutes
-    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 1000 * 60 * 2,
+    refetchInterval: (query) => {
+      const deployments = query.state.data?.data
+      const hasBuilding = deployments?.some((d: any) => d.status === 'building')
+      return hasBuilding ? 10000 : 30000
+    },
   })
+
+  // État dérivé
+  const deployments = deploymentsQuery.data?.data || []
+  const currentDeployment = deployments[0]
+  const isDeploying = currentDeployment?.status === 'building' || deployStartedAt !== null
+  const isLoading = deploymentsQuery.isLoading
+
+  // Détection de fin de déploiement
+  useEffect(() => {
+    if (prevDeployingRef.current && !isDeploying && currentDeployment) {
+      if (currentDeployment.status === 'ready') {
+        toaster.create({
+          title: 'Déploiement terminé',
+          description: 'Votre site a été déployé avec succès !',
+          type: 'success',
+          duration: 6000,
+        })
+      } else if (currentDeployment.status === 'error') {
+        toaster.create({
+          title: 'Échec du déploiement',
+          description: currentDeployment.error_message || 'Le déploiement a échoué',
+          type: 'error',
+          duration: 10000,
+        })
+      }
+    }
+    prevDeployingRef.current = isDeploying
+  }, [isDeploying, currentDeployment])
+
+  // Reset optimistic state quand les données réelles rattrapent
+  useEffect(() => {
+    if (deployStartedAt === null) return
+
+    if (currentDeployment?.status === 'building') {
+      setDeployStartedAt(null)
+      return
+    }
+
+    const timeout = setTimeout(() => setDeployStartedAt(null), 30000)
+    return () => clearTimeout(timeout)
+  }, [deployStartedAt, currentDeployment?.status])
 
   // Mutation pour déclencher un déploiement
   const triggerDeployMutation = useMutation({
@@ -39,11 +86,8 @@ export const useDeployment = () => {
         duration: 5000,
       })
 
-      // Invalider et refetch immédiatement
+      setDeployStartedAt(Date.now())
       queryClient.invalidateQueries({ queryKey: DEPLOYMENT_QUERY_KEYS.all })
-
-      // Démarrer le polling pour suivre le déploiement
-      startPolling()
     },
     onError: (error: any) => {
       toaster.create({
@@ -55,102 +99,16 @@ export const useDeployment = () => {
     },
   })
 
-  // Mutation pour vérifier le statut d'un déploiement
-  const checkStatusMutation = useMutation({
-    mutationFn: deploymentService.checkDeploymentStatus,
-    onSuccess: (data) => {
-      // Mettre à jour le cache avec les nouvelles données
-      queryClient.setQueryData(
-        DEPLOYMENT_QUERY_KEYS.detail(data.data.deployment_id),
-        data
-      )
-
-      // Si le déploiement est terminé, invalider la liste
-      if (data.data.status !== 'building') {
-        queryClient.invalidateQueries({ queryKey: DEPLOYMENT_QUERY_KEYS.all })
-
-        // Arrêter le polling
-        stopPolling()
-
-        // Toast de notification selon le statut
-        if (data.data.status === 'ready') {
-          toaster.create({
-            title: 'Déploiement terminé',
-            description: 'Votre site a été déployé avec succès !',
-            type: 'success',
-            duration: 6000,
-          })
-        } else if (data.data.status === 'error') {
-          toaster.create({
-            title: 'Échec du déploiement',
-            description: data.data.error_message || 'Le déploiement a échoué',
-            type: 'error',
-            duration: 10000,
-          })
-        }
-      }
-    },
-  })
-
-  // Démarrer le polling pour un déploiement en cours
-  const startPolling = () => {
-    stopPolling() // Arrêter le polling existant
-
-    pollingIntervalRef.current = window.setInterval(() => {
-      const deployments = deploymentsQuery.data?.data
-      const buildingDeployment = deployments?.find((d: any) => d.status === 'building')
-
-      if (buildingDeployment) {
-        checkStatusMutation.mutate(buildingDeployment.deployment_id)
-      } else {
-        stopPolling()
-      }
-    }, 10000) // Vérifier toutes les 10 secondes
-  }
-
-  // Arrêter le polling
-  const stopPolling = () => {
-    if (pollingIntervalRef.current) {
-      clearInterval(pollingIntervalRef.current)
-      pollingIntervalRef.current = undefined
-    }
-  }
-
-  // Nettoyage à la destruction du hook
-  const cleanup = () => {
-    stopPolling()
-  }
-
-  // État dérivé
-  const deployments = deploymentsQuery.data?.data || []
-  const currentDeployment = deployments[0] // Le plus récent
-  const isDeploying = currentDeployment?.status === 'building'
-  const isLoading = deploymentsQuery.isLoading || triggerDeployMutation.isPending
-
   return {
-    // Données
     deployments,
     currentDeployment,
     isDeploying,
     isLoading,
-
-    // État des queries
-    isFetching: deploymentsQuery.isFetching,
     deploymentsQuery,
-
-    // Actions
     triggerDeploy: triggerDeployMutation.mutate,
-    checkStatus: checkStatusMutation.mutate,
-    refetch: deploymentsQuery.refetch,
-
-    // État des mutations
     isTriggering: triggerDeployMutation.isPending,
     triggerError: triggerDeployMutation.error,
-
-    // Utilitaires
-    startPolling,
-    stopPolling,
-    cleanup,
+    deployStartedAt,
   }
 }
 
@@ -162,7 +120,7 @@ export const useDeploymentStatus = (deploymentId?: string) => {
     queryKey: DEPLOYMENT_QUERY_KEYS.detail(deploymentId!),
     queryFn: () => deploymentService.checkDeploymentStatus(deploymentId!),
     enabled: !!deploymentId,
-    refetchInterval: 10000, // Poll every 10 seconds
+    refetchInterval: 10000,
   })
 }
 

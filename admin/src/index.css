@@ -335,3 +335,9 @@
   height: 100%;
   border: 0;
 }
+
+/* Deployment progress bar animation */
+@keyframes slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}

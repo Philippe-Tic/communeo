@@ -6,12 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-admin:
-    name: Build admin
+  deploy:
+    name: Build & Deploy to VPS
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: admin
     steps:
       - uses: actions/checkout@v4
 
@@ -21,26 +18,11 @@ jobs:
           cache: npm
           cache-dependency-path: admin/package-lock.json
 
-      - run: npm ci
-      - run: npm run build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: admin-dist
-          path: admin/dist/
-          retention-days: 1
-
-  deploy:
-    name: Deploy to VPS
-    needs: build-admin
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: admin-dist
-          path: dist/
+      - name: Build admin
+        working-directory: admin
+        run: |
+          npm ci
+          npm run build
 
       - name: Setup SSH
         run: |
@@ -53,7 +35,7 @@ jobs:
         run: |
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key" \
-            dist/ \
+            admin/dist/ \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/communeo/admin/dist/
 
       - name: Build and transfer Docker image

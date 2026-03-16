@@ -1,4 +1,4 @@
-# Guide de mise en production — CMS Mairies
+# Guide de mise en production — Communeo
 
 ## Architecture cible
 
@@ -270,7 +270,7 @@ docker compose down
 # Copier les certificats dans le volume de docker-compose
 docker run --rm \
   -v cms-certbot-certs:/source:ro \
-  -v cms-mairies_certbot-certs:/dest \
+  -v communeo_certbot-certs:/dest \
   alpine sh -c "cp -a /source/. /dest/"
 
 # Nettoyer les volumes temporaires

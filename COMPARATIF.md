@@ -1,26 +1,26 @@
-# Comparatif CMS Mairies vs 123mairie.fr
+# Comparatif Communeo vs 123mairie.fr
 
-Analyse concurrentielle entre **cms-mairies** et **123mairie.fr** (leader du marché des sites de mairies clé en main).
+Analyse concurrentielle entre **Communeo** et **123mairie.fr** (leader du marché des sites de mairies clé en main).
 Objectif : identifier les fonctionnalités manquantes pour atteindre la parité fonctionnelle.
 
 ---
 
 ## 1. Gestion de contenu
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Pages CMS hiérarchiques | ✅ | ✅ | Parité |
 | Articles / Actualités | ✅ | ✅ | Parité |
 | Événements / Agenda | ✅ | ✅ | Parité |
-| Éditeur richtext avancé (TipTap) | ✅ | ✅ | **cms-mairies supérieur** (colonnes, tableaux, slash commands) |
+| Éditeur richtext avancé (TipTap) | ✅ | ✅ | **Communeo supérieur** (colonnes, tableaux, slash commands) |
 | Statut draft / published / archived | ✅ | ✅ | Parité |
 | Publication programmée | ✅ | ✅ | Parité |
-| Compteur de vues articles | ✅ | ❓ | cms-mairies a cette feature |
-| Blocs de contenu réutilisables | ✅ | ❓ | ContentBlock dans cms-mairies |
+| Compteur de vues articles | ✅ | ❓ | Communeo a cette feature |
+| Blocs de contenu réutilisables | ✅ | ❓ | ContentBlock dans Communeo |
 
 ## 2. Modules municipaux
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Équipe municipale | ✅ | ✅ | Parité |
 | Associations (annuaire + soumission publique) | ✅ | ✅ | Parité |
@@ -37,7 +37,7 @@ Objectif : identifier les fonctionnalités manquantes pour atteindre la parité 
 
 ## 3. Communication & Engagement
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | RSS Feed | ✅ | ✅ | Parité |
 | **Newsletter** | ❌ | ✅ | Création et envoi de newsletters, gestion abonnés, widget d'inscription |
@@ -47,65 +47,65 @@ Objectif : identifier les fonctionnalités manquantes pour atteindre la parité 
 
 ## 4. Paiement & E-services
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | **TIPI / PayFip (paiement en ligne)** | ❌ | ✅ | Paiement de factures de services publics (cantine, garderie…) |
-| **Recueil des actes administratifs** | 🔶 | ✅ | cms-mairies a OfficialDocument mais pas de module "recueil" dématérialisé formalisé |
+| **Recueil des actes administratifs** | 🔶 | ✅ | Communeo a OfficialDocument mais pas de module "recueil" dématérialisé formalisé |
 | **Billetterie en ligne** | ❌ | ✅ | Intégration billetterie (ex: Festik) pour événements |
 
 ## 5. Thèmes & Personnalisation
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Couleurs personnalisables | ✅ | ✅ | Parité |
 | Logo & favicon | ✅ | ✅ | Parité |
 | Navigation configurable (drag & drop) | ✅ | ✅ | Parité |
 | Homepage configurable (sections toggle) | ✅ | ✅ | Parité |
-| **Catalogue de thèmes (15+)** | ❌ | ✅ | 123mairie propose 15+ templates, cms-mairies n'a qu'un seul design |
+| **Catalogue de thèmes (15+)** | ❌ | ✅ | 123mairie propose 15+ templates, Communeo n'a qu'un seul design |
 | **Boutons accessibilité (taille texte)** | ❌ | ✅ | Augmenter/réduire la taille du texte côté public |
 
 ## 6. SEO & Technique
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Meta tags OG / Twitter | ✅ | ✅ | Parité |
-| JSON-LD structured data | ✅ | 🔶 | **cms-mairies supérieur** (GovernmentOrganization, FAQPage, etc.) |
+| JSON-LD structured data | ✅ | 🔶 | **Communeo supérieur** (GovernmentOrganization, FAQPage, etc.) |
 | Sitemap auto | ✅ | ✅ | Parité |
 | Robots.txt | ✅ | ✅ | Parité |
 | Recherche full-text (Pagefind) | ✅ | ✅ | Parité |
-| PWA / Web App Manifest | ✅ | ❌ | **cms-mairies supérieur** |
+| PWA / Web App Manifest | ✅ | ❌ | **Communeo supérieur** |
 
 ## 7. Conformité légale
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Mentions légales | ✅ | ✅ | Parité |
 | RGPD / Politique confidentialité | ✅ | ✅ | Parité |
-| Exercice des droits RGPD | ✅ | ❓ | cms-mairies a un formulaire dédié |
+| Exercice des droits RGPD | ✅ | ❓ | Communeo a un formulaire dédié |
 | Accessibilité (déclaration RGAA) | ✅ | ✅ | Parité |
 | Cookie consent (CNIL) | ✅ | ✅ | Parité (tarteaucitron chez 123mairie) |
-| Open Data (CRPA) | ✅ | ❓ | cms-mairies a cette feature |
+| Open Data (CRPA) | ✅ | ❓ | Communeo a cette feature |
 | SVE (Saisine par Voie Électronique) | ✅ | ✅ | Parité |
-| Dashboard conformité avec score | ✅ | ❌ | **cms-mairies supérieur** |
-| Génération auto de politique RGPD | ✅ | ❌ | **cms-mairies supérieur** |
+| Dashboard conformité avec score | ✅ | ❌ | **Communeo supérieur** |
+| Génération auto de politique RGPD | ✅ | ❌ | **Communeo supérieur** |
 
 ## 8. Déploiement & Domaines
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Déploiement automatique | ✅ | ✅ | Parité |
 | Domaine personnalisé + SSL | ✅ | ✅ | Parité |
-| Auto-deploy sur modification | ✅ | ❓ | Feature avancée de cms-mairies |
+| Auto-deploy sur modification | ✅ | ❓ | Feature avancée de Communeo |
 | **Sauvegardes quotidiennes** | ❌ | ✅ | Sauvegardes automatiques des données |
 
 ## 9. Admin & Multi-tenant
 
-| Fonctionnalité | cms-mairies | 123mairie | Notes |
+| Fonctionnalité | Communeo | 123mairie | Notes |
 |---|:---:|:---:|---|
 | Multi-tenant (isolation par site) | ✅ | ✅ | Parité |
 | Gestion des utilisateurs | ✅ | ✅ | Parité |
 | Médiathèque par site | ✅ | ✅ | Parité |
-| Preview du site dans l'admin | ✅ | ❌ | **cms-mairies supérieur** |
+| Preview du site dans l'admin | ✅ | ❌ | **Communeo supérieur** |
 | **Tutoriels vidéo intégrés** | ❌ | ✅ | Documentation vidéo pour la prise en main |
 | **Édition front-end (inline)** | ❌ | ✅ | Édition directe sur le site public (WYSIWYG) |
 
@@ -147,7 +147,7 @@ Objectif : identifier les fonctionnalités manquantes pour atteindre la parité 
 
 ---
 
-## Points forts de cms-mairies par rapport à 123mairie
+## Points forts de Communeo par rapport à 123mairie
 
 | Avantage | Détail |
 |---|---|

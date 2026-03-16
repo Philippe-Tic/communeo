@@ -1,15 +1,15 @@
 #!/bin/bash
 # =============================================================================
-# CMS Mairies — Backup automatique
+# Communeo — Backup automatique
 # =============================================================================
 # Usage : ./scripts/backup.sh
-# Cron  : 0 3 * * * /opt/cms-mairies/scripts/backup.sh >> /var/log/cms-backup.log 2>&1
+# Cron  : 0 3 * * * /opt/communeo/scripts/backup.sh >> /var/log/cms-backup.log 2>&1
 # =============================================================================
 
 set -euo pipefail
 
 # Configuration
-BACKUP_DIR="/opt/cms-mairies/backups"
+BACKUP_DIR="/opt/communeo/backups"
 RETENTION_DAYS=30
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

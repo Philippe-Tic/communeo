@@ -1,0 +1,152 @@
+---
+title: Événements
+description: Créer, modifier et promouvoir les événements de votre commune.
+---
+
+Les événements vous permettent d'annoncer les manifestations, fêtes, réunions et activités de votre commune. Cette page vous guide à travers toutes les étapes : création, modification, mise en avant et suppression.
+
+{/* TODO: screenshot
+import contenuEvenementsListe from '../../../assets/screenshots/contenu-evenements-liste.png';
+<Image src={contenuEvenementsListe} alt="Vue complète de la liste des événements avec filtres et cartes" />
+*/}
+
+## Liste des événements
+
+Les événements sont affichés sous forme de **cartes** dans une grille responsive (une colonne sur mobile, deux sur tablette, trois sur ordinateur).
+
+Chaque carte présente :
+
+- Des **badges** indiquant la catégorie, et éventuellement "À la une" (orange), "À venir" (vert), "Passé" (gris) ou "Inscription" (bleu)
+- Le **titre** de l'événement
+- L'**image** (si renseignée)
+- La **date et l'heure** de début, et la date de fin (si renseignée)
+- Le **lieu** (si renseigné)
+- Le **tarif** (si renseigné)
+- Un **aperçu de la description** (tronqué)
+- L'**organisateur** et le **nombre maximum de participants** (si renseignés)
+- La **date de création**
+
+Un **menu contextuel** (icône ···) sur chaque carte propose les actions suivantes :
+
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Voir** — Afficher la page de détail
+- **Mettre à la une** / **Retirer de la une** — Basculer la mise en avant
+- **Dupliquer** — Créer une copie de l'événement
+- **Supprimer** — Supprimer l'événement
+
+### Filtrer et trier
+
+Six contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par mot-clé dans le titre
+- **Catégorie** — Culturel, Sport, Réunion, Célébration, Atelier ou Conférence
+- **À la une** — Oui ou Non
+- **Période** — À venir uniquement ou Tous les événements
+- **Trier par** — Titre, Date de début ou Date de création
+- **Ordre** — Croissant ou Décroissant
+
+:::tip[Astuce]
+Filtrez par **À venir uniquement** pour vous concentrer sur les événements qui seront affichés sur votre site. Les événements passés restent consultables en sélectionnant **Tous les événements**.
+:::
+
+## Créer un événement
+
+1. Cliquez sur le bouton **Nouvel événement** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Informations générales
+
+- **Titre** (obligatoire) — Le titre de l'événement
+- **Slug** (obligatoire) — L'identifiant URL, généré automatiquement à partir du titre
+- **Description** (obligatoire) — Le détail de l'événement, rédigé dans l'[éditeur de texte riche](/reference/editeur-texte/)
+- **Catégorie** — Classe l'événement dans l'une des six catégories :
+  - **Culturel** — Spectacles, expositions, concerts
+  - **Sport** — Compétitions, tournois, randonnées
+  - **Réunion** — Conseils municipaux, assemblées
+  - **Célébration** — Fêtes, commémorations, cérémonies
+  - **Atelier** — Activités participatives, formations
+  - **Conférence** — Conférences, colloques, débats
+
+### Dates et lieu
+
+- **Date et heure de début** (obligatoire) — Quand commence l'événement
+- **Date et heure de fin** — Quand se termine l'événement (optionnel)
+- **Lieu** — Nom du lieu (texte libre)
+- **Adresse** — Adresse complète du lieu
+
+### Informations pratiques
+
+- **Tarif** — Texte libre (ex : "Gratuit", "10€", "Sur inscription")
+- **Organisateur** — Nom de l'organisateur
+- **Lien externe** — URL vers un site complémentaire
+- **Email de contact** — Adresse email pour les questions
+- **Téléphone de contact** — Numéro de téléphone
+
+### Inscription
+
+- **Inscription obligatoire** — Cochez cette case si les participants doivent s'inscrire
+- **Nombre maximum de participants** — Limite de places disponibles
+- **Date limite d'inscription** — Date et heure après lesquelles l'inscription n'est plus possible
+- **Événement à la une** — Cochez cette case pour mettre l'événement en avant sur le site
+
+{/* TODO: screenshot
+import contenuEvenementsFormulaire from '../../../assets/screenshots/contenu-evenements-formulaire.png';
+<Image src={contenuEvenementsFormulaire} alt="Formulaire de création d'un événement" />
+*/}
+
+### Aperçu en temps réel
+
+Sur ordinateur, cliquez sur le bouton **Aperçu** pour afficher une vue côte à côte du formulaire et du rendu de l'événement.
+
+## Modifier un événement
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· d'une carte, puis sur **Modifier**
+- Depuis la page de détail : cliquez sur le bouton **Modifier**
+
+Le formulaire s'affiche avec les données existantes. Effectuez vos modifications, puis cliquez sur **Mettre à jour**.
+
+## Dupliquer un événement
+
+Depuis la liste, cliquez sur le menu ··· → **Dupliquer**. Un nouvel événement est créé avec les mêmes informations. Vous pouvez ensuite le modifier pour ajuster les dates, le titre ou tout autre champ.
+
+:::tip[Astuce]
+La duplication est pratique pour les événements récurrents : dupliquez un événement passé et modifiez uniquement les dates.
+:::
+
+## Mettre à la une
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Mettre à la une**
+- Depuis le formulaire : cochez la case **Événement à la une**
+
+Un badge orange "À la une" apparaît sur la carte de l'événement. Pour retirer la mise en avant, utilisez les mêmes chemins : l'option devient **Retirer de la une**.
+
+## Supprimer un événement
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Supprimer**
+- Depuis la page de détail : cliquez sur le bouton **Supprimer**
+
+Un dialogue de confirmation s'affiche avec le titre de l'événement et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données de l'événement (description, images, informations pratiques) seront perdues.
+:::
+
+{/* TODO: screenshot
+import contenuEvenementsSuppression from '../../../assets/screenshots/contenu-evenements-suppression.png';
+<Image src={contenuEvenementsSuppression} alt="Dialogue de confirmation de suppression d'un événement" />
+*/}
+
+## Pour aller plus loin
+
+- [Éditeur de texte riche](/reference/editeur-texte/) — Découvrir les fonctionnalités de l'éditeur de contenu
+- [Actualités](/contenu/actualites/) — Rédiger et publier des articles d'actualité
+- [Tableau de bord](/contenu/tableau-de-bord/) — Visualiser les prochains événements depuis l'accueil
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

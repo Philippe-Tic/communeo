@@ -27,7 +27,7 @@ const TEST_SITE = {
     hebergeur_name: 'Netlify, Inc.',
     hebergeur_address: '512 2nd Street, Suite 200, San Francisco, CA 94107, USA',
     hebergeur_phone: '+1 844-899-7312',
-    credits: 'Site réalisé par CMS Mairies. Photos : Mairie de Bellefontaine, sauf mention contraire.',
+    credits: 'Site réalisé par Communeo. Photos : Mairie de Bellefontaine, sauf mention contraire.',
   },
   rgpd: {
     dpo_name: 'Marie Durand',

@@ -1,0 +1,147 @@
+---
+title: Équipe municipale
+description: Gérer les membres de l'équipe municipale affichés sur le site de votre commune.
+---
+
+L'équipe municipale vous permet de présenter les élus et agents de votre commune sur le site public. Cette page vous guide dans l'ajout, la modification et l'organisation des membres.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteEquipeListe from '../../../assets/screenshots/communaute-equipe-liste.png';
+
+<Image src={communauteEquipeListe} alt="Vue complète de la grille des membres de l'équipe municipale" />
+*/}
+
+## Liste des membres
+
+Les membres sont affichés sous forme de **cartes** dans une grille responsive (une colonne sur mobile, deux sur tablette, trois sur ordinateur).
+
+Chaque carte présente :
+
+- Un **badge de rôle** coloré (en haut à gauche)
+- La **photo** du membre (si renseignée)
+- Le **nom** complet (prénom et nom)
+- La **délégation** (si renseignée)
+- L'**ordre d'affichage**
+
+Un **menu contextuel** (icône ···) sur chaque carte propose :
+
+- **Voir** — Afficher la page de détail
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Supprimer** — Supprimer le membre
+
+Des **boutons de déplacement** (flèches haut/bas) permettent de réordonner les membres directement depuis les cartes.
+
+### Filtrer
+
+Deux contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par nom (prénom ou nom de famille)
+- **Rôle** — Filtrer par rôle (voir ci-dessous)
+
+## Rôles disponibles
+
+Cinq rôles sont disponibles, chacun associé à une couleur :
+
+- **Maire** (violet)
+- **Adjoint(e)** (bleu)
+- **Conseiller(e)** (vert)
+- **DGS** (orange)
+- **Agent** (gris)
+
+## Créer un membre
+
+1. Cliquez sur le bouton **Nouveau membre** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Identité
+
+- **Prénom** (obligatoire) — Le prénom du membre
+- **Nom** (obligatoire) — Le nom de famille du membre
+- **Rôle** (obligatoire) — Le rôle au sein de l'équipe (Maire, Adjoint, Conseiller, DGS ou Agent)
+- **Délégation** — Le domaine de compétence (ex : "Urbanisme et travaux")
+- **Biographie** — Un texte de présentation du membre
+
+### Photo
+
+- **Photo** — Image au format portrait
+
+:::note[Bon à savoir]
+Le format portrait 3:4 est recommandé, avec une taille minimale de 400×533 pixels, pour un affichage optimal sur les cartes et la page de détail.
+:::
+
+### Affichage
+
+- **Ordre d'affichage** — Nombre entier déterminant la position du membre dans la liste (0 = premier affiché). Les membres sont triés par ordre croissant.
+
+:::tip[Astuce]
+Utilisez l'ordre d'affichage pour classer les membres par importance : le maire en position 0, les adjoints de 1 à 10, les conseillers ensuite.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteEquipeFormulaire from '../../../assets/screenshots/communaute-equipe-formulaire.png';
+
+<Image src={communauteEquipeFormulaire} alt="Formulaire de création d'un membre de l'équipe municipale" />
+*/}
+
+## Modifier un membre
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· d'une carte, puis sur **Modifier**
+- Depuis la page de détail : cliquez sur le bouton **Modifier**
+
+Le formulaire s'affiche avec les données existantes. Effectuez vos modifications, puis cliquez sur **Mettre à jour**.
+
+## Réordonner les membres
+
+Utilisez les **boutons flèches** (haut/bas) sur chaque carte pour déplacer un membre dans la liste. L'ordre d'affichage des deux membres concernés est automatiquement échangé.
+
+Le premier membre de la liste n'a pas de flèche vers le haut, et le dernier n'a pas de flèche vers le bas.
+
+## Voir le détail
+
+Pour accéder au détail d'un membre :
+
+- Cliquez directement sur une carte dans la liste
+- Ou cliquez sur le menu ··· → **Voir**
+
+La page de détail affiche :
+
+- Le **badge de rôle** coloré
+- La **photo** (si renseignée)
+- La **délégation** (si renseignée)
+- La **biographie** (si renseignée)
+- Les **métadonnées** : ordre d'affichage, dates de création et de modification
+
+Les boutons d'action en haut de la page permettent de :
+
+- **Retour** — Revenir à la liste
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Supprimer** — Supprimer le membre
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteEquipeDetail from '../../../assets/screenshots/communaute-equipe-detail.png';
+
+<Image src={communauteEquipeDetail} alt="Page de détail d'un membre de l'équipe municipale" />
+*/}
+
+## Supprimer un membre
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Supprimer**
+- Depuis la page de détail : cliquez sur le bouton **Supprimer**
+
+Un dialogue de confirmation s'affiche avec le nom du membre et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données du membre (photo, biographie, métadonnées) seront perdues.
+:::
+
+## Pour aller plus loin
+
+- [Associations](/communaute/associations/) — Gérer l'annuaire des associations de la commune
+- [Pages](/contenu/pages/) — Créer des pages dédiées pour présenter votre commune
+- [Médiathèque](/contenu/mediatheque/) — Gérer les images et fichiers de votre site
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site

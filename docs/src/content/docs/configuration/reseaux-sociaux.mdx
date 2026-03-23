@@ -1,0 +1,69 @@
+---
+title: Réseaux sociaux
+description: Ajouter et gérer les liens vers les réseaux sociaux de votre commune, affichés dans le pied de page du site.
+---
+
+Les liens vers vos réseaux sociaux sont affichés sous forme d'icônes dans le pied de page de votre site public. Vous pouvez configurer jusqu'à 8 liens.
+
+Pour y accéder, rendez-vous dans **Paramètres > Configuration du site**, puis cliquez sur l'onglet **Réseaux sociaux**.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationReseauxSociauxVue from '../../../assets/screenshots/configuration-reseaux-sociaux-vue.png';
+
+<Image src={configurationReseauxSociauxVue} alt="Onglet Réseaux sociaux de la configuration du site" />
+*/}
+
+## Ajouter un réseau social
+
+1. Cliquez sur le bouton **Ajouter** en haut à droite de la section
+2. Une nouvelle carte apparaît avec deux champs : **Plateforme** et **URL**
+3. Sélectionnez la plateforme dans la liste déroulante
+4. Saisissez l'URL complète de votre page (ex : `https://www.facebook.com/mairie-exemple`)
+5. Cliquez sur **Enregistrer** en bas de la page pour sauvegarder
+
+### Plateformes disponibles
+
+Les plateformes suivantes sont proposées avec une icône dédiée :
+
+- **Facebook**
+- **Instagram**
+- **LinkedIn**
+- **X (Twitter)**
+- **YouTube**
+- **TikTok**
+- **Autre** — pour toute plateforme non listée (voir ci-dessous)
+
+### Plateforme personnalisée
+
+Si vous choisissez **Autre** comme plateforme, deux champs supplémentaires apparaissent :
+
+- **Label** (obligatoire, max 50 caractères) — Le nom du réseau affiché dans le pied de page
+- **Icône personnalisée** — Une image à utiliser comme icône (sélecteur d'image)
+
+:::note[Icône personnalisée]
+Si vous ne fournissez pas d'icône personnalisée, une icône générique sera utilisée. Privilégiez une image carrée de petite taille pour un rendu optimal.
+:::
+
+## Modifier un lien
+
+Les champs de chaque carte sont directement modifiables. Changez la plateforme ou l'URL selon vos besoins, puis cliquez sur **Enregistrer** pour appliquer les modifications.
+
+## Supprimer un lien
+
+Cliquez sur l'icône **corbeille** à droite de la carte du réseau à supprimer. La carte disparaît immédiatement du formulaire. La suppression est persistée lorsque vous cliquez sur **Enregistrer**.
+
+:::caution[Validation de l'URL]
+L'URL de chaque réseau social doit commencer par `https://`. Si ce n'est pas le cas, un message d'erreur s'affiche sous le champ.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationReseauxSociauxFormulaire from '../../../assets/screenshots/configuration-reseaux-sociaux-formulaire.png';
+
+<Image src={configurationReseauxSociauxFormulaire} alt="Carte de configuration d'un réseau social avec plateforme et URL" />
+*/}
+
+## Pour aller plus loin
+
+- [Accueil & Navigation](/configuration/accueil-navigation/) — Configurer la page d'accueil et le menu du site
+- [Informations générales](/configuration/informations-generales/) — Modifier l'identité et les coordonnées de votre commune
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site

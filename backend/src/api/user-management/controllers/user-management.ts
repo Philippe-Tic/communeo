@@ -41,7 +41,7 @@ async function sendInvitationEmail(email: string, firstName: string, token: stri
 
   await strapi.plugin('email').service('email').send({
     to: email,
-    subject: `Invitation à rejoindre ${siteName} — CMS Mairies`,
+    subject: `Invitation à rejoindre ${siteName} — Communeo`,
     html: `
       <h2>Bienvenue sur ${siteName}</h2>
       <p>Bonjour ${firstName},</p>
@@ -229,7 +229,7 @@ export default {
     // Determine which site to assign the user to
     const isSuperAdmin = currentUser.municipality_role === 'super_admin';
     let targetSiteId: number | null = null;
-    let targetSiteName = 'CMS Mairies';
+    let targetSiteName = 'Communeo';
 
     if (isSuperAdmin && data.site) {
       // Super admin specifies which site to assign the user to
@@ -395,7 +395,7 @@ export default {
       data: { resetPasswordToken: newToken },
     });
 
-    const siteName = user.site?.name || 'CMS Mairies';
+    const siteName = user.site?.name || 'Communeo';
 
     try {
       await sendPasswordResetEmail(user.email, user.first_name, newToken, siteName);

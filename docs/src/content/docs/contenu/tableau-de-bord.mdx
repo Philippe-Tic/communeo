@@ -1,0 +1,160 @@
+---
+title: Tableau de bord
+description: Découvrez le tableau de bord, la page d'accueil de votre espace d'administration Communeo.
+---
+
+Le tableau de bord est la première page qui s'affiche après votre connexion. Il vous offre une vue d'ensemble de l'activité de votre site et un accès rapide aux actions courantes.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuDashboardComplet from '../../../assets/screenshots/contenu-dashboard-complet.png';
+
+<Image src={contenuDashboardComplet} alt="Vue complète du tableau de bord" />
+*/}
+
+## Accéder à cette page
+
+1. Connectez-vous à votre espace d'administration
+2. Le tableau de bord s'affiche automatiquement
+
+:::note[Bon à savoir]
+Vous pouvez revenir au tableau de bord à tout moment en cliquant sur le **logo Communeo** dans l'en-tête ou sur **Tableau de bord** en haut de la barre latérale.
+:::
+
+## Statistiques en un coup d'œil
+
+La première zone du tableau de bord présente quatre cartes de statistiques qui résument le contenu de votre site :
+
+- **Actualités** (bleu) — Le nombre total d'actualités
+- **Pages** (vert) — Le nombre total de pages créées
+- **Événements** (violet) — Le nombre total d'événements enregistrés
+- **Messages** (orange) — Le nombre de messages non lus
+
+Chaque carte affiche un compteur mis à jour automatiquement. D'un seul regard, vous savez où en est votre site.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuDashboardStats from '../../../assets/screenshots/contenu-dashboard-stats.png';
+
+<Image src={contenuDashboardStats} alt="Les quatre cartes de statistiques : Actualités, Pages, Événements, Messages" />
+*/}
+
+## Alerte de conformité
+
+Si des obligations légales critiques ne sont pas encore remplies, un **bandeau orange** s'affiche sous les statistiques. Il indique :
+
+- Le nombre d'obligations critiques à compléter
+- La prochaine étape recommandée
+- Un bouton **Voir le détail** qui vous redirige vers la page [Conformité légale](/administration/conformite-legale)
+
+Ce bandeau disparaît automatiquement lorsque toutes les obligations critiques sont satisfaites.
+
+:::tip[Priorité]
+Les obligations critiques concernent les mentions légales, le RGPD et l'accessibilité. Nous vous recommandons de les traiter en priorité pour que votre site soit conforme à la réglementation.
+:::
+
+## Actions rapides
+
+Trois boutons vous permettent de créer du contenu sans passer par la barre latérale :
+
+- **Nouvelle actualité** — Ouvre le formulaire de création d'une actualité
+- **Nouvel événement** — Ouvre le formulaire de création d'un événement
+- **Nouvelle page** — Ouvre le formulaire de création d'une page
+
+Ces raccourcis vous font gagner du temps au quotidien.
+
+## Suivi de votre site
+
+Sous les actions rapides, deux colonnes de widgets vous informent sur l'état de votre site.
+
+### Messages non lus
+
+Ce widget affiche les trois derniers messages reçus via le formulaire de contact de votre site. Pour chaque message, vous voyez :
+
+- Les **initiales** de l'expéditeur (dans un cercle coloré)
+- L'**objet** du message
+- Le **nom** de l'expéditeur et la **date** de réception
+
+Un badge indique le nombre total de messages non lus. Le lien **Voir tout** vous redirige vers la page [Messages](/communaute/messages).
+
+Si aucun message n'est en attente, le widget affiche "Aucun message non lu".
+
+### Dernier déploiement
+
+Ce widget affiche l'état de la dernière publication de votre site. Trois états sont possibles :
+
+- **En cours** (bleu) — La publication est en cours de traitement
+- **Succès** (vert) — Le site a été publié avec succès
+- **Échec** (rouge) — Une erreur est survenue lors de la publication
+
+La date et l'heure du déploiement sont affichées sous le statut. Le lien **Gérer** vous redirige vers la page [Déploiement](/administration/deploiement).
+
+Si aucun déploiement n'a encore été effectué, le widget affiche "Aucun déploiement".
+
+### Conformité légale
+
+Ce widget résume votre avancement sur les obligations réglementaires :
+
+- Une **barre de progression** de 0 à 100 %
+- Le **ratio** d'éléments complétés (par exemple "7/10")
+
+Si toutes les obligations ne sont pas remplies, le widget affiche :
+
+- La **prochaine action** à effectuer
+- Le **temps estimé** pour la réaliser
+- Un bouton **Corriger** pour accéder directement au formulaire concerné
+
+Lorsque vous atteignez 100 %, un message vert "Tout est conforme" s'affiche.
+
+Le lien **Détails** vous redirige vers la page [Conformité légale](/administration/conformite-legale).
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuDashboardConformite from '../../../assets/screenshots/contenu-dashboard-conformite.png';
+
+<Image src={contenuDashboardConformite} alt="Widgets Messages non lus, Dernier déploiement et Conformité légale" />
+*/}
+
+### Associations en attente
+
+Si des associations ont été soumises et attendent votre validation, un **bandeau jaune** apparaît. Il indique le nombre d'associations en attente de modération et vous redirige vers la page [Associations](/communaute/associations) en cliquant dessus.
+
+Ce bandeau disparaît lorsqu'il n'y a plus d'association en attente.
+
+## Événements et actualités
+
+La partie basse du tableau de bord met en avant votre contenu récent.
+
+### Prochains événements
+
+Jusqu'à quatre événements à venir sont affichés dans une grille de deux colonnes. Chaque carte présente :
+
+- Un **badge date** avec le jour et le mois
+- Le **titre** de l'événement
+- Le **lieu** (si renseigné)
+- L'**heure** de début
+
+Le lien **Voir tout** vous redirige vers la page [Événements](/contenu/evenements). Cliquez sur un événement pour ouvrir sa fiche détaillée.
+
+### Actualités récentes
+
+Les trois dernières actualités publiées sont affichées dans une grille de trois colonnes. Chaque carte indique le statut, la catégorie, le titre et un aperçu du contenu.
+
+Si aucune actualité n'a encore été publiée, un message vous invite à **créer votre première actualité**.
+
+Le lien **Voir tout** vous redirige vers la page [Actualités](/contenu/actualites).
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuDashboardEvenements from '../../../assets/screenshots/contenu-dashboard-evenements.png';
+
+<Image src={contenuDashboardEvenements} alt="Prochains événements et actualités récentes" />
+*/}
+
+:::tip[Astuce]
+Le tableau de bord s'adapte à l'activité de votre site : les sections n'apparaissent que lorsque du contenu existe. Ne vous inquiétez pas si certaines zones sont absentes lors de vos premières connexions — elles se rempliront au fur et à mesure.
+:::
+
+## Pour aller plus loin
+
+- [Actualités](/contenu/actualites) — Rédiger et publier des articles
+- [Événements](/contenu/evenements) — Annoncer les événements de votre commune
+- [Messages](/communaute/messages) — Consulter les messages reçus
+- [Conformité légale](/administration/conformite-legale) — Suivre vos obligations réglementaires
+- [Déploiement](/administration/deploiement) — Publier les modifications sur votre site

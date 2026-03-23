@@ -1,0 +1,135 @@
+---
+title: Conformité légale
+description: Suivre, comprendre et corriger les obligations légales de votre site municipal.
+---
+
+Les sites internet des collectivités sont soumis à plusieurs obligations légales : mentions légales, protection des données personnelles, accessibilité et transparence. Le tableau de bord de conformité vous aide à identifier les points à corriger et à suivre votre progression.
+
+## Tableau de bord
+
+En haut de la page, trois cartes vous donnent une vue d'ensemble de votre conformité :
+
+- **Score global** — Le pourcentage de conformité de votre site, avec un code couleur : vert (100 %), bleu (≥ 50 %) ou rouge (< 50 %)
+- **Obligations critiques** — Le nombre d'obligations obligatoires satisfaites par rapport au total (ex : « 3/5 »)
+- **Prochaine action** — Le nom de la prochaine obligation à corriger, avec sa durée estimée et un bouton **Corriger** pour y accéder directement
+
+Lorsque toutes les obligations sont satisfaites, la troisième carte affiche un message de confirmation « Tout est conforme ».
+
+{/* TODO: screenshot
+import adminConformiteStats from '../../../assets/screenshots/admin-conformite-stats.png';
+<Image src={adminConformiteStats} alt="Trois cartes du tableau de bord : score global, obligations critiques et prochaine action" />
+*/}
+
+:::tip[Concentrez-vous sur les obligations critiques]
+Les obligations marquées **Obligatoire** sont les plus importantes. Commencez par celles-ci pour garantir que votre site respecte les exigences légales essentielles.
+:::
+
+## Comprendre les indicateurs
+
+Chaque obligation est représentée par une carte avec plusieurs indicateurs visuels :
+
+### Icônes de statut
+
+- ✓ (vert) — L'obligation est remplie
+- ⚠ (orange) — L'obligation est partiellement remplie
+- ✗ (rouge) — L'obligation n'est pas remplie
+
+### Badges de priorité
+
+- **Obligatoire** (rouge) — Exigence légale impérative
+- **Recommandé** (bleu) — Bonne pratique fortement conseillée
+- **Optionnel** (gris) — Amélioration non contraignante
+
+### Badges de statut
+
+- **Conforme** (vert) — Tous les critères sont remplis
+- **Partiel** (orange) — Certains critères restent à compléter
+- **Manquant** (rouge) — Aucun critère n'est rempli
+
+Chaque carte affiche également une description, une checklist des critères à valider, la durée estimée de correction, la référence légale applicable et un lien « En savoir plus » vers la source officielle.
+
+## Obligations légales
+
+### Mentions légales
+
+Votre site doit afficher les informations permettant d'identifier le responsable de la publication :
+
+- **SIRET** de la commune
+- **Directeur de publication** (nom de la personne responsable)
+- **Hébergeur** (nom de l'hébergeur du site)
+
+Référence : Art. 6 LCEN (loi n° 2004-575).
+
+### Contact
+
+Les usagers doivent pouvoir contacter la mairie par voie électronique. Il est nécessaire de renseigner une **adresse email de contact**.
+
+Référence : Art. L112-2-1 CRPA.
+
+## Protection des données
+
+### Politique RGPD
+
+Votre site doit disposer d'une politique de confidentialité informant les visiteurs sur l'utilisation de leurs données personnelles. Cette politique doit être suffisamment détaillée (50 caractères minimum).
+
+Référence : RGPD art. 13-14, règlement UE 2016/679.
+
+### Délégué à la protection des données
+
+Toute collectivité doit désigner un DPO (Délégué à la Protection des Données). Deux informations sont requises :
+
+- **Nom du DPO**
+- **Email du DPO**
+
+Référence : RGPD art. 37-39.
+
+## Accessibilité
+
+Votre site doit déclarer son **niveau d'accessibilité** et publier une **déclaration d'accessibilité** conforme au RGAA (Référentiel Général d'Amélioration de l'Accessibilité).
+
+Référence : Art. 47 loi n° 2005-102, RGAA.
+
+:::note[Obligation depuis 2012]
+L'accessibilité des sites publics est une obligation légale depuis 2012. Le RGAA fournit le cadre technique et méthodologique à respecter.
+:::
+
+## Transparence
+
+### Documents obligatoires
+
+Plusieurs types de documents doivent être rendus publics :
+
+- **Procès-verbaux du conseil municipal** — Les PV des séances doivent être accessibles (Art. L2121-25 CGCT)
+- **Délibérations** — Les délibérations du conseil municipal doivent être publiées (Art. L2121-24 CGCT)
+- **Documents d'urbanisme** — PLU, SCoT ou carte communale doivent être consultables en ligne (Art. L153-1 Code de l'urbanisme, recommandé)
+
+### Obligations pour les communes de plus de 3 500 habitants
+
+Les communes dépassant 3 500 habitants sont soumises à des obligations supplémentaires :
+
+- **Open data** — Publication des données publiques : délibérations, PV du conseil et documents budgétaires (Art. L312-1-1 CRPA)
+- **Budget** — Les documents budgétaires doivent être mis à disposition du public (Art. L2313-1 CGCT)
+
+{/* TODO: screenshot
+import adminConformiteAccordion from '../../../assets/screenshots/admin-conformite-accordion.png';
+<Image src={adminConformiteAccordion} alt="Liste des obligations par catégorie avec barres de progression" />
+*/}
+
+## Corriger un point de non-conformité
+
+1. Identifiez l'obligation à corriger dans la liste (statut **Partiel** ou **Manquant**)
+2. Cliquez sur le bouton **Corriger** de l'obligation concernée
+3. Vous êtes redirigé vers la page de configuration correspondante
+4. Remplissez les champs requis et enregistrez
+5. Revenez sur la page de conformité pour vérifier que le statut a été mis à jour
+
+:::tip[Mise à jour automatique]
+Le tableau de bord de conformité se met à jour automatiquement dans l'administration. En revanche, pour que les informations apparaissent sur le site public, un [déploiement](/administration/deploiement) est nécessaire.
+:::
+
+## Pour aller plus loin
+
+- [Mentions légales et RGPD](/configuration/mentions-legales-rgpd) — Renseigner les mentions légales et la politique de confidentialité
+- [Informations générales](/configuration/informations-generales) — Configurer les coordonnées et l'email de contact
+- [Documents officiels](/contenu/documents-officiels) — Publier les PV, délibérations et documents budgétaires
+- [Déploiement](/administration/deploiement) — Mettre en ligne les corrections apportées

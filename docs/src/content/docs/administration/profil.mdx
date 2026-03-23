@@ -1,0 +1,52 @@
+---
+title: Profil
+description: Consulter et modifier vos informations personnelles et réinitialiser votre mot de passe.
+---
+
+La page **Mon profil** vous permet de consulter vos informations, de mettre à jour vos coordonnées et de réinitialiser votre mot de passe. Vous y accédez depuis le menu utilisateur en haut à droite de l'écran, en cliquant sur **Mon profil**.
+
+## Consulter vos informations
+
+Votre profil affiche les informations suivantes en mode lecture :
+
+- **Prénom** et **Nom**
+- **Email**
+- **Nom d'utilisateur** — précédé du symbole @
+- **Téléphone** — affiché uniquement s'il a été renseigné
+- **Rôle** — affiché sous forme de badge (Administrateur ou Rédacteur)
+- **Site** — le nom de la commune à laquelle votre compte est rattaché
+- **Membre depuis** — la date de création de votre compte
+
+{/* TODO: screenshot
+import adminProfilView from '../../../assets/screenshots/admin-profil-view.png';
+<Image src={adminProfilView} alt="Page Mon profil en mode lecture avec les informations personnelles" />
+*/}
+
+## Modifier vos informations
+
+1. Cliquez sur le bouton **Modifier** en haut de la carte d'informations
+2. Modifiez les champs souhaités : **Prénom**, **Nom** et/ou **Téléphone**
+3. Cliquez sur **Enregistrer** pour valider vos modifications, ou sur **Annuler** pour revenir à l'état précédent
+
+Un message de confirmation « Profil mis à jour » s'affiche en cas de succès.
+
+:::note[Champs non modifiables]
+Votre adresse email, votre nom d'utilisateur, votre rôle et votre site ne peuvent pas être modifiés depuis cette page. Seul un administrateur peut mettre à jour ces informations depuis la page [Utilisateurs](/administration/utilisateurs).
+:::
+
+## Réinitialiser votre mot de passe
+
+Si vous souhaitez changer votre mot de passe :
+
+1. Dans la section **Mot de passe**, cliquez sur **Réinitialiser mon mot de passe**
+2. Un email contenant un lien de réinitialisation vous est envoyé à votre adresse
+
+:::tip[Vérifiez vos courriers indésirables]
+Si vous ne recevez pas l'email dans les minutes qui suivent, pensez à vérifier votre dossier de courriers indésirables (spam).
+:::
+
+## Pour aller plus loin
+
+- [Connexion et navigation](/guide/connexion) — Comprendre l'interface et se connecter à l'administration
+- [Utilisateurs](/administration/utilisateurs) — Gérer les comptes et les rôles des utilisateurs de votre site
+- [Déploiement](/administration/deploiement) — Publier votre site en ligne après vos modifications

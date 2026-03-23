@@ -1,0 +1,125 @@
+---
+title: Messages
+description: Consulter, filtrer et répondre aux messages envoyés par les citoyens via le formulaire de contact.
+---
+
+Les messages regroupent toutes les demandes envoyées par les citoyens depuis le formulaire de contact de votre site. Cette page vous guide dans la consultation, le suivi et la réponse aux messages reçus.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteMessagesListe from '../../../assets/screenshots/communaute-messages-liste.png';
+
+<Image src={communauteMessagesListe} alt="Vue complète de la liste des messages avec filtres et tableau" />
+*/}
+
+## Liste des messages
+
+Les messages sont affichés sous forme de **tableau** avec les colonnes suivantes :
+
+- **Référence** — Numéro de référence unique du message
+- **Expéditeur** — Nom et adresse email de l'expéditeur
+- **Objet** — Objet du message (masqué sur mobile)
+- **Catégorie** — Catégorie du message (masquée sur tablette)
+- **Statut** — Badge coloré indiquant l'état du traitement
+- **Date** — Date de réception du message (masquée sur mobile)
+
+Un **menu contextuel** sur chaque ligne propose :
+
+- **Voir** — Afficher le détail du message
+- **Supprimer** — Supprimer le message
+
+:::note[Bon à savoir]
+Les messages proviennent du formulaire de contact du site public. Ils apparaissent automatiquement dans cette liste dès qu'un citoyen envoie une demande.
+:::
+
+### Filtrer et rechercher
+
+Trois contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par nom, email ou numéro de référence
+- **Statut** — Reçu, En cours, Résolu ou Fermé
+- **Catégorie** — Général, Urbanisme, État civil, Voirie, Associations, RGPD ou Autre
+
+:::tip[Astuce]
+Filtrez par statut "Reçu" pour afficher uniquement les messages qui n'ont pas encore été traités.
+:::
+
+## Consulter un message
+
+Cliquez sur une ligne du tableau pour accéder au détail d'un message. La page de détail affiche :
+
+### Expéditeur
+
+- **Nom** de l'expéditeur
+- **Email** (lien cliquable)
+- **Téléphone** (si renseigné)
+
+### Informations
+
+- **Catégorie** du message
+- **Date** de réception
+- **Statut** actuel (badge coloré)
+
+### Contenu du message
+
+Le texte intégral du message, affiché avec sa mise en forme d'origine.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteMessagesDetail from '../../../assets/screenshots/communaute-messages-detail.png';
+
+<Image src={communauteMessagesDetail} alt="Page de détail d'un message avec informations expéditeur et contenu" />
+*/}
+
+## Changer le statut
+
+Sur la page de détail, la section **Changer le statut** permet de mettre à jour l'état du traitement :
+
+1. Sélectionnez le nouveau statut dans le menu déroulant
+2. Cliquez sur **Mettre à jour**
+
+Les quatre statuts disponibles sont :
+
+- **Reçu** (bleu) — Message non traité
+- **En cours** (jaune) — Traitement en cours
+- **Résolu** (vert) — Demande traitée
+- **Fermé** (gris) — Message clos
+
+## Répondre à un message
+
+Sur la page de détail, la section **Répondre** vous permet d'envoyer une réponse :
+
+1. Saisissez votre réponse dans la zone de texte
+2. Cliquez sur **Enregistrer la réponse**
+
+Le statut du message passe automatiquement à **Résolu** après l'envoi de la réponse. La réponse envoyée s'affiche ensuite dans un encadré vert avec la date d'envoi.
+
+Si une réponse a déjà été envoyée, la section s'intitule **Nouvelle réponse** et vous pouvez envoyer une réponse complémentaire.
+
+:::note[Bon à savoir]
+La section de réponse n'est pas disponible lorsque le message est au statut **Fermé**.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteMessagesReponse from '../../../assets/screenshots/communaute-messages-reponse.png';
+
+<Image src={communauteMessagesReponse} alt="Section de réponse à un message avec zone de texte" />
+*/}
+
+## Supprimer un message
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Supprimer**
+- Depuis la page de détail : cliquez sur le bouton **Supprimer**
+
+Un dialogue de confirmation s'affiche. Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données du message (contenu, réponse, métadonnées) seront perdues.
+:::
+
+## Pour aller plus loin
+
+- [Tableau de bord](/contenu/tableau-de-bord/) — Vue d'ensemble de l'activité de votre site
+- [Newsletter](/communaute/newsletter/) — Gérer les abonnés à la newsletter
+- [Associations](/communaute/associations/) — Gérer l'annuaire des associations
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site

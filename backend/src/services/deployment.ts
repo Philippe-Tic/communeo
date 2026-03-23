@@ -35,7 +35,7 @@ class DeploymentService {
     // Le dossier sites est au niveau parent du backend
     this.sitesPath = path.join(process.cwd(), '../sites');
     // Utiliser le dossier temp système pour éviter les redémarrages Strapi
-    this.tempDir = path.join(os.tmpdir(), 'cms-mairies-builds');
+    this.tempDir = path.join(os.tmpdir(), 'communeo-builds');
 
     console.log('🔧 [DEPLOYMENT SERVICE] Configuration des chemins :');
     console.log(`   - Working directory: ${process.cwd()}`);

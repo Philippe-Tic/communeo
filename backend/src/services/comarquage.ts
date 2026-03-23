@@ -24,7 +24,7 @@ class ComarquageService {
   private downloadInProgress: Map<DilaAudience, Promise<void>> = new Map()
 
   constructor() {
-    this.cacheDir = path.join(os.tmpdir(), 'cms-mairies-comarquage')
+    this.cacheDir = path.join(os.tmpdir(), 'communeo-comarquage')
     this.ttlMs = process.env.COMARQUAGE_TTL_MS
       ? parseInt(process.env.COMARQUAGE_TTL_MS, 10)
       : DEFAULT_TTL_MS

@@ -1,6 +1,144 @@
 ---
 title: Pages
-description: "Gérer les pages de votre site : création, édition et organisation."
+description: Créer, modifier et organiser les pages statiques de votre site municipal.
 ---
 
-Documentation à venir.
+Les pages constituent la structure de votre site : accueil, à propos, services, etc. Cette page vous explique comment créer, modifier, organiser et supprimer vos pages.
+
+{/* TODO: screenshot
+import contenuPagesListe from '../../../assets/screenshots/contenu-pages-liste.png';
+<Image src={contenuPagesListe} alt="Vue complète de la liste des pages avec filtres et cartes" />
+*/}
+
+## Liste des pages
+
+Les pages sont affichées sous forme de **cartes** dans une grille responsive (une colonne sur mobile, deux sur tablette, trois sur ordinateur).
+
+Chaque carte présente :
+
+- Un **badge de statut** : Brouillon (jaune), Publié (vert) ou Archivé (rouge)
+- Un badge **Programmé** si une date de publication future est définie
+- Le **titre** de la page
+- Le **slug** (chemin URL)
+- Un **aperçu du contenu** (texte brut, tronqué)
+- La **date de modification** et l'**ordre dans le menu**
+
+Un **menu contextuel** (icône ···) sur chaque carte propose les actions suivantes :
+
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Voir** — Afficher la page de détail
+- **Supprimer** — Supprimer la page
+
+### Filtrer et trier
+
+Quatre contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par mot-clé dans le titre
+- **Statut** — Publié, Brouillon ou Archivé
+- **Trier par** — Titre, Date de modification ou Ordre du menu
+- **Ordre** — Croissant ou Décroissant
+
+:::tip[Astuce]
+Utilisez le tri par **Ordre du menu** pour visualiser rapidement la hiérarchie de navigation de votre site.
+:::
+
+## Créer une page
+
+1. Cliquez sur le bouton **Nouvelle page** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Informations de base
+
+- **Titre** (obligatoire) — Le titre de la page
+- **Slug** (obligatoire) — L'identifiant URL, généré automatiquement à partir du titre
+- **Contenu** (obligatoire) — Le corps de la page, rédigé dans l'[éditeur de texte riche](/reference/editeur-texte/)
+
+:::note[Bon à savoir]
+Le slug est généré automatiquement à partir du titre lors de la création. Vous pouvez le modifier manuellement si besoin. En revanche, lors d'une modification ultérieure du titre, le slug n'est pas recalculé automatiquement.
+:::
+
+### Organisation
+
+- **Statut** — Détermine la visibilité de la page :
+  - **Brouillon** (jaune) — Non visible sur le site
+  - **Publié** (vert) — Visible sur le site après déploiement
+  - **Archivé** (rouge) — Retiré du site
+- **Publication programmée** — Date et heure de publication souhaitée. Ce champ n'apparaît que lorsque le statut est **Publié**. Laissez vide pour publier immédiatement.
+- **Ordre dans le menu** — Numéro qui détermine la position de la page dans la navigation (0 par défaut)
+- **Template** — Modèle de mise en page : **Par défaut**, **À propos** ou **Services**
+
+:::caution[Publication programmée]
+La publication programmée définit une date de mise en ligne, mais la page ne sera effectivement visible qu'après un [déploiement](/administration/deploiement/) réalisé après cette date.
+:::
+
+### SEO
+
+- **Titre SEO** — Titre affiché dans les résultats des moteurs de recherche. Pré-rempli avec le titre de la page.
+- **Description SEO** — Texte affiché dans les résultats des moteurs de recherche. 150 à 160 caractères recommandés.
+
+{/* TODO: screenshot
+import contenuPagesFormulaire from '../../../assets/screenshots/contenu-pages-formulaire.png';
+<Image src={contenuPagesFormulaire} alt="Formulaire de création d'une page" />
+*/}
+
+### Aperçu en temps réel
+
+Sur ordinateur, cliquez sur le bouton **Aperçu** pour afficher une vue côte à côte du formulaire et du rendu de la page. Cela vous permet de vérifier la mise en forme avant de créer ou mettre à jour la page.
+
+## Modifier une page
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· d'une carte, puis sur **Modifier**
+- Depuis la page de détail : cliquez sur le bouton **Modifier**
+
+Le formulaire s'affiche avec les données existantes. Effectuez vos modifications, puis cliquez sur **Mettre à jour**.
+
+:::note[Bon à savoir]
+Lorsque vous modifiez le titre, le slug n'est pas recalculé automatiquement. Si vous souhaitez changer le slug, modifiez-le manuellement dans le champ correspondant.
+:::
+
+## Publier et dépublier
+
+### Publier une page
+
+Depuis le formulaire : changez le statut en **Publié**, puis cliquez sur **Mettre à jour**.
+
+### Dépublier une page
+
+Depuis le formulaire : changez le statut en **Brouillon**, puis cliquez sur **Mettre à jour**.
+
+### Archiver une page
+
+Depuis le formulaire : changez le statut en **Archivé**, puis cliquez sur **Mettre à jour**.
+
+:::tip[Rappel]
+Les changements de statut ne sont visibles sur votre site qu'après un [déploiement](/administration/deploiement/).
+:::
+
+## Supprimer une page
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Supprimer**
+- Depuis la page de détail : cliquez sur le bouton **Supprimer**
+
+Un dialogue de confirmation s'affiche avec le titre de la page et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données de la page (contenu, métadonnées) seront perdues.
+:::
+
+{/* TODO: screenshot
+import contenuPagesSuppression from '../../../assets/screenshots/contenu-pages-suppression.png';
+<Image src={contenuPagesSuppression} alt="Dialogue de confirmation de suppression d'une page" />
+*/}
+
+## Pour aller plus loin
+
+- [Éditeur de texte riche](/reference/editeur-texte/) — Découvrir les fonctionnalités de l'éditeur de contenu
+- [Actualités](/contenu/actualites/) — Rédiger et publier des articles d'actualité
+- [Accueil et navigation](/configuration/accueil-navigation/) — Configurer la page d'accueil et les menus
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

@@ -1,6 +1,126 @@
 ---
 title: Alertes
-description: Diffuser des alertes et informations urgentes aux citoyens.
+description: Créer et gérer les bandeaux d'alerte affichés sur votre site pour informer les citoyens.
 ---
 
-Documentation à venir.
+Les alertes vous permettent d'afficher des bandeaux d'information sur votre site pour prévenir les citoyens de situations importantes : travaux, coupures, intempéries ou toute autre perturbation. Cette page vous guide à travers la création, la planification et la gestion des alertes.
+
+{/* TODO: screenshot
+import contenuAlertesListe from '../../../assets/screenshots/contenu-alertes-liste.png';
+<Image src={contenuAlertesListe} alt="Vue complète de la liste des alertes" />
+*/}
+
+## Liste des alertes
+
+Les alertes sont affichées dans une liste verticale. Chaque ligne présente :
+
+- Un **cercle coloré** avec une icône correspondant au niveau de sévérité
+- Le **titre** de l'alerte
+- Des **badges** indiquant le type d'alerte, le niveau de sévérité, le statut actif/inactif, et éventuellement "Expiré"
+- Un **aperçu du message** (tronqué)
+- La **localisation** (si renseignée)
+- La **période d'affichage** (si renseignée)
+
+### Filtrer par type
+
+Des boutons de filtre en haut de la liste permettent de n'afficher qu'un type d'alerte :
+
+- **Tous** — Toutes les alertes
+- **Travaux** 🚧 — Chantiers et travaux publics
+- **Coupure d'eau** 💧 — Interruptions d'alimentation en eau
+- **Coupure d'électricité** ⚡ — Interruptions d'alimentation électrique
+- **Déviation** ↩️ — Changements de circulation
+- **Intempérie** 🌧️ — Alertes météo
+- **Autre** 📋 — Autres situations
+
+### Niveaux de sévérité
+
+Trois niveaux déterminent l'apparence visuelle du bandeau sur votre site :
+
+- **Information** (bleu) — Pour les messages informatifs sans urgence
+- **Avertissement** (orange) — Pour les situations nécessitant l'attention des citoyens
+- **Critique** (rouge) — Pour les urgences et situations dangereuses
+
+### Actions rapides
+
+Chaque alerte dispose de trois boutons d'action :
+
+- **Activer / Désactiver** — Rendre l'alerte visible ou invisible sur le site
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Supprimer** — Supprimer l'alerte
+
+:::note[Bon à savoir]
+Les alertes inactives sont affichées avec une opacité réduite dans la liste. Elles ne sont pas visibles sur le site public.
+:::
+
+## Créer une alerte
+
+1. Cliquez sur le bouton **Nouvelle alerte** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Contenu
+
+- **Titre** (obligatoire) — Le titre de l'alerte (200 caractères max.)
+- **Message** (obligatoire) — Le texte du bandeau d'alerte (500 caractères max.)
+- **Sévérité** — Le niveau de l'alerte : **Information**, **Avertissement** ou **Critique**
+- **Active** — Cochez pour rendre l'alerte visible sur le site public
+
+### Type et localisation
+
+- **Type d'alerte** — Travaux, Coupure d'eau, Coupure d'électricité, Déviation, Intempérie ou Autre
+- **Localisation** — Le lieu concerné (200 caractères max., ex : "Rue de la Mairie, centre-ville")
+- **Date de début** — Date de début de la perturbation
+- **Date de fin** — Date de fin prévue de la perturbation
+- **Zone concernée** — Description de la zone affectée (500 caractères max.)
+
+### Planification
+
+- **Afficher à partir du** — Date et heure de début d'affichage du bandeau. Laissez vide pour afficher immédiatement.
+- **Afficher jusqu'au** — Date et heure de fin d'affichage. Laissez vide pour afficher indéfiniment.
+
+:::caution[Expiration]
+Lorsque la date **Afficher jusqu'au** est dépassée, l'alerte est automatiquement marquée comme "Expiré" dans la liste. Elle n'est plus visible sur le site, même si elle est active.
+:::
+
+### Lien optionnel
+
+- **URL du lien** — Lien vers une page d'information complémentaire
+- **Libellé du lien** — Texte du lien affiché sur le bandeau (100 caractères max., ex : "En savoir plus")
+
+{/* TODO: screenshot
+import contenuAlertesFormulaire from '../../../assets/screenshots/contenu-alertes-formulaire.png';
+<Image src={contenuAlertesFormulaire} alt="Formulaire de création d'une alerte" />
+*/}
+
+## Modifier une alerte
+
+Depuis la liste, cliquez sur le bouton **Modifier** (icône crayon) de l'alerte souhaitée.
+
+Le formulaire s'affiche avec les données existantes. Effectuez vos modifications, puis cliquez sur **Modifier**.
+
+## Activer et désactiver
+
+Depuis la liste, cliquez sur le bouton **Activer** / **Désactiver** (icône marche/arrêt) pour basculer la visibilité de l'alerte sur le site public.
+
+:::tip[Rappel]
+Les changements de visibilité ne sont effectifs sur votre site qu'après un [déploiement](/administration/deploiement/).
+:::
+
+## Supprimer une alerte
+
+Depuis la liste, cliquez sur le bouton **Supprimer** (icône corbeille).
+
+Un dialogue de confirmation s'affiche. Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données de l'alerte seront perdues.
+:::
+
+## Pour aller plus loin
+
+- [Actualités](/contenu/actualites/) — Publier des informations détaillées sur les situations en cours
+- [Pages](/contenu/pages/) — Créer des pages d'information complémentaires
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Informations générales](/configuration/informations-generales/) — Configurer les coordonnées de votre commune
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

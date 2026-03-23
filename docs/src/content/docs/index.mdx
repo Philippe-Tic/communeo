@@ -3,9 +3,43 @@ title: Communeo
 description: Documentation du CMS multi-tenant pour les sites municipaux.
 template: splash
 hero:
-  tagline: Documentation technique et guides d'utilisation de Communeo.
+  tagline: Créez et gérez facilement le site internet de votre commune avec Communeo.
   actions:
     - text: Commencer
       link: /guide/presentation/
       icon: right-arrow
 ---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Premiers pas
+
+<CardGrid>
+  <LinkCard title="Présentation" href="/guide/presentation/" description="Découvrez Communeo et ses fonctionnalités principales." />
+  <LinkCard title="Connexion et navigation" href="/guide/connexion/" description="Connectez-vous et prenez en main l'interface d'administration." />
+</CardGrid>
+
+## Gérer votre contenu
+
+<CardGrid>
+  <Card title="Contenu" icon="pencil">
+    Actualités, pages, événements, documents officiels, alertes, cantine et collecte des déchets.
+  </Card>
+  <Card title="Médiathèque" icon="open-book">
+    Gérez les images et fichiers utilisés sur votre site.
+  </Card>
+  <Card title="Communauté" icon="comment">
+    Messages reçus, équipe municipale, associations et newsletter.
+  </Card>
+  <Card title="Configuration" icon="setting">
+    Informations générales, mentions légales, réseaux sociaux et navigation.
+  </Card>
+</CardGrid>
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Déploiement" href="/administration/deploiement/" description="Publiez votre site en ligne en un clic." />
+  <LinkCard title="Éditeur de texte" href="/reference/editeur-texte/" description="Maîtrisez l'éditeur de texte enrichi." />
+  <LinkCard title="Astuces" href="/reference/astuces/" description="Conseils et bonnes pratiques pour tirer le meilleur de Communeo." />
+</CardGrid>

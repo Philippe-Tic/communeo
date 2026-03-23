@@ -1,6 +1,77 @@
 ---
 title: Déploiement
-description: Publier votre site en ligne et suivre les déploiements.
+description: Publier votre site en ligne, suivre l'avancement des déploiements et consulter l'historique.
 ---
 
-Documentation à venir.
+Le déploiement publie vos modifications sur le site visible par les administrés. Tant que vous n'avez pas déployé, vos modifications restent en préparation dans l'espace d'administration.
+
+## État actuel du site
+
+En haut de la page, un badge indique l'état actuel de votre site :
+
+- **Site en ligne** (vert) — Le site est à jour et accessible au public
+- **En cours de déploiement** (bleu) — Une publication est en cours
+- **Échec du déploiement** (rouge) — Le dernier déploiement a échoué
+
+Deux boutons sont disponibles à côté du badge :
+
+- **Voir le site** — Ouvre votre site public dans un nouvel onglet (visible uniquement lorsque le site est en ligne)
+- **Publier le site** — Lance un nouveau déploiement
+
+{/* TODO: screenshot
+import adminDeploiementStatus from '../../../assets/screenshots/admin-deploiement-status.png';
+<Image src={adminDeploiementStatus} alt="État actuel du site avec le badge de statut et les boutons d'action" />
+*/}
+
+:::note[Bouton désactivé]
+Le bouton **Publier le site** est désactivé lorsqu'un déploiement est déjà en cours. Attendez la fin du déploiement pour en lancer un nouveau.
+:::
+
+## Publier le site
+
+1. Cliquez sur le bouton **Publier le site**
+2. Une barre de progression animée s'affiche avec un chronomètre indiquant le temps écoulé
+3. À la fin du processus, une notification vous indique si le déploiement a réussi ou échoué
+
+Le déploiement prend généralement entre 30 secondes et quelques minutes selon la quantité de contenu.
+
+:::caution[Ne fermez pas votre navigateur]
+Pendant le déploiement, gardez la page ouverte. Si vous fermez le navigateur, le déploiement continuera en arrière-plan, mais vous ne verrez pas le résultat.
+:::
+
+## En cas d'erreur
+
+Si le déploiement échoue, un encadré rouge affiche le message d'erreur. Vous pouvez :
+
+1. Vérifier que le contenu requis de votre site est bien renseigné (informations générales, pages essentielles)
+2. Relancer un déploiement en cliquant à nouveau sur **Publier le site**
+
+Si l'erreur persiste, contactez votre administrateur ou l'équipe technique.
+
+## Historique des déploiements
+
+Le tableau en bas de page liste les 5 derniers déploiements avec les informations suivantes :
+
+| Colonne | Description |
+|---------|-------------|
+| **Statut** | Réussi (vert), En cours (bleu) ou Échec (rouge) |
+| **Déclenché par** | Le nom de l'utilisateur qui a lancé le déploiement |
+| **Date** | La date relative du déploiement (ex : « il y a 2 heures ») |
+| **Durée** | Le temps total du déploiement (ex : « 45s », « 2m 15s ») |
+
+{/* TODO: screenshot
+import adminDeploiementHistory from '../../../assets/screenshots/admin-deploiement-history.png';
+<Image src={adminDeploiementHistory} alt="Tableau d'historique des 5 derniers déploiements" />
+*/}
+
+:::tip[Regroupez vos modifications]
+Plutôt que de déployer après chaque petite modification, regroupez vos changements et déployez une seule fois. Cela réduit le temps d'attente global.
+:::
+
+## Pour aller plus loin
+
+- [Tableau de bord](/contenu/tableau-de-bord) — Suivre l'état de votre site depuis la page d'accueil
+- [Conformité légale](/administration/conformite-legale) — Vérifier les obligations réglementaires avant de publier
+- [Domaine personnalisé](/administration/domaine-personnalise) — Associer votre propre adresse web à votre site
+- [Actualités](/contenu/actualites) — Rédiger et publier des articles d'actualité
+- [Pages](/contenu/pages) — Créer et organiser les pages de votre site

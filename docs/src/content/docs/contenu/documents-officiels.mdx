@@ -1,6 +1,137 @@
 ---
 title: Documents officiels
-description: Publier les délibérations, arrêtés et autres documents officiels.
+description: Publier et organiser les délibérations, arrêtés, budgets et autres documents officiels de votre commune.
 ---
 
-Documentation à venir.
+Les documents officiels vous permettent de mettre à disposition des citoyens les actes administratifs de votre commune : procès-verbaux, délibérations, arrêtés, documents d'urbanisme et budgets. Cette page vous guide à travers la publication, le classement et la gestion de ces documents.
+
+{/* TODO: screenshot
+import contenuDocumentsListe from '../../../assets/screenshots/contenu-documents-liste.png';
+<Image src={contenuDocumentsListe} alt="Vue complète de la liste des documents officiels avec filtres" />
+*/}
+
+## Liste des documents
+
+Les documents sont affichés sous forme de **cartes** dans une grille. Chaque carte présente :
+
+- Des **badges** indiquant le statut (Brouillon, Publié, Archivé) et le type de document (couleur selon la catégorie)
+- Le **titre** du document
+- La **description** (tronquée sur deux lignes, si renseignée)
+- La **date du document** et l'**année**
+- Le **numéro de référence** (si renseigné)
+- Un indicateur de **fichier joint**
+
+Un **menu contextuel** (icône ···) sur chaque carte propose les actions suivantes :
+
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Voir** — Afficher la page de détail
+- **Publier** — Publier le document (si en brouillon)
+- **Archiver** — Archiver le document (si non archivé)
+- **Supprimer** — Supprimer le document
+
+### Types de documents
+
+Dix types de documents sont disponibles, regroupés par couleur :
+
+- **Conseil municipal** (bleu) — Procès-verbal de conseil municipal, Délibération
+- **Urbanisme** (vert) — PLU (Plan Local d'Urbanisme), SCoT (Schéma de Cohérence Territoriale), Carte communale
+- **Finances** (orange) — Budget primitif, Compte administratif, Rapport d'Orientations Budgétaires (ROB)
+- **Réglementation** (rouge) — Arrêté
+- **Divers** (gris) — Autre
+
+### Filtrer et trier
+
+Cinq contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par mot-clé dans le titre
+- **Statut** — Publié, Brouillon ou Archivé
+- **Type** — Filtrer par type de document
+- **Année** — Filtrer par année (liste des 10 dernières années)
+- **Trier par** — Date du document, Titre, Date de création ou Année
+- **Ordre** — Croissant ou Décroissant
+
+:::tip[Astuce]
+Combinez les filtres **Type** et **Année** pour retrouver rapidement un document précis. Par exemple, filtrez par "Délibération" et "2025" pour afficher toutes les délibérations de l'année en cours.
+:::
+
+## Créer un document
+
+1. Cliquez sur le bouton **Nouveau document** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Informations
+
+- **Titre** (obligatoire) — Le titre du document
+- **Slug** (obligatoire) — L'identifiant URL, généré automatiquement à partir du titre
+- **Description** — Un résumé du contenu du document
+- **Numéro de référence** — Référence interne (ex : "DEL-2024-042")
+
+### Classification
+
+- **Type de document** (obligatoire) — Sélectionnez parmi les dix types disponibles
+- **Année** (obligatoire) — L'année du document (entre 1900 et 2100)
+- **Date du document** (obligatoire) — La date officielle du document
+- **Date de session** — La date de la session ou réunion associée (optionnel)
+- **Statut** — Détermine la visibilité du document :
+  - **Brouillon** (jaune) — Non visible sur le site
+  - **Publié** (vert) — Visible sur le site après déploiement
+  - **Archivé** (rouge) — Retiré du site
+
+### Fichiers
+
+- **Document principal (PDF)** (obligatoire à la création) — Le fichier PDF du document officiel. Lors de la modification, le fichier existant est conservé sauf si vous en sélectionnez un nouveau.
+- **Annexes** (optionnel) — Fichiers complémentaires au format PDF, JPG ou PNG. Vous pouvez en sélectionner plusieurs.
+
+{/* TODO: screenshot
+import contenuDocumentsFormulaire from '../../../assets/screenshots/contenu-documents-formulaire.png';
+<Image src={contenuDocumentsFormulaire} alt="Formulaire de création d'un document officiel" />
+*/}
+
+:::note[Bon à savoir]
+Le slug est généré automatiquement à partir du titre, avec normalisation des accents. Vous pouvez le modifier manuellement si besoin.
+:::
+
+## Modifier un document
+
+Depuis la liste, cliquez sur le menu ··· d'une carte, puis sur **Modifier**.
+
+Le formulaire s'affiche avec les données existantes. Le fichier PDF actuel est indiqué par son nom. Effectuez vos modifications, puis cliquez sur **Mettre à jour**.
+
+## Publier et archiver
+
+### Publier un document
+
+Deux méthodes :
+
+- Depuis la liste : cliquez sur le menu ··· → **Publier**
+- Depuis le formulaire : changez le statut en **Publié**, puis cliquez sur **Mettre à jour**
+
+### Archiver un document
+
+Deux méthodes :
+
+- Depuis la liste : cliquez sur le menu ··· → **Archiver**
+- Depuis le formulaire : changez le statut en **Archivé**, puis cliquez sur **Mettre à jour**
+
+:::tip[Rappel]
+Les changements de statut ne sont visibles sur votre site qu'après un [déploiement](/administration/deploiement/).
+:::
+
+## Supprimer un document
+
+Depuis la liste, cliquez sur le menu ··· → **Supprimer**.
+
+Un dialogue de confirmation s'affiche avec le titre du document et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Le document et tous ses fichiers (PDF, annexes) seront perdus.
+:::
+
+## Pour aller plus loin
+
+- [Conformité légale](/administration/conformite-legale/) — Suivre vos obligations réglementaires de publication
+- [Médiathèque](/contenu/mediatheque/) — Gérer les fichiers et images de votre site
+- [Pages](/contenu/pages/) — Créer des pages statiques complémentaires
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

@@ -1,6 +1,104 @@
 ---
 title: Utilisateurs
-description: Gérer les utilisateurs et leurs rôles.
+description: Inviter, gérer et supprimer les utilisateurs de votre site municipal.
 ---
 
-Documentation à venir.
+La page **Utilisateurs** vous permet de contrôler qui a accès à l'espace d'administration de votre site. Vous pouvez inviter de nouveaux utilisateurs, modifier leurs rôles et supprimer des comptes. Cette page est réservée aux administrateurs.
+
+## Liste des utilisateurs
+
+La page affiche un tableau avec l'ensemble des utilisateurs de votre site :
+
+| Colonne | Description |
+|---------|-------------|
+| **Nom** | Prénom, nom et nom d'utilisateur (@username) |
+| **Email** | Adresse email de l'utilisateur |
+| **Rôle** | Badge indiquant le rôle (Administrateur ou Rédacteur) |
+| **Statut** | Badge indiquant l'état du compte (Actif, Inactif ou Invitation en attente) |
+| **Actions** | Boutons **Modifier** et **Supprimer** |
+
+En haut de page, vous disposez de deux filtres :
+
+- **Recherche** — Recherchez un utilisateur par son nom ou son email
+- **Rôle** — Filtrez par rôle (Administrateur ou Rédacteur)
+
+Le bouton **Inviter un utilisateur** en haut à droite permet d'ajouter un nouveau compte.
+
+{/* TODO: screenshot
+import adminUtilisateursList from '../../../assets/screenshots/admin-utilisateurs-list.png';
+<Image src={adminUtilisateursList} alt="Liste des utilisateurs avec filtres et tableau" />
+*/}
+
+## Rôles disponibles
+
+Chaque utilisateur se voit attribuer un rôle qui détermine ses permissions :
+
+- **Administrateur** (badge violet) — Accès complet à l'ensemble des fonctionnalités : contenu, configuration du site, gestion des utilisateurs, déploiement
+- **Rédacteur** (badge gris) — Accès limité à la gestion du contenu : actualités, pages, événements, documents
+
+:::note[Super Admin]
+Le rôle **Super Admin** (badge rouge) est réservé à l'équipe technique. Il n'apparaît pas dans les choix lors de la création d'un utilisateur.
+:::
+
+## Inviter un utilisateur
+
+1. Cliquez sur **Inviter un utilisateur** en haut de la page
+2. Remplissez les trois sections du formulaire :
+
+### Identifiants
+
+- **Nom d'utilisateur** (obligatoire) — L'identifiant unique du compte
+- **Email** (obligatoire) — L'adresse email de l'utilisateur
+
+### Informations personnelles
+
+- **Prénom** (obligatoire)
+- **Nom** (obligatoire)
+- **Téléphone** (facultatif)
+
+### Rôle et statut
+
+- **Rôle** — Choisissez entre **Administrateur** et **Rédacteur** (Rédacteur par défaut)
+- **Compte actif** — Case cochée par défaut
+
+3. Cliquez sur **Envoyer l'invitation**
+
+L'utilisateur recevra un email d'invitation pour définir son mot de passe et activer son compte.
+
+{/* TODO: screenshot
+import adminUtilisateursInvite from '../../../assets/screenshots/admin-utilisateurs-invite.png';
+<Image src={adminUtilisateursInvite} alt="Formulaire d'invitation d'un nouvel utilisateur" />
+*/}
+
+## Consulter le détail d'un utilisateur
+
+Cliquez sur le nom d'un utilisateur dans la liste pour accéder à sa fiche. Vous y retrouvez l'ensemble de ses informations : nom d'utilisateur, email, prénom, nom, téléphone, rôle, statut et date de création.
+
+### Invitation en attente
+
+Si l'utilisateur n'a pas encore activé son compte, une bannière orange **Invitation en attente** s'affiche en haut de la fiche. Cliquez sur **Renvoyer l'invitation** pour envoyer un nouvel email d'activation.
+
+### Réinitialiser le mot de passe
+
+Pour les utilisateurs actifs, une section **Mot de passe** permet d'envoyer un email de réinitialisation en cliquant sur **Réinitialiser le mot de passe**.
+
+## Modifier un utilisateur
+
+Depuis la liste des utilisateurs ou depuis la fiche de détail, cliquez sur **Modifier**. Le même formulaire que pour l'invitation s'affiche, pré-rempli avec les informations actuelles. Apportez vos modifications puis cliquez sur **Mettre à jour**.
+
+## Supprimer un utilisateur
+
+1. Cliquez sur le bouton **Supprimer** dans la liste ou sur la fiche de détail
+2. Une boîte de dialogue vous demande de confirmer la suppression
+3. Cliquez sur **Supprimer** pour valider
+
+:::caution[Suppression définitive]
+La suppression d'un utilisateur est irréversible. Le compte et toutes ses données d'accès seront définitivement effacés.
+:::
+
+## Pour aller plus loin
+
+- [Mon profil](/administration/profil) — Modifier vos propres informations personnelles
+- [Connexion et navigation](/guide/connexion) — Comprendre le processus de connexion et la première activation
+- [Conformité légale](/administration/conformite-legale) — Vérifier les obligations réglementaires de votre site
+- [Déploiement](/administration/deploiement) — Publier votre site après avoir configuré les accès

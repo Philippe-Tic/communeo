@@ -1,0 +1,11 @@
+starlight-theme-select select {
+  color: transparent;
+  width: calc(
+    var(--sl-label-icon-size) + var(--sl-caret-size) + var(--sl-inline-padding) *
+      2 + 0.5rem
+  );
+}
+
+starlight-theme-select option {
+  color: var(--sl-color-gray-1);
+}

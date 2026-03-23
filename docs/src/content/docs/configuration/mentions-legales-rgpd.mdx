@@ -1,6 +1,94 @@
 ---
 title: Mentions légales & RGPD
-description: Configurer les mentions légales et la politique de confidentialité.
+description: Configurer les mentions légales, la politique de confidentialité et la déclaration d'accessibilité de votre site municipal.
 ---
 
-Documentation à venir.
+Tout site internet public français est soumis à des obligations légales en matière d'identification, de protection des données personnelles et d'accessibilité numérique. Cette page vous guide dans la configuration de ces informations.
+
+Pour y accéder, rendez-vous dans **Paramètres > Configuration du site**, puis cliquez sur l'onglet concerné : **Mentions légales**, **RGPD** ou **Accessibilité**.
+
+## Mentions légales
+
+L'onglet **Mentions légales** regroupe les informations d'identification obligatoires de votre site.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationMentionsLegalesVue from '../../../assets/screenshots/configuration-mentions-legales-vue.png';
+
+<Image src={configurationMentionsLegalesVue} alt="Onglet Mentions légales de la configuration du site" />
+*/}
+
+### Identification
+
+- **SIRET** (obligatoire) — Le numéro SIRET de votre commune (14 chiffres). Les espaces sont acceptés dans la saisie.
+- **Directeur de publication** (obligatoire) — Le nom de la personne responsable du contenu du site (généralement le Maire)
+- **Titre du directeur de publication** — Sa fonction (ex : "Maire")
+
+:::note[SIRET]
+Le numéro SIRET est composé de 14 chiffres : les 9 chiffres du SIREN suivis des 5 chiffres du NIC. Vous pouvez le retrouver sur le site annuaire-entreprises.data.gouv.fr.
+:::
+
+### Hébergeur
+
+- **Nom de l'hébergeur** (obligatoire) — Le nom de la société qui héberge le site (ex : "Netlify", "OVH")
+- **Adresse de l'hébergeur** — L'adresse postale de l'hébergeur
+- **Téléphone de l'hébergeur** — Le numéro de téléphone de l'hébergeur
+
+### Crédits et mentions supplémentaires
+
+- **Crédits** — Un champ en [texte riche](/reference/editeur-texte/) pour renseigner les crédits photos, la conception du site, etc.
+- **Mentions légales supplémentaires** — Un champ en [texte riche](/reference/editeur-texte/) pour toute information complémentaire à faire figurer dans les mentions légales
+
+## RGPD & Confidentialité
+
+L'onglet **RGPD** permet de configurer les coordonnées du Délégué à la Protection des Données (DPO) et la politique de confidentialité.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationRgpdVue from '../../../assets/screenshots/configuration-rgpd-vue.png';
+
+<Image src={configurationRgpdVue} alt="Onglet RGPD de la configuration du site" />
+*/}
+
+### Coordonnées du DPO
+
+- **Nom du DPO** (obligatoire) — Le nom du Délégué à la Protection des Données
+- **Email du DPO** (obligatoire) — L'adresse email de contact du DPO
+- **Téléphone du DPO** — Le numéro de téléphone du DPO
+
+### Politique de confidentialité
+
+La politique de confidentialité est rédigée dans un [éditeur de texte riche](/reference/editeur-texte/). Elle doit contenir au minimum 50 caractères.
+
+Lorsque le champ est vide, un bouton **Charger le modèle** apparaît. Ce modèle pré-rempli couvre les sections essentielles : responsable du traitement, données collectées, finalités, base légale, durée de conservation, droits des personnes, cookies et réclamation.
+
+:::tip[Modèle intégré]
+Le modèle contient des marqueurs `[NOM DE LA COMMUNE]` à remplacer par le nom de votre commune. Pensez à personnaliser l'ensemble du texte pour qu'il reflète fidèlement vos pratiques.
+:::
+
+## Accessibilité
+
+L'onglet **Accessibilité** permet de déclarer le niveau de conformité de votre site au RGAA (Référentiel Général d'Amélioration de l'Accessibilité).
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationAccessibiliteVue from '../../../assets/screenshots/configuration-accessibilite-vue.png';
+
+<Image src={configurationAccessibiliteVue} alt="Onglet Accessibilité de la configuration du site" />
+*/}
+
+- **Niveau de conformité** (obligatoire) — Sélectionnez le niveau correspondant à votre dernier audit :
+  - **Non conforme** — Aucun audit réalisé ou résultat inférieur à 50 %
+  - **Partiellement conforme** — Résultat d'audit entre 50 % et 99 %
+  - **Conforme** — Résultat d'audit à 100 %
+- **URL du schéma pluriannuel** — Lien vers votre schéma pluriannuel d'accessibilité
+- **URL du plan d'action** — Lien vers votre plan d'action annuel
+- **Déclaration d'accessibilité** — Un champ en [texte riche](/reference/editeur-texte/) pour rédiger votre déclaration d'accessibilité complète
+
+:::note[Obligation RGAA]
+Depuis 2012, tous les sites internet publics doivent être conformes au RGAA. La mention du niveau de conformité est obligatoire et doit figurer sur chaque page du site. Pour en savoir plus, consultez le site accessibilite.numerique.gouv.fr.
+:::
+
+## Pour aller plus loin
+
+- [Informations générales](/configuration/informations-generales/) — Configurer l'identité et les coordonnées de votre commune
+- [Accueil & Navigation](/configuration/accueil-navigation/) — Configurer la page d'accueil et le menu du site
+- [Réseaux sociaux](/configuration/reseaux-sociaux/) — Ajouter les liens vers vos réseaux sociaux
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site

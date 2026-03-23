@@ -1,6 +1,172 @@
 ---
 title: Informations générales
-description: Configurer le nom, le slug et les coordonnées du site.
+description: Configurer l'identité, les coordonnées, les informations pratiques, l'open data et le guichet démarches de votre site municipal.
 ---
 
-Documentation à venir.
+La configuration du site regroupe tous les paramètres qui définissent l'identité de votre commune en ligne : nom, coordonnées, identité visuelle, horaires d'ouverture, open data et guichet démarches. Cette page couvre les onglets **Informations générales**, **Infos pratiques**, **Open Data** et **Démarches**.
+
+## Accéder à la configuration du site
+
+Rendez-vous dans **Paramètres > Configuration du site** depuis la barre latérale. La page se compose de **10 onglets** organisés horizontalement :
+
+1. Informations générales
+2. Mentions légales
+3. RGPD
+4. Accessibilité
+5. Infos pratiques
+6. Open Data
+7. Démarches
+8. Page d'accueil
+9. Navigation
+10. Réseaux sociaux
+
+Cliquez sur un onglet pour afficher la section correspondante. Après toute modification, cliquez sur **Enregistrer** en bas de la page.
+
+:::note[Accès restreint]
+La configuration du site n'est accessible qu'aux utilisateurs disposant des droits d'administration (maires, adjoints). Si vous ne voyez pas cette section dans la barre latérale, contactez votre administrateur.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationInformationsGeneralesVue from '../../../assets/screenshots/configuration-informations-generales-vue.png';
+
+<Image src={configurationInformationsGeneralesVue} alt="Onglet Informations générales de la configuration du site" />
+*/}
+
+## Informations générales
+
+L'onglet **Informations générales** contient les données d'identification de base de votre commune.
+
+- **Nom du site** (obligatoire, max 100 caractères) — Le nom affiché dans l'en-tête du site public et dans les moteurs de recherche
+- **Slug** (lecture seule) — L'identifiant URL de votre site, défini à la création. Ce champ ne peut pas être modifié.
+- **Email de contact** (obligatoire) — L'adresse email principale de la mairie, affichée sur la page de contact et dans le pied de page
+- **Téléphone** — Le numéro de téléphone de la mairie
+- **Adresse** — L'adresse postale complète de la mairie
+
+## Identité visuelle
+
+La section **Identité visuelle** permet de personnaliser l'apparence de votre site.
+
+- **Logo** — L'image affichée dans l'en-tête du site public. Utilisez le sélecteur d'image pour choisir ou téléverser un fichier depuis la médiathèque.
+- **Favicon** — L'icône affichée dans l'onglet du navigateur et sur l'écran d'accueil des appareils mobiles (PWA)
+
+:::tip[Format favicon]
+Utilisez une image carrée de 512×512 pixels minimum pour garantir un rendu optimal sur tous les appareils. Si aucun favicon n'est défini, le logo sera utilisé à la place.
+:::
+
+## Configuration des couleurs
+
+La couleur principale définit l'identité visuelle de votre site : boutons, liens, en-têtes et éléments interactifs.
+
+- **Couleur principale** — Sélectionnez une couleur via le sélecteur visuel ou saisissez un code hexadécimal (ex : `#1E3A5F`)
+
+Deux badges de contraste WCAG s'affichent automatiquement pour vous indiquer la lisibilité de la couleur choisie :
+
+- **Sur fond blanc** — Contraste sur les pages à fond clair
+- **Sur fond sombre** — Contraste sur les éléments à fond sombre
+
+Les niveaux affichés sont : **AAA** (excellent), **AA** (acceptable) ou **Insuffisant** (à éviter).
+
+:::note[Contraste]
+Un contraste suffisant est essentiel pour l'accessibilité de votre site. Privilégiez une couleur atteignant au minimum le niveau AA (ratio de 4,5:1) pour garantir la lisibilité du texte.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationInformationsGeneralesCouleurs from '../../../assets/screenshots/configuration-informations-generales-couleurs.png';
+
+<Image src={configurationInformationsGeneralesCouleurs} alt="Sélecteur de couleur avec badges de contraste WCAG" />
+*/}
+
+## Déploiement automatique
+
+Le déploiement automatique permet de reconstruire votre site public à chaque modification de contenu (articles, pages, événements, documents, alertes), sans intervention manuelle.
+
+- **Activer le déploiement automatique** — Toggle on/off
+- **Délai avant déploiement** (visible uniquement si activé) — Temps d'attente après la dernière modification avant de lancer la reconstruction (de 60 à 3 600 secondes, par défaut 300 secondes soit 5 minutes)
+
+Ce délai permet de regrouper plusieurs modifications successives en un seul déploiement.
+
+## Infos pratiques
+
+L'onglet **Infos pratiques** regroupe les données complémentaires sur votre commune.
+
+### Population et coordonnées GPS
+
+- **Population** — Le nombre d'habitants de la commune (nombre positif)
+- **Latitude** — La latitude de la commune (entre -90 et 90, ex : 45.764)
+- **Longitude** — La longitude de la commune (entre -180 et 180, ex : 4.8357)
+
+:::note[Widget météo]
+Les coordonnées GPS sont utilisées par le widget météo de la page d'accueil. Si vous souhaitez afficher la météo, pensez à renseigner ces deux champs. Voir [Accueil & Navigation](/configuration/accueil-navigation/).
+:::
+
+### Page Contact
+
+- **Texte d'introduction de la page Contact** — Un texte libre affiché au-dessus du formulaire de contact sur la page `/contact` de votre site public
+
+### Horaires d'ouverture
+
+L'éditeur d'horaires permet de définir les créneaux d'ouverture de la mairie pour chaque jour de la semaine (lundi à dimanche).
+
+Pour chaque jour :
+
+1. Activez ou désactivez le jour avec le toggle **Ouvert / Fermé**
+2. Renseignez les créneaux **matin** et/ou **après-midi** (heures de début et de fin)
+
+Un bouton **Dupliquer** permet de copier les horaires d'un jour vers un ou plusieurs autres jours, pour éviter de ressaisir les mêmes créneaux.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationInformationsGeneralesHoraires from '../../../assets/screenshots/configuration-informations-generales-horaires.png';
+
+<Image src={configurationInformationsGeneralesHoraires} alt="Éditeur d'horaires d'ouverture jour par jour" />
+*/}
+
+## Open Data
+
+L'onglet **Open Data** permet d'activer la publication de données ouvertes sur votre site.
+
+- **Activer la page Open Data sur le site public** — Toggle on/off
+
+Lorsque l'option est activée, deux champs supplémentaires apparaissent :
+
+- **Plateforme Open Data** — Sélectionnez la plateforme sur laquelle vos données sont publiées :
+  - Aucune
+  - data.gouv.fr
+  - OpenDataSoft
+  - Autre plateforme
+- **URL du portail Open Data** — Le lien direct vers votre page sur la plateforme choisie
+
+:::note[Obligation légale]
+L'article L312-1-1 du Code des relations entre le public et l'administration (CRPA) impose aux communes de plus de 3 500 habitants de publier certaines données en open data : délibérations, budgets, marchés publics, etc.
+:::
+
+## Guichet démarches
+
+L'onglet **Démarches** permet d'intégrer les fiches démarches de service-public.gouv.fr directement sur votre site grâce au module comarquage.
+
+- **Activer le guichet démarches** — Toggle on/off
+
+Lorsque l'option est activée, les champs suivants apparaissent :
+
+- **Code INSEE de la commune** — Le code à 5 chiffres de votre commune (ex : 69123 pour Lyon). Dès la saisie d'un code valide, le nom de la commune s'affiche automatiquement en vert à côté du champ.
+- **Audiences activées** — Cochez les types de fiches à afficher :
+  - Particuliers
+  - Professionnels
+- **Vider le cache des fiches** — Force le re-téléchargement des données depuis service-public.gouv.fr
+
+:::tip[Code INSEE]
+Le code INSEE de votre commune est un identifiant à 5 chiffres. Vous pouvez le retrouver sur le site geo.api.gouv.fr ou sur la fiche de votre commune sur Wikipedia.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import configurationInformationsGeneralesDemarches from '../../../assets/screenshots/configuration-informations-generales-demarches.png';
+
+<Image src={configurationInformationsGeneralesDemarches} alt="Configuration du guichet démarches avec code INSEE vérifié" />
+*/}
+
+## Pour aller plus loin
+
+- [Mentions légales & RGPD](/configuration/mentions-legales-rgpd/) — Configurer les obligations légales de votre site
+- [Accueil & Navigation](/configuration/accueil-navigation/) — Configurer la page d'accueil et le menu du site
+- [Réseaux sociaux](/configuration/reseaux-sociaux/) — Ajouter les liens vers vos réseaux sociaux
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Médiathèque](/contenu/mediatheque/) — Gérer les images et fichiers de votre site

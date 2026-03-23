@@ -1,6 +1,83 @@
 ---
 title: Newsletter
-description: Gérer les abonnés à la newsletter de la commune.
+description: Gérer les abonnés à la newsletter et exporter la liste pour vos campagnes d'emailing.
 ---
 
-Documentation à venir.
+La newsletter vous permet de suivre les inscriptions des citoyens et de gérer la liste des abonnés. Cette page vous guide dans la consultation, le filtrage et l'export des abonnés.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import communauteNewsletterListe from '../../../assets/screenshots/communaute-newsletter-liste.png';
+
+<Image src={communauteNewsletterListe} alt="Vue complète de la page newsletter avec statistiques et tableau des abonnés" />
+*/}
+
+## Statistiques
+
+Trois cartes en haut de la page présentent les indicateurs clés :
+
+- **Total abonnés** (bleu) — Nombre total d'inscrits à la newsletter
+- **Abonnés actifs** (vert) — Nombre d'abonnés actuellement actifs
+- **Nouveaux ce mois** (violet) — Nombre d'inscriptions sur le mois en cours
+
+## Liste des abonnés
+
+Les abonnés sont affichés sous forme de **tableau** avec les colonnes suivantes :
+
+- **Email** — Adresse email de l'abonné
+- **Prénom** — Prénom de l'abonné
+- **Nom** — Nom de famille de l'abonné
+- **Date d'inscription** — Date à laquelle l'abonné s'est inscrit
+- **Statut** — Badge "Actif" ou "Inactif"
+- **Actions** — Boutons d'activation/désactivation et de suppression
+
+:::note[Bon à savoir]
+Les citoyens s'inscrivent à la newsletter via le formulaire du site public. Le désabonnement se fait via un lien présent dans chaque email envoyé.
+:::
+
+### Filtrer et rechercher
+
+Deux contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par adresse email
+- **Statut** — Tous, Actifs ou Inactifs
+
+## Activer et désactiver un abonné
+
+Chaque ligne du tableau comporte un **bouton toggle** dans la colonne Actions :
+
+- **Actif** (icône verte) — L'abonné reçoit les newsletters. Cliquez pour désactiver.
+- **Inactif** (icône grise) — L'abonné ne reçoit plus les newsletters. Cliquez pour réactiver.
+
+Le changement de statut est immédiat.
+
+## Exporter en CSV
+
+Cliquez sur le bouton **Exporter en CSV** en haut de la page pour télécharger la liste des abonnés actifs.
+
+Le fichier généré est nommé `newsletter-subscribers-AAAA-MM-JJ.csv` et contient les colonnes suivantes :
+
+- **Email**
+- **Prénom**
+- **Nom**
+- **Date d'inscription**
+
+:::tip[Astuce]
+Exportez la liste en CSV pour l'utiliser avec un outil d'emailing externe (Brevo, Mailchimp, etc.).
+:::
+
+## Supprimer un abonné
+
+Cliquez sur le bouton **corbeille** dans la colonne Actions d'une ligne du tableau.
+
+Un dialogue de confirmation s'affiche avec l'adresse email de l'abonné. Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. L'abonné devra se réinscrire via le site public s'il souhaite recevoir à nouveau la newsletter.
+:::
+
+## Pour aller plus loin
+
+- [Messages](/communaute/messages/) — Consulter et répondre aux messages des citoyens
+- [Équipe municipale](/communaute/equipe/) — Présenter les élus et agents de votre commune
+- [Associations](/communaute/associations/) — Gérer l'annuaire des associations
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site

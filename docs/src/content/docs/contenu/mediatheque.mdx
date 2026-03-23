@@ -1,6 +1,94 @@
 ---
 title: Médiathèque
-description: Gérer les images et fichiers de votre site.
+description: Uploader, organiser et gérer les images et fichiers de votre site municipal.
 ---
 
-Documentation à venir.
+La médiathèque centralise tous les fichiers de votre site : images, documents PDF et vidéos. Vous pouvez y uploader des fichiers, les organiser par dossier et modifier leurs informations. Les fichiers de la médiathèque sont ensuite utilisables dans vos pages, actualités et événements.
+
+{/* TODO: screenshot
+import contenuMediathequeVue from '../../../assets/screenshots/contenu-mediatheque-vue.png';
+<Image src={contenuMediathequeVue} alt="Vue complète de la médiathèque en mode grille" />
+*/}
+
+## Vue d'ensemble
+
+La médiathèque propose deux modes d'affichage :
+
+- **Grille** (par défaut) — Les fichiers sont affichés sous forme de vignettes dans une grille responsive (jusqu'à 6 colonnes sur grand écran)
+- **Liste** — Les fichiers sont affichés en lignes détaillées avec miniature, nom, extension, taille et dossier
+
+### Filtrer et rechercher
+
+Trois contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par mot-clé dans le nom du fichier
+- **Dossier** — Tous les dossiers, Général, Articles, Pages ou Événements
+- **Type** — Tous les types, Images, Vidéos ou Documents
+
+### Pagination
+
+Les fichiers sont affichés par pages de 24 éléments. Utilisez les boutons **Précédent** et **Suivant** pour naviguer entre les pages.
+
+## Uploader des fichiers
+
+Deux méthodes :
+
+1. Cliquez sur le bouton **Uploader** en haut de la page, puis sélectionnez un ou plusieurs fichiers
+2. **Glissez-déposez** des fichiers directement sur la zone de la médiathèque
+
+:::tip[Astuce]
+Vous pouvez sélectionner plusieurs fichiers à la fois lors de l'upload. La zone de dépôt se met en surbrillance lorsque vous glissez des fichiers au-dessus.
+:::
+
+{/* TODO: screenshot
+import contenuMediathequeUpload from '../../../assets/screenshots/contenu-mediatheque-upload.png';
+<Image src={contenuMediathequeUpload} alt="Zone de glisser-déposer pour l'upload de fichiers" />
+*/}
+
+## Consulter et modifier un fichier
+
+Cliquez sur un fichier dans la grille ou la liste pour afficher son **panneau de détail** sur le côté droit de l'écran. Ce panneau présente :
+
+- Un **aperçu** du fichier (image ou icône selon le type)
+- Le **nom** du fichier — Cliquez dessus pour le modifier
+- Le **texte alternatif** — Cliquez sur "Cliquer pour ajouter" pour renseigner la description d'accessibilité
+- La **légende** — Cliquez sur "Cliquer pour ajouter" pour ajouter une légende
+- Les **informations techniques** (lecture seule) :
+  - Type MIME
+  - Taille du fichier
+  - Dimensions (pour les images)
+  - Dossier
+
+:::note[Bon à savoir]
+Le texte alternatif est important pour l'accessibilité de votre site. Il décrit le contenu de l'image aux personnes utilisant un lecteur d'écran. Pensez à le renseigner pour chaque image.
+:::
+
+### Copier l'URL
+
+Depuis le panneau de détail ou la vue en liste, cliquez sur le bouton **Copier l'URL** pour copier le lien du fichier dans votre presse-papiers. Ce lien peut être utilisé dans vos contenus ou partagé.
+
+## Supprimer un fichier
+
+Deux chemins possibles :
+
+- Depuis le panneau de détail : cliquez sur le bouton **Supprimer**
+- Depuis la vue en liste : cliquez sur l'icône de suppression (corbeille rouge)
+
+Un dialogue de confirmation s'affiche avec le nom du fichier et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Si le fichier est utilisé dans des pages ou des actualités, le lien sera cassé.
+:::
+
+{/* TODO: screenshot
+import contenuMediathequeSuppression from '../../../assets/screenshots/contenu-mediatheque-suppression.png';
+<Image src={contenuMediathequeSuppression} alt="Dialogue de confirmation de suppression d'un média" />
+*/}
+
+## Pour aller plus loin
+
+- [Éditeur de texte riche](/reference/editeur-texte/) — Insérer des images dans vos contenus
+- [Actualités](/contenu/actualites/) — Ajouter des images à la une à vos articles
+- [Pages](/contenu/pages/) — Illustrer vos pages avec des images
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

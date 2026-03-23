@@ -3,4 +3,209 @@ title: Actualités
 description: Créer, modifier et publier des actualités sur votre site municipal.
 ---
 
-Documentation à venir.
+Les actualités vous permettent de publier des articles d'information sur le site de votre commune. Cette page vous guide à travers toutes les étapes : création, modification, publication et suppression.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuActualitesListe from '../../../assets/screenshots/contenu-actualites-liste.png';
+
+<Image src={contenuActualitesListe} alt="Vue complète de la liste des actualités avec filtres et cartes" />
+*/}
+
+## Liste des actualités
+
+Les actualités sont affichées sous forme de **cartes** dans une grille responsive (une colonne sur mobile, deux sur tablette, trois sur ordinateur).
+
+Chaque carte présente :
+
+- Des **badges** indiquant le statut (Brouillon, Publié, Archivé), la catégorie, et éventuellement "Programmé" ou "À la une"
+- Le **titre** de l'actualité
+- L'**image à la une** (si renseignée)
+- Le **résumé** (si renseigné)
+- Le **nombre de vues**
+- L'**auteur** (si renseigné)
+- La **date de création** et la **date de publication** (si publiée)
+
+Un **menu contextuel** (icône ···) sur chaque carte propose les actions suivantes :
+
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Voir** — Afficher la page de détail
+- **Mettre à la une** / **Retirer de la une** — Basculer la mise en avant
+- **Publier** — Publier l'article (si non publié)
+- **Dépublier** — Repasser en brouillon (si publié)
+- **Supprimer** — Supprimer l'article
+
+### Filtrer et trier
+
+Six contrôles vous permettent d'affiner l'affichage :
+
+- **Recherche** — Filtrer par mot-clé dans le titre
+- **Statut** — Publié, Brouillon ou Archivé
+- **Catégorie** — Actualité, Événement, Information ou Urgence
+- **À la une** — Oui ou Non
+- **Trier par** — Titre, Date de création, Date de publication ou Nombre de vues
+- **Ordre** — Croissant ou Décroissant
+
+Par défaut, les actualités sont triées par **Date de création**, en ordre **Décroissant** (les plus récentes en premier).
+
+:::tip[Astuce]
+Combinez plusieurs filtres pour retrouver rapidement un article précis. Par exemple, filtrez par catégorie "Urgence" et statut "Publié" pour voir toutes les alertes actives.
+:::
+
+## Créer une actualité
+
+1. Cliquez sur le bouton **Nouvelle actualité** en haut de la liste
+2. Remplissez le formulaire (voir les sections ci-dessous)
+3. Cliquez sur **Créer**
+
+### Informations de base
+
+- **Titre** (obligatoire) — Le titre de l'actualité
+- **Slug** (obligatoire) — L'identifiant URL de l'article, généré automatiquement à partir du titre
+- **Résumé** — Un court texte de présentation affiché dans les cartes et les aperçus
+- **Contenu** (obligatoire) — Le corps de l'article, rédigé dans l'[éditeur de texte riche](/reference/editeur-texte)
+
+:::note[Bon à savoir]
+Le slug est généré automatiquement à partir du titre lors de la création. Vous pouvez le modifier manuellement si besoin. En revanche, lors d'une modification ultérieure du titre, le slug n'est pas recalculé automatiquement.
+:::
+
+### Catégorisation
+
+- **Catégorie** — Classe l'article dans l'une des quatre catégories :
+  - **Actualité** (bleu) — Informations générales
+  - **Événement** (violet) — Annonces d'événements
+  - **Information** (vert) — Notes d'information
+  - **Urgence** (rouge) — Communications urgentes
+- **Statut** — Détermine la visibilité de l'article :
+  - **Brouillon** (jaune) — Non visible sur le site
+  - **Publié** (vert) — Visible sur le site après déploiement
+  - **Archivé** (rouge) — Retiré du site
+- **Publication programmée** — Date et heure de publication souhaitée. Ce champ n'apparaît que lorsque le statut est **Publié**.
+- **Auteur** — Nom de l'auteur de l'article (texte libre)
+- **Actualité à la une** — Cochez cette case pour mettre l'article en avant sur le site
+
+:::caution[Publication programmée]
+La publication programmée définit une date de mise en ligne, mais l'article ne sera effectivement visible qu'après un [déploiement](/administration/deploiement) réalisé après cette date.
+:::
+
+### SEO
+
+- **Description SEO** — Texte affiché dans les résultats des moteurs de recherche. 150 à 160 caractères recommandés pour un affichage optimal.
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuActualitesFormulaire from '../../../assets/screenshots/contenu-actualites-formulaire.png';
+
+<Image src={contenuActualitesFormulaire} alt="Formulaire de création d'une actualité" />
+*/}
+
+### Aperçu en temps réel
+
+Sur ordinateur, cliquez sur le bouton **Aperçu** pour afficher une vue côte à côte du formulaire et du rendu de l'article. Cela vous permet de vérifier la mise en forme avant de créer ou mettre à jour l'actualité.
+
+## Modifier une actualité
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· d'une carte, puis sur **Modifier**
+- Depuis la page de détail : cliquez sur le bouton **Modifier**
+
+Le formulaire s'affiche avec les données existantes. Effectuez vos modifications, puis cliquez sur **Mettre à jour**.
+
+:::note[Bon à savoir]
+Lorsque vous modifiez le titre, le slug n'est pas recalculé automatiquement. Si vous souhaitez changer le slug, modifiez-le manuellement dans le champ correspondant.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuActualitesEdition from '../../../assets/screenshots/contenu-actualites-edition.png';
+
+<Image src={contenuActualitesEdition} alt="Formulaire d'édition d'une actualité avec contenu" />
+*/}
+
+## Publier et dépublier
+
+### Publier un article
+
+Deux méthodes :
+
+- Depuis la liste : cliquez sur le menu ··· → **Publier**
+- Depuis le formulaire : changez le statut en **Publié**, puis cliquez sur **Mettre à jour**
+
+### Dépublier un article
+
+Deux méthodes :
+
+- Depuis la liste : cliquez sur le menu ··· → **Dépublier**
+- Depuis le formulaire : changez le statut en **Brouillon**, puis cliquez sur **Mettre à jour**
+
+### Archiver un article
+
+Depuis le formulaire uniquement : changez le statut en **Archivé**, puis cliquez sur **Mettre à jour**.
+
+:::tip[Rappel]
+Les changements de statut ne sont visibles sur votre site qu'après un [déploiement](/administration/deploiement).
+:::
+
+## Mettre à la une
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Mettre à la une**
+- Depuis la page de détail : cliquez sur le bouton **Mettre à la une**
+
+Un badge orange "À la une" apparaît sur la carte de l'article. Pour retirer la mise en avant, utilisez les mêmes chemins : l'option devient **Retirer de la une**.
+
+## Voir le détail d'un article
+
+Pour accéder au détail d'un article :
+
+- Cliquez directement sur une carte dans la liste
+- Ou cliquez sur le menu ··· → **Voir**
+
+La page de détail affiche :
+
+- Le **titre** et le **slug** de l'article
+- Les **badges** de statut, catégorie et mise en avant
+- L'**image à la une** (si renseignée)
+- Le **résumé** (si renseigné)
+- La **description SEO** (si renseignée)
+- Le **contenu** rendu en HTML
+- Les **métadonnées** : auteur, nombre de vues, dates de création, modification et publication
+
+Les boutons d'action en haut de la page permettent de :
+
+- **Retour** — Revenir à la liste
+- **Mettre à la une** / **Retirer de la une** — Basculer la mise en avant
+- **Modifier** — Ouvrir le formulaire d'édition
+- **Supprimer** — Supprimer l'article
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuActualitesDetail from '../../../assets/screenshots/contenu-actualites-detail.png';
+
+<Image src={contenuActualitesDetail} alt="Page de détail d'une actualité avec contenu et métadonnées" />
+*/}
+
+## Supprimer une actualité
+
+Deux chemins possibles :
+
+- Depuis la liste : cliquez sur le menu ··· → **Supprimer**
+- Depuis la page de détail : cliquez sur le bouton **Supprimer**
+
+Un dialogue de confirmation s'affiche avec le titre de l'article et le message "Cette action est irréversible." Cliquez sur **Supprimer** pour confirmer ou **Annuler** pour revenir en arrière.
+
+:::caution[Attention]
+La suppression est définitive. Toutes les données de l'article (contenu, image, métadonnées) seront perdues.
+:::
+
+{/* TODO: décommenter quand la capture sera ajoutée dans docs/src/assets/screenshots/
+import contenuActualitesSuppression from '../../../assets/screenshots/contenu-actualites-suppression.png';
+
+<Image src={contenuActualitesSuppression} alt="Dialogue de confirmation de suppression d'une actualité" />
+*/}
+
+## Pour aller plus loin
+
+- [Éditeur de texte riche](/reference/editeur-texte/) — Découvrir les fonctionnalités de l'éditeur de contenu
+- [Pages](/contenu/pages/) — Créer et organiser les pages statiques de votre site
+- [Événements](/contenu/evenements/) — Annoncer les événements de votre commune
+- [Déploiement](/administration/deploiement/) — Publier les modifications sur votre site
+- [Astuces](/reference/astuces/) — Conseils pour tirer le meilleur parti de Communeo

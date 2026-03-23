@@ -5,6 +5,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "Communeo — Documentation",
+      customCss: ["./src/custom.css"],
       defaultLocale: "root",
       locales: {
         root: { label: "Français", lang: "fr" },

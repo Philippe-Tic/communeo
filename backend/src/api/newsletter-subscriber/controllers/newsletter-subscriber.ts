@@ -5,30 +5,11 @@
 import { factories } from '@strapi/strapi';
 import crypto from 'crypto';
 
-// Simple in-memory rate limiter for public endpoints
-const rateLimitMap = new Map<string, number[]>();
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const RATE_LIMIT_MAX = 5; // 5 requests per window
+import { createRateLimiter } from '../../../utils/security';
+import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const timestamps = rateLimitMap.get(ip) || [];
-  const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-  if (recent.length >= RATE_LIMIT_MAX) return true;
-  recent.push(now);
-  rateLimitMap.set(ip, recent);
-  return false;
-}
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, timestamps] of rateLimitMap.entries()) {
-    const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW);
-    if (recent.length === 0) rateLimitMap.delete(ip);
-    else rateLimitMap.set(ip, recent);
-  }
-}, 5 * 60 * 1000);
+// 5 requêtes par minute et par IP
+const isRateLimited = createRateLimiter({ windowMs: 60 * 1000, max: 5 });
 
 export default factories.createCoreController('api::newsletter-subscriber.newsletter-subscriber', ({ strapi }) => ({
   async publicSubscribe(ctx) {
@@ -147,13 +128,13 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
   },
 
   async stats(ctx) {
-    const user = ctx.state.user;
+    const site = await getEffectiveSite(ctx);
 
-    if (!user?.site) {
+    if (!site) {
       return ctx.forbidden('Utilisateur sans site assigné');
     }
 
-    const siteDocumentId = user.site.documentId;
+    const siteDocumentId = site.documentId;
 
     const allSubscribers = await strapi.entityService.findMany('api::newsletter-subscriber.newsletter-subscriber', {
       filters: {

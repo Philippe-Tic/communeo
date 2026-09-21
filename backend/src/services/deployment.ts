@@ -290,6 +290,18 @@ class DeploymentService {
   }
 
   /**
+   * Environnement minimal pour npm et Node pendant le build
+   */
+  private baseBuildEnv(): NodeJS.ProcessEnv {
+    const keep = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'NODE_OPTIONS', 'npm_config_cache', 'HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
+    const env: NodeJS.ProcessEnv = {};
+    for (const key of keep) {
+      if (process.env[key] !== undefined) env[key] = process.env[key];
+    }
+    return env;
+  }
+
+  /**
    * Build un site Astro avec les variables d'environnement appropriées
    */
   async buildSite(siteId: string, siteSlug: string, liveUrl?: string, customDomain?: { domain: string; verified: boolean }): Promise<BuildResult> {
@@ -310,6 +322,7 @@ class DeploymentService {
       try {
         await execAsync('npm ci --include=dev', {
           cwd: tempBuildDir,
+          env: this.baseBuildEnv(),
           maxBuffer: 10 * 1024 * 1024
         });
         console.log(`✅ [BUILD] Dependencies installed successfully`);
@@ -319,8 +332,10 @@ class DeploymentService {
       }
 
       // 3. Build avec les variables d'environnement
+      // Seules les variables nécessaires sont transmises : jamais les secrets de Strapi
+      // (base de données, JWT, NETLIFY_TOKEN…) aux scripts du build et de ses dépendances.
       const buildEnv = {
-        ...process.env,
+        ...this.baseBuildEnv(),
         // Variables pour Astro/Strapi
         SITE_DOCUMENT_ID: siteId,  // Le projet Astro s'attend à SITE_DOCUMENT_ID
         SITE_SLUG: siteSlug,

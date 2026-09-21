@@ -1,3 +1,6 @@
+// Champs du site jamais exposés au client (identifiants d'infrastructure)
+const PRIVATE_SITE_FIELDS = ['netlify_site_id', 'domain_verification_token'];
+
 export default (plugin) => {
   const originalMe = plugin.controllers.user.me;
 
@@ -19,7 +22,9 @@ export default (plugin) => {
         ctx.body.phone = fullUser.phone;
         ctx.body.active = fullUser.active;
         if (fullUser.site) {
-          ctx.body.site = fullUser.site;
+          const site = { ...fullUser.site };
+          for (const field of PRIVATE_SITE_FIELDS) delete site[field];
+          ctx.body.site = site;
         }
       }
     }

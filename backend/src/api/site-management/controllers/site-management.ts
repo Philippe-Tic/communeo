@@ -5,6 +5,7 @@
 
 import crypto from 'crypto';
 import netlifyService from '../../../services/netlify';
+import { createInvitationToken, escapeHtml } from '../../../utils/security';
 
 async function requireSuperAdmin(ctx) {
   const user = ctx.state.user;
@@ -210,7 +211,7 @@ export default {
         const userService = strapi.plugin('users-permissions').service('user');
         const randomPassword = crypto.randomBytes(32).toString('hex');
         const hashedPassword = (await userService.ensureHashedPasswords({ password: randomPassword })).password;
-        const invitationToken = crypto.randomBytes(32).toString('hex');
+        const { token: invitationToken, stored: storedInvitationToken } = createInvitationToken();
 
         const authenticatedRole = await strapi.query('plugin::users-permissions.role').findOne({
           where: { type: 'authenticated' },
@@ -230,7 +231,7 @@ export default {
             provider: 'local',
             role: authenticatedRole.id,
             site: site.id,
-            resetPasswordToken: invitationToken,
+            resetPasswordToken: storedInvitationToken,
           },
         });
 
@@ -244,7 +245,7 @@ export default {
             subject: `Invitation à administrer ${data.name} — Communeo`,
             html: `
               <h2>Bienvenue sur Communeo</h2>
-              <p>Votre espace d'administration pour <strong>${data.name}</strong> a été créé.</p>
+              <p>Votre espace d'administration pour <strong>${escapeHtml(data.name)}</strong> a été créé.</p>
               <p>Cliquez sur le lien ci-dessous pour définir votre mot de passe et accéder à votre espace :</p>
               <p><a href="${invitationLink}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Activer mon compte</a></p>
             `,

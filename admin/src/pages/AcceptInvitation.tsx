@@ -120,8 +120,8 @@ export const AcceptInvitation = () => {
                   {...register('password', {
                     required: 'Le mot de passe est requis',
                     minLength: {
-                      value: 6,
-                      message: 'Le mot de passe doit contenir au moins 6 caractères',
+                      value: 10,
+                      message: 'Le mot de passe doit contenir au moins 10 caractères',
                     },
                   })}
                 />

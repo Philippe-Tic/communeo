@@ -4,9 +4,31 @@
  */
 
 import crypto from 'crypto';
+import {
+  INVITATION_EXPIRY_DAYS,
+  MIN_PASSWORD_LENGTH,
+  createInvitationToken,
+  createRateLimiter,
+  escapeHtml,
+  resolveInvitationToken,
+} from '../../../utils/security';
 
 const ALLOWED_ROLES = ['super_admin', 'admin'];
-const INVITATION_EXPIRY_DAYS = 7;
+
+// Rôles qu'un utilisateur peut attribuer : un admin de commune ne peut jamais créer de super_admin
+const ASSIGNABLE_ROLES: Record<string, string[]> = {
+  super_admin: ['super_admin', 'admin', 'editor'],
+  admin: ['admin', 'editor'],
+};
+
+const isRateLimited = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
+
+function assertAssignableRole(ctx, currentUser, role: unknown) {
+  if (role === undefined) return;
+  if (typeof role !== 'string' || !(ASSIGNABLE_ROLES[currentUser.municipality_role] || []).includes(role)) {
+    ctx.throw(403, 'Rôle non autorisé');
+  }
+}
 
 async function getAuthenticatedUser(ctx) {
   const user = ctx.state.user;
@@ -31,17 +53,15 @@ async function getAuthenticatedUser(ctx) {
   return fullUser;
 }
 
-function generateInvitationToken(): string {
-  return crypto.randomBytes(32).toString('hex');
-}
-
-async function sendInvitationEmail(email: string, firstName: string, token: string, siteName: string) {
+async function sendInvitationEmail(email: string, rawFirstName: string, token: string, rawSiteName: string) {
+  const firstName = escapeHtml(rawFirstName);
+  const siteName = escapeHtml(rawSiteName);
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
   const invitationLink = `${adminUrl}/accept-invitation?token=${token}`;
 
   await strapi.plugin('email').service('email').send({
     to: email,
-    subject: `Invitation à rejoindre ${siteName} — Communeo`,
+    subject: `Invitation à rejoindre ${rawSiteName} — Communeo`,
     html: `
       <h2>Bienvenue sur ${siteName}</h2>
       <p>Bonjour ${firstName},</p>
@@ -51,17 +71,19 @@ async function sendInvitationEmail(email: string, firstName: string, token: stri
       <p>Ce lien est valable pendant ${INVITATION_EXPIRY_DAYS} jours.</p>
       <p>Si vous n'avez pas demandé cette invitation, vous pouvez ignorer cet email.</p>
     `,
-    text: `Bonjour ${firstName}, vous avez été invité(e) à rejoindre ${siteName}. Cliquez sur ce lien pour définir votre mot de passe : ${invitationLink} (valable ${INVITATION_EXPIRY_DAYS} jours).`,
+    text: `Bonjour ${rawFirstName}, vous avez été invité(e) à rejoindre ${rawSiteName}. Cliquez sur ce lien pour définir votre mot de passe : ${invitationLink} (valable ${INVITATION_EXPIRY_DAYS} jours).`,
   });
 }
 
-async function sendPasswordResetEmail(email: string, firstName: string, token: string, siteName: string) {
+async function sendPasswordResetEmail(email: string, rawFirstName: string, token: string, rawSiteName: string) {
+  const firstName = escapeHtml(rawFirstName);
+  const siteName = escapeHtml(rawSiteName);
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
   const resetLink = `${adminUrl}/accept-invitation?token=${token}&type=reset`;
 
   await strapi.plugin('email').service('email').send({
     to: email,
-    subject: `Réinitialisation de votre mot de passe — ${siteName}`,
+    subject: `Réinitialisation de votre mot de passe — ${rawSiteName}`,
     html: `
       <h2>Réinitialisation de mot de passe</h2>
       <p>Bonjour ${firstName},</p>
@@ -71,7 +93,7 @@ async function sendPasswordResetEmail(email: string, firstName: string, token: s
       <p>Ce lien est valable pendant ${INVITATION_EXPIRY_DAYS} jours.</p>
       <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
     `,
-    text: `Bonjour ${firstName}, une demande de réinitialisation de mot de passe a été effectuée. Cliquez sur ce lien pour choisir un nouveau mot de passe : ${resetLink} (valable ${INVITATION_EXPIRY_DAYS} jours).`,
+    text: `Bonjour ${rawFirstName}, une demande de réinitialisation de mot de passe a été effectuée. Cliquez sur ce lien pour choisir un nouveau mot de passe : ${resetLink} (valable ${INVITATION_EXPIRY_DAYS} jours).`,
   });
 }
 
@@ -129,15 +151,15 @@ export default {
       ctx.throw(400, "Votre compte n'est pas encore activé.");
     }
 
-    const newToken = generateInvitationToken();
+    const { token: newToken, stored } = createInvitationToken();
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: currentUser.id },
-      data: { resetPasswordToken: newToken },
+      data: { resetPasswordToken: stored },
     });
 
     try {
-      await sendPasswordResetEmail(currentUser.email, currentUser.first_name, newToken, currentUser.site.name);
+      await sendPasswordResetEmail(currentUser.email, currentUser.first_name, newToken, currentUser.site?.name || 'Communeo');
     } catch (emailError) {
       console.error('Failed to send password reset email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
@@ -199,6 +221,8 @@ export default {
       ctx.throw(400, 'Missing required fields: username, email, first_name, last_name');
     }
 
+    assertAssignableRole(ctx, currentUser, data.municipality_role);
+
     // Check email uniqueness
     const existingUser = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: data.email },
@@ -219,7 +243,7 @@ export default {
     const userService = strapi.plugin('users-permissions').service('user');
     const randomPassword = crypto.randomBytes(32).toString('hex');
     const hashedPassword = (await userService.ensureHashedPasswords({ password: randomPassword })).password;
-    const invitationToken = generateInvitationToken();
+    const { token: invitationToken, stored: storedInvitationToken } = createInvitationToken();
 
     // Get authenticated role
     const authenticatedRole = await strapi.query('plugin::users-permissions.role').findOne({
@@ -265,7 +289,7 @@ export default {
           provider: 'local',
           role: authenticatedRole.id,
           site: targetSiteId,
-          resetPasswordToken: invitationToken,
+          resetPasswordToken: storedInvitationToken,
         },
         populate: ['site'],
       });
@@ -302,6 +326,8 @@ export default {
     if (currentUser.municipality_role !== 'super_admin' && existingUser.site?.documentId !== currentUser.site.documentId) {
       ctx.throw(403, 'User does not belong to your site');
     }
+
+    assertAssignableRole(ctx, currentUser, data.municipality_role);
 
     const updateData: Record<string, any> = {};
     if (data.username !== undefined) updateData.username = data.username;
@@ -369,9 +395,13 @@ export default {
    * POST /api/user-management/forgot-password
    */
   async forgotPassword(ctx) {
-    const { email } = ctx.request.body;
+    const { email } = ctx.request.body || {};
 
-    if (!email) {
+    if (isRateLimited(`forgot:${ctx.request.ip}`) || (typeof email === 'string' && isRateLimited(`forgot:${email.toLowerCase()}`))) {
+      return ctx.tooManyRequests('Trop de demandes, réessayez plus tard');
+    }
+
+    if (!email || typeof email !== 'string') {
       // Always return ok to avoid revealing info
       ctx.body = { ok: true };
       return;
@@ -388,11 +418,11 @@ export default {
       return;
     }
 
-    const newToken = generateInvitationToken();
+    const { token: newToken, stored } = createInvitationToken();
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: user.id },
-      data: { resetPasswordToken: newToken },
+      data: { resetPasswordToken: stored },
     });
 
     const siteName = user.site?.name || 'Communeo';
@@ -411,7 +441,11 @@ export default {
    * POST /api/user-management/accept-invitation
    */
   async acceptInvitation(ctx) {
-    const { token, password, passwordConfirmation } = ctx.request.body;
+    const { token, password, passwordConfirmation } = ctx.request.body || {};
+
+    if (isRateLimited(`accept:${ctx.request.ip}`)) {
+      return ctx.tooManyRequests('Trop de tentatives, réessayez plus tard');
+    }
 
     if (!token || !password || !passwordConfirmation) {
       ctx.throw(400, 'Missing required fields: token, password, passwordConfirmation');
@@ -421,26 +455,22 @@ export default {
       ctx.throw(400, 'Les mots de passe ne correspondent pas');
     }
 
-    if (password.length < 6) {
-      ctx.throw(400, 'Le mot de passe doit contenir au moins 6 caractères');
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+      ctx.throw(400, `Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères`);
     }
 
-    // Find user by invitation token
+    // Le jeton porte sa date d'expiration ; seule son empreinte est stockée
+    const storedToken = resolveInvitationToken(token);
+    if (!storedToken) {
+      ctx.throw(400, 'Ce lien est invalide ou a expiré. Demandez à votre administrateur de renvoyer le lien.');
+    }
+
     const user = await strapi.query('plugin::users-permissions.user').findOne({
-      where: { resetPasswordToken: token },
+      where: { resetPasswordToken: storedToken },
     });
 
     if (!user) {
-      ctx.throw(400, 'Token invalide ou expiré');
-    }
-
-    // Check token expiry (7 days from last token update)
-    const updatedAt = new Date(user.updatedAt).getTime();
-    const now = Date.now();
-    const expiryMs = INVITATION_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
-
-    if (now - updatedAt > expiryMs) {
-      ctx.throw(400, 'Ce lien a expiré. Demandez à votre administrateur de renvoyer le lien.');
+      ctx.throw(400, 'Ce lien est invalide ou a expiré. Demandez à votre administrateur de renvoyer le lien.');
     }
 
     // Hash the new password and activate the user
@@ -485,15 +515,15 @@ export default {
     }
 
     // Generate new token
-    const newToken = generateInvitationToken();
+    const { token: newToken, stored } = createInvitationToken();
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: user.id },
-      data: { resetPasswordToken: newToken },
+      data: { resetPasswordToken: stored },
     });
 
     try {
-      await sendInvitationEmail(user.email, user.first_name, newToken, currentUser.site.name);
+      await sendInvitationEmail(user.email, user.first_name, newToken, user.site?.name || 'Communeo');
     } catch (emailError) {
       console.error('Failed to resend invitation email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
@@ -528,15 +558,15 @@ export default {
     }
 
     // Generate new token
-    const newToken = generateInvitationToken();
+    const { token: newToken, stored } = createInvitationToken();
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: user.id },
-      data: { resetPasswordToken: newToken },
+      data: { resetPasswordToken: stored },
     });
 
     try {
-      await sendPasswordResetEmail(user.email, user.first_name, newToken, currentUser.site.name);
+      await sendPasswordResetEmail(user.email, user.first_name, newToken, user.site?.name || 'Communeo');
     } catch (emailError) {
       console.error('Failed to send password reset email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");

@@ -1,6 +1,7 @@
 export default ({ env }) => ({
   mcp: {
-    enabled: true,
+    // Outil de développement : jamais exposé en production
+    enabled: env('NODE_ENV') !== 'production',
     config: {
       session: {
         type: 'memory',

@@ -5,7 +5,7 @@
 import domainService from '../../../services/domain';
 import domainValidationService from '../../../services/domain-validation';
 import netlifyService from '../../../services/netlify';
-import { getEffectiveSite } from '../../../utils/getEffectiveSite';
+import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 
 export default {
   /**
@@ -18,6 +18,10 @@ export default {
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!hasRole(ctx, ['admin', 'super_admin'])) {
+        return ctx.forbidden('Seul un administrateur peut gérer le domaine');
       }
 
       const site = await getEffectiveSite(ctx);
@@ -74,6 +78,10 @@ export default {
         return ctx.unauthorized('Authentification requise');
       }
 
+      if (!hasRole(ctx, ['admin', 'super_admin'])) {
+        return ctx.forbidden('Seul un administrateur peut gérer le domaine');
+      }
+
       const site = await getEffectiveSite(ctx);
       if (!site) {
         return ctx.badRequest('Utilisateur sans site assigné');
@@ -117,6 +125,10 @@ export default {
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!hasRole(ctx, ['admin', 'super_admin'])) {
+        return ctx.forbidden('Seul un administrateur peut gérer le domaine');
       }
 
       const site = await getEffectiveSite(ctx);

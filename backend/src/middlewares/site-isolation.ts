@@ -1,424 +1,228 @@
+/**
+ * Isolation multi-tenant : chaque utilisateur ne voit et ne modifie que les données de son site.
+ *
+ * Politique « fail-closed » pour les utilisateurs authentifiés (hors super_admin) :
+ * seules les routes explicitement listées ici sont autorisées, tout le reste est refusé.
+ * Les requêtes sans utilisateur (public, API tokens) sont laissées aux permissions Strapi.
+ */
+
 interface StrapiUser {
   id: number;
   documentId: string;
   municipality_role?: string;
+  blocked?: boolean;
   site?: {
     id: number;
     documentId: string;
   };
 }
 
-interface StrapiContext {
-  state: {
-    user?: StrapiUser;
-  };
-  request: {
-    method: string;
-    url?: string;
-    path?: string;
-    body: {
-      data?: any;
-    };
-    headers?: any;
-  };
-  query: {
-    filters?: any;
-  };
-  notFound: () => void;
-  forbidden: (message: string) => void;
-  badRequest: (message: string) => void;
-  internalServerError: (message: string) => void;
-}
+// Content-types filtrés par site : pluralApiId → uid
+const SITE_SCOPED_CONTENT_TYPES: Record<string, string> = {
+  'pages': 'api::page.page',
+  'articles': 'api::article.article',
+  'evenements': 'api::evenement.evenement',
+  'contact-submissions': 'api::contact-submission.contact-submission',
+  'official-documents': 'api::official-document.official-document',
+  'team-members': 'api::team-member.team-member',
+  'associations': 'api::association.association',
+  'alertes': 'api::alerte.alerte',
+  'media-items': 'api::media-item.media-item',
+  'content-blocks': 'api::content-block.content-block',
+  'waste-schedules': 'api::waste-schedule.waste-schedule',
+  'newsletter-subscribers': 'api::newsletter-subscriber.newsletter-subscriber',
+  'school-menus': 'api::school-menu.school-menu',
+};
 
-interface ParsedUrl {
-  pluralApiId: string | null;
-  documentId: string | null;
-}
+// Routes custom de niveau collection (ne sont pas des documentId) : pluralApiId → segments
+const COLLECTION_ROUTES: Record<string, string[]> = {
+  'media-items': ['upload'],
+  'newsletter-subscribers': ['stats', 'public', 'unsubscribe'],
+  'contact-submissions': ['public'],
+  'associations': ['public'],
+  'alertes': ['public'],
+};
 
-interface OwnershipResult {
-  entity?: any;
-  error?: 'notFound' | 'forbidden';
-  message?: string;
-}
+// APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management'];
+
+// Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
+const PROTECTED_SITE_FIELDS = [
+  'slug',
+  'netlify_site_id',
+  'live_url',
+  'custom_domain',
+  'domain_status',
+  'domain_type',
+  'domain_verification_token',
+  'domain_configured_at',
+  'ssl_enabled',
+  // relations : empêchent de rattacher les contenus d'une autre commune
+  'pages',
+  'articles',
+  'evenements',
+  'deployments',
+  'contact_submissions',
+  'official_documents',
+  'team_members',
+  'associations',
+  'alertes',
+  'waste_schedules',
+  'media_items',
+  'newsletter_subscribers',
+  'school_menus',
+  'users',
+];
+
+const parsePath = (rawUrl: string) => {
+  const pathname = rawUrl.split('?')[0];
+  const segments = pathname.split('/').filter(Boolean).map((s) => decodeURIComponent(s));
+  if (segments[0] !== 'api') {
+    return { isApi: false, apiId: null as string | null, id: null as string | null, extra: [] as string[] };
+  }
+  return { isApi: true, apiId: segments[1] || null, id: segments[2] || null, extra: segments.slice(3) };
+};
 
 export default (config: any, { strapi }: { strapi: any }) => {
-  console.log('🔧 Site Isolation Middleware - LOADING');
-
-  // Helper function pour parser l'URL et extraire les paramètres
-  const parseUrl = (url: string): ParsedUrl => {
-    console.log('🔍 Parsing URL:', url);
-
-    // Pattern pour les routes API Strapi v5: /api/{pluralApiId}/{documentId?}
-    // documentId peut être un string (UUID-like) ou un nombre
-    const apiRoutePattern = /^\/api\/([a-zA-Z0-9-_]+)(?:\/([a-zA-Z0-9-_]+))?(?:\?.*)?$/;
-    const match = url.match(apiRoutePattern);
-
-    if (!match) {
-      return { pluralApiId: null, documentId: null };
-    }
-
-    const pluralApiId = match[1];
-    const documentId = match[2] || null;
-
-    console.log('✅ Parsed URL:', { pluralApiId, documentId });
-    return { pluralApiId, documentId };
-  };
-
-  // Helper function pour vérifier l'ownership d'une entité
-  const verifyOwnership = async (
-    contentType: string,
-    documentId: string,
-    userSiteDocumentId: string
-  ): Promise<OwnershipResult> => {
-    try {
-      console.log(`🔍 Verifying ownership - contentType: ${contentType}, documentId: ${documentId}, userSiteDocumentId: ${userSiteDocumentId}`);
-
-      // Dans Strapi v5, pour chercher par documentId, il faut utiliser findMany avec des filtres
-      const entities = await strapi.entityService.findMany(contentType, {
-        filters: { documentId: { $eq: documentId } },
-        populate: ['site']
-      });
-
-      const entity = entities && entities.length > 0 ? entities[0] : null;
-
-      console.log('🔍 Entity found:', entity ? {
-        id: entity.id,
-        documentId: entity.documentId,
-        site: entity.site ? { id: entity.site.id, documentId: entity.site.documentId } : null
-      } : 'null');
-
-      if (!entity) {
-        console.log('❌ Entity not found');
-        return { error: 'notFound' };
-      }
-
-      if (!entity.site) {
-        console.log('❌ Entity has no site relation');
-        return { error: 'forbidden', message: 'Ressource sans site assigné' };
-      }
-
-      if (entity.site.documentId !== userSiteDocumentId) {
-        console.log(`❌ Site mismatch - entity.site.documentId: ${entity.site.documentId}, userSiteDocumentId: ${userSiteDocumentId}`);
-        return { error: 'forbidden', message: 'Accès non autorisé à cette ressource' };
-      }
-
-      console.log('✅ Ownership verified successfully');
-      return { entity };
-    } catch (error) {
-      console.log('❌ Error verifying ownership:', error);
-      return { error: 'forbidden', message: 'Erreur lors de la vérification des permissions' };
-    }
-  };
-
-  // Helper function pour récupérer l'utilisateur depuis le token
   const getUserFromToken = async (token: string): Promise<StrapiUser | null> => {
     try {
-      console.log('🔍 Attempting to get user from token...');
-
-      // Décoder le token JWT
-      const jwt = strapi.plugin('users-permissions').service('jwt');
-      const decoded = await jwt.verify(token);
-
-      console.log('🔍 Token decoded:', { userId: decoded.id });
-
-      // Récupérer l'utilisateur avec sa relation site
-      const user = await strapi.entityService.findOne('plugin::users-permissions.user', decoded.id, {
-        populate: ['site']
+      const decoded = await strapi.plugin('users-permissions').service('jwt').verify(token);
+      return await strapi.entityService.findOne('plugin::users-permissions.user', decoded.id, {
+        populate: ['site'],
       });
-
-      console.log('🔍 User found:', user ? {
-        id: user.id,
-        documentId: user.documentId,
-        email: user.email,
-        site: user.site ? { id: user.site.id, documentId: user.site.documentId, name: user.site.name } : null
-      } : 'null');
-
-      return user;
-    } catch (error: any) {
-      console.log('❌ Error getting user from token:', error.message);
+    } catch {
+      // Jeton invalide ou API token (non-JWT) : laissé aux permissions Strapi
       return null;
     }
   };
 
-  console.log('🔧 Site Isolation Middleware - LOADED SUCCESSFULLY');
+  const verifyOwnership = async (uid: string, documentId: string, siteDocumentId: string) => {
+    const entities = await strapi.entityService.findMany(uid, {
+      filters: { documentId: { $eq: documentId } },
+      populate: ['site'],
+    });
+    const entity = entities?.[0];
+    if (!entity) return 'notFound' as const;
+    if (!entity.site || entity.site.documentId !== siteDocumentId) return 'forbidden' as const;
+    return null;
+  };
 
-  return async (ctx: StrapiContext, next: () => Promise<void>) => {
-    const startTime = Date.now();
-    const requestId = Math.random().toString(36).substr(2, 9);
+  return async (ctx: any, next: () => Promise<void>) => {
+    const { isApi, apiId, id, extra } = parsePath(ctx.request.url || ctx.request.path || '');
+    if (!isApi) return next();
 
-    // Extraire l'URL
-    const url = ctx.request.url || ctx.request.path || '';
-    const method = ctx.request.method;
+    const method: string = ctx.request.method;
 
-    // Debug: Log every request
-    console.log(`\n🌐 [${requestId}] === Site Isolation Middleware START ===`);
-    console.log(`🌐 [${requestId}] URL: ${url}`);
-    console.log(`🌐 [${requestId}] Method: ${method}`);
-
-    // Parser l'URL pour extraire les paramètres
-    const { pluralApiId, documentId } = parseUrl(url);
-
-    // Vérifier l'authentification
-    let user = ctx.state.user;
-
-    // Si pas d'utilisateur dans ctx.state, essayer de l'obtenir du token
+    let user: StrapiUser | null = ctx.state.user || null;
     if (!user) {
-      const authHeader = ctx.request.headers?.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7);
-        user = await getUserFromToken(token);
+      const authHeader: string | undefined = ctx.request.headers?.authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        user = await getUserFromToken(authHeader.substring(7));
       }
-    } else {
-      // Même si l'utilisateur existe dans ctx.state, s'assurer qu'il a sa relation site
-      if (!user.site) {
-        console.log('🔍 User exists but missing site relation, fetching complete user...');
-        const completeUser = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, {
-          populate: ['site']
-        });
-
-        if (completeUser) {
-          user = completeUser;
-        }
-      }
+    } else if (!user.site) {
+      user = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, { populate: ['site'] });
     }
 
-    // IMPORTANT: Toujours mettre à jour ctx.state.user avec l'utilisateur complet
-    if (user) {
-      ctx.state.user = user;
-      console.log(`🔄 [${requestId}] Updated ctx.state.user with complete user data including site`);
+    if (!user || user.blocked) return next();
+    ctx.state.user = user;
+
+    // Routes d'authentification et profil courant : toujours accessibles
+    if (apiId === 'auth' || (apiId === 'users' && id === 'me' && extra.length === 0)) {
+      return next();
     }
 
-    console.log(`🔍 [${requestId}] Final user:`, user ? {
-      id: user.id,
-      documentId: user.documentId,
-      site: user.site ? { id: user.site.id, documentId: user.site.documentId } : null
-    } : 'No user');
-
-    // Skip middleware if no user
-    if (!user) {
-      console.log(`🔄 [${requestId}] Skipping middleware: No user authenticated`);
-      const result = await next();
-      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (no user) === ${Date.now() - startTime}ms`);
-      return result;
-    }
-
-    // Super admin handling
     if (user.municipality_role === 'super_admin') {
-      const siteDocumentId = ctx.request.headers?.['x-site-document-id'];
+      const impersonatedId = ctx.request.headers?.['x-site-document-id'];
+      if (!impersonatedId) return next();
 
-      if (!siteDocumentId) {
-        // Pas d'impersonation — bypass total
-        console.log(`🔄 [${requestId}] Skipping middleware: Super admin bypass (no impersonation)`);
-        const result = await next();
-        console.log(`🌐 [${requestId}] === Site Isolation Middleware END (super_admin) === ${Date.now() - startTime}ms`);
-        return result;
-      }
-
-      // Impersonation active — charger le site et appliquer le filtrage
-      console.log(`🔍 [${requestId}] Super admin impersonating site: ${siteDocumentId}`);
       const sites = await strapi.entityService.findMany('api::site.site', {
-        filters: { documentId: siteDocumentId } as any,
+        filters: { documentId: { $eq: impersonatedId } },
       });
+      if (!sites?.length) return ctx.notFound('Site introuvable');
 
-      if (sites?.length > 0) {
-        (ctx.state as any).impersonatedSite = sites[0];
-        // Construire un objet site minimal avec documentId garanti depuis le header
-        user.site = { id: (sites[0] as any).id, documentId: siteDocumentId } as any;
-        console.log(`✅ [${requestId}] Impersonated site loaded: ${(sites[0] as any).name}, documentId: ${siteDocumentId}`);
-      } else {
-        console.log(`⚠️ [${requestId}] Impersonated site not found, bypassing`);
-        const result = await next();
-        return result;
-      }
-      // Fall through → la logique de filtrage normale s'applique
+      ctx.state.impersonatedSite = sites[0];
+      user.site = { id: sites[0].id, documentId: impersonatedId };
+      // Puis même filtrage qu'un utilisateur de commune
+    } else if (!user.site) {
+      return ctx.forbidden('Aucun site assigné à ce compte');
     }
 
-    if (!user.site) {
-      console.log(`🔄 [${requestId}] Skipping middleware: User has no site - User ID: ${user.id}`);
-      const result = await next();
-      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (no site) === ${Date.now() - startTime}ms`);
-      return result;
-    }
-
-    console.log(`🔍 [${requestId}] - pluralApiId: ${pluralApiId}`);
-    console.log(`🔍 [${requestId}] - documentId: ${documentId}`);
-    console.log(`🔍 [${requestId}] - method: ${method}`);
-    console.log(`🔍 [${requestId}] - user.site.documentId: ${user.site.documentId}`);
-
-    // Content-types that need site isolation
-    const contentTypes: Record<string, string> = {
-      'pages': 'api::page.page',
-      'articles': 'api::article.article',
-      'evenements': 'api::evenement.evenement',
-      'contact-submissions': 'api::contact-submission.contact-submission',
-      'official-documents': 'api::official-document.official-document',
-      'team-members': 'api::team-member.team-member',
-      'associations': 'api::association.association',
-      'alertes': 'api::alerte.alerte',
-      'media-items': 'api::media-item.media-item',
-      'content-blocks': 'api::content-block.content-block',
-      'waste-schedules': 'api::waste-schedule.waste-schedule',
-      'newsletter-subscribers': 'api::newsletter-subscriber.newsletter-subscriber',
-      'school-menus': 'api::school-menu.school-menu',
-    };
-
-    // Endpoints spéciaux qui nécessitent juste la vérification de la relation site
-    const specialEndpoints = [
-      'deployment', // /api/deployment/* - toutes les routes de déploiement
-      'domain',     // /api/domain/* - toutes les routes de domaine
-      'comarquage', // /api/comarquage/* - fiches service-public.fr
-    ];
-
-    // Skip if not a content-type that needs site isolation and not a special endpoint
-    if (!pluralApiId || (!contentTypes[pluralApiId] && !specialEndpoints.includes(pluralApiId))) {
-      console.log(`🔄 [${requestId}] Skipping middleware: Not a content-type that needs site isolation or special endpoint`);
-      const result = await next();
-      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (not target content) === ${Date.now() - startTime}ms`);
-      return result;
-    }
-
-    console.log(`🎯 [${requestId}] === APPLYING SITE ISOLATION ===`);
-    console.log(`🎯 [${requestId}] pluralApiId: ${pluralApiId}`);
-    console.log(`🎯 [${requestId}] User Site Document ID: ${user.site.documentId}`);
-
-    // Traitement spécial pour les endpoints deployment et domain
-    if (specialEndpoints.includes(pluralApiId)) {
-      console.log(`🎯 [${requestId}] Special endpoint detected: ${pluralApiId}`);
-      // Pour ces endpoints, on s'assure juste que l'utilisateur a une relation site
-      // Le contrôleur se chargera de la logique métier spécifique
-      console.log(`✅ [${requestId}] Special endpoint access granted - user has site`);
-      const result = await next();
-      console.log(`🌐 [${requestId}] === Site Isolation Middleware END (special endpoint) === ${Date.now() - startTime}ms`);
-      return result;
-    }
-
-    const contentType = contentTypes[pluralApiId];
-    const userSiteDocumentId = user.site.documentId;
-    console.log(`🔎 [${requestId}] userSiteDocumentId for filter: "${userSiteDocumentId}" (type: ${typeof userSiteDocumentId})`);
-
-    console.log(`🎯 [${requestId}] Content Type: ${contentType}`);
+    const siteDocumentId = user.site!.documentId;
 
     try {
-      switch (method) {
-        case 'GET':
-          if (!documentId) {
-            // GET list - add site filter automatically
-            console.log(`📝 [${requestId}] GET LIST - Adding site filter`);
-
-            if (!ctx.query) {
-              ctx.query = {};
-            }
-
-            if (!ctx.query.filters) {
-              ctx.query.filters = {};
-            }
-
-            // Preserve existing filters and add site filter using documentId
-            ctx.query.filters = {
-              ...ctx.query.filters,
-              site: { documentId: { $eq: userSiteDocumentId } }
-            };
-
-            console.log(`📝 [${requestId}] Applied filter:`, JSON.stringify(ctx.query.filters));
-            console.log(`📝 [${requestId}] Site filter applied successfully`);
-          } else {
-            // GET single - verify ownership
-            console.log(`📝 [${requestId}] GET SINGLE - Verifying ownership`);
-            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-            if (result.error) {
-              console.log(`❌ [${requestId}] Access denied for single GET`);
-              return result.error === 'notFound'
-                ? ctx.notFound()
-                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
-            }
-            console.log(`✅ [${requestId}] Access granted for single GET`);
+      // --- /api/sites : uniquement son propre site, en lecture et mise à jour ---
+      if (apiId === 'sites') {
+        if (extra.length > 0 || !['GET', 'PUT'].includes(method)) {
+          return ctx.forbidden('Action non autorisée sur le site');
+        }
+        if (method === 'GET' && !id) {
+          ctx.query = { ...ctx.query, filters: { ...(ctx.query?.filters || {}), documentId: { $eq: siteDocumentId } } };
+          return next();
+        }
+        if (id !== siteDocumentId) return ctx.notFound();
+        if (method === 'PUT') {
+          const data = ctx.request.body?.data;
+          if (data && typeof data === 'object') {
+            for (const field of PROTECTED_SITE_FIELDS) delete data[field];
           }
-          break;
-
-        case 'POST':
-          // POST create - force user's site using documentId
-          console.log(`📝 [${requestId}] POST CREATE - Forcing user's site`);
-
-          if (!ctx.request.body.data) {
-            ctx.request.body.data = {};
-          }
-
-          // Force the user's site using documentId
-          ctx.request.body.data.site = userSiteDocumentId;
-          console.log(`📝 [${requestId}] Forced site documentId: ${userSiteDocumentId}`);
-          break;
-
-        case 'PUT':
-        case 'PATCH':
-          // PUT/PATCH update - verify ownership and prevent site changes
-          if (documentId) {
-            console.log(`📝 [${requestId}] ${method} UPDATE - Verifying ownership`);
-            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-            if (result.error) {
-              console.log(`❌ [${requestId}] Access denied for ${method}`);
-              return result.error === 'notFound'
-                ? ctx.notFound()
-                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
-            }
-
-            // Remove site changes from request body to prevent site switching
-            if (ctx.request.body.data && ctx.request.body.data.site) {
-              delete ctx.request.body.data.site;
-              console.log(`📝 [${requestId}] Removed site change attempt for ${method}`);
-            }
-
-            console.log(`✅ [${requestId}] Access granted for ${method}`);
-          }
-          break;
-
-        case 'DELETE':
-          // DELETE - verify ownership
-          if (documentId) {
-            console.log(`📝 [${requestId}] DELETE - Verifying ownership`);
-            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-            if (result.error) {
-              console.log(`❌ [${requestId}] Access denied for DELETE`);
-              return result.error === 'notFound'
-                ? ctx.notFound()
-                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
-            }
-            console.log(`✅ [${requestId}] Access granted for DELETE`);
-          }
-          break;
-
-        default:
-          // For other HTTP methods, apply same logic as PUT
-          console.log(`📝 [${requestId}] OTHER METHOD (${method})`);
-
-          if (documentId) {
-            const result = await verifyOwnership(contentType, documentId, userSiteDocumentId);
-            if (result.error) {
-              console.log(`❌ [${requestId}] Access denied for ${method}`);
-              return result.error === 'notFound'
-                ? ctx.notFound()
-                : ctx.forbidden(result.message || 'Accès non autorisé à cette ressource');
-            }
-
-            if (ctx.request.body.data && ctx.request.body.data.site) {
-              delete ctx.request.body.data.site;
-              console.log(`📝 [${requestId}] Removed site change attempt for ${method}`);
-            }
-          }
-          break;
+        }
+        return next();
       }
+
+      // --- Upload : envoi de fichiers uniquement, sans rattachement ni remplacement ---
+      if (apiId === 'upload') {
+        if (method !== 'POST' || id || extra.length > 0 || ctx.query?.id) {
+          return ctx.forbidden('Action non autorisée sur les fichiers');
+        }
+        const body = ctx.request.body;
+        if (body && typeof body === 'object') {
+          delete body.ref;
+          delete body.refId;
+          delete body.field;
+          delete body.path;
+        }
+        return next();
+      }
+
+      if (apiId && SELF_GUARDED_APIS.includes(apiId)) return next();
+
+      const uid = apiId ? SITE_SCOPED_CONTENT_TYPES[apiId] : undefined;
+      if (!uid) return ctx.forbidden('Accès non autorisé');
+
+      const isCollectionRoute = !!id && (COLLECTION_ROUTES[apiId!] || []).includes(id);
+      const documentId = isCollectionRoute ? null : id;
+      if (extra.length > 0) return ctx.forbidden('Accès non autorisé');
+
+      if (method === 'GET' && !documentId) {
+        if (!isCollectionRoute) {
+          ctx.query = {
+            ...ctx.query,
+            filters: { ...(ctx.query?.filters || {}), site: { documentId: { $eq: siteDocumentId } } },
+          };
+        }
+        return next();
+      }
+
+      if (method === 'POST' && !documentId) {
+        if (!ctx.request.body || typeof ctx.request.body !== 'object') ctx.request.body = {};
+        if (!ctx.request.body.data || typeof ctx.request.body.data !== 'object') ctx.request.body.data = {};
+        ctx.request.body.data.site = siteDocumentId;
+        return next();
+      }
+
+      if (!documentId) return ctx.forbidden('Accès non autorisé');
+
+      const error = await verifyOwnership(uid, documentId, siteDocumentId);
+      if (error === 'notFound') return ctx.notFound();
+      if (error === 'forbidden') return ctx.forbidden('Accès non autorisé à cette ressource');
+
+      if (ctx.request.body?.data && typeof ctx.request.body.data === 'object') {
+        delete ctx.request.body.data.site;
+      }
+      return next();
     } catch (error) {
-      console.log(`❌ [${requestId}] Site isolation middleware error:`, error);
+      strapi.log.error('[site-isolation] Erreur lors de la vérification des permissions', error);
       return ctx.internalServerError('Erreur lors de la vérification des permissions');
     }
-
-    console.log(`🔄 [${requestId}] Calling next middleware...`);
-
-    // Continue to next middleware
-    const result = await next();
-
-    console.log(`✅ [${requestId}] Next middleware completed`);
-    console.log(`🌐 [${requestId}] === Site Isolation Middleware END === ${Date.now() - startTime}ms`);
-
-    return result;
   };
 };

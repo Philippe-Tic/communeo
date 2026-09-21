@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
-import { getEffectiveSite } from '../../../utils/getEffectiveSite';
+import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 
 export default factories.createCoreController('api::deployment.deployment', ({ strapi }) => ({
   /**
@@ -284,6 +284,10 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
+      }
+
+      if (!hasRole(ctx, ['super_admin'])) {
+        return ctx.forbidden('Réservé au super administrateur');
       }
 
       const site = await getEffectiveSite(ctx);

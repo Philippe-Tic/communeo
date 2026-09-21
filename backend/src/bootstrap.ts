@@ -149,13 +149,15 @@ export default async ({ strapi }) => {
 
       // --- Seed production : premier admin ---
       const userCount = await strapi.query('plugin::users-permissions.user').count();
-      if (userCount === 0) {
+      if (userCount === 0 && !process.env.SEED_ADMIN_PASSWORD) {
+        console.log('⚠️ Bootstrap - No users and SEED_ADMIN_PASSWORD not set: skipping initial admin creation');
+      } else if (userCount === 0) {
         console.log('🌱 Bootstrap - No users found, creating initial admin...');
 
         const siteName = process.env.SEED_SITE_NAME || 'Ma Commune';
         const siteSlug = process.env.SEED_SITE_SLUG || 'ma-commune';
         const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@communeo.fr';
-        const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe123!';
+        const adminPassword = process.env.SEED_ADMIN_PASSWORD;
 
         let seedSites = await strapi.entityService.findMany('api::site.site', {
           filters: { slug: siteSlug },
@@ -197,11 +199,18 @@ export default async ({ strapi }) => {
             },
           });
           console.log('✅ Bootstrap - Created seed admin:', admin.email);
-          console.log('⚠️  IMPORTANT: Change the default password immediately!');
         } catch (error) {
           console.log('❌ Bootstrap - Could not create seed admin:', error.message);
         }
       }
+    }
+
+    // Désactiver l'inscription publique (activée par défaut dans users-permissions)
+    const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
+    const advancedSettings = (await pluginStore.get({ key: 'advanced' })) || {};
+    if (advancedSettings.allow_register !== false) {
+      await pluginStore.set({ key: 'advanced', value: { ...advancedSettings, allow_register: false } });
+      console.log('✅ Bootstrap - Public registration disabled');
     }
 
     // Définir les permissions à accorder
@@ -230,9 +239,9 @@ export default async ({ strapi }) => {
       // Sites
       { action: 'api::site.site.find', enabled: true },
       { action: 'api::site.site.findOne', enabled: true },
-      { action: 'api::site.site.create', enabled: true },
+      { action: 'api::site.site.create', enabled: false },
       { action: 'api::site.site.update', enabled: true },
-      { action: 'api::site.site.delete', enabled: true },
+      { action: 'api::site.site.delete', enabled: false },
 
       // Contact Submissions
       { action: 'api::contact-submission.contact-submission.find', enabled: true },
@@ -293,15 +302,15 @@ export default async ({ strapi }) => {
 
       // Upload (needed for file uploads)
       { action: 'plugin::upload.content-api.upload', enabled: true },
-      { action: 'plugin::upload.content-api.find', enabled: true },
-      { action: 'plugin::upload.content-api.findOne', enabled: true },
-      { action: 'plugin::upload.content-api.destroy', enabled: true },
+      { action: 'plugin::upload.content-api.find', enabled: false },
+      { action: 'plugin::upload.content-api.findOne', enabled: false },
+      { action: 'plugin::upload.content-api.destroy', enabled: false },
 
       // Deployment (custom actions)
       { action: 'api::deployment.deployment.trigger', enabled: true },
       { action: 'api::deployment.deployment.status', enabled: true },
       { action: 'api::deployment.deployment.check', enabled: true },
-      { action: 'api::deployment.deployment.debug', enabled: true },
+      { action: 'api::deployment.deployment.debug', enabled: false },
 
       // Domain (custom actions)
       { action: 'api::domain.domain.configure', enabled: true },
@@ -343,6 +352,14 @@ export default async ({ strapi }) => {
       { action: 'api::newsletter-subscriber.newsletter-subscriber.update', enabled: true },
       { action: 'api::newsletter-subscriber.newsletter-subscriber.delete', enabled: true },
       { action: 'api::newsletter-subscriber.newsletter-subscriber.stats', enabled: true },
+
+      // Gestion native des utilisateurs : passe uniquement par /api/user-management
+      { action: 'plugin::users-permissions.user.find', enabled: false },
+      { action: 'plugin::users-permissions.user.findOne', enabled: false },
+      { action: 'plugin::users-permissions.user.count', enabled: false },
+      { action: 'plugin::users-permissions.user.create', enabled: false },
+      { action: 'plugin::users-permissions.user.update', enabled: false },
+      { action: 'plugin::users-permissions.user.destroy', enabled: false },
     ];
 
     // Appliquer les permissions
@@ -391,6 +408,8 @@ export default async ({ strapi }) => {
         { action: 'api::user-management.user-management.acceptInvitation', enabled: true },
         { action: 'api::newsletter-subscriber.newsletter-subscriber.publicSubscribe', enabled: true },
         { action: 'api::newsletter-subscriber.newsletter-subscriber.publicUnsubscribe', enabled: true },
+        // Pas d'inscription publique : les comptes sont créés par invitation
+        { action: 'plugin::users-permissions.auth.register', enabled: false },
       ];
 
       for (const permission of publicPermissions) {
@@ -514,11 +533,21 @@ export default async ({ strapi }) => {
         });
 
         if (existingTokens.length === 0) {
+          // Lecture seule, limitée aux contenus publiés sur les sites (pas de données personnelles)
+          const readable = ['site', 'page', 'article', 'evenement', 'official-document', 'team-member', 'association', 'alerte', 'waste-schedule', 'school-menu'];
           const token = await tokenService.create({
             name: 'Build Token',
-            type: 'full-access',
+            type: 'custom',
             lifespan: null,
-            description: 'Auto-generated token for Astro site builds',
+            description: 'Auto-generated read-only token for Astro site builds',
+            permissions: [
+              ...readable.flatMap((name) => [`api::${name}.${name}.find`, `api::${name}.${name}.findOne`]),
+              'api::comarquage.comarquage.categories',
+              'api::comarquage.comarquage.fiche',
+              'api::comarquage.comarquage.search',
+              'plugin::upload.content-api.find',
+              'plugin::upload.content-api.findOne',
+            ],
           });
           console.log('='.repeat(60));
           console.log('  API TOKEN CREATED FOR BUILDS');
@@ -527,6 +556,9 @@ export default async ({ strapi }) => {
           console.log('  Then restart: docker compose up -d strapi');
           console.log('='.repeat(60));
         } else {
+          if (existingTokens[0].type === 'full-access') {
+            console.warn('⚠️  Bootstrap - The existing Build Token is full-access: delete it in Strapi admin and restart to regenerate a read-only one.');
+          }
           console.log('ℹ️  Bootstrap - Build Token exists but STRAPI_API_TOKEN env var not set');
           console.log('   If you lost the token, delete it in Strapi admin and restart to regenerate.');
         }

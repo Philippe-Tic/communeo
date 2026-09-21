@@ -28,3 +28,11 @@ export async function getEffectiveSite(ctx: any): Promise<any | null> {
 
   return null;
 }
+
+/**
+ * Vérifie que l'utilisateur courant a l'un des rôles donnés (municipality_role).
+ * Retourne false si ce n'est pas le cas ; l'appelant répond alors 403.
+ */
+export function hasRole(ctx: any, roles: string[]): boolean {
+  return roles.includes(ctx.state.user?.municipality_role);
+}

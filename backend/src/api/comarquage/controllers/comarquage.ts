@@ -91,6 +91,10 @@ export default {
       return ctx.unauthorized('Authentification requise')
     }
 
+    if (ctx.state.user.municipality_role !== 'super_admin') {
+      return ctx.forbidden('Réservé au super administrateur')
+    }
+
     try {
       const audience = ctx.request.body?.audience as DilaAudience | undefined
       if (audience) {

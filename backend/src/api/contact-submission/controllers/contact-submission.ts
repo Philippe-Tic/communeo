@@ -3,11 +3,19 @@
  */
 
 import { factories } from '@strapi/strapi';
+import { createRateLimiter } from '../../../utils/security';
+
+// 5 envois par tranche de 10 minutes et par IP
+const isRateLimited = createRateLimiter({ windowMs: 10 * 60 * 1000, max: 5 });
 
 const VALID_CATEGORIES = ['general', 'urbanisme', 'etat-civil', 'voirie', 'associations', 'rgpd', 'autre'];
 
 export default factories.createCoreController('api::contact-submission.contact-submission', ({ strapi }) => ({
   async publicCreate(ctx) {
+    if (isRateLimited(ctx.request.ip)) {
+      return ctx.tooManyRequests('Trop de demandes. Veuillez réessayer dans quelques minutes.');
+    }
+
     const { data } = ctx.request.body;
 
     if (!data) {

@@ -3,6 +3,10 @@
  */
 
 import { factories } from '@strapi/strapi';
+import { createRateLimiter } from '../../../utils/security';
+
+// 3 propositions par heure et par IP
+const isRateLimited = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 3 });
 
 const VALID_CATEGORIES = ['sport', 'culture', 'social', 'environnement', 'education', 'autre'];
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2 Mo
@@ -10,6 +14,10 @@ const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
 export default factories.createCoreController('api::association.association', ({ strapi }) => ({
   async publicCreate(ctx) {
+    if (isRateLimited(ctx.request.ip)) {
+      return ctx.tooManyRequests('Trop de demandes. Veuillez réessayer plus tard.');
+    }
+
     // Support both JSON and multipart form data
     let data: any;
     let logoFile: any = null;

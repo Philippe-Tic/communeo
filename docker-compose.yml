@@ -27,6 +27,7 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: production
+      IS_PROXIED: "true"
       DATABASE_CLIENT: postgres
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432

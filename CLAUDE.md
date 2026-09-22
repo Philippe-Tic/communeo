@@ -39,6 +39,7 @@ pnpm install              # at the root, installs every workspace package
 pnpm check                # lint + typecheck + tests (Turborepo)
 pnpm build                # build everything
 pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
+pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 
 Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites && npm run dev`.

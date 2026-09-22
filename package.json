@@ -13,7 +13,8 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "check": "turbo run lint typecheck test",
-    "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\" \"themes/**/*.{ts,tsx,astro,json,md}\" \"*.{json,md,yaml}\""
+    "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\" \"themes/**/*.{ts,tsx,astro,json,md}\" \"*.{json,md,yaml}\"",
+    "gen:types": "pnpm --filter @communeo/core gen:types"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

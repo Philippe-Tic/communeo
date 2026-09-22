@@ -3,10 +3,18 @@
  */
 
 import domainService from '../../../services/domain';
+import { isPublisherUnavailable } from '../../../publishing';
 import domainValidationService from '../../../services/domain-validation';
-import netlifyService from '../../../services/netlify';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
+
+/** Hébergeur non configuré : 503 plutôt qu'une erreur générique */
+function unavailable(ctx, error: unknown): boolean {
+  if (!isPublisherUnavailable(error)) return false;
+  ctx.status = 503;
+  ctx.body = { error: { status: 503, message: error.message } };
+  return true;
+}
 
 export default {
   /**
@@ -56,12 +64,13 @@ export default {
         success: true,
         domain: config.domain,
         domainType: config.domainType,
-        netlifyUrl: config.netlifyUrl,
+        dnsTarget: config.dnsInstructions.target,
         dnsInstructions: config.dnsInstructions,
-        message: 'Domaine enregistré sur Netlify. Veuillez configurer le pointage DNS.'
+        message: 'Domaine enregistré. Veuillez configurer le pointage DNS.'
       };
 
     } catch (error: any) {
+      if (unavailable(ctx, error)) return;
       log.error('Configure domain error:', error);
       ctx.badRequest(error.message || 'Erreur lors de la configuration du domaine');
     }
@@ -111,6 +120,7 @@ export default {
       }
 
     } catch (error: any) {
+      if (unavailable(ctx, error)) return;
       log.error('Verify domain error:', error);
       ctx.internalServerError('Erreur lors de la vérification du domaine');
     }
@@ -156,6 +166,7 @@ export default {
       }
 
     } catch (error: any) {
+      if (unavailable(ctx, error)) return;
       log.error('Remove domain error:', error);
       ctx.internalServerError('Erreur lors de la suppression du domaine');
     }
@@ -194,39 +205,18 @@ export default {
       const domainType = (siteData as any).domain_type || null;
       let sslStatus = null;
 
-      // Récupérer le statut SSL si domaine configuré et site Netlify existe
+      // Statut du certificat HTTPS une fois le domaine vérifié
       if (hasCustomDomain && (siteData as any).netlify_site_id && (siteData as any).domain_status === 'verified') {
-        try {
-          sslStatus = await domainService.getSSLStatus((siteData as any).netlify_site_id, (siteData as any).custom_domain);
-        } catch (error) {
-          log.warn('Could not get SSL status:', error);
-        }
+        sslStatus = await domainService.getSSLStatus(siteData);
       }
 
-      // Récupérer l'URL Netlify pour les domaines en pending
-      let netlifyUrl: string | null = null;
+      // Enregistrements DNS à créer tant que le domaine n'est pas vérifié
       let dnsInstructions: any = null;
-
       if (hasCustomDomain && (siteData as any).domain_status === 'pending') {
-        // Construire l'URL Netlify
-        if ((siteData as any).netlify_site_id) {
-          try {
-            const netlifySite = await netlifyService.getSite((siteData as any).netlify_site_id);
-            netlifyUrl = `${netlifySite.name}.netlify.app`;
-          } catch {
-            // fallback
-          }
-        }
-        if (!netlifyUrl && (siteData as any).slug) {
-          netlifyUrl = `${(siteData as any).slug}-mairie.netlify.app`;
-        }
-
-        // Reconstruire les instructions DNS pour l'UI
-        if (netlifyUrl) {
-          dnsInstructions = domainService.generateDnsInstructions(
-            (siteData as any).custom_domain,
-            netlifyUrl
-          );
+        try {
+          dnsInstructions = await domainService.dnsInstructions(siteData);
+        } catch (error) {
+          log.warn('Could not build DNS instructions:', error);
         }
       }
 
@@ -235,7 +225,7 @@ export default {
         customDomain: (siteData as any).custom_domain || null,
         domainStatus: (siteData as any).domain_status || 'pending',
         domainType,
-        netlifyUrl,
+        dnsTarget: dnsInstructions?.target ?? null,
         dnsInstructions,
         liveUrl: (siteData as any).live_url || null,
         sslEnabled: (siteData as any).ssl_enabled !== false,

@@ -72,7 +72,8 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `src/validation/` — blocks, homepage, per-site slugs (document service middlewares)
 - `src/bootstrap/` — closes public registration, syncs permissions, dev accounts (`test@example.com` / `super@example.com`), read-only build token
 - `database/migrations/` — data migrations (never in bootstrap)
-- `src/services/deployment.ts` / `netlify.ts` / `domain.ts` — build, Netlify publishing, custom domains
+- `src/publishing/` — `SitePublisher` interface and its Netlify adapter, the only code that calls the host (`getPublisher()`; without `NETLIFY_TOKEN` Strapi still boots and publishing answers 503)
+- `src/services/deployment.ts` / `domain.ts` — build and custom domains, host-agnostic (they go through `getPublisher()`)
 - `src/api/*/content-types/*/schema.json` — content type schemas
 
 ## Content Types

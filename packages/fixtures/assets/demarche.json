@@ -1,0 +1,200 @@
+{
+  "data": {
+    "id": "F17578",
+    "type": "Fiche pratique",
+    "audience": "particuliers",
+    "title": "Déclaration préalable de travaux",
+    "description": "La déclaration préalable de travaux est une autorisation d'urbanisme exigée pour les travaux de faible importance : abri de jardin, clôture, modification de façade, piscine.",
+    "dateModification": "2026-03-12",
+    "filDAriane": [
+      { "id": "N19808", "title": "Logement" },
+      { "id": "N319", "title": "Urbanisme" }
+    ],
+    "avertissement": {
+      "type": "aNoter",
+      "title": "Travaux soumis à autorisation",
+      "children": [
+        {
+          "type": "paragraphe",
+          "children": [
+            { "type": "texte", "text": "Des travaux réalisés sans autorisation peuvent entraîner une amende et une remise en état à vos frais." }
+          ]
+        }
+      ]
+    },
+    "introduction": [
+      {
+        "type": "paragraphe",
+        "children": [
+          { "type": "texte", "text": "La déclaration préalable est déposée en mairie avant le début des travaux. La mairie dispose d'un mois pour répondre, " },
+          { "type": "miseEnEvidence", "children": [{ "type": "texte", "text": "deux mois en secteur protégé" }] },
+          { "type": "texte", "text": "." }
+        ]
+      }
+    ],
+    "content": [
+      {
+        "type": "chapitre",
+        "title": "Travaux concernés",
+        "children": [
+          {
+            "type": "paragraphe",
+            "children": [{ "type": "texte", "text": "Une déclaration préalable est nécessaire pour les travaux suivants :" }]
+          },
+          {
+            "type": "liste",
+            "attributes": { "listeType": "puce" },
+            "children": [
+              {
+                "type": "element",
+                "children": [
+                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Construction d'une surface de plancher entre 5 m² et 20 m² (abri de jardin, véranda, garage)" }] }
+                ]
+              },
+              {
+                "type": "element",
+                "children": [
+                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Modification de l'aspect extérieur : ravalement, changement de fenêtres, pose de panneaux solaires" }] }
+                ]
+              },
+              {
+                "type": "element",
+                "children": [
+                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Piscine dont le bassin mesure entre 10 m² et 100 m²" }] }
+                ]
+              },
+              {
+                "type": "element",
+                "children": [
+                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Clôture, dans les communes qui l'ont rendue obligatoire" }] }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "aSavoir",
+            "children": [
+              {
+                "type": "paragraphe",
+                "children": [
+                  { "type": "texte", "text": "Au-delà de 20 m² de surface de plancher, c'est un " },
+                  { "type": "lienInterne", "href": "/demarches/fiche?id=F1986&public=particuliers", "children": [{ "type": "texte", "text": "permis de construire" }] },
+                  { "type": "texte", "text": " qui est exigé." }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "chapitre",
+        "title": "Délais d'instruction",
+        "children": [
+          {
+            "type": "tableau",
+            "title": "Délai selon la situation du terrain",
+            "children": [
+              {
+                "type": "rangee",
+                "children": [
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Situation" }] }] },
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Délai" }] }] }
+                ]
+              },
+              {
+                "type": "rangee",
+                "children": [
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Cas général" }] }] },
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "1 mois" }] }] }
+                ]
+              },
+              {
+                "type": "rangee",
+                "children": [
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Abords d'un monument historique, site classé" }] }] },
+                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "2 mois" }] }] }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "attention",
+            "children": [
+              {
+                "type": "paragraphe",
+                "children": [{ "type": "texte", "text": "L'absence de réponse de la mairie au terme du délai vaut accord, sauf en secteur protégé." }]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "chapitre",
+        "title": "Déposer la déclaration",
+        "children": [
+          {
+            "type": "listeSituations",
+            "children": [
+              {
+                "type": "situation",
+                "title": "En ligne",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [{ "type": "texte", "text": "Le dépôt se fait sur le guichet numérique des autorisations d'urbanisme, accessible avec FranceConnect." }]
+                  }
+                ]
+              },
+              {
+                "type": "situation",
+                "title": "Sur place ou par courrier",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [{ "type": "texte", "text": "Le dossier est déposé à l'accueil de la mairie en deux exemplaires, ou envoyé en recommandé avec accusé de réception." }]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "references": {
+      "ouSAdresser": [],
+      "servicesEnLigne": [
+        {
+          "id": "R52221",
+          "title": "Déposer une demande d'autorisation d'urbanisme",
+          "url": "https://www.service-public.fr/particuliers/vosdroits/R52221",
+          "type": "teleservice"
+        },
+        {
+          "id": "R11646",
+          "title": "Déclaration préalable de travaux (constructions et travaux non soumis à permis)",
+          "url": "https://www.service-public.fr/particuliers/vosdroits/R11646",
+          "type": "formulaire",
+          "numeroCerfa": "13703*11"
+        }
+      ],
+      "references": [
+        {
+          "id": "L1",
+          "title": "Code de l'urbanisme : articles R421-9 à R421-12",
+          "url": "https://www.legifrance.gouv.fr/codes/id/LEGISCTA000006188900"
+        }
+      ],
+      "voirAussi": [{ "id": "F1986", "title": "Permis de construire" }],
+      "definitions": [],
+      "questionsReponses": [],
+      "pourEnSavoirPlus": [
+        {
+          "id": "P1",
+          "title": "Urbanisme : les autorisations de travaux",
+          "url": "https://www.ecologie.gouv.fr/urbanisme"
+        }
+      ]
+    }
+  },
+  "meta": { "audience": "particuliers", "cacheAge": 0, "stale": false }
+}

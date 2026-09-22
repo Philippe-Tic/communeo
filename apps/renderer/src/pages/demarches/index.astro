@@ -1,0 +1,87 @@
+---
+/**
+ * Démarches Service-Public : l'arborescence officielle, filtrable dans le navigateur.
+ * Chaque fiche renvoie vers la page de fiche, qui la charge depuis l'API publique.
+ */
+import { AUDIENCE_LABELS, demarcheHref, type DemarcheAudience } from '@communeo/core';
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+import { fetchThemes } from '../../lib/demarches';
+
+const source = getSource();
+const site = await source.site();
+const ctx = await simplePage(source, {
+  path: '/demarches',
+  title: 'Démarches',
+  description: `Les démarches administratives de service-public.fr, depuis le site de la mairie de ${site.name}`,
+});
+
+const audiences = (site.services.demarches.audiences.filter((audience) =>
+  audience === 'particuliers' || audience === 'professionnels',
+) as DemarcheAudience[]) ?? [];
+const themes = await Promise.all(audiences.map(async (audience) => ({ audience, themes: await fetchThemes(audience) })));
+const available = themes.filter((entry) => entry.themes.length > 0);
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}>
+  <Frame ctx={ctx} lead="Les fiches officielles de service-public.fr, mises à jour par l'État, avec les informations de la commune.">
+    {available.length === 0 ? (
+      <p>
+        L'annuaire des démarches n'est pas disponible pour le moment.
+        Vous pouvez consulter <a href="https://www.service-public.fr" target="_blank" rel="noopener noreferrer">service-public.fr<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>
+        ou <a href="/contact">contacter la mairie</a>.
+      </p>
+    ) : (
+      <>
+        <form class="cn-js-only" data-cn-demarches-filter>
+          <p>
+            <label for="cn-demarches-q">Filtrer les démarches</label>
+            <input id="cn-demarches-q" type="search" name="q" placeholder="Carte d'identité, urbanisme…" data-cn-demarches-input />
+          </p>
+          <p role="status" data-cn-demarches-count></p>
+        </form>
+
+        {available.map((entry) => (
+          <section aria-labelledby={`cn-demarches-${entry.audience}`}>
+            {available.length > 1 && <h2 id={`cn-demarches-${entry.audience}`}>{AUDIENCE_LABELS[entry.audience]}</h2>}
+            <ul class="cn-demarches-themes">
+              {entry.themes.map((themeEntry) => (
+                <li data-cn-demarches-theme>
+                  <details>
+                    <summary>{themeEntry.title}</summary>
+                    <ul>
+                      {themeEntry.children.map((child) => (
+                        <li>
+                          <p>{child.title}</p>
+                          <ul>
+                            {child.fiches.map((fiche) => (
+                              <li data-cn-demarches-fiche={fiche.title.toLowerCase()}>
+                                <a href={demarcheHref(fiche.id, entry.audience)}>{fiche.title}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                      {themeEntry.fiches.map((fiche) => (
+                        <li data-cn-demarches-fiche={fiche.title.toLowerCase()}>
+                          <a href={demarcheHref(fiche.id, entry.audience)}>{fiche.title}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </>
+    )}
+  </Frame>
+</Document>
+
+<script>
+  import { initDemarchesFilter } from '../../lib/demarches-filter';
+
+  initDemarchesFilter();
+</script>

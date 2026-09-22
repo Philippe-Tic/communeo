@@ -34,7 +34,8 @@ const fixtureAssets = () => {
         devServer.middlewares.use('/fixtures', (req, res, next) => {
           const file = `${dir}${decodeURIComponent(req.url.split('?')[0])}`;
           if (!existsSync(file)) return next();
-          res.setHeader('Content-Type', file.endsWith('.svg') ? 'image/svg+xml' : 'application/pdf');
+          const types = { '.svg': 'image/svg+xml', '.json': 'application/json', '.pdf': 'application/pdf' };
+          res.setHeader('Content-Type', types[file.slice(file.lastIndexOf('.'))] ?? 'application/octet-stream');
           res.end(readFileSync(file));
         });
       },

@@ -5,3 +5,4 @@
 export * from './format';
 export * from './site/opening-status';
 export * from './site/practical-rules';
+export * from './demarches';

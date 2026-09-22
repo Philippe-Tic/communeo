@@ -1,17 +1,29 @@
 ---
+/** Liste des actualités : filtres, article à la une, grille de cartes, pagination. */
 import type { ArticleCardVM } from '@communeo/core';
-import type { FilterOption, PaginationLinks } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+import type { FilterOption, PageContext, PaginationLinks } from '@communeo/theme-contract';
 import ArticleCard from '../parts/ArticleCard.astro';
 import Filters from '../parts/Filters.astro';
+import Layout from '../parts/Layout.astro';
 import Pagination from '../parts/Pagination.astro';
 
 interface Props { ctx: PageContext; articles: ArticleCardVM[]; categories: FilterOption[]; pagination: PaginationLinks }
 const { ctx, articles, categories, pagination } = Astro.props;
+const [first, ...rest] = articles;
+const highlight = pagination.page === 1 && first?.featured ? first : null;
+const others = highlight ? rest : articles;
 ---
 <Layout ctx={ctx}>
-  <Filters label="Filtrer par catégorie" options={categories} allHref="/actualites" />
-  {articles.length ? articles.map((article) => <ArticleCard article={article} level={2} />) : <p>Aucune actualité pour le moment.</p>}
+  <div class="in-list-head">
+    <Filters label="Filtrer par catégorie" options={categories} allHref="/actualites" />
+    <p class="in-meta in-count" role="status">{pagination.total} actualité{pagination.total > 1 ? 's' : ''}</p>
+  </div>
+
+  {highlight && <ArticleCard article={highlight} level={2} featured highlight />}
+
+  {others.length > 0 && <div class="in-grid-3 in-grid-start">{others.map((article) => <ArticleCard article={article} level={2} />)}</div>}
+
+  {articles.length === 0 && <p class="in-empty">Aucune actualité pour le moment.</p>}
+
   <Pagination pagination={pagination} noun="actualités" />
 </Layout>

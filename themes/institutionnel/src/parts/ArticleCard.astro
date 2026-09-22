@@ -8,13 +8,15 @@ interface Props {
   level?: 2 | 3;
   /** Carte mise en avant : titre plus grand */
   featured?: boolean;
+  /** Article à la une : image et texte côte à côte */
+  highlight?: boolean;
 }
 
-const { article, level = 3, featured = false } = Astro.props;
+const { article, level = 3, featured = false, highlight = false } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
 const urgent = article.category.key === 'emergency';
 ---
-<article class:list={['in-card', 'in-card-article', { 'in-card-featured': featured }]}>
+<article class:list={['in-card', 'in-card-article', { 'in-card-featured': featured, 'in-card-highlight': highlight }]}>
   {article.image && (
     <img
       class="in-card-image"
@@ -28,6 +30,7 @@ const urgent = article.category.key === 'emergency';
   )}
   <div class="in-card-body">
     <p class="in-card-meta">
+      {highlight && <span class="in-tag in-tag-outline">À la une</span>}
       <span class:list={['in-tag', { 'in-tag-urgent': urgent }]}>
         {urgent && <TriangleAlert size={16} aria-hidden="true" />}{article.category.label}
       </span>

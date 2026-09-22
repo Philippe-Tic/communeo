@@ -1,27 +1,66 @@
 ---
+/**
+ * Équipe municipale : le maire en grand, les adjoints en cartes, les conseillers dans une liste
+ * dépliable (accordéon natif), puis les services.
+ */
 import type { TeamVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Minus from '@lucide/astro/icons/minus';
+import Plus from '@lucide/astro/icons/plus';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; team: TeamVM }
 const { ctx, team } = Astro.props;
+const groups = team.groups.filter((group) => group.members.length > 0);
 ---
 <Layout ctx={ctx}>
-  {team.groups.length ? team.groups.map((group) => (
+  {groups.length === 0 && <p class="in-empty">La composition de l'équipe municipale sera bientôt publiée.</p>}
+
+  {groups.map((group) => (
     <section aria-labelledby={`in-team-${group.key}`}>
       <h2 id={`in-team-${group.key}`}>{group.label}</h2>
-      <ul class="in-team">
-        {group.members.map((member) => (
-          <li>
-            {member.photo ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} /> : <span aria-hidden="true" class="in-initials">{member.initials}</span>}
-            <h3>{member.name}</h3>
-            <p>{member.title}{member.delegation && <> – {member.delegation}</>}</p>
-            {member.bio && <p>{member.bio}</p>}
-            {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
-            {member.officeHours && <p>{member.officeHours}</p>}
-          </li>
-        ))}
-      </ul>
+
+      {group.key === 'conseillers' ? (
+        <ul class="in-team-list">
+          {group.members.map((member) => (
+            <li>
+              <details>
+                <summary>
+                  {member.photo
+                    ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} loading="lazy" />
+                    : <span class="in-initials" aria-hidden="true">{member.initials}</span>}
+                  <span class="in-team-identity"><strong>{member.name}</strong> <span class="in-meta">· {member.delegation ?? member.title}</span></span>
+                  <Plus size={22} aria-hidden="true" class="in-faq-open" /><Minus size={22} aria-hidden="true" class="in-faq-close" />
+                </summary>
+                <div class="in-team-details">
+                  <p>{member.title}{member.delegation && <> · {member.delegation}</>}</p>
+                  {member.bio && <p>{member.bio}</p>}
+                  {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
+                  {member.officeHours && <p class="in-meta">{member.officeHours}</p>}
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul class:list={['in-team', { 'in-team-lead': group.key === 'maire' }]}>
+          {group.members.map((member) => (
+            <li class="in-team-card">
+              {member.photo
+                ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} loading="lazy" />
+                : <span class="in-initials" aria-hidden="true">{member.initials}</span>}
+              <div>
+                <h3>{member.name}</h3>
+                <p class="in-team-role">{member.title}</p>
+                {member.delegation && <p>{member.delegation}</p>}
+                {member.bio && <p>{member.bio}</p>}
+                {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
+                {member.officeHours && <p class="in-meta">{member.officeHours}</p>}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
-  )) : <p>La composition de l'équipe municipale sera bientôt publiée.</p>}
+  ))}
 </Layout>

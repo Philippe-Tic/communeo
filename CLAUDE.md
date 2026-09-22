@@ -16,7 +16,7 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **packages/core** — generated Strapi types, block/settings schemas (zod), French formatting, **view-models** (`src/vm`: the ready-to-render data themes receive, never Strapi types) and the **content source** (`src/source`: `createStrapiLoader` → `createContentSource`).
 - **packages/theme-contract** — what a theme must provide: `manifest`, 18 `templates` (Home, Page, ArticleList…, Frame, NotFound) and 9 `blocks`, declared with `defineTheme` (a missing template or wrong props fails `astro check`). Themes never fetch data: they receive view-models.
 - **packages/ui-a11y** — shared accessible Astro components: RichText, Blocks dispatcher, SkipLinks, Breadcrumb, CookieBanner + consent store, ConsentEmbed (videos load after consent), OpeningStatus (computed in the browser), disclosure script.
-- **themes/** — one package per public-site theme (`@communeo/theme-<id>`). `themes/starter` implements the whole contract in plain accessible HTML (template for new themes, reference for renderer tests). Institutionnel, Moderne, Journal, Bourg mockups are in `v2/`.
+- **themes/** — one package per public-site theme (`@communeo/theme-<id>`). `themes/starter` implements the whole contract in plain accessible HTML (template for new themes, reference for renderer tests); `themes/institutionnel` is the reference theme and the renderer's default. Moderne, Journal, Bourg mockups are in `v2/`.
 - **packages/fixtures** — demo commune Saint-Aubin-sur-Loire in Strapi format (`createFixtureLoader({ variant: complete | minimal | empty })`, `FIXTURE_NOW`), goes through the same mappers as production; assets served under `/fixtures`.
 
 Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 launch): **admin/** (React admin V1) and **sites/** (Astro site V1). **docs/** (Starlight) stays at the root while the Netlify docs site points to it.
@@ -41,6 +41,7 @@ pnpm build                # build everything
 pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
 pnpm theme:dev <id> [--variant complete|minimal|empty] [--logo blason]   # demo commune in a theme, no Strapi
 pnpm create-theme <id> --name "Nom"   # new theme from themes/starter (guide: packages/theme-contract/README.md)
+pnpm theme:thumbnail <id>            # regenerate themes/<id>/thumbnail.png (1200 x 800)
 THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
 pnpm --filter @communeo/renderer test:e2e     # every theme × every demo page: axe (WCAG 2.2 AA) at 390/1440 px + structure
 pnpm --filter @communeo/renderer test:parity  # static build HTML == server (preview) HTML

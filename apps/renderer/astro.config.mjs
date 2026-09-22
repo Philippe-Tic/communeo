@@ -2,7 +2,7 @@
  * Renderer Communeo : un seul projet Astro pour toutes les communes et tous les thèmes.
  *
  * Variables d'environnement :
- * - THEME            identifiant du thème (package @communeo/theme-<id>), défaut « starter »
+ * - THEME            identifiant du thème (package @communeo/theme-<id>), défaut « institutionnel »
  * - RENDER_MODE      « static » (sites publiés) ou « server » (preview des brouillons)
  * - DATA_SOURCE      « strapi » ou « fixtures » (commune de démonstration, sans Strapi)
  * - SITE_URL         URL publique du site (liens canoniques, sitemap)
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import node from '@astrojs/node';
 
-const theme = process.env.THEME || 'starter';
+const theme = process.env.THEME || 'institutionnel';
 const server = process.env.RENDER_MODE === 'server';
 const fixtures = process.env.DATA_SOURCE !== 'strapi';
 

@@ -5,6 +5,7 @@
  */
 import type { PageContext } from '@communeo/theme-contract';
 import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import { searchAttributes } from '@communeo/ui-a11y/search';
 import Alerts from './Alerts.astro';
 import Footer from './Footer.astro';
 import Header from './Header.astro';
@@ -25,14 +26,14 @@ const { ctx, heading = ctx.title, full = false } = Astro.props;
 
 <div class="in-page">
   {full ? (
-    <main id="contenu" tabindex="-1" class="in-main in-main-full">
+    <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="in-main in-main-full">
       {heading && <h1 class="in-title in-container">{heading}</h1>}
       <slot />
     </main>
   ) : (
     <div class="in-container">
       <Breadcrumb items={ctx.breadcrumb} class="in-breadcrumb" />
-      <main id="contenu" tabindex="-1" class="in-main">
+      <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="in-main">
         {heading && <h1 class="in-title">{heading}</h1>}
         <slot />
       </main>

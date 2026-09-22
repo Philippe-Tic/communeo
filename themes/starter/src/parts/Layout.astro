@@ -5,6 +5,7 @@
  */
 import type { PageContext } from '@communeo/theme-contract';
 import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import { searchAttributes } from '@communeo/ui-a11y/search';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
 import '../styles.css';
 
@@ -62,7 +63,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
 
 <Breadcrumb items={ctx.breadcrumb} />
 
-<main id="contenu" tabindex="-1">
+<main {...searchAttributes(ctx)} id="contenu" tabindex="-1">
   {heading && <h1>{heading}</h1>}
   <slot />
 </main>

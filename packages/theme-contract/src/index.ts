@@ -107,6 +107,8 @@ export interface ThemeTemplates {
   AssociationList: ThemeComponent<WithContext<{ associations: AssociationCardVM[]; categories: FilterOption[]; proposeHref: string }>>;
   Association: ThemeComponent<WithContext<{ association: AssociationVM }>>;
   AssociationProposal: ThemeComponent<WithContext<{ form: FormConfig }>>;
+  /** Demande d'exercice des droits RGPD (accès, rectification, effacement…) */
+  RightsRequest: ThemeComponent<WithContext<{ form: FormConfig }>>;
   Contact: ThemeComponent<WithContext<{ form: FormConfig }>>;
   Waste: ThemeComponent<WithContext<{ collections: WasteCollectionVM[] }>>;
   Canteen: ThemeComponent<WithContext<{ weeks: CanteenWeekVM[] }>>;
@@ -149,6 +151,7 @@ export const TEMPLATE_NAMES: TemplateName[] = [
   'AssociationList',
   'Association',
   'AssociationProposal',
+  'RightsRequest',
   'Contact',
   'Waste',
   'Canteen',

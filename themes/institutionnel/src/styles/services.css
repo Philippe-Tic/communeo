@@ -189,6 +189,71 @@
   border: 1px solid var(--in-border);
 }
 
+/* Recherche (page commune, habillée par le thème) */
+.in-frame form[role='search'] p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.in-frame form[role='search'] label {
+  flex: 1 0 100%;
+}
+
+.in-frame form[role='search'] input {
+  flex: 1 1 16rem;
+  width: auto;
+}
+
+.in-frame form[role='search'] button {
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--in-primary);
+  border: 2px solid var(--in-primary);
+  border-radius: var(--in-radius);
+}
+
+.in-frame form[role='search'] button:hover {
+  background: var(--in-primary-dark);
+  border-color: var(--in-primary-dark);
+}
+
+.in-frame [data-cn-search-results] {
+  display: grid;
+  gap: var(--in-space-2);
+  padding-left: 1.5rem;
+}
+
+.in-frame [data-cn-search-results] li::marker {
+  color: var(--in-muted);
+}
+
+.in-frame [data-cn-search-results] a {
+  font-family: var(--in-font-title);
+  font-size: var(--in-h4);
+  font-weight: 600;
+}
+
+.in-frame [data-cn-search-results] p:first-of-type {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--in-muted);
+  text-transform: uppercase;
+}
+
+.in-frame [data-cn-search-results] mark {
+  padding: 0 0.125rem;
+  color: var(--in-ink);
+  background: #fff1d6;
+}
+
+.in-frame [data-cn-search-count] {
+  font-weight: 600;
+}
+
 /* 404 */
 .in-404 {
   max-width: 42rem;

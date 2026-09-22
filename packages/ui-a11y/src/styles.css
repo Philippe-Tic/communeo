@@ -45,6 +45,11 @@ html:not(.cn-js) .cn-js-only {
   display: none !important;
 }
 
+/* Et l'inverse : le repli proposé quand JavaScript est absent */
+html.cn-js .cn-no-js-only {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

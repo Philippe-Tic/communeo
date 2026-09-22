@@ -1,0 +1,58 @@
+---
+/**
+ * Recherche sur le site. L'index est produit par Pagefind au moment du build : la recherche
+ * tourne entièrement dans le navigateur, sans serveur. Sans JavaScript, les rubriques sont proposées.
+ */
+import { SECTIONS } from '@communeo/core';
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const site = await source.site();
+const ctx = await simplePage(source, {
+  path: '/recherche',
+  title: 'Rechercher',
+  description: `Rechercher une page, une actualité ou un document sur le site de ${site.name}`,
+  noindex: true,
+});
+const { Frame } = theme.templates;
+const suggestions = [
+  SECTIONS.actualites,
+  SECTIONS.agenda,
+  SECTIONS.documents,
+  SECTIONS.equipe,
+  SECTIONS.contact,
+];
+---
+<Document ctx={ctx}>
+  <Frame ctx={ctx}>
+    <form role="search" action="/recherche" method="get" data-cn-search-form>
+      <p>
+        <label for="cn-search">Rechercher sur le site</label>
+        <input id="cn-search" type="search" name="q" autocomplete="off" data-cn-search-input />
+        <button type="submit">Rechercher</button>
+      </p>
+    </form>
+
+    <p role="status" data-cn-search-count></p>
+    <ol data-cn-search-results></ol>
+
+    <div data-cn-search-empty hidden>
+      <p>Aucun résultat ne correspond à votre recherche. Essayez un mot plus court, ou parcourez les rubriques :</p>
+      <ul>{suggestions.map((section) => <li><a href={section.path}>{section.label}</a></li>)}</ul>
+    </div>
+
+    <div class="cn-no-js-only">
+      <p>La recherche a besoin de JavaScript. Vous pouvez parcourir les rubriques du site :</p>
+      <ul>{suggestions.map((section) => <li><a href={section.path}>{section.label}</a></li>)}</ul>
+      <p><a href="/plan-du-site">Voir le plan du site</a></p>
+    </div>
+  </Frame>
+</Document>
+
+<script>
+  import { initSearch } from '../lib/search';
+
+  initSearch();
+</script>

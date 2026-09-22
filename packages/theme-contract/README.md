@@ -28,12 +28,15 @@ auquel il manque un template ou un bloc, ou dont les props ne correspondent pas 
 | Élément | Rôle |
 |---|---|
 | `manifest` | Identifiant, nom, description, vignette (`thumbnail.png`, 1200 × 800), sections d'accueil gérées, menus |
-| `templates` | 18 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
+| `templates` | 19 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `RightsRequest`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
 | `blocks` | 9 composants de blocs : `text`, `image`, `buttons`, `callout`, `documents`, `gallery`, `faq`, `contact`, `video` |
 
 Chaque template reçoit `ctx` (site, menus, alertes, chemin courant, fil d'Ariane, titre, SEO) et ses données
 propres, sous forme de **view-models** de `@communeo/core` : libellés en français, dates formatées,
 liens prêts, champs absents à `null`. Un thème ne fait jamais d'appel à Strapi.
+
+Le `<main>` du thème porte les attributs de `searchAttributes(ctx)` : l'index de recherche du site
+(Pagefind, construit après le build) ne retient alors que le contenu propre à chaque page.
 
 `Frame` est le cadre des pages dont le contenu est commun à tous les thèmes (mentions légales, données
 personnelles, déclaration d'accessibilité, plan du site, recherche, démarches) : le renderer fournit le
@@ -67,6 +70,7 @@ Open Graph, JSON-LD), les liens d'évitement et le bandeau cookies. Le thème re
 | `Lightbox` + `scripts/lightbox` | Agrandissement d'une galerie : Échap, flèches, focus rendu à la vignette |
 | `scripts/menu` | Menu repliable sur petit écran et sous-menus : `aria-expanded`, Échap, clic à l'extérieur |
 | `styles.css` | Utilitaires d'accessibilité (`cn-sr-only`, `cn-js-only`, `prefers-reduced-motion`) |
+| `search` | Attributs à poser sur le `<main>` : seul le contenu principal entre dans l'index de recherche |
 
 Le renderer pose la classe `cn-js` sur `<html>` : tout élément qui n'a de sens qu'avec JavaScript
 (bouton de menu, agrandissement, copie d'un lien) porte la classe `cn-js-only` et disparaît sans lui.

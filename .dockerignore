@@ -1,0 +1,16 @@
+# Contexte Docker = racine du monorepo
+**/node_modules
+**/.turbo
+**/.tmp
+**/.cache
+**/dist
+**/build
+**/.env
+**/.env.*
+**/*.log
+.git
+admin
+sites
+docs
+v2
+d

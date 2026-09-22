@@ -64,24 +64,16 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
     partners: Schema.Attribute.Component<'homepage.partner', true>;
     quick_links: Schema.Attribute.Component<'homepage.quick-link', true>;
     show_articles: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    show_associations: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    show_disruptions: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
+    show_associations: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    show_disruptions: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_events: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    show_key_figures: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    show_mayor_word: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    show_newsletter: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
+    show_key_figures: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    show_mayor_word: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    show_newsletter: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_quick_links: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<true>;
-    show_school_menu: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
-    show_waste_collection: Schema.Attribute.Boolean &
-      Schema.Attribute.DefaultTo<false>;
+    show_quick_links: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    show_school_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    show_waste_collection: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     show_weather: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
   };
 }
@@ -94,18 +86,7 @@ export interface HomepageKeyFigure extends Struct.ComponentSchema {
   };
   attributes: {
     icon: Schema.Attribute.Enumeration<
-      [
-        'users',
-        'map',
-        'building',
-        'calendar',
-        'heart',
-        'book',
-        'globe',
-        'shield',
-        'tree',
-        'star',
-      ]
+      ['users', 'map', 'building', 'calendar', 'heart', 'book', 'globe', 'shield', 'tree', 'star']
     > &
       Schema.Attribute.DefaultTo<'users'>;
     label: Schema.Attribute.String &
@@ -188,9 +169,7 @@ export interface LegalAccessibilite extends Struct.ComponentSchema {
   attributes: {
     accessibility_action_plan_url: Schema.Attribute.String;
     accessibility_declaration: Schema.Attribute.RichText;
-    accessibility_level: Schema.Attribute.Enumeration<
-      ['non-conforme', 'partiellement-conforme', 'conforme']
-    > &
+    accessibility_level: Schema.Attribute.Enumeration<['non-conforme', 'partiellement-conforme', 'conforme']> &
       Schema.Attribute.DefaultTo<'non-conforme'>;
     accessibility_schema_url: Schema.Attribute.String;
   };
@@ -254,10 +233,7 @@ export interface SchoolMenuMeal extends Struct.ComponentSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
-    day: Schema.Attribute.Enumeration<
-      ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']
-    > &
-      Schema.Attribute.Required;
+    day: Schema.Attribute.Enumeration<['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi']> & Schema.Attribute.Required;
     dessert: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
@@ -295,9 +271,7 @@ export interface SocialSocialLink extends Struct.ComponentSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
-    platform: Schema.Attribute.Enumeration<
-      ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre']
-    > &
+    platform: Schema.Attribute.Enumeration<['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre']> &
       Schema.Attribute.Required;
     url: Schema.Attribute.String & Schema.Attribute.Required;
   };

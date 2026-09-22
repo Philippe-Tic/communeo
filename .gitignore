@@ -10,3 +10,8 @@
 # Backups
 backups/
 d/
+
+# Monorepo
+node_modules/
+.turbo/
+dist/

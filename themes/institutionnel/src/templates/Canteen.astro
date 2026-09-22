@@ -29,7 +29,7 @@ const badges = [...new Set(weeks.flatMap((week) => week.days.flatMap((day) => da
       {week.mode === 'detailed' ? (
         <div class="in-menu-days">
           {week.days.map((day) => (
-            <article class="in-box in-menu-day">
+            <article class="in-box in-menu-day" data-cn-day={day.date.iso.slice(0, 10)}>
               <h3 class="in-box-title">{day.day.label} <time datetime={day.date.iso}>{day.date.label}</time></h3>
               {day.closed ? (
                 <p class="in-meta">Pas de cantine ce jour.</p>
@@ -63,3 +63,7 @@ const badges = [...new Set(weeks.flatMap((week) => week.days.flatMap((day) => da
     </section>
   ))}
 </Layout>
+
+<script>
+  import '@communeo/ui-a11y/scripts/today';
+</script>

@@ -4,6 +4,7 @@
  * ne tourne qu'avec VISUAL=1.
  */
 import { existsSync } from 'node:fs';
+import { FIXTURE_NOW } from '@communeo/fixtures';
 import { expect, test } from '@playwright/test';
 
 const KEY_PAGES = [
@@ -32,6 +33,10 @@ test.beforeEach(({}, testInfo) => {
 
 for (const path of KEY_PAGES) {
   test(`capture ${path}`, async ({ page }) => {
+    // Les widgets qui dépendent du moment (prochaines collectes, jour du menu, météo) rendraient
+    // les captures différentes à chaque exécution : horloge figée et service météo coupé.
+    await page.clock.setFixedTime(FIXTURE_NOW);
+    await page.route('**://api.open-meteo.com/**', (route) => route.abort());
     await page.goto(path);
     // Le bandeau cookies masquerait le bas de page : choix déjà fait
     await page.evaluate(() => localStorage.setItem('communeo-consent-v1', JSON.stringify({ media: false, decidedAt: new Date().toISOString() })));

@@ -1,0 +1,42 @@
+---
+/**
+ * Prochains passages d'une collecte. Les dates sont calculées au build (lisibles sans JavaScript)
+ * puis recalculées dans le navigateur : un site statique publié il y a trois semaines reste juste.
+ */
+import type { WasteCollectionVM } from '@communeo/core';
+
+interface Props {
+  collection: WasteCollectionVM;
+  /** Nombre de passages affichés */
+  count?: number;
+  class?: string;
+}
+
+const { collection, count = 1, class: className } = Astro.props;
+const dates = collection.upcoming.slice(0, count);
+---
+{dates.length > 0 && (
+  <span class:list={['cn-waste-next', className]} data-cn-waste={JSON.stringify({ rule: collection.rule, count })}>
+    {dates.map((date, index) => (
+      <>{index > 0 && ', '}<time datetime={date.iso}>{date.label}</time></>
+    ))}
+  </span>
+)}
+
+<script>
+  import { formatDate, nextCollections, type WasteRule } from '@communeo/core/client';
+
+  for (const element of document.querySelectorAll<HTMLElement>('[data-cn-waste]')) {
+    const { rule, count } = JSON.parse(element.dataset.cnWaste!) as { rule: WasteRule; count: number };
+    const dates = nextCollections(rule, new Date(), count);
+    if (!dates.length) continue;
+    element.replaceChildren(
+      ...dates.flatMap((iso, index) => {
+        const time = document.createElement('time');
+        time.dateTime = iso;
+        time.textContent = formatDate(iso);
+        return index > 0 ? [document.createTextNode(', '), time] : [time];
+      }),
+    );
+  }
+</script>

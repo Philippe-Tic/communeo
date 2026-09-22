@@ -28,8 +28,7 @@ export default defineTheme({
     name: 'Institutionnel',
     description:
       'Sobre et très lisible : un site « guichet » pour trouver vite une démarche, un horaire ou une actualité. Vert forêt, titres à empattements, texte en grand.',
-    // La météo arrive avec le widget partagé : tout le reste est rendu par le thème
-    homeSections: HOMEPAGE_SECTION_IDS.filter((section) => section !== 'weather'),
+    homeSections: HOMEPAGE_SECTION_IDS,
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
   },

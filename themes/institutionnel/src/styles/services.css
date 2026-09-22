@@ -189,6 +189,61 @@
   border: 1px solid var(--in-border);
 }
 
+/* Météo (composant partagé) */
+.in-weather .cn-weather-now {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+}
+
+.in-weather .cn-weather-temp {
+  font-family: var(--in-font-title);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.in-weather .cn-weather-now span {
+  color: var(--in-muted);
+}
+
+.in-weather .cn-weather-days {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 0 0;
+  font-size: 1rem;
+  text-align: center;
+  list-style: none;
+  border-top: 1px solid var(--in-border);
+}
+
+.in-weather .cn-weather-days li {
+  display: grid;
+  gap: 0.125rem;
+}
+
+.in-weather .cn-weather-days li span:last-child {
+  color: var(--in-muted);
+}
+
+/* Jour courant, marqué à l'affichage (les sites sont statiques) */
+.in-menu-day[data-today] {
+  border: 2px solid var(--in-primary);
+}
+
+.in-menu-day[data-today] .in-box-title::after {
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--in-font);
+  font-size: 0.875rem;
+  color: var(--in-primary-dark);
+  background: var(--in-primary-light);
+  border-radius: 3px;
+  content: "aujourd'hui";
+}
+
 /* Recherche (page commune, habillée par le thème) */
 .in-frame form[role='search'] p {
   display: flex;

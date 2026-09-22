@@ -62,6 +62,38 @@ jobs:
 
       - run: pnpm turbo run build --cache-dir=.turbo
 
+  themes:
+    name: Thèmes (accessibilité, parité statique / serveur)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run build --filter "@communeo/renderer^..."
+
+      - run: pnpm --filter @communeo/renderer exec playwright install --with-deps chromium
+
+      - name: Accessibilité de toutes les pages (axe, WCAG 2.2 AA) en 390 et 1440 px
+        run: pnpm --filter @communeo/renderer test:e2e
+
+      - name: Parité build statique / mode serveur
+        run: pnpm --filter @communeo/renderer test:parity
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-playwright
+          path: apps/renderer/test-results
+          retention-days: 7
+
   docker-backend:
     name: Image Docker du backend
     runs-on: ubuntu-latest

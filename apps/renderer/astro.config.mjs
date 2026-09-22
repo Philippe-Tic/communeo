@@ -45,6 +45,7 @@ const fixtureAssets = () => {
 
 export default defineConfig({
   site: process.env.SITE_URL || 'https://saint-aubin-sur-loire.fr',
+  outDir: process.env.OUT_DIR || './dist',
   output: server ? 'server' : 'static',
   adapter: server ? node({ mode: 'standalone' }) : undefined,
   trailingSlash: 'never',

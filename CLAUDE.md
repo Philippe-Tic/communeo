@@ -39,7 +39,8 @@ pnpm install              # at the root, installs every workspace package
 pnpm check                # lint + typecheck + tests (Turborepo)
 pnpm build                # build everything
 pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
-pnpm --filter @communeo/renderer dev    # demo commune with the starter theme (http://localhost:4321)
+pnpm theme:dev <id> [--variant complete|minimal|empty] [--logo blason]   # demo commune in a theme, no Strapi
+pnpm create-theme <id> --name "Nom"   # new theme from themes/starter (guide: packages/theme-contract/README.md)
 THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```

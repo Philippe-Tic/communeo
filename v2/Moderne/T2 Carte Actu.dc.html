@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article style="font-family:'Figtree',system-ui,sans-serif;font-size:18px;line-height:1.5;color:#12211B;display:flex;flex-direction:column;gap:14px;height:100%">
+  <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ true }}">
+    <div role="img" aria-label="{{ alt }}" style="aspect-ratio:{{ ratio }};border-radius:20px;background:repeating-linear-gradient(135deg,#DDE5E0 0 10px,#EAF0EC 10px 20px);display:flex;align-items:center;justify-content:center;font:12px ui-monospace,monospace;color:#4B5750;position:relative;overflow:hidden">photo · {{ alt }}<sc-if value="{{ isUrgent }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#B3261E;color:#fff;font:700 14px 'Figtree',sans-serif;text-transform:uppercase;letter-spacing:.04em"><span aria-hidden="true">!</span>Urgence</span></sc-if></div>
+  </sc-if>
+  <sc-if value="{{ noImage }}" hint-placeholder-val="{{ false }}">
+    <div style="border-radius:20px;background:{{ tileBg }};color:{{ tileFg }};padding:22px 24px 8px;display:flex;flex-direction:column;gap:14px;height:100%;box-sizing:border-box">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:15px"><span style="display:inline-flex;padding:4px 12px;border-radius:999px;background:{{ chipBg }};color:{{ chipFg }};font-weight:700"><sc-if value="{{ isUrgent }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="margin-right:6px">!</span></sc-if>{{ cat }}</span><time style="opacity:.85">{{ date }}</time></div>
+      <h3 style="margin:0;font-family:'Newsreader',Georgia,serif;font-size:{{ titleSize }};line-height:1.15;font-weight:400;text-wrap:pretty"><a href="#" style="color:inherit;text-decoration:none" style-hover="text-decoration:underline">{{ title }}</a></h3>
+      <sc-if value="{{ hasSummary }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:17px;opacity:.9">{{ summary }}</p></sc-if>
+      <span style="margin-top:auto;padding:8px 0 14px;font-weight:600;display:inline-flex;align-items:center;gap:8px">Lire la suite <span aria-hidden="true">→</span><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"> : {{ title }}</span></span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px;flex:1">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:15px;color:#4B5750"><span style="display:inline-flex;padding:4px 12px;border-radius:999px;background:#EAF0EC;color:#12211B;font-weight:700">{{ cat }}</span><time>{{ date }}</time></div>
+      <h3 style="margin:0;font-family:'Newsreader',Georgia,serif;font-size:{{ titleSize }};line-height:1.15;font-weight:400;text-wrap:pretty"><a href="#" style="color:#12211B;text-decoration:none" style-hover="text-decoration:underline">{{ title }}</a></h3>
+      <sc-if value="{{ hasSummary }}" hint-placeholder-val="{{ true }}"><p style="margin:0;font-size:17px;color:#4B5750">{{ summary }}</p></sc-if>
+    </div>
+  </sc-if>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:400,&quot;height&quot;:420},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Titre de l'actualité&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;summary&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;date&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;12 septembre 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Actualité&quot;,&quot;Événement&quot;,&quot;Information&quot;,&quot;Urgence&quot;],&quot;default&quot;:&quot;Actualité&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;image&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;alt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;illustration&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;featured&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, cat = p.cat ?? 'Actualité', urgent = cat === 'Urgence', img = p.image !== false;
+    return { hasImage: img, noImage: !img, alt: p.alt ?? 'illustration', isUrgent: urgent, cat, date: p.date ?? '12 septembre 2026', title: p.title ?? 'Titre de l\u2019actualité', hasSummary: !!p.summary, summary: p.summary ?? '', titleSize: p.featured ? '34px' : '24px', ratio: p.featured ? '16/10' : '4/3',
+      tileBg: urgent ? '#FBE9E7' : (p.tone === 'dark' ? '#12211B' : '#EAF0EC'), tileFg: urgent ? '#12211B' : (p.tone === 'dark' ? '#fff' : '#12211B'),
+      chipBg: urgent ? '#B3261E' : (p.tone === 'dark' ? '#00A86B' : '#12211B'), chipFg: urgent ? '#fff' : (p.tone === 'dark' ? '#12211B' : '#fff') };
+  }
+}
+</script>
+</body>
+</html>

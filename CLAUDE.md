@@ -113,5 +113,5 @@ npm run build      # Build static documentation site
 
 ## GitHub Project Workflow
 
-Projet conformité légale (#5, owner: Philippe-Tic) — 21 issues (#2-#22) sur board Kanban.
-Détails complets (IDs, commandes, mapping phases) : voir skill `.claude/skills/github-project.md`
+Refonte V2 : projet **#6 « Communeo V2 »** (owner: Philippe-Tic), 10 epics avec sous-issues, 1 milestone par phase, label `v2`. Maquettes des thèmes et brief dans `v2/`.
+Détails complets (IDs, commandes, epics) : voir skill `.claude/skills/github-project.md`

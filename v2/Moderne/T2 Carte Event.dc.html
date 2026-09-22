@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article style="font-family:'Figtree',system-ui,sans-serif;font-size:18px;line-height:1.5;color:#12211B;background:#fff;border:1px solid #DDE5E0;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px;height:100%;box-sizing:border-box">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+    <div aria-hidden="true" style="display:flex;align-items:baseline;gap:6px;font-family:'Newsreader',Georgia,serif;line-height:1"><span style="font-size:{{ daySize }}">{{ day }}</span><span style="font-size:20px;color:#4B5750">{{ month }}</span></div>
+    <span style="display:inline-flex;padding:4px 12px;border-radius:999px;background:{{ catBg }};color:{{ catFg }};font-size:14px;font-weight:700">{{ cat }}</span>
+  </div>
+  <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ false }}">
+    <div role="img" aria-label="{{ alt }}" style="aspect-ratio:16/9;border-radius:12px;background:repeating-linear-gradient(135deg,#DDE5E0 0 10px,#EAF0EC 10px 20px);display:flex;align-items:center;justify-content:center;font:11px ui-monospace,monospace;color:#4B5750">photo</div>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+    <h3 style="margin:0;font-family:'Newsreader',Georgia,serif;font-size:24px;line-height:1.15;font-weight:400;text-wrap:pretty"><a href="#" style="color:#12211B;text-decoration:none" style-hover="text-decoration:underline">{{ title }}</a></h3>
+    <p style="margin:0;font-size:16px;color:#4B5750"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Date : </span>{{ dateText }}<sc-if value="{{ hasTime }}" hint-placeholder-val="{{ true }}"> · {{ time }}</sc-if><br>{{ place }}</p>
+  </div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:340,&quot;height&quot;:220},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Titre de l'événement&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;day&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;month&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;oct.&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dateText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Samedi 5 octobre 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;time&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;place&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Salle des fêtes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Culture&quot;,&quot;Sport&quot;,&quot;Réunion&quot;,&quot;Fête&quot;,&quot;Atelier&quot;,&quot;Conférence&quot;],&quot;default&quot;:&quot;Culture&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;image&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, day = String(p.day ?? '5'), cat = p.cat ?? 'Culture';
+    const tones = { Culture: ['#EAF0EC', '#12211B'], Sport: ['#E3F0FA', '#0B4F8A'], 'Réunion': ['#12211B', '#fff'], 'Fête': ['#FFF1D6', '#7A4A00'], Atelier: ['#F0E6F5', '#5B2A7A'], 'Conférence': ['#EAF0EC', '#12211B'] };
+    const [catBg, catFg] = tones[cat] ?? tones.Culture;
+    return { day, daySize: day.length > 2 ? '34px' : '48px', month: p.month ?? 'oct.', dateText: p.dateText ?? 'Samedi 5 octobre 2026', hasTime: !!p.time, time: p.time ?? '', title: p.title ?? 'Titre de l\u2019événement', place: p.place ?? 'Salle des fêtes', cat, catBg, catFg, hasImage: !!p.image, alt: p.alt ?? 'illustration' };
+  }
+}
+</script>
+</body>
+</html>

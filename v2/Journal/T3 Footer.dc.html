@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<footer style="font-family:'Public Sans',system-ui,sans-serif;font-size:16px;line-height:1.55;color:#1B2430;background:#E4EBF4;border-top:1px solid #D3DAE3">
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:36px 40px 28px;display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:32px"><div><p style="margin:0;font-family:'Lora',Georgia,serif;font-size:20px;font-weight:600">Mairie de Saint-Aubin-sur-Loire</p><address style="font-style:normal;margin:10px 0 0">1 place de la Mairie · 49000<br><a href="tel:0241000000" style="color:#1B2430;font-weight:600">02 41 00 00 00</a><br><a href="mailto:contact@saint-aubin-sur-loire.fr" style="color:#2B4C7E">contact@saint-aubin-sur-loire.fr</a></address></div><div><p style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#52606D">Horaires</p><p style="margin:8px 0 0">Lun–Ven 9h–12h / 14h–17h30<br>Samedi 9h–12h<br>Fermé le mercredi après-midi</p></div><div><p style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#52606D">Liens utiles</p><ul style="list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px"><li><a href="#" style="color:#2B4C7E">Démarches en ligne</a></li><li><a href="#" style="color:#2B4C7E">Collecte des déchets</a></li><li><a href="#" style="color:#2B4C7E">Cantine scolaire</a></li><li><a href="#" style="color:#2B4C7E">Open data</a></li></ul></div><div><p style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#52606D">Suivre · Partenaires</p><div style="display:flex;gap:8px;margin-top:8px"><a href="#" aria-label="Facebook (nouvelle fenêtre)" style="width:44px;height:44px;border-radius:4px;background:#1B2430;color:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:700">f</a><a href="#" aria-label="Instagram (nouvelle fenêtre)" style="width:44px;height:44px;border-radius:4px;background:#1B2430;color:#fff;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:700;font-size:13px">ig</a></div><div style="display:flex;gap:8px;margin-top:12px"><div style="width:80px;height:40px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font:10px ui-monospace,monospace;color:#52606D">interco</div><div style="width:80px;height:40px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font:10px ui-monospace,monospace;color:#52606D">dépt.</div></div></div></div>
+    <div style="margin:0 40px;padding:14px 0 24px;border-top:1px solid #D3DAE3;display:flex;flex-wrap:wrap;gap:6px 24px;font-size:15px"><a href="#" style="color:#1B2430">Mentions légales</a><a href="#" style="color:#1B2430">Données personnelles</a><a href="#" style="color:#1B2430">Accessibilité : partiellement conforme</a><a href="#" style="color:#1B2430">Gestion des cookies</a><a href="#" style="color:#1B2430">Plan du site</a></div>
+  </sc-if>
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:28px 20px 20px;display:grid;gap:18px"><p style="margin:0;font-family:'Lora',Georgia,serif;font-size:19px;font-weight:600">Mairie de Saint-Aubin-sur-Loire</p><address style="font-style:normal;margin:0">1 place de la Mairie · 49000<br><a href="tel:0241000000" style="color:#1B2430;font-weight:600;display:inline-flex;min-height:44px;align-items:center">02 41 00 00 00</a><br><a href="mailto:contact@saint-aubin-sur-loire.fr" style="color:#2B4C7E;word-break:break-all">contact@saint-aubin-sur-loire.fr</a></address><p style="margin:0;font-size:15px">Lun–Ven 9h–12h / 14h–17h30 · Sam 9h–12h</p><div style="display:flex;flex-wrap:wrap;gap:6px 16px;font-size:15px"><a href="#" style="color:#2B4C7E">Démarches</a><a href="#" style="color:#2B4C7E">Déchets</a><a href="#" style="color:#2B4C7E">Cantine</a><a href="#" style="color:#2B4C7E">Open data</a></div></div>
+    <div style="margin:0 20px;padding:12px 0 20px;border-top:1px solid #D3DAE3;display:flex;flex-wrap:wrap;gap:8px 16px;font-size:14px"><a href="#" style="color:#1B2430">Mentions légales</a><a href="#" style="color:#1B2430">Données personnelles</a><a href="#" style="color:#1B2430">Accessibilité : partiellement conforme</a><a href="#" style="color:#1B2430">Cookies</a><a href="#" style="color:#1B2430">Plan du site</a></div>
+  </sc-if>
+</footer>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1160,&quot;height&quot;:300},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() { const m = !!this.props.mobile; return { isDesktop: !m, isMobile: m }; }
+}
+</script>
+</body>
+</html>

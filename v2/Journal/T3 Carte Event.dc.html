@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article style="font-family:'Public Sans',system-ui,sans-serif;font-size:17px;line-height:1.5;color:#1B2430;display:grid;grid-template-columns:64px 1fr;gap:14px;padding:14px 0;border-top:1px solid #D3DAE3;align-items:start">
+  <div aria-hidden="true" style="text-align:center;border-right:2px solid #2B4C7E;padding-right:12px;line-height:1"><span style="display:block;font-family:'Lora',Georgia,serif;font-size:{{ daySize }};font-weight:600;color:#2B4C7E">{{ day }}</span><span style="display:block;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:#52606D;margin-top:4px">{{ month }}</span></div>
+  <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+    <h3 style="margin:0;font-family:'Lora',Georgia,serif;font-size:19px;line-height:1.25;font-weight:600;text-wrap:pretty"><a href="#" style="color:#1B2430;text-decoration:none" style-hover="color:#2B4C7E;text-decoration:underline">{{ title }}</a></h3>
+    <p style="margin:0;font-size:15px;color:#52606D"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Date : </span>{{ dateText }}<sc-if value="{{ hasTime }}" hint-placeholder-val="{{ true }}"> · {{ time }}</sc-if> · {{ place }}</p>
+    <span style="display:inline-flex;align-self:flex-start;padding:1px 8px;border:1px solid #D3DAE3;border-radius:3px;font-size:13px;font-weight:600;color:#1B2430">{{ cat }}</span>
+  </div>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:120},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Titre de l'événement&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;day&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;month&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;oct.&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dateText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Samedi 5 octobre&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;time&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;place&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Salle des fêtes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Culture&quot;,&quot;Sport&quot;,&quot;Réunion&quot;,&quot;Fête&quot;,&quot;Atelier&quot;,&quot;Conférence&quot;],&quot;default&quot;:&quot;Culture&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, day = String(p.day ?? '5');
+    return { day, daySize: day.length > 2 ? '20px' : '30px', month: p.month ?? 'oct.', dateText: p.dateText ?? 'Samedi 5 octobre', hasTime: !!p.time, time: p.time ?? '', title: p.title ?? 'Titre de l\u2019événement', place: p.place ?? 'Salle des fêtes', cat: p.cat ?? 'Culture' };
+  }
+}
+</script>
+</body>
+</html>

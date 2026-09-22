@@ -3,6 +3,9 @@
 Guide rapide pour déployer des mises à jour de code sur le VPS.
 Pour le setup initial complet, voir [DEPLOYMENT.md](./DEPLOYMENT.md).
 
+> **Refonte V2 en cours** : le workflow GitHub `Deploy` ne part plus automatiquement à chaque push sur `main`.
+> Il se lance à la main (Actions → Deploy → Run workflow). Le déploiement V2 sera redéfini en phase 2 (epic #123).
+
 ---
 
 ## Prérequis

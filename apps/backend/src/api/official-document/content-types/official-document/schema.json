@@ -8,7 +8,7 @@
     "description": "Documents officiels des communes (PV, délibérations, arrêtés, budgets)"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
@@ -52,19 +52,18 @@
     "file": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["files"],
+      "allowedTypes": [
+        "files"
+      ],
       "required": true
     },
     "additional_files": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": ["files", "images"]
-    },
-    "status": {
-      "type": "enumeration",
-      "enum": ["draft", "published", "archived"],
-      "default": "draft",
-      "required": true
+      "allowedTypes": [
+        "files",
+        "images"
+      ]
     },
     "reference_number": {
       "type": "string"
@@ -79,6 +78,9 @@
       "target": "api::site.site",
       "inversedBy": "official_documents",
       "required": true
+    },
+    "scheduled_at": {
+      "type": "datetime"
     }
   }
 }

@@ -8,7 +8,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
@@ -26,12 +26,6 @@
       "type": "richtext",
       "required": true
     },
-    "status": {
-      "type": "enumeration",
-      "enum": ["draft", "published", "archived"],
-      "default": "draft",
-      "required": true
-    },
     "meta_description": {
       "type": "string",
       "maxLength": 160
@@ -39,7 +33,9 @@
     "featured_image": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "menu_order": {
       "type": "integer",
@@ -51,7 +47,11 @@
     },
     "template": {
       "type": "enumeration",
-      "enum": ["default", "about", "services"],
+      "enum": [
+        "default",
+        "about",
+        "services"
+      ],
       "default": "default"
     },
     "scheduled_at": {

@@ -34,6 +34,15 @@ const SITE_SCOPED_CONTENT_TYPES: Record<string, string> = {
   'school-menus': 'api::school-menu.school-menu',
 };
 
+// Content-types avec Draft & Publish : sans `?status=published` explicite, on écrit le brouillon
+// (par défaut l'API REST de Strapi 5 publierait directement).
+const DRAFT_AND_PUBLISH_CONTENT_TYPES = new Set([
+  'api::page.page',
+  'api::article.article',
+  'api::evenement.evenement',
+  'api::official-document.official-document',
+]);
+
 // Routes custom de niveau collection (ne sont pas des documentId) : pluralApiId → segments
 const COLLECTION_ROUTES: Record<string, string[]> = {
   'media-items': ['upload'],
@@ -97,11 +106,11 @@ export default (config: any, { strapi }: { strapi: any }) => {
   };
 
   const verifyOwnership = async (uid: string, documentId: string, siteDocumentId: string) => {
-    const entities = await strapi.entityService.findMany(uid, {
-      filters: { documentId: { $eq: documentId } },
+    // Requête bas niveau : trouve le document qu'il soit brouillon ou publié (Draft & Publish)
+    const entity = await strapi.db.query(uid).findOne({
+      where: { documentId },
       populate: ['site'],
     });
-    const entity = entities?.[0];
     if (!entity) return 'notFound' as const;
     if (!entity.site || entity.site.documentId !== siteDocumentId) return 'forbidden' as const;
     return null;
@@ -201,6 +210,10 @@ export default (config: any, { strapi }: { strapi: any }) => {
           };
         }
         return next();
+      }
+
+      if ((method === 'POST' || method === 'PUT') && DRAFT_AND_PUBLISH_CONTENT_TYPES.has(uid) && !ctx.query?.status) {
+        ctx.query = { ...ctx.query, status: 'draft' };
       }
 
       if (method === 'POST' && !documentId) {

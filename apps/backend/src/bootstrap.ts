@@ -502,17 +502,17 @@ export default async ({ strapi }) => {
       const testSite = testSiteForPages?.[0];
 
       if (testSite) {
-        const existingPages = await strapi.entityService.findMany('api::page.page', {
+        const existingPages = await strapi.documents('api::page.page').findMany({
           filters: { site: { documentId: testSite.documentId } },
         });
 
         if (!existingPages || existingPages.length === 0) {
-          const testPage = await strapi.entityService.create('api::page.page', {
+          const testPage = await strapi.documents('api::page.page').create({
+            status: 'published',
             data: {
               title: 'Page de test',
               slug: 'page-de-test',
               content: 'Contenu de la page de test',
-              status: 'published',
               site: testSite.documentId,
               template: 'default',
               menu_order: 0,

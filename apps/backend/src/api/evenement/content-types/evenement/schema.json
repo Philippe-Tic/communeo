@@ -8,7 +8,7 @@
     "description": "Municipal events and activities"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
@@ -37,7 +37,9 @@
     "image": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "required": false
     },
     "price": {
@@ -58,7 +60,14 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["cultural", "sport", "meeting", "celebration", "workshop", "conference"],
+      "enum": [
+        "cultural",
+        "sport",
+        "meeting",
+        "celebration",
+        "workshop",
+        "conference"
+      ],
       "default": "cultural",
       "required": true
     },
@@ -101,6 +110,9 @@
       "target": "api::site.site",
       "inversedBy": "evenements",
       "required": true
+    },
+    "scheduled_at": {
+      "type": "datetime"
     }
   }
 }

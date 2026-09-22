@@ -66,11 +66,13 @@ export default {
     const enriched = await Promise.all(
       sites.map(async (site) => {
         const [pagesCount, articlesCount, usersCount] = await Promise.all([
+          // Draft & Publish : une ligne brouillon par document (la version publiée est une ligne de plus)
           strapi.query('api::page.page').count({
-            where: { site: { documentId: site.documentId } },
+            where: { site: { documentId: site.documentId }, publishedAt: null },
           }),
+          // Draft & Publish : une ligne brouillon par document (la version publiée est une ligne de plus)
           strapi.query('api::article.article').count({
-            where: { site: { documentId: site.documentId } },
+            where: { site: { documentId: site.documentId }, publishedAt: null },
           }),
           strapi.query('plugin::users-permissions.user').count({
             where: { site: { documentId: site.documentId } },
@@ -125,16 +127,16 @@ export default {
 
     const sanitizedUsers = users.map(({ password, resetPasswordToken, confirmationToken, ...rest }) => rest);
 
-    // Get stats
+    // Get stats (Draft & Publish : on compte les lignes brouillon, une par document)
     const [pagesCount, articlesCount, eventsCount] = await Promise.all([
       strapi.query('api::page.page').count({
-        where: { site: { documentId } },
+        where: { site: { documentId }, publishedAt: null },
       }),
       strapi.query('api::article.article').count({
-        where: { site: { documentId } },
+        where: { site: { documentId }, publishedAt: null },
       }),
       strapi.query('api::evenement.evenement').count({
-        where: { site: { documentId } },
+        where: { site: { documentId }, publishedAt: null },
       }),
     ]);
 

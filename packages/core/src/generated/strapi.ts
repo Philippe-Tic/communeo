@@ -76,9 +76,6 @@ export type AlerteSeverity = (typeof alerteSeverityValues)[number];
 export const alerteAlertTypeValues = ['travaux', 'coupure-eau', 'coupure-electricite', 'deviation', 'intemperie', 'autre'] as const;
 export type AlerteAlertType = (typeof alerteAlertTypeValues)[number];
 
-export const articleStatusValues = ['draft', 'published', 'archived'] as const;
-export type ArticleStatus = (typeof articleStatusValues)[number];
-
 export const articleCategoryValues = ['news', 'event', 'information', 'emergency'] as const;
 export type ArticleCategory = (typeof articleCategoryValues)[number];
 
@@ -108,12 +105,6 @@ export type EvenementCategory = (typeof evenementCategoryValues)[number];
 
 export const officialDocumentDocumentTypeValues = ['pv-conseil-municipal', 'deliberation', 'arrete', 'plu', 'scot', 'carte-communale', 'budget-primitif', 'compte-administratif', 'rapport-orientations-budgetaires', 'autre'] as const;
 export type OfficialDocumentDocumentType = (typeof officialDocumentDocumentTypeValues)[number];
-
-export const officialDocumentStatusValues = ['draft', 'published', 'archived'] as const;
-export type OfficialDocumentStatus = (typeof officialDocumentStatusValues)[number];
-
-export const pageStatusValues = ['draft', 'published', 'archived'] as const;
-export type PageStatus = (typeof pageStatusValues)[number];
 
 export const pageTemplateValues = ['default', 'about', 'services'] as const;
 export type PageTemplate = (typeof pageTemplateValues)[number];
@@ -280,11 +271,10 @@ export interface Alerte extends StrapiDocument {
 }
 
 /** Content-type `api::article.article` — News articles and posts */
-export interface Article extends StrapiDocument {
+export interface Article extends StrapiPublishableDocument {
   title: string;
   slug: string;
   content: string;
-  status: ArticleStatus;
   image?: Media | null;
   publication_date: string | null;
   summary: string | null;
@@ -357,7 +347,7 @@ export interface Deployment extends StrapiDocument {
 }
 
 /** Content-type `api::evenement.evenement` — Municipal events and activities */
-export interface Evenement extends StrapiDocument {
+export interface Evenement extends StrapiPublishableDocument {
   title: string;
   description: string;
   start_date: string;
@@ -377,6 +367,7 @@ export interface Evenement extends StrapiDocument {
   address: string | null;
   featured: boolean | null;
   site?: Site | null;
+  scheduled_at: string | null;
 }
 
 /** Content-type `api::media-item.media-item` — Bibliothèque de médias avec isolation par site */
@@ -400,7 +391,7 @@ export interface NewsletterSubscriber extends StrapiDocument {
 }
 
 /** Content-type `api::official-document.official-document` — Documents officiels des communes (PV, délibérations, arrêtés, budgets) */
-export interface OfficialDocument extends StrapiDocument {
+export interface OfficialDocument extends StrapiPublishableDocument {
   title: string;
   slug: string;
   description: string | null;
@@ -409,18 +400,17 @@ export interface OfficialDocument extends StrapiDocument {
   session_date: string | null;
   file?: Media | null;
   additional_files?: Media[];
-  status: OfficialDocumentStatus;
   reference_number: string | null;
   year: number;
   site?: Site | null;
+  scheduled_at: string | null;
 }
 
 /** Content-type `api::page.page` */
-export interface Page extends StrapiDocument {
+export interface Page extends StrapiPublishableDocument {
   title: string;
   slug: string;
   content: string;
-  status: PageStatus;
   meta_description: string | null;
   featured_image?: Media | null;
   menu_order: number | null;

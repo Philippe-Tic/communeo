@@ -1,8 +1,8 @@
 name: Deploy
 
+# Déploiement V1 : manuel uniquement pendant la refonte V2 (le VPS V1 est arrêté).
+# Le déploiement V2 sera redéfini en phase 2 (voir epic #123).
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:

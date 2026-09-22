@@ -1,0 +1,301 @@
+/* Jetons et styles de base. Contrastes vérifiés sur fond blanc et sur le fond de page. */
+:root {
+  color-scheme: light;
+
+  /* Couleurs */
+  --in-primary: #1f5a3c; /* blanc dessus : 7,9:1 */
+  --in-primary-dark: #143d29;
+  --in-primary-hover: #174a31;
+  --in-primary-light: #e3efe7;
+  --in-primary-line: #3c7a5a; /* séparateurs sur fond vert */
+  --in-ink: #1c2321;
+  --in-muted: #4a5350;
+  --in-page: #f7f6f1;
+  --in-surface: #fff;
+  --in-surface-alt: #eceae3;
+  --in-border: #cfd4cf;
+  --in-field: #6b756f;
+  --in-info: #0b4f8a;
+  --in-info-bg: #e2eef8;
+  --in-info-line: #b9d1ea;
+  --in-warning: #7a4a00;
+  --in-warning-bg: #fff1d6;
+  --in-warning-line: #ead3a0;
+  --in-danger: #8b1a1a;
+  --in-danger-bg: #fbe3e3;
+
+  /* Typographie */
+  --in-font: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+  --in-font-title: 'Source Serif 4 Variable', 'Source Serif 4', Georgia, serif;
+  --in-h1: 1.875rem;
+  --in-h2: 1.5625rem;
+  --in-h3: 1.3125rem;
+  --in-h4: 1.1875rem;
+  --in-small: 1rem;
+
+  /* Espacements, formes */
+  --in-space-1: 0.5rem;
+  --in-space-2: 1rem;
+  --in-space-3: 1.5rem;
+  --in-space-4: 2rem;
+  --in-space-5: 3rem;
+  --in-space-6: 4rem;
+  --in-radius: 4px;
+  --in-shadow: 0 8px 20px rgb(28 35 33 / 12%);
+  --in-max: 84rem;
+  --in-gutter: 1rem;
+  --in-target: 2.75rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --in-gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --in-h1: 2.75rem;
+    --in-h2: 2rem;
+    --in-h3: 1.5rem;
+    --in-h4: 1.25rem;
+    --in-gutter: 3rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Le bandeau cookies, fixé en bas, ne doit pas masquer l'élément qui reçoit le focus */
+html:has([data-cn-cookie-banner]:not([hidden])) {
+  scroll-padding-bottom: 18rem;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--in-font);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--in-ink);
+  background: var(--in-page);
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--in-font-title);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--in-h1);
+}
+
+h2 {
+  font-size: var(--in-h2);
+}
+
+h3 {
+  font-size: var(--in-h3);
+}
+
+h4 {
+  font-size: var(--in-h4);
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+
+a {
+  color: var(--in-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--in-primary-dark);
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--in-ink);
+  outline-offset: 3px;
+}
+
+/* Sur fond vert, le focus passe en blanc pour rester visible */
+.in-on-dark :focus-visible {
+  outline-color: #fff;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+address {
+  font-style: normal;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+small {
+  font-size: var(--in-small);
+}
+
+[id] {
+  scroll-margin-top: var(--in-space-3);
+}
+
+/* Formulaires */
+label {
+  font-weight: 600;
+}
+
+input:not([type='checkbox'], [type='radio']),
+select,
+textarea {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.625rem 0.875rem;
+  font: inherit;
+  color: var(--in-ink);
+  background: var(--in-surface);
+  border: 2px solid var(--in-field);
+  border-radius: var(--in-radius);
+}
+
+textarea {
+  min-height: 9rem;
+  resize: vertical;
+}
+
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border: 3px solid var(--in-danger);
+}
+
+input:not([type='checkbox'], [type='radio']):disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--in-muted);
+  background: var(--in-surface-alt);
+  border-style: dashed;
+  border-color: var(--in-border);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0.25rem 0 0;
+  accent-color: var(--in-primary);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  padding: 0;
+  font-weight: 700;
+}
+
+/* Boutons : plein (principal) et contour (secondaire) */
+.in-button,
+.in-form button[type='submit'],
+.cn-cookie-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background: var(--in-primary);
+  border: 2px solid var(--in-primary);
+  border-radius: var(--in-radius);
+}
+
+.in-button:hover,
+.in-form button[type='submit']:hover,
+.cn-cookie-actions button:hover {
+  color: #fff;
+  background: var(--in-primary-dark);
+  border-color: var(--in-primary-dark);
+}
+
+.in-button-secondary,
+.cn-cookie-actions button[data-cn-consent='customize'],
+.cn-cookie-actions button[value='cancel'] {
+  color: var(--in-primary);
+  background: var(--in-surface);
+}
+
+.in-button-secondary:hover,
+.cn-cookie-actions button[data-cn-consent='customize']:hover,
+.cn-cookie-actions button[value='cancel']:hover {
+  color: var(--in-primary-dark);
+  background: var(--in-primary-light);
+}
+
+.in-button:disabled,
+.in-form button[type='submit']:disabled {
+  color: var(--in-muted);
+  background: var(--in-surface-alt);
+  border-color: var(--in-border);
+  cursor: not-allowed;
+}
+
+.in-button svg {
+  flex: none;
+}
+
+.in-meta {
+  color: var(--in-muted);
+}

@@ -1,0 +1,13 @@
+---
+import type { BlockOf } from '@communeo/core';
+
+interface Props { block: BlockOf<'buttons'> }
+const { block } = Astro.props;
+---
+<p class="in-buttons">
+  {block.buttons.map((button) => (
+    <a href={button.href} class={`in-button in-button-${button.style}`} target={button.external ? '_blank' : undefined} rel={button.external ? 'noopener noreferrer' : undefined}>
+      {button.label}{button.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+    </a>
+  ))}
+</p>

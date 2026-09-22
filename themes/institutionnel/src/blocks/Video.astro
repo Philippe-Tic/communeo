@@ -1,0 +1,16 @@
+---
+import type { BlockOf } from '@communeo/core';
+import ConsentEmbed from '@communeo/ui-a11y/ConsentEmbed.astro';
+
+interface Props { block: BlockOf<'video'> }
+const { block } = Astro.props;
+---
+<section class="in-video" aria-label={block.title}>
+  <ConsentEmbed title={block.title} src={block.embedUrl} provider={block.providerLabel} href={block.watchUrl} />
+  {block.transcript && (
+    <details>
+      <summary>Transcription</summary>
+      <p>{block.transcript}</p>
+    </details>
+  )}
+</section>

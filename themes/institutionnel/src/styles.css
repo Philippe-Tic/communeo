@@ -1,0 +1,11 @@
+/*
+ * Thème Institutionnel : un site « guichet », sobre et très lisible.
+ * Vert forêt, titres en Source Serif, texte en Source Sans à 18 px, cibles d'au moins 44 px.
+ */
+@import '@communeo/ui-a11y/styles.css';
+@import '@fontsource-variable/source-sans-3/wght.css';
+@import '@fontsource-variable/source-sans-3/wght-italic.css';
+@import '@fontsource-variable/source-serif-4/wght.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';

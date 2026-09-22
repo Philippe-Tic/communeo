@@ -1,0 +1,13 @@
+---
+import type { ArticleCardVM } from '@communeo/core';
+
+interface Props { article: ArticleCardVM; level?: 2 | 3 }
+const { article, level = 3 } = Astro.props;
+const Heading = level === 2 ? 'h2' : 'h3';
+---
+<article class="in-card">
+  <Heading><a href={article.href}>{article.title}</a></Heading>
+  <p class="in-meta"><span>{article.category.label}</span> · <time datetime={article.date.iso}>{article.date.label}</time></p>
+  {article.summary && <p>{article.summary}</p>}
+  {article.image && <img src={article.image.src} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} loading="lazy" />}
+</article>

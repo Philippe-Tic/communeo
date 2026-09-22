@@ -1,0 +1,41 @@
+---
+/**
+ * Formulaire envoyé en JSON à l'API. Les erreurs sont annoncées dans une zone live et
+ * récapitulées en haut du formulaire ; le focus y est placé.
+ */
+import type { FormConfig } from '@communeo/theme-contract';
+
+interface Props { form: FormConfig; submitLabel: string; success: string }
+const { form, submitLabel, success } = Astro.props;
+---
+<form class="in-form" action={form.action} method="post" data-in-api-form data-site={form.siteId} data-success={success} novalidate>
+  <div class="in-form-status" role="status" aria-live="polite" tabindex="-1" data-in-form-status></div>
+  <slot />
+  <p><button type="submit">{submitLabel}</button></p>
+</form>
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-in-api-form]')) {
+    const status = form.querySelector<HTMLElement>('[data-in-form-status]')!;
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        const invalid = [...form.elements].filter((el): el is HTMLInputElement => 'validity' in el && !(el as HTMLInputElement).validity.valid);
+        status.innerHTML = `<p><strong>${invalid.length} champ(s) à corriger :</strong></p><ul>${invalid
+          .map((el) => `<li><a href="#${el.id}">${form.querySelector(`label[for="${el.id}"]`)?.textContent ?? el.name}</a></li>`)
+          .join('')}</ul>`;
+        status.focus();
+        return;
+      }
+      const data = Object.fromEntries(new FormData(form).entries());
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { ...data, site: form.dataset.site } }),
+      }).catch(() => null);
+      status.textContent = response?.ok ? form.dataset.success! : "L'envoi a échoué. Réessayez dans quelques minutes.";
+      if (response?.ok) form.reset();
+      status.focus();
+    });
+  }
+</script>

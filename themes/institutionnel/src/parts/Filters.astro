@@ -1,0 +1,22 @@
+---
+import type { FilterOption } from '@communeo/theme-contract';
+import Check from '@lucide/astro/icons/check';
+
+interface Props { label: string; options: FilterOption[]; allHref: string }
+const { label, options, allHref } = Astro.props;
+const anyCurrent = options.some((option) => option.current);
+---
+{options.length > 1 && (
+  <nav class="in-filters" aria-label={label}>
+    <ul>
+      <li><a href={allHref} aria-current={anyCurrent ? undefined : 'page'}>{!anyCurrent && <Check size={18} aria-hidden="true" />}Tout</a></li>
+      {options.map((option) => (
+        <li>
+          <a href={option.href} aria-current={option.current ? 'page' : undefined}>
+            {option.current && <Check size={18} aria-hidden="true" />}{option.label} <span class="in-filters-count">({option.count})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

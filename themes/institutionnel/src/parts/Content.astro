@@ -1,0 +1,20 @@
+---
+/** Blocs d'un contenu, avec le sommaire quand la page est longue. */
+import type { BlockVM, TocEntryVM } from '@communeo/core';
+import Blocks from '@communeo/ui-a11y/Blocks.astro';
+import { blocks as components } from '../blocks/index';
+
+interface Props {
+  blocks: BlockVM[];
+  toc?: TocEntryVM[];
+}
+
+const { blocks, toc = [] } = Astro.props;
+---
+{toc.length >= 3 && (
+  <nav class="in-toc" aria-labelledby="in-toc-title">
+    <h2 id="in-toc-title">Sommaire</h2>
+    <ol>{toc.map((entry) => <li class={`in-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}</ol>
+  </nav>
+)}
+<Blocks blocks={blocks} components={components} />

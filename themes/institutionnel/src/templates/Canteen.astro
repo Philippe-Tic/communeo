@@ -1,0 +1,30 @@
+---
+import type { CanteenWeekVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; weeks: CanteenWeekVM[] }
+const { ctx, weeks } = Astro.props;
+---
+<Layout ctx={ctx}>
+  {weeks.length ? weeks.map((week) => (
+    <section aria-labelledby={`in-week-${week.id}`}>
+      <h2 id={`in-week-${week.id}`}>{week.label}{week.school && <> – {week.school}</>}</h2>
+      {week.mode === 'detailed' ? (
+        week.days.map((day) => (
+          <div>
+            <h3>{day.day.label} <time datetime={day.date.iso}>{day.date.label}</time></h3>
+            {day.closed ? <p>Pas de cantine</p> : (
+              <dl>{day.courses.map((course) => <><dt>{course.label}</dt><dd>{course.dish}{course.badges.length > 0 && <> ({course.badges.join(', ')})</>}</dd></>)}</dl>
+            )}
+          </div>
+        ))
+      ) : (
+        <>
+          {week.image && <img src={week.image.src} alt={week.image.alt} width={week.image.width ?? undefined} height={week.image.height ?? undefined} />}
+          {week.file && <p><a href={week.file.href} download>Télécharger le menu ({week.file.label})</a></p>}
+        </>
+      )}
+    </section>
+  )) : <p>Le menu de la cantine sera bientôt publié.</p>}
+</Layout>

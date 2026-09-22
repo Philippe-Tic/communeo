@@ -1,0 +1,21 @@
+---
+import type { DocumentVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; document: DocumentVM }
+const { ctx, document: doc } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <dl class="in-facts">
+    <dt>Type</dt><dd>{doc.type.label}</dd>
+    <dt>Date</dt><dd><time datetime={doc.date.iso}>{doc.date.label}</time></dd>
+    {doc.sessionDate && <><dt>Séance du conseil</dt><dd>{doc.sessionDate.label}</dd></>}
+    {doc.reference && <><dt>Référence</dt><dd>{doc.reference}</dd></>}
+  </dl>
+  {doc.description && <p>{doc.description}</p>}
+  {doc.file && <p><a href={doc.file.href} download>Télécharger le document ({doc.file.label})</a></p>}
+  {doc.attachments.length > 0 && (
+    <section aria-labelledby="in-annexes"><h2 id="in-annexes">Annexes</h2><ul>{doc.attachments.map((file) => <li><a href={file.href} download>{file.name} ({file.label})</a></li>)}</ul></section>
+  )}
+</Layout>

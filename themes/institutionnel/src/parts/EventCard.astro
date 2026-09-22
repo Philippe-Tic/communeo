@@ -1,0 +1,12 @@
+---
+import type { EventCardVM } from '@communeo/core';
+
+interface Props { event: EventCardVM; level?: 2 | 3 }
+const { event, level = 3 } = Astro.props;
+const Heading = level === 2 ? 'h2' : 'h3';
+---
+<article class="in-card">
+  <Heading><a href={event.href}>{event.title}</a></Heading>
+  <p class="in-meta"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
+  <p class="in-meta">{event.category.label}</p>
+</article>

@@ -17,6 +17,7 @@
     "@communeo/core": "workspace:*",
     "@communeo/fixtures": "workspace:*",
     "@communeo/theme-contract": "workspace:*",
+    "@communeo/theme-institutionnel": "workspace:*",
     "@communeo/theme-starter": "workspace:*",
     "@communeo/ui-a11y": "workspace:*",
     "astro": "^7.3.3"

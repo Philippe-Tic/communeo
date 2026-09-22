@@ -1,9 +1,10 @@
 ---
 /**
  * Galerie : grille de vignettes. Sans JavaScript, chaque vignette ouvre l'image dans l'onglet ;
- * avec JavaScript, elle s'agrandit dans une fenêtre modale (Échap ferme, flèches pour naviguer).
+ * avec JavaScript, elle s'agrandit dans la fenêtre modale partagée (Échap, flèches, focus rendu).
  */
 import type { BlockOf } from '@communeo/core';
+import Lightbox from '@communeo/ui-a11y/Lightbox.astro';
 import ChevronLeft from '@lucide/astro/icons/chevron-left';
 import ChevronRight from '@lucide/astro/icons/chevron-right';
 import X from '@lucide/astro/icons/x';
@@ -11,12 +12,12 @@ import X from '@lucide/astro/icons/x';
 interface Props { block: BlockOf<'gallery'> }
 const { block } = Astro.props;
 ---
-<section class="in-gallery" aria-label={block.title ?? 'Galerie'} data-in-gallery>
+<section class="in-gallery" aria-label={block.title ?? 'Galerie'} data-cn-gallery>
   {block.title && <h2>{block.title}</h2>}
   <ul>
-    {block.images.map((image, index) => (
+    {block.images.map((image) => (
       <li>
-        <a href={image.src} data-in-gallery-item={index} data-caption={image.caption ?? ''}>
+        <a href={image.src} data-cn-lightbox-item data-cn-lightbox-caption={image.caption ?? undefined}>
           <img
             src={image.src}
             alt={image.alt}
@@ -32,57 +33,8 @@ const { block } = Astro.props;
   </ul>
 </section>
 
-<dialog class="in-lightbox" aria-label="Image agrandie" data-in-lightbox>
-  <figure>
-    <img alt="" data-in-lightbox-image />
-    <figcaption data-in-lightbox-caption></figcaption>
-  </figure>
-  <p class="in-lightbox-actions">
-    <button type="button" data-in-lightbox-previous><ChevronLeft size={24} aria-hidden="true" />Précédente</button>
-    <span data-in-lightbox-counter aria-live="polite"></span>
-    <button type="button" data-in-lightbox-next>Suivante<ChevronRight size={24} aria-hidden="true" /></button>
-  </p>
-  <button type="button" class="in-lightbox-close" data-in-lightbox-close>
-    <X size={24} aria-hidden="true" /><span class="cn-sr-only">Fermer l'image agrandie</span>
-  </button>
-</dialog>
-
-<script>
-  const dialog = document.querySelector<HTMLDialogElement>('[data-in-lightbox]');
-
-  for (const gallery of document.querySelectorAll<HTMLElement>('[data-in-gallery]')) {
-    if (!dialog) break;
-    const links = [...gallery.querySelectorAll<HTMLAnchorElement>('[data-in-gallery-item]')];
-    const image = dialog.querySelector<HTMLImageElement>('[data-in-lightbox-image]')!;
-    const caption = dialog.querySelector<HTMLElement>('[data-in-lightbox-caption]')!;
-    const counter = dialog.querySelector<HTMLElement>('[data-in-lightbox-counter]')!;
-    let current = 0;
-
-    const show = (index: number) => {
-      current = (index + links.length) % links.length;
-      const link = links[current];
-      image.src = link.href;
-      image.alt = link.querySelector('img')?.alt ?? '';
-      caption.textContent = link.dataset.caption ?? '';
-      counter.textContent = `Image ${current + 1} sur ${links.length}`;
-    };
-
-    links.forEach((link, index) =>
-      link.addEventListener('click', (event) => {
-        event.preventDefault();
-        show(index);
-        dialog.showModal();
-      }),
-    );
-
-    dialog.querySelector('[data-in-lightbox-previous]')?.addEventListener('click', () => show(current - 1));
-    dialog.querySelector('[data-in-lightbox-next]')?.addEventListener('click', () => show(current + 1));
-    dialog.querySelector('[data-in-lightbox-close]')?.addEventListener('click', () => dialog.close());
-    // Le focus revient sur la vignette d'où l'on vient, une fois la fenêtre refermée
-    dialog.addEventListener('close', () => requestAnimationFrame(() => links[current]?.focus()));
-    dialog.addEventListener('keydown', (event) => {
-      if (event.key === 'ArrowLeft') show(current - 1);
-      if (event.key === 'ArrowRight') show(current + 1);
-    });
-  }
-</script>
+<Lightbox class="in-lightbox">
+  <Fragment slot="precedente"><ChevronLeft size={24} aria-hidden="true" />Précédente</Fragment>
+  <Fragment slot="suivante">Suivante<ChevronRight size={24} aria-hidden="true" /></Fragment>
+  <Fragment slot="fermer"><X size={24} aria-hidden="true" /><span class="cn-sr-only">Fermer l'image agrandie</span></Fragment>
+</Lightbox>

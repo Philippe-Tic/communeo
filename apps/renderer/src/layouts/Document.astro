@@ -52,6 +52,7 @@ const jsonLd = [organization, ...seo.jsonLd];
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
   </head>
   <body>
+    <script is:inline>document.documentElement.classList.add('cn-js');</script>
     <SkipLinks />
     <slot />
     <CookieBanner />

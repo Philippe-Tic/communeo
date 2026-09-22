@@ -18,7 +18,7 @@ const { ctx, documents, types, years } = Astro.props;
   </p>
 
   {documents.length > 0 && (
-    <form class="in-filter-form" hidden data-in-doc-filters>
+    <form class="in-filter-form cn-js-only" data-in-doc-filters>
       <p>
         <label for="in-doc-q">Rechercher un document</label>
         <input id="in-doc-q" type="search" name="q" placeholder="Mot-clé, référence…" data-in-doc-search />
@@ -93,7 +93,6 @@ const { ctx, documents, types, years } = Astro.props;
   const count = document.querySelector<HTMLElement>('[data-in-doc-count]');
   const empty = document.querySelector<HTMLElement>('[data-in-doc-empty]');
   if (form && rows.length) {
-    form.hidden = false;
     const search = form.querySelector<HTMLInputElement>('[data-in-doc-search]')!;
     const type = form.querySelector<HTMLSelectElement>('[data-in-doc-type]')!;
     const year = form.querySelector<HTMLSelectElement>('[data-in-doc-year]')!;

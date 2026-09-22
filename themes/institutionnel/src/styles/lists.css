@@ -83,14 +83,6 @@
   text-underline-offset: 3px;
 }
 
-.in-share-copy {
-  display: none !important;
-}
-
-.in-js .in-share-copy {
-  display: inline-flex !important;
-}
-
 .in-related {
   margin-top: var(--in-space-5);
   padding-top: var(--in-space-3);

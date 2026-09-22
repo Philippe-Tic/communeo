@@ -102,12 +102,8 @@
   background: var(--in-primary-light);
 }
 
-/* Le bouton Menu n'existe qu'avec JavaScript : sans lui, le menu reste déplié */
+/* Le bouton Menu n'existe qu'avec JavaScript (classe cn-js-only) : sans lui, le menu reste déplié */
 .in-menu-toggle {
-  display: none;
-}
-
-.in-js .in-menu-toggle {
   display: inline-flex;
 }
 
@@ -130,7 +126,7 @@
   outline: none;
 }
 
-.in-js .in-nav:not([data-open]) {
+.cn-js .in-nav:not([data-open]) {
   display: none;
 }
 
@@ -228,12 +224,7 @@ summary.in-nav-link::-webkit-details-marker {
 }
 
 .in-nav-hint {
-  display: none;
   font-size: 0.875rem;
-}
-
-.in-js .in-nav-hint {
-  display: block;
 }
 
 @media (min-width: 64rem) {
@@ -257,7 +248,7 @@ summary.in-nav-link::-webkit-details-marker {
   }
 
   .in-header-actions,
-  .in-js .in-menu-toggle,
+  .in-menu-toggle,
   .in-nav-footer {
     display: none;
   }
@@ -323,7 +314,7 @@ summary.in-nav-link::-webkit-details-marker {
     background: var(--in-primary-dark);
   }
 
-  .in-js .in-nav:not([data-open]),
+  .cn-js .in-nav:not([data-open]),
   .in-nav {
     display: block;
   }
@@ -457,7 +448,7 @@ summary.in-nav-link::-webkit-details-marker {
 }
 
 .in-alert-close {
-  display: none;
+  display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
@@ -468,10 +459,6 @@ summary.in-nav-link::-webkit-details-marker {
   background: transparent;
   border: 0;
   border-radius: var(--in-radius);
-}
-
-.in-js .in-alert-close {
-  display: inline-flex;
 }
 
 .in-alert-close:hover {

@@ -37,7 +37,7 @@ const icons = { info: Info, warning: TriangleAlert, critical: OctagonAlert };
               </span>
             </p>
             {alert.severity.key !== 'critical' && (
-              <button type="button" class="in-alert-close" data-in-alert-close>
+              <button type="button" class="in-alert-close cn-js-only" data-in-alert-close>
                 <X size={24} aria-hidden="true" /><span class="cn-sr-only">Masquer l'alerte « {alert.title} »</span>
               </button>
             )}

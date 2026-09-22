@@ -14,21 +14,30 @@ interface Props {
   ctx: PageContext;
   /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
   heading?: string | false;
+  /** Pleine largeur : le template gère lui-même ses conteneurs (accueil) */
+  full?: boolean;
 }
 
-const { ctx, heading = ctx.title } = Astro.props;
+const { ctx, heading = ctx.title, full = false } = Astro.props;
 ---
 <Header ctx={ctx} />
 <Alerts alerts={ctx.alerts} />
 
 <div class="in-page">
-  <div class="in-container">
-    <Breadcrumb items={ctx.breadcrumb} class="in-breadcrumb" />
-    <main id="contenu" tabindex="-1" class="in-main">
-      {heading && <h1 class="in-title">{heading}</h1>}
+  {full ? (
+    <main id="contenu" tabindex="-1" class="in-main in-main-full">
+      {heading && <h1 class="in-title in-container">{heading}</h1>}
       <slot />
     </main>
-  </div>
+  ) : (
+    <div class="in-container">
+      <Breadcrumb items={ctx.breadcrumb} class="in-breadcrumb" />
+      <main id="contenu" tabindex="-1" class="in-main">
+        {heading && <h1 class="in-title">{heading}</h1>}
+        <slot />
+      </main>
+    </div>
+  )}
 </div>
 
 <Footer ctx={ctx} />

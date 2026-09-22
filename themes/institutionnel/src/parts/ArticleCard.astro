@@ -1,13 +1,40 @@
 ---
+/** Carte d'actualité : image, catégorie (jamais la couleur seule), date, titre, résumé. */
 import type { ArticleCardVM } from '@communeo/core';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
 
-interface Props { article: ArticleCardVM; level?: 2 | 3 }
-const { article, level = 3 } = Astro.props;
+interface Props {
+  article: ArticleCardVM;
+  level?: 2 | 3;
+  /** Carte mise en avant : titre plus grand */
+  featured?: boolean;
+}
+
+const { article, level = 3, featured = false } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
+const urgent = article.category.key === 'emergency';
 ---
-<article class="in-card">
-  <Heading><a href={article.href}>{article.title}</a></Heading>
-  <p class="in-meta"><span>{article.category.label}</span> · <time datetime={article.date.iso}>{article.date.label}</time></p>
-  {article.summary && <p>{article.summary}</p>}
-  {article.image && <img src={article.image.src} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} loading="lazy" />}
+<article class:list={['in-card', 'in-card-article', { 'in-card-featured': featured }]}>
+  {article.image && (
+    <img
+      class="in-card-image"
+      src={article.image.src}
+      alt={article.image.alt}
+      srcset={article.image.srcset ?? undefined}
+      width={article.image.width ?? undefined}
+      height={article.image.height ?? undefined}
+      loading="lazy"
+    />
+  )}
+  <div class="in-card-body">
+    <p class="in-card-meta">
+      <span class:list={['in-tag', { 'in-tag-urgent': urgent }]}>
+        {urgent && <TriangleAlert size={16} aria-hidden="true" />}{article.category.label}
+      </span>
+      <time datetime={article.date.iso}>{article.date.label}</time>
+    </p>
+    <Heading class="in-card-title"><a href={article.href}>{article.title}</a></Heading>
+    {article.summary && <p class="in-card-summary">{article.summary}</p>}
+    <span class="in-card-more" aria-hidden="true">Lire la suite</span>
+  </div>
 </article>

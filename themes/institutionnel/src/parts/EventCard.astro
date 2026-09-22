@@ -1,12 +1,29 @@
 ---
+/** Carte d'événement : pastille de date, période, titre, lieu et catégorie. */
 import type { EventCardVM } from '@communeo/core';
+import MapPin from '@lucide/astro/icons/map-pin';
+import { dateBadge } from '../lib/date';
 
-interface Props { event: EventCardVM; level?: 2 | 3 }
+interface Props {
+  event: EventCardVM;
+  level?: 2 | 3;
+}
+
 const { event, level = 3 } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<article class="in-card">
-  <Heading><a href={event.href}>{event.title}</a></Heading>
-  <p class="in-meta"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
-  <p class="in-meta">{event.category.label}</p>
+<article class="in-card in-card-event">
+  <p class="in-card-date" aria-hidden="true">
+    <span class="in-card-day">{badge.day}</span>
+    <span class="in-card-month">{badge.month}</span>
+  </p>
+  <div class="in-card-body">
+    <p class="in-card-meta"><span class="cn-sr-only">Date : </span><time datetime={event.start.iso}>{event.period}</time></p>
+    <Heading class="in-card-title"><a href={event.href}>{event.title}</a></Heading>
+    <p class="in-card-place">
+      {event.location && <span><MapPin size={16} aria-hidden="true" />{event.location}</span>}
+      <span class="in-tag in-tag-outline">{event.category.label}</span>
+    </p>
+  </div>
 </article>

@@ -14,7 +14,9 @@
     "test": "turbo run test",
     "check": "turbo run lint typecheck test",
     "format": "prettier --write \"packages/**/*.{ts,tsx,json,md}\" \"themes/**/*.{ts,tsx,astro,json,md}\" \"*.{json,md,yaml}\"",
-    "gen:types": "pnpm --filter @communeo/core gen:types"
+    "gen:types": "pnpm --filter @communeo/core gen:types",
+    "create-theme": "node scripts/create-theme.mjs",
+    "theme:dev": "node scripts/theme-dev.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

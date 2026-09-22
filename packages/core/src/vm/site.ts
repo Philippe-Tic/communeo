@@ -148,6 +148,7 @@ export function mapNavigation(ctx: MapContext, site: Site, pages: Pick<Page, 'do
       href: LEGAL_PAGES.accessibility.path,
       external: false,
     },
+    { label: LEGAL_PAGES.rights.label, href: LEGAL_PAGES.rights.path, external: false },
     { label: LEGAL_PAGES.cookies.label, href: LEGAL_PAGES.cookies.path, external: false },
     { label: LEGAL_PAGES.sitemap.label, href: LEGAL_PAGES.sitemap.path, external: false },
   ];

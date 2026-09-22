@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/pagefind.mjs",
     "preview": "astro preview",
     "lint": "eslint src e2e playwright.config.ts",
     "typecheck": "astro check",
@@ -26,6 +26,7 @@
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
+    "pagefind": "^1.5.2",
     "typescript": "^5.9.2"
   }
 }

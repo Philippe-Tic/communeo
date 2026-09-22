@@ -5,6 +5,7 @@
   "description": "Composants Astro accessibles partagés par les thèmes : texte riche, blocs, liens d'évitement, fil d'Ariane, consentement, statut d'ouverture, scripts de comportement.",
   "type": "module",
   "exports": {
+    "./search": "./src/search.ts",
     "./*": "./src/*"
   },
   "scripts": {

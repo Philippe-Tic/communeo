@@ -21,6 +21,22 @@ export const contactForm = (siteId: string): FormConfig => ({
   options: options(CONTACT_CATEGORIES),
 });
 
+/** Demandes RGPD : le type de demande devient l'objet du message envoyé à la mairie. */
+export const RIGHTS_REQUESTS: Record<string, string> = {
+  acces: 'Accès à mes données',
+  rectification: 'Rectification de mes données',
+  effacement: 'Effacement de mes données',
+  limitation: 'Limitation du traitement',
+  opposition: "Opposition au traitement",
+  portabilite: 'Portabilité de mes données',
+};
+
+export const rightsForm = (siteId: string): FormConfig => ({
+  action: `${apiUrl()}/api/contact-submissions/public`,
+  siteId,
+  options: options(RIGHTS_REQUESTS),
+});
+
 export const associationForm = (siteId: string): FormConfig => ({
   action: `${apiUrl()}/api/associations/public`,
   siteId,

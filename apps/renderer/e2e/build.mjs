@@ -24,6 +24,8 @@ for (const theme of themes) {
     stdio: ['ignore', 'ignore', 'inherit'],
     env: { ...process.env, THEME: theme, DATA_SOURCE: 'fixtures', OUT_DIR: dir, RENDER_MODE: 'static' },
   });
+  // Index de recherche : les tests parcourent le site comme un visiteur
+  execSync(`node scripts/pagefind.mjs ${dir}`, { stdio: ['ignore', 'ignore', 'inherit'] });
   const list = pages(dir.replace(/\/$/, '')).sort();
   writeFileSync(`${dir}/pages.json`, JSON.stringify(list, null, 2));
   console.log(`  ${list.length} pages`);

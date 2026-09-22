@@ -18,6 +18,7 @@ import Frame from './templates/Frame.astro';
 import Home from './templates/Home.astro';
 import NotFound from './templates/NotFound.astro';
 import Page from './templates/Page.astro';
+import RightsRequest from './templates/RightsRequest.astro';
 import Team from './templates/Team.astro';
 import Waste from './templates/Waste.astro';
 
@@ -45,6 +46,7 @@ export default defineTheme({
     AssociationList,
     Association,
     AssociationProposal,
+    RightsRequest,
     Contact,
     Waste,
     Canteen,

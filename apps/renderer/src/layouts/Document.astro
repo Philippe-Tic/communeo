@@ -28,7 +28,23 @@ const organization = {
   ...(site.contact.hours ? { openingHoursSpecification: toSchemaOrgOpeningHours(site.contact.hours) } : {}),
   ...(site.social.length ? { sameAs: site.social.map((link) => link.href) } : {}),
 };
-const jsonLd = [organization, ...seo.jsonLd];
+// Fil d'Ariane lisible par les moteurs de recherche
+const breadcrumbLd =
+  ctx.breadcrumb.length > 1
+    ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: ctx.breadcrumb.map((item, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: item.label,
+            item: `${site.url}${item.href}`,
+          })),
+        },
+      ]
+    : [];
+const jsonLd = [organization, ...breadcrumbLd, ...seo.jsonLd];
 ---
 <!doctype html>
 <html lang="fr">
@@ -40,6 +56,8 @@ const jsonLd = [organization, ...seo.jsonLd];
     <link rel="canonical" href={seo.canonical} />
     {seo.noindex && <meta name="robots" content="noindex" />}
     {site.favicon ? <link rel="icon" href={site.favicon.src} /> : site.logo && <link rel="icon" href={site.logo.src} />}
+    {(site.favicon ?? site.logo) && <link rel="apple-touch-icon" href={(site.favicon ?? site.logo)!.src} />}
+    <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:type" content={ctx.path === '/' ? 'website' : 'article'} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={seo.title} />

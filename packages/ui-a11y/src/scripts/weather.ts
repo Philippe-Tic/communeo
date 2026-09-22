@@ -55,7 +55,7 @@ export async function initWeather() {
       days.append(item);
     }
 
-    element.replaceChildren(now, days);
+    element.querySelector('[data-cn-weather-content]')?.replaceChildren(now, days);
     element.hidden = false;
   }
 }

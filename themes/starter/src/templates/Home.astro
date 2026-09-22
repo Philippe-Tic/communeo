@@ -67,10 +67,9 @@ const { site } = ctx;
   )}
 
   {home.weather && (
-    <section aria-labelledby="in-weather">
-      <h2 id="in-weather">Météo</h2>
-      <Weather position={home.weather} />
-    </section>
+    <Weather position={home.weather}>
+      <h2 slot="titre">Météo</h2>
+    </Weather>
   )}
 
   {home.wasteCollection && (

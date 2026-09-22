@@ -1,7 +1,8 @@
 ---
 /**
- * Météo de la commune : rien n'est affiché tant que la prévision n'est pas chargée, et rien
- * n'apparaît si le service ne répond pas. Les données viennent d'Open-Meteo, sans cookie.
+ * Météo de la commune. Tout le bloc (titre compris) reste masqué tant que la prévision n'est pas
+ * chargée, et le reste si le service ne répond pas : une page publique n'affiche pas un widget vide.
+ * Les données viennent d'Open-Meteo, sans cookie.
  */
 interface Props {
   /** Coordonnées de la mairie (infos pratiques du site) */
@@ -11,7 +12,10 @@ interface Props {
 
 const { position, class: className } = Astro.props;
 ---
-<div class:list={['cn-weather', className]} data-cn-weather={JSON.stringify(position)} hidden></div>
+<section class:list={['cn-weather', className]} aria-label="Météo" data-cn-weather={JSON.stringify(position)} hidden>
+  <slot name="titre" />
+  <div data-cn-weather-content></div>
+</section>
 
 <script>
   import './scripts/weather';

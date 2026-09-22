@@ -123,10 +123,9 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
             )}
 
             {home.weather && (
-              <section class="in-box" aria-labelledby="in-weather">
-                <h2 id="in-weather" class="in-box-title">Météo</h2>
-                <Weather position={home.weather} class="in-weather" />
-              </section>
+              <Weather position={home.weather} class="in-box in-weather">
+                <h2 slot="titre" class="in-box-title">Météo</h2>
+              </Weather>
             )}
 
             {home.wasteCollection && (

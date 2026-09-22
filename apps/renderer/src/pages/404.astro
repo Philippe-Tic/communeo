@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+Astro.response.status = 404;
+const source = getSource();
+const ctx = await simplePage(source, { path: '/404', title: 'Page introuvable', noindex: true, trail: [] });
+const { NotFound } = theme.templates;
+---
+<Document ctx={ctx}><NotFound ctx={ctx} /></Document>

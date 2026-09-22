@@ -1,0 +1,21 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../../layouts/Document.astro';
+import { getSource, simplePage } from '../../../lib/content';
+import { categoryFilters } from '../../../lib/lists';
+
+export async function getStaticPaths() {
+  const keys = new Set((await getSource().associations()).map((a) => a.category.key));
+  return [...keys].map((category) => ({ params: { category } }));
+}
+
+const source = getSource();
+const associations = await source.associations();
+const filtered = associations.filter((a) => a.category.key === Astro.params.category);
+if (!filtered.length) return Astro.rewrite('/404');
+const label = filtered[0]!.category.label;
+const path = `/associations/categorie/${Astro.params.category}`;
+const ctx = await simplePage(source, { path, title: `Associations : ${label}`, trail: [{ label: 'Associations', href: '/associations' }, { label, href: path }] });
+const { AssociationList } = theme.templates;
+---
+<Document ctx={ctx}><AssociationList ctx={ctx} associations={filtered} categories={categoryFilters(associations, '/associations', Astro.params.category ?? null)} proposeHref="/associations/proposer" /></Document>

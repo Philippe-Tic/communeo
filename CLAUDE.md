@@ -12,11 +12,11 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 
 - **apps/backend/** — Strapi v5 headless CMS (TypeScript). REST API, SQLite (dev) or PostgreSQL (prod). The `site-isolation` middleware enforces multi-tenant isolation (fail-closed) based on the authenticated user's site.
 - **apps/admin/** — V2 admin (React 19 + Vite + TanStack Router/Query + shadcn/ui), built in phase 3. Mockups: `v2/Design Admin Handoff/`.
-- **apps/renderer/** — V2 Astro 5 renderer (static for prod, SSR for preview), built in phase 1.
+- **apps/renderer/** — Astro 7 renderer: one project for every commune and theme. Static build for published sites, `RENDER_MODE=server` for the draft preview. The theme is chosen at build time via `THEME` (virtual module `virtual:communeo/theme`); data comes from Strapi (`DATA_SOURCE=strapi`) or the demo fixtures (default). The renderer owns the HTML document (head, SEO, JSON-LD, skip links, cookie banner) and the pages common to all themes (legal notice, privacy, accessibility statement, sitemap).
 - **packages/core** — generated Strapi types, block/settings schemas (zod), French formatting, **view-models** (`src/vm`: the ready-to-render data themes receive, never Strapi types) and the **content source** (`src/source`: `createStrapiLoader` → `createContentSource`).
-- **packages/theme-contract** — interface a theme must implement.
-- **packages/ui-a11y** — shared accessible components for themes.
-- **themes/** — one package per public-site theme (Institutionnel, Moderne, Journal, Bourg; mockups in `v2/`).
+- **packages/theme-contract** — what a theme must provide: `manifest`, 18 `templates` (Home, Page, ArticleList…, Frame, NotFound) and 9 `blocks`, declared with `defineTheme` (a missing template or wrong props fails `astro check`). Themes never fetch data: they receive view-models.
+- **packages/ui-a11y** — shared accessible Astro components: RichText, Blocks dispatcher, SkipLinks, Breadcrumb, CookieBanner + consent store, ConsentEmbed (videos load after consent), OpeningStatus (computed in the browser), disclosure script.
+- **themes/** — one package per public-site theme (`@communeo/theme-<id>`). `themes/starter` implements the whole contract in plain accessible HTML (template for new themes, reference for renderer tests). Institutionnel, Moderne, Journal, Bourg mockups are in `v2/`.
 - **packages/fixtures** — demo commune Saint-Aubin-sur-Loire in Strapi format (`createFixtureLoader({ variant: complete | minimal | empty })`, `FIXTURE_NOW`), goes through the same mappers as production; assets served under `/fixtures`.
 
 Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 launch): **admin/** (React admin V1) and **sites/** (Astro site V1). **docs/** (Starlight) stays at the root while the Netlify docs site points to it.
@@ -39,6 +39,8 @@ pnpm install              # at the root, installs every workspace package
 pnpm check                # lint + typecheck + tests (Turborepo)
 pnpm build                # build everything
 pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
+pnpm --filter @communeo/renderer dev    # demo commune with the starter theme (http://localhost:4321)
+THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 

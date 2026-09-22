@@ -1,0 +1,13 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+import { categoryFilters } from '../../lib/lists';
+import { upcomingEvents } from '../../lib/events';
+
+const source = getSource();
+const upcoming = upcomingEvents(await source.events());
+const ctx = await simplePage(source, { path: '/agenda', title: 'Agenda', description: 'Les prochains événements de la commune' });
+const { EventList } = theme.templates;
+---
+<Document ctx={ctx}><EventList ctx={ctx} upcoming={upcoming} categories={categoryFilters(upcoming, '/agenda', null)} /></Document>

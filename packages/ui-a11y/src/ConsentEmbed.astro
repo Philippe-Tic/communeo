@@ -1,0 +1,53 @@
+---
+/**
+ * Contenu tiers (vidéo) chargé seulement après consentement. Avant : un encart explique qui héberge
+ * le contenu, propose de l'afficher et donne un lien pour le consulter sur le site d'origine.
+ */
+interface Props {
+  title: string;
+  src: string;
+  provider: string;
+  href: string;
+  class?: string;
+}
+
+const { title, src, provider, href, class: className } = Astro.props;
+---
+<div class:list={['cn-embed', className]} data-cn-embed data-src={src} data-title={title}>
+  <div class="cn-embed-placeholder" data-cn-embed-placeholder>
+    <p><strong>{title}</strong></p>
+    <p>Ce contenu est hébergé par {provider}, qui peut déposer des cookies.</p>
+    <p class="cn-embed-actions">
+      <button type="button" data-cn-embed-accept>Afficher la vidéo</button>
+      <a href={href} target="_blank" rel="noopener noreferrer">Voir sur {provider}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>
+    </p>
+  </div>
+</div>
+
+<script>
+  import { onConsent, setConsent } from './scripts/consent';
+
+  const load = (container: HTMLElement) => {
+    if (container.querySelector('iframe')) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = container.dataset.src!;
+    iframe.title = container.dataset.title!;
+    iframe.loading = 'lazy';
+    iframe.allow = 'fullscreen; picture-in-picture';
+    iframe.setAttribute('allowfullscreen', '');
+    container.querySelector('[data-cn-embed-placeholder]')?.remove();
+    container.append(iframe);
+  };
+
+  const embeds = [...document.querySelectorAll<HTMLElement>('[data-cn-embed]')];
+  onConsent((consent) => {
+    if (consent?.media) embeds.forEach(load);
+  });
+  embeds.forEach((embed) =>
+    embed.querySelector('[data-cn-embed-accept]')?.addEventListener('click', () => {
+      setConsent(true);
+      load(embed);
+      embed.querySelector('iframe')?.focus();
+    }),
+  );
+</script>

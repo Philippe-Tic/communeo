@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const weeks = await source.canteen();
+const ctx = await simplePage(source, { path: '/cantine', title: 'Cantine scolaire', description: 'Les menus de la cantine' });
+const { Canteen } = theme.templates;
+---
+<Document ctx={ctx}><Canteen ctx={ctx} weeks={weeks} /></Document>

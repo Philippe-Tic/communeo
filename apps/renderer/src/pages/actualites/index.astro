@@ -1,0 +1,13 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+import { categoryFilters, paginate } from '../../lib/lists';
+
+const source = getSource();
+const [articles, site] = await Promise.all([source.articles(), source.site()]);
+const { items, pagination } = paginate(articles, 1, '/actualites');
+const ctx = await simplePage(source, { path: '/actualites', title: 'Actualités', description: `Toute l'actualité de ${site.name}` });
+const { ArticleList } = theme.templates;
+---
+<Document ctx={ctx}><ArticleList ctx={ctx} articles={items} categories={categoryFilters(articles, '/actualites', null)} pagination={pagination} /></Document>

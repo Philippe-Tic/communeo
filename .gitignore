@@ -15,3 +15,6 @@ d/
 node_modules/
 .turbo/
 dist/
+
+# Astro
+.astro/

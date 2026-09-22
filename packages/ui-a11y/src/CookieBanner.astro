@@ -1,0 +1,78 @@
+---
+/**
+ * Bandeau de consentement (CNIL) : « Tout accepter » et « Tout refuser » ont la même importance,
+ * « Personnaliser » ouvre un panneau. Le lien « Gestion des cookies » du pied de page le rouvre
+ * (tout élément portant data-cn-cookie-preferences).
+ */
+---
+<section class="cn-cookie-banner" aria-labelledby="cn-cookie-title" hidden data-cn-cookie-banner>
+  <h2 id="cn-cookie-title">Ce site utilise des contenus tiers</h2>
+  <p>
+    Certaines pages affichent des vidéos ou des cartes hébergées par d'autres services, qui peuvent déposer des cookies.
+    Vous pouvez les accepter ou les refuser ; les contenus refusés restent consultables sur le site d'origine.
+  </p>
+  <div class="cn-cookie-actions">
+    <button type="button" data-cn-consent="accept">Tout accepter</button>
+    <button type="button" data-cn-consent="refuse">Tout refuser</button>
+    <button type="button" data-cn-consent="customize">Personnaliser</button>
+  </div>
+</section>
+
+<dialog class="cn-cookie-dialog" aria-labelledby="cn-cookie-dialog-title" data-cn-cookie-dialog>
+  <form method="dialog">
+    <h2 id="cn-cookie-dialog-title">Personnaliser les cookies</h2>
+    <fieldset>
+      <legend>Catégories</legend>
+      <p>
+        <input type="checkbox" id="cn-consent-necessary" checked disabled />
+        <label for="cn-consent-necessary">Nécessaires au fonctionnement du site (toujours actifs)</label>
+      </p>
+      <p>
+        <input type="checkbox" id="cn-consent-media" role="switch" data-cn-consent-media />
+        <label for="cn-consent-media">Contenus tiers : vidéos (YouTube, Dailymotion, Vimeo) et cartes</label>
+      </p>
+    </fieldset>
+    <div class="cn-cookie-actions">
+      <button type="submit" value="save">Enregistrer mes choix</button>
+      <button type="submit" value="cancel">Annuler</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { getConsent, setConsent } from './scripts/consent';
+
+  const banner = document.querySelector<HTMLElement>('[data-cn-cookie-banner]')!;
+  const dialog = document.querySelector<HTMLDialogElement>('[data-cn-cookie-dialog]')!;
+  const mediaSwitch = dialog.querySelector<HTMLInputElement>('[data-cn-consent-media]')!;
+
+  const openPreferences = () => {
+    mediaSwitch.checked = getConsent()?.media ?? false;
+    dialog.showModal();
+  };
+
+  if (!getConsent()) banner.hidden = false;
+
+  banner.addEventListener('click', (event) => {
+    const action = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-cn-consent]')?.dataset.cnConsent;
+    if (action === 'accept' || action === 'refuse') {
+      setConsent(action === 'accept');
+      banner.hidden = true;
+    }
+    if (action === 'customize') openPreferences();
+  });
+
+  dialog.addEventListener('close', () => {
+    if (dialog.returnValue === 'save') {
+      setConsent(mediaSwitch.checked);
+      banner.hidden = true;
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if ((event.target as HTMLElement).closest('[data-cn-cookie-preferences]')) {
+      event.preventDefault();
+      openPreferences();
+    }
+  });
+</script>

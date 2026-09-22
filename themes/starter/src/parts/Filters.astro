@@ -1,0 +1,15 @@
+---
+import type { FilterOption } from '@communeo/theme-contract';
+
+interface Props { label: string; options: FilterOption[]; allHref: string }
+const { label, options, allHref } = Astro.props;
+const anyCurrent = options.some((option) => option.current);
+---
+{options.length > 1 && (
+  <nav class="st-filters" aria-label={label}>
+    <ul>
+      <li><a href={allHref} aria-current={anyCurrent ? undefined : 'page'}>Tout</a></li>
+      {options.map((option) => <li><a href={option.href} aria-current={option.current ? 'page' : undefined}>{option.label} ({option.count})</a></li>)}
+    </ul>
+  </nav>
+)}

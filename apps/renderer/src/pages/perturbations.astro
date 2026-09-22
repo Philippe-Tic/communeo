@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const alerts = await source.alerts();
+const ctx = await simplePage(source, { path: '/perturbations', title: 'Perturbations et travaux', description: 'Alertes, coupures et travaux en cours' });
+const { Disruptions } = theme.templates;
+---
+<Document ctx={ctx}><Disruptions ctx={ctx} alerts={alerts} /></Document>

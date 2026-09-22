@@ -1,0 +1,16 @@
+---
+/** Rend une liste de blocs avec les composants du thème (un composant par type de bloc). */
+import type { BlockVM } from '@communeo/core';
+import type { ThemeBlocks } from '@communeo/theme-contract';
+
+interface Props {
+  blocks: BlockVM[];
+  components: ThemeBlocks;
+}
+
+const { blocks, components } = Astro.props;
+---
+{blocks.map((block) => {
+  const Component = components[block.type] as (props: { block: BlockVM }) => unknown;
+  return <Component block={block} />;
+})}

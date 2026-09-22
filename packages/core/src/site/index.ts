@@ -4,3 +4,4 @@ export * from './slug';
 export * from './opening-hours';
 export * from './navigation';
 export * from './settings';
+export * from './practical-rules';

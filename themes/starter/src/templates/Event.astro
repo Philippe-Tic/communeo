@@ -1,0 +1,30 @@
+---
+import type { EventVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import Content from '../parts/Content.astro';
+
+interface Props { ctx: PageContext; event: EventVM }
+const { ctx, event } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <p class="st-meta">{event.category.label}</p>
+  <dl class="st-facts">
+    <dt>Dates et horaires</dt><dd><time datetime={event.start.iso}>{event.period}</time></dd>
+    {(event.location || event.address) && <><dt>Lieu</dt><dd>{event.location}{event.address && <><br />{event.address}</>}</dd></>}
+    {event.price && <><dt>Tarif</dt><dd>{event.price}</dd></>}
+    {event.registration && (
+      <><dt>Inscription</dt><dd>{event.registration.required ? 'Obligatoire' : 'Conseillée'}{event.registration.deadline && <> · avant le {event.registration.deadline.label}</>}{event.registration.places && <> · {event.registration.places} places</>}</dd></>
+    )}
+    {event.organizer && <><dt>Organisateur</dt><dd>{event.organizer}</dd></>}
+    {(event.contact.email || event.contact.phone) && (
+      <><dt>Contact</dt><dd>{event.contact.email && <a href={event.contact.email.href}>{event.contact.email.label}</a>}{event.contact.phone && <> · <a href={event.contact.phone.href}>{event.contact.phone.label}</a></>}</dd></>
+    )}
+  </dl>
+  <p>
+    <a href={event.icsHref} download>Ajouter à mon agenda<span class="cn-sr-only"> (fichier .ics)</span></a>
+    {event.externalLink && <> · <a href={event.externalLink.href} target="_blank" rel="noopener noreferrer">{event.externalLink.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></>}
+  </p>
+  {event.image && <img src={event.image.src} alt={event.image.alt} width={event.image.width ?? undefined} height={event.image.height ?? undefined} />}
+  <Content blocks={event.blocks} toc={event.toc} />
+</Layout>

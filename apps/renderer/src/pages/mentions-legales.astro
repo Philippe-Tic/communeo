@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+import LegalNotice from '../common/LegalNotice.astro';
+const source = getSource();
+const site = await source.site();
+const ctx = await simplePage(source, { path: '/mentions-legales', title: 'Mentions légales', description: 'Éditeur, directeur de la publication et hébergeur du site' });
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}><Frame ctx={ctx}><LegalNotice site={site} /></Frame></Document>

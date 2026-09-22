@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const team = await source.team();
+const ctx = await simplePage(source, { path: '/equipe-municipale', title: 'Équipe municipale', description: 'Le maire, les adjoints et les conseillers municipaux' });
+const { Team } = theme.templates;
+---
+<Document ctx={ctx}><Team ctx={ctx} team={team} /></Document>

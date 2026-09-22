@@ -1,0 +1,12 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, pageContext } from '../lib/content';
+
+const source = getSource();
+const home = await source.home();
+const site = await source.site();
+const ctx = await pageContext(source, '/', { title: site.name, seo: home.seo });
+const { Home } = theme.templates;
+---
+<Document ctx={ctx}><Home ctx={ctx} home={home} /></Document>

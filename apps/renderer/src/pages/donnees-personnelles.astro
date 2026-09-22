@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+import PrivacyPolicy from '../common/PrivacyPolicy.astro';
+const source = getSource();
+const site = await source.site();
+const ctx = await simplePage(source, { path: '/donnees-personnelles', title: 'Données personnelles', description: 'Comment la commune protège vos données personnelles' });
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}><Frame ctx={ctx}><PrivacyPolicy site={site} /></Frame></Document>

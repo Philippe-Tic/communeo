@@ -1,0 +1,12 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+import { categoryFilters } from '../../lib/lists';
+
+const source = getSource();
+const associations = await source.associations();
+const ctx = await simplePage(source, { path: '/associations', title: 'Associations', description: 'Annuaire des associations de la commune' });
+const { AssociationList } = theme.templates;
+---
+<Document ctx={ctx}><AssociationList ctx={ctx} associations={associations} categories={categoryFilters(associations, '/associations', null)} proposeHref="/associations/proposer" /></Document>

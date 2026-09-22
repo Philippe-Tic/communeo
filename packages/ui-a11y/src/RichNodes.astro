@@ -1,0 +1,29 @@
+---
+/** Rendu récursif des nœuds du texte riche (paragraphes, titres, listes imbriquées). */
+import type { RichTextVM } from '@communeo/core';
+import Inline from './RichInline.astro';
+
+type Node = RichTextVM['content'][number] | { type: 'listItem'; content: Node[] };
+
+interface Props {
+  nodes: Node[];
+}
+
+const { nodes } = Astro.props;
+---
+{nodes.map((node) => {
+  switch (node.type) {
+    case 'paragraph':
+      return <p><Inline nodes={node.content ?? []} /></p>;
+    case 'heading':
+      return node.attrs.level === 2
+        ? <h2 id={node.attrs.id}><Inline nodes={node.content ?? []} /></h2>
+        : <h3 id={node.attrs.id}><Inline nodes={node.content ?? []} /></h3>;
+    case 'bulletList':
+      return <ul>{node.content.map((item) => <li><Astro.self nodes={item.content as Node[]} /></li>)}</ul>;
+    case 'orderedList':
+      return <ol start={node.attrs?.start ?? undefined}>{node.content.map((item) => <li><Astro.self nodes={item.content as Node[]} /></li>)}</ol>;
+    default:
+      return null;
+  }
+})}

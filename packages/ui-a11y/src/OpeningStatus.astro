@@ -1,0 +1,31 @@
+---
+/**
+ * Statut « Ouverte · ferme à 12h » calculé dans le navigateur, à l'heure du visiteur
+ * (les sites sont statiques). Sans JavaScript, rien n'est affiché : le résumé des horaires reste lisible.
+ */
+import type { OpeningHours } from '@communeo/core';
+
+interface Props {
+  hours: OpeningHours | null;
+  /** « Ouverte » (la mairie) ou « Ouvert » (un lieu) */
+  feminine?: boolean;
+  class?: string;
+}
+
+const { hours, feminine = true, class: className } = Astro.props;
+---
+{hours && (
+  <p class:list={['cn-opening-status', className]} data-cn-opening={JSON.stringify(hours)} data-feminine={String(feminine)} hidden></p>
+)}
+
+<script>
+  import { openingStatusAt, openingStatusLabel, type OpeningHours } from '@communeo/core/client';
+
+  for (const element of document.querySelectorAll<HTMLElement>('[data-cn-opening]')) {
+    const hours = JSON.parse(element.dataset.cnOpening!) as OpeningHours;
+    const status = openingStatusAt(hours, new Date());
+    element.textContent = openingStatusLabel(status, element.dataset.feminine !== 'false');
+    element.dataset.open = String(status.open);
+    element.hidden = false;
+  }
+</script>

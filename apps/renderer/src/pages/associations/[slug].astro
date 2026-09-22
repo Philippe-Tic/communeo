@@ -1,0 +1,16 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, pageContext } from '../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getSource().associations()).map((a) => ({ params: { slug: a.href.split('/').pop()! } }));
+}
+
+const source = getSource();
+const association = (await source.associations()).find((a) => a.href === `/associations/${Astro.params.slug}`);
+if (!association) return Astro.rewrite('/404');
+const ctx = await pageContext(source, association.href, { title: association.name, seo: association.seo, breadcrumb: association.breadcrumb });
+const { Association } = theme.templates;
+---
+<Document ctx={ctx}><Association ctx={ctx} association={association} /></Document>

@@ -5,8 +5,10 @@
  */
 import type { HomeVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
 import RichText from '@communeo/ui-a11y/RichText.astro';
+import Weather from '@communeo/ui-a11y/Weather.astro';
 import ArrowRight from '@lucide/astro/icons/arrow-right';
 import Info from '@lucide/astro/icons/info';
 import OctagonAlert from '@lucide/astro/icons/octagon-alert';
@@ -24,7 +26,7 @@ interface Props {
 const { ctx, home } = Astro.props;
 const { site } = ctx;
 const hero = home.hero;
-const aside = home.practicalInfo || home.wasteCollection;
+const aside = home.practicalInfo || home.weather || home.wasteCollection;
 const severityIcons = { info: Info, warning: TriangleAlert, critical: OctagonAlert };
 const today = home.canteen?.days.find((day) => !day.closed) ?? null;
 ---
@@ -120,6 +122,13 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
               </section>
             )}
 
+            {home.weather && (
+              <section class="in-box" aria-labelledby="in-weather">
+                <h2 id="in-weather" class="in-box-title">Météo</h2>
+                <Weather position={home.weather} class="in-weather" />
+              </section>
+            )}
+
             {home.wasteCollection && (
               <section class="in-box" aria-labelledby="in-waste">
                 <h2 id="in-waste" class="in-box-title">Prochaines collectes</h2>
@@ -129,7 +138,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
                       <span class={`in-waste-badge in-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
                       <span>
                         <strong>{collection.label}</strong>
-                        {collection.upcoming[0] && <> · <time datetime={collection.upcoming[0].iso}>{collection.upcoming[0].label}</time></>}
+                        {collection.upcoming.length > 0 && <> · <NextCollections collection={collection} /></>}
                       </span>
                     </li>
                   ))}
@@ -223,7 +232,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
             <div class="in-box in-canteen">
               {today ? (
                 <>
-                  <p class="in-canteen-day">
+                  <p class="in-canteen-day" data-cn-day={today.date.iso.slice(0, 10)}>
                     <strong>{today.day.label} {today.date.label}</strong>
                     {home.canteen.school && <> · {home.canteen.school}</>}
                   </p>

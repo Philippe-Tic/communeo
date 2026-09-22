@@ -1,0 +1,18 @@
+---
+/**
+ * Météo de la commune : rien n'est affiché tant que la prévision n'est pas chargée, et rien
+ * n'apparaît si le service ne répond pas. Les données viennent d'Open-Meteo, sans cookie.
+ */
+interface Props {
+  /** Coordonnées de la mairie (infos pratiques du site) */
+  position: { lat: number; lng: number };
+  class?: string;
+}
+
+const { position, class: className } = Astro.props;
+---
+<div class:list={['cn-weather', className]} data-cn-weather={JSON.stringify(position)} hidden></div>
+
+<script>
+  import './scripts/weather';
+</script>

@@ -2,7 +2,9 @@
 import type { HomeVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
 import RichText from '@communeo/ui-a11y/RichText.astro';
+import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import Weather from '@communeo/ui-a11y/Weather.astro';
 import Layout from '../parts/Layout.astro';
 import ArticleCard from '../parts/ArticleCard.astro';
 import EventCard from '../parts/EventCard.astro';
@@ -64,10 +66,17 @@ const { site } = ctx;
     </section>
   )}
 
+  {home.weather && (
+    <section aria-labelledby="in-weather">
+      <h2 id="in-weather">Météo</h2>
+      <Weather position={home.weather} />
+    </section>
+  )}
+
   {home.wasteCollection && (
     <section aria-labelledby="st-waste">
       <h2 id="st-waste">Prochaines collectes</h2>
-      <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming[0] && <> : <time datetime={c.upcoming[0].iso}>{c.upcoming[0].label}</time></>}</li>)}</ul>
+      <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming.length > 0 && <> : <NextCollections collection={c} /></>}</li>)}</ul>
       <p><a href="/collecte-des-dechets">Tout le calendrier</a></p>
     </section>
   )}

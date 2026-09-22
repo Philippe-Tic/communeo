@@ -71,6 +71,9 @@ Open Graph, JSON-LD), les liens d'évitement et le bandeau cookies. Le thème re
 | `scripts/menu` | Menu repliable sur petit écran et sous-menus : `aria-expanded`, Échap, clic à l'extérieur |
 | `styles.css` | Utilitaires d'accessibilité (`cn-sr-only`, `cn-js-only`, `prefers-reduced-motion`) |
 | `search` | Attributs à poser sur le `<main>` : seul le contenu principal entre dans l'index de recherche |
+| `Weather` | Météo de la commune (Open-Meteo, sans cookie), chargée dans le navigateur |
+| `NextCollections` | Prochains passages de collecte, recalculés à l'affichage : un site publié il y a trois semaines reste juste |
+| `scripts/today` | Marque le jour courant parmi des éléments datés (`data-cn-day`) |
 
 Le renderer pose la classe `cn-js` sur `<html>` : tout élément qui n'a de sens qu'avec JavaScript
 (bouton de menu, agrandissement, copie d'un lien) porte la classe `cn-js-only` et disparaît sans lui.

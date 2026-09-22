@@ -2,6 +2,7 @@
 /** Collecte des déchets : prochaines collectes en cartes, puis calendrier détaillé. */
 import type { WasteCollectionVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; collections: WasteCollectionVM[] }
@@ -17,10 +18,10 @@ const { ctx, collections } = Astro.props;
             <li class="in-box">
               <p><span class={`in-waste-badge in-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span></p>
               <h3 class="in-box-title">{collection.label}</h3>
-              {collection.upcoming[0] ? (
+              {collection.upcoming.length > 0 ? (
                 <>
                   <p class="in-meta">Prochaine collecte</p>
-                  <p class="in-waste-date"><time datetime={collection.upcoming[0].iso}>{collection.upcoming[0].label}</time></p>
+                  <p class="in-waste-date"><NextCollections collection={collection} /></p>
                 </>
               ) : (
                 <p class="in-waste-date">Sur rendez-vous</p>

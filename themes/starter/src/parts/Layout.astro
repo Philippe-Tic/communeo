@@ -4,6 +4,7 @@
  * Le document (<html>, <head>, lien d'évitement, bandeau cookies) est fourni par le renderer.
  */
 import type { PageContext } from '@communeo/theme-contract';
+import Alerts from '@communeo/ui-a11y/Alerts.astro';
 import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
 import { searchAttributes } from '@communeo/ui-a11y/search';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
@@ -50,16 +51,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
   </form>
 </header>
 
-{alerts.length > 0 && (
-  <section class="st-alerts" aria-label="Alertes">
-    {alerts.map((alert) => (
-      <p class={`st-alert st-alert-${alert.severity.key}`} data-cn-alert-until={alert.displayUntil}>
-        <strong>{alert.severity.label} – {alert.title} :</strong> {alert.message}
-        {alert.link && <> <a href={alert.link.href}>{alert.link.label}</a></>}
-      </p>
-    ))}
-  </section>
-)}
+<Alerts alerts={alerts} class="st-alerts" />
 
 <Breadcrumb items={ctx.breadcrumb} />
 

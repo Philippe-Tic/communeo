@@ -492,7 +492,7 @@ export interface LegalAccessibilite extends Struct.ComponentSchema {
   };
   attributes: {
     accessibility_action_plan_url: Schema.Attribute.String;
-    accessibility_declaration: Schema.Attribute.RichText;
+    accessibility_declaration: Schema.Attribute.JSON;
     accessibility_level: Schema.Attribute.Enumeration<['non-conforme', 'partiellement-conforme', 'conforme']> &
       Schema.Attribute.DefaultTo<'non-conforme'>;
     accessibility_schema_url: Schema.Attribute.String;
@@ -521,11 +521,11 @@ export interface LegalMentionsLegales extends Struct.ComponentSchema {
     displayName: 'Mentions l\u00E9gales';
   };
   attributes: {
-    credits: Schema.Attribute.RichText;
+    credits: Schema.Attribute.JSON;
     hebergeur_address: Schema.Attribute.String;
     hebergeur_name: Schema.Attribute.String;
     hebergeur_phone: Schema.Attribute.String;
-    mentions_legales_extra: Schema.Attribute.RichText;
+    mentions_legales_extra: Schema.Attribute.JSON;
     publication_director: Schema.Attribute.String;
     publication_director_title: Schema.Attribute.String;
     siret: Schema.Attribute.String;
@@ -542,7 +542,7 @@ export interface LegalRgpd extends Struct.ComponentSchema {
     dpo_email: Schema.Attribute.Email;
     dpo_name: Schema.Attribute.String;
     dpo_phone: Schema.Attribute.String;
-    rgpd_policy: Schema.Attribute.RichText;
+    rgpd_policy: Schema.Attribute.JSON;
   };
 }
 

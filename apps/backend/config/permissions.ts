@@ -61,6 +61,8 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     // Connexion (POST /api/auth/local) et renouvellement de session
     'plugin::users-permissions.auth.callback',
     'plugin::users-permissions.auth.refresh',
+    // Alertes affichées en direct sur les sites publics (bandeau rechargé par le navigateur)
+    ...custom('alerte', ['findPublicAlerts']),
     // Formulaires publics des sites
     ...custom('contact-submission', ['publicCreate']),
     ...custom('association', ['publicCreate']),

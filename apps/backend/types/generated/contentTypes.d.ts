@@ -882,6 +882,10 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     featured_image: Schema.Attribute.Media<'images'>;
+    lead: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> & Schema.Attribute.Private;
     menu_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
@@ -990,7 +994,6 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     domain_status: Schema.Attribute.Enumeration<['pending', 'verified', 'error']> &
       Schema.Attribute.DefaultTo<'pending'>;
     domain_type: Schema.Attribute.Enumeration<['apex', 'subdomain']>;
-    domain_verification_token: Schema.Attribute.String & Schema.Attribute.Private;
     evenements: Schema.Attribute.Relation<'oneToMany', 'api::evenement.evenement'>;
     favicon: Schema.Attribute.Media<'images'>;
     homepage: Schema.Attribute.Component<'homepage.homepage', false>;
@@ -1052,6 +1055,7 @@ export interface ApiTeamMemberTeamMember extends Struct.CollectionTypeSchema {
         maxLength: 200;
       }>;
     display_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    email: Schema.Attribute.Email;
     first_name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -1064,10 +1068,18 @@ export interface ApiTeamMemberTeamMember extends Struct.CollectionTypeSchema {
       }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::team-member.team-member'> & Schema.Attribute.Private;
+    office_hours: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
     photo: Schema.Attribute.Media<'images'>;
     publishedAt: Schema.Attribute.DateTime;
     role: Schema.Attribute.Enumeration<['maire', 'adjoint', 'conseiller', 'dgs', 'agent']> & Schema.Attribute.Required;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 80;
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
   };

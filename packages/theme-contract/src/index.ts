@@ -50,7 +50,7 @@ export interface ThemeManifest {
   homeSections: HomepageSectionId[];
   /** Emplacements de menus gérés par le thème */
   menus: { main: true; footer: boolean };
-  /** Vignette 1200 × 800 pour le sélecteur de thème de l'admin */
+  /** Vignette 1200 × 800 pour le sélecteur de thème de l'admin, relative au package (`thumbnail.png`) */
   thumbnail: string;
 }
 

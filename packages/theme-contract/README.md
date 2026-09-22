@@ -12,6 +12,8 @@ pnpm theme:dev moderne                       # commune de démonstration dans ce
 pnpm theme:dev moderne --variant minimal     # accueil réduit, sans image
 pnpm theme:dev moderne --variant empty       # états vides
 pnpm theme:dev moderne --logo blason         # logo carré (blason)
+pnpm theme:dev moderne --alert               # ajoute une alerte urgente
+pnpm theme:thumbnail moderne                 # vignette 1200 × 800 du sélecteur de thème
 ```
 
 Pour qu'une commune puisse choisir le thème, ajoutez son identifiant au registre `THEMES`
@@ -25,7 +27,7 @@ auquel il manque un template ou un bloc, ou dont les props ne correspondent pas 
 
 | Élément | Rôle |
 |---|---|
-| `manifest` | Identifiant, nom, description, vignette 1200 × 800, sections d'accueil gérées, menus |
+| `manifest` | Identifiant, nom, description, vignette (`thumbnail.png`, 1200 × 800), sections d'accueil gérées, menus |
 | `templates` | 18 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
 | `blocks` | 9 composants de blocs : `text`, `image`, `buttons`, `callout`, `documents`, `gallery`, `faq`, `contact`, `video` |
 

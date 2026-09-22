@@ -1,12 +1,41 @@
 ---
+/** Page 404 : expliquer, proposer la recherche et les rubriques principales. */
 import type { PageContext } from '@communeo/theme-contract';
+import { SECTIONS } from '@communeo/core';
+import Search from '@lucide/astro/icons/search';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
+const links = [
+  { href: '/', label: 'Accueil' },
+  SECTIONS.demarches,
+  SECTIONS.actualites,
+  SECTIONS.agenda,
+  SECTIONS.contact,
+  { path: '/plan-du-site', label: 'Plan du site' },
+].map((link) => ('path' in link ? { href: link.path, label: link.label } : link));
 ---
-<Layout ctx={ctx}>
-  <p>La page demandée n'existe pas ou a été déplacée.</p>
-  <form role="search" action="/recherche"><label for="nf-q">Rechercher sur le site</label> <input id="nf-q" name="q" type="search" /> <button type="submit">Rechercher</button></form>
-  <p><a href="/">Retour à l'accueil</a></p>
+<Layout ctx={ctx} heading={false}>
+  <div class="in-404">
+    <p class="in-404-code" aria-hidden="true">404</p>
+    <h1>{ctx.title}</h1>
+    <p class="in-lead">
+      Cette page n'existe pas ou a été déplacée. Le lien que vous avez suivi est peut-être ancien,
+      ou l'adresse contient une erreur. Voici comment retrouver ce que vous cherchez.
+    </p>
+
+    <form role="search" action="/recherche" class="in-404-search">
+      <label for="in-404-q">Rechercher sur le site</label>
+      <span class="in-404-field">
+        <input id="in-404-q" name="q" type="search" placeholder="Rechercher sur le site…" />
+        <button type="submit"><Search size={20} aria-hidden="true" />Rechercher</button>
+      </span>
+    </form>
+
+    <h2>Liens utiles</h2>
+    <ul class="in-404-links">
+      {links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+    </ul>
+  </div>
 </Layout>

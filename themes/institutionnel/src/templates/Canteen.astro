@@ -1,30 +1,65 @@
 ---
+/** Cantine : une semaine par section, un jour par carte, labels en toutes lettres. */
 import type { CanteenWeekVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Download from '@lucide/astro/icons/download';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; weeks: CanteenWeekVM[] }
 const { ctx, weeks } = Astro.props;
+const badges = [...new Set(weeks.flatMap((week) => week.days.flatMap((day) => day.courses.flatMap((course) => course.badges))))];
 ---
 <Layout ctx={ctx}>
-  {weeks.length ? weeks.map((week) => (
-    <section aria-labelledby={`in-week-${week.id}`}>
-      <h2 id={`in-week-${week.id}`}>{week.label}{week.school && <> – {week.school}</>}</h2>
+  {weeks.length === 0 && <p class="in-empty">Le menu de la cantine sera bientôt publié.</p>}
+
+  {badges.length > 0 && (
+    <p class="in-legend">
+      <span class="in-legend-label">Légende :</span>
+      {badges.map((badge) => <span class="in-tag">{badge}</span>)}
+    </p>
+  )}
+
+  {weeks.map((week) => (
+    <section class="in-week" aria-labelledby={`in-week-${week.id}`}>
+      <h2 id={`in-week-${week.id}`}>
+        {week.label}
+        {week.school && <><br /><span class="in-meta">{week.school}</span></>}
+      </h2>
+
       {week.mode === 'detailed' ? (
-        week.days.map((day) => (
-          <div>
-            <h3>{day.day.label} <time datetime={day.date.iso}>{day.date.label}</time></h3>
-            {day.closed ? <p>Pas de cantine</p> : (
-              <dl>{day.courses.map((course) => <><dt>{course.label}</dt><dd>{course.dish}{course.badges.length > 0 && <> ({course.badges.join(', ')})</>}</dd></>)}</dl>
-            )}
-          </div>
-        ))
+        <div class="in-menu-days">
+          {week.days.map((day) => (
+            <article class="in-box in-menu-day">
+              <h3 class="in-box-title">{day.day.label} <time datetime={day.date.iso}>{day.date.label}</time></h3>
+              {day.closed ? (
+                <p class="in-meta">Pas de cantine ce jour.</p>
+              ) : (
+                <dl class="in-menu">
+                  {day.courses.map((course) => (
+                    <div>
+                      <dt>{course.label}</dt>
+                      <dd>{course.dish}{course.badges.map((badge) => <span class="in-tag in-tag-soft">{badge}</span>)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </article>
+          ))}
+        </div>
       ) : (
-        <>
-          {week.image && <img src={week.image.src} alt={week.image.alt} width={week.image.width ?? undefined} height={week.image.height ?? undefined} />}
-          {week.file && <p><a href={week.file.href} download>Télécharger le menu ({week.file.label})</a></p>}
-        </>
+        <div class="in-menu-file">
+          {week.image && (
+            <img src={week.image.src} alt={week.image.alt} width={week.image.width ?? undefined} height={week.image.height ?? undefined} loading="lazy" />
+          )}
+          {week.file && (
+            <p>
+              <a href={week.file.href} class="in-button in-button-secondary" download>
+                <Download size={20} aria-hidden="true" />Télécharger le menu ({week.file.label})
+              </a>
+            </p>
+          )}
+        </div>
       )}
     </section>
-  )) : <p>Le menu de la cantine sera bientôt publié.</p>}
+  ))}
 </Layout>

@@ -1,40 +1,122 @@
 ---
 /**
- * Formulaire envoyé en JSON à l'API. Les erreurs sont annoncées dans une zone live et
- * récapitulées en haut du formulaire ; le focus y est placé.
+ * Formulaire envoyé en JSON à l'API. Les erreurs sont récapitulées en haut (avec un lien vers
+ * chaque champ) et répétées sous le champ concerné ; le focus est placé sur le récapitulatif.
  */
 import type { FormConfig } from '@communeo/theme-contract';
 
-interface Props { form: FormConfig; submitLabel: string; success: string }
-const { form, submitLabel, success } = Astro.props;
+interface Props {
+  form: FormConfig;
+  submitLabel: string;
+  success: string;
+  /** Phrase affichée à côté du bouton d'envoi */
+  hint?: string;
+}
+
+const { form, submitLabel, success, hint } = Astro.props;
 ---
-<form class="in-form" action={form.action} method="post" data-in-api-form data-site={form.siteId} data-success={success} novalidate>
-  <div class="in-form-status" role="status" aria-live="polite" tabindex="-1" data-in-form-status></div>
+<form
+  class="in-form"
+  action={form.action}
+  method="post"
+  data-in-api-form
+  data-site={form.siteId}
+  data-success={success}
+  novalidate
+>
+  <div class="in-form-status" tabindex="-1" data-in-form-status></div>
+  <p class="in-meta">Tous les champs sont obligatoires sauf mention contraire.</p>
   <slot />
-  <p><button type="submit">{submitLabel}</button></p>
+  <p class="in-form-submit">
+    <button type="submit">{submitLabel}</button>
+    {hint && <span class="in-meta">{hint}</span>}
+  </p>
 </form>
 
 <script>
+  const messages = (field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+    const { validity, type } = field as HTMLInputElement;
+    if (validity.valueMissing) return 'Ce champ est obligatoire.';
+    if (validity.typeMismatch && type === 'email') return "L'adresse e-mail doit contenir un « @ » et un nom de domaine, par exemple nom@exemple.fr.";
+    if (validity.typeMismatch && type === 'tel') return 'Le numéro de téléphone n’est pas valide.';
+    if (validity.tooShort) return `Ce champ doit contenir au moins ${(field as HTMLInputElement).minLength} caractères.`;
+    if (validity.tooLong) return `Ce champ doit contenir au plus ${(field as HTMLInputElement).maxLength} caractères.`;
+    return 'La valeur saisie n’est pas valide.';
+  };
+
   for (const form of document.querySelectorAll<HTMLFormElement>('[data-in-api-form]')) {
     const status = form.querySelector<HTMLElement>('[data-in-form-status]')!;
+    const fields = () =>
+      [...form.elements].filter(
+        (element): element is HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement =>
+          'validity' in element && (element as HTMLInputElement).type !== 'submit',
+      );
+
+    // Un libellé court peut être donné par data-in-label (utile pour les cases à cocher bavardes)
+    const labelOf = (field: HTMLElement) => {
+      if (field.dataset.inLabel) return field.dataset.inLabel;
+      const text = form.querySelector(`label[for="${field.id}"]`)?.textContent?.replace(/\s*\(facultatif\)\s*/, '').trim() ?? '';
+      return text.length > 60 ? `${text.slice(0, 57).trimEnd()}…` : text;
+    };
+
+    const clear = (field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+      field.removeAttribute('aria-invalid');
+      document.getElementById(`${field.id}-erreur`)?.remove();
+      const described = (field.getAttribute('aria-describedby') ?? '')
+        .split(' ')
+        .filter((id) => id && id !== `${field.id}-erreur`)
+        .join(' ');
+      if (described) field.setAttribute('aria-describedby', described);
+      else field.removeAttribute('aria-describedby');
+    };
+
+    const markInvalid = (field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+      clear(field);
+      field.setAttribute('aria-invalid', 'true');
+      const error = document.createElement('p');
+      error.id = `${field.id}-erreur`;
+      error.className = 'in-field-error';
+      error.textContent = `Erreur : ${messages(field)}`;
+      field.after(error);
+      const described = (field.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean);
+      field.setAttribute('aria-describedby', [error.id, ...described].join(' '));
+    };
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!form.checkValidity()) {
-        const invalid = [...form.elements].filter((el): el is HTMLInputElement => 'validity' in el && !(el as HTMLInputElement).validity.valid);
-        status.innerHTML = `<p><strong>${invalid.length} champ(s) à corriger :</strong></p><ul>${invalid
-          .map((el) => `<li><a href="#${el.id}">${form.querySelector(`label[for="${el.id}"]`)?.textContent ?? el.name}</a></li>`)
+      status.className = 'in-form-status';
+      status.removeAttribute('role');
+      status.textContent = '';
+      fields().forEach(clear);
+
+      const invalid = fields().filter((field) => !field.checkValidity());
+      if (invalid.length) {
+        invalid.forEach(markInvalid);
+        status.className = 'in-form-status in-form-status-error';
+        status.setAttribute('role', 'alert');
+        status.innerHTML = `<p><strong>Le formulaire contient ${invalid.length} erreur${invalid.length > 1 ? 's' : ''}</strong></p><ul>${invalid
+          .map((field) => `<li><a href="#${field.id}">${labelOf(field)} : ${messages(field).replace(/\.$/, '')}</a></li>`)
           .join('')}</ul>`;
         status.focus();
         return;
       }
+
       const data = Object.fromEntries(new FormData(form).entries());
       const response = await fetch(form.action, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { ...data, site: form.dataset.site } }),
       }).catch(() => null);
-      status.textContent = response?.ok ? form.dataset.success! : "L'envoi a échoué. Réessayez dans quelques minutes.";
-      if (response?.ok) form.reset();
+
+      status.setAttribute('role', 'status');
+      if (response?.ok) {
+        status.className = 'in-form-status in-form-status-success';
+        status.textContent = form.dataset.success!;
+        form.reset();
+      } else {
+        status.className = 'in-form-status in-form-status-error';
+        status.textContent = "L'envoi a échoué. Réessayez dans quelques minutes ou appelez la mairie.";
+      }
       status.focus();
     });
   }

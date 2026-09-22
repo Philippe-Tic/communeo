@@ -512,9 +512,13 @@ export default async ({ strapi }) => {
             data: {
               title: 'Page de test',
               slug: 'page-de-test',
-              content: 'Contenu de la page de test',
+              blocks: [
+                {
+                  __component: 'blocks.text',
+                  body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Contenu de la page de test' }] }] },
+                },
+              ],
               site: testSite.documentId,
-              template: 'default',
               menu_order: 0,
               show_in_menu: true,
             },

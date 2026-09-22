@@ -13,4 +13,5 @@ admin
 sites
 docs
 v2
+**/*.test.ts
 d

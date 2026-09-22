@@ -1,5 +1,6 @@
 import bootstrap from './bootstrap';
 import autoDeployService from './services/auto-deploy';
+import { blocksValidationMiddleware } from './validation/blocks';
 
 export default {
   /**
@@ -9,6 +10,9 @@ export default {
    * This gives you an opportunity to extend code.
    */
   register({ strapi }: { strapi: any }) {
+    // Validation des blocs de contenu, avant tout le reste (y compris l'auto-deploy)
+    strapi.documents.use(blocksValidationMiddleware(strapi));
+
     strapi.documents.use(async (ctx: any, next: () => Promise<any>) => {
       const triggerActions = ['create', 'update', 'delete', 'publish', 'unpublish'];
       if (!triggerActions.includes(ctx.action)) return next();

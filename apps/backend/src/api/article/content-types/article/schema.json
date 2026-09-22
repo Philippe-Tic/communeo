@@ -23,10 +23,6 @@
       "required": true,
       "unique": true
     },
-    "content": {
-      "type": "richtext",
-      "required": true
-    },
     "image": {
       "type": "media",
       "multiple": false,
@@ -43,6 +39,20 @@
       "type": "text",
       "maxLength": 300,
       "required": false
+    },
+    "blocks": {
+      "type": "dynamiczone",
+      "components": [
+        "blocks.text",
+        "blocks.image",
+        "blocks.buttons",
+        "blocks.callout",
+        "blocks.documents",
+        "blocks.gallery",
+        "blocks.faq",
+        "blocks.contact",
+        "blocks.video"
+      ]
     },
     "category": {
       "type": "enumeration",

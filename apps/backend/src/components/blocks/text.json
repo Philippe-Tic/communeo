@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_blocks_texts",
+  "info": {
+    "displayName": "Texte",
+    "icon": "align-left",
+    "description": "Titres, paragraphes, listes, gras, italique et liens"
+  },
+  "options": {},
+  "attributes": {
+    "body": {
+      "type": "json",
+      "required": true
+    }
+  }
+}

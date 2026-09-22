@@ -17,9 +17,19 @@
       "required": true,
       "maxLength": 200
     },
-    "description": {
-      "type": "richtext",
-      "required": true
+    "blocks": {
+      "type": "dynamiczone",
+      "components": [
+        "blocks.text",
+        "blocks.image",
+        "blocks.buttons",
+        "blocks.callout",
+        "blocks.documents",
+        "blocks.gallery",
+        "blocks.faq",
+        "blocks.contact",
+        "blocks.video"
+      ]
     },
     "start_date": {
       "type": "datetime",

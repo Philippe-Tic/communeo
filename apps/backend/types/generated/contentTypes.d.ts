@@ -451,10 +451,22 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
+    blocks: Schema.Attribute.DynamicZone<
+      [
+        'blocks.text',
+        'blocks.image',
+        'blocks.buttons',
+        'blocks.callout',
+        'blocks.documents',
+        'blocks.gallery',
+        'blocks.faq',
+        'blocks.contact',
+        'blocks.video',
+      ]
+    >;
     category: Schema.Attribute.Enumeration<['news', 'event', 'information', 'emergency']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'news'>;
-    content: Schema.Attribute.RichText & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -601,39 +613,6 @@ export interface ApiContactSubmissionContactSubmission extends Struct.Collection
   };
 }
 
-export interface ApiContentBlockContentBlock extends Struct.CollectionTypeSchema {
-  collectionName: 'content_blocks';
-  info: {
-    description: "Blocs de contenu r\u00E9utilisables dans l'\u00E9diteur";
-    displayName: 'Content Block';
-    pluralName: 'content-blocks';
-    singularName: 'content-block';
-  };
-  options: {
-    draftAndPublish: false;
-  };
-  attributes: {
-    category: Schema.Attribute.Enumeration<['header', 'footer', 'sidebar', 'content', 'cta', 'other']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'content'>;
-    content: Schema.Attribute.RichText & Schema.Attribute.Required;
-    createdAt: Schema.Attribute.DateTime;
-    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::content-block.content-block'> &
-      Schema.Attribute.Private;
-    name: Schema.Attribute.String &
-      Schema.Attribute.Required &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 200;
-      }>;
-    publishedAt: Schema.Attribute.DateTime;
-    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
-    updatedAt: Schema.Attribute.DateTime;
-    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-  };
-}
-
 export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
   collectionName: 'deployments';
   info: {
@@ -680,6 +659,19 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
   };
   attributes: {
     address: Schema.Attribute.Text;
+    blocks: Schema.Attribute.DynamicZone<
+      [
+        'blocks.text',
+        'blocks.image',
+        'blocks.buttons',
+        'blocks.callout',
+        'blocks.documents',
+        'blocks.gallery',
+        'blocks.faq',
+        'blocks.contact',
+        'blocks.video',
+      ]
+    >;
     category: Schema.Attribute.Enumeration<['cultural', 'sport', 'meeting', 'celebration', 'workshop', 'conference']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'cultural'>;
@@ -687,7 +679,6 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
     contact_phone: Schema.Attribute.String;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    description: Schema.Attribute.RichText & Schema.Attribute.Required;
     end_date: Schema.Attribute.DateTime;
     external_link: Schema.Attribute.String;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -863,7 +854,19 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    content: Schema.Attribute.RichText & Schema.Attribute.Required;
+    blocks: Schema.Attribute.DynamicZone<
+      [
+        'blocks.text',
+        'blocks.image',
+        'blocks.buttons',
+        'blocks.callout',
+        'blocks.documents',
+        'blocks.gallery',
+        'blocks.faq',
+        'blocks.contact',
+        'blocks.video',
+      ]
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     featured_image: Schema.Attribute.Media<'images'>;
@@ -883,7 +886,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     show_in_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
-    template: Schema.Attribute.Enumeration<['default', 'about', 'services']> & Schema.Attribute.DefaultTo<'default'>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -1522,7 +1524,6 @@ declare module '@strapi/strapi' {
       'api::article.article': ApiArticleArticle;
       'api::association.association': ApiAssociationAssociation;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
-      'api::content-block.content-block': ApiContentBlockContentBlock;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::media-item.media-item': ApiMediaItemMediaItem;

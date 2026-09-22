@@ -12,10 +12,14 @@ WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backend/package.json apps/backend/
 COPY apps/backend/src/providers apps/backend/src/providers
+COPY packages/core/package.json packages/core/
 RUN pnpm install --frozen-lockfile --filter @communeo/backend...
 
+COPY tsconfig.base.json ./
+COPY packages/core packages/core
 COPY apps/backend apps/backend
-RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm --filter @communeo/backend build
+# Construit @communeo/core puis le backend
+RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm --filter "@communeo/backend..." build
 
 # Dossier autonome avec les seules dépendances de production
 RUN pnpm deploy --filter @communeo/backend --prod --legacy /out \

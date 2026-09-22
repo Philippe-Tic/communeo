@@ -22,9 +22,19 @@
       "targetField": "title",
       "required": true
     },
-    "content": {
-      "type": "richtext",
-      "required": true
+    "blocks": {
+      "type": "dynamiczone",
+      "components": [
+        "blocks.text",
+        "blocks.image",
+        "blocks.buttons",
+        "blocks.callout",
+        "blocks.documents",
+        "blocks.gallery",
+        "blocks.faq",
+        "blocks.contact",
+        "blocks.video"
+      ]
     },
     "meta_description": {
       "type": "string",
@@ -44,15 +54,6 @@
     "show_in_menu": {
       "type": "boolean",
       "default": true
-    },
-    "template": {
-      "type": "enumeration",
-      "enum": [
-        "default",
-        "about",
-        "services"
-      ],
-      "default": "default"
     },
     "scheduled_at": {
       "type": "datetime"

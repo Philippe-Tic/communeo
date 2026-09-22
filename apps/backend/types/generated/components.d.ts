@@ -1,5 +1,213 @@
 import type { Schema, Struct } from '@strapi/strapi';
 
+export interface BlockPartsButton extends Struct.ComponentSchema {
+  collectionName: 'components_block_parts_buttons';
+  info: {
+    description: 'Un bouton du bloc Bouton / lien';
+    displayName: 'Bouton';
+    icon: 'cursor';
+  };
+  attributes: {
+    label: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    style: Schema.Attribute.Enumeration<['primary', 'secondary']> & Schema.Attribute.DefaultTo<'primary'>;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
+export interface BlockPartsFaqItem extends Struct.ComponentSchema {
+  collectionName: 'components_block_parts_faq_items';
+  info: {
+    description: 'Une paire question / r\u00E9ponse';
+    displayName: 'Question / r\u00E9ponse';
+    icon: 'question';
+  };
+  attributes: {
+    answer: Schema.Attribute.JSON & Schema.Attribute.Required;
+    question: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+  };
+}
+
+export interface BlocksButtons extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_buttonss';
+  info: {
+    description: '1 \u00E0 3 boutons vers une page ou un site';
+    displayName: 'Bouton / lien';
+    icon: 'cursor';
+  };
+  attributes: {
+    buttons: Schema.Attribute.Component<'block-parts.button', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 3;
+          min: 1;
+        },
+        number
+      >;
+  };
+}
+
+export interface BlocksCallout extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_callouts';
+  info: {
+    description: 'Information, attention, important ou conseil';
+    displayName: 'Encadr\u00E9';
+    icon: 'information';
+  };
+  attributes: {
+    body: Schema.Attribute.JSON & Schema.Attribute.Required;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    variant: Schema.Attribute.Enumeration<['info', 'warning', 'important', 'tip']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'info'>;
+  };
+}
+
+export interface BlocksContact extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_contacts';
+  info: {
+    description: "Coordonn\u00E9es d'un lieu ou d'un service";
+    displayName: 'Contact / lieu';
+    icon: 'pinMap';
+  };
+  attributes: {
+    address: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
+    email: Schema.Attribute.Email;
+    hours: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 30;
+      }>;
+    show_map: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+  };
+}
+
+export interface BlocksDocuments extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_documentss';
+  info: {
+    description: 'Liste de fichiers \u00E0 t\u00E9l\u00E9charger';
+    displayName: 'Documents \u00E0 t\u00E9l\u00E9charger';
+    icon: 'file';
+  };
+  attributes: {
+    files: Schema.Attribute.Media<'files' | 'images', true> & Schema.Attribute.Required;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface BlocksFaq extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_faqs';
+  info: {
+    description: 'Questions fr\u00E9quentes en accord\u00E9on';
+    displayName: 'Questions / r\u00E9ponses';
+    icon: 'question';
+  };
+  attributes: {
+    items: Schema.Attribute.Component<'block-parts.faq-item', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 50;
+          min: 1;
+        },
+        number
+      >;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface BlocksGallery extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_gallerys';
+  info: {
+    description: '3 \u00E0 12 images';
+    displayName: 'Galerie';
+    icon: 'landscape';
+  };
+  attributes: {
+    images: Schema.Attribute.Media<'images', true> & Schema.Attribute.Required;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface BlocksImage extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_images';
+  info: {
+    description: 'Une image avec l\u00E9gende';
+    displayName: 'Image';
+    icon: 'picture';
+  };
+  attributes: {
+    caption: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
+    image: Schema.Attribute.Media<'images'> & Schema.Attribute.Required;
+    width: Schema.Attribute.Enumeration<['normal', 'full']> & Schema.Attribute.DefaultTo<'normal'>;
+  };
+}
+
+export interface BlocksText extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_texts';
+  info: {
+    description: 'Titres, paragraphes, listes, gras, italique et liens';
+    displayName: 'Texte';
+    icon: 'align-left';
+  };
+  attributes: {
+    body: Schema.Attribute.JSON & Schema.Attribute.Required;
+  };
+}
+
+export interface BlocksVideo extends Struct.ComponentSchema {
+  collectionName: 'components_blocks_videos';
+  info: {
+    description: 'Vid\u00E9o YouTube, Dailymotion ou Vimeo';
+    displayName: 'Vid\u00E9o';
+    icon: 'play';
+  };
+  attributes: {
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    transcript: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20000;
+      }>;
+    url: Schema.Attribute.String & Schema.Attribute.Required;
+  };
+}
+
 export interface HomepageHomepageConfig extends Struct.ComponentSchema {
   collectionName: 'components_homepage_homepage_configs';
   info: {
@@ -280,6 +488,17 @@ export interface SocialSocialLink extends Struct.ComponentSchema {
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
+      'block-parts.button': BlockPartsButton;
+      'block-parts.faq-item': BlockPartsFaqItem;
+      'blocks.buttons': BlocksButtons;
+      'blocks.callout': BlocksCallout;
+      'blocks.contact': BlocksContact;
+      'blocks.documents': BlocksDocuments;
+      'blocks.faq': BlocksFaq;
+      'blocks.gallery': BlocksGallery;
+      'blocks.image': BlocksImage;
+      'blocks.text': BlocksText;
+      'blocks.video': BlocksVideo;
       'homepage.homepage-config': HomepageHomepageConfig;
       'homepage.key-figure': HomepageKeyFigure;
       'homepage.partner': HomepagePartner;

@@ -1,29 +1,84 @@
 ---
-import type { FormConfig } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+/** Contact : formulaire à gauche, coordonnées et horaires à droite. */
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
 import ApiForm from '../parts/ApiForm.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; form: FormConfig }
 const { ctx, form } = Astro.props;
 const { contact } = ctx.site;
 ---
 <Layout ctx={ctx}>
-  <address>
-    {contact.address && <p>{contact.address}</p>}
-    {contact.phone && <p>Téléphone : <a href={contact.phone.href}>{contact.phone.label}</a></p>}
-    <p>E-mail : <a href={contact.email.href}>{contact.email.label}</a></p>
-  </address>
-  {contact.formIntro && <p>{contact.formIntro}</p>}
-  <ApiForm form={form} submitLabel="Envoyer" success="Votre message a bien été envoyé. Un accusé de réception vous sera adressé par e-mail.">
-    <p><label for="ct-first">Prénom (obligatoire)</label><input id="ct-first" name="first_name" required autocomplete="given-name" /></p>
-    <p><label for="ct-last">Nom (obligatoire)</label><input id="ct-last" name="last_name" required autocomplete="family-name" /></p>
-    <p><label for="ct-email">E-mail (obligatoire)</label><input id="ct-email" name="email" type="email" required autocomplete="email" /></p>
-    <p><label for="ct-phone">Téléphone</label><input id="ct-phone" name="phone" type="tel" autocomplete="tel" /></p>
-    <p><label for="ct-category">Catégorie (obligatoire)</label>
-      <select id="ct-category" name="category" required>{(form.options ?? []).map((o) => <option value={o.key}>{o.label}</option>)}</select></p>
-    <p><label for="ct-subject">Objet (obligatoire)</label><input id="ct-subject" name="subject" required /></p>
-    <p><label for="ct-message">Message (obligatoire)</label><textarea id="ct-message" name="message" rows="6" required></textarea></p>
-    <p class="in-meta">Vos données servent uniquement à traiter votre demande. <a href="/donnees-personnelles">En savoir plus</a></p>
-  </ApiForm>
+  {contact.formIntro && <p class="in-lead">{contact.formIntro}</p>}
+
+  <div class="in-split in-split-aside">
+    <ApiForm
+      form={form}
+      submitLabel="Envoyer la demande"
+      success="Votre message a bien été envoyé. Un accusé de réception vous sera adressé par e-mail."
+      hint="Un accusé de réception vous sera envoyé par e-mail."
+    >
+      <div class="in-field-row">
+        <p><label for="ct-first">Prénom</label><input id="ct-first" name="first_name" required autocomplete="given-name" /></p>
+        <p><label for="ct-last">Nom</label><input id="ct-last" name="last_name" required autocomplete="family-name" /></p>
+      </div>
+      <div class="in-field-row">
+        <p><label for="ct-email">E-mail</label><input id="ct-email" name="email" type="email" required autocomplete="email" /></p>
+        <p>
+          <label for="ct-phone">Téléphone <span class="in-meta">(facultatif)</span></label>
+          <input id="ct-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="ct-phone-aide" />
+          <span id="ct-phone-aide" class="in-meta">Format : 02 41 00 00 00</span>
+        </p>
+      </div>
+      <div class="in-field-row">
+        <p>
+          <label for="ct-category">Catégorie</label>
+          <select id="ct-category" name="category" required>
+            {(form.options ?? []).map((option) => <option value={option.key}>{option.label}</option>)}
+          </select>
+        </p>
+        <p><label for="ct-subject">Objet</label><input id="ct-subject" name="subject" required /></p>
+      </div>
+      <p>
+        <label for="ct-message">Message</label>
+        <textarea id="ct-message" name="message" rows="6" required maxlength="2000" aria-describedby="ct-message-aide"></textarea>
+        <span id="ct-message-aide" class="in-meta">2 000 caractères maximum.</span>
+      </p>
+      <p class="in-field-check">
+        <input id="ct-consent" name="consent" type="checkbox" required data-in-label="Utilisation de mes données" />
+        <label for="ct-consent">
+          J'accepte que mes données soient utilisées pour traiter ma demande. Elles sont conservées 12 mois.
+          <a href="/donnees-personnelles">Consulter la politique de données personnelles</a>
+        </label>
+      </p>
+    </ApiForm>
+
+    <aside class="in-aside">
+      <section class="in-box" aria-labelledby="in-contact-mairie">
+        <h2 id="in-contact-mairie" class="in-box-title">Mairie de {ctx.site.name}</h2>
+        <OpeningStatus hours={contact.hours} class="in-box-status" />
+        <address>
+          {contact.address && <span class="in-address">{contact.address}</span>}
+          {contact.phone && <a href={contact.phone.href}>{contact.phone.label}</a>}
+          <a href={contact.email.href}>{contact.email.label}</a>
+        </address>
+        {contact.hoursSummary.length > 0 && (
+          <dl class="in-box-hours">
+            {contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
+          </dl>
+        )}
+      </section>
+
+      <section class="in-box" aria-labelledby="in-contact-urgences">
+        <h2 id="in-contact-urgences" class="in-box-title">Urgences</h2>
+        <ul class="in-plain-list">
+          <li>Samu : <a href="tel:15">15</a></li>
+          <li>Police secours : <a href="tel:17">17</a></li>
+          <li>Pompiers : <a href="tel:18">18</a></li>
+          <li>Numéro d'urgence européen : <a href="tel:112">112</a></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
 </Layout>

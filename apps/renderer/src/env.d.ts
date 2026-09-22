@@ -1,6 +1,7 @@
 /// <reference types="astro/client" />
 
 declare module 'virtual:communeo/theme' {
-  const theme: import('@communeo/theme-contract').Theme;
+  import type { Theme } from '@communeo/theme-contract';
+  const theme: Theme;
   export default theme;
 }

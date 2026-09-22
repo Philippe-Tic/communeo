@@ -416,7 +416,12 @@ summary.in-nav-link::-webkit-details-marker {
   --in-alert-line: var(--in-danger);
 }
 
+/* Le balisage partagé n'a pas de conteneur : l'alerte s'aligne ici sur la largeur du site */
 .in-alerts .cn-alert-inner {
+  width: 100%;
+  max-width: var(--in-max);
+  margin-inline: auto;
+  padding-inline: var(--in-gutter);
   display: flex;
   align-items: flex-start;
   gap: var(--in-space-2);

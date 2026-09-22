@@ -1,3 +1,4 @@
 // Types Strapi générés, client API, view-models et schémas de blocs partagés (backend, admin, renderer).
 export * from './generated/strapi';
 export * from './blocks';
+export * from './site';

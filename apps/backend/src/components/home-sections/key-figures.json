@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_home_sections_key_figures",
+  "info": {
+    "displayName": "Chiffres clés",
+    "icon": "chartBubble",
+    "description": "3 ou 4 chiffres sur la commune"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "homepage.key-figure",
+      "max": 4
+    }
+  }
+}

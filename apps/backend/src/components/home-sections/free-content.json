@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_home_sections_free_content",
+  "info": {
+    "displayName": "Contenu libre",
+    "icon": "feather",
+    "description": "Texte libre de présentation de la commune"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "body": {
+      "type": "json"
+    }
+  }
+}

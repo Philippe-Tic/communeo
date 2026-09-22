@@ -1,0 +1,45 @@
+{
+  "collectionName": "components_home_sections_hero",
+  "info": {
+    "displayName": "Accroche",
+    "icon": "star",
+    "description": "Titre, sous-titre, image et boutons en haut de l'accueil"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "subtitle": {
+      "type": "text",
+      "maxLength": 300
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "primary_label": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "primary_url": {
+      "type": "string"
+    },
+    "secondary_label": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "secondary_url": {
+      "type": "string"
+    }
+  }
+}

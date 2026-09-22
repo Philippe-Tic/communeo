@@ -6,6 +6,7 @@
 import crypto from 'crypto';
 import netlifyService from '../../../services/netlify';
 import { createInvitationToken, escapeHtml } from '../../../utils/security';
+import { DEFAULT_THEME } from '@communeo/core';
 
 async function requireSuperAdmin(ctx) {
   const user = ctx.state.user;
@@ -186,6 +187,7 @@ export default {
       data: {
         name: data.name,
         slug: data.slug,
+        theme: DEFAULT_THEME,
         contact_mail: data.admin_email || '',
         contact_phone: data.contact_phone || '',
         address: data.address || '',

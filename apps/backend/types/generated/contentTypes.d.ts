@@ -961,7 +961,6 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 5;
       }>;
-    colors: Schema.Attribute.JSON;
     comarquage_audiences: Schema.Attribute.JSON;
     comarquage_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     contact_mail: Schema.Attribute.Email & Schema.Attribute.Required;
@@ -978,7 +977,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     domain_verification_token: Schema.Attribute.String & Schema.Attribute.Private;
     evenements: Schema.Attribute.Relation<'oneToMany', 'api::evenement.evenement'>;
     favicon: Schema.Attribute.Media<'images'>;
-    homepage: Schema.Attribute.Component<'homepage.homepage-config', false>;
+    homepage: Schema.Attribute.Component<'homepage.homepage', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1008,6 +1007,9 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     social_links: Schema.Attribute.Component<'social.social-link', true>;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     team_members: Schema.Attribute.Relation<'oneToMany', 'api::team-member.team-member'>;
+    theme: Schema.Attribute.Enumeration<['institutionnel', 'moderne', 'journal', 'bourg']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'institutionnel'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     waste_schedules: Schema.Attribute.Relation<'oneToMany', 'api::waste-schedule.waste-schedule'>;

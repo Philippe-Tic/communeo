@@ -23,20 +23,32 @@
       "targetField": "name",
       "required": true
     },
-    "colors": {
-      "type": "json"
+    "theme": {
+      "type": "enumeration",
+      "enum": [
+        "institutionnel",
+        "moderne",
+        "journal",
+        "bourg"
+      ],
+      "default": "institutionnel",
+      "required": true
     },
     "logo": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "favicon": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "contact_mail": {
       "type": "email",
@@ -65,13 +77,20 @@
     },
     "domain_status": {
       "type": "enumeration",
-      "enum": ["pending", "verified", "error"],
+      "enum": [
+        "pending",
+        "verified",
+        "error"
+      ],
       "default": "pending",
       "required": false
     },
     "domain_type": {
       "type": "enumeration",
-      "enum": ["apex", "subdomain"],
+      "enum": [
+        "apex",
+        "subdomain"
+      ],
       "required": false
     },
     "domain_verification_token": {
@@ -183,13 +202,18 @@
     },
     "open_data_platform": {
       "type": "enumeration",
-      "enum": ["data-gouv-fr", "opendatasoft", "custom", "none"],
+      "enum": [
+        "data-gouv-fr",
+        "opendatasoft",
+        "custom",
+        "none"
+      ],
       "default": "none"
     },
     "homepage": {
       "type": "component",
-      "component": "homepage.homepage-config",
-      "required": false
+      "repeatable": false,
+      "component": "homepage.homepage"
     },
     "auto_deploy_enabled": {
       "type": "boolean",

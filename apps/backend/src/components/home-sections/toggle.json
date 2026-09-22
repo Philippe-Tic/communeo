@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_home_sections_toggle",
+  "info": {
+    "displayName": "Section automatique",
+    "icon": "eye",
+    "description": "Section alimentée automatiquement (infos pratiques, météo, collectes…)"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    }
+  }
+}

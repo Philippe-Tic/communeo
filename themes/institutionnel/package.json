@@ -1,0 +1,31 @@
+{
+  "name": "@communeo/theme-institutionnel",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Thème Institutionnel des sites Communeo.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "astro check --root . --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "@communeo/core": "workspace:*",
+    "@communeo/theme-contract": "workspace:*",
+    "@communeo/ui-a11y": "workspace:*",
+    "@fontsource-variable/source-sans-3": "^5.3.0",
+    "@fontsource-variable/source-serif-4": "^5.3.0",
+    "@lucide/astro": "^1.47.0"
+  },
+  "peerDependencies": {
+    "astro": "^7.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.3.3",
+    "typescript": "^5.9.2"
+  }
+}

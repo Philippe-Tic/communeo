@@ -1,0 +1,126 @@
+---
+/**
+ * En-tête en deux étages : identité et services (téléphone, statut d'ouverture, contact, recherche),
+ * puis la barre de menu verte. Sous 1024 px, le menu se replie derrière un bouton « Menu ».
+ *
+ * Sans JavaScript : sous-menus en <details> natifs, menu mobile toujours déplié.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import { SECTIONS } from '@communeo/core';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import Menu from '@lucide/astro/icons/menu';
+import Search from '@lucide/astro/icons/search';
+import X from '@lucide/astro/icons/x';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav, path } = Astro.props.ctx;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+const contactHref = SECTIONS.contact.path;
+---
+<script is:inline>document.documentElement.classList.add('in-js');</script>
+<header class="in-header">
+  <div class="in-container in-header-top">
+    <a href="/" class="in-brand">
+      {site.logo && (
+        <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="in-brand-logo" />
+      )}
+      <span class="in-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
+    </a>
+
+    <div class="in-header-services">
+      {(site.contact.phone || site.contact.hours) && (
+        <div class="in-header-contact">
+          {site.contact.phone && <a href={site.contact.phone.href} class="in-header-phone">{site.contact.phone.label}</a>}
+          <OpeningStatus hours={site.contact.hours} class="in-header-status" />
+        </div>
+      )}
+      <a href={contactHref} class="in-button in-button-secondary in-header-button" aria-current={isCurrent(contactHref) ? 'page' : undefined}>Contact</a>
+      <form role="search" action="/recherche" class="in-header-search">
+        <label for="in-search-q" class="cn-sr-only">Rechercher sur le site</label>
+        <input id="in-search-q" name="q" type="search" placeholder="Rechercher…" />
+        <button type="submit">Rechercher</button>
+      </form>
+    </div>
+
+    <div class="in-header-actions">
+      <a href="/recherche" class="in-icon-button"><Search size={22} aria-hidden="true" />Recherche</a>
+      <button type="button" class="in-icon-button in-menu-toggle" aria-expanded="false" aria-controls="menu" data-in-menu-toggle>
+        <Menu size={22} aria-hidden="true" class="in-menu-open-icon" /><X size={22} aria-hidden="true" class="in-menu-close-icon" />
+        <span data-in-menu-label>Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <nav id="menu" class="in-nav in-on-dark" aria-label="Menu principal" tabindex="-1" data-in-menu>
+    <ul class="in-container in-nav-list">
+      <li><a href="/" class="in-nav-link" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
+      {nav.main.map((item) =>
+        item.kind === 'link' ? (
+          <li><a href={item.href} class="in-nav-link" aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ) : (
+          <li class="in-nav-item">
+            <details name="in-menu" class="in-nav-group">
+              <summary class:list={['in-nav-link', { 'in-nav-current': item.children.some((child) => isCurrent(child.href)) }]}>
+                {item.label}<ChevronDown size={18} aria-hidden="true" class="in-nav-chevron" />
+              </summary>
+              <ul class="in-subnav">
+                {item.children.map((child) => (
+                  <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>
+                ))}
+              </ul>
+            </details>
+          </li>
+        ),
+      )}
+    </ul>
+    <div class="in-nav-footer">
+      <p>
+        <strong>Mairie{site.contact.phone && <> · <a href={site.contact.phone.href}>{site.contact.phone.label}</a></>}</strong>
+      </p>
+      <OpeningStatus hours={site.contact.hours} />
+      <p class="in-nav-hint">Touche Échap pour fermer le menu</p>
+    </div>
+  </nav>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-in-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-in-menu]');
+  const label = toggle?.querySelector<HTMLElement>('[data-in-menu-label]');
+  const groups = () => [...document.querySelectorAll<HTMLDetailsElement>('.in-nav-group')];
+
+  function setMenu(open: boolean) {
+    if (!toggle || !menu || !label) return;
+    toggle.setAttribute('aria-expanded', String(open));
+    label.textContent = open ? 'Fermer' : 'Menu';
+    menu.toggleAttribute('data-open', open);
+  }
+
+  toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
+
+  // Le lien d'évitement « Aller au menu » déplie le menu mobile
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    if (target.closest('a[href="#menu"]')) setMenu(true);
+    // Un clic hors d'un sous-menu le referme
+    for (const group of groups()) if (group.open && !group.contains(target)) group.open = false;
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    const group = groups().find((item) => item.open);
+    if (group) {
+      group.open = false;
+      group.querySelector('summary')?.focus();
+      return;
+    }
+    if (toggle?.getAttribute('aria-expanded') === 'true' && menu?.contains(document.activeElement)) {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
+</script>

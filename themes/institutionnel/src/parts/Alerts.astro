@@ -1,0 +1,85 @@
+---
+/**
+ * Bandeau d'alertes sous l'en-tête. La sévérité passe par l'icône, le libellé et la couleur.
+ * Les alertes « information » et « attention » peuvent être masquées (mémorisé dans le navigateur) ;
+ * les alertes urgentes restent affichées.
+ */
+import type { AlertVM } from '@communeo/core';
+import Info from '@lucide/astro/icons/info';
+import OctagonAlert from '@lucide/astro/icons/octagon-alert';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
+import X from '@lucide/astro/icons/x';
+
+interface Props {
+  alerts: AlertVM[];
+}
+
+const { alerts } = Astro.props;
+const icons = { info: Info, warning: TriangleAlert, critical: OctagonAlert };
+---
+{alerts.length > 0 && (
+  <section class="in-alerts" aria-label="Alertes">
+    {alerts.map((alert) => {
+      const Icon = icons[alert.severity.key];
+      return (
+        <div class={`in-alert in-alert-${alert.severity.key}`} data-in-alert={alert.id} data-cn-alert-until={alert.displayUntil}>
+          <div class="in-container in-alert-inner">
+            <Icon size={26} aria-hidden="true" class="in-alert-icon" />
+            <p class="in-alert-text">
+              <strong>{alert.severity.label} – {alert.title} :</strong>{' '}
+              <span class="in-alert-detail">
+                {alert.message}
+                {alert.link && (
+                  <> <a href={alert.link.href} target={alert.link.external ? '_blank' : undefined} rel={alert.link.external ? 'noopener noreferrer' : undefined}>
+                    {alert.link.label}{alert.link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+                  </a></>
+                )}
+              </span>
+            </p>
+            {alert.severity.key !== 'critical' && (
+              <button type="button" class="in-alert-close" data-in-alert-close>
+                <X size={24} aria-hidden="true" /><span class="cn-sr-only">Masquer l'alerte « {alert.title} »</span>
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </section>
+)}
+
+<script>
+  const KEY = 'communeo-alertes-masquees';
+
+  const read = (): string[] => {
+    try {
+      return JSON.parse(localStorage.getItem(KEY) ?? '[]') as string[];
+    } catch {
+      return [];
+    }
+  };
+
+  const hide = (alert: HTMLElement) => {
+    alert.hidden = true;
+    const region = alert.closest<HTMLElement>('.in-alerts');
+    if (region && [...region.querySelectorAll<HTMLElement>('[data-in-alert]')].every((item) => item.hidden)) region.hidden = true;
+  };
+
+  const dismissed = read();
+  for (const alert of document.querySelectorAll<HTMLElement>('[data-in-alert]')) {
+    if (alert.querySelector('[data-in-alert-close]') && dismissed.includes(alert.dataset.inAlert!)) hide(alert);
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest('[data-in-alert-close]');
+    const alert = button?.closest<HTMLElement>('[data-in-alert]');
+    if (!alert) return;
+    hide(alert);
+    try {
+      localStorage.setItem(KEY, JSON.stringify([...new Set([...read(), alert.dataset.inAlert!])]));
+    } catch {
+      // Stockage indisponible : l'alerte reviendra à la prochaine page
+    }
+    document.getElementById('contenu')?.focus();
+  });
+</script>

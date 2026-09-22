@@ -1,0 +1,28 @@
+---
+import type { PaginationLinks } from '@communeo/theme-contract';
+import ArrowLeft from '@lucide/astro/icons/arrow-left';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+
+interface Props {
+  pagination: PaginationLinks;
+  /** Nom des éléments comptés : « actualités » */
+  noun?: string;
+}
+const { pagination, noun } = Astro.props;
+---
+{pagination.pageCount > 1 && (
+  <nav class="in-pagination" aria-label="Pagination">
+    <ul>
+      {pagination.previous && (
+        <li><a href={pagination.previous} rel="prev" class="in-pagination-step"><ArrowLeft size={20} aria-hidden="true" />Précédent<span class="cn-sr-only"> : page {pagination.page - 1}</span></a></li>
+      )}
+      {pagination.pages.map((page) => (
+        <li><a href={page.href} aria-current={page.current ? 'page' : undefined}><span class="cn-sr-only">Page </span>{page.page}</a></li>
+      ))}
+      {pagination.next && (
+        <li><a href={pagination.next} rel="next" class="in-pagination-step">Suivant<span class="cn-sr-only"> : page {pagination.page + 1}</span><ArrowRight size={20} aria-hidden="true" /></a></li>
+      )}
+    </ul>
+    <p class="in-meta">Page {pagination.page} sur {pagination.pageCount}{noun && <> · {pagination.total} {noun}</>}</p>
+  </nav>
+)}

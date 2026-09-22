@@ -1,0 +1,34 @@
+---
+/**
+ * Mise en page du thème : en-tête, alertes, fil d'Ariane, contenu, pied de page.
+ * Le document (<html>, <head>, liens d'évitement, bandeau cookies) est fourni par le renderer.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import Alerts from './Alerts.astro';
+import Footer from './Footer.astro';
+import Header from './Header.astro';
+import '../styles.css';
+
+interface Props {
+  ctx: PageContext;
+  /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
+  heading?: string | false;
+}
+
+const { ctx, heading = ctx.title } = Astro.props;
+---
+<Header ctx={ctx} />
+<Alerts alerts={ctx.alerts} />
+
+<div class="in-page">
+  <div class="in-container">
+    <Breadcrumb items={ctx.breadcrumb} class="in-breadcrumb" />
+    <main id="contenu" tabindex="-1" class="in-main">
+      {heading && <h1 class="in-title">{heading}</h1>}
+      <slot />
+    </main>
+  </div>
+</div>
+
+<Footer ctx={ctx} />

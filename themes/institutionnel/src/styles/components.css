@@ -1,0 +1,283 @@
+/* Composants transverses : liens d'évitement, consentement, pagination, filtres, formulaires. */
+
+/* Liens d'évitement : barre sombre en haut de page au premier Tab */
+.cn-skip-links ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--in-space-1);
+}
+
+.cn-skip-links a {
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--in-target);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: var(--in-ink);
+  background: #fff;
+  border: 3px solid var(--in-ink);
+  border-radius: var(--in-radius);
+  box-shadow: 0 0 0 0.5rem var(--in-ink);
+}
+
+.cn-skip-links a:focus {
+  top: 0.5rem;
+  left: 0.5rem;
+}
+
+/* Bandeau cookies : carte fixée en bas, les deux choix ont le même poids */
+.cn-cookie-banner {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  display: grid;
+  gap: 0.875rem;
+  max-height: 80vh;
+  padding: 1.25rem var(--in-gutter);
+  overflow-y: auto;
+  background: var(--in-surface);
+  border-top: 2px solid var(--in-ink);
+  box-shadow: var(--in-shadow);
+}
+
+.cn-cookie-banner h2,
+.cn-cookie-dialog h2 {
+  font-size: 1.375rem;
+}
+
+.cn-cookie-banner p {
+  font-size: 1.0625rem;
+}
+
+.cn-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cn-cookie-actions button {
+  flex: 1 1 auto;
+}
+
+@media (min-width: 48rem) {
+  .cn-cookie-banner {
+    right: var(--in-space-3);
+    bottom: var(--in-space-3);
+    left: auto;
+    max-width: 36rem;
+    padding: 1.375rem 1.5rem;
+    border: 2px solid var(--in-ink);
+    border-radius: var(--in-radius);
+  }
+
+  .cn-cookie-actions button {
+    flex: 0 1 auto;
+  }
+}
+
+.cn-cookie-dialog {
+  width: min(36rem, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  padding: 1.375rem 1.5rem;
+  color: var(--in-ink);
+  background: var(--in-surface);
+  border: 1px solid var(--in-border);
+  border-radius: var(--in-radius);
+  box-shadow: var(--in-shadow);
+}
+
+.cn-cookie-dialog::backdrop {
+  background: rgb(28 35 33 / 60%);
+}
+
+.cn-cookie-dialog form {
+  display: grid;
+  gap: var(--in-space-2);
+}
+
+.cn-cookie-dialog legend {
+  margin-bottom: 0.25rem;
+}
+
+.cn-cookie-dialog fieldset p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--in-space-2);
+  padding-block: 0.875rem;
+  border-top: 1px solid var(--in-border);
+}
+
+.cn-cookie-dialog fieldset label {
+  order: -1;
+}
+
+/* Interrupteur : case à cocher habillée, l'état reste lisible sans la couleur (position du rond) */
+.cn-cookie-dialog input[role='switch'],
+.cn-cookie-dialog input[type='checkbox']:disabled {
+  position: relative;
+  width: 3.25rem;
+  height: 1.875rem;
+  margin: 0;
+  appearance: none;
+  background: var(--in-field);
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+.cn-cookie-dialog input[role='switch']::before,
+.cn-cookie-dialog input[type='checkbox']:disabled::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1.5rem;
+  height: 1.5rem;
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.cn-cookie-dialog input:checked,
+.cn-cookie-dialog input[type='checkbox']:checked:disabled {
+  background: var(--in-primary);
+}
+
+.cn-cookie-dialog input:checked::before {
+  transform: translateX(1.375rem);
+}
+
+.cn-cookie-dialog input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Pagination ------------------------------------------------------------------------------- */
+.in-pagination {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.in-pagination ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.in-pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: var(--in-target);
+  min-height: var(--in-target);
+  padding: 0 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--in-surface);
+  border: 2px solid var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+.in-pagination a:hover {
+  border-color: var(--in-primary);
+}
+
+.in-pagination a[aria-current='page'] {
+  color: #fff;
+  background: var(--in-primary);
+  border-color: var(--in-primary);
+}
+
+.in-pagination p {
+  font-size: 1rem;
+}
+
+/* Filtres ---------------------------------------------------------------------------------- */
+.in-filters ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.in-filters a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--in-target);
+  padding: 0.25rem 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  background: var(--in-surface);
+  border: 2px solid var(--in-field);
+  border-radius: var(--in-radius);
+}
+
+.in-filters a:hover {
+  border-color: var(--in-primary);
+  background: var(--in-primary-light);
+}
+
+.in-filters a[aria-current='page'] {
+  color: #fff;
+  background: var(--in-primary);
+  border-color: var(--in-primary);
+}
+
+.in-filters-count {
+  font-weight: 400;
+}
+
+/* Formulaires ------------------------------------------------------------------------------ */
+.in-form {
+  display: grid;
+  gap: var(--in-space-3);
+  max-width: 40rem;
+}
+
+.in-form p:has(> label) {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.in-form p:has(> input[type='checkbox']) {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-size: 1.0625rem;
+}
+
+.in-form p:has(> input[type='checkbox']) label {
+  font-weight: 400;
+}
+
+.in-form-status:empty {
+  display: none;
+}
+
+.in-form-status {
+  padding: 1rem 1.125rem;
+  background: var(--in-primary-light);
+  border: 2px solid var(--in-primary);
+  border-radius: var(--in-radius);
+}
+
+.in-form-status:has(ul) {
+  background: var(--in-danger-bg);
+  border-color: var(--in-danger);
+}
+
+.in-form-status ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.5rem;
+}

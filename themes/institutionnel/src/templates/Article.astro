@@ -1,0 +1,22 @@
+---
+import type { ArticleVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import ArticleCard from '../parts/ArticleCard.astro';
+import Content from '../parts/Content.astro';
+
+interface Props { ctx: PageContext; article: ArticleVM }
+const { ctx, article } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <p class="in-meta"><span>{article.category.label}</span> · Publié le <time datetime={article.date.iso}>{article.date.label}</time>{article.author && <> · {article.author}</>}</p>
+  {article.summary && <p class="in-lead">{article.summary}</p>}
+  {article.image && <img src={article.image.src} srcset={article.image.srcset ?? undefined} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} />}
+  <Content blocks={article.blocks} toc={article.toc} />
+  {article.related.length > 0 && (
+    <section aria-labelledby="in-related">
+      <h2 id="in-related">Autres actualités</h2>
+      {article.related.slice(0, 3).map((other) => <ArticleCard article={other} />)}
+    </section>
+  )}
+</Layout>

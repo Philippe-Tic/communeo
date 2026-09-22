@@ -1,0 +1,17 @@
+---
+import type { ArticleCardVM } from '@communeo/core';
+import type { FilterOption, PaginationLinks } from '@communeo/theme-contract';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import ArticleCard from '../parts/ArticleCard.astro';
+import Filters from '../parts/Filters.astro';
+import Pagination from '../parts/Pagination.astro';
+
+interface Props { ctx: PageContext; articles: ArticleCardVM[]; categories: FilterOption[]; pagination: PaginationLinks }
+const { ctx, articles, categories, pagination } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <Filters label="Filtrer par catégorie" options={categories} allHref="/actualites" />
+  {articles.length ? articles.map((article) => <ArticleCard article={article} level={2} />) : <p>Aucune actualité pour le moment.</p>}
+  <Pagination pagination={pagination} noun="actualités" />
+</Layout>

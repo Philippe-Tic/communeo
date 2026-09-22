@@ -1,0 +1,11 @@
+---
+import type { BlockOf } from '@communeo/core';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+
+interface Props { block: BlockOf<'callout'> }
+const { block } = Astro.props;
+---
+<aside class={`in-callout in-callout-${block.variant}`} aria-label={block.title ?? block.variantLabel}>
+  <p class="in-callout-label"><strong>{block.variantLabel}{block.title && block.title !== block.variantLabel && <> – {block.title}</>}</strong></p>
+  <RichText doc={block.body} />
+</aside>

@@ -1,0 +1,23 @@
+---
+import type { AlertVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; alerts: AlertVM[] }
+const { ctx, alerts } = Astro.props;
+---
+<Layout ctx={ctx}>
+  {alerts.length ? (
+    <ul>
+      {alerts.map((alert) => (
+        <li>
+          <h2>{alert.title}</h2>
+          <p><strong>{alert.severity.label}</strong>{alert.type && <> · {alert.type.label}</>}{alert.period && <> · {alert.period}</>}</p>
+          <p>{alert.message}</p>
+          {(alert.area || alert.location) && <p>Secteur : {alert.area ?? alert.location}</p>}
+          {alert.link && <p><a href={alert.link.href}>{alert.link.label}</a></p>}
+        </li>
+      ))}
+    </ul>
+  ) : <p>Aucune perturbation en cours.</p>}
+</Layout>

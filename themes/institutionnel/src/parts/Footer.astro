@@ -1,0 +1,65 @@
+---
+/** Pied de page vert foncé : coordonnées, horaires, liens utiles, réseaux sociaux, liens légaux. */
+import type { PageContext } from '@communeo/theme-contract';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav } = Astro.props.ctx;
+---
+<footer class="in-footer in-on-dark">
+  <div class="in-container in-footer-grid">
+    <section aria-labelledby="in-footer-mairie">
+      <h2 id="in-footer-mairie" class="in-footer-title">Mairie de {site.name}</h2>
+      <address>
+        {site.contact.address && <span class="in-footer-address">{site.contact.address}</span>}
+        {site.contact.phone && <a href={site.contact.phone.href}>{site.contact.phone.label}</a>}
+        <a href={site.contact.email.href}>{site.contact.email.label}</a>
+      </address>
+    </section>
+
+    {site.contact.hoursSummary.length > 0 && (
+      <section aria-labelledby="in-footer-hours">
+        <h2 id="in-footer-hours" class="in-footer-heading">Horaires d'ouverture</h2>
+        <dl class="in-footer-hours">
+          {site.contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
+        </dl>
+      </section>
+    )}
+
+    {nav.footer.length > 0 && (
+      <nav aria-labelledby="in-footer-links">
+        <h2 id="in-footer-links" class="in-footer-heading">Liens utiles</h2>
+        <ul class="in-footer-list">
+          {nav.footer.map((link) => (
+            <li>
+              <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+                {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {site.social.length > 0 && (
+      <section aria-labelledby="in-footer-social">
+        <h2 id="in-footer-social" class="in-footer-heading">Suivez la commune</h2>
+        <ul class="in-footer-list">
+          {site.social.map((link) => (
+            <li><a href={link.href} target="_blank" rel="noopener noreferrer">{link.label} <span class="in-footer-new">(nouvelle fenêtre)</span></a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+
+  <div class="in-footer-legal">
+    <ul class="in-container" aria-label="Informations légales">
+      {nav.legal.map((link) => (
+        <li><a href={link.href} data-cn-cookie-preferences={link.href === '/gestion-des-cookies' ? '' : undefined}>{link.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</footer>

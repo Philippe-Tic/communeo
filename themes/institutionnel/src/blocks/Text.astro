@@ -1,0 +1,8 @@
+---
+import type { BlockOf } from '@communeo/core';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+
+interface Props { block: BlockOf<'text'> }
+const { block } = Astro.props;
+---
+<RichText doc={block.body} class="in-prose" />

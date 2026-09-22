@@ -34,6 +34,11 @@ jobs:
 
       - run: pnpm turbo run lint typecheck test --cache-dir=.turbo
 
+      - name: Types Strapi à jour
+        run: |
+          pnpm gen:types
+          git diff --exit-code packages/core/src/generated || (echo "::error::Types Strapi obsolètes : lancer 'pnpm gen:types' et commiter le résultat." && exit 1)
+
   build:
     name: Build
     runs-on: ubuntu-latest

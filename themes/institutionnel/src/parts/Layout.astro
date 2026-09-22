@@ -6,7 +6,7 @@
 import type { PageContext } from '@communeo/theme-contract';
 import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
 import { searchAttributes } from '@communeo/ui-a11y/search';
-import Alerts from './Alerts.astro';
+import Alerts from '@communeo/ui-a11y/Alerts.astro';
 import Footer from './Footer.astro';
 import Header from './Header.astro';
 import '../styles.css';
@@ -22,7 +22,7 @@ interface Props {
 const { ctx, heading = ctx.title, full = false } = Astro.props;
 ---
 <Header ctx={ctx} />
-<Alerts alerts={ctx.alerts} />
+<Alerts alerts={ctx.alerts} class="in-alerts" />
 
 <div class="in-page">
   {full ? (

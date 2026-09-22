@@ -1,0 +1,49 @@
+---
+/**
+ * Bandeau d'alertes, commun à tous les thèmes.
+ *
+ * Le rendu initial vient du build (lisible sans JavaScript). Ensuite, le navigateur demande les
+ * alertes en cours à l'API publique : une alerte publiée dans l'admin apparaît sans attendre la
+ * prochaine mise en ligne du site, et une alerte terminée disparaît d'elle-même.
+ *
+ * La sévérité est portée par le libellé (« Urgent », « Attention », « Information ») et par une
+ * classe : le thème l'habille (couleur, icône) sans jamais reposer sur la couleur seule.
+ */
+import type { AlertVM } from '@communeo/core';
+
+interface Props {
+  alerts: AlertVM[];
+  class?: string;
+}
+
+const { alerts, class: className } = Astro.props;
+---
+<section class:list={['cn-alerts', className]} aria-label="Alertes" data-cn-alerts hidden={alerts.length === 0}>
+  {alerts.map((alert) => (
+    <div class={`cn-alert cn-alert-${alert.severity.key}`} data-cn-alert={alert.id} data-cn-alert-until={alert.displayUntil}>
+      <div class="cn-alert-inner">
+        <span class="cn-alert-icon" aria-hidden="true"></span>
+        <p class="cn-alert-text">
+          <strong>{alert.severity.label} – {alert.title} :</strong>{' '}
+          <span class="cn-alert-detail">
+            {alert.message}
+            {alert.link && (
+              <> <a href={alert.link.href} target={alert.link.external ? '_blank' : undefined} rel={alert.link.external ? 'noopener noreferrer' : undefined}>
+                {alert.link.label}{alert.link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+              </a></>
+            )}
+          </span>
+        </p>
+        {alert.severity.key !== 'critical' && (
+          <button type="button" class="cn-alert-close cn-js-only" data-cn-alert-close>
+            <span aria-hidden="true">✕</span><span class="cn-sr-only">Masquer l'alerte « {alert.title} »</span>
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</section>
+
+<script>
+  import './scripts/alerts';
+</script>

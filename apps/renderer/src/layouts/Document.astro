@@ -45,6 +45,10 @@ const breadcrumbLd =
       ]
     : [];
 const jsonLd = [organization, ...breadcrumbLd, ...seo.jsonLd];
+
+// Bandeau d'alertes rechargé par le navigateur : mise en ligne immédiate, sans reconstruire le site
+const apiUrl = (process.env.STRAPI_PUBLIC_URL ?? process.env.STRAPI_URL ?? '').replace(/\/$/, '');
+const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUrl}/api/alertes/public/${site.id}` : undefined;
 ---
 <!doctype html>
 <html lang="fr">
@@ -69,7 +73,7 @@ const jsonLd = [organization, ...breadcrumbLd, ...seo.jsonLd];
     <link rel="alternate" type="application/rss+xml" title={`Actualités – ${site.name}`} href="/rss.xml" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
   </head>
-  <body>
+  <body data-cn-alerts-endpoint={alertsEndpoint}>
     <script is:inline>document.documentElement.classList.add('cn-js');</script>
     <SkipLinks />
     <slot />

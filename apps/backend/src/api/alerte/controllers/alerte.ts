@@ -28,6 +28,10 @@ export default factories.createCoreController('api::alerte.alerte', ({ strapi })
       return new Date(alert.display_until) > new Date();
     });
 
+    // Les sites publics sont statiques : le bandeau est rechargé à chaque page, un cache court suffit
+    // (les en-têtes CORS viennent de la configuration Strapi, communes à toute l'API publique)
+    ctx.set('Cache-Control', 'public, max-age=60');
+
     return { data: activeAlerts };
   },
 }));

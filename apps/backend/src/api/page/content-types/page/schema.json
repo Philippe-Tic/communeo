@@ -23,6 +23,10 @@
       "maxLength": 100,
       "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
+    "lead": {
+      "type": "text",
+      "maxLength": 300
+    },
     "blocks": {
       "type": "dynamiczone",
       "components": [

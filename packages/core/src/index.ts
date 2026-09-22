@@ -2,3 +2,6 @@
 export * from './generated/strapi';
 export * from './blocks';
 export * from './site';
+export * from './format';
+export * from './vm';
+export * from './source';

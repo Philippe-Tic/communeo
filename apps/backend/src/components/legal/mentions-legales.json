@@ -24,10 +24,10 @@
       "type": "string"
     },
     "credits": {
-      "type": "richtext"
+      "type": "json"
     },
     "mentions_legales_extra": {
-      "type": "richtext"
+      "type": "json"
     }
   }
 }

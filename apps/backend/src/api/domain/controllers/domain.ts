@@ -3,7 +3,7 @@
  */
 
 import domainService from '../../../services/domain';
-import { isPublisherUnavailable } from '../../../publishing';
+import { isPublisherUnavailable } from '@communeo/pipeline';
 import domainValidationService from '../../../services/domain-validation';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';

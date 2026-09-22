@@ -5,7 +5,7 @@
     "singularName": "deployment",
     "pluralName": "deployments",
     "displayName": "Deployment",
-    "description": "Track deployments to Netlify"
+    "description": "Mises en ligne : un enregistrement par job de build"
   },
   "options": {
     "draftAndPublish": false
@@ -19,14 +19,21 @@
       "inversedBy": "deployments",
       "required": true
     },
+    "job_id": {
+      "type": "string",
+      "unique": true
+    },
     "deployment_id": {
       "type": "string",
-      "required": true,
       "unique": true
     },
     "status": {
       "type": "enumeration",
-      "enum": ["building", "ready", "error"],
+      "enum": [
+        "building",
+        "ready",
+        "error"
+      ],
       "default": "building",
       "required": true
     },

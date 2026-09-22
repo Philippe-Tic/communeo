@@ -620,7 +620,7 @@ export interface ApiContactSubmissionContactSubmission extends Struct.Collection
 export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
   collectionName: 'deployments';
   info: {
-    description: 'Track deployments to Netlify';
+    description: 'Mises en ligne : un enregistrement par job de build';
     displayName: 'Deployment';
     pluralName: 'deployments';
     singularName: 'deployment';
@@ -633,9 +633,10 @@ export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
     completed_at: Schema.Attribute.DateTime;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    deployment_id: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique;
+    deployment_id: Schema.Attribute.String & Schema.Attribute.Unique;
     deployment_url: Schema.Attribute.String;
     error_message: Schema.Attribute.Text;
+    job_id: Schema.Attribute.String & Schema.Attribute.Unique;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::deployment.deployment'> & Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;

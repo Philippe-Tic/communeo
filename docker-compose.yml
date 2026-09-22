@@ -45,6 +45,9 @@ services:
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
+      # File des builds (schéma pgboss de la même base), traitée par le service worker
+      QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
+      WORKER_SECRET: ${WORKER_SECRET}
       RESEND_API_KEY: ${RESEND_API_KEY}
       EMAIL_DEFAULT_FROM: ${EMAIL_DEFAULT_FROM:-noreply@communeo.fr}
       ADMIN_URL: https://${DOMAIN}
@@ -58,7 +61,30 @@ services:
       SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
-      - ./sites:/sites:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  worker:
+    image: communeo-worker:latest
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      strapi:
+        condition: service_started
+    environment:
+      QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
+      STRAPI_URL: http://strapi:1337
+      STRAPI_PUBLIC_URL: https://${DOMAIN}
+      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
+      WORKER_SECRET: ${WORKER_SECRET}
+      NETLIFY_TOKEN: ${NETLIFY_TOKEN}
     logging:
       driver: json-file
       options:

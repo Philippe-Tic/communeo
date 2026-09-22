@@ -19,6 +19,10 @@
     "test": {
       "dependsOn": [
         "^build"
+      ],
+      "env": [
+        "TEST_QUEUE_DATABASE_URL",
+        "CI"
       ]
     },
     "dev": {

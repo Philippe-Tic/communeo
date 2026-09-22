@@ -13,12 +13,14 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/backend/package.json apps/backend/
 COPY apps/backend/src/providers apps/backend/src/providers
 COPY packages/core/package.json packages/core/
+COPY packages/pipeline/package.json packages/pipeline/
 RUN pnpm install --frozen-lockfile --filter @communeo/backend...
 
 COPY tsconfig.base.json ./
 COPY packages/core packages/core
+COPY packages/pipeline packages/pipeline
 COPY apps/backend apps/backend
-# Construit @communeo/core puis le backend
+# Construit @communeo/core, @communeo/pipeline puis le backend
 RUN NODE_OPTIONS=--max-old-space-size=2048 pnpm --filter "@communeo/backend..." build
 
 # Dossier autonome avec les seules dépendances de production
@@ -30,14 +32,12 @@ FROM node:22-alpine
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
-ENV SITES_PATH=/sites
 
 WORKDIR /app
 
 COPY --from=builder /out ./
 
-# Le service de déploiement (V1) a besoin du runtime Node.js complet
-# pour exécuter npm ci et npx astro build dans des dossiers temporaires
+# Les sites ne sont pas construits ici : voir le worker (apps/worker/Dockerfile)
 
 EXPOSE 1337
 

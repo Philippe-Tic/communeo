@@ -5,8 +5,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { getPublisher, PublisherUnavailableError } from '../src/publishing';
-import { NetlifyPublisher } from '../src/publishing/netlify';
+import { getPublisher, PublisherUnavailableError } from '../src';
+import { NetlifyPublisher } from '../src/publisher/netlify';
 
 interface Call {
   method: string;
@@ -20,7 +20,7 @@ type Handler = (call: Call) => { status?: number; body?: unknown } | undefined;
 /** Fausse API Netlify : chaque requête est journalisée puis confiée au handler. */
 function fakeNetlify(handler: Handler) {
   const calls: Call[] = [];
-  const fetch = (async (url: string, init: RequestInit = {}) => {
+  const fetch: typeof globalThis.fetch = (async (url: string, init: RequestInit = {}) => {
     const headers = init.headers as Record<string, string>;
     const call: Call = {
       method: init.method ?? 'GET',
@@ -32,7 +32,7 @@ function fakeNetlify(handler: Handler) {
     const res = handler(call) ?? { status: 404, body: 'Not Found' };
     const text = res.body === undefined ? '' : typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
     return new Response(text || null, { status: res.status ?? 200 });
-  }) as typeof fetch;
+  }) as typeof globalThis.fetch;
   return { calls, fetch };
 }
 
@@ -56,7 +56,7 @@ describe('ensureSite', () => {
     });
     expect(await p.ensureSite(site)).toEqual({ hostId: 'site-lyon', defaultUrl: 'https://lyon-mairie.netlify.app' });
     expect(api.calls.filter((c) => c.method === 'POST')).toHaveLength(0);
-    expect(api.calls[0].path).toContain('name=lyon-mairie');
+    expect(api.calls[0]?.path).toContain('name=lyon-mairie');
   });
 
   it("crée le site quand il n'existe pas, avec le préfixe d'environnement", async () => {

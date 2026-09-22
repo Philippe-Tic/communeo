@@ -8,7 +8,7 @@
     "description": "News articles and posts"
   },
   "options": {
-    "draftAndPublish": false
+    "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
@@ -27,16 +27,12 @@
       "type": "richtext",
       "required": true
     },
-    "status": {
-      "type": "enumeration",
-      "enum": ["draft", "published", "archived"],
-      "default": "draft",
-      "required": true
-    },
     "image": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "required": false
     },
     "publication_date": {
@@ -50,7 +46,12 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["news", "event", "information", "emergency"],
+      "enum": [
+        "news",
+        "event",
+        "information",
+        "emergency"
+      ],
       "default": "news",
       "required": true
     },

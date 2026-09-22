@@ -444,7 +444,7 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     singularName: 'article';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   attributes: {
     author: Schema.Attribute.String &
@@ -470,9 +470,6 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
     scheduled_at: Schema.Attribute.DateTime;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique;
-    status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>;
     summary: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 300;
@@ -679,7 +676,7 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
     singularName: 'evenement';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   attributes: {
     address: Schema.Attribute.Text;
@@ -710,6 +707,7 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     registration_deadline: Schema.Attribute.DateTime;
     registration_required: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    scheduled_at: Schema.Attribute.DateTime;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique;
     start_date: Schema.Attribute.DateTime & Schema.Attribute.Required;
@@ -809,7 +807,7 @@ export interface ApiOfficialDocumentOfficialDocument extends Struct.CollectionTy
     singularName: 'official-document';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   attributes: {
     additional_files: Schema.Attribute.Media<'files' | 'images', true>;
@@ -838,12 +836,10 @@ export interface ApiOfficialDocumentOfficialDocument extends Struct.CollectionTy
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     reference_number: Schema.Attribute.String;
+    scheduled_at: Schema.Attribute.DateTime;
     session_date: Schema.Attribute.Date;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required & Schema.Attribute.Unique;
-    status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -864,7 +860,7 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     singularName: 'page';
   };
   options: {
-    draftAndPublish: false;
+    draftAndPublish: true;
   };
   attributes: {
     content: Schema.Attribute.RichText & Schema.Attribute.Required;
@@ -887,9 +883,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
     show_in_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
-    status: Schema.Attribute.Enumeration<['draft', 'published', 'archived']> &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'draft'>;
     template: Schema.Attribute.Enumeration<['default', 'about', 'services']> & Schema.Attribute.DefaultTo<'default'>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &

@@ -1,3 +1,6 @@
 export * from './homepage';
 export * from './themes';
 export * from './slug';
+export * from './opening-hours';
+export * from './navigation';
+export * from './settings';

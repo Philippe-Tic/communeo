@@ -7,11 +7,15 @@
   "attributes": {
     "accessibility_level": {
       "type": "enumeration",
-      "enum": ["non-conforme", "partiellement-conforme", "conforme"],
+      "enum": [
+        "non-conforme",
+        "partiellement-conforme",
+        "conforme"
+      ],
       "default": "non-conforme"
     },
     "accessibility_declaration": {
-      "type": "richtext"
+      "type": "json"
     },
     "accessibility_schema_url": {
       "type": "string"

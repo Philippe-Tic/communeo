@@ -6,7 +6,7 @@
   },
   "attributes": {
     "rgpd_policy": {
-      "type": "richtext"
+      "type": "json"
     },
     "dpo_name": {
       "type": "string"

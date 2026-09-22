@@ -13,7 +13,7 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **apps/backend/** — Strapi v5 headless CMS (TypeScript). REST API, SQLite (dev) or PostgreSQL (prod). The `site-isolation` middleware enforces multi-tenant isolation (fail-closed) based on the authenticated user's site.
 - **apps/admin/** — V2 admin (React 19 + Vite + TanStack Router/Query + shadcn/ui), built in phase 3. Mockups: `v2/Design Admin Handoff/`.
 - **apps/renderer/** — V2 Astro 5 renderer (static for prod, SSR for preview), built in phase 1.
-- **packages/core** — generated Strapi types, API client, view-models, block schemas (zod).
+- **packages/core** — generated Strapi types, block/settings schemas (zod), French formatting, **view-models** (`src/vm`: the ready-to-render data themes receive, never Strapi types) and the **content source** (`src/source`: `createStrapiLoader` → `createContentSource`).
 - **packages/theme-contract** — interface a theme must implement.
 - **packages/ui-a11y** — shared accessible components for themes.
 - **themes/** — one package per public-site theme (Institutionnel, Moderne, Journal, Bourg; mockups in `v2/`).

@@ -24,8 +24,18 @@
     },
     "role": {
       "type": "enumeration",
-      "enum": ["maire", "adjoint", "conseiller", "dgs", "agent"],
+      "enum": [
+        "maire",
+        "adjoint",
+        "conseiller",
+        "dgs",
+        "agent"
+      ],
       "required": true
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 80
     },
     "delegation": {
       "type": "string",
@@ -36,10 +46,19 @@
       "type": "text",
       "required": false
     },
+    "email": {
+      "type": "email"
+    },
+    "office_hours": {
+      "type": "string",
+      "maxLength": 200
+    },
     "photo": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "required": false
     },
     "display_order": {

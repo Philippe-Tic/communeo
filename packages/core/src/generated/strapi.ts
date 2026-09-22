@@ -319,7 +319,7 @@ export interface HomepageQuickLink extends StrapiComponent {
 /** Composant `legal.accessibilite` */
 export interface LegalAccessibilite extends StrapiComponent {
   accessibility_level: LegalAccessibiliteAccessibilityLevel | null;
-  accessibility_declaration: string | null;
+  accessibility_declaration: JsonValue | null;
   accessibility_schema_url: string | null;
   accessibility_action_plan_url: string | null;
 }
@@ -341,13 +341,13 @@ export interface LegalMentionsLegales extends StrapiComponent {
   hebergeur_name: string | null;
   hebergeur_address: string | null;
   hebergeur_phone: string | null;
-  credits: string | null;
-  mentions_legales_extra: string | null;
+  credits: JsonValue | null;
+  mentions_legales_extra: JsonValue | null;
 }
 
 /** Composant `legal.rgpd` */
 export interface LegalRgpd extends StrapiComponent {
-  rgpd_policy: string | null;
+  rgpd_policy: JsonValue | null;
   dpo_name: string | null;
   dpo_email: string | null;
   dpo_phone: string | null;
@@ -525,6 +525,7 @@ export interface OfficialDocument extends StrapiPublishableDocument {
 export interface Page extends StrapiPublishableDocument {
   title: string;
   slug: string;
+  lead: string | null;
   blocks?: Array<DynamicZoneEntry<'blocks.text', BlocksText> | DynamicZoneEntry<'blocks.image', BlocksImage> | DynamicZoneEntry<'blocks.buttons', BlocksButtons> | DynamicZoneEntry<'blocks.callout', BlocksCallout> | DynamicZoneEntry<'blocks.documents', BlocksDocuments> | DynamicZoneEntry<'blocks.gallery', BlocksGallery> | DynamicZoneEntry<'blocks.faq', BlocksFaq> | DynamicZoneEntry<'blocks.contact', BlocksContact> | DynamicZoneEntry<'blocks.video', BlocksVideo>>;
   meta_description: string | null;
   featured_image?: Media | null;
@@ -597,8 +598,11 @@ export interface TeamMember extends StrapiDocument {
   first_name: string;
   last_name: string;
   role: TeamMemberRole;
+  title: string | null;
   delegation: string | null;
   bio: string | null;
+  email: string | null;
+  office_hours: string | null;
   photo?: Media | null;
   display_order: number | null;
   site?: Site | null;

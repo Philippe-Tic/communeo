@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "@communeo/backend",
   "version": "0.1.0",
   "private": true,
   "description": "A Strapi application",
@@ -12,7 +12,8 @@
     "start": "strapi start",
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
-    "upgrade:dry": "npx @strapi/upgrade latest --dry"
+    "upgrade:dry": "npx @strapi/upgrade latest --dry",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@sensinum/strapi-plugin-mcp": "^1.1.0",
@@ -41,8 +42,7 @@
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=18.0.0 <=24.x.x",
-    "npm": ">=6.0.0"
+    "node": ">=22 <25"
   },
   "strapi": {
     "uuid": "2fccff1e-9b6b-442b-8c36-2b56d96462a2",

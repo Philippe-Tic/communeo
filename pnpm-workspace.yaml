@@ -1,0 +1,15 @@
+# admin/ et sites/ (V1) sont gelés : hors workspace, supprimés au lancement de la V2.
+# docs/ reste à la racine tant que le site Netlify de la documentation pointe dessus.
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "themes/*"
+
+# pnpm 10 n'exécute pas les scripts d'installation par défaut : liste des dépendances natives autorisées
+onlyBuiltDependencies:
+  - "@swc/core"
+  - better-sqlite3
+  - core-js-pure
+  - esbuild
+  - sharp
+  - sqlite3

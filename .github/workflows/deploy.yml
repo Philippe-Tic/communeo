@@ -40,7 +40,7 @@ jobs:
 
       - name: Build and transfer Docker image
         run: |
-          docker build -t communeo-strapi:latest ./backend
+          docker build -t communeo-strapi:latest -f apps/backend/Dockerfile .
           docker save communeo-strapi:latest | gzip | \
             ssh -i ~/.ssh/deploy_key \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \

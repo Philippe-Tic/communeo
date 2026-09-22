@@ -21,6 +21,9 @@ services:
 
   strapi:
     image: communeo-strapi:latest
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
     restart: unless-stopped
     depends_on:
       postgres:

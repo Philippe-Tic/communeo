@@ -1,0 +1,18 @@
+{
+  "name": "@communeo/ui-a11y",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Composants accessibles partagés par les thèmes (liens d'évitement, menus, accordéon, lightbox, bandeau cookies).",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

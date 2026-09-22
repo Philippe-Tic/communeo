@@ -1,0 +1,6 @@
+admin/
+sites/
+docs/
+apps/backend/
+v2/
+pnpm-lock.yaml

@@ -32,8 +32,8 @@ class DeploymentService {
   private tempDir: string;
 
   constructor() {
-    // Le dossier sites est au niveau parent du backend
-    this.sitesPath = path.join(process.cwd(), '../sites');
+    // Site V1 (gelé) : racine du monorepo en local, volume /sites en Docker
+    this.sitesPath = process.env.SITES_PATH || path.resolve(process.cwd(), '../../sites');
     // Utiliser le dossier temp système pour éviter les redémarrages Strapi
     this.tempDir = path.join(os.tmpdir(), 'communeo-builds');
 

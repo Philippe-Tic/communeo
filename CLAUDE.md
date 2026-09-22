@@ -8,63 +8,40 @@ Multi-tenant municipal website CMS (CMS pour mairies). Municipalities each get t
 
 ## Architecture
 
-Four independent applications in a monorepo (no shared package manager workspace):
+pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 
-- **backend/** — Strapi v5 headless CMS (TypeScript). Serves REST API, stores content in SQLite (dev) or MySQL/PostgreSQL (prod). Custom `site-isolation` middleware enforces multi-tenant data isolation by filtering all API requests based on the authenticated user's assigned site.
-- **admin/** — React 19 + Vite admin dashboard (TypeScript). Uses Tailwind CSS 4 + shadcn/ui, TanStack React Query 5, React Hook Form 7, React Router 7. Dark/light mode via `class` strategy. Authenticated users see only their municipality's content.
-- **sites/** — Astro 4 static site generator (TypeScript + Tailwind CSS 3). Builds one static site per municipality, parameterized by environment variables (`SITE_DOCUMENT_ID`, `SITE_SLUG`).
-- **docs/** — Astro Starlight documentation site. Technical docs and usage guides.
+- **apps/backend/** — Strapi v5 headless CMS (TypeScript). REST API, SQLite (dev) or PostgreSQL (prod). The `site-isolation` middleware enforces multi-tenant isolation (fail-closed) based on the authenticated user's site.
+- **apps/admin/** — V2 admin (React 19 + Vite + TanStack Router/Query + shadcn/ui), built in phase 3. Mockups: `v2/Design Admin Handoff/`.
+- **apps/renderer/** — V2 Astro 5 renderer (static for prod, SSR for preview), built in phase 1.
+- **packages/core** — generated Strapi types, API client, view-models, block schemas (zod).
+- **packages/theme-contract** — interface a theme must implement.
+- **packages/ui-a11y** — shared accessible components for themes.
+- **themes/** — one package per public-site theme (Institutionnel, Moderne, Journal, Bourg; mockups in `v2/`).
+- **fixtures/** — demo commune data for theme development.
+
+Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 launch): **admin/** (React admin V1) and **sites/** (Astro site V1). **docs/** (Starlight) stays at the root while the Netlify docs site points to it.
 
 ### Data Flow
 
 ```
-Admin UI → Strapi API (filtered by site-isolation middleware) → SQLite/MySQL/PostgreSQL
-Strapi API → Astro (build-time fetch) → Static HTML → Netlify
+Admin UI → Strapi API (filtered by site-isolation middleware) → SQLite/PostgreSQL
+Strapi API → Astro renderer (build-time fetch) → Static HTML → Netlify
 ```
 
 ### Multi-Tenancy
 
-Every content type (Page, Article, Event) has a mandatory `site` relation. The middleware at `backend/src/middlewares/site-isolation.ts` automatically scopes queries to the user's site. New content types must include a `site` relation.
-
-### Deployment Pipeline
-
-Triggered from admin UI → `backend/src/services/deployment.ts` orchestrates: fetches site data, runs Astro build in temp directory with per-site env vars, zips output, uploads to Netlify via `backend/src/services/netlify.ts`. Each municipality gets a separate Netlify site named `{slug}-mairie`.
+Every content type has a mandatory `site` relation. `apps/backend/src/middlewares/site-isolation.ts` scopes queries to the user's site and rejects any route not explicitly allowed. New content types must include a `site` relation and be added to the middleware allowlist.
 
 ## Development Commands
 
-Each app has its own `node_modules` — run `npm install` in each directory separately.
-
-### Backend (Strapi)
 ```bash
-cd backend
-npm run dev        # Dev server with hot reload (http://localhost:1337)
-npm run build      # Build admin panel
-npm run start      # Production mode
+pnpm install              # at the root, installs every workspace package
+pnpm check                # lint + typecheck + tests (Turborepo)
+pnpm build                # build everything
+pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
 ```
 
-### Admin Dashboard (React + Vite)
-```bash
-cd admin
-npm run dev        # Dev server (http://localhost:5173)
-npm run build      # TypeScript check + Vite production build
-npm run lint       # ESLint
-```
-
-### Sites (Astro)
-```bash
-cd sites
-npm run dev        # Dev server (http://localhost:4321), requires env vars:
-                   # SITE_DOCUMENT_ID=<uuid> SITE_SLUG=<slug> STRAPI_URL=http://localhost:1337
-npm run build      # Build static site (with type checking)
-npm run type-check # Astro type checking only
-```
-
-### Documentation (Starlight)
-```bash
-cd docs
-npm run dev        # Dev server (http://localhost:4321)
-npm run build      # Build static documentation site
-```
+Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites && npm run dev`.
 
 ## Environment Variables
 
@@ -81,7 +58,7 @@ npm run build      # Build static documentation site
 - `SITE_SLUG` — URL slug (e.g., "lyon")
 - `STRAPI_URL` — Strapi API endpoint
 
-## Key Backend Files
+## Key Backend Files (apps/backend)
 
 - `src/middlewares/site-isolation.ts` — Multi-tenant query filtering (critical)
 - `src/bootstrap.ts` — Creates test site and user on first startup

@@ -4,6 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
+import { getPublisher } from '../../../publishing';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
 
@@ -61,6 +62,12 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       if (!siteData) {
         log.info('❌ Site not found with siteId:', siteId);
         return ctx.notFound('Site non trouvé');
+      }
+
+      if (!getPublisher().configured) {
+        ctx.status = 503;
+        ctx.body = { error: { status: 503, message: "Publication indisponible : aucun hébergeur n'est configuré" } };
+        return;
       }
 
       // Lancer le déploiement en arrière-plan
@@ -155,7 +162,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       const lastDeployment = latestDeployments.length > 0 ? latestDeployments[0] : null;
 
-      // Si le dernier déploiement est en cours, vérifier son statut sur Netlify
+      // Si le dernier déploiement est en cours, vérifier son statut chez l'hébergeur
       let currentStatus = null;
       if (lastDeployment && lastDeployment.status === 'building') {
         try {
@@ -296,7 +303,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       // 1. Variables d'environnement
       const envVars = {
-        NETLIFY_TOKEN: process.env.NETLIFY_TOKEN ? '***SET***' : 'NOT_SET',
+        PUBLISHER: getPublisher().configured ? getPublisher().id : 'NOT_CONFIGURED',
         STRAPI_PUBLIC_URL: process.env.STRAPI_PUBLIC_URL || 'NOT_SET',
         STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN ? '***SET***' : 'NOT_SET',
         NODE_ENV: process.env.NODE_ENV || 'NOT_SET'

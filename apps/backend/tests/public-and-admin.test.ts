@@ -139,3 +139,12 @@ describe('gestion des communes (super admin)', () => {
     expect((await http.get('/api/site-management').set(auth(admin))).status).toBe(403);
   });
 });
+
+describe('publication sans hébergeur configuré', () => {
+  it('répond 503 au lieu de faire planter Strapi', async () => {
+    expect((await http.post('/api/deployment/trigger').set(auth(admin))).status).toBe(503);
+    const domain = await http.post('/api/domain/configure').set(auth(admin)).send({ customDomain: 'mairie-exemple.fr' });
+    expect(domain.status).toBe(503);
+    expect(domain.body.error.message).toMatch(/NETLIFY_TOKEN/);
+  });
+});

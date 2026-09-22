@@ -2,14 +2,13 @@
  * Deployment Service - Orchestration des builds et déploiements
  */
 
-import archiver from 'archiver';
 import { exec } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { Readable } from 'stream';
 import { promisify } from 'util';
-import netlifyService from './netlify';
+import { getPublisher, toPublisherSite } from '../publishing';
 import { log } from '../utils/logger';
 
 const execAsync = promisify(exec);
@@ -57,12 +56,11 @@ class DeploymentService {
   }
 
   /**
-   * Déploie un site complet : build + upload vers Netlify
+   * Déploie un site complet : build + publication chez l'hébergeur
    */
   async buildAndDeploy(siteId: string, siteSlug: string, userId?: string): Promise<DeploymentResult> {
     const startTime = Date.now();
     let tempBuildDir: string | undefined;
-    let zipPath: string | undefined;
     let deploymentRecord: any = null;
 
     log.info(`🚀 [DEPLOYMENT] Starting deployment for site ${siteSlug} (ID: ${siteId})`);
@@ -89,28 +87,19 @@ class DeploymentService {
 
       log.info(`✅ [DEPLOYMENT] Site found: ${(site as any).name}`);
 
-      // 2. Créer le site Netlify si nécessaire
-      log.info(`🌐 [DEPLOYMENT] Step 2: Checking Netlify site...`);
-
-      let netlifyId = (site as any).netlify_site_id;
-      if (!netlifyId) {
-        log.info(`🔧 [DEPLOYMENT] Creating new Netlify site...`);
-        const netlifyResult = await netlifyService.createSite((site as any).name, (site as any).slug);
-        netlifyId = netlifyResult.id;
-
-        log.info(`✅ [DEPLOYMENT] Netlify site created: ${netlifyId}`);
-
-        // Mettre à jour le site avec l'ID Netlify
+      // 2. Créer le site chez l'hébergeur si nécessaire (avant le build : live_url sert au build)
+      const publisher = getPublisher();
+      const host = await publisher.ensureSite(toPublisherSite(site));
+      if ((site as any).netlify_site_id !== host.hostId) {
         await strapi.documents('api::site.site').update({ documentId: site.documentId,
           data: {
-            netlify_site_id: netlifyId,
-            live_url: netlifyResult.url
-          }
+            netlify_site_id: host.hostId,
+            ...((site as any).custom_domain ? {} : { live_url: host.defaultUrl })
+          } as any
         });
-
-                log.info(`✅ [DEPLOYMENT] Site updated with Netlify ID`);
-      } else {
-        log.info(`✅ [DEPLOYMENT] Using existing Netlify site: ${netlifyId}`);
+        (site as any).netlify_site_id = host.hostId;
+        if (!(site as any).custom_domain) (site as any).live_url = host.defaultUrl;
+        log.info(`✅ [DEPLOYMENT] Host site ready: ${host.hostId}`);
       }
 
       // 3. Build le site Astro
@@ -140,27 +129,13 @@ class DeploymentService {
         log.info(`✅ [DEPLOYMENT] demarches/index.html validated (${size} bytes)`);
       }
 
-      // 4. Créer le ZIP
-      log.info(`📦 [DEPLOYMENT] Step 4: Creating ZIP archive...`);
-      zipPath = await this.createZip(tempBuildDir);
-      log.info(`✅ [DEPLOYMENT] ZIP created: ${zipPath}`);
+      // 4. Publier chez l'hébergeur
+      log.info(`⬆️ [DEPLOYMENT] Step 4: Publishing with ${publisher.id}...`);
+      const deployment = await publisher.publish(toPublisherSite(site), tempBuildDir);
+      log.info(`✅ [DEPLOYMENT] Published, deployment ID: ${deployment.deployId} (${deployment.state})`);
 
-      // 5. Nettoyer immédiatement le dossier de build (garde seulement le ZIP)
-      log.info(`🧹 [DEPLOYMENT] Step 5: Immediate cleanup of build directory...`);
-      if (tempBuildDir && fs.existsSync(tempBuildDir)) {
-        await fs.promises.rm(tempBuildDir, { recursive: true, force: true });
-        log.info(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
-        tempBuildDir = undefined; // Pour éviter de le nettoyer à nouveau dans finally
-      }
-
-      // 6. Uploader vers Netlify
-      log.info(`⬆️ [DEPLOYMENT] Step 6: Uploading to Netlify...`);
-      const zipBuffer = fs.readFileSync(zipPath);
-      const deployment = await netlifyService.deploySite(netlifyId, zipBuffer);
-      log.info(`✅ [DEPLOYMENT] Uploaded to Netlify, deployment ID: ${deployment.id}`);
-
-      // 7. Créer l'entrée de déploiement en base
-      log.info(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
+      // 5. Créer l'entrée de déploiement en base
+      log.info(`💾 [DEPLOYMENT] Step 5: Creating deployment record...`);
       try {
         // Utiliser l'ID du site pour la relation, pas le documentId
         const siteIdForRelation = (site as any).documentId;
@@ -168,7 +143,7 @@ class DeploymentService {
         deploymentRecord = await strapi.documents('api::deployment.deployment').create({
           data: {
             site: siteIdForRelation,
-            deployment_id: deployment.id,
+            deployment_id: deployment.deployId,
             status: 'building',
             ...(userId ? { triggered_by: userId } : {}),
             triggered_at: new Date()
@@ -182,10 +157,8 @@ class DeploymentService {
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
-      // 8. Mettre à jour le statut final du déploiement
-      log.info(`📊 [DEPLOYMENT] Step 8: Updating deployment status to ready...`);
-
-      if (deploymentRecord) {
+      // 6. Mettre à jour le statut final du déploiement (resté `building` si l'hébergeur n'a pas fini)
+      if (deploymentRecord && deployment.state === 'ready') {
         try {
           await strapi.documents('api::deployment.deployment').update({ documentId: deploymentRecord.documentId,
             data: {
@@ -201,7 +174,6 @@ class DeploymentService {
       }
 
       log.info(`🎉 [DEPLOYMENT] Deployment initiated successfully in ${buildTime}s`);
-      log.info(`🔗 [DEPLOYMENT] Deployment URL: ${deployment.deploy_url}`);
 
       return {
         deployment: deploymentRecord,
@@ -263,18 +235,8 @@ class DeploymentService {
         error: error.message
       };
     } finally {
-      // Cleanup des fichiers temporaires (ZIP et dossier build s'il reste)
+      // Cleanup du dossier de build
       log.info(`🧹 [DEPLOYMENT] Final cleanup...`);
-
-      // Nettoyer le ZIP s'il existe encore
-      if (zipPath && fs.existsSync(zipPath)) {
-        try {
-          await fs.promises.unlink(zipPath);
-          log.info(`✅ [DEPLOYMENT] ZIP file cleaned: ${zipPath}`);
-        } catch (cleanupError: any) {
-          log.warn(`⚠️ [DEPLOYMENT] Could not clean ZIP: ${cleanupError.message}`);
-        }
-      }
 
       // Nettoyer le dossier build s'il existe encore
       if (tempBuildDir && fs.existsSync(tempBuildDir)) {
@@ -345,7 +307,7 @@ class DeploymentService {
         STRAPI_TOKEN: process.env.STRAPI_API_TOKEN,
         SITE_URL: (customDomain?.verified && customDomain.domain)
           ? `https://${customDomain.domain}`
-          : liveUrl || `https://${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`,
+          : liveUrl,
         NODE_ENV: 'production'
       };
 
@@ -453,15 +415,6 @@ class DeploymentService {
         log.warn(`⚠️ [BUILD] Could not analyze dist contents:`, error);
       }
 
-      // Générer _redirects pour rediriger .netlify.app → custom domain
-      if (customDomain?.verified && customDomain.domain) {
-        const netlifySubdomain = `${process.env.NODE_ENV === 'production' ? '' : 'dev-'}${siteSlug}-mairie.netlify.app`;
-        const redirectsContent = `# Redirect netlify subdomain to primary custom domain\nhttps://${netlifySubdomain}/* https://${customDomain.domain}/:splat 301!\n`;
-        const redirectsPath = path.join(distPath, '_redirects');
-        fs.writeFileSync(redirectsPath, redirectsContent, 'utf8');
-        log.info(`✅ [BUILD] _redirects generated: ${netlifySubdomain} → ${customDomain.domain}`);
-      }
-
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
       log.info(`🎉 [BUILD] Build completed successfully in ${buildTime}s`);
@@ -482,34 +435,6 @@ class DeploymentService {
         buildTime
       };
     }
-  }
-
-  /**
-   * Crée un ZIP du dossier de build
-   * Structure le ZIP pour que Netlify trouve les fichiers dans dist/
-   */
-  async createZip(sourceDir: string): Promise<string> {
-    const zipPath = path.join(this.tempDir, `deploy-${Date.now()}.zip`);
-
-    return new Promise((resolve, reject) => {
-      const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
-
-      output.on('close', () => {
-        log.info(`✅ [ZIP] Created: ${archive.pointer()} total bytes`);
-        log.info(`📁 [ZIP] Structure: Files placed at ZIP root for direct Netlify deployment`);
-        resolve(zipPath);
-      });
-
-      archive.on('error', (err) => {
-        reject(err);
-      });
-
-      archive.pipe(output);
-      // Mettre les fichiers directement à la racine du ZIP
-      archive.directory(sourceDir, false);
-      archive.finalize();
-    });
   }
 
   /**
@@ -554,29 +479,10 @@ class DeploymentService {
 
       const deployment = deployments[0];
 
-      // Vérifier le statut sur Netlify
-      const netlifyStatus = await netlifyService.getDeploymentStatus(deploymentId);
-
-      // Mapper les statuts Netlify vers nos statuts
-      let status = 'building';
-      let completedAt = null;
-
-      switch (netlifyStatus.state) {
-        case 'ready':
-          status = 'ready';
-          completedAt = new Date();
-          break;
-        case 'error':
-        case 'skipped':
-          status = 'error';
-          completedAt = new Date();
-          break;
-        case 'building':
-        case 'enqueued':
-        default:
-          status = 'building';
-          break;
-      }
+      // Vérifier le statut chez l'hébergeur
+      const hostStatus = await getPublisher().status(deploymentId);
+      const status = hostStatus.state;
+      const completedAt = status === 'building' ? null : new Date();
 
       // Mettre à jour en base si le statut a changé
       if (deployment.status !== status) {
@@ -586,8 +492,8 @@ class DeploymentService {
           updateData.completed_at = completedAt;
         }
 
-        if (netlifyStatus.error_message) {
-          updateData.error_message = netlifyStatus.error_message;
+        if (hostStatus.error) {
+          updateData.error_message = hostStatus.error;
         }
 
         await strapi.documents('api::deployment.deployment').update({ documentId: deployment.documentId,
@@ -598,7 +504,7 @@ class DeploymentService {
       return {
         ...deployment,
         status,
-        netlify_status: netlifyStatus
+        host_status: hostStatus
       };
 
     } catch (error: any) {

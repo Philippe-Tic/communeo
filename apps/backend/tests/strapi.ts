@@ -30,7 +30,8 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     TRANSFER_TOKEN_SALT: 'test-transfer-token-salt',
     JWT_SECRET: 'test-jwt-secret',
     ENCRYPTION_KEY: 'test-encryption-key',
-    NETLIFY_TOKEN: 'test-netlify-token',
+    // Aucun hébergeur : Strapi doit démarrer, seules les actions de publication répondent 503
+    NETLIFY_TOKEN: '',
     STRAPI_API_TOKEN: 'test-build-token',
     CRON_ENABLED: 'false',
     STRAPI_TELEMETRY_DISABLED: 'true',

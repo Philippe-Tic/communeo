@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import netlifyService from '../../../services/netlify';
+import { getPublisher, toPublisherSite } from '../../../publishing';
 import { createInvitationToken, escapeHtml } from '../../../utils/security';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';
@@ -195,19 +195,18 @@ export default {
       },
     });
 
-    // 2. Create Netlify site
-    let netlifyId: string | null = null;
-    try {
-      const netlifySite = await netlifyService.findOrCreateSite(data.name, data.slug);
-      netlifyId = netlifySite.id;
-
-      // Save netlify_site_id on the site
-      await strapi.documents('api::site.site').update({ documentId: site.documentId,
-        data: { netlify_site_id: netlifyId },
-      });
-    } catch (error) {
-      log.error('Failed to create Netlify site:', error);
-      // Don't fail the whole operation — Netlify can be configured later
+    // 2. Create the site at the host (otherwise done on first publication)
+    const publisher = getPublisher();
+    if (publisher.configured) {
+      try {
+        const host = await publisher.ensureSite(toPublisherSite(site));
+        await strapi.documents('api::site.site').update({ documentId: site.documentId,
+          data: { netlify_site_id: host.hostId, live_url: host.defaultUrl } as any,
+        });
+      } catch (error) {
+        log.error('Failed to create host site:', error);
+        // Don't fail the whole operation — the host site is created again on first publication
+      }
     }
 
     // 3. Create initial admin user if email provided
@@ -307,7 +306,7 @@ export default {
   },
 
   /**
-   * DELETE /api/site-management/:documentId — delete site and Netlify site
+   * DELETE /api/site-management/:documentId — delete site and its host site
    */
   async delete(ctx) {
     await requireSuperAdmin(ctx);
@@ -323,13 +322,13 @@ export default {
 
     const site = sites[0] as any;
 
-    // Delete Netlify site if exists
+    // Delete the host site if exists
     if (site.netlify_site_id) {
       try {
-        await netlifyService.deleteSite(site.netlify_site_id);
+        await getPublisher().deleteSite(toPublisherSite(site));
       } catch (error) {
-        log.error('Failed to delete Netlify site:', error);
-        // Continue with deletion even if Netlify fails
+        log.error('Failed to delete host site:', error);
+        // Continue with deletion even if the host fails
       }
     }
 

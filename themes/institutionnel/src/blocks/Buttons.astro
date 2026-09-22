@@ -1,13 +1,21 @@
 ---
+/** Boutons : le premier est plein, les suivants en contour ; les liens externes sont signalés. */
 import type { BlockOf } from '@communeo/core';
+import ExternalLink from '@lucide/astro/icons/external-link';
 
 interface Props { block: BlockOf<'buttons'> }
 const { block } = Astro.props;
 ---
 <p class="in-buttons">
   {block.buttons.map((button) => (
-    <a href={button.href} class={`in-button in-button-${button.style}`} target={button.external ? '_blank' : undefined} rel={button.external ? 'noopener noreferrer' : undefined}>
-      {button.label}{button.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+    <a
+      href={button.href}
+      class:list={['in-button', { 'in-button-secondary': button.style !== 'primary' }]}
+      target={button.external ? '_blank' : undefined}
+      rel={button.external ? 'noopener noreferrer' : undefined}
+    >
+      {button.label}
+      {button.external && <><ExternalLink size={18} aria-hidden="true" /><span class="cn-sr-only">(nouvelle fenêtre)</span></>}
     </a>
   ))}
 </p>

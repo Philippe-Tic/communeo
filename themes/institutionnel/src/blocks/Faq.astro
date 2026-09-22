@@ -1,5 +1,8 @@
 ---
+/** Questions fréquentes : accordéon natif, utilisable sans JavaScript. */
 import type { BlockOf } from '@communeo/core';
+import Minus from '@lucide/astro/icons/minus';
+import Plus from '@lucide/astro/icons/plus';
 import RichText from '@communeo/ui-a11y/RichText.astro';
 
 interface Props { block: BlockOf<'faq'> }
@@ -7,10 +10,15 @@ const { block } = Astro.props;
 ---
 <section class="in-faq" aria-label={block.title ?? 'Questions fréquentes'}>
   {block.title && <h2>{block.title}</h2>}
-  {block.items.map((item) => (
-    <details id={item.id}>
-      <summary>{item.question}</summary>
-      <RichText doc={item.answer} />
-    </details>
-  ))}
+  <div class="in-faq-list">
+    {block.items.map((item) => (
+      <details id={item.id}>
+        <summary>
+          {item.question}
+          <Plus size={22} aria-hidden="true" class="in-faq-open" /><Minus size={22} aria-hidden="true" class="in-faq-close" />
+        </summary>
+        <div class="in-faq-answer"><RichText doc={item.answer} class="in-prose" /></div>
+      </details>
+    ))}
+  </div>
 </section>

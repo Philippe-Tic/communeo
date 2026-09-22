@@ -1,15 +1,32 @@
 ---
+/** Page de contenu : sommaire à gauche sur grand écran, contenu en colonne de lecture. */
 import type { PageVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Blocks from '@communeo/ui-a11y/Blocks.astro';
+import { blocks as components } from '../blocks/index';
 import Layout from '../parts/Layout.astro';
-import Content from '../parts/Content.astro';
+import Toc from '../parts/Toc.astro';
 
 interface Props { ctx: PageContext; page: PageVM }
 const { ctx, page } = Astro.props;
+const withToc = page.toc.length >= 3;
 ---
-<Layout ctx={ctx}>
-  {page.lead && <p class="in-lead">{page.lead}</p>}
-  {page.image && <img src={page.image.src} srcset={page.image.srcset ?? undefined} alt={page.image.alt} width={page.image.width ?? undefined} height={page.image.height ?? undefined} />}
-  <Content blocks={page.blocks} toc={page.toc} />
-  <p class="in-meta">Mis à jour le <time datetime={page.updatedAt.iso}>{page.updatedAt.label}</time></p>
+<Layout ctx={ctx} heading={false}>
+  <div class:list={['in-article-layout', { 'in-article-with-toc': withToc }]}>
+    {withToc && <Toc entries={page.toc} />}
+    <article class="in-article">
+      <h1>{page.title}</h1>
+      {page.lead && <p class="in-lead">{page.lead}</p>}
+      {page.image && (
+        <figure class="in-cover">
+          <img src={page.image.src} srcset={page.image.srcset ?? undefined} alt={page.image.alt} width={page.image.width ?? undefined} height={page.image.height ?? undefined} />
+          {(page.image.caption || page.image.credit) && (
+            <figcaption>{page.image.caption}{page.image.credit && <> Crédit : {page.image.credit}</>}</figcaption>
+          )}
+        </figure>
+      )}
+      <div class="in-blocks"><Blocks blocks={page.blocks} components={components} /></div>
+      <p class="in-meta in-updated">Mis à jour le <time datetime={page.updatedAt.iso}>{page.updatedAt.label}</time></p>
+    </article>
+  </div>
 </Layout>

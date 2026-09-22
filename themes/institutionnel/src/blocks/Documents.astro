@@ -1,12 +1,34 @@
 ---
+/** Documents à télécharger : un fichier seul est mis en avant, plusieurs forment une liste. */
 import type { BlockOf } from '@communeo/core';
+import Download from '@lucide/astro/icons/download';
 
 interface Props { block: BlockOf<'documents'> }
 const { block } = Astro.props;
+const single = block.files.length === 1;
+const type = (label: string) => label.split(' – ')[0];
 ---
 <section class="in-documents" aria-label={block.title ?? 'Documents à télécharger'}>
   {block.title && <h2>{block.title}</h2>}
-  <ul>
-    {block.files.map((file) => <li><a href={file.href} download>{file.name}<span> ({file.label})</span></a></li>)}
-  </ul>
+  {single ? (
+    <a href={block.files[0].href} class="in-document-single" download>
+      <Download size={24} aria-hidden="true" />
+      <span>
+        <strong>{block.files[0].name}</strong>
+        <span class="in-meta">{block.files[0].label}</span>
+      </span>
+    </a>
+  ) : (
+    <ul class="in-document-list">
+      {block.files.map((file) => (
+        <li>
+          <a href={file.href} download>
+            <span class="in-document-type" aria-hidden="true">{type(file.label)}</span>
+            <span class="in-document-name">{file.name}</span>
+            <span class="in-meta">{file.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
 </section>

@@ -1,0 +1,67 @@
+name: Captures visuelles
+
+# Les captures dépendent du rendu des polices : elles sont toujours produites dans le conteneur Playwright.
+# - Sur une PR qui touche aux thèmes : comparaison avec les captures de référence (si elles existent).
+# - À la main (« Run workflow » avec update) : régénère les captures et ouvre une PR.
+on:
+  pull_request:
+    branches: [main]
+    paths: ['themes/**', 'packages/ui-a11y/**', 'apps/renderer/**', 'packages/fixtures/**']
+  workflow_dispatch:
+    inputs:
+      update:
+        description: Régénérer les captures de référence et ouvrir une PR
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  visual:
+    name: Captures visuelles des thèmes
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run build --filter "@communeo/renderer^..."
+
+      - run: node e2e/build.mjs
+        working-directory: apps/renderer
+
+      - name: Comparer aux captures de référence
+        if: github.event_name == 'pull_request' && hashFiles('apps/renderer/e2e/__screenshots__/**') != ''
+        run: VISUAL=1 pnpm exec playwright test visual
+        working-directory: apps/renderer
+
+      - name: Régénérer les captures
+        if: github.event_name == 'workflow_dispatch' && inputs.update
+        run: VISUAL=1 pnpm exec playwright test visual --update-snapshots=all
+        working-directory: apps/renderer
+
+      - uses: peter-evans/create-pull-request@v7
+        if: github.event_name == 'workflow_dispatch' && inputs.update
+        with:
+          branch: chore/captures-visuelles
+          title: 'test: mise à jour des captures visuelles des thèmes'
+          commit-message: 'test: mise à jour des captures visuelles des thèmes'
+          body: Captures de référence régénérées dans le conteneur Playwright. Vérifier chaque image avant de merger.
+          add-paths: apps/renderer/e2e/__screenshots__/**
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: differences-visuelles
+          path: apps/renderer/test-results
+          retention-days: 7

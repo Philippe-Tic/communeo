@@ -42,6 +42,8 @@ pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337
 pnpm theme:dev <id> [--variant complete|minimal|empty] [--logo blason]   # demo commune in a theme, no Strapi
 pnpm create-theme <id> --name "Nom"   # new theme from themes/starter (guide: packages/theme-contract/README.md)
 THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
+pnpm --filter @communeo/renderer test:e2e     # every theme × every demo page: axe (WCAG 2.2 AA) at 390/1440 px + structure
+pnpm --filter @communeo/renderer test:parity  # static build HTML == server (preview) HTML
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 

@@ -18,3 +18,8 @@ dist/
 
 # Astro
 .astro/
+
+# Tests des thèmes
+.e2e/
+test-results/
+playwright-report/

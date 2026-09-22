@@ -8,6 +8,8 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Core } from '@strapi/strapi';
 import { setupStrapi, teardownStrapi } from './strapi';
+import { ROLE_PERMISSIONS } from '../config/permissions';
+import { syncPermissions } from '../src/bootstrap/permissions';
 
 let strapi: Core.Strapi;
 let http: ReturnType<typeof request>;
@@ -93,13 +95,61 @@ afterAll(async () => {
   await teardownStrapi();
 });
 
+describe('permissions des rôles (config/permissions.ts)', () => {
+  const granted = async (roleType: string) => {
+    const role = await strapi.db.query('plugin::users-permissions.role').findOne({ where: { type: roleType } });
+    const rows = await strapi.db.query('plugin::users-permissions.permission').findMany({ where: { role: role.id } });
+    return rows.map((row: any) => row.action as string).sort();
+  };
+
+  it('la base correspond exactement à la déclaration', async () => {
+    expect(await granted('authenticated')).toEqual([...ROLE_PERMISSIONS.authenticated].sort());
+    expect(await granted('public')).toEqual([...ROLE_PERMISSIONS.public].sort());
+  });
+
+  it("n'accorde pas les permissions dangereuses", async () => {
+    const authenticated = await granted('authenticated');
+    for (const action of [
+      'plugin::upload.content-api.find',
+      'plugin::upload.content-api.destroy',
+      'plugin::users-permissions.user.find',
+      'plugin::users-permissions.user.update',
+      'plugin::users-permissions.user.destroy',
+      'api::site.site.create',
+      'api::site.site.delete',
+    ]) {
+      expect(authenticated, action).not.toContain(action);
+    }
+    const publicActions = await granted('public');
+    for (const action of ['register', 'forgotPassword', 'resetPassword', 'connect']) {
+      expect(publicActions).not.toContain(`plugin::users-permissions.auth.${action}`);
+    }
+  });
+
+  it('la synchronisation est idempotente (redémarrer ne change rien)', async () => {
+    const results = await syncPermissions(strapi);
+    expect(results.every((r) => r.created.length === 0 && r.removed.length === 0)).toBe(true);
+  });
+
+  it('retire une permission ajoutée hors déclaration', async () => {
+    const role = await strapi.db.query('plugin::users-permissions.role').findOne({ where: { type: 'public' } });
+    await strapi.db.query('plugin::users-permissions.permission').create({
+      data: { action: 'plugin::users-permissions.auth.register', role: role.id },
+    });
+    const results = await syncPermissions(strapi);
+    expect(results.find((r) => r.role === 'public')?.removed).toEqual(['plugin::users-permissions.auth.register']);
+  });
+});
+
 describe('inscription et comptes', () => {
   it("l'inscription publique est fermée", async () => {
     const res = await http
       .post('/api/auth/local/register')
       .send({ username: 'intrus', email: 'intrus@example.test', password: 'motdepasse123' });
-    expect(res.status).toBe(400);
-    expect(res.body.error.message).toMatch(/disabled/i);
+    // Refusée par la permission (403) ; le réglage allow_register=false la bloque aussi en second rideau
+    expect(res.status).toBe(403);
+    const advanced = await strapi.store({ type: 'plugin', name: 'users-permissions' }).get({ key: 'advanced' });
+    expect((advanced as any).allow_register).toBe(false);
   });
 
   it('un admin de commune ne peut pas créer de super_admin', async () => {

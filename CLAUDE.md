@@ -61,12 +61,13 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 
 ## Key Backend Files (apps/backend)
 
-- `src/middlewares/site-isolation.ts` — Multi-tenant query filtering (critical)
-- `src/bootstrap.ts` — Creates test site and user on first startup
-- `src/services/deployment.ts` — Build and deploy orchestration
-- `src/services/netlify.ts` — Netlify API client
-- `src/services/domain.ts` / `domain-validation.ts` — Custom domain management
-- `src/api/*/content-types/*/schema.json` — Content type schemas (Page, Article, Event, Site, Domain, Deployment)
+- `config/permissions.ts` — role permissions as code, synced at every boot (missing ones created, undeclared ones removed; in Strapi 5 a permission row = granted)
+- `src/middlewares/site-isolation.ts` — Multi-tenant query filtering, fail-closed (critical)
+- `src/validation/` — blocks, homepage, per-site slugs (document service middlewares)
+- `src/bootstrap/` — closes public registration, syncs permissions, dev accounts (`test@example.com` / `super@example.com`), read-only build token
+- `database/migrations/` — data migrations (never in bootstrap)
+- `src/services/deployment.ts` / `netlify.ts` / `domain.ts` — build, Netlify publishing, custom domains
+- `src/api/*/content-types/*/schema.json` — content type schemas
 
 ## Content Types
 

@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const collections = await source.waste();
+const ctx = await simplePage(source, { path: '/collecte-des-dechets', title: 'Collecte des déchets', description: 'Jours de passage et prochaines collectes' });
+const { Waste } = theme.templates;
+---
+<Document ctx={ctx}><Waste ctx={ctx} collections={collections} /></Document>

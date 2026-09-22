@@ -1,0 +1,61 @@
+/* Thème de départ : lisibilité de base uniquement. Chaque vrai thème apporte son propre design. */
+@import '@communeo/ui-a11y/styles.css';
+
+:root {
+  color-scheme: light;
+  --st-text: #1c1b18;
+  --st-link: #0b4f9c;
+}
+
+body {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  color: var(--st-text);
+  background: #fff;
+}
+
+a {
+  color: var(--st-link);
+}
+
+:focus-visible {
+  outline: 3px solid var(--st-link);
+  outline-offset: 2px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.st-menu,
+.st-filters ul,
+.st-pagination ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.st-alert-warning {
+  border-left: 4px solid #8a5300;
+  padding-left: 0.75rem;
+}
+
+.st-alert-critical {
+  border-left: 4px solid #9b2c1f;
+  padding-left: 0.75rem;
+}
+
+.st-callout {
+  border-left: 4px solid currentColor;
+  padding: 0.5rem 1rem;
+}
+
+.st-meta {
+  color: #4a4942;
+}

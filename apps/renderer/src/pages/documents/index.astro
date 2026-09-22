@@ -1,0 +1,13 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+
+const source = getSource();
+const documents = await source.documents();
+const types = [...new Map(documents.map((d) => [d.type.key, d.type])).values()].sort((a, b) => a.label.localeCompare(b.label, 'fr'));
+const years = [...new Set(documents.map((d) => d.year))].sort((a, b) => b - a);
+const ctx = await simplePage(source, { path: '/documents', title: 'Documents officiels', description: 'Procès-verbaux, délibérations, arrêtés et budgets de la commune' });
+const { DocumentList } = theme.templates;
+---
+<Document ctx={ctx}><DocumentList ctx={ctx} documents={documents} types={types} years={years} /></Document>

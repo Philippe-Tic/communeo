@@ -1,0 +1,94 @@
+---
+/**
+ * Mise en page du thème : en-tête, menu, bandeau d'alertes, fil d'Ariane, contenu, pied de page.
+ * Le document (<html>, <head>, lien d'évitement, bandeau cookies) est fourni par le renderer.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import '../styles.css';
+
+interface Props {
+  ctx: PageContext;
+  /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
+  heading?: string | false;
+}
+
+const { ctx, heading = ctx.title } = Astro.props;
+const { site, nav, alerts, path } = ctx;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+---
+<header class="st-header">
+  <a href="/" class="st-brand">
+    {site.logo ? <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} /> : null}
+    <span>{site.name}</span>
+  </a>
+  <nav id="menu" aria-label="Menu principal" tabindex="-1">
+    <ul class="st-menu">
+      <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
+      {nav.main.map((item) =>
+        item.kind === 'link' ? (
+          <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ) : (
+          <li>
+            <details>
+              <summary>{item.label}</summary>
+              <ul>
+                {item.children.map((child) => <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>)}
+              </ul>
+            </details>
+          </li>
+        ),
+      )}
+    </ul>
+  </nav>
+  <form role="search" action="/recherche" class="st-search">
+    <label for="st-search-q">Rechercher</label>
+    <input id="st-search-q" name="q" type="search" />
+    <button type="submit">Rechercher</button>
+  </form>
+</header>
+
+{alerts.length > 0 && (
+  <section class="st-alerts" aria-label="Alertes">
+    {alerts.map((alert) => (
+      <p class={`st-alert st-alert-${alert.severity.key}`} data-cn-alert-until={alert.displayUntil}>
+        <strong>{alert.severity.label} – {alert.title} :</strong> {alert.message}
+        {alert.link && <> <a href={alert.link.href}>{alert.link.label}</a></>}
+      </p>
+    ))}
+  </section>
+)}
+
+<Breadcrumb items={ctx.breadcrumb} />
+
+<main id="contenu" tabindex="-1">
+  {heading && <h1>{heading}</h1>}
+  <slot />
+</main>
+
+<footer class="st-footer">
+  <section aria-labelledby="st-footer-contact">
+    <h2 id="st-footer-contact">Mairie de {site.name}</h2>
+    {site.contact.address && <p>{site.contact.address}</p>}
+    {site.contact.phone && <p><a href={site.contact.phone.href}>{site.contact.phone.label}</a></p>}
+    <p><a href={site.contact.email.href}>{site.contact.email.label}</a></p>
+    <OpeningStatus hours={site.contact.hours} />
+    {site.contact.hoursSummary.length > 0 && (
+      <dl>{site.contact.hoursSummary.map((line) => <><dt>{line.days}</dt><dd>{line.hours}</dd></>)}</dl>
+    )}
+  </section>
+  {site.social.length > 0 && (
+    <ul aria-label="Réseaux sociaux">
+      {site.social.map((link) => <li><a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></li>)}
+    </ul>
+  )}
+  {nav.footer.length > 0 && (
+    <ul aria-label="Liens utiles">{nav.footer.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>
+  )}
+  <ul aria-label="Informations légales">
+    {nav.legal.map((link) => (
+      <li><a href={link.href} data-cn-cookie-preferences={link.href === '/gestion-des-cookies' ? '' : undefined}>{link.label}</a></li>
+    ))}
+  </ul>
+</footer>

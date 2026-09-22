@@ -1,0 +1,12 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import Sitemap from '../common/Sitemap.astro';
+import { getSource, simplePage } from '../lib/content';
+
+const source = getSource();
+const [nav, pages] = await Promise.all([source.navigation(), source.pages()]);
+const ctx = await simplePage(source, { path: '/plan-du-site', title: 'Plan du site' });
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}><Frame ctx={ctx}><Sitemap nav={nav} pages={pages} /></Frame></Document>

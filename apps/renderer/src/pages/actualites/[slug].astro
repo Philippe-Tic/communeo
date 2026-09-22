@@ -1,0 +1,16 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, pageContext } from '../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getSource().articles()).map((a) => ({ params: { slug: a.href.split('/').pop()! } }));
+}
+
+const source = getSource();
+const article = (await source.articles()).find((a) => a.href === `/actualites/${Astro.params.slug}`);
+if (!article) return Astro.rewrite('/404');
+const ctx = await pageContext(source, article.href, article);
+const { Article } = theme.templates;
+---
+<Document ctx={ctx}><Article ctx={ctx} article={article} /></Document>

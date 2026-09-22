@@ -1,0 +1,19 @@
+---
+/** Plan du site : toutes les pages, rubriques et contenus. */
+import type { NavVM, PageVM } from '@communeo/core';
+
+interface Props { nav: NavVM; pages: PageVM[] }
+const { nav, pages } = Astro.props;
+---
+<ul>
+  <li><a href="/">Accueil</a></li>
+  {nav.main.map((item) =>
+    item.kind === 'link' ? <li><a href={item.href}>{item.label}</a></li> : (
+      <li>{item.label}<ul>{item.children.map((child) => <li><a href={child.href}>{child.label}</a></li>)}</ul></li>
+    ),
+  )}
+</ul>
+<h2>Pages</h2>
+<ul>{pages.map((page) => <li><a href={page.href}>{page.title}</a></li>)}</ul>
+<h2>Informations légales</h2>
+<ul>{nav.legal.map((link) => <li><a href={link.href}>{link.label}</a></li>)}</ul>

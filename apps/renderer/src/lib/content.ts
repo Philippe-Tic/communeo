@@ -1,0 +1,70 @@
+/**
+ * Accès aux contenus de la commune. Au build (sites statiques), une seule source est partagée par toutes
+ * les pages : chaque type de contenu n'est chargé qu'une fois. En preview (serveur), chaque requête
+ * recharge les brouillons.
+ */
+import { breadcrumb, createContentSource, createStrapiLoader, seo, type ContentSource, type LinkVM, type SeoVM } from '@communeo/core';
+import { createFixtureLoader, FIXTURE_CONTEXT, FIXTURE_NOW, type FixtureVariant } from '@communeo/fixtures';
+import type { PageContext } from '@communeo/theme-contract';
+
+const env = process.env;
+const isServer = env.RENDER_MODE === 'server';
+
+function required(name: string): string {
+  const value = env[name];
+  if (!value) throw new Error(`Variable d'environnement manquante : ${name}`);
+  return value;
+}
+
+function createSource(): ContentSource {
+  if (env.DATA_SOURCE === 'strapi') {
+    const apiUrl = required('STRAPI_URL');
+    return createContentSource(
+      createStrapiLoader({
+        apiUrl,
+        token: required('STRAPI_TOKEN'),
+        siteDocumentId: required('SITE_DOCUMENT_ID'),
+        status: env.CONTENT_STATUS === 'draft' ? 'draft' : 'published',
+      }),
+      { siteUrl: (env.SITE_URL ?? '').replace(/\/$/, ''), mediaUrl: env.STRAPI_PUBLIC_URL ?? apiUrl },
+    );
+  }
+  return createContentSource(
+    createFixtureLoader({ variant: (env.FIXTURE_VARIANT as FixtureVariant) || 'complete', logo: env.FIXTURE_LOGO === 'blason' ? 'blason' : 'horizontal' }),
+    FIXTURE_CONTEXT,
+    { now: FIXTURE_NOW },
+  );
+}
+
+let shared: ContentSource | undefined;
+export const getSource = (): ContentSource => (isServer ? createSource() : (shared ??= createSource()));
+
+/** Contexte commun passé à chaque template du thème. */
+export async function pageContext(
+  source: ContentSource,
+  path: string,
+  page: { title: string; seo: SeoVM; breadcrumb?: LinkVM[] },
+): Promise<PageContext> {
+  const [site, nav, alerts] = await Promise.all([source.site(), source.navigation(), source.alerts()]);
+  return { site, nav, alerts, path, title: page.title, seo: page.seo, breadcrumb: page.breadcrumb ?? [] };
+}
+
+/** Réponse 404 en preview ; au build, les routes dynamiques ne génèrent que les chemins existants. */
+export const notFound = () => new Response(null, { status: 404, statusText: 'Not found' });
+
+/**
+ * Contexte d'une page sans contenu propre (listes, pages pratiques, pages légales) :
+ * titre, description, fil d'Ariane et SEO construits d'un coup.
+ */
+export async function simplePage(
+  source: ContentSource,
+  options: { path: string; title: string; description?: string | null; trail?: Array<{ label: string; href: string }>; noindex?: boolean },
+): Promise<PageContext> {
+  const site = await source.site();
+  const trail = options.trail ?? [{ label: options.title, href: options.path }];
+  return pageContext(source, options.path, {
+    title: options.title,
+    seo: seo({ siteUrl: site.url, mediaUrl: '' }, { title: options.title, description: options.description, path: options.path, noindex: options.noindex }),
+    breadcrumb: breadcrumb(...trail),
+  });
+}

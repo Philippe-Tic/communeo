@@ -1,0 +1,34 @@
+---
+/** Mentions légales (loi pour la confiance dans l'économie numérique, art. 6). */
+import type { SiteVM } from '@communeo/core';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+
+interface Props { site: SiteVM }
+const { site } = Astro.props;
+const { legal, contact } = site;
+---
+<h2>Éditeur du site</h2>
+<p>
+  Mairie de {site.name}<br />
+  {contact.address && <>{contact.address}<br /></>}
+  {contact.phone && <>Téléphone : <a href={contact.phone.href}>{contact.phone.label}</a><br /></>}
+  E-mail : <a href={contact.email.href}>{contact.email.label}</a>
+  {legal.siret && <><br />SIRET : {legal.siret}</>}
+</p>
+
+<h2>Directeur de la publication</h2>
+<p>{legal.publicationDirector ? <>{legal.publicationDirector.name}{legal.publicationDirector.title && <>, {legal.publicationDirector.title}</>}</> : 'Le maire de la commune'}</p>
+
+<h2>Hébergement</h2>
+{legal.host ? (
+  <p>{legal.host.name}{legal.host.address && <><br />{legal.host.address}</>}{legal.host.phone && <><br />{legal.host.phone}</>}</p>
+) : <p>Informations d'hébergement disponibles sur demande auprès de la mairie.</p>}
+
+<h2>Réalisation</h2>
+<p>Site réalisé avec Communeo.</p>
+
+{legal.credits && <><h2>Crédits</h2><RichText doc={legal.credits} /></>}
+{legal.extra && <RichText doc={legal.extra} />}
+
+<h2>Données personnelles</h2>
+<p>Pour savoir comment la commune traite vos données, consultez la page <a href="/donnees-personnelles">Données personnelles</a>.</p>

@@ -1,0 +1,36 @@
+---
+/** Déclaration d'accessibilité (RGAA) : état de conformité, contenus, retour d'information et recours. */
+import type { SiteVM } from '@communeo/core';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+
+interface Props { site: SiteVM }
+const { site } = Astro.props;
+const a11y = site.legal.accessibility;
+---
+<p>La mairie de {site.name} s'engage à rendre son site internet accessible conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.</p>
+
+<h2>État de conformité</h2>
+<p>Le site <strong>{site.url.replace(/^https?:\/\//, '')}</strong> est <strong>{a11y.levelLabel.toLowerCase()}</strong> avec le référentiel général d'amélioration de l'accessibilité (RGAA), version 4.1.</p>
+
+{a11y.declaration && <RichText doc={a11y.declaration} />}
+
+{(a11y.schemaUrl || a11y.actionPlanUrl) && (
+  <>
+    <h2>Schéma pluriannuel et plan d'action</h2>
+    <ul>
+      {a11y.schemaUrl && <li><a href={a11y.schemaUrl}>Schéma pluriannuel de mise en accessibilité</a></li>}
+      {a11y.actionPlanUrl && <li><a href={a11y.actionPlanUrl}>Plan d'action de l'année en cours</a></li>}
+    </ul>
+  </>
+)}
+
+<h2>Retour d'information et contact</h2>
+<p>Si vous n'arrivez pas à accéder à un contenu ou à un service, contactez la mairie pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme : <a href={site.contact.email.href}>{site.contact.email.label}</a>{site.contact.phone && <>, <a href={site.contact.phone.href}>{site.contact.phone.label}</a></>}.</p>
+
+<h2>Voies de recours</h2>
+<p>Si vous constatez un défaut d'accessibilité qui vous empêche d'accéder à un contenu, que vous l'avez signalé et que vous n'avez pas obtenu de réponse satisfaisante, vous pouvez :</p>
+<ul>
+  <li><a href="https://formulaire.defenseurdesdroits.fr/" target="_blank" rel="noopener noreferrer">écrire un message au Défenseur des droits<span class="cn-sr-only"> (nouvelle fenêtre)</span></a> ;</li>
+  <li>contacter le délégué du Défenseur des droits de votre région ;</li>
+  <li>envoyer un courrier (gratuit, sans timbre) à : Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07.</li>
+</ul>

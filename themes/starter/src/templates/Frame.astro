@@ -1,0 +1,11 @@
+---
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; lead?: string | null }
+const { ctx, lead } = Astro.props;
+---
+<Layout ctx={ctx}>
+  {lead && <p class="st-lead">{lead}</p>}
+  <div class="st-prose"><slot /></div>
+</Layout>

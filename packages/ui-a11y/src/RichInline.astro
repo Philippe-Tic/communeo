@@ -1,0 +1,33 @@
+---
+/**
+ * Texte en ligne : gras, italique, liens. Un lien externe ouvert dans un nouvel onglet l'annonce
+ * aux lecteurs d'écran ; les thèmes peuvent ajouter une icône via la classe `cn-external`.
+ */
+import type { RichTextInline } from '@communeo/core';
+
+interface Props {
+  nodes: RichTextInline[];
+}
+
+const { nodes } = Astro.props;
+const isExternal = (href: string) => /^https?:\/\//i.test(href);
+---
+{nodes.map((node) => {
+  if (node.type === 'hardBreak') return <br />;
+  const marks = node.marks ?? [];
+  const bold = marks.some((mark) => mark.type === 'bold');
+  const italic = marks.some((mark) => mark.type === 'italic');
+  const link = marks.find((mark) => mark.type === 'link');
+  const text = italic ? <em>{node.text}</em> : node.text;
+  const strong = bold ? <strong>{text}</strong> : text;
+  if (!link || link.type !== 'link') return strong;
+  const newTab = link.attrs.target === '_blank';
+  return (
+    <a
+      href={link.attrs.href}
+      class:list={[{ 'cn-external': isExternal(link.attrs.href) }]}
+      target={newTab ? '_blank' : undefined}
+      rel={newTab ? 'noopener noreferrer' : undefined}
+    >{strong}{newTab && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}</a>
+  );
+})}

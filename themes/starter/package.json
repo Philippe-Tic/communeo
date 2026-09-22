@@ -1,0 +1,28 @@
+{
+  "name": "@communeo/theme-starter",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Thème de départ : implémente tout le contrat en HTML sémantique et accessible, sans design. Sert de modèle à create-theme et de référence aux tests du renderer.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "astro check --root . --tsconfig tsconfig.json"
+  },
+  "dependencies": {
+    "@communeo/core": "workspace:*",
+    "@communeo/theme-contract": "workspace:*",
+    "@communeo/ui-a11y": "workspace:*"
+  },
+  "peerDependencies": {
+    "astro": "^7.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^7.3.3",
+    "typescript": "^5.9.2"
+  }
+}

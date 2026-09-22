@@ -1,0 +1,16 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, pageContext } from '../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getSource().events()).map((e) => ({ params: { slug: e.href.split('/').pop()! } }));
+}
+
+const source = getSource();
+const event = (await source.events()).find((e) => e.href === `/agenda/${Astro.params.slug}`);
+if (!event) return Astro.rewrite('/404');
+const ctx = await pageContext(source, event.href, event);
+const { Event } = theme.templates;
+---
+<Document ctx={ctx}><Event ctx={ctx} event={event} /></Document>

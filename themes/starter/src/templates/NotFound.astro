@@ -1,0 +1,12 @@
+---
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext }
+const { ctx } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <p>La page demandée n'existe pas ou a été déplacée.</p>
+  <form role="search" action="/recherche"><label for="nf-q">Rechercher sur le site</label> <input id="nf-q" name="q" type="search" /> <button type="submit">Rechercher</button></form>
+  <p><a href="/">Retour à l'accueil</a></p>
+</Layout>

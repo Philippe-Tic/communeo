@@ -1,0 +1,16 @@
+---
+/**
+ * Texte riche (JSON TipTap restreint) rendu en HTML sémantique, sans jamais injecter de HTML brut.
+ * Styles : le thème cible le conteneur via `class`.
+ */
+import type { RichTextVM } from '@communeo/core';
+import RichNodes from './RichNodes.astro';
+
+interface Props {
+  doc: RichTextVM;
+  class?: string;
+}
+
+const { doc, class: className } = Astro.props;
+---
+<div class:list={['cn-rich-text', className]}><RichNodes nodes={doc.content} /></div>

@@ -1,0 +1,11 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../layouts/Document.astro';
+import { getSource, simplePage } from '../lib/content';
+import AccessibilityStatement from '../common/AccessibilityStatement.astro';
+const source = getSource();
+const site = await source.site();
+const ctx = await simplePage(source, { path: '/accessibilite', title: 'Déclaration d’accessibilité', description: 'État de conformité du site au RGAA' });
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}><Frame ctx={ctx}><AccessibilityStatement site={site} /></Frame></Document>

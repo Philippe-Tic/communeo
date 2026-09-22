@@ -1,0 +1,25 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../../layouts/Document.astro';
+import { getSource, simplePage } from '../../../lib/content';
+import { categoryFilters, PAGE_SIZE, paginate } from '../../../lib/lists';
+
+export async function getStaticPaths() {
+  const count = Math.ceil((await getSource().articles()).length / PAGE_SIZE);
+  return Array.from({ length: Math.max(0, count - 1) }, (_, i) => ({ params: { page: String(i + 2) } }));
+}
+
+const source = getSource();
+const articles = await source.articles();
+const page = Number(Astro.params.page);
+const { items, pagination } = paginate(articles, page, '/actualites');
+if (!Number.isInteger(page) || page < 2 || page > pagination.pageCount) return Astro.rewrite('/404');
+const path = `/actualites/page/${page}`;
+const ctx = await simplePage(source, {
+  path,
+  title: `Actualités – page ${page}`,
+  trail: [{ label: 'Actualités', href: '/actualites' }, { label: `Page ${page}`, href: path }],
+});
+const { ArticleList } = theme.templates;
+---
+<Document ctx={ctx}><ArticleList ctx={ctx} articles={items} categories={categoryFilters(articles, '/actualites', null)} pagination={pagination} /></Document>

@@ -1,0 +1,30 @@
+---
+/** Politique de données personnelles (RGPD) : texte de la commune, délégué et droits. */
+import type { SiteVM } from '@communeo/core';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+
+interface Props { site: SiteVM }
+const { site } = Astro.props;
+const { privacyPolicy, dpo } = site.legal;
+---
+<p>Responsable des traitements : mairie de {site.name}, représentée par son maire.</p>
+{privacyPolicy ? <RichText doc={privacyPolicy} /> : <p>La politique de protection des données de la commune sera bientôt publiée.</p>}
+
+<h2>Délégué à la protection des données</h2>
+{dpo ? (
+  <p>
+    {dpo.name && <>{dpo.name}<br /></>}
+    {dpo.email && <>E-mail : <a href={dpo.email.href}>{dpo.email.label}</a><br /></>}
+    {dpo.phone && <>Téléphone : <a href={dpo.phone.href}>{dpo.phone.label}</a></>}
+  </p>
+) : <p>Contactez la mairie : <a href={site.contact.email.href}>{site.contact.email.label}</a>.</p>}
+
+<h2>Vos droits</h2>
+<p>
+  Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation et d'opposition sur vos données.
+  Pour les exercer, contactez la mairie. En cas de difficulté, vous pouvez saisir la
+  <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer">CNIL<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>.
+</p>
+
+<h2>Cookies</h2>
+<p>Ce site ne dépose aucun cookie de mesure d'audience. Les contenus tiers (vidéos, cartes) ne sont chargés qu'avec votre accord : <a href="/gestion-des-cookies" data-cn-cookie-preferences>gérer mes choix</a>.</p>

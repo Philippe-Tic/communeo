@@ -1,0 +1,26 @@
+{
+  "name": "@communeo/renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "lint": "eslint src",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.6",
+    "@communeo/core": "workspace:*",
+    "@communeo/fixtures": "workspace:*",
+    "@communeo/theme-contract": "workspace:*",
+    "@communeo/theme-starter": "workspace:*",
+    "@communeo/ui-a11y": "workspace:*",
+    "astro": "^7.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^5.9.2"
+  }
+}

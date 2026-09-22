@@ -1,0 +1,20 @@
+---
+/** Fil d'Ariane accessible : liste ordonnée, page courante signalée par aria-current. */
+import type { LinkVM } from '@communeo/core';
+
+interface Props {
+  items: LinkVM[];
+  class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+{items.length > 1 && (
+  <nav aria-label="Fil d'Ariane" class:list={['cn-breadcrumb', className]}>
+    <ol>
+      {items.map((item, index) =>
+        index === items.length - 1 ? <li aria-current="page">{item.label}</li> : <li><a href={item.href}>{item.label}</a></li>,
+      )}
+    </ol>
+  </nav>
+)}

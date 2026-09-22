@@ -1,0 +1,21 @@
+---
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+
+export async function getStaticPaths() {
+  return (await getSource().documents()).map((d) => ({ params: { slug: d.href.split('/').pop()! } }));
+}
+
+const source = getSource();
+const doc = (await source.documents()).find((d) => d.href === `/documents/${Astro.params.slug}`);
+if (!doc) return Astro.rewrite('/404');
+const ctx = await simplePage(source, {
+  path: doc.href,
+  title: doc.title,
+  description: `${doc.type.label} du ${doc.date.label}`,
+  trail: [{ label: 'Documents officiels', href: '/documents' }, { label: doc.title, href: doc.href }],
+});
+const { Document: DocumentTemplate } = theme.templates;
+---
+<Document ctx={ctx}><DocumentTemplate ctx={ctx} document={doc} /></Document>

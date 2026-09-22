@@ -1,0 +1,17 @@
+---
+import type { PaginationLinks } from '@communeo/theme-contract';
+
+interface Props { pagination: PaginationLinks }
+const { pagination } = Astro.props;
+---
+{pagination.pageCount > 1 && (
+  <nav class="st-pagination" aria-label="Pagination">
+    <ul>
+      {pagination.previous && <li><a href={pagination.previous} rel="prev">Page précédente</a></li>}
+      {pagination.pages.map((page) => (
+        <li><a href={page.href} aria-current={page.current ? 'page' : undefined}><span class="cn-sr-only">Page </span>{page.page}</a></li>
+      ))}
+      {pagination.next && <li><a href={pagination.next} rel="next">Page suivante</a></li>}
+    </ul>
+  </nav>
+)}

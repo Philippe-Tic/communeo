@@ -1,0 +1,126 @@
+---
+import type { HomeVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import RichText from '@communeo/ui-a11y/RichText.astro';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import Layout from '../parts/Layout.astro';
+import ArticleCard from '../parts/ArticleCard.astro';
+import EventCard from '../parts/EventCard.astro';
+
+interface Props { ctx: PageContext; home: HomeVM }
+const { ctx, home } = Astro.props;
+const { site } = ctx;
+---
+<Layout ctx={ctx} heading={false}>
+  <section class="st-hero" aria-labelledby="st-hero-title">
+    <h1 id="st-hero-title">{home.hero?.title ?? site.name}</h1>
+    {home.hero?.subtitle && <p>{home.hero.subtitle}</p>}
+    {home.hero?.image && <img src={home.hero.image.src} alt={home.hero.image.alt} width={home.hero.image.width ?? undefined} height={home.hero.image.height ?? undefined} />}
+    {(home.hero?.primary || home.hero?.secondary) && (
+      <p>
+        {home.hero.primary && <a class="st-button st-button-primary" href={home.hero.primary.href}>{home.hero.primary.label}</a>}
+        {home.hero.secondary && <a class="st-button st-button-secondary" href={home.hero.secondary.href}>{home.hero.secondary.label}</a>}
+      </p>
+    )}
+  </section>
+
+  {home.quickLinks && (
+    <section aria-labelledby="st-quick">
+      <h2 id="st-quick">Accès rapides</h2>
+      <ul>{home.quickLinks.map((link) => <li><a href={link.href}>{link.label}</a>{link.description && <span> – {link.description}</span>}</li>)}</ul>
+    </section>
+  )}
+
+  {home.featuredNews && (
+    <section aria-labelledby="st-news">
+      <h2 id="st-news">Actualités</h2>
+      {home.featuredNews.map((article) => <ArticleCard article={article} />)}
+      <p><a href="/actualites">Toutes les actualités</a></p>
+    </section>
+  )}
+
+  {home.agenda && (
+    <section aria-labelledby="st-agenda">
+      <h2 id="st-agenda">Agenda</h2>
+      {home.agenda.map((event) => <EventCard event={event} />)}
+      <p><a href="/agenda">Tout l'agenda</a></p>
+    </section>
+  )}
+
+  {home.practicalInfo && (
+    <section aria-labelledby="st-info">
+      <h2 id="st-info">Mairie</h2>
+      <OpeningStatus hours={site.contact.hours} />
+      {site.contact.address && <p>{site.contact.address}</p>}
+      {site.contact.phone && <p><a href={site.contact.phone.href}>{site.contact.phone.label}</a></p>}
+      {site.contact.hoursSummary.length > 0 && <dl>{site.contact.hoursSummary.map((line) => <><dt>{line.days}</dt><dd>{line.hours}</dd></>)}</dl>}
+    </section>
+  )}
+
+  {home.disruptions && (
+    <section aria-labelledby="st-disruptions">
+      <h2 id="st-disruptions">Perturbations en cours</h2>
+      <ul>{home.disruptions.map((alert) => <li><strong>{alert.title}</strong> – {alert.message}</li>)}</ul>
+    </section>
+  )}
+
+  {home.wasteCollection && (
+    <section aria-labelledby="st-waste">
+      <h2 id="st-waste">Prochaines collectes</h2>
+      <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming[0] && <> : <time datetime={c.upcoming[0].iso}>{c.upcoming[0].label}</time></>}</li>)}</ul>
+      <p><a href="/collecte-des-dechets">Tout le calendrier</a></p>
+    </section>
+  )}
+
+  {home.canteen && (
+    <section aria-labelledby="st-canteen">
+      <h2 id="st-canteen">Cantine</h2>
+      <p>{home.canteen.label}</p>
+      <p><a href="/cantine">Voir le menu</a></p>
+    </section>
+  )}
+
+  {home.mayorWord && (
+    <section aria-labelledby="st-mayor">
+      <h2 id="st-mayor">{home.mayorWord.title}</h2>
+      {home.mayorWord.photo && <img src={home.mayorWord.photo.src} alt={home.mayorWord.photo.alt} width={home.mayorWord.photo.width ?? undefined} height={home.mayorWord.photo.height ?? undefined} />}
+      <RichText doc={home.mayorWord.body} />
+      {home.mayorWord.signature.name && <p>{home.mayorWord.signature.name}{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}</p>}
+    </section>
+  )}
+
+  {home.keyFigures && (
+    <section aria-labelledby="st-figures">
+      <h2 id="st-figures">La commune en chiffres</h2>
+      <ul>{home.keyFigures.map((figure) => <li><strong>{figure.value}</strong> {figure.label}</li>)}</ul>
+    </section>
+  )}
+
+  {home.associations && (
+    <section aria-labelledby="st-assos">
+      <h2 id="st-assos">Associations</h2>
+      <ul>{home.associations.map((a) => <li><a href={a.href}>{a.name}</a> – {a.category.label}</li>)}</ul>
+    </section>
+  )}
+
+  {home.freeContent && (
+    <section aria-labelledby="st-free">
+      <h2 id="st-free">{home.freeContent.title ?? site.name}</h2>
+      <RichText doc={home.freeContent.body} />
+    </section>
+  )}
+
+  {home.newsletter && (
+    <section aria-labelledby="st-newsletter">
+      <h2 id="st-newsletter">Lettre d'information</h2>
+      <p><a href="/contact">S'inscrire à la lettre d'information</a></p>
+    </section>
+  )}
+
+  {home.partners && (
+    <section aria-labelledby="st-partners">
+      <h2 id="st-partners">Partenaires</h2>
+      <ul>{home.partners.map((p) => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}</ul>
+    </section>
+  )}
+</Layout>

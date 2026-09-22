@@ -32,6 +32,8 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     ENCRYPTION_KEY: 'test-encryption-key',
     // Aucun hébergeur : Strapi doit démarrer, seules les actions de publication répondent 503
     NETLIFY_TOKEN: '',
+    QUEUE_DATABASE_URL: '',
+    WORKER_SECRET: 'test-worker-secret',
     STRAPI_API_TOKEN: 'test-build-token',
     CRON_ENABLED: 'false',
     STRAPI_TELEMETRY_DISABLED: 'true',

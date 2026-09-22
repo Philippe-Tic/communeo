@@ -448,10 +448,11 @@ export interface ContactSubmission extends StrapiDocument {
   site?: Site | null;
 }
 
-/** Content-type `api::deployment.deployment` — Track deployments to Netlify */
+/** Content-type `api::deployment.deployment` — Mises en ligne : un enregistrement par job de build */
 export interface Deployment extends StrapiDocument {
   site?: Site | null;
-  deployment_id: string;
+  job_id: string | null;
+  deployment_id: string | null;
   status: DeploymentStatus;
   triggered_by?: User | null;
   build_time: number | null;

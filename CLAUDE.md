@@ -13,6 +13,8 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **apps/backend/** — Strapi v5 headless CMS (TypeScript). REST API, SQLite (dev) or PostgreSQL (prod). The `site-isolation` middleware enforces multi-tenant isolation (fail-closed) based on the authenticated user's site.
 - **apps/admin/** — V2 admin (React 19 + Vite + TanStack Router/Query + shadcn/ui), built in phase 3. Mockups: `v2/Design Admin Handoff/`.
 - **apps/renderer/** — Astro 7 renderer: one project for every commune and theme. Static build for published sites, `RENDER_MODE=server` for the draft preview. The theme is chosen at build time via `THEME` (virtual module `virtual:communeo/theme`); data comes from Strapi (`DATA_SOURCE=strapi`) or the demo fixtures (default). The renderer owns the HTML document (head, SEO, JSON-LD, skip links, cookie banner), the pages common to all themes (legal notice, privacy, accessibility statement, rights request, cookies, sitemap, search) and the machine-readable files (`rss.xml`, `sitemap.xml`, `robots.txt`, `site.webmanifest`). Alerts are rendered at build time and refreshed in the browser from `/api/alertes/public/:siteDocumentId` (public, cached 60 s): an alert published in the admin shows up without rebuilding the site. Site search is Pagefind: `pnpm --filter @communeo/renderer build` indexes the static output after `astro build`. Service-Public démarches (comarquage): the theme tree is fetched at build from the backend, a fiche is loaded in the browser from the public API (`/api/comarquage/fiche/…`) and rendered with `@communeo/core` (`demarches/`) — thousands of DILA fiches can't be built per commune.
+- **apps/worker/** — build worker (own container, `apps/worker/Dockerfile`): consumes the build queue, builds the renderer for one commune into a temp dir (+ Pagefind), publishes it through `SitePublisher`, reports to Strapi via the internal routes `/api/build-worker/jobs/:jobId/{start,finish}` (shared `WORKER_SECRET`). One Deployment record per job (retries reuse it, a single error on final failure); temp dirs removed even on failure.
+- **packages/pipeline** — publishing pipeline shared by backend and worker: `SitePublisher` + adapters (`NetlifyPublisher`, `LocalPublisher` for dev via `PUBLISH_DIR`; the only code that calls the host), the build queue (pg-boss on `QUEUE_DATABASE_URL`, `stately` policy keyed by site: at most one build running and one waiting per commune, heartbeat → resumed after a worker restart) and the worker ⇄ Strapi payload types.
 - **packages/core** — generated Strapi types, block/settings schemas (zod), French formatting, **view-models** (`src/vm`: the ready-to-render data themes receive, never Strapi types) and the **content source** (`src/source`: `createStrapiLoader` → `createContentSource`).
 - **packages/theme-contract** — what a theme must provide: `manifest`, 19 `templates` (Home, Page, ArticleList…, Frame, NotFound) and 9 `blocks`, declared with `defineTheme` (a missing template or wrong props fails `astro check`). Themes never fetch data: they receive view-models.
 - **packages/ui-a11y** — shared accessible Astro components: RichText, Blocks dispatcher, SkipLinks, Breadcrumb, CookieBanner + consent store, ConsentEmbed (videos load after consent), OpeningStatus (computed in the browser), disclosure script.
@@ -25,7 +27,7 @@ Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 laun
 
 ```
 Admin UI → Strapi API (filtered by site-isolation middleware) → SQLite/PostgreSQL
-Strapi API → Astro renderer (build-time fetch) → Static HTML → Netlify
+Admin « Mettre en ligne » → Strapi → build queue (pg-boss, Postgres) → worker → Astro renderer (reads Strapi with the read-only build token) → Static HTML → SitePublisher (Netlify)
 ```
 
 ### Multi-Tenancy
@@ -45,6 +47,8 @@ pnpm theme:thumbnail <id>            # regenerate themes/<id>/thumbnail.png (120
 THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
 pnpm --filter @communeo/renderer test:e2e     # every theme × every demo page: axe (WCAG 2.2 AA) at 390/1440 px + structure
 pnpm --filter @communeo/renderer test:parity  # static build HTML == server (preview) HTML
+pnpm --filter @communeo/worker dev   # build worker (apps/worker/.env: QUEUE_DATABASE_URL, STRAPI_URL, STRAPI_API_TOKEN, WORKER_SECRET, NETLIFY_TOKEN or PUBLISH_DIR)
+docker run -d -p 55432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_DB=queue postgres:16-alpine   # queue for local tests: TEST_QUEUE_DATABASE_URL=postgres://postgres:test@localhost:55432/queue pnpm test
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 
@@ -53,9 +57,16 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 ## Environment Variables
 
 ### Backend
-- `NETLIFY_TOKEN` — Netlify API token for deployments
-- `STRAPI_PUBLIC_URL` — Public URL of Strapi (used during site builds)
-- `STRAPI_API_TOKEN` — API token for Strapi access from build process
+- `NETLIFY_TOKEN` — Netlify API token (custom domains); without it Strapi boots and those actions answer 503
+- `QUEUE_DATABASE_URL` — Postgres of the build queue (pg-boss schema `pgboss`); without it « Mettre en ligne » answers 503
+- `WORKER_SECRET` — shared secret of the internal `/api/build-worker/*` routes
+- `STRAPI_PUBLIC_URL` — Public URL of Strapi
+- `STRAPI_API_TOKEN` — read-only build token (created at first boot when unset, see logs)
+
+### Worker (`apps/worker/.env.example`)
+- `QUEUE_DATABASE_URL`, `WORKER_SECRET`, `STRAPI_URL`, `STRAPI_PUBLIC_URL`, `STRAPI_API_TOKEN` (passed to the renderer)
+- `NETLIFY_TOKEN` — publish to Netlify; or `PUBLISH_DIR` (+ `PUBLISH_BASE_URL`) to publish into a local folder in dev
+- `BUILD_TIMEOUT_SECONDS` (600), `WORK_DIR`, `RENDERER_DIR`
 
 ### Admin
 - `VITE_API_URL` — Strapi backend URL (e.g., `http://localhost:1337`)
@@ -72,8 +83,9 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `src/validation/` — blocks, homepage, per-site slugs (document service middlewares)
 - `src/bootstrap/` — closes public registration, syncs permissions, dev accounts (`test@example.com` / `super@example.com`), read-only build token
 - `database/migrations/` — data migrations (never in bootstrap)
-- `src/publishing/` — `SitePublisher` interface and its Netlify adapter, the only code that calls the host (`getPublisher()`; without `NETLIFY_TOKEN` Strapi still boots and publishing answers 503)
-- `src/services/deployment.ts` / `domain.ts` — build and custom domains, host-agnostic (they go through `getPublisher()`)
+- `src/utils/publisher.ts` — the backend's access to the host (`@communeo/pipeline` publisher with Strapi's logger)
+- `src/services/deployment.ts` / `build-queue.ts` — « Mettre en ligne » enqueues a build (Strapi never builds sites); `domain.ts` — custom domains through the publisher
+- `src/api/build-worker/` — internal routes of the build worker (shared secret)
 - `src/api/*/content-types/*/schema.json` — content type schemas
 
 ## Content Types
@@ -85,7 +97,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 | Article | `api::article.article` | title, slug, summary, **blocks**, image, category, featured, scheduled_at |
 | Event | `api::evenement.evenement` | title, **blocks**, start_date, end_date, location, registration, scheduled_at |
 | Official document | `api::official-document.official-document` | title, document_type, dates, file, scheduled_at |
-| Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain, build status |
+| Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain; one Deployment per build job (`job_id`, status, host `deployment_id`) |
 
 - **Draft & Publish** is enabled on page, article, event and official document. Writes from commune users default to the draft (`?status=published` to publish); `scheduled_at` is published by a cron task every minute (`src/services/scheduled-publication.ts`).
 - **Homepage in intents**: `homepage.homepage` holds 15 fixed sections (`home-sections.*`), each with an `enabled` flag and its data; no order or position, the theme decides the layout. Section ids and the theme registry (`THEMES`) live in `@communeo/core`; the Site `theme` enum must match `THEME_IDS` (tested). Only admins can change the theme.

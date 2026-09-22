@@ -7,7 +7,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { PassThrough } from 'node:stream';
 import archiver from 'archiver';
-import { log } from '../utils/logger';
+import { consoleLogger, type Logger } from '../logger';
 import { baseDomain, displayName, isApexDomain } from './dns';
 import type {
   DeployState,
@@ -42,7 +42,10 @@ interface NetlifyDeploy {
 }
 
 export class NetlifyApiError extends Error {
-  constructor(readonly status: number, body: string) {
+  constructor(
+    readonly status: number,
+    body: string,
+  ) {
     super(`Netlify API ${status}: ${body}`);
     this.name = 'NetlifyApiError';
   }
@@ -56,6 +59,7 @@ export interface NetlifyPublisherOptions {
   resolveCname?: (domain: string) => Promise<string[]>;
   resolve4?: (domain: string) => Promise<string[]>;
   sleep?: (ms: number) => Promise<void>;
+  logger?: Logger;
   /** Attente maximale de la mise en ligne d'un dépôt, en ms */
   deployTimeoutMs?: number;
   pollIntervalMs?: number;
@@ -73,6 +77,7 @@ export class NetlifyPublisher implements SitePublisher {
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly deployTimeoutMs: number;
   private readonly pollIntervalMs: number;
+  private readonly log: Logger;
 
   constructor(options: NetlifyPublisherOptions) {
     this.token = options.token;
@@ -83,6 +88,7 @@ export class NetlifyPublisher implements SitePublisher {
     this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
     this.deployTimeoutMs = options.deployTimeoutMs ?? 60_000;
     this.pollIntervalMs = options.pollIntervalMs ?? 1_000;
+    this.log = options.logger ?? consoleLogger;
   }
 
   // Sites
@@ -94,7 +100,7 @@ export class NetlifyPublisher implements SitePublisher {
       } catch (error) {
         // Site supprimé côté Netlify : on le retrouve par son nom ou on le recrée
         if (!(error instanceof NetlifyApiError && error.status === 404)) throw error;
-        log.warn(`[NETLIFY] Site ${site.hostId} introuvable, recherche par nom`);
+        this.log.warn(`[NETLIFY] Site ${site.hostId} introuvable, recherche par nom`);
       }
     }
 
@@ -102,7 +108,7 @@ export class NetlifyPublisher implements SitePublisher {
     const existing = await this.findSiteByName(name);
     if (existing) return this.toHostSite(existing);
 
-    log.info(`[NETLIFY] Création du site ${name}`);
+    this.log.info(`[NETLIFY] Création du site ${name}`);
     const created: NetlifySite = await this.request('/sites', {
       method: 'POST',
       body: JSON.stringify({ name }),
@@ -112,7 +118,7 @@ export class NetlifyPublisher implements SitePublisher {
 
   async deleteSite(site: PublisherSite): Promise<void> {
     if (!site.hostId) return;
-    log.info(`[NETLIFY] Suppression du site ${site.hostId}`);
+    this.log.info(`[NETLIFY] Suppression du site ${site.hostId}`);
     await this.request(`/sites/${site.hostId}`, { method: 'DELETE' });
   }
 
@@ -122,7 +128,7 @@ export class NetlifyPublisher implements SitePublisher {
     const host = await this.ensureSite(site);
     if (site.customDomain) await this.redirectDefaultDomain(dir, host, site.customDomain);
     const zip = await zipDirectory(dir);
-    log.info(`[NETLIFY] Dépôt de ${(zip.length / 1024 / 1024).toFixed(2)} Mo sur ${host.hostId}`);
+    this.log.info(`[NETLIFY] Dépôt de ${(zip.length / 1024 / 1024).toFixed(2)} Mo sur ${host.hostId}`);
 
     const deploy: NetlifyDeploy = await this.request(`/sites/${host.hostId}/deploys`, {
       method: 'POST',
@@ -159,7 +165,7 @@ export class NetlifyPublisher implements SitePublisher {
       try {
         await this.setAliases(updated, [...(updated.domain_aliases ?? []), `www.${domain}`]);
       } catch (error) {
-        log.warn(`[NETLIFY] Alias www.${domain} non ajouté:`, error);
+        this.log.warn(`[NETLIFY] Alias www.${domain} non ajouté:`, error);
       }
     }
 
@@ -194,7 +200,7 @@ export class NetlifyPublisher implements SitePublisher {
       await this.request(`/sites/${hostId}/ssl`, { method: 'POST' });
       await this.request(`/sites/${hostId}`, { method: 'PATCH', body: JSON.stringify({ force_ssl: true }) });
     } catch (error) {
-      log.warn(`[NETLIFY] Certificat HTTPS non demandé pour ${domain}:`, error);
+      this.log.warn(`[NETLIFY] Certificat HTTPS non demandé pour ${domain}:`, error);
     }
     return { ok: true, errors: [] };
   }
@@ -209,7 +215,7 @@ export class NetlifyPublisher implements SitePublisher {
       try {
         await this.setAliases(updated, (updated.domain_aliases ?? []).filter((alias) => alias !== `www.${domain}`));
       } catch (error) {
-        log.warn(`[NETLIFY] Alias www.${domain} non retiré:`, error);
+        this.log.warn(`[NETLIFY] Alias www.${domain} non retiré:`, error);
       }
     }
     return { defaultUrl: this.toHostSite(updated).defaultUrl };
@@ -220,7 +226,7 @@ export class NetlifyPublisher implements SitePublisher {
     try {
       return await this.request(`/sites/${site.hostId}/ssl`);
     } catch (error) {
-      log.warn(`[NETLIFY] État du certificat indisponible pour ${site.hostId}:`, error);
+      this.log.warn(`[NETLIFY] État du certificat indisponible pour ${site.hostId}:`, error);
       return null;
     }
   }
@@ -299,7 +305,7 @@ export class NetlifyPublisher implements SitePublisher {
       try {
         status = await this.status(deployId);
       } catch (error) {
-        log.warn(`[NETLIFY] État du dépôt ${deployId} indisponible:`, error);
+        this.log.warn(`[NETLIFY] État du dépôt ${deployId} indisponible:`, error);
       }
       if (status?.state === 'error') throw new Error(`Netlify a refusé le dépôt : ${status.error}`);
       if (status?.state === 'ready') {
@@ -309,10 +315,11 @@ export class NetlifyPublisher implements SitePublisher {
       }
       await this.sleep(this.pollIntervalMs);
     }
-    log.warn(`[NETLIFY] Dépôt ${deployId} toujours en cours après ${this.deployTimeoutMs / 1000} s`);
+    this.log.warn(`[NETLIFY] Dépôt ${deployId} toujours en cours après ${this.deployTimeoutMs / 1000} s`);
     return 'building';
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- réponses JSON de l'API, typées à l'appel
   private async request(endpoint: string, init: RequestInit = {}): Promise<any> {
     const response = await this.fetch(`${API_URL}${endpoint}`, {
       ...init,
@@ -339,12 +346,14 @@ function requireHostId(site: PublisherSite): string {
   return site.hostId;
 }
 
+const DNS_MISSES = new Set(['ENOTFOUND', 'ENODATA', 'ESERVFAIL', 'ENOTIMP', 'EREFUSED']);
+
 /** Résolution DNS : un nom absent n'est pas une erreur, juste aucun enregistrement. */
 async function lookup(resolve: () => Promise<string[]>): Promise<string[]> {
   try {
     return await resolve();
-  } catch (error: any) {
-    if (['ENOTFOUND', 'ENODATA', 'ESERVFAIL', 'ENOTIMP', 'EREFUSED'].includes(error?.code)) return [];
+  } catch (error) {
+    if (DNS_MISSES.has((error as NodeJS.ErrnoException).code ?? '')) return [];
     throw error;
   }
 }

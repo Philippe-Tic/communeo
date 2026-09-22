@@ -4,7 +4,7 @@
  */
 
 import crypto from 'crypto';
-import { getPublisher, toPublisherSite } from '../../../publishing';
+import { publisher as getPublisher, toPublisherSite } from '../../../utils/publisher';
 import { createInvitationToken, escapeHtml } from '../../../utils/security';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';

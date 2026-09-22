@@ -14,6 +14,22 @@ jobs:
   check:
     name: Lint, typecheck, tests
     runs-on: ubuntu-latest
+    # File des builds (pg-boss) : tests du worker et du dépôt des demandes de mise en ligne
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: queue
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_QUEUE_DATABASE_URL: postgres://postgres:test@localhost:5432/queue
     steps:
       - uses: actions/checkout@v4
 
@@ -94,16 +110,19 @@ jobs:
           path: apps/renderer/test-results
           retention-days: 7
 
-  docker-backend:
-    name: Image Docker du backend
+  docker:
+    name: Image Docker (${{ matrix.app }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [backend, worker]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/backend/Dockerfile
+          file: apps/${{ matrix.app }}/Dockerfile
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}

@@ -4,7 +4,8 @@
 
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
-import { getPublisher } from '../../../publishing';
+import { isBuildQueueConfigured } from '../../../services/build-queue';
+import { publisher } from '../../../utils/publisher';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
 
@@ -28,22 +29,9 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       const siteId = site.documentId || site.id;
       const userId = user.documentId || user.id;
-      const siteIdForRelation = site.documentId;
 
       log.debug('🔍 Trigger deployment - siteId:', siteId, 'userId:', userId);
       log.debug('🔍 User site object:', site);
-
-      // Vérifier s'il n'y a pas déjà un déploiement en cours
-      const ongoingDeployments = await strapi.documents('api::deployment.deployment').findMany({
-        filters: {
-          site: { documentId: siteIdForRelation },
-          status: 'building'
-        }
-      });
-
-      if (ongoingDeployments && ongoingDeployments.length > 0) {
-        return ctx.badRequest('Un déploiement est déjà en cours pour ce site');
-      }
 
       log.debug('🔍 Attempting to fetch site with siteId:', siteId);
 
@@ -64,57 +52,29 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.notFound('Site non trouvé');
       }
 
-      if (!getPublisher().configured) {
+      if (!isBuildQueueConfigured()) {
         ctx.status = 503;
-        ctx.body = { error: { status: 503, message: "Publication indisponible : aucun hébergeur n'est configuré" } };
+        ctx.body = { error: { status: 503, message: "Publication indisponible : QUEUE_DATABASE_URL n'est pas défini" } };
         return;
       }
 
-      // Lancer le déploiement en arrière-plan
-      log.info('🚀 Launching async deployment process...');
+      // Dépôt dans la file : le worker construit et publie le site
+      const jobId = await deploymentService.requestBuild(siteId, { triggeredBy: userId, reason: 'manual' });
 
-      deploymentService.buildAndDeploy(siteId, (siteData as any).slug, userId)
-        .then(result => {
-          log.info('✅ Async deployment process completed:', result);
-          if (!result.success) {
-            log.error('❌ Deployment failed:', result.error);
-            // Créer une entrée d'erreur en base
-            strapi.documents('api::deployment.deployment').create({
-              data: {
-                site: siteIdForRelation,
-                deployment_id: `error-${Date.now()}`,
-                status: 'error',
-                triggered_by: userId,
-                error_message: result.error,
-                build_time: result.buildTime,
-                triggered_at: new Date(),
-                completed_at: new Date()
-              }
-                          }).catch(err => log.error('Failed to create error deployment record:', err));
-          } else {
-            log.info('✅ Deployment successful, deployment ID:', result.deployment?.deployment_id);
-          }
-        })
-        .catch(error => {
-          log.error('💥 Unexpected deployment error:', error);
-          log.error('Unexpected deployment error:', error);
-        });
-
-      log.info('📤 Returning immediate response to client...');
-
-      // Retourner immédiatement avec statut "building"
+      ctx.status = 202;
       ctx.body = {
         success: true,
-        message: 'Déploiement lancé avec succès',
-        status: 'building',
+        queued: !!jobId,
+        jobId,
+        message: jobId
+          ? 'Mise en ligne demandée'
+          : 'Une mise en ligne est déjà en attente : elle prendra en compte vos dernières modifications',
         site: {
           id: siteId,
           name: (siteData as any).name,
           slug: (siteData as any).slug
         }
       };
-
-      log.info('✅ Trigger response sent successfully');
 
     } catch (error) {
       log.error('💥 Trigger deployment error:', error);
@@ -164,7 +124,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       // Si le dernier déploiement est en cours, vérifier son statut chez l'hébergeur
       let currentStatus = null;
-      if (lastDeployment && lastDeployment.status === 'building') {
+      if (lastDeployment && lastDeployment.status === 'building' && lastDeployment.deployment_id) {
         try {
           currentStatus = await deploymentService.checkDeploymentStatus(lastDeployment.deployment_id);
         } catch (error) {
@@ -303,7 +263,8 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       // 1. Variables d'environnement
       const envVars = {
-        PUBLISHER: getPublisher().configured ? getPublisher().id : 'NOT_CONFIGURED',
+        PUBLISHER: publisher().configured ? publisher().id : 'NOT_CONFIGURED',
+        QUEUE_DATABASE_URL: isBuildQueueConfigured() ? '***SET***' : 'NOT_SET',
         STRAPI_PUBLIC_URL: process.env.STRAPI_PUBLIC_URL || 'NOT_SET',
         STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN ? '***SET***' : 'NOT_SET',
         NODE_ENV: process.env.NODE_ENV || 'NOT_SET'

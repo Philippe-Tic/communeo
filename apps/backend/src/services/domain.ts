@@ -2,7 +2,8 @@
  * Domain Service - Gestion des domaines personnalisés
  */
 
-import { getPublisher, isApexDomain, isPublisherUnavailable, toPublisherSite, type DnsInstructions } from '../publishing';
+import { isApexDomain, isPublisherUnavailable, type DnsInstructions } from '@communeo/pipeline';
+import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { log } from '../utils/logger';
 
 interface DomainConfiguration {

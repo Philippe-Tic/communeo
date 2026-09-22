@@ -37,24 +37,10 @@ class AutoDeployService {
         pendingTimers.delete(siteDocumentId);
 
         try {
-          // Check if a build is already in progress
-          const activeDeployments = await strapi.documents('api::deployment.deployment').findMany({
-            filters: {
-              site: { documentId: siteDocumentId },
-              status: 'building',
-            } as any,
-          });
-
-          if (activeDeployments && activeDeployments.length > 0) {
-            log.info(`⏸️ [AUTO-DEPLOY] Build already in progress for "${siteSlug}", skipping`);
-            return;
-          }
-
-          log.info(`🚀 [AUTO-DEPLOY] Triggering deploy for "${siteSlug}"`);
-          await deploymentService.buildAndDeploy(siteDocumentId, siteSlug);
-          log.info(`✅ [AUTO-DEPLOY] Deploy completed for "${siteSlug}"`);
+          // La file garantit un seul build à la fois par site
+          await deploymentService.requestBuild(siteDocumentId, { reason: 'content' });
         } catch (error) {
-          log.error(`❌ [AUTO-DEPLOY] Deploy failed for "${siteSlug}":`, error);
+          log.error(`❌ [AUTO-DEPLOY] Could not queue a build for "${siteSlug}":`, error);
         }
       }, delaySeconds * 1000);
 
@@ -62,6 +48,11 @@ class AutoDeployService {
     } catch (error) {
       log.error(`❌ [AUTO-DEPLOY] Error scheduling deploy:`, error);
     }
+  }
+
+  /** A deploy is scheduled for this site */
+  hasPending(siteDocumentId: string): boolean {
+    return pendingTimers.has(siteDocumentId);
   }
 
   /**

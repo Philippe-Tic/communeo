@@ -1,5 +1,6 @@
 import bootstrap from './bootstrap';
 import autoDeployService from './services/auto-deploy';
+import { stopBuildQueue } from './services/build-queue';
 import { blocksValidationMiddleware } from './validation/blocks';
 import { siteValidationMiddleware } from './validation/site';
 import { slugsMiddleware } from './validation/slugs';
@@ -91,4 +92,9 @@ export default {
    * run jobs, or perform some special logic.
    */
   bootstrap,
+
+  /** Ferme la connexion à la file des builds */
+  async destroy() {
+    await stopBuildQueue();
+  },
 };

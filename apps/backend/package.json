@@ -13,7 +13,8 @@
     "strapi": "strapi",
     "upgrade": "npx @strapi/upgrade latest",
     "upgrade:dry": "npx @strapi/upgrade latest --dry",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@communeo/core": "workspace:*",
@@ -41,7 +42,10 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/unzipper": "^0.10.11",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3"
   },
   "engines": {
     "node": ">=22 <25"

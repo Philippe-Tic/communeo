@@ -30,7 +30,7 @@ Strapi API → Astro renderer (build-time fetch) → Static HTML → Netlify
 
 ### Multi-Tenancy
 
-Every content type has a mandatory `site` relation. `apps/backend/src/middlewares/site-isolation.ts` scopes queries to the user's site and rejects any route not explicitly allowed. New content types must include a `site` relation and be added to the middleware allowlist.
+Every content type has a mandatory `site` relation. `apps/backend/src/middlewares/site-isolation.ts` scopes queries to the user's site and rejects any route not explicitly allowed. New content types must include a `site` relation and be added to the middleware allowlist. Integration tests (`apps/backend/tests/isolation.test.ts`, real Strapi on a throwaway SQLite DB, run by `pnpm test` and CI) must pass; add every new site-scoped content type to `SITE_SCOPED_TYPES` there.
 
 ## Development Commands
 

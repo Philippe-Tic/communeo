@@ -1,11 +1,21 @@
 ---
+/** Encadré : le type est porté par l'icône et le libellé, jamais par la seule couleur. */
 import type { BlockOf } from '@communeo/core';
 import RichText from '@communeo/ui-a11y/RichText.astro';
+import Info from '@lucide/astro/icons/info';
+import Lightbulb from '@lucide/astro/icons/lightbulb';
+import OctagonAlert from '@lucide/astro/icons/octagon-alert';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
 
 interface Props { block: BlockOf<'callout'> }
 const { block } = Astro.props;
+const icons = { info: Info, warning: TriangleAlert, important: OctagonAlert, tip: Lightbulb };
+const Icon = icons[block.variant as keyof typeof icons] ?? Info;
 ---
 <aside class={`in-callout in-callout-${block.variant}`} aria-label={block.title ?? block.variantLabel}>
-  <p class="in-callout-label"><strong>{block.variantLabel}{block.title && block.title !== block.variantLabel && <> – {block.title}</>}</strong></p>
-  <RichText doc={block.body} />
+  <Icon size={26} aria-hidden="true" class="in-callout-icon" />
+  <div>
+    <p class="in-callout-label"><strong>{block.variantLabel}{block.title && block.title !== block.variantLabel && <> – {block.title}</>}</strong></p>
+    <RichText doc={block.body} class="in-prose" />
+  </div>
 </aside>

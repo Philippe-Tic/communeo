@@ -1,4 +1,5 @@
 ---
+/** Image : largeur de lecture par défaut, ou pleine largeur de la colonne. */
 import type { BlockOf } from '@communeo/core';
 
 interface Props { block: BlockOf<'image'> }
@@ -7,5 +8,7 @@ const { image } = block;
 ---
 <figure class:list={['in-image', { 'in-image-full': block.width === 'full' }]}>
   <img src={image.src} srcset={image.srcset ?? undefined} alt={image.alt} width={image.width ?? undefined} height={image.height ?? undefined} loading="lazy" decoding="async" />
-  {(image.caption || image.credit) && <figcaption>{image.caption}{image.credit && <> – {image.credit}</>}</figcaption>}
+  {(image.caption || image.credit) && (
+    <figcaption>{image.caption}{image.credit && <> Crédit : {image.credit}</>}</figcaption>
+  )}
 </figure>

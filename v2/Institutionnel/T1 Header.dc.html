@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<header style="font-family:'Source Sans 3',system-ui,sans-serif;font-size:18px;line-height:1.5;color:#1C2321;background:#FFFFFF;border-bottom:1px solid #CFD4CF">
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px 48px">
+      <a href="#" style="display:flex;align-items:center;gap:16px;text-decoration:none;color:#1C2321;outline:none" style-focus="outline:3px solid #1C2321;outline-offset:3px">
+        <div style="width:168px;height:52px;border:1px dashed #6B756F;border-radius:4px;background:repeating-linear-gradient(135deg,#E9ECE8 0 6px,#F4F6F3 6px 12px);display:flex;align-items:center;justify-content:center;font:12px ui-monospace,monospace;color:#4A5350">logo horizontal</div>
+        <span style="font-family:'Source Serif 4',Georgia,serif;font-size:26px;font-weight:600;line-height:1.1">Saint-Aubin-sur-Loire</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:20px">
+        <div style="font-size:16px;color:#4A5350;text-align:right;line-height:1.35"><strong style="color:#1C2321;font-size:17px">02 41 00 00 00</strong><br>Mairie ouverte aujourd'hui 9h–12h / 14h–17h30</div>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border:2px solid #1F5A3C;border-radius:4px;color:#1F5A3C;font-weight:600;text-decoration:none">Contact</a>
+        <form style="display:flex;margin:0">
+          <label for="t1-search" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Rechercher sur le site</label>
+          <input id="t1-search" type="search" placeholder="Rechercher…" style="width:220px;height:48px;padding:0 14px;border:2px solid #6B756F;border-right:none;border-radius:4px 0 0 4px;font:inherit;font-size:17px;color:#1C2321;background:#fff">
+          <button type="submit" style="height:48px;padding:0 18px;border:none;border-radius:0 4px 4px 0;background:#1F5A3C;color:#fff;font:inherit;font-weight:600;cursor:pointer">Rechercher</button>
+        </form>
+      </div>
+    </div>
+    <nav aria-label="Menu principal" style="background:#1F5A3C">
+      <ul style="list-style:none;margin:0;padding:0 48px;display:flex;gap:4px;flex-wrap:wrap">
+        <li><a href="#" aria-current="page" style="display:flex;align-items:center;min-height:56px;padding:0 18px;color:#fff;text-decoration:none;font-weight:600;border-bottom:4px solid #fff">Accueil</a></li>
+        <li><button style="display:flex;align-items:center;gap:8px;min-height:56px;padding:0 18px;border:none;background:transparent;color:#fff;font:inherit;font-weight:600;cursor:pointer;border-bottom:4px solid transparent" style-hover="background:#174A31" aria-expanded="false">Mairie <span aria-hidden="true" style="font-size:13px">▼</span></button></li>
+        <li><button style="display:flex;align-items:center;gap:8px;min-height:56px;padding:0 18px;border:none;background:transparent;color:#fff;font:inherit;font-weight:600;cursor:pointer;border-bottom:4px solid transparent" aria-expanded="false">Vivre à Saint-Aubin <span aria-hidden="true" style="font-size:13px">▼</span></button></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:56px;padding:0 18px;color:#fff;text-decoration:none;font-weight:600;border-bottom:4px solid transparent">Démarches</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:56px;padding:0 18px;color:#fff;text-decoration:none;font-weight:600;border-bottom:4px solid transparent">Actualités</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:56px;padding:0 18px;color:#fff;text-decoration:none;font-weight:600;border-bottom:4px solid transparent">Agenda</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:56px;padding:0 18px;color:#fff;text-decoration:none;font-weight:600;border-bottom:4px solid transparent">Contact</a></li>
+      </ul>
+    </nav>
+    <sc-if value="{{ submenuOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:relative;padding:0 48px;background:#fff;border-bottom:1px solid #CFD4CF">
+        <div style="position:absolute;left:190px;top:0;width:320px;background:#fff;border:1px solid #CFD4CF;border-top:none;box-shadow:0 8px 20px rgba(28,35,33,.12);padding:8px 0;z-index:5">
+          <a href="#" style="display:block;padding:12px 20px;color:#1C2321;text-decoration:none;font-weight:500" style-hover="background:#E3EFE7">Équipe municipale</a>
+          <a href="#" style="display:block;padding:12px 20px;color:#1C2321;text-decoration:none;font-weight:500">Documents officiels</a>
+          <a href="#" style="display:block;padding:12px 20px;color:#1C2321;text-decoration:none;font-weight:500">Conseil municipal</a>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px">
+      <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#1C2321;min-width:0">
+        <div style="width:96px;height:32px;flex:none;border:1px dashed #6B756F;border-radius:4px;background:repeating-linear-gradient(135deg,#E9ECE8 0 6px,#F4F6F3 6px 12px);display:flex;align-items:center;justify-content:center;font:10px ui-monospace,monospace;color:#4A5350">logo</div>
+        <span style="font-family:'Source Serif 4',Georgia,serif;font-size:17px;font-weight:600;line-height:1.1">Saint-Aubin-sur-Loire</span>
+      </a>
+      <div style="display:flex;gap:4px;flex:none">
+        <button aria-label="Rechercher" style="width:44px;height:44px;border:none;background:transparent;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#1F5A3C;font:600 11px 'Source Sans 3',sans-serif;cursor:pointer"><span aria-hidden="true" style="width:14px;height:14px;border:2.5px solid #1F5A3C;border-radius:50%"></span>Recherche</button>
+        <button aria-expanded="{{ menuOpen }}" aria-controls="t1-menu" style="width:44px;height:44px;border:none;background:transparent;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#1F5A3C;font:600 11px 'Source Sans 3',sans-serif;cursor:pointer"><span aria-hidden="true" style="display:flex;flex-direction:column;gap:3px"><span style="width:20px;height:2.5px;background:#1F5A3C"></span><span style="width:20px;height:2.5px;background:#1F5A3C"></span><span style="width:20px;height:2.5px;background:#1F5A3C"></span></span>{{ menuLabel }}</button>
+      </div>
+    </div>
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <nav id="t1-menu" aria-label="Menu principal" style="background:#1F5A3C;color:#fff;padding:8px 0 16px">
+        <ul style="list-style:none;margin:0;padding:0">
+          <li><a href="#" aria-current="page" style="display:flex;align-items:center;min-height:52px;padding:0 20px;color:#fff;text-decoration:none;font-weight:600;background:#174A31">Accueil</a></li>
+          <li>
+            <button aria-expanded="true" style="width:100%;display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 20px;border:none;border-top:1px solid #3C7A5A;background:transparent;color:#fff;font:inherit;font-weight:600;text-align:left;cursor:pointer">Mairie <span aria-hidden="true" style="font-size:13px">▲</span></button>
+            <ul style="list-style:none;margin:0;padding:0 0 8px;background:#174A31">
+              <li><a href="#" style="display:flex;align-items:center;min-height:48px;padding:0 36px;color:#fff;text-decoration:none">Équipe municipale</a></li>
+              <li><a href="#" style="display:flex;align-items:center;min-height:48px;padding:0 36px;color:#fff;text-decoration:none">Documents officiels</a></li>
+              <li><a href="#" style="display:flex;align-items:center;min-height:48px;padding:0 36px;color:#fff;text-decoration:none">Conseil municipal</a></li>
+            </ul>
+          </li>
+          <li><button aria-expanded="false" style="width:100%;display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 20px;border:none;border-top:1px solid #3C7A5A;background:transparent;color:#fff;font:inherit;font-weight:600;text-align:left;cursor:pointer">Vivre à Saint-Aubin <span aria-hidden="true" style="font-size:13px">▼</span></button></li>
+          <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 20px;border-top:1px solid #3C7A5A;color:#fff;text-decoration:none;font-weight:600">Démarches</a></li>
+          <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 20px;border-top:1px solid #3C7A5A;color:#fff;text-decoration:none;font-weight:600">Actualités</a></li>
+          <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 20px;border-top:1px solid #3C7A5A;color:#fff;text-decoration:none;font-weight:600">Agenda</a></li>
+          <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 20px;border-top:1px solid #3C7A5A;color:#fff;text-decoration:none;font-weight:600">Contact</a></li>
+        </ul>
+        <div style="margin:16px 20px 0;padding-top:16px;border-top:1px solid #3C7A5A;font-size:16px;line-height:1.5"><strong>Mairie · 02 41 00 00 00</strong><br>Ouverte aujourd'hui 9h–12h / 14h–17h30<br><span style="font-size:14px;opacity:.9">Touche Échap pour fermer le menu</span></div>
+      </nav>
+    </sc-if>
+  </sc-if>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:140},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;menuOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;submenuOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const mobile = !!this.props.mobile, open = !!this.props.menuOpen;
+    return { isDesktop: !mobile, isMobile: mobile, menuOpen: open, submenuOpen: !mobile && !!this.props.submenuOpen, menuLabel: open ? 'Fermer' : 'Menu' };
+  }
+}
+</script>
+</body>
+</html>

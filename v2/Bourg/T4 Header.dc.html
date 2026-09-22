@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<header style="font-family:'Nunito Sans',system-ui,sans-serif;font-size:17px;line-height:1.5;color:#2E2A26;background:#FBF7F2;border-bottom:1px solid #E7DFD5">
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 40px 10px">
+      <a href="#" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:#2E2A26"><div style="width:150px;height:44px;border:1px dashed #A89C8E;border-radius:10px;background:repeating-linear-gradient(135deg,#F1EAE1 0 6px,#F8F3ED 6px 12px);display:flex;align-items:center;justify-content:center;font:11px ui-monospace,monospace;color:#6B615A">logo horizontal</div><span style="font-family:'Nunito',sans-serif;font-size:24px;font-weight:800;line-height:1">Saint-Aubin-sur-Loire</span></a>
+      
+      <form style="display:flex;margin:0"><label for="t4q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Rechercher sur le site</label><input id="t4q" type="search" placeholder="Rechercher…" style="width:320px;height:46px;padding:0 16px;border:2px solid #A89C8E;border-right:none;border-radius:12px 0 0 12px;font:inherit;font-size:16px;background:#fff;color:#2E2A26"><button type="submit" aria-label="Lancer la recherche" style="width:46px;height:46px;border:none;border-radius:0 12px 12px 0;background:#1F6F6B;color:#fff;cursor:pointer"><span aria-hidden="true" style="display:inline-block;width:14px;height:14px;border:2.5px solid #fff;border-radius:50%"></span></button></form>
+    </div>
+    <nav aria-label="Menu principal" style="padding:0 40px 10px"><ul style="list-style:none;margin:0;padding:0;display:flex;gap:6px;flex-wrap:nowrap">
+        <li><a href="#" aria-current="{{ cur.accueil }}" style="display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700;white-space:nowrap;background:{{ bg.accueil }}">Accueil</a></li>
+        <li><button aria-expanded="false" style="display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 18px;border:none;border-radius:12px;color:#2E2A26;font:inherit;font-weight:700;white-space:nowrap;background:{{ bg.mairie }};cursor:pointer">Mairie <span aria-hidden="true" style="font-size:12px">▼</span></button></li>
+        <li><button aria-expanded="false" style="display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 18px;border:none;border-radius:12px;color:#2E2A26;font:inherit;font-weight:700;white-space:nowrap;background:{{ bg.vivre }};cursor:pointer">Vivre ici <span aria-hidden="true" style="font-size:12px">▼</span></button></li>
+        <li><a href="#" aria-current="{{ cur.demarches }}" style="display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700;white-space:nowrap;background:{{ bg.demarches }}">Démarches</a></li>
+        <li><a href="#" aria-current="{{ cur.actus }}" style="display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700;white-space:nowrap;background:{{ bg.actus }}">Actualités</a></li>
+        <li><a href="#" aria-current="{{ cur.agenda }}" style="display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700;white-space:nowrap;background:{{ bg.agenda }}">Agenda</a></li>
+        <li><a href="#" aria-current="{{ cur.contact }}" style="display:inline-flex;align-items:center;min-height:46px;padding:0 18px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700;white-space:nowrap;background:{{ bg.contact }}">Contact</a></li>
+      </ul></nav>
+  </sc-if>
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px">
+      <a href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:#2E2A26;min-width:0"><div style="width:84px;height:30px;flex:none;border:1px dashed #A89C8E;border-radius:8px;background:repeating-linear-gradient(135deg,#F1EAE1 0 6px,#F8F3ED 6px 12px);display:flex;align-items:center;justify-content:center;font:9px ui-monospace,monospace;color:#6B615A">logo</div><span style="font-family:'Nunito',sans-serif;font-size:17px;font-weight:800;line-height:1.1">Saint-Aubin-sur-Loire</span></a>
+      <div style="display:flex;gap:6px;flex:none"><button aria-label="Rechercher" style="width:44px;height:44px;border:none;border-radius:12px;background:#F1EAE1;color:#2E2A26;display:inline-flex;align-items:center;justify-content:center"><span aria-hidden="true" style="display:inline-block;width:14px;height:14px;border:2.5px solid #2E2A26;border-radius:50%"></span></button><button aria-expanded="{{ menuOpen }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 14px;border:none;border-radius:12px;background:#1F6F6B;color:#fff;font:inherit;font-weight:700;font-size:15px"><span aria-hidden="true" style="display:flex;flex-direction:column;gap:4px"><span style="width:16px;height:2px;background:#fff;border-radius:1px"></span><span style="width:16px;height:2px;background:#fff;border-radius:1px"></span><span style="width:16px;height:2px;background:#fff;border-radius:1px"></span></span>{{ menuLabel }}</button></div>
+    </div>
+    <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+      <nav aria-label="Menu principal" style="padding:8px 16px 20px;background:#fff;border-top:1px solid #E7DFD5"><ul style="list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:18px">
+        <li><a href="#" aria-current="page" style="display:flex;align-items:center;min-height:52px;padding:0 16px;border-radius:12px;background:#DCEBE2;color:#2E2A26;text-decoration:none;font-weight:700">Accueil</a></li>
+        <li><button aria-expanded="true" style="width:100%;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 16px;border:none;border-radius:12px;background:transparent;color:#2E2A26;font:inherit;font-weight:700;font-size:18px;text-align:left">Mairie <span aria-hidden="true" style="font-size:12px">▲</span></button><ul style="list-style:none;margin:0;padding:0 0 6px 32px;display:grid;gap:2px;font-size:17px"><li><a href="#" style="display:inline-flex;min-height:44px;align-items:center;color:#2E2A26;text-decoration:none">Équipe municipale</a></li><li><a href="#" style="display:inline-flex;min-height:44px;align-items:center;color:#2E2A26;text-decoration:none">Documents officiels</a></li><li><a href="#" style="display:inline-flex;min-height:44px;align-items:center;color:#2E2A26;text-decoration:none">Conseil municipal</a></li></ul></li>
+        <li><button aria-expanded="false" style="width:100%;display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 16px;border:none;border-radius:12px;background:transparent;color:#2E2A26;font:inherit;font-weight:700;font-size:18px;text-align:left">Vivre ici <span aria-hidden="true" style="font-size:12px">▼</span></button></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 16px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700">Démarches</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 16px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700">Actualités</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 16px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700">Agenda</a></li>
+        <li><a href="#" style="display:flex;align-items:center;min-height:52px;padding:0 16px;border-radius:12px;color:#2E2A26;text-decoration:none;font-weight:700">Contact</a></li>
+      </ul></nav>
+    </sc-if>
+  </sc-if>
+</header>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:76},&quot;mobile&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;menuOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;active&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;accueil&quot;,&quot;mairie&quot;,&quot;vivre&quot;,&quot;demarches&quot;,&quot;actus&quot;,&quot;agenda&quot;,&quot;contact&quot;],&quot;default&quot;:&quot;accueil&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, m = !!p.mobile, open = !!p.menuOpen, a = p.active ?? 'accueil';
+    const cur = {}, bg = {};
+    ['accueil','mairie','vivre','demarches','actus','agenda','contact'].forEach(k => { cur[k] = k === a ? 'page' : undefined; bg[k] = k === a ? '#DCEBE2' : 'transparent'; });
+    return { isDesktop: !m, isMobile: m, menuOpen: open, menuLabel: open ? 'Fermer' : 'Menu', cur, bg };
+  }
+}
+</script>
+</body>
+</html>

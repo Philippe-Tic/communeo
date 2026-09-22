@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<article style="font-family:'Source Sans 3',system-ui,sans-serif;font-size:18px;line-height:1.5;color:#1C2321;background:#fff;border:1px solid #CFD4CF;border-radius:4px;display:flex;gap:18px;padding:18px;height:100%;box-sizing:border-box">
+  <div aria-hidden="true" style="flex:none;width:76px;min-height:84px;background:#1F5A3C;color:#fff;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8px 4px;line-height:1.1">
+    <span style="font-family:'Source Serif 4',Georgia,serif;font-size:{{ daySize }};font-weight:700">{{ day }}</span>
+    <span style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;margin-top:4px">{{ month }}</span>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;min-width:0;flex:1">
+    <span style="font-size:15px;color:#4A5350"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Date : </span>{{ dateText }}<sc-if value="{{ hasTime }}" hint-placeholder-val="{{ true }}"> · {{ time }}</sc-if></span>
+    <h3 style="margin:0;font-family:'Source Serif 4',Georgia,serif;font-size:21px;line-height:1.25;font-weight:600;text-wrap:pretty"><a href="#" style="color:#1C2321;text-decoration:none" style-hover="text-decoration:underline">{{ title }}</a></h3>
+    <p style="margin:0;font-size:16px;color:#4A5350;display:flex;flex-wrap:wrap;gap:4px 14px"><span><span aria-hidden="true">◎ </span>{{ place }}</span><span style="display:inline-flex;padding:0 8px;border:1px solid #CFD4CF;border-radius:3px;font-size:14px;color:#1C2321;font-weight:600">{{ cat }}</span></p>
+  </div>
+  <sc-if value="{{ hasImage }}" hint-placeholder-val="{{ false }}">
+    <div role="img" aria-label="{{ alt }}" style="flex:none;width:120px;border-radius:4px;background:repeating-linear-gradient(135deg,#E3E7E2 0 10px,#EEF1ED 10px 20px);display:flex;align-items:center;justify-content:center;font:11px ui-monospace,monospace;color:#4A5350;text-align:center">photo</div>
+  </sc-if>
+</article>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:140},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Titre de l'événement&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;day&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;5&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;month&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;oct.&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dateText&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Samedi 5 octobre 2026&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;time&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;place&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Salle des fêtes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cat&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Culture&quot;,&quot;Sport&quot;,&quot;Réunion&quot;,&quot;Fête&quot;,&quot;Atelier&quot;,&quot;Conférence&quot;],&quot;default&quot;:&quot;Culture&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;image&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props, day = String(p.day ?? '5');
+    return { day, daySize: day.length > 2 ? '22px' : '30px', month: p.month ?? 'oct.', dateText: p.dateText ?? 'Samedi 5 octobre 2026', hasTime: !!p.time, time: p.time ?? '', title: p.title ?? 'Titre de l\u2019événement', place: p.place ?? 'Salle des fêtes', cat: p.cat ?? 'Culture', hasImage: !!p.image, alt: p.alt ?? 'illustration' };
+  }
+}
+</script>
+</body>
+</html>

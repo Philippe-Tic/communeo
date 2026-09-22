@@ -10,11 +10,7 @@ export async function getEffectiveSite(ctx: any): Promise<any | null> {
 
   // 2. Tenter de charger la relation site depuis la DB
   if (user) {
-    const completeUser = await strapi.entityService.findOne(
-      'plugin::users-permissions.user',
-      user.id,
-      { populate: ['site'] }
-    );
+    const completeUser = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: user.id }, populate: ['site'] });
     if ((completeUser as any)?.site) {
       ctx.state.user = completeUser;
       return (completeUser as any).site;

@@ -11,7 +11,7 @@ module.exports = {
     const apiKey = providerOptions.apiKey;
 
     if (!apiKey) {
-      console.warn('⚠️  Resend provider: RESEND_API_KEY not set — emails will fail');
+      global.strapi?.log.warn('Resend provider: RESEND_API_KEY not set — emails will fail');
     }
 
     return {

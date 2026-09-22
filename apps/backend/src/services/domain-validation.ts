@@ -4,6 +4,7 @@
 
 import dns from 'dns';
 import { promisify } from 'util';
+import { log } from '../utils/logger';
 
 const resolveTxt = promisify(dns.resolveTxt);
 const resolveCname = promisify(dns.resolveCname);
@@ -96,12 +97,12 @@ class DomainValidationService {
         result.warnings.push('Le domaine ne semble pas être configuré dans le DNS. Vous devrez configurer les enregistrements DNS après validation.');
       }
 
-      strapi.log.info(`Domain validation for ${domain}:`, result);
+      log.info(`Domain validation for ${domain}:`, result);
 
       return result;
 
     } catch (error: any) {
-      strapi.log.error(`Error validating domain ${domain}:`, error);
+      log.error(`Error validating domain ${domain}:`, error);
       result.errors.push(`Erreur lors de la validation: ${error.message}`);
       result.isValid = false;
       return result;
@@ -228,14 +229,14 @@ class DomainValidationService {
         filters.documentId = { $ne: excludeSiteId };
       }
 
-      const existingSites = await strapi.entityService.findMany('api::site.site', {
+      const existingSites = await strapi.documents('api::site.site').findMany({
         filters
       });
 
       return !existingSites || existingSites.length === 0;
 
     } catch (error: any) {
-      strapi.log.error(`Error checking domain availability:`, error);
+      log.error(`Error checking domain availability:`, error);
       // En cas d'erreur, on considère le domaine comme non disponible par sécurité
       return false;
     }
@@ -317,7 +318,7 @@ class DomainValidationService {
       }
 
     } catch (error: any) {
-      strapi.log.error(`Error diagnosing domain ${domain}:`, error);
+      log.error(`Error diagnosing domain ${domain}:`, error);
     }
 
     return diagnostic;

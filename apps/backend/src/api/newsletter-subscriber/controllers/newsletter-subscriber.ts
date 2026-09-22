@@ -47,7 +47,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
       return ctx.badRequest('Le champ site est requis');
     }
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: site } } as any,
     });
 
@@ -56,7 +56,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
     }
 
     // Check uniqueness: email + site
-    const existing = await strapi.entityService.findMany('api::newsletter-subscriber.newsletter-subscriber', {
+    const existing = await strapi.documents('api::newsletter-subscriber.newsletter-subscriber').findMany({
       filters: {
         email: { $eq: email.trim().toLowerCase() },
         site: { documentId: { $eq: site } },
@@ -72,7 +72,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
       }
 
       // Reactivate inactive subscriber
-      await strapi.entityService.update('api::newsletter-subscriber.newsletter-subscriber', subscriber.id, {
+      await strapi.documents('api::newsletter-subscriber.newsletter-subscriber').update({ documentId: subscriber.documentId,
         data: {
           active: true,
           unsubscribe_token: crypto.randomUUID(),
@@ -87,7 +87,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
     }
 
     // Create new subscriber
-    await strapi.entityService.create('api::newsletter-subscriber.newsletter-subscriber', {
+    await strapi.documents('api::newsletter-subscriber.newsletter-subscriber').create({
       data: {
         email: email.trim().toLowerCase(),
         first_name: first_name?.trim() || undefined,
@@ -110,7 +110,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
       return ctx.badRequest('Token manquant');
     }
 
-    const subscribers = await strapi.entityService.findMany('api::newsletter-subscriber.newsletter-subscriber', {
+    const subscribers = await strapi.documents('api::newsletter-subscriber.newsletter-subscriber').findMany({
       filters: { unsubscribe_token: { $eq: token } } as any,
     });
 
@@ -120,7 +120,7 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
 
     const subscriber = subscribers[0] as any;
 
-    await strapi.entityService.update('api::newsletter-subscriber.newsletter-subscriber', subscriber.id, {
+    await strapi.documents('api::newsletter-subscriber.newsletter-subscriber').update({ documentId: subscriber.documentId,
       data: { active: false, unsubscribe_token: crypto.randomUUID() },
     });
 
@@ -136,21 +136,16 @@ export default factories.createCoreController('api::newsletter-subscriber.newsle
 
     const siteDocumentId = site.documentId;
 
-    const allSubscribers = await strapi.entityService.findMany('api::newsletter-subscriber.newsletter-subscriber', {
-      filters: {
-        site: { documentId: { $eq: siteDocumentId } },
-      } as any,
-      limit: -1,
-    });
-
-    const subscribers = allSubscribers || [];
-    const total = subscribers.length;
-    const active = subscribers.filter((s: any) => s.active).length;
-
-    // Count subscribers from current month
+    const subscribers = strapi.documents('api::newsletter-subscriber.newsletter-subscriber');
+    const bySite = { site: { documentId: { $eq: siteDocumentId } } };
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const thisMonth = subscribers.filter((s: any) => new Date(s.subscribed_at) >= startOfMonth && s.active).length;
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    const [total, active, thisMonth] = await Promise.all([
+      subscribers.count({ filters: bySite }),
+      subscribers.count({ filters: { ...bySite, active: true } }),
+      subscribers.count({ filters: { ...bySite, active: true, subscribed_at: { $gte: startOfMonth } } }),
+    ]);
 
     return { data: { total, active, thisMonth } };
   },

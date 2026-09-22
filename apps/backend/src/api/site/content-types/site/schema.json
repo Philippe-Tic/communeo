@@ -93,11 +93,6 @@
       ],
       "required": false
     },
-    "domain_verification_token": {
-      "type": "string",
-      "required": false,
-      "private": true
-    },
     "domain_configured_at": {
       "type": "datetime",
       "required": false

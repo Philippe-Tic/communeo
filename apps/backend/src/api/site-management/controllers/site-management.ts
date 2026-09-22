@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import netlifyService from '../../../services/netlify';
 import { createInvitationToken, escapeHtml } from '../../../utils/security';
 import { DEFAULT_THEME } from '@communeo/core';
+import { log } from '../../../utils/logger';
 
 async function requireSuperAdmin(ctx) {
   const user = ctx.state.user;
@@ -59,7 +60,7 @@ export default {
   async find(ctx) {
     await requireSuperAdmin(ctx);
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       populate: ['logo'],
     });
 
@@ -81,7 +82,7 @@ export default {
         ]);
 
         // Last deployment
-        const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
+        const deployments = await strapi.documents('api::deployment.deployment').findMany({
           filters: { site: { documentId: site.documentId } } as any,
           sort: { createdAt: 'desc' } as any,
           limit: 1,
@@ -109,7 +110,7 @@ export default {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: documentId } } as any,
       populate: ['logo'],
     });
@@ -142,7 +143,7 @@ export default {
     ]);
 
     // Last deployments
-    const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
+    const deployments = await strapi.documents('api::deployment.deployment').findMany({
       filters: { site: { documentId } } as any,
       sort: { createdAt: 'desc' } as any,
       limit: 5,
@@ -174,7 +175,7 @@ export default {
     }
 
     // Check slug uniqueness
-    const existing = await strapi.entityService.findMany('api::site.site', {
+    const existing = await strapi.documents('api::site.site').findMany({
       filters: { slug: { $eq: data.slug } },
     });
 
@@ -183,7 +184,7 @@ export default {
     }
 
     // 1. Create the site in Strapi
-    const site = await strapi.entityService.create('api::site.site', {
+    const site = await strapi.documents('api::site.site').create({
       data: {
         name: data.name,
         slug: data.slug,
@@ -201,11 +202,11 @@ export default {
       netlifyId = netlifySite.id;
 
       // Save netlify_site_id on the site
-      await strapi.entityService.update('api::site.site', site.id, {
+      await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: { netlify_site_id: netlifyId },
       });
     } catch (error) {
-      console.error('Failed to create Netlify site:', error);
+      log.error('Failed to create Netlify site:', error);
       // Don't fail the whole operation — Netlify can be configured later
     }
 
@@ -256,15 +257,16 @@ export default {
             text: `Votre espace d'administration pour ${data.name} a été créé. Activez votre compte : ${invitationLink}`,
           });
         } catch (emailError) {
-          console.error('Failed to send invitation email for new site:', emailError);
+          log.error('Failed to send invitation email for new site:', emailError);
         }
       } catch (error) {
-        console.error('Failed to create initial admin user:', error);
+        log.error('Failed to create initial admin user:', error);
       }
     }
 
     // Re-fetch the complete site
-    const completeSite = await strapi.entityService.findOne('api::site.site', site.id, {
+    const completeSite = await strapi.documents('api::site.site').findOne({
+      documentId: site.documentId,
       populate: ['logo'],
     });
 
@@ -279,7 +281,7 @@ export default {
     const { documentId } = ctx.params;
     const data = ctx.request.body?.data || ctx.request.body;
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: documentId } } as any,
     });
 
@@ -296,7 +298,7 @@ export default {
     if (data.contact_phone !== undefined) updateData.contact_phone = data.contact_phone;
     if (data.address !== undefined) updateData.address = data.address;
 
-    const updated = await strapi.entityService.update('api::site.site', site.id, {
+    const updated = await strapi.documents('api::site.site').update({ documentId: site.documentId,
       data: updateData,
       populate: ['logo'],
     });
@@ -311,7 +313,7 @@ export default {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: documentId } } as any,
     });
 
@@ -326,7 +328,7 @@ export default {
       try {
         await netlifyService.deleteSite(site.netlify_site_id);
       } catch (error) {
-        console.error('Failed to delete Netlify site:', error);
+        log.error('Failed to delete Netlify site:', error);
         // Continue with deletion even if Netlify fails
       }
     }
@@ -341,7 +343,7 @@ export default {
     }
 
     // Delete the site
-    await strapi.entityService.delete('api::site.site', site.id);
+    await strapi.documents('api::site.site').delete({ documentId: site.documentId });
 
     ctx.body = { data: { documentId } };
   },

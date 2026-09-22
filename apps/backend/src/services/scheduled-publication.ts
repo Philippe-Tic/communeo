@@ -1,3 +1,4 @@
+import { log } from '../utils/logger';
 /**
  * Publication programmée : publie les brouillons dont la date `scheduled_at` est passée.
  * Appelé chaque minute par la tâche cron (config/cron-tasks.ts). La publication déclenche
@@ -34,9 +35,9 @@ export async function publishDueDocuments(strapi: any, now: Date = new Date()): 
           throw error;
         }
         published += 1;
-        strapi.log.info(`[scheduled-publication] ${uid} ${doc.documentId} publié (prévu le ${doc.scheduled_at})`);
+        log.info(`[scheduled-publication] ${uid} ${doc.documentId} publié (prévu le ${doc.scheduled_at})`);
       } catch (error) {
-        strapi.log.error(`[scheduled-publication] Échec de la publication de ${uid} ${doc.documentId}, nouvel essai dans une minute`, error);
+        log.error(`[scheduled-publication] Échec de la publication de ${uid} ${doc.documentId}, nouvel essai dans une minute`, error);
       }
     }
   }

@@ -1,3 +1,4 @@
+import { log } from '../utils/logger';
 /**
  * Isolation multi-tenant : chaque utilisateur ne voit et ne modifie que les données de son site.
  *
@@ -62,7 +63,6 @@ const PROTECTED_SITE_FIELDS = [
   'custom_domain',
   'domain_status',
   'domain_type',
-  'domain_verification_token',
   'domain_configured_at',
   'ssl_enabled',
   // relations : empêchent de rattacher les contenus d'une autre commune
@@ -95,7 +95,8 @@ export default (config: any, { strapi }: { strapi: any }) => {
   const getUserFromToken = async (token: string): Promise<StrapiUser | null> => {
     try {
       const decoded = await strapi.plugin('users-permissions').service('jwt').verify(token);
-      return await strapi.entityService.findOne('plugin::users-permissions.user', decoded.id, {
+      return await strapi.db.query('plugin::users-permissions.user').findOne({
+        where: { id: decoded.id },
         populate: ['site'],
       });
     } catch {
@@ -128,7 +129,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
         user = await getUserFromToken(authHeader.substring(7));
       }
     } else if (!user.site) {
-      user = await strapi.entityService.findOne('plugin::users-permissions.user', user.id, { populate: ['site'] });
+      user = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: user.id }, populate: ['site'] });
     }
 
     if (!user || user.blocked) return next();
@@ -143,7 +144,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       const impersonatedId = ctx.request.headers?.['x-site-document-id'];
       if (!impersonatedId) return next();
 
-      const sites = await strapi.entityService.findMany('api::site.site', {
+      const sites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: { $eq: impersonatedId } },
       });
       if (!sites?.length) return ctx.notFound('Site introuvable');
@@ -237,7 +238,7 @@ export default (config: any, { strapi }: { strapi: any }) => {
       }
       return next();
     } catch (error) {
-      strapi.log.error('[site-isolation] Erreur lors de la vérification des permissions', error);
+      log.error('[site-isolation] Erreur lors de la vérification des permissions', error);
       return ctx.internalServerError('Erreur lors de la vérification des permissions');
     }
   };

@@ -4,6 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import { createRateLimiter } from '../../../utils/security';
+import { log } from '../../../utils/logger';
 
 // 3 propositions par heure et par IP
 const isRateLimited = createRateLimiter({ windowMs: 60 * 60 * 1000, max: 3 });
@@ -68,7 +69,7 @@ export default factories.createCoreController('api::association.association', ({
       return ctx.badRequest('Le champ site est requis');
     }
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: site } } as any,
     });
 
@@ -87,7 +88,7 @@ export default factories.createCoreController('api::association.association', ({
     }
 
     // Create the association
-    const entry = await strapi.entityService.create('api::association.association', {
+    const entry = await strapi.documents('api::association.association').create({
       data: {
         name: name.trim(),
         description: description ? description.trim() : undefined,
@@ -118,7 +119,7 @@ export default factories.createCoreController('api::association.association', ({
         });
       } catch (err) {
         // Log but don't fail the whole request — association is already created
-        strapi.log.error('Failed to upload association logo:', err);
+        log.error('Failed to upload association logo:', err);
       }
     }
 

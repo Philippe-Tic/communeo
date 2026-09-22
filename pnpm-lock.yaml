@@ -122,6 +122,16 @@ importers:
         specifier: ^3.2.4
         version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.4)(terser@5.51.2)(tsx@4.23.15)
 
+  packages/fixtures:
+    dependencies:
+      '@communeo/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@22.20.4)(terser@5.51.2)(tsx@4.23.15)
+
   packages/theme-contract:
     devDependencies:
       vitest:

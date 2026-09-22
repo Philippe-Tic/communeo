@@ -17,7 +17,7 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **packages/theme-contract** — interface a theme must implement.
 - **packages/ui-a11y** — shared accessible components for themes.
 - **themes/** — one package per public-site theme (Institutionnel, Moderne, Journal, Bourg; mockups in `v2/`).
-- **fixtures/** — demo commune data for theme development.
+- **packages/fixtures** — demo commune Saint-Aubin-sur-Loire in Strapi format (`createFixtureLoader({ variant: complete | minimal | empty })`, `FIXTURE_NOW`), goes through the same mappers as production; assets served under `/fixtures`.
 
 Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 launch): **admin/** (React admin V1) and **sites/** (Astro site V1). **docs/** (Starlight) stays at the root while the Netlify docs site points to it.
 

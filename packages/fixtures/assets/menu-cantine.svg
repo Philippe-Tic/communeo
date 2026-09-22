@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600" role="img" aria-label="menu de la cantine">
+  <defs><pattern id="h" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="14" height="14" fill="#e7e5dc"/><line x1="0" y1="0" x2="0" y2="14" stroke="#d3d0c3" stroke-width="6"/></pattern></defs>
+  <rect width="1200" height="1600" fill="url(#h)"/>
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="system-ui, sans-serif" font-size="42" fill="#6b6859">menu de la cantine</text>
+</svg>

@@ -81,6 +81,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 
 - **Draft & Publish** is enabled on page, article, event and official document. Writes from commune users default to the draft (`?status=published` to publish); `scheduled_at` is published by a cron task every minute (`src/services/scheduled-publication.ts`).
 - **Homepage in intents**: `homepage.homepage` holds 15 fixed sections (`home-sections.*`), each with an `enabled` flag and its data; no order or position, the theme decides the layout. Section ids and the theme registry (`THEMES`) live in `@communeo/core`; the Site `theme` enum must match `THEME_IDS` (tested). Only admins can change the theme.
+- **Slugs** are unique per site, not globally (`string` + regex, not `uid`): generated from the title with a numeric suffix when missing, rejected when already used in the same site (`apps/backend/src/validation/slugs.ts`, `slugify` in `@communeo/core`). The Site slug stays globally unique.
 - **Blocks**: `blocks` is a dynamic zone restricted to the 9 `blocks.*` components (text, image, buttons, callout, documents, gallery, faq, contact, video). Rich text is restricted TipTap JSON. Validation lives in `@communeo/core` (`validateBlocks`) and runs in `apps/backend/src/validation/blocks.ts`: structure on every save, completeness (required fields, minimums, image alt text) on publish.
 
 ## Tech Stack Summary

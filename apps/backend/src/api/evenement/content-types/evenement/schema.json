@@ -63,10 +63,10 @@
       "regex": "^https?://.*"
     },
     "slug": {
-      "type": "uid",
-      "targetField": "title",
+      "type": "string",
       "required": true,
-      "unique": true
+      "maxLength": 100,
+      "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
     "category": {
       "type": "enumeration",

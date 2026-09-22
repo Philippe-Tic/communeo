@@ -7,7 +7,7 @@ export async function getStaticPaths() {
 }
 
 const stamp = (iso: string) => iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-const escape = (text: string) => text.replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+const escape = (text: string) => text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 
 export const GET: APIRoute = async ({ params }) => {
   const source = getSource();

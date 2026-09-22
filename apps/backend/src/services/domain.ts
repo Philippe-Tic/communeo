@@ -5,6 +5,7 @@
 import { promisify } from 'util';
 import dns from 'dns';
 import netlifyService from './netlify';
+import { log } from '../utils/logger';
 
 const resolveCname = promisify(dns.resolveCname);
 const resolve4 = promisify(dns.resolve4);
@@ -45,7 +46,7 @@ class DomainService {
    * Trouve un site par documentId (Strapi v5 : findOne attend un id numérique)
    */
   private async findSiteByDocumentId(siteId: string) {
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: siteId } as any
     });
     return sites && sites.length > 0 ? sites[0] : null;
@@ -76,7 +77,7 @@ class DomainService {
         // le custom domain après PATCH)
         return `${netlifySite.name}.netlify.app`;
       } catch (error) {
-        strapi.log.warn('Could not fetch Netlify URL, using default target');
+        log.warn('Could not fetch Netlify URL, using default target');
       }
     }
 
@@ -94,7 +95,7 @@ class DomainService {
    */
   async configureDomain(siteId: string, customDomain: string): Promise<DomainConfiguration> {
     try {
-      strapi.log.info(`Configuring domain ${customDomain} for site ${siteId}`);
+      log.info(`Configuring domain ${customDomain} for site ${siteId}`);
 
       // 1. Valider le format du domaine
       if (!this.validateDomainFormat(customDomain)) {
@@ -129,7 +130,7 @@ class DomainService {
         try {
           await netlifyService.addDomainAlias((site as any).netlify_site_id, `www.${customDomain}`);
         } catch (wwwError) {
-          strapi.log.warn(`Could not add www variant for ${customDomain}:`, wwwError);
+          log.warn(`Could not add www variant for ${customDomain}:`, wwwError);
         }
       }
 
@@ -137,7 +138,7 @@ class DomainService {
       const netlifyUrl = await this.getNetlifyUrl(siteId);
 
       // 8. Mettre à jour le site en base
-      await strapi.entityService.update('api::site.site', site.id, {
+      await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: {
           custom_domain: customDomain,
           domain_status: 'pending',
@@ -148,7 +149,7 @@ class DomainService {
       // 9. Préparer les instructions DNS (CNAME/A uniquement)
       const dnsInstructions = this.generateDnsInstructions(customDomain, netlifyUrl);
 
-      strapi.log.info(`Domain ${customDomain} registered on Netlify and saved (type: ${domainType})`);
+      log.info(`Domain ${customDomain} registered on Netlify and saved (type: ${domainType})`);
 
       return {
         domain: customDomain,
@@ -158,7 +159,7 @@ class DomainService {
       };
 
     } catch (error: any) {
-      strapi.log.error(`Error configuring domain ${customDomain}:`, error);
+      log.error(`Error configuring domain ${customDomain}:`, error);
       throw error;
     }
   }
@@ -175,7 +176,7 @@ class DomainService {
     };
 
     try {
-      strapi.log.info(`Verifying DNS routing for ${domain}`);
+      log.info(`Verifying DNS routing for ${domain}`);
 
       const isApex = this.isApexDomain(domain);
       let dnsValid = false;
@@ -196,15 +197,15 @@ class DomainService {
       result.isValid = dnsValid;
 
       if (result.isValid) {
-        strapi.log.info(`Domain ${domain} DNS routing verified successfully`);
+        log.info(`Domain ${domain} DNS routing verified successfully`);
       } else {
-        strapi.log.warn(`Domain ${domain} DNS routing verification failed: ${JSON.stringify(result.errors)}`);
+        log.warn(`Domain ${domain} DNS routing verification failed: ${JSON.stringify(result.errors)}`);
       }
 
       return result;
 
     } catch (error: any) {
-      strapi.log.error(`Error verifying domain ${domain}:`, error);
+      log.error(`Error verifying domain ${domain}:`, error);
       result.errors.push(`Erreur lors de la vérification DNS: ${error.message}`);
       return result;
     }
@@ -215,9 +216,9 @@ class DomainService {
    */
   async checkCnameRecord(domain: string): Promise<boolean> {
     try {
-      strapi.log.info(`[DOMAIN] CNAME lookup: ${domain}`);
+      log.info(`[DOMAIN] CNAME lookup: ${domain}`);
       const records = await resolveCname(domain);
-      strapi.log.info(`[DOMAIN] CNAME records found: ${JSON.stringify(records)}, expected suffix: ${this.NETLIFY_DNS_TARGET}`);
+      log.info(`[DOMAIN] CNAME records found: ${JSON.stringify(records)}, expected suffix: ${this.NETLIFY_DNS_TARGET}`);
 
       // Vérifier si le CNAME pointe vers Netlify
       for (const record of records) {
@@ -230,7 +231,7 @@ class DomainService {
 
     } catch (error: any) {
       if (error.code === 'ENOTFOUND' || error.code === 'ENODATA') {
-        strapi.log.info(`[DOMAIN] CNAME lookup failed: ${error.code} for ${domain}`);
+        log.info(`[DOMAIN] CNAME lookup failed: ${error.code} for ${domain}`);
         return false;
       }
       throw error;
@@ -274,7 +275,7 @@ class DomainService {
     try {
       const domain = (site as any).custom_domain;
 
-      strapi.log.info(`[DOMAIN] Verifying DNS routing for ${domain}`);
+      log.info(`[DOMAIN] Verifying DNS routing for ${domain}`);
 
       // 1. Vérifier le pointage DNS (CNAME/A uniquement)
       const validation = await this.verifyDomainRouting(domain);
@@ -290,7 +291,7 @@ class DomainService {
       // 2. Mettre à jour le site en base
       const customUrl = `https://${domain}`;
 
-      await strapi.entityService.update('api::site.site', site.id, {
+      await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: {
           domain_status: 'verified',
           live_url: customUrl,
@@ -305,11 +306,11 @@ class DomainService {
           // Activer force_ssl pour rediriger .netlify.app → custom domain
           await netlifyService.updateSite((site as any).netlify_site_id, { force_ssl: true });
         } catch (sslError) {
-          strapi.log.warn(`SSL provisioning failed for ${domain}:`, sslError);
+          log.warn(`SSL provisioning failed for ${domain}:`, sslError);
         }
       }
 
-      strapi.log.info(`Custom domain ${domain} activated successfully`);
+      log.info(`Custom domain ${domain} activated successfully`);
 
       return {
         success: true,
@@ -317,10 +318,10 @@ class DomainService {
       };
 
     } catch (error: any) {
-      strapi.log.error(`Error activating custom domain:`, error);
+      log.error(`Error activating custom domain:`, error);
 
       // Marquer le domaine en erreur
-      await strapi.entityService.update('api::site.site', site.id, {
+      await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: {
           domain_status: 'error'
         } as any
@@ -352,14 +353,14 @@ class DomainService {
         try {
           await netlifyService.removeDomainFromNetlify((site as any).netlify_site_id, domain);
         } catch (netlifyError) {
-          strapi.log.warn(`Failed to remove domain from Netlify:`, netlifyError);
+          log.warn(`Failed to remove domain from Netlify:`, netlifyError);
         }
 
         if (this.isApexDomain(domain)) {
           try {
             await netlifyService.removeDomainAlias((site as any).netlify_site_id, `www.${domain}`);
           } catch (wwwError) {
-            strapi.log.warn(`Failed to remove www variant from Netlify:`, wwwError);
+            log.warn(`Failed to remove www variant from Netlify:`, wwwError);
           }
         }
       }
@@ -371,12 +372,12 @@ class DomainService {
           const netlifyInfo = await netlifyService.getSite((site as any).netlify_site_id);
           defaultUrl = netlifyInfo.url;
         } catch (error) {
-          strapi.log.warn('Could not fetch default Netlify URL');
+          log.warn('Could not fetch default Netlify URL');
         }
       }
 
       // 4. Reset en base
-      await strapi.entityService.update('api::site.site', site.id, {
+      await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: {
           custom_domain: null,
           domain_status: 'pending',
@@ -386,7 +387,7 @@ class DomainService {
         } as any
       });
 
-      strapi.log.info(`Custom domain removed for site ${siteId}`);
+      log.info(`Custom domain removed for site ${siteId}`);
 
       return {
         success: true,
@@ -394,7 +395,7 @@ class DomainService {
       };
 
     } catch (error: any) {
-      strapi.log.error(`Error removing domain:`, error);
+      log.error(`Error removing domain:`, error);
       return {
         success: false,
         error: error.message
@@ -420,7 +421,7 @@ class DomainService {
       filters.documentId = { $ne: excludeSiteId };
     }
 
-    const existingSites = await strapi.entityService.findMany('api::site.site', {
+    const existingSites = await strapi.documents('api::site.site').findMany({
       filters
     });
 
@@ -500,7 +501,7 @@ class DomainService {
     try {
       return await netlifyService.getSSLStatus(netlifyId, domain);
     } catch (error: any) {
-      strapi.log.warn(`Could not get SSL status for ${domain}:`, error);
+      log.warn(`Could not get SSL status for ${domain}:`, error);
       return null;
     }
   }

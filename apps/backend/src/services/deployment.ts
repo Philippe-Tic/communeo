@@ -10,6 +10,7 @@ import path from 'path';
 import { Readable } from 'stream';
 import { promisify } from 'util';
 import netlifyService from './netlify';
+import { log } from '../utils/logger';
 
 const execAsync = promisify(exec);
 
@@ -37,11 +38,11 @@ class DeploymentService {
     // Utiliser le dossier temp système pour éviter les redémarrages Strapi
     this.tempDir = path.join(os.tmpdir(), 'communeo-builds');
 
-    console.log('🔧 [DEPLOYMENT SERVICE] Configuration des chemins :');
-    console.log(`   - Working directory: ${process.cwd()}`);
-    console.log(`   - Sites path: ${this.sitesPath}`);
-    console.log(`   - Temp directory: ${this.tempDir}`);
-    console.log(`   - Sites directory exists: ${fs.existsSync(this.sitesPath)}`);
+    log.info('🔧 [DEPLOYMENT SERVICE] Configuration des chemins :');
+    log.info(`   - Working directory: ${process.cwd()}`);
+    log.info(`   - Sites path: ${this.sitesPath}`);
+    log.info(`   - Temp directory: ${this.tempDir}`);
+    log.info(`   - Sites directory exists: ${fs.existsSync(this.sitesPath)}`);
 
     // Nettoyer tous les anciens dossiers temporaires au démarrage
     this.cleanupOldTempFiles();
@@ -49,9 +50,9 @@ class DeploymentService {
     // Créer le dossier temp s'il n'existe pas
     if (!fs.existsSync(this.tempDir)) {
       fs.mkdirSync(this.tempDir, { recursive: true });
-      console.log(`✅ [DEPLOYMENT SERVICE] Temp directory created: ${this.tempDir}`);
+      log.info(`✅ [DEPLOYMENT SERVICE] Temp directory created: ${this.tempDir}`);
     } else {
-      console.log(`✅ [DEPLOYMENT SERVICE] Temp directory exists: ${this.tempDir}`);
+      log.info(`✅ [DEPLOYMENT SERVICE] Temp directory exists: ${this.tempDir}`);
     }
   }
 
@@ -64,13 +65,13 @@ class DeploymentService {
     let zipPath: string | undefined;
     let deploymentRecord: any = null;
 
-    console.log(`🚀 [DEPLOYMENT] Starting deployment for site ${siteSlug} (ID: ${siteId})`);
+    log.info(`🚀 [DEPLOYMENT] Starting deployment for site ${siteSlug} (ID: ${siteId})`);
 
     try {
       // 1. Récupérer les infos du site
-      console.log(`📋 [DEPLOYMENT] Step 1: Fetching site data...`);
+      log.info(`📋 [DEPLOYMENT] Step 1: Fetching site data...`);
 
-      const sites = await strapi.entityService.findMany('api::site.site', {
+      const sites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: siteId } as any,
         populate: {
           pages: true,
@@ -82,48 +83,48 @@ class DeploymentService {
       const site = sites && sites.length > 0 ? sites[0] : null;
 
       if (!site) {
-        console.error(`❌ [DEPLOYMENT] Site not found: ${siteId}`);
+        log.error(`❌ [DEPLOYMENT] Site not found: ${siteId}`);
         throw new Error(`Site not found: ${siteId}`);
       }
 
-      console.log(`✅ [DEPLOYMENT] Site found: ${(site as any).name}`);
+      log.info(`✅ [DEPLOYMENT] Site found: ${(site as any).name}`);
 
       // 2. Créer le site Netlify si nécessaire
-      console.log(`🌐 [DEPLOYMENT] Step 2: Checking Netlify site...`);
+      log.info(`🌐 [DEPLOYMENT] Step 2: Checking Netlify site...`);
 
       let netlifyId = (site as any).netlify_site_id;
       if (!netlifyId) {
-        console.log(`🔧 [DEPLOYMENT] Creating new Netlify site...`);
+        log.info(`🔧 [DEPLOYMENT] Creating new Netlify site...`);
         const netlifyResult = await netlifyService.createSite((site as any).name, (site as any).slug);
         netlifyId = netlifyResult.id;
 
-        console.log(`✅ [DEPLOYMENT] Netlify site created: ${netlifyId}`);
+        log.info(`✅ [DEPLOYMENT] Netlify site created: ${netlifyId}`);
 
         // Mettre à jour le site avec l'ID Netlify
-        await strapi.entityService.update('api::site.site', site.id, {
+        await strapi.documents('api::site.site').update({ documentId: site.documentId,
           data: {
             netlify_site_id: netlifyId,
             live_url: netlifyResult.url
           }
         });
 
-                console.log(`✅ [DEPLOYMENT] Site updated with Netlify ID`);
+                log.info(`✅ [DEPLOYMENT] Site updated with Netlify ID`);
       } else {
-        console.log(`✅ [DEPLOYMENT] Using existing Netlify site: ${netlifyId}`);
+        log.info(`✅ [DEPLOYMENT] Using existing Netlify site: ${netlifyId}`);
       }
 
       // 3. Build le site Astro
-      console.log(`🏗️ [DEPLOYMENT] Step 3: Building Astro site...`);
+      log.info(`🏗️ [DEPLOYMENT] Step 3: Building Astro site...`);
       const customDomain = (site as any).custom_domain
         ? { domain: (site as any).custom_domain, verified: (site as any).domain_status === 'verified' }
         : undefined;
       const buildResult = await this.buildSite(siteId, (site as any).slug, (site as any).live_url, customDomain);
       if (!buildResult.success) {
-        console.error(`❌ [DEPLOYMENT] Build failed: ${buildResult.error}`);
+        log.error(`❌ [DEPLOYMENT] Build failed: ${buildResult.error}`);
         throw new Error(buildResult.error || 'Build failed');
       }
 
-      console.log(`✅ [DEPLOYMENT] Build successful in ${buildResult.buildTime}s`);
+      log.info(`✅ [DEPLOYMENT] Build successful in ${buildResult.buildTime}s`);
       tempBuildDir = buildResult.buildPath!;
 
       // 3b. Validation post-build : vérifier les pages critiques
@@ -136,35 +137,35 @@ class DeploymentService {
         if (size < 2000) {
           throw new Error(`Build validation failed: demarches/index.html too small (${size} bytes), comarquage data likely missing`);
         }
-        console.log(`✅ [DEPLOYMENT] demarches/index.html validated (${size} bytes)`);
+        log.info(`✅ [DEPLOYMENT] demarches/index.html validated (${size} bytes)`);
       }
 
       // 4. Créer le ZIP
-      console.log(`📦 [DEPLOYMENT] Step 4: Creating ZIP archive...`);
+      log.info(`📦 [DEPLOYMENT] Step 4: Creating ZIP archive...`);
       zipPath = await this.createZip(tempBuildDir);
-      console.log(`✅ [DEPLOYMENT] ZIP created: ${zipPath}`);
+      log.info(`✅ [DEPLOYMENT] ZIP created: ${zipPath}`);
 
       // 5. Nettoyer immédiatement le dossier de build (garde seulement le ZIP)
-      console.log(`🧹 [DEPLOYMENT] Step 5: Immediate cleanup of build directory...`);
+      log.info(`🧹 [DEPLOYMENT] Step 5: Immediate cleanup of build directory...`);
       if (tempBuildDir && fs.existsSync(tempBuildDir)) {
         await fs.promises.rm(tempBuildDir, { recursive: true, force: true });
-        console.log(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
+        log.info(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
         tempBuildDir = undefined; // Pour éviter de le nettoyer à nouveau dans finally
       }
 
       // 6. Uploader vers Netlify
-      console.log(`⬆️ [DEPLOYMENT] Step 6: Uploading to Netlify...`);
+      log.info(`⬆️ [DEPLOYMENT] Step 6: Uploading to Netlify...`);
       const zipBuffer = fs.readFileSync(zipPath);
       const deployment = await netlifyService.deploySite(netlifyId, zipBuffer);
-      console.log(`✅ [DEPLOYMENT] Uploaded to Netlify, deployment ID: ${deployment.id}`);
+      log.info(`✅ [DEPLOYMENT] Uploaded to Netlify, deployment ID: ${deployment.id}`);
 
       // 7. Créer l'entrée de déploiement en base
-      console.log(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
+      log.info(`💾 [DEPLOYMENT] Step 7: Creating deployment record...`);
       try {
         // Utiliser l'ID du site pour la relation, pas le documentId
-        const siteIdForRelation = (site as any).id;
+        const siteIdForRelation = (site as any).documentId;
 
-        deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
+        deploymentRecord = await strapi.documents('api::deployment.deployment').create({
           data: {
             site: siteIdForRelation,
             deployment_id: deployment.id,
@@ -173,34 +174,34 @@ class DeploymentService {
             triggered_at: new Date()
           }
         });
-        console.log(`✅ [DEPLOYMENT] Deployment record created: ${deploymentRecord.id}`);
+        log.info(`✅ [DEPLOYMENT] Deployment record created: ${deploymentRecord.id}`);
       } catch (dbError: any) {
-        console.warn(`⚠️ [DEPLOYMENT] Could not create deployment record: ${dbError.message}`);
+        log.warn(`⚠️ [DEPLOYMENT] Could not create deployment record: ${dbError.message}`);
         // Ne pas faire échouer le déploiement si l'enregistrement en base échoue
       }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
       // 8. Mettre à jour le statut final du déploiement
-      console.log(`📊 [DEPLOYMENT] Step 8: Updating deployment status to ready...`);
+      log.info(`📊 [DEPLOYMENT] Step 8: Updating deployment status to ready...`);
 
       if (deploymentRecord) {
         try {
-          await global.strapi.entityService.update('api::deployment.deployment', deploymentRecord.id, {
+          await strapi.documents('api::deployment.deployment').update({ documentId: deploymentRecord.documentId,
             data: {
               status: 'ready',
               build_time: buildTime,
               completed_at: new Date()
             }
           });
-          console.log(`✅ [DEPLOYMENT] Deployment status updated to ready`);
+          log.info(`✅ [DEPLOYMENT] Deployment status updated to ready`);
         } catch (updateError: any) {
-          console.warn(`⚠️ [DEPLOYMENT] Could not update deployment status: ${updateError.message}`);
+          log.warn(`⚠️ [DEPLOYMENT] Could not update deployment status: ${updateError.message}`);
         }
       }
 
-      console.log(`🎉 [DEPLOYMENT] Deployment initiated successfully in ${buildTime}s`);
-      console.log(`🔗 [DEPLOYMENT] Deployment URL: ${deployment.deploy_url}`);
+      log.info(`🎉 [DEPLOYMENT] Deployment initiated successfully in ${buildTime}s`);
+      log.info(`🔗 [DEPLOYMENT] Deployment URL: ${deployment.deploy_url}`);
 
       return {
         deployment: deploymentRecord,
@@ -210,12 +211,12 @@ class DeploymentService {
 
     } catch (error: any) {
       const buildTime = Math.round((Date.now() - startTime) / 1000);
-      console.error(`💥 [DEPLOYMENT] Deployment failed for site ${siteSlug} after ${buildTime}s:`, error);
+      log.error(`💥 [DEPLOYMENT] Deployment failed for site ${siteSlug} after ${buildTime}s:`, error);
 
       // Mettre à jour le statut du déploiement en erreur s'il existe
       if (deploymentRecord) {
         try {
-          await global.strapi.entityService.update('api::deployment.deployment', deploymentRecord.id, {
+          await strapi.documents('api::deployment.deployment').update({ documentId: deploymentRecord.documentId,
             data: {
               status: 'error',
               build_time: buildTime,
@@ -223,21 +224,21 @@ class DeploymentService {
               completed_at: new Date()
             }
           });
-          console.log(`❌ [DEPLOYMENT] Deployment status updated to error`);
+          log.info(`❌ [DEPLOYMENT] Deployment status updated to error`);
         } catch (updateError: any) {
-          console.warn(`⚠️ [DEPLOYMENT] Could not update deployment error status: ${updateError.message}`);
+          log.warn(`⚠️ [DEPLOYMENT] Could not update deployment error status: ${updateError.message}`);
         }
       } else {
                 // Créer un record d'erreur s'il n'existe pas encore
         try {
           // Récupérer le site pour obtenir son ID
-          const sites = await global.strapi.entityService.findMany('api::site.site', {
+          const sites = await strapi.documents('api::site.site').findMany({
             filters: { documentId: siteId } as any
           });
           const siteForError = sites && sites.length > 0 ? sites[0] : null;
-          const siteIdForRelation = siteForError ? (siteForError as any).id : siteId;
+          const siteIdForRelation = siteForError ? (siteForError as any).documentId : siteId;
 
-          deploymentRecord = await global.strapi.entityService.create('api::deployment.deployment', {
+          deploymentRecord = await strapi.documents('api::deployment.deployment').create({
             data: {
               site: siteIdForRelation,
               deployment_id: `error-${Date.now()}`,
@@ -249,9 +250,9 @@ class DeploymentService {
               completed_at: new Date()
             }
           });
-          console.log(`❌ [DEPLOYMENT] Error deployment record created: ${deploymentRecord.id}`);
+          log.info(`❌ [DEPLOYMENT] Error deployment record created: ${deploymentRecord.id}`);
         } catch (dbError: any) {
-          console.warn(`⚠️ [DEPLOYMENT] Could not create error deployment record: ${dbError.message}`);
+          log.warn(`⚠️ [DEPLOYMENT] Could not create error deployment record: ${dbError.message}`);
         }
       }
 
@@ -263,15 +264,15 @@ class DeploymentService {
       };
     } finally {
       // Cleanup des fichiers temporaires (ZIP et dossier build s'il reste)
-      console.log(`🧹 [DEPLOYMENT] Final cleanup...`);
+      log.info(`🧹 [DEPLOYMENT] Final cleanup...`);
 
       // Nettoyer le ZIP s'il existe encore
       if (zipPath && fs.existsSync(zipPath)) {
         try {
           await fs.promises.unlink(zipPath);
-          console.log(`✅ [DEPLOYMENT] ZIP file cleaned: ${zipPath}`);
+          log.info(`✅ [DEPLOYMENT] ZIP file cleaned: ${zipPath}`);
         } catch (cleanupError: any) {
-          console.warn(`⚠️ [DEPLOYMENT] Could not clean ZIP: ${cleanupError.message}`);
+          log.warn(`⚠️ [DEPLOYMENT] Could not clean ZIP: ${cleanupError.message}`);
         }
       }
 
@@ -279,13 +280,13 @@ class DeploymentService {
       if (tempBuildDir && fs.existsSync(tempBuildDir)) {
         try {
           await fs.promises.rm(tempBuildDir, { recursive: true, force: true });
-          console.log(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
+          log.info(`✅ [DEPLOYMENT] Build directory cleaned: ${tempBuildDir}`);
         } catch (cleanupError: any) {
-          console.warn(`⚠️ [DEPLOYMENT] Could not clean build dir: ${cleanupError.message}`);
+          log.warn(`⚠️ [DEPLOYMENT] Could not clean build dir: ${cleanupError.message}`);
         }
       }
 
-      console.log(`✅ [DEPLOYMENT] Final cleanup completed`);
+      log.info(`✅ [DEPLOYMENT] Final cleanup completed`);
     }
   }
 
@@ -309,25 +310,25 @@ class DeploymentService {
     const tempBuildDir = path.join(this.tempDir, `build-${siteSlug}-${Date.now()}`);
 
     try {
-      console.log(`🏗️ [BUILD] Starting build for ${siteSlug}`);
-      console.log(`📁 [BUILD] Temp directory: ${tempBuildDir}`);
+      log.info(`🏗️ [BUILD] Starting build for ${siteSlug}`);
+      log.info(`📁 [BUILD] Temp directory: ${tempBuildDir}`);
 
       // 1. Copier les sources Astro
-      console.log(`📂 [BUILD] Step 1: Copying Astro sources...`);
+      log.info(`📂 [BUILD] Step 1: Copying Astro sources...`);
       await this.copyDirectory(this.sitesPath, tempBuildDir);
-      console.log(`✅ [BUILD] Sources copied from ${this.sitesPath}`);
+      log.info(`✅ [BUILD] Sources copied from ${this.sitesPath}`);
 
       // 2. Installer les dépendances (--include=dev pour pagefind et autres outils de build)
-      console.log(`📦 [BUILD] Step 2: Installing dependencies...`);
+      log.info(`📦 [BUILD] Step 2: Installing dependencies...`);
       try {
         await execAsync('npm ci --include=dev', {
           cwd: tempBuildDir,
           env: this.baseBuildEnv(),
           maxBuffer: 10 * 1024 * 1024
         });
-        console.log(`✅ [BUILD] Dependencies installed successfully`);
+        log.info(`✅ [BUILD] Dependencies installed successfully`);
       } catch (npmError: any) {
-        console.error(`❌ [BUILD] npm ci failed:`, npmError.message);
+        log.error(`❌ [BUILD] npm ci failed:`, npmError.message);
         throw new Error(`npm ci failed: ${npmError.message}`);
       }
 
@@ -348,12 +349,12 @@ class DeploymentService {
         NODE_ENV: 'production'
       };
 
-      console.log(`🔧 [BUILD] Step 3: Building with environment variables:`);
-      console.log(`   SITE_DOCUMENT_ID: ${buildEnv.SITE_DOCUMENT_ID}`);
-      console.log(`   SITE_SLUG: ${buildEnv.SITE_SLUG}`);
-      console.log(`   STRAPI_URL: ${buildEnv.STRAPI_URL}`);
-      console.log(`   STRAPI_TOKEN: ${buildEnv.STRAPI_TOKEN ? '***SET***' : 'NOT_SET'}`);
-      console.log(`   NODE_ENV: ${buildEnv.NODE_ENV}`);
+      log.info(`🔧 [BUILD] Step 3: Building with environment variables:`);
+      log.info(`   SITE_DOCUMENT_ID: ${buildEnv.SITE_DOCUMENT_ID}`);
+      log.info(`   SITE_SLUG: ${buildEnv.SITE_SLUG}`);
+      log.info(`   STRAPI_URL: ${buildEnv.STRAPI_URL}`);
+      log.info(`   STRAPI_TOKEN: ${buildEnv.STRAPI_TOKEN ? '***SET***' : 'NOT_SET'}`);
+      log.info(`   NODE_ENV: ${buildEnv.NODE_ENV}`);
 
       // Pre-build health check: verify Strapi is reachable and site exists
       if (!buildEnv.STRAPI_TOKEN) {
@@ -361,7 +362,7 @@ class DeploymentService {
       }
 
       const checkUrl = `${buildEnv.STRAPI_URL}/api/sites?filters[documentId][$eq]=${siteId}`;
-      console.log(`🔍 [BUILD] Pre-build check: ${checkUrl}`);
+      log.debug(`🔍 [BUILD] Pre-build check: ${checkUrl}`);
       const check = await fetch(checkUrl, {
         headers: { 'Authorization': `Bearer ${buildEnv.STRAPI_TOKEN}`, 'Content-Type': 'application/json' }
       });
@@ -372,44 +373,44 @@ class DeploymentService {
       if (!checkData.data?.length) {
         throw new Error(`Site ${siteId} not found via API. Build would produce an empty site.`);
       }
-      console.log(`✅ [BUILD] Site "${checkData.data[0].name}" accessible via API`);
+      log.info(`✅ [BUILD] Site "${checkData.data[0].name}" accessible via API`);
 
       try {
-        console.log(`🚀 [BUILD] Running: npx astro build`);
+        log.info(`🚀 [BUILD] Running: npx astro build`);
         const { stdout: buildOutput } = await execAsync('npx astro build', {
           cwd: tempBuildDir,
           env: buildEnv,
           maxBuffer: 10 * 1024 * 1024
         });
-        console.log(`📋 [BUILD] Build output:\n${buildOutput}`);
-        console.log(`✅ [BUILD] Astro build completed successfully`);
+        log.info(`📋 [BUILD] Build output:\n${buildOutput}`);
+        log.info(`✅ [BUILD] Astro build completed successfully`);
       } catch (buildError: any) {
-        console.error(`❌ [BUILD] npx astro build failed:`);
-        console.error(`❌ [BUILD] Exit code: ${buildError.code}`);
-        console.error(`❌ [BUILD] Error message: ${buildError.message}`);
+        log.error(`❌ [BUILD] npx astro build failed:`);
+        log.error(`❌ [BUILD] Exit code: ${buildError.code}`);
+        log.error(`❌ [BUILD] Error message: ${buildError.message}`);
         if (buildError.stdout) {
-          console.error(`📋 [BUILD] STDOUT:\n${buildError.stdout}`);
+          log.error(`📋 [BUILD] STDOUT:\n${buildError.stdout}`);
         }
         if (buildError.stderr) {
-          console.error(`📋 [BUILD] STDERR:\n${buildError.stderr}`);
+          log.error(`📋 [BUILD] STDERR:\n${buildError.stderr}`);
         }
         throw new Error(`Astro build failed: ${buildError.message}\n${buildError.stderr || buildError.stdout || ''}`);
       }
 
       // 3b. Run Pagefind indexing
-      console.log(`🔍 [BUILD] Running Pagefind indexing...`);
+      log.debug(`🔍 [BUILD] Running Pagefind indexing...`);
       try {
         const { stdout: pagefindOutput } = await execAsync('npx pagefind --site dist', {
           cwd: tempBuildDir,
           env: buildEnv,
           maxBuffer: 10 * 1024 * 1024
         });
-        console.log(`📋 [BUILD] Pagefind output:\n${pagefindOutput}`);
-        console.log(`✅ [BUILD] Pagefind indexing completed`);
+        log.info(`📋 [BUILD] Pagefind output:\n${pagefindOutput}`);
+        log.info(`✅ [BUILD] Pagefind indexing completed`);
       } catch (pagefindError: any) {
-        console.error(`❌ [BUILD] Pagefind indexing failed: ${pagefindError.message}`);
+        log.error(`❌ [BUILD] Pagefind indexing failed: ${pagefindError.message}`);
         if (pagefindError.stderr) {
-          console.error(`📋 [BUILD] Pagefind STDERR:\n${pagefindError.stderr}`);
+          log.error(`📋 [BUILD] Pagefind STDERR:\n${pagefindError.stderr}`);
         }
         throw new Error(`Pagefind indexing failed: ${pagefindError.message}`);
       }
@@ -417,39 +418,39 @@ class DeploymentService {
       const distPath = path.join(tempBuildDir, 'dist');
 
       if (!fs.existsSync(distPath)) {
-        console.error(`❌ [BUILD] Build output directory not found: ${distPath}`);
+        log.error(`❌ [BUILD] Build output directory not found: ${distPath}`);
         throw new Error('Build output directory not found');
       }
 
-      console.log(`📁 [BUILD] Build output found at: ${distPath}`);
+      log.info(`📁 [BUILD] Build output found at: ${distPath}`);
 
       // Analyser le contenu du dossier dist
       try {
         const distFiles = fs.readdirSync(distPath, { recursive: true });
-        console.log(`📋 [BUILD] Dist contents (${distFiles.length} files):`);
-        distFiles.slice(0, 20).forEach(file => console.log(`   - ${file}`));
+        log.info(`📋 [BUILD] Dist contents (${distFiles.length} files):`);
+        distFiles.slice(0, 20).forEach(file => log.info(`   - ${file}`));
         if (distFiles.length > 20) {
-          console.log(`   ... and ${distFiles.length - 20} more files`);
+          log.info(`   ... and ${distFiles.length - 20} more files`);
         }
 
         // Vérifier la taille du dossier
         const distStats = fs.statSync(distPath);
-        console.log(`📊 [BUILD] Dist directory size: ${distStats.size} bytes`);
+        log.info(`📊 [BUILD] Dist directory size: ${distStats.size} bytes`);
 
         // Vérifier le fichier index.html
         const indexPath = path.join(distPath, 'index.html');
         if (fs.existsSync(indexPath)) {
           const indexSize = fs.statSync(indexPath).size;
-          console.log(`📄 [BUILD] index.html found: ${indexSize} bytes`);
+          log.info(`📄 [BUILD] index.html found: ${indexSize} bytes`);
           if (indexSize < 1000) {
             const indexContent = fs.readFileSync(indexPath, 'utf8');
-            console.log(`⚠️  [BUILD] index.html content (small file):\n${indexContent.substring(0, 500)}`);
+            log.info(`⚠️  [BUILD] index.html content (small file):\n${indexContent.substring(0, 500)}`);
           }
         } else {
-          console.log(`❌ [BUILD] index.html NOT found!`);
+          log.info(`❌ [BUILD] index.html NOT found!`);
         }
       } catch (error) {
-        console.warn(`⚠️ [BUILD] Could not analyze dist contents:`, error);
+        log.warn(`⚠️ [BUILD] Could not analyze dist contents:`, error);
       }
 
       // Générer _redirects pour rediriger .netlify.app → custom domain
@@ -458,12 +459,12 @@ class DeploymentService {
         const redirectsContent = `# Redirect netlify subdomain to primary custom domain\nhttps://${netlifySubdomain}/* https://${customDomain.domain}/:splat 301!\n`;
         const redirectsPath = path.join(distPath, '_redirects');
         fs.writeFileSync(redirectsPath, redirectsContent, 'utf8');
-        console.log(`✅ [BUILD] _redirects generated: ${netlifySubdomain} → ${customDomain.domain}`);
+        log.info(`✅ [BUILD] _redirects generated: ${netlifySubdomain} → ${customDomain.domain}`);
       }
 
       const buildTime = Math.round((Date.now() - startTime) / 1000);
 
-      console.log(`🎉 [BUILD] Build completed successfully in ${buildTime}s`);
+      log.info(`🎉 [BUILD] Build completed successfully in ${buildTime}s`);
 
       return {
         success: true,
@@ -473,7 +474,7 @@ class DeploymentService {
 
     } catch (error: any) {
       const buildTime = Math.round((Date.now() - startTime) / 1000);
-      console.error(`💥 [BUILD] Build failed for ${siteSlug} after ${buildTime}s:`, error);
+      log.error(`💥 [BUILD] Build failed for ${siteSlug} after ${buildTime}s:`, error);
 
       return {
         success: false,
@@ -495,8 +496,8 @@ class DeploymentService {
       const archive = archiver('zip', { zlib: { level: 9 } });
 
       output.on('close', () => {
-        console.log(`✅ [ZIP] Created: ${archive.pointer()} total bytes`);
-        console.log(`📁 [ZIP] Structure: Files placed at ZIP root for direct Netlify deployment`);
+        log.info(`✅ [ZIP] Created: ${archive.pointer()} total bytes`);
+        log.info(`📁 [ZIP] Structure: Files placed at ZIP root for direct Netlify deployment`);
         resolve(zipPath);
       });
 
@@ -543,7 +544,7 @@ class DeploymentService {
   async checkDeploymentStatus(deploymentId: string): Promise<any> {
     try {
       // Récupérer le déploiement depuis la base
-      const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
+      const deployments = await strapi.documents('api::deployment.deployment').findMany({
         filters: { deployment_id: deploymentId }
       });
 
@@ -589,7 +590,7 @@ class DeploymentService {
           updateData.error_message = netlifyStatus.error_message;
         }
 
-        await strapi.entityService.update('api::deployment.deployment', deployment.id, {
+        await strapi.documents('api::deployment.deployment').update({ documentId: deployment.documentId,
           data: updateData
         });
       }
@@ -601,7 +602,7 @@ class DeploymentService {
       };
 
     } catch (error: any) {
-      console.error(`❌ [DEPLOYMENT STATUS] Error checking deployment status:`, error);
+      log.error(`❌ [DEPLOYMENT STATUS] Error checking deployment status:`, error);
       throw error;
     }
   }
@@ -620,9 +621,9 @@ class DeploymentService {
           } else {
             await fs.promises.unlink(cleanupPath);
           }
-          console.log(`🧹 [CLEANUP] Cleaned up: ${cleanupPath}`);
+          log.info(`🧹 [CLEANUP] Cleaned up: ${cleanupPath}`);
         } catch (error: any) {
-          console.warn(`⚠️ [CLEANUP] Failed to cleanup ${cleanupPath}: ${error.message}`);
+          log.warn(`⚠️ [CLEANUP] Failed to cleanup ${cleanupPath}: ${error.message}`);
         }
       }
     }
@@ -644,13 +645,13 @@ class DeploymentService {
               } else {
                 await fs.promises.unlink(filePath);
               }
-              console.log(`🧹 [CLEANUP] Old temp file removed: ${file}`);
+              log.info(`🧹 [CLEANUP] Old temp file removed: ${file}`);
             }
           }
         }
       }
     } catch (error: any) {
-      console.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
+      log.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
     }
   }
 
@@ -674,13 +675,13 @@ class DeploymentService {
               } else {
                 await fs.promises.unlink(filePath);
               }
-              console.log(`🧹 [CLEANUP] Old temp file removed: ${file}`);
+              log.info(`🧹 [CLEANUP] Old temp file removed: ${file}`);
             }
           }
         }
       }
     } catch (error: any) {
-      console.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
+      log.error(`❌ [CLEANUP] Auto-cleanup error:`, error.message);
     }
   }
 }

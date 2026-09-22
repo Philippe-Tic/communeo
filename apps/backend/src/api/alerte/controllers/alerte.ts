@@ -10,7 +10,7 @@ export default factories.createCoreController('api::alerte.alerte', ({ strapi })
 
     const now = new Date().toISOString();
 
-    const alerts = await strapi.entityService.findMany('api::alerte.alerte' as any, {
+    const alerts = await strapi.documents('api::alerte.alerte').findMany({
       filters: {
         site: { documentId: { $eq: siteDocumentId } },
         active: true,
@@ -19,7 +19,7 @@ export default factories.createCoreController('api::alerte.alerte', ({ strapi })
           { display_from: { $lte: now } },
         ],
       },
-      sort: { severity: 'desc', createdAt: 'desc' },
+      sort: [{ severity: 'desc' }, { createdAt: 'desc' }],
     });
 
     // Filter out alerts that have expired (display_until in the past)

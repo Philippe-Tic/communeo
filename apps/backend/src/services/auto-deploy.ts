@@ -3,6 +3,7 @@
  */
 
 import deploymentService from './deployment';
+import { log } from '../utils/logger';
 
 // In-memory map of pending deploy timers per site
 const pendingTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
@@ -15,7 +16,7 @@ class AutoDeployService {
   async scheduleDeployIfEnabled(siteDocumentId: string): Promise<void> {
     try {
       // Look up the site to check auto-deploy settings
-      const sites = await strapi.entityService.findMany('api::site.site', {
+      const sites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: siteDocumentId } as any,
       });
 
@@ -30,14 +31,14 @@ class AutoDeployService {
       // Cancel any pending timer for this site (debounce)
       this.cancelPending(siteDocumentId);
 
-      console.log(`⏱️ [AUTO-DEPLOY] Scheduling deploy for "${siteSlug}" in ${delaySeconds}s`);
+      log.info(`⏱️ [AUTO-DEPLOY] Scheduling deploy for "${siteSlug}" in ${delaySeconds}s`);
 
       const timer = setTimeout(async () => {
         pendingTimers.delete(siteDocumentId);
 
         try {
           // Check if a build is already in progress
-          const activeDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
+          const activeDeployments = await strapi.documents('api::deployment.deployment').findMany({
             filters: {
               site: { documentId: siteDocumentId },
               status: 'building',
@@ -45,21 +46,21 @@ class AutoDeployService {
           });
 
           if (activeDeployments && activeDeployments.length > 0) {
-            console.log(`⏸️ [AUTO-DEPLOY] Build already in progress for "${siteSlug}", skipping`);
+            log.info(`⏸️ [AUTO-DEPLOY] Build already in progress for "${siteSlug}", skipping`);
             return;
           }
 
-          console.log(`🚀 [AUTO-DEPLOY] Triggering deploy for "${siteSlug}"`);
+          log.info(`🚀 [AUTO-DEPLOY] Triggering deploy for "${siteSlug}"`);
           await deploymentService.buildAndDeploy(siteDocumentId, siteSlug);
-          console.log(`✅ [AUTO-DEPLOY] Deploy completed for "${siteSlug}"`);
+          log.info(`✅ [AUTO-DEPLOY] Deploy completed for "${siteSlug}"`);
         } catch (error) {
-          console.error(`❌ [AUTO-DEPLOY] Deploy failed for "${siteSlug}":`, error);
+          log.error(`❌ [AUTO-DEPLOY] Deploy failed for "${siteSlug}":`, error);
         }
       }, delaySeconds * 1000);
 
       pendingTimers.set(siteDocumentId, timer);
     } catch (error) {
-      console.error(`❌ [AUTO-DEPLOY] Error scheduling deploy:`, error);
+      log.error(`❌ [AUTO-DEPLOY] Error scheduling deploy:`, error);
     }
   }
 
@@ -71,7 +72,7 @@ class AutoDeployService {
     if (existing) {
       clearTimeout(existing);
       pendingTimers.delete(siteDocumentId);
-      console.log(`🛑 [AUTO-DEPLOY] Cancelled pending deploy for site ${siteDocumentId}`);
+      log.info(`🛑 [AUTO-DEPLOY] Cancelled pending deploy for site ${siteDocumentId}`);
     }
   }
 }

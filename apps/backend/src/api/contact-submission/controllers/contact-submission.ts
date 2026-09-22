@@ -45,7 +45,7 @@ export default factories.createCoreController('api::contact-submission.contact-s
       return ctx.badRequest('Le champ site est requis');
     }
 
-    const sites = await strapi.entityService.findMany('api::site.site', {
+    const sites = await strapi.documents('api::site.site').findMany({
       filters: { documentId: { $eq: site } } as any,
     });
 
@@ -55,7 +55,7 @@ export default factories.createCoreController('api::contact-submission.contact-s
 
     // Generate SVE reference number: SVE-{YYYY}-{N}
     const year = new Date().getFullYear();
-    const existingCount = await strapi.entityService.findMany('api::contact-submission.contact-submission', {
+    const existingCount = await strapi.documents('api::contact-submission.contact-submission').findMany({
       filters: {
         reference_number: { $startsWith: `SVE-${year}-` },
       },
@@ -75,7 +75,7 @@ export default factories.createCoreController('api::contact-submission.contact-s
     const reference_number = `SVE-${year}-${String(nextNumber).padStart(4, '0')}`;
 
     // Create the submission
-    const entry = await strapi.entityService.create('api::contact-submission.contact-submission', {
+    const entry = await strapi.documents('api::contact-submission.contact-submission').create({
       data: {
         first_name: first_name.trim(),
         last_name: last_name.trim(),

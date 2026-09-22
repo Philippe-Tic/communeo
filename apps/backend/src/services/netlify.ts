@@ -2,7 +2,7 @@
  * Netlify Service - Intégration API Netlify
  */
 
-import fetch from 'node-fetch';
+import { log } from '../utils/logger';
 
 
 interface NetlifySite {
@@ -65,7 +65,7 @@ class NetlifyService {
       throw new Error(`Netlify API Error ${response.status}: ${error}`);
     }
 
-    return response.json();
+    return (await response.json()) as any;
   }
 
   /**
@@ -83,7 +83,7 @@ class NetlifyService {
     const envPrefix = process.env.NODE_ENV === 'production' ? '' : 'dev-';
     const siteDomainName = `${envPrefix}${siteSlug}-mairie`;
 
-    console.log(`🔍 [NETLIFY] Looking for existing site: ${siteDomainName}`);
+    log.debug(`🔍 [NETLIFY] Looking for existing site: ${siteDomainName}`);
 
     try {
       // 1. Chercher un site existant avec ce nom
@@ -91,16 +91,16 @@ class NetlifyService {
       const existingSite = sites.find(site => site.name === siteDomainName);
 
       if (existingSite) {
-        console.log(`✅ [NETLIFY] Found existing site: ${existingSite.id} (${existingSite.name})`);
+        log.info(`✅ [NETLIFY] Found existing site: ${existingSite.id} (${existingSite.name})`);
         return existingSite;
       }
 
       // 2. Aucun site trouvé, créer un nouveau
-      console.log(`🆕 [NETLIFY] Creating new site: ${siteDomainName}`);
+      log.info(`🆕 [NETLIFY] Creating new site: ${siteDomainName}`);
       return await this.createSiteWithName(siteName, siteDomainName);
 
     } catch (error: any) {
-      console.error(`❌ [NETLIFY] Error finding/creating site: ${error.message}`);
+      log.error(`❌ [NETLIFY] Error finding/creating site: ${error.message}`);
       throw error;
     }
   }
@@ -109,7 +109,7 @@ class NetlifyService {
    * Crée un nouveau site sur Netlify avec un nom spécifique
    */
   async createSiteWithName(siteName: string, siteDomainName: string): Promise<NetlifySite> {
-    console.log(`🌐 [NETLIFY] Creating site: ${siteName} with name: ${siteDomainName}`);
+    log.info(`🌐 [NETLIFY] Creating site: ${siteName} with name: ${siteDomainName}`);
 
     const siteData = {
       name: siteDomainName,
@@ -126,32 +126,11 @@ class NetlifyService {
       body: JSON.stringify(siteData)
     });
 
-    console.log(`✅ [NETLIFY] Site created successfully: ${site.id} (${site.name})`);
+    log.info(`✅ [NETLIFY] Site created successfully: ${site.id} (${site.name})`);
     return site;
   }
 
-  /**
-   * Met à jour les paramètres d'un site existant
-   */
-  async updateSiteSettings(siteId: string): Promise<NetlifySite> {
-    console.log(`🔧 [NETLIFY] Updating site settings: ${siteId}`);
 
-    const settings = {
-      build_settings: {
-        cmd: '',
-        dir: '.', // Publier depuis la racine du ZIP
-        env: {}
-      }
-    };
-
-    const site = await this.apiRequest(`/sites/${siteId}`, {
-      method: 'PATCH',
-      body: JSON.stringify(settings)
-    });
-
-    console.log(`✅ [NETLIFY] Site settings updated: ${site.id}`);
-    return site;
-  }
 
   /**
    * Crée un nouveau site sur Netlify (ancienne méthode - gardée pour compatibilité)
@@ -164,8 +143,8 @@ class NetlifyService {
    * Déploie un site à partir d'un fichier ZIP
    */
   async deploySite(netlifyId: string, zipBuffer: Buffer): Promise<NetlifyDeployment> {
-    console.log(`⬆️ [NETLIFY] Starting deployment to site: ${netlifyId}`);
-    console.log(`📦 [NETLIFY] ZIP size: ${(zipBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+    log.info(`⬆️ [NETLIFY] Starting deployment to site: ${netlifyId}`);
+    log.info(`📦 [NETLIFY] ZIP size: ${(zipBuffer.length / 1024 / 1024).toFixed(2)} MB`);
 
     // L'API Netlify attend le ZIP en binaire brut, pas du FormData
     const response = await fetch(`${this.baseUrl}/sites/${netlifyId}/deploys`, {
@@ -179,13 +158,13 @@ class NetlifyService {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error(`❌ [NETLIFY] Deploy failed ${response.status}: ${error}`);
+      log.error(`❌ [NETLIFY] Deploy failed ${response.status}: ${error}`);
       throw new Error(`Netlify deploy error ${response.status}: ${error}`);
     }
 
-    const deployment = await response.json();
-    console.log(`🚀 [NETLIFY] Deployment initiated: ${deployment.id}`);
-    console.log(`🔗 [NETLIFY] Deploy URL: ${deployment.deploy_url}`);
+    const deployment = (await response.json()) as NetlifyDeployment;
+    log.info(`🚀 [NETLIFY] Deployment initiated: ${deployment.id}`);
+    log.info(`🔗 [NETLIFY] Deploy URL: ${deployment.deploy_url}`);
 
     // Attendre que le déploiement soit prêt et l'activer automatiquement
     await this.waitAndActivateDeployment(netlifyId, deployment.id);
@@ -197,7 +176,7 @@ class NetlifyService {
    * Attend que le déploiement soit prêt et l'active en production
    */
   async waitAndActivateDeployment(siteId: string, deploymentId: string): Promise<void> {
-    console.log(`⏳ [NETLIFY] Waiting for deployment to be ready: ${deploymentId}`);
+    log.info(`⏳ [NETLIFY] Waiting for deployment to be ready: ${deploymentId}`);
 
     let attempts = 0;
     const maxAttempts = 30; // 30 secondes max
@@ -207,31 +186,31 @@ class NetlifyService {
         const deployment = await this.apiRequest(`/deploys/${deploymentId}`);
 
         if (deployment.state === 'ready') {
-          console.log(`✅ [NETLIFY] Deployment ready, activating in production...`);
+          log.info(`✅ [NETLIFY] Deployment ready, activating in production...`);
 
           // Activer le déploiement en production
           await this.apiRequest(`/sites/${siteId}/deploys/${deploymentId}/restore`, {
             method: 'POST'
           });
 
-          console.log(`🎉 [NETLIFY] Deployment activated in production!`);
+          log.info(`🎉 [NETLIFY] Deployment activated in production!`);
           return;
         } else if (deployment.state === 'error') {
           throw new Error(`Deployment failed: ${deployment.error_message}`);
         }
 
-        console.log(`⏳ [NETLIFY] Deployment state: ${deployment.state}, waiting...`);
+        log.info(`⏳ [NETLIFY] Deployment state: ${deployment.state}, waiting...`);
         await new Promise(resolve => setTimeout(resolve, 1000)); // Attendre 1 seconde
         attempts++;
 
       } catch (error: any) {
-        console.warn(`⚠️ [NETLIFY] Error checking deployment status: ${error.message}`);
+        log.warn(`⚠️ [NETLIFY] Error checking deployment status: ${error.message}`);
         await new Promise(resolve => setTimeout(resolve, 1000));
         attempts++;
       }
     }
 
-    console.warn(`⚠️ [NETLIFY] Timeout waiting for deployment, but upload was successful`);
+    log.warn(`⚠️ [NETLIFY] Timeout waiting for deployment, but upload was successful`);
   }
 
   /**
@@ -247,14 +226,14 @@ class NetlifyService {
   async addDomainToNetlify(netlifyId: string, domain: string): Promise<NetlifyDomain> {
     const body = { custom_domain: domain };
 
-    strapi.log.info(`[DOMAIN] PATCH /sites/${netlifyId} body: ${JSON.stringify(body)}`);
+    log.info(`[DOMAIN] PATCH /sites/${netlifyId} body: ${JSON.stringify(body)}`);
 
     const site = await this.apiRequest(`/sites/${netlifyId}`, {
       method: 'PATCH',
       body: JSON.stringify(body)
     });
 
-    strapi.log.info(`[DOMAIN] Netlify response custom_domain: ${site.custom_domain}`);
+    log.info(`[DOMAIN] Netlify response custom_domain: ${site.custom_domain}`);
 
     // Détecter le rejet silencieux : Netlify retourne 200 OK mais custom_domain reste null
     if (!site.custom_domain || site.custom_domain !== domain) {
@@ -271,7 +250,7 @@ class NetlifyService {
    * Supprime un domaine personnalisé d'un site Netlify
    */
   async removeDomainFromNetlify(netlifyId: string, domain: string): Promise<void> {
-    strapi.log.info(`Removing domain ${domain} from Netlify site ${netlifyId}`);
+    log.info(`Removing domain ${domain} from Netlify site ${netlifyId}`);
 
     await this.apiRequest(`/sites/${netlifyId}`, {
       method: 'PATCH',
@@ -283,7 +262,7 @@ class NetlifyService {
    * Ajoute un alias de domaine (ex: www variant) à un site Netlify
    */
   async addDomainAlias(netlifyId: string, alias: string): Promise<void> {
-    strapi.log.info(`Adding domain alias ${alias} to Netlify site ${netlifyId}`);
+    log.info(`Adding domain alias ${alias} to Netlify site ${netlifyId}`);
 
     const site = await this.getSite(netlifyId);
     const currentAliases: string[] = (site as any).domain_aliases || [];
@@ -300,7 +279,7 @@ class NetlifyService {
    * Supprime un alias de domaine d'un site Netlify
    */
   async removeDomainAlias(netlifyId: string, alias: string): Promise<void> {
-    strapi.log.info(`Removing domain alias ${alias} from Netlify site ${netlifyId}`);
+    log.info(`Removing domain alias ${alias} from Netlify site ${netlifyId}`);
 
     const site = await this.getSite(netlifyId);
     const currentAliases: string[] = (site as any).domain_aliases || [];
@@ -319,7 +298,7 @@ class NetlifyService {
     try {
       return await this.apiRequest(`/sites/${netlifyId}/ssl`);
     } catch (error: any) {
-      strapi.log.warn(`Could not get SSL status for ${domain}: ${error.message}`);
+      log.warn(`Could not get SSL status for ${domain}: ${error.message}`);
       return null;
     }
   }
@@ -328,7 +307,7 @@ class NetlifyService {
    * Provisionne un certificat SSL pour un site
    */
   async provisionSSL(netlifyId: string): Promise<any> {
-    strapi.log.info(`Provisioning SSL for site ${netlifyId}`);
+    log.info(`Provisioning SSL for site ${netlifyId}`);
 
     return this.apiRequest(`/sites/${netlifyId}/ssl`, {
       method: 'POST'
@@ -356,19 +335,14 @@ class NetlifyService {
    * Supprime un site Netlify
    */
   async deleteSite(netlifyId: string): Promise<void> {
-    strapi.log.info(`Deleting Netlify site: ${netlifyId}`);
+    log.info(`Deleting Netlify site: ${netlifyId}`);
 
     await this.apiRequest(`/sites/${netlifyId}`, {
       method: 'DELETE'
     });
   }
 
-  /**
-   * Liste les déploiements d'un site
-   */
-  async listDeployments(netlifyId: string, page = 1, perPage = 20): Promise<NetlifyDeployment[]> {
-    return this.apiRequest(`/sites/${netlifyId}/deploys?page=${page}&per_page=${perPage}`);
-  }
+
 }
 
 // Export singleton instance

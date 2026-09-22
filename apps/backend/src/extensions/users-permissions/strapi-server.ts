@@ -1,5 +1,5 @@
 // Champs du site jamais exposés au client (identifiants d'infrastructure)
-const PRIVATE_SITE_FIELDS = ['netlify_site_id', 'domain_verification_token'];
+const PRIVATE_SITE_FIELDS = ['netlify_site_id'];
 
 export default (plugin) => {
   const originalMe = plugin.controllers.user.me;

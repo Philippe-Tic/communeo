@@ -14,6 +14,7 @@ import type {
   MenuResult,
 } from '../types/comarquage'
 import normalizer from './dila-normalizer'
+import { log } from '../utils/logger';
 
 const DILA_BASE_URL = 'https://lecomarquage.service-public.fr/vdd/3.4'
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000 // 24h
@@ -37,8 +38,8 @@ class ComarquageService {
       }
     }
 
-    console.log(`🗂️ [COMARQUAGE] Cache directory: ${this.cacheDir}`)
-    console.log(`🗂️ [COMARQUAGE] TTL: ${this.ttlMs / 1000}s`)
+    log.info(`🗂️ [COMARQUAGE] Cache directory: ${this.cacheDir}`)
+    log.info(`🗂️ [COMARQUAGE] TTL: ${this.ttlMs / 1000}s`)
   }
 
   // ─── API publique ────────────────────────────────────────────────
@@ -137,9 +138,9 @@ class ComarquageService {
     }
 
     // Cache stale → refresh en arrière-plan, servir le stale
-    console.log(`🔄 [COMARQUAGE] Cache stale for ${audience}, refreshing in background`)
+    log.info(`🔄 [COMARQUAGE] Cache stale for ${audience}, refreshing in background`)
     const bgPromise = this.downloadAndExtract(audience).catch((err) => {
-      console.warn(`⚠️ [COMARQUAGE] Background refresh failed for ${audience}:`, err.message)
+      log.warn(`⚠️ [COMARQUAGE] Background refresh failed for ${audience}:`, err.message)
     })
     this.downloadInProgress.set(audience, bgPromise as Promise<void>)
     bgPromise.finally(() => this.downloadInProgress.delete(audience))
@@ -172,7 +173,7 @@ class ComarquageService {
     const zipPath = path.join(this.cacheDir, `${audienceSlug}-${Date.now()}.zip`)
     const audienceDir = this.audienceDir(audience)
 
-    console.log(`⬇️ [COMARQUAGE] Downloading ${zipUrl}`)
+    log.info(`⬇️ [COMARQUAGE] Downloading ${zipUrl}`)
     const startTime = Date.now()
 
     try {
@@ -184,7 +185,7 @@ class ComarquageService {
 
       const buffer = Buffer.from(await response.arrayBuffer())
       await fs.promises.writeFile(zipPath, buffer)
-      console.log(`✅ [COMARQUAGE] ZIP downloaded: ${(buffer.length / 1024 / 1024).toFixed(1)} MB`)
+      log.info(`✅ [COMARQUAGE] ZIP downloaded: ${(buffer.length / 1024 / 1024).toFixed(1)} MB`)
 
       // 2. Vider le répertoire audience (supprimer anciens XML)
       const existingFiles = await fs.promises.readdir(audienceDir).catch(() => [])
@@ -220,12 +221,12 @@ class ComarquageService {
       )
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1)
-      console.log(`✅ [COMARQUAGE] Cache refreshed for ${audience}: ${fileCount} files in ${elapsed}s`)
+      log.info(`✅ [COMARQUAGE] Cache refreshed for ${audience}: ${fileCount} files in ${elapsed}s`)
     } catch (error: any) {
       // Si cache stale existe, on le garde et on log un warning
       const metadata = this.readMetadata(audience)
       if (metadata) {
-        console.warn(`⚠️ [COMARQUAGE] Download failed for ${audience}, serving stale cache: ${error.message}`)
+        log.warn(`⚠️ [COMARQUAGE] Download failed for ${audience}, serving stale cache: ${error.message}`)
       } else {
         throw new Error(`[COMARQUAGE] Download failed for ${audience} and no cache available: ${error.message}`)
       }

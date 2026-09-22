@@ -6,6 +6,7 @@ import domainService from '../../../services/domain';
 import domainValidationService from '../../../services/domain-validation';
 import netlifyService from '../../../services/netlify';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
+import { log } from '../../../utils/logger';
 
 export default {
   /**
@@ -61,7 +62,7 @@ export default {
       };
 
     } catch (error: any) {
-      strapi.log.error('Configure domain error:', error);
+      log.error('Configure domain error:', error);
       ctx.badRequest(error.message || 'Erreur lors de la configuration du domaine');
     }
   },
@@ -110,7 +111,7 @@ export default {
       }
 
     } catch (error: any) {
-      strapi.log.error('Verify domain error:', error);
+      log.error('Verify domain error:', error);
       ctx.internalServerError('Erreur lors de la vérification du domaine');
     }
   },
@@ -155,7 +156,7 @@ export default {
       }
 
     } catch (error: any) {
-      strapi.log.error('Remove domain error:', error);
+      log.error('Remove domain error:', error);
       ctx.internalServerError('Erreur lors de la suppression du domaine');
     }
   },
@@ -180,7 +181,7 @@ export default {
       const siteId = site.documentId || site.id;
 
       // Récupérer les infos du site - utiliser findMany avec filtre documentId pour Strapi v5
-      const sites = await strapi.entityService.findMany('api::site.site', {
+      const sites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: siteId } as any
       });
       const siteData = sites && sites.length > 0 ? sites[0] : null;
@@ -198,7 +199,7 @@ export default {
         try {
           sslStatus = await domainService.getSSLStatus((siteData as any).netlify_site_id, (siteData as any).custom_domain);
         } catch (error) {
-          strapi.log.warn('Could not get SSL status:', error);
+          log.warn('Could not get SSL status:', error);
         }
       }
 
@@ -243,7 +244,7 @@ export default {
       };
 
     } catch (error: any) {
-      strapi.log.error('Get domain status error:', error);
+      log.error('Get domain status error:', error);
       ctx.internalServerError('Erreur lors de la récupération du statut du domaine');
     }
   },
@@ -291,7 +292,7 @@ export default {
       };
 
     } catch (error: any) {
-      strapi.log.error('Domain diagnostic error:', error);
+      log.error('Domain diagnostic error:', error);
       ctx.internalServerError('Erreur lors du diagnostic du domaine');
     }
   }

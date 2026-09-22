@@ -5,6 +5,7 @@
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
+import { log } from '../../../utils/logger';
 
 export default factories.createCoreController('api::deployment.deployment', ({ strapi }) => ({
   /**
@@ -26,15 +27,15 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
 
       const siteId = site.documentId || site.id;
       const userId = user.documentId || user.id;
-      const siteIdForRelation = site.id;
+      const siteIdForRelation = site.documentId;
 
-      console.log('🔍 Trigger deployment - siteId:', siteId, 'userId:', userId);
-      console.log('🔍 User site object:', site);
+      log.debug('🔍 Trigger deployment - siteId:', siteId, 'userId:', userId);
+      log.debug('🔍 User site object:', site);
 
       // Vérifier s'il n'y a pas déjà un déploiement en cours
-      const ongoingDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
+      const ongoingDeployments = await strapi.documents('api::deployment.deployment').findMany({
         filters: {
-          site: siteIdForRelation,
+          site: { documentId: siteIdForRelation },
           status: 'building'
         }
       });
@@ -43,35 +44,35 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.badRequest('Un déploiement est déjà en cours pour ce site');
       }
 
-      console.log('🔍 Attempting to fetch site with siteId:', siteId);
+      log.debug('🔍 Attempting to fetch site with siteId:', siteId);
 
       // Récupérer les infos du site - utiliser findMany avec filtre pour Strapi v5
-      const sites = await strapi.entityService.findMany('api::site.site', {
+      const sites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: siteId } as any
       });
 
       const siteData = sites && sites.length > 0 ? sites[0] : null;
 
-      console.log('🔍 Site found:', siteData ? 'YES' : 'NO');
+      log.debug('🔍 Site found:', siteData ? 'YES' : 'NO');
       if (siteData) {
-        console.log('🔍 Site details:', { id: (siteData as any).id, documentId: (siteData as any).documentId, name: (siteData as any).name, slug: (siteData as any).slug });
+        log.debug('🔍 Site details:', { id: (siteData as any).id, documentId: (siteData as any).documentId, name: (siteData as any).name, slug: (siteData as any).slug });
       }
 
       if (!siteData) {
-        console.log('❌ Site not found with siteId:', siteId);
+        log.info('❌ Site not found with siteId:', siteId);
         return ctx.notFound('Site non trouvé');
       }
 
       // Lancer le déploiement en arrière-plan
-      console.log('🚀 Launching async deployment process...');
+      log.info('🚀 Launching async deployment process...');
 
       deploymentService.buildAndDeploy(siteId, (siteData as any).slug, userId)
         .then(result => {
-          console.log('✅ Async deployment process completed:', result);
+          log.info('✅ Async deployment process completed:', result);
           if (!result.success) {
-            console.error('❌ Deployment failed:', result.error);
+            log.error('❌ Deployment failed:', result.error);
             // Créer une entrée d'erreur en base
-            strapi.entityService.create('api::deployment.deployment', {
+            strapi.documents('api::deployment.deployment').create({
               data: {
                 site: siteIdForRelation,
                 deployment_id: `error-${Date.now()}`,
@@ -82,17 +83,17 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
                 triggered_at: new Date(),
                 completed_at: new Date()
               }
-                          }).catch(err => console.error('Failed to create error deployment record:', err));
+                          }).catch(err => log.error('Failed to create error deployment record:', err));
           } else {
-            console.log('✅ Deployment successful, deployment ID:', result.deployment?.deployment_id);
+            log.info('✅ Deployment successful, deployment ID:', result.deployment?.deployment_id);
           }
         })
         .catch(error => {
-          console.error('💥 Unexpected deployment error:', error);
-          strapi.log.error('Unexpected deployment error:', error);
+          log.error('💥 Unexpected deployment error:', error);
+          log.error('Unexpected deployment error:', error);
         });
 
-      console.log('📤 Returning immediate response to client...');
+      log.info('📤 Returning immediate response to client...');
 
       // Retourner immédiatement avec statut "building"
       ctx.body = {
@@ -106,11 +107,11 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         }
       };
 
-      console.log('✅ Trigger response sent successfully');
+      log.info('✅ Trigger response sent successfully');
 
     } catch (error) {
-      console.error('💥 Trigger deployment error:', error);
-      strapi.log.error('Trigger deployment error:', error);
+      log.error('💥 Trigger deployment error:', error);
+      log.error('Trigger deployment error:', error);
       ctx.internalServerError('Erreur lors du lancement du déploiement');
     }
   },
@@ -123,7 +124,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
     try {
       const user = ctx.state.user;
 
-      console.log('user', user);
+      log.info('user', user);
 
       if (!user) {
         return ctx.unauthorized('Authentification requise');
@@ -134,12 +135,12 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteIdForRelation = site.id;
+      const siteIdForRelation = site.documentId;
 
       // 1. Récupérer le statut du dernier déploiement
-      const latestDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
+      const latestDeployments = await strapi.documents('api::deployment.deployment').findMany({
         filters: {
-          site: siteIdForRelation
+          site: { documentId: siteIdForRelation }
         },
         sort: { triggered_at: 'desc' },
         limit: 1,
@@ -150,7 +151,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         }
       });
 
-      console.log('🔍 Latest deployments:', latestDeployments);
+      log.debug('🔍 Latest deployments:', latestDeployments);
 
       const lastDeployment = latestDeployments.length > 0 ? latestDeployments[0] : null;
 
@@ -160,7 +161,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         try {
           currentStatus = await deploymentService.checkDeploymentStatus(lastDeployment.deployment_id);
         } catch (error) {
-          console.warn('Could not check deployment status:', error);
+          log.warn('Could not check deployment status:', error);
           currentStatus = lastDeployment;
         }
       } else {
@@ -173,9 +174,9 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       const start = (page - 1) * pageSize;
 
       // 3. Récupérer l'historique paginé
-      const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
+      const deployments = await strapi.documents('api::deployment.deployment').findMany({
         filters: {
-          site: siteIdForRelation
+          site: { documentId: siteIdForRelation }
         },
         sort: { triggered_at: 'desc' },
         start,
@@ -188,9 +189,9 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       });
 
       // 4. Compter le total
-      const total = await strapi.entityService.count('api::deployment.deployment', {
+      const total = await strapi.documents('api::deployment.deployment').count({
         filters: {
-          site: siteIdForRelation
+          site: { documentId: siteIdForRelation }
         }
       });
 
@@ -208,7 +209,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       };
 
     } catch (error) {
-      strapi.log.error('Get deployment status error:', error);
+      log.error('Get deployment status error:', error);
       ctx.internalServerError('Erreur lors de la récupération du statut');
     }
   },
@@ -231,13 +232,13 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.badRequest('Utilisateur sans site assigné');
       }
 
-      const siteIdForRelation = site.id;
+      const siteIdForRelation = site.documentId;
 
       // Vérifier que le déploiement appartient au site de l'utilisateur
-      const deployments = await strapi.entityService.findMany('api::deployment.deployment', {
+      const deployments = await strapi.documents('api::deployment.deployment').findMany({
         filters: {
           deployment_id: deploymentId,
-          site: siteIdForRelation
+          site: { documentId: siteIdForRelation }
         },
         populate: {
           site: {
@@ -261,7 +262,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
           const updatedDeployment = await deploymentService.checkDeploymentStatus(deploymentId);
           ctx.body = { data: updatedDeployment };
         } catch (error) {
-          strapi.log.error('Error checking deployment status:', error);
+          log.error('Error checking deployment status:', error);
           ctx.body = { data: deployment };
         }
       } else {
@@ -269,7 +270,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       }
 
     } catch (error) {
-      strapi.log.error('Check deployment error:', error);
+      log.error('Check deployment error:', error);
       ctx.internalServerError('Erreur lors de la vérification du déploiement');
     }
   },
@@ -316,7 +317,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       // 3. Déploiements récents
       let recentDeployments = [];
       if (siteId) {
-        recentDeployments = await strapi.entityService.findMany('api::deployment.deployment', {
+        recentDeployments = await strapi.documents('api::deployment.deployment').findMany({
           filters: { site: siteId },
           sort: { triggered_at: 'desc' },
           limit: 5,
@@ -331,7 +332,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       // 4. Info du site
       let siteInfo = null;
       if (siteId) {
-        const sites = await strapi.entityService.findMany('api::site.site', {
+        const sites = await strapi.documents('api::site.site').findMany({
           filters: { documentId: siteId } as any
         });
         siteInfo = sites && sites.length > 0 ? {
@@ -362,7 +363,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       };
 
     } catch (error) {
-      console.error('Debug endpoint error:', error);
+      log.error('Debug endpoint error:', error);
       ctx.internalServerError('Erreur lors de la récupération des informations de debug');
     }
   }

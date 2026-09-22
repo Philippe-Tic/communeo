@@ -3,6 +3,7 @@ import autoDeployService from './services/auto-deploy';
 import { blocksValidationMiddleware } from './validation/blocks';
 import { siteValidationMiddleware } from './validation/site';
 import { slugsMiddleware } from './validation/slugs';
+import { log } from './utils/logger';
 
 export default {
   /**
@@ -43,7 +44,7 @@ export default {
           return next();
         }
         try {
-          const entries: any[] = await strapi.entityService.findMany(ctx.uid, {
+          const entries: any[] = await strapi.documents(ctx.uid).findMany({
             filters: { documentId: ctx.params.documentId } as any,
             populate: ['site'],
             limit: 1,
@@ -62,7 +63,7 @@ export default {
           siteDocumentId = ctx.params?.documentId || result?.documentId || null;
         } else if (result?.documentId) {
           try {
-            const entries: any[] = await strapi.entityService.findMany(ctx.uid, {
+            const entries: any[] = await strapi.documents(ctx.uid).findMany({
               filters: { documentId: result.documentId } as any,
               populate: ['site'],
               limit: 1,
@@ -74,7 +75,7 @@ export default {
       }
 
       if (siteDocumentId) {
-        console.log(`📝 [AUTO-DEPLOY] Content changed (${ctx.action} on ${ctx.uid})`);
+        log.info(`📝 [AUTO-DEPLOY] Content changed (${ctx.action} on ${ctx.uid})`);
         autoDeployService.scheduleDeployIfEnabled(siteDocumentId);
       }
 

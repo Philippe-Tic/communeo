@@ -12,6 +12,7 @@ import {
   escapeHtml,
   resolveInvitationToken,
 } from '../../../utils/security';
+import { log } from '../../../utils/logger';
 
 const ALLOWED_ROLES = ['super_admin', 'admin'];
 
@@ -161,7 +162,7 @@ export default {
     try {
       await sendPasswordResetEmail(currentUser.email, currentUser.first_name, newToken, currentUser.site?.name || 'Communeo');
     } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError);
+      log.error('Failed to send password reset email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
     }
 
@@ -257,7 +258,7 @@ export default {
 
     if (isSuperAdmin && data.site) {
       // Super admin specifies which site to assign the user to
-      const targetSites = await strapi.entityService.findMany('api::site.site', {
+      const targetSites = await strapi.documents('api::site.site').findMany({
         filters: { documentId: { $eq: data.site } } as any,
       });
       if (!targetSites || targetSites.length === 0) {
@@ -294,7 +295,7 @@ export default {
         populate: ['site'],
       });
     } catch (error) {
-      console.error('Failed to create user:', error);
+      log.error('Failed to create user:', error);
       ctx.throw(400, error.message || 'Failed to create user');
     }
 
@@ -302,7 +303,7 @@ export default {
     try {
       await sendInvitationEmail(data.email, data.first_name, invitationToken, targetSiteName);
     } catch (emailError) {
-      console.error('Failed to send invitation email:', emailError);
+      log.error('Failed to send invitation email:', emailError);
     }
 
     const { password, resetPasswordToken, confirmationToken, ...sanitized } = newUser;
@@ -430,7 +431,7 @@ export default {
     try {
       await sendPasswordResetEmail(user.email, user.first_name, newToken, siteName);
     } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError);
+      log.error('Failed to send password reset email:', emailError);
     }
 
     ctx.body = { ok: true };
@@ -525,7 +526,7 @@ export default {
     try {
       await sendInvitationEmail(user.email, user.first_name, newToken, user.site?.name || 'Communeo');
     } catch (emailError) {
-      console.error('Failed to resend invitation email:', emailError);
+      log.error('Failed to resend invitation email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
     }
 
@@ -568,7 +569,7 @@ export default {
     try {
       await sendPasswordResetEmail(user.email, user.first_name, newToken, user.site?.name || 'Communeo');
     } catch (emailError) {
-      console.error('Failed to send password reset email:', emailError);
+      log.error('Failed to send password reset email:', emailError);
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
     }
 

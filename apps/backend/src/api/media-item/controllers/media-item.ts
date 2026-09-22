@@ -1,4 +1,5 @@
 import { factories } from '@strapi/strapi';
+import { log } from '../../../utils/logger';
 
 export default factories.createCoreController('api::media-item.media-item' as any, ({ strapi }) => ({
   /**
@@ -19,11 +20,7 @@ export default factories.createCoreController('api::media-item.media-item' as an
     // Ensure we have the user's site
     let userSite = user.site;
     if (!userSite) {
-      const completeUser = await strapi.entityService.findOne(
-        'plugin::users-permissions.user',
-        user.id,
-        { populate: ['site'] }
-      );
+      const completeUser = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: user.id }, populate: ['site'] });
       userSite = (completeUser as any)?.site;
     }
 
@@ -60,7 +57,7 @@ export default factories.createCoreController('api::media-item.media-item' as an
       }
 
       // Create media-item linked to the user's site
-      const mediaItem = await strapi.entityService.create('api::media-item.media-item' as any, {
+      const mediaItem = await strapi.documents('api::media-item.media-item' as any).create({
         data: {
           name: name.trim(),
           alt_text: alt_text.trim(),
@@ -75,7 +72,7 @@ export default factories.createCoreController('api::media-item.media-item' as an
       ctx.status = 201;
       return { data: mediaItem };
     } catch (error) {
-      strapi.log.error('Media upload error:', error);
+      log.error('Media upload error:', error);
       return ctx.internalServerError('Erreur lors de l\'upload du média');
     }
   },

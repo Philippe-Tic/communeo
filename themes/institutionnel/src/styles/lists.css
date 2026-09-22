@@ -1,0 +1,387 @@
+/* Listes et pages de détail : actualités, agenda, documents, équipe, associations. */
+.in-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.in-count {
+  font-size: 1rem;
+}
+
+.in-empty {
+  padding: 1.25rem 1.5rem;
+  color: var(--in-muted);
+  background: var(--in-surface);
+  border: 1px dashed var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+/* Article à la une */
+.in-card-highlight {
+  border-width: 2px;
+}
+
+.in-card-highlight .in-card-image {
+  aspect-ratio: 16 / 9;
+}
+
+@media (min-width: 48rem) {
+  .in-card-highlight {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .in-card-highlight .in-card-image {
+    width: 45%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .in-card-highlight .in-card-body {
+    flex: 1;
+    padding: 1.5rem 1.75rem;
+  }
+
+  .in-card-highlight .in-card-title {
+    font-size: var(--in-h2);
+  }
+}
+
+/* Partage */
+.in-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  margin-top: var(--in-space-4);
+  padding-top: var(--in-space-2);
+  border-top: 1px solid var(--in-border);
+  font-size: 1.0625rem;
+}
+
+.in-share-label {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-weight: 600;
+}
+
+.in-share a,
+.in-share button {
+  display: inline-flex;
+  gap: 0.375rem;
+  align-items: center;
+  min-height: var(--in-target);
+  color: var(--in-primary);
+  background: transparent;
+  border: 0;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.in-share-copy {
+  display: none !important;
+}
+
+.in-js .in-share-copy {
+  display: inline-flex !important;
+}
+
+.in-related {
+  margin-top: var(--in-space-5);
+  padding-top: var(--in-space-3);
+  border-top: 1px solid var(--in-border);
+}
+
+.in-related h2 {
+  margin-bottom: var(--in-space-3);
+}
+
+/* Agenda */
+.in-month + .in-month {
+  margin-top: var(--in-space-4);
+}
+
+.in-month-title {
+  margin-bottom: var(--in-space-2);
+  font-size: var(--in-h3);
+  text-transform: capitalize;
+}
+
+/* Documents */
+.in-filter-form {
+  display: grid;
+  gap: var(--in-space-2);
+  padding: 1.25rem 1.5rem;
+  background: var(--in-surface);
+  border: 1px solid var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+.in-filter-form p {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+}
+
+.in-table-wrapper {
+  overflow-x: auto;
+}
+
+.in-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.0625rem;
+  background: var(--in-surface);
+}
+
+.in-table th,
+.in-table td {
+  padding: 0.75rem 0.875rem;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid var(--in-border);
+}
+
+.in-table thead th {
+  background: var(--in-primary-light);
+}
+
+.in-table tbody th {
+  font-weight: 600;
+}
+
+.in-table a {
+  display: inline-flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.in-table td:last-child a {
+  white-space: nowrap;
+}
+
+/* Les cartes des listes s'adaptent à leur contenu, sans grand vide sous les courtes */
+.in-grid-start {
+  align-items: start;
+}
+
+/* Sous 48 rem, chaque ligne devient une fiche : les en-têtes sont rappelés devant les valeurs */
+@media (max-width: 47.99rem) {
+  .in-table,
+  .in-table tbody,
+  .in-table tr,
+  .in-table th,
+  .in-table td {
+    display: block;
+  }
+
+  .in-table thead {
+    display: none;
+  }
+
+  .in-table tr {
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--in-border);
+    border-radius: var(--in-radius);
+  }
+
+  .in-table th,
+  .in-table td {
+    border: 0;
+    padding: 0.375rem 1rem;
+  }
+
+  .in-table tbody th {
+    order: -1;
+    padding-top: 0.875rem;
+    font-size: 1.125rem;
+  }
+
+  .in-table td:empty {
+    display: none;
+  }
+
+  .in-table td[data-label]::before {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--in-muted);
+    content: attr(data-label);
+  }
+
+  .in-table td:last-child {
+    padding-bottom: 0.875rem;
+  }
+}
+
+/* Équipe */
+.in-team {
+  display: grid;
+  gap: var(--in-space-2);
+  margin: var(--in-space-2) 0 var(--in-space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.in-team-card {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  background: var(--in-surface);
+  border: 1px solid var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+.in-team-card img {
+  flex: none;
+  width: 4.5rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: var(--in-radius);
+}
+
+.in-team-card .in-initials,
+.in-team-list .in-initials {
+  flex: none;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+}
+
+.in-team-role {
+  font-weight: 600;
+}
+
+.in-team-lead .in-team-card img {
+  width: 9rem;
+  height: 12rem;
+}
+
+.in-team-list {
+  display: grid;
+  margin: var(--in-space-2) 0 var(--in-space-4);
+  padding: 0;
+  list-style: none;
+  background: var(--in-surface);
+  border: 1px solid var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+.in-team-list li + li {
+  border-top: 1px solid var(--in-border);
+}
+
+.in-team-list summary {
+  display: flex;
+  gap: 0.875rem;
+  align-items: center;
+  min-height: 3.75rem;
+  padding: 0.625rem 1.25rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.in-team-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.in-team-list summary img,
+.in-team-list summary .in-initials {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 1rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.in-team-identity {
+  flex: 1;
+}
+
+.in-team-list details[open] > summary {
+  background: var(--in-primary-light);
+}
+
+.in-team-list summary svg {
+  flex: none;
+  color: var(--in-primary);
+}
+
+.in-team-details {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem 1.25rem 5.125rem;
+  border-top: 1px solid var(--in-border);
+}
+
+/* Associations */
+.in-asso-cards {
+  display: grid;
+  gap: var(--in-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.in-asso-logo {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
+
+.in-asso-cards .in-initials {
+  width: 4rem;
+  height: 4rem;
+}
+
+.in-asso-head {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+/* Fiches en deux colonnes (dates, contacts) */
+.in-facts {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.in-facts dt {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--in-muted);
+  text-transform: uppercase;
+}
+
+.in-facts dd {
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .in-filter-form {
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--in-space-2) 1.25rem;
+    align-items: end;
+  }
+
+  .in-team:not(.in-team-lead) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .in-asso-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .in-asso-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

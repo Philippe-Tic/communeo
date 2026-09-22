@@ -1,17 +1,38 @@
 ---
+/** Annuaire des associations : filtres par catégorie, cartes, proposition d'ajout. */
 import type { AssociationCardVM } from '@communeo/core';
-import type { FilterOption } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+import type { FilterOption, PageContext } from '@communeo/theme-contract';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import Filters from '../parts/Filters.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; associations: AssociationCardVM[]; categories: FilterOption[]; proposeHref: string }
 const { ctx, associations, categories, proposeHref } = Astro.props;
 ---
 <Layout ctx={ctx}>
-  <p><a href={proposeHref}>Proposer une association</a></p>
-  <Filters label="Filtrer par catégorie" options={categories} allHref="/associations" />
+  <div class="in-list-head">
+    <Filters label="Filtrer par catégorie" options={categories} allHref="/associations" />
+    <p class="in-meta in-count" role="status">{associations.length} association{associations.length > 1 ? 's' : ''}</p>
+  </div>
+
   {associations.length ? (
-    <ul>{associations.map((a) => <li><h2><a href={a.href}>{a.name}</a></h2><p>{a.category.label}</p>{a.summary && <p>{a.summary}</p>}</li>)}</ul>
-  ) : <p>Aucune association référencée pour le moment.</p>}
+    <ul class="in-asso-cards">
+      {associations.map((association) => (
+        <li class="in-card">
+          <div class="in-card-body">
+            {association.logo
+              ? <img class="in-asso-logo" src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} loading="lazy" />
+              : <span class="in-initials" aria-hidden="true">{association.name.slice(0, 2).toUpperCase()}</span>}
+            <p class="in-card-meta"><span class="in-tag">{association.category.label}</span></p>
+            <h2 class="in-card-title"><a href={association.href}>{association.name}</a></h2>
+            {association.summary && <p class="in-card-summary">{association.summary}</p>}
+          </div>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="in-empty">Aucune association référencée pour le moment.</p>
+  )}
+
+  <p><a href={proposeHref} class="in-button in-button-secondary">Proposer une association<ArrowRight size={20} aria-hidden="true" /></a></p>
 </Layout>

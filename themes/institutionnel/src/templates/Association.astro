@@ -1,4 +1,5 @@
 ---
+/** Association : présentation et coordonnées. */
 import type { AssociationVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
 import Layout from '../parts/Layout.astro';
@@ -6,15 +7,31 @@ import Layout from '../parts/Layout.astro';
 interface Props { ctx: PageContext; association: AssociationVM }
 const { ctx, association } = Astro.props;
 ---
-<Layout ctx={ctx}>
-  <p class="in-meta">{association.category.label}</p>
-  {association.logo && <img src={association.logo.src} alt={association.logo.alt} width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} />}
-  {association.description && <p>{association.description}</p>}
-  <dl class="in-facts">
-    {association.contact.name && <><dt>Contact</dt><dd>{association.contact.name}</dd></>}
-    {association.contact.email && <><dt>E-mail</dt><dd><a href={association.contact.email.href}>{association.contact.email.label}</a></dd></>}
-    {association.contact.phone && <><dt>Téléphone</dt><dd><a href={association.contact.phone.href}>{association.contact.phone.label}</a></dd></>}
-    {association.address && <><dt>Adresse</dt><dd>{association.address}</dd></>}
-  </dl>
-  {association.website && <p><a href={association.website.href} target="_blank" rel="noopener noreferrer">{association.website.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></p>}
+<Layout ctx={ctx} heading={false}>
+  <article class="in-article">
+    <p class="in-card-meta"><span class="in-tag">{association.category.label}</span></p>
+    <div class="in-asso-head">
+      {association.logo && (
+        <img class="in-asso-logo" src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} />
+      )}
+      <h1>{association.name}</h1>
+    </div>
+    {association.description && <p class="in-lead">{association.description}</p>}
+
+    <div class="in-box">
+      <h2 class="in-box-title">Contact</h2>
+      <dl class="in-facts">
+        {association.contact.name && <div><dt>Interlocuteur</dt><dd>{association.contact.name}</dd></div>}
+        {association.contact.email && <div><dt>E-mail</dt><dd><a href={association.contact.email.href}>{association.contact.email.label}</a></dd></div>}
+        {association.contact.phone && <div><dt>Téléphone</dt><dd><a href={association.contact.phone.href}>{association.contact.phone.label}</a></dd></div>}
+        {association.address && <div><dt>Adresse</dt><dd><span class="in-address">{association.address}</span></dd></div>}
+        {association.website && (
+          <div>
+            <dt>Site internet</dt>
+            <dd><a href={association.website.href} target="_blank" rel="noopener noreferrer">{association.website.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></dd>
+          </div>
+        )}
+      </dl>
+    </div>
+  </article>
 </Layout>

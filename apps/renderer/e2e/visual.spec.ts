@@ -24,6 +24,7 @@ const KEY_PAGES = [
 test.skip(!process.env.VISUAL, 'Captures visuelles : VISUAL=1 (conteneur Playwright)');
 
 // Un thème sans captures de référence (nouveau thème) n'est comparé qu'une fois ses captures générées
+// eslint-disable-next-line no-empty-pattern -- signature imposée par Playwright (fixtures, testInfo)
 test.beforeEach(({}, testInfo) => {
   const baselines = new URL(`__screenshots__/${testInfo.project.name}/`, import.meta.url);
   test.skip(testInfo.config.updateSnapshots !== 'all' && !existsSync(baselines), `Pas encore de captures pour ${testInfo.project.name}`);

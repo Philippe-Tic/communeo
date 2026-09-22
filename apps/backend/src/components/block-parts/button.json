@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_block_parts_buttons",
+  "info": {
+    "displayName": "Bouton",
+    "icon": "cursor",
+    "description": "Un bouton du bloc Bouton / lien"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 60
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "style": {
+      "type": "enumeration",
+      "enum": [
+        "primary",
+        "secondary"
+      ],
+      "default": "primary"
+    }
+  }
+}

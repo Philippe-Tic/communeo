@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_blocks_faqs",
+  "info": {
+    "displayName": "Questions / réponses",
+    "icon": "question",
+    "description": "Questions fréquentes en accordéon"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "block-parts.faq-item",
+      "min": 1,
+      "max": 50
+    }
+  }
+}

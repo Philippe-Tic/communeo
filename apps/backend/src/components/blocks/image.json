@@ -1,0 +1,31 @@
+{
+  "collectionName": "components_blocks_images",
+  "info": {
+    "displayName": "Image",
+    "icon": "picture",
+    "description": "Une image avec légende"
+  },
+  "options": {},
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "caption": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "width": {
+      "type": "enumeration",
+      "enum": [
+        "normal",
+        "full"
+      ],
+      "default": "normal"
+    }
+  }
+}

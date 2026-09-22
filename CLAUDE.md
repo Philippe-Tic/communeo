@@ -72,12 +72,15 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 
 | Type | API ID | Key fields |
 |------|--------|------------|
-| Site | `api::site.site` | name, slug, theme, colors, netlify_site_id, plan_type |
-| Page | `api::page.page` | title, slug, content (richtext), status, template, menu_order, show_in_menu |
-| Article | `api::article.article` | title, slug, content, status, publication_date, featured, category |
-| Event | `api::evenement.evenement` | title, description, start_date, end_date, location |
-| Domain | `api::domain.domain` | Domain verification and SSL |
-| Deployment | `api::deployment.deployment` | Build status tracking (building/success/failed) |
+| Site | `api::site.site` | name, slug, logo, contact, legal components, homepage, navigation_config |
+| Page | `api::page.page` | title, slug, **blocks**, featured_image, show_in_menu, scheduled_at |
+| Article | `api::article.article` | title, slug, summary, **blocks**, image, category, featured, scheduled_at |
+| Event | `api::evenement.evenement` | title, **blocks**, start_date, end_date, location, registration, scheduled_at |
+| Official document | `api::official-document.official-document` | title, document_type, dates, file, scheduled_at |
+| Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain, build status |
+
+- **Draft & Publish** is enabled on page, article, event and official document. Writes from commune users default to the draft (`?status=published` to publish); `scheduled_at` is published by a cron task every minute (`src/services/scheduled-publication.ts`).
+- **Blocks**: `blocks` is a dynamic zone restricted to the 9 `blocks.*` components (text, image, buttons, callout, documents, gallery, faq, contact, video). Rich text is restricted TipTap JSON. Validation lives in `@communeo/core` (`validateBlocks`) and runs in `apps/backend/src/validation/blocks.ts`: structure on every save, completeness (required fields, minimums, image alt text) on publish.
 
 ## Tech Stack Summary
 

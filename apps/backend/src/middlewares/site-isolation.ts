@@ -28,7 +28,6 @@ const SITE_SCOPED_CONTENT_TYPES: Record<string, string> = {
   'associations': 'api::association.association',
   'alertes': 'api::alerte.alerte',
   'media-items': 'api::media-item.media-item',
-  'content-blocks': 'api::content-block.content-block',
   'waste-schedules': 'api::waste-schedule.waste-schedule',
   'newsletter-subscribers': 'api::newsletter-subscriber.newsletter-subscriber',
   'school-menus': 'api::school-menu.school-menu',

@@ -55,6 +55,15 @@ export interface Role extends StrapiDocument {
 
 // --- Énumérations ---
 
+export const blockPartsButtonStyleValues = ['primary', 'secondary'] as const;
+export type BlockPartsButtonStyle = (typeof blockPartsButtonStyleValues)[number];
+
+export const blocksCalloutVariantValues = ['info', 'warning', 'important', 'tip'] as const;
+export type BlocksCalloutVariant = (typeof blocksCalloutVariantValues)[number];
+
+export const blocksImageWidthValues = ['normal', 'full'] as const;
+export type BlocksImageWidth = (typeof blocksImageWidthValues)[number];
+
 export const homepageKeyFigureIconValues = ['users', 'map', 'building', 'calendar', 'heart', 'book', 'globe', 'shield', 'tree', 'star'] as const;
 export type HomepageKeyFigureIcon = (typeof homepageKeyFigureIconValues)[number];
 
@@ -94,9 +103,6 @@ export type ContactSubmissionCategory = (typeof contactSubmissionCategoryValues)
 export const contactSubmissionStatusValues = ['received', 'in_progress', 'resolved', 'closed'] as const;
 export type ContactSubmissionStatus = (typeof contactSubmissionStatusValues)[number];
 
-export const contentBlockCategoryValues = ['header', 'footer', 'sidebar', 'content', 'cta', 'other'] as const;
-export type ContentBlockCategory = (typeof contentBlockCategoryValues)[number];
-
 export const deploymentStatusValues = ['building', 'ready', 'error'] as const;
 export type DeploymentStatus = (typeof deploymentStatusValues)[number];
 
@@ -105,9 +111,6 @@ export type EvenementCategory = (typeof evenementCategoryValues)[number];
 
 export const officialDocumentDocumentTypeValues = ['pv-conseil-municipal', 'deliberation', 'arrete', 'plu', 'scot', 'carte-communale', 'budget-primitif', 'compte-administratif', 'rapport-orientations-budgetaires', 'autre'] as const;
 export type OfficialDocumentDocumentType = (typeof officialDocumentDocumentTypeValues)[number];
-
-export const pageTemplateValues = ['default', 'about', 'services'] as const;
-export type PageTemplate = (typeof pageTemplateValues)[number];
 
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
@@ -137,6 +140,78 @@ export const userMunicipalityRoleValues = ['super_admin', 'admin', 'editor'] as 
 export type UserMunicipalityRole = (typeof userMunicipalityRoleValues)[number];
 
 // --- Composants ---
+
+/** Composant `block-parts.button` */
+export interface BlockPartsButton extends StrapiComponent {
+  label: string;
+  url: string;
+  style: BlockPartsButtonStyle | null;
+}
+
+/** Composant `block-parts.faq-item` */
+export interface BlockPartsFaqItem extends StrapiComponent {
+  question: string;
+  answer: JsonValue;
+}
+
+/** Composant `blocks.buttons` */
+export interface BlocksButtons extends StrapiComponent {
+  buttons?: BlockPartsButton[];
+}
+
+/** Composant `blocks.callout` */
+export interface BlocksCallout extends StrapiComponent {
+  variant: BlocksCalloutVariant;
+  title: string | null;
+  body: JsonValue;
+}
+
+/** Composant `blocks.contact` */
+export interface BlocksContact extends StrapiComponent {
+  name: string;
+  address: string | null;
+  phone: string | null;
+  email: string | null;
+  hours: string | null;
+  show_map: boolean | null;
+}
+
+/** Composant `blocks.documents` */
+export interface BlocksDocuments extends StrapiComponent {
+  title: string | null;
+  files?: Media[];
+}
+
+/** Composant `blocks.faq` */
+export interface BlocksFaq extends StrapiComponent {
+  title: string | null;
+  items?: BlockPartsFaqItem[];
+}
+
+/** Composant `blocks.gallery` */
+export interface BlocksGallery extends StrapiComponent {
+  title: string | null;
+  images?: Media[];
+}
+
+/** Composant `blocks.image` */
+export interface BlocksImage extends StrapiComponent {
+  image?: Media | null;
+  caption: string | null;
+  width: BlocksImageWidth | null;
+}
+
+/** Composant `blocks.text` */
+export interface BlocksText extends StrapiComponent {
+  body: JsonValue;
+}
+
+/** Composant `blocks.video` */
+export interface BlocksVideo extends StrapiComponent {
+  url: string;
+  title: string;
+  transcript: string | null;
+}
 
 /** Composant `homepage.homepage-config` */
 export interface HomepageHomepageConfig extends StrapiComponent {
@@ -274,10 +349,10 @@ export interface Alerte extends StrapiDocument {
 export interface Article extends StrapiPublishableDocument {
   title: string;
   slug: string;
-  content: string;
   image?: Media | null;
   publication_date: string | null;
   summary: string | null;
+  blocks?: Array<DynamicZoneEntry<'blocks.text', BlocksText> | DynamicZoneEntry<'blocks.image', BlocksImage> | DynamicZoneEntry<'blocks.buttons', BlocksButtons> | DynamicZoneEntry<'blocks.callout', BlocksCallout> | DynamicZoneEntry<'blocks.documents', BlocksDocuments> | DynamicZoneEntry<'blocks.gallery', BlocksGallery> | DynamicZoneEntry<'blocks.faq', BlocksFaq> | DynamicZoneEntry<'blocks.contact', BlocksContact> | DynamicZoneEntry<'blocks.video', BlocksVideo>>;
   category: ArticleCategory;
   author: string | null;
   featured: boolean | null;
@@ -325,14 +400,6 @@ export interface ContactSubmission extends StrapiDocument {
   site?: Site | null;
 }
 
-/** Content-type `api::content-block.content-block` — Blocs de contenu réutilisables dans l'éditeur */
-export interface ContentBlock extends StrapiDocument {
-  name: string;
-  content: string;
-  category: ContentBlockCategory;
-  site?: Site | null;
-}
-
 /** Content-type `api::deployment.deployment` — Track deployments to Netlify */
 export interface Deployment extends StrapiDocument {
   site?: Site | null;
@@ -349,7 +416,7 @@ export interface Deployment extends StrapiDocument {
 /** Content-type `api::evenement.evenement` — Municipal events and activities */
 export interface Evenement extends StrapiPublishableDocument {
   title: string;
-  description: string;
+  blocks?: Array<DynamicZoneEntry<'blocks.text', BlocksText> | DynamicZoneEntry<'blocks.image', BlocksImage> | DynamicZoneEntry<'blocks.buttons', BlocksButtons> | DynamicZoneEntry<'blocks.callout', BlocksCallout> | DynamicZoneEntry<'blocks.documents', BlocksDocuments> | DynamicZoneEntry<'blocks.gallery', BlocksGallery> | DynamicZoneEntry<'blocks.faq', BlocksFaq> | DynamicZoneEntry<'blocks.contact', BlocksContact> | DynamicZoneEntry<'blocks.video', BlocksVideo>>;
   start_date: string;
   end_date: string | null;
   location: string | null;
@@ -410,12 +477,11 @@ export interface OfficialDocument extends StrapiPublishableDocument {
 export interface Page extends StrapiPublishableDocument {
   title: string;
   slug: string;
-  content: string;
+  blocks?: Array<DynamicZoneEntry<'blocks.text', BlocksText> | DynamicZoneEntry<'blocks.image', BlocksImage> | DynamicZoneEntry<'blocks.buttons', BlocksButtons> | DynamicZoneEntry<'blocks.callout', BlocksCallout> | DynamicZoneEntry<'blocks.documents', BlocksDocuments> | DynamicZoneEntry<'blocks.gallery', BlocksGallery> | DynamicZoneEntry<'blocks.faq', BlocksFaq> | DynamicZoneEntry<'blocks.contact', BlocksContact> | DynamicZoneEntry<'blocks.video', BlocksVideo>>;
   meta_description: string | null;
   featured_image?: Media | null;
   menu_order: number | null;
   show_in_menu: boolean | null;
-  template: PageTemplate | null;
   scheduled_at: string | null;
   seo_keywords: string | null;
   site?: Site | null;
@@ -524,7 +590,6 @@ export const pluralNames = {
   'api::article.article': 'articles',
   'api::association.association': 'associations',
   'api::contact-submission.contact-submission': 'contact-submissions',
-  'api::content-block.content-block': 'content-blocks',
   'api::deployment.deployment': 'deployments',
   'api::evenement.evenement': 'evenements',
   'api::media-item.media-item': 'media-items',
@@ -544,7 +609,6 @@ export interface ContentTypes {
   'api::article.article': Article;
   'api::association.association': Association;
   'api::contact-submission.contact-submission': ContactSubmission;
-  'api::content-block.content-block': ContentBlock;
   'api::deployment.deployment': Deployment;
   'api::evenement.evenement': Evenement;
   'api::media-item.media-item': MediaItem;
@@ -559,6 +623,17 @@ export interface ContentTypes {
 }
 
 export interface Components {
+  'block-parts.button': BlockPartsButton;
+  'block-parts.faq-item': BlockPartsFaqItem;
+  'blocks.buttons': BlocksButtons;
+  'blocks.callout': BlocksCallout;
+  'blocks.contact': BlocksContact;
+  'blocks.documents': BlocksDocuments;
+  'blocks.faq': BlocksFaq;
+  'blocks.gallery': BlocksGallery;
+  'blocks.image': BlocksImage;
+  'blocks.text': BlocksText;
+  'blocks.video': BlocksVideo;
   'homepage.homepage-config': HomepageHomepageConfig;
   'homepage.key-figure': HomepageKeyFigure;
   'homepage.partner': HomepagePartner;

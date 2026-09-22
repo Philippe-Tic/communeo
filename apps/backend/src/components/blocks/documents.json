@@ -1,0 +1,24 @@
+{
+  "collectionName": "components_blocks_documentss",
+  "info": {
+    "displayName": "Documents à télécharger",
+    "icon": "file",
+    "description": "Liste de fichiers à télécharger"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "files": {
+      "type": "media",
+      "multiple": true,
+      "required": true,
+      "allowedTypes": [
+        "files",
+        "images"
+      ]
+    }
+  }
+}

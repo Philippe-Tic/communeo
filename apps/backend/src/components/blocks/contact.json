@@ -1,0 +1,35 @@
+{
+  "collectionName": "components_blocks_contacts",
+  "info": {
+    "displayName": "Contact / lieu",
+    "icon": "pinMap",
+    "description": "Coordonnées d'un lieu ou d'un service"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 120
+    },
+    "address": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 30
+    },
+    "email": {
+      "type": "email"
+    },
+    "hours": {
+      "type": "text",
+      "maxLength": 500
+    },
+    "show_map": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

@@ -1,3 +1,4 @@
+export { demarcheThemes } from './demarches';
 /**
  * Commune de démonstration pour développer et tester les thèmes sans Strapi.
  *

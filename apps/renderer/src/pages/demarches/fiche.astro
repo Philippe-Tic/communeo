@@ -1,0 +1,46 @@
+---
+/**
+ * Fiche de démarche. Le corpus de la DILA compte des milliers de fiches : elles ne sont pas
+ * construites page par page pour chaque commune, mais chargées depuis l'API publique du backend.
+ * Sans JavaScript, la page renvoie vers service-public.fr.
+ */
+import theme from 'virtual:communeo/theme';
+import Document from '../../layouts/Document.astro';
+import { getSource, simplePage } from '../../lib/content';
+import { ficheEndpoint } from '../../lib/demarches';
+
+const source = getSource();
+const ctx = await simplePage(source, {
+  path: '/demarches/fiche',
+  title: 'Fiche pratique',
+  description: 'Fiche pratique de service-public.fr',
+  noindex: true,
+  trail: [
+    { label: 'Démarches', href: '/demarches' },
+    { label: 'Fiche pratique', href: '/demarches/fiche' },
+  ],
+});
+const { Frame } = theme.templates;
+---
+<Document ctx={ctx}>
+  <Frame ctx={ctx}>
+    <div data-cn-demarche data-endpoint={ficheEndpoint()}>
+      <p data-cn-demarche-status role="status">Chargement de la fiche…</p>
+    </div>
+
+    <div class="cn-no-js-only">
+      <p>L'affichage de cette fiche a besoin de JavaScript.</p>
+      <p>
+        Vous pouvez la consulter sur
+        <a href="https://www.service-public.fr" target="_blank" rel="noopener noreferrer">service-public.fr<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>,
+        revenir à <a href="/demarches">la liste des démarches</a> ou <a href="/contact">contacter la mairie</a>.
+      </p>
+    </div>
+  </Frame>
+</Document>
+
+<script>
+  import { initDemarche } from '../../lib/demarche-page';
+
+  void initDemarche();
+</script>

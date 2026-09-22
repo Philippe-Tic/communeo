@@ -172,6 +172,10 @@ export default (config: any, { strapi }: { strapi: any }) => {
           const data = ctx.request.body?.data;
           if (data && typeof data === 'object') {
             for (const field of PROTECTED_SITE_FIELDS) delete data[field];
+            // Le choix du thème est réservé aux administrateurs (écran Apparence)
+            if ('theme' in data && !['admin', 'super_admin'].includes(user.municipality_role)) {
+              return ctx.forbidden('Seul un administrateur peut changer le thème du site');
+            }
           }
         }
         return next();

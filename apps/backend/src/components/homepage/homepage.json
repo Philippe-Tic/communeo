@@ -1,0 +1,90 @@
+{
+  "collectionName": "components_homepage_homepage",
+  "info": {
+    "displayName": "Page d'accueil",
+    "icon": "house",
+    "description": "Ce que la commune veut mettre en avant. L'ordre et la mise en page sont décidés par le thème."
+  },
+  "options": {},
+  "attributes": {
+    "hero": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.hero"
+    },
+    "quick_links": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.quick-links"
+    },
+    "featured_news": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.listing"
+    },
+    "agenda": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.listing"
+    },
+    "mayor_word": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.mayor-word"
+    },
+    "key_figures": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.key-figures"
+    },
+    "practical_info": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "weather": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "waste_collection": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "disruptions": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "canteen": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "associations": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.listing"
+    },
+    "partners": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.partners"
+    },
+    "newsletter": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.toggle"
+    },
+    "free_content": {
+      "type": "component",
+      "repeatable": false,
+      "component": "home-sections.free-content"
+    },
+    "meta_description": {
+      "type": "string",
+      "maxLength": 160
+    }
+  }
+}

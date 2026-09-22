@@ -115,6 +115,9 @@ export type OfficialDocumentDocumentType = (typeof officialDocumentDocumentTypeV
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
 
+export const siteThemeValues = ['institutionnel', 'moderne', 'journal', 'bourg'] as const;
+export type SiteTheme = (typeof siteThemeValues)[number];
+
 export const siteDomainStatusValues = ['pending', 'verified', 'error'] as const;
 export type SiteDomainStatus = (typeof siteDomainStatusValues)[number];
 
@@ -213,37 +216,82 @@ export interface BlocksVideo extends StrapiComponent {
   transcript: string | null;
 }
 
-/** Composant `homepage.homepage-config` */
-export interface HomepageHomepageConfig extends StrapiComponent {
-  hero_title: string | null;
-  hero_subtitle: string | null;
-  hero_image?: Media | null;
-  hero_cta_primary_label: string | null;
-  hero_cta_primary_url: string | null;
-  hero_cta_secondary_label: string | null;
-  hero_cta_secondary_url: string | null;
-  content: string | null;
+/** Composant `home-sections.free-content` */
+export interface HomeSectionsFreeContent extends StrapiComponent {
+  enabled: boolean;
+  title: string | null;
+  body: JsonValue | null;
+}
+
+/** Composant `home-sections.hero` */
+export interface HomeSectionsHero extends StrapiComponent {
+  enabled: boolean;
+  title: string | null;
+  subtitle: string | null;
+  image?: Media | null;
+  primary_label: string | null;
+  primary_url: string | null;
+  secondary_label: string | null;
+  secondary_url: string | null;
+}
+
+/** Composant `home-sections.key-figures` */
+export interface HomeSectionsKeyFigures extends StrapiComponent {
+  enabled: boolean;
+  items?: HomepageKeyFigure[];
+}
+
+/** Composant `home-sections.listing` */
+export interface HomeSectionsListing extends StrapiComponent {
+  enabled: boolean;
+  count: number | null;
+}
+
+/** Composant `home-sections.mayor-word` */
+export interface HomeSectionsMayorWord extends StrapiComponent {
+  enabled: boolean;
+  title: string | null;
+  body: JsonValue | null;
+  photo?: Media | null;
+  signature_name: string | null;
+  signature_role: string | null;
+}
+
+/** Composant `home-sections.partners` */
+export interface HomeSectionsPartners extends StrapiComponent {
+  enabled: boolean;
+  items?: HomepagePartner[];
+}
+
+/** Composant `home-sections.quick-links` */
+export interface HomeSectionsQuickLinks extends StrapiComponent {
+  enabled: boolean;
+  items?: HomepageQuickLink[];
+}
+
+/** Composant `home-sections.toggle` */
+export interface HomeSectionsToggle extends StrapiComponent {
+  enabled: boolean;
+}
+
+/** Composant `homepage.homepage` */
+export interface HomepageHomepage extends StrapiComponent {
+  hero?: HomeSectionsHero | null;
+  quick_links?: HomeSectionsQuickLinks | null;
+  featured_news?: HomeSectionsListing | null;
+  agenda?: HomeSectionsListing | null;
+  mayor_word?: HomeSectionsMayorWord | null;
+  key_figures?: HomeSectionsKeyFigures | null;
+  practical_info?: HomeSectionsToggle | null;
+  weather?: HomeSectionsToggle | null;
+  waste_collection?: HomeSectionsToggle | null;
+  disruptions?: HomeSectionsToggle | null;
+  canteen?: HomeSectionsToggle | null;
+  associations?: HomeSectionsListing | null;
+  partners?: HomeSectionsPartners | null;
+  newsletter?: HomeSectionsToggle | null;
+  free_content?: HomeSectionsFreeContent | null;
   meta_description: string | null;
-  show_quick_links: boolean | null;
-  quick_links?: HomepageQuickLink[];
-  show_mayor_word: boolean | null;
-  mayor_word_title: string | null;
-  mayor_word_content: string | null;
-  show_articles: boolean | null;
-  articles_count: number | null;
-  show_events: boolean | null;
-  events_count: number | null;
-  show_key_figures: boolean | null;
-  key_figures?: HomepageKeyFigure[];
-  show_associations: boolean | null;
-  associations_count: number | null;
-  show_partners: boolean | null;
-  partners?: HomepagePartner[];
-  show_weather: boolean | null;
-  show_waste_collection: boolean | null;
-  show_disruptions: boolean | null;
-  show_newsletter: boolean | null;
-  show_school_menu: boolean | null;
 }
 
 /** Composant `homepage.key-figure` */
@@ -502,7 +550,7 @@ export interface SchoolMenu extends StrapiDocument {
 export interface Site extends StrapiDocument {
   name: string;
   slug: string;
-  colors: JsonValue | null;
+  theme: SiteTheme;
   logo?: Media | null;
   favicon?: Media | null;
   contact_mail: string;
@@ -532,7 +580,7 @@ export interface Site extends StrapiDocument {
   open_data_enabled: boolean | null;
   open_data_url: string | null;
   open_data_platform: SiteOpenDataPlatform | null;
-  homepage?: HomepageHomepageConfig | null;
+  homepage?: HomepageHomepage | null;
   auto_deploy_enabled: boolean | null;
   auto_deploy_delay: number | null;
   navigation_config: JsonValue | null;
@@ -634,7 +682,15 @@ export interface Components {
   'blocks.image': BlocksImage;
   'blocks.text': BlocksText;
   'blocks.video': BlocksVideo;
-  'homepage.homepage-config': HomepageHomepageConfig;
+  'home-sections.free-content': HomeSectionsFreeContent;
+  'home-sections.hero': HomeSectionsHero;
+  'home-sections.key-figures': HomeSectionsKeyFigures;
+  'home-sections.listing': HomeSectionsListing;
+  'home-sections.mayor-word': HomeSectionsMayorWord;
+  'home-sections.partners': HomeSectionsPartners;
+  'home-sections.quick-links': HomeSectionsQuickLinks;
+  'home-sections.toggle': HomeSectionsToggle;
+  'homepage.homepage': HomepageHomepage;
   'homepage.key-figure': HomepageKeyFigure;
   'homepage.partner': HomepagePartner;
   'homepage.quick-link': HomepageQuickLink;

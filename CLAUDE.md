@@ -72,7 +72,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 
 | Type | API ID | Key fields |
 |------|--------|------------|
-| Site | `api::site.site` | name, slug, logo, contact, legal components, homepage, navigation_config |
+| Site | `api::site.site` | name, slug, **theme**, logo, contact, legal components, **homepage**, navigation_config |
 | Page | `api::page.page` | title, slug, **blocks**, featured_image, show_in_menu, scheduled_at |
 | Article | `api::article.article` | title, slug, summary, **blocks**, image, category, featured, scheduled_at |
 | Event | `api::evenement.evenement` | title, **blocks**, start_date, end_date, location, registration, scheduled_at |
@@ -80,6 +80,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 | Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain, build status |
 
 - **Draft & Publish** is enabled on page, article, event and official document. Writes from commune users default to the draft (`?status=published` to publish); `scheduled_at` is published by a cron task every minute (`src/services/scheduled-publication.ts`).
+- **Homepage in intents**: `homepage.homepage` holds 15 fixed sections (`home-sections.*`), each with an `enabled` flag and its data; no order or position, the theme decides the layout. Section ids and the theme registry (`THEMES`) live in `@communeo/core`; the Site `theme` enum must match `THEME_IDS` (tested). Only admins can change the theme.
 - **Blocks**: `blocks` is a dynamic zone restricted to the 9 `blocks.*` components (text, image, buttons, callout, documents, gallery, faq, contact, video). Rich text is restricted TipTap JSON. Validation lives in `@communeo/core` (`validateBlocks`) and runs in `apps/backend/src/validation/blocks.ts`: structure on every save, completeness (required fields, minimums, image alt text) on publish.
 
 ## Tech Stack Summary

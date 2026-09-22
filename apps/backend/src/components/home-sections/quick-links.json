@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_home_sections_quick_links",
+  "info": {
+    "displayName": "Accès rapides",
+    "icon": "link",
+    "description": "4 à 8 liens vers les démarches fréquentes"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "required": true
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "homepage.quick-link",
+      "max": 8
+    }
+  }
+}

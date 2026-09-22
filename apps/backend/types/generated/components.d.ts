@@ -208,14 +208,82 @@ export interface BlocksVideo extends Struct.ComponentSchema {
   };
 }
 
-export interface HomepageHomepageConfig extends Struct.ComponentSchema {
-  collectionName: 'components_homepage_homepage_configs';
+export interface HomeSectionsFreeContent extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_free_content';
   info: {
-    description: "Configuration compl\u00E8te de la page d'accueil du site";
-    displayName: "Configuration page d'accueil";
+    description: 'Texte libre de pr\u00E9sentation de la commune';
+    displayName: 'Contenu libre';
+    icon: 'feather';
   };
   attributes: {
-    articles_count: Schema.Attribute.Integer &
+    body: Schema.Attribute.JSON;
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<false>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface HomeSectionsHero extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_hero';
+  info: {
+    description: "Titre, sous-titre, image et boutons en haut de l'accueil";
+    displayName: 'Accroche';
+    icon: 'star';
+  };
+  attributes: {
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<true>;
+    image: Schema.Attribute.Media<'images'>;
+    primary_label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    primary_url: Schema.Attribute.String;
+    secondary_label: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    secondary_url: Schema.Attribute.String;
+    subtitle: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 300;
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface HomeSectionsKeyFigures extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_key_figures';
+  info: {
+    description: '3 ou 4 chiffres sur la commune';
+    displayName: 'Chiffres cl\u00E9s';
+    icon: 'chartBubble';
+  };
+  attributes: {
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<false>;
+    items: Schema.Attribute.Component<'homepage.key-figure', true> &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 4;
+        },
+        number
+      >;
+  };
+}
+
+export interface HomeSectionsListing extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_listing';
+  info: {
+    description: "Nombre d'\u00E9l\u00E9ments \u00E0 mettre en avant";
+    displayName: 'Liste de contenus';
+    icon: 'bulletList';
+  };
+  attributes: {
+    count: Schema.Attribute.Integer &
       Schema.Attribute.SetMinMax<
         {
           max: 6;
@@ -224,65 +292,113 @@ export interface HomepageHomepageConfig extends Struct.ComponentSchema {
         number
       > &
       Schema.Attribute.DefaultTo<3>;
-    associations_count: Schema.Attribute.Integer &
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<true>;
+  };
+}
+
+export interface HomeSectionsMayorWord extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_mayor_word';
+  info: {
+    description: 'Message du maire avec photo et signature';
+    displayName: 'Mot du maire';
+    icon: 'quote';
+  };
+  attributes: {
+    body: Schema.Attribute.JSON;
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<false>;
+    photo: Schema.Attribute.Media<'images'>;
+    signature_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    signature_role: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 120;
+      }>;
+  };
+}
+
+export interface HomeSectionsPartners extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_partners';
+  info: {
+    description: 'Logos des partenaires avec lien';
+    displayName: 'Partenaires';
+    icon: 'handHeart';
+  };
+  attributes: {
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<false>;
+    items: Schema.Attribute.Component<'homepage.partner', true> &
       Schema.Attribute.SetMinMax<
         {
           max: 12;
-          min: 1;
         },
         number
-      > &
-      Schema.Attribute.DefaultTo<6>;
-    content: Schema.Attribute.RichText;
-    events_count: Schema.Attribute.Integer &
+      >;
+  };
+}
+
+export interface HomeSectionsQuickLinks extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_quick_links';
+  info: {
+    description: '4 \u00E0 8 liens vers les d\u00E9marches fr\u00E9quentes';
+    displayName: 'Acc\u00E8s rapides';
+    icon: 'link';
+  };
+  attributes: {
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<true>;
+    items: Schema.Attribute.Component<'homepage.quick-link', true> &
       Schema.Attribute.SetMinMax<
         {
-          max: 6;
-          min: 1;
+          max: 8;
         },
         number
-      > &
-      Schema.Attribute.DefaultTo<3>;
-    hero_cta_primary_label: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 50;
-      }>;
-    hero_cta_primary_url: Schema.Attribute.String;
-    hero_cta_secondary_label: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 50;
-      }>;
-    hero_cta_secondary_url: Schema.Attribute.String;
-    hero_image: Schema.Attribute.Media<'images'>;
-    hero_subtitle: Schema.Attribute.Text;
-    hero_title: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 120;
-      }>;
-    key_figures: Schema.Attribute.Component<'homepage.key-figure', true>;
-    mayor_word_content: Schema.Attribute.RichText;
-    mayor_word_title: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 120;
-      }>;
+      >;
+  };
+}
+
+export interface HomeSectionsToggle extends Struct.ComponentSchema {
+  collectionName: 'components_home_sections_toggle';
+  info: {
+    description: 'Section aliment\u00E9e automatiquement (infos pratiques, m\u00E9t\u00E9o, collectes\u2026)';
+    displayName: 'Section automatique';
+    icon: 'eye';
+  };
+  attributes: {
+    enabled: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<true>;
+  };
+}
+
+export interface HomepageHomepage extends Struct.ComponentSchema {
+  collectionName: 'components_homepage_homepage';
+  info: {
+    description: "Ce que la commune veut mettre en avant. L'ordre et la mise en page sont d\u00E9cid\u00E9s par le th\u00E8me.";
+    displayName: "Page d'accueil";
+    icon: 'house';
+  };
+  attributes: {
+    agenda: Schema.Attribute.Component<'home-sections.listing', false>;
+    associations: Schema.Attribute.Component<'home-sections.listing', false>;
+    canteen: Schema.Attribute.Component<'home-sections.toggle', false>;
+    disruptions: Schema.Attribute.Component<'home-sections.toggle', false>;
+    featured_news: Schema.Attribute.Component<'home-sections.listing', false>;
+    free_content: Schema.Attribute.Component<'home-sections.free-content', false>;
+    hero: Schema.Attribute.Component<'home-sections.hero', false>;
+    key_figures: Schema.Attribute.Component<'home-sections.key-figures', false>;
+    mayor_word: Schema.Attribute.Component<'home-sections.mayor-word', false>;
     meta_description: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
       }>;
-    partners: Schema.Attribute.Component<'homepage.partner', true>;
-    quick_links: Schema.Attribute.Component<'homepage.quick-link', true>;
-    show_articles: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    show_associations: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_disruptions: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_events: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    show_key_figures: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_mayor_word: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_newsletter: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_partners: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_quick_links: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    show_school_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_waste_collection: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    show_weather: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    newsletter: Schema.Attribute.Component<'home-sections.toggle', false>;
+    partners: Schema.Attribute.Component<'home-sections.partners', false>;
+    practical_info: Schema.Attribute.Component<'home-sections.toggle', false>;
+    quick_links: Schema.Attribute.Component<'home-sections.quick-links', false>;
+    waste_collection: Schema.Attribute.Component<'home-sections.toggle', false>;
+    weather: Schema.Attribute.Component<'home-sections.toggle', false>;
   };
 }
 
@@ -499,7 +615,15 @@ declare module '@strapi/strapi' {
       'blocks.image': BlocksImage;
       'blocks.text': BlocksText;
       'blocks.video': BlocksVideo;
-      'homepage.homepage-config': HomepageHomepageConfig;
+      'home-sections.free-content': HomeSectionsFreeContent;
+      'home-sections.hero': HomeSectionsHero;
+      'home-sections.key-figures': HomeSectionsKeyFigures;
+      'home-sections.listing': HomeSectionsListing;
+      'home-sections.mayor-word': HomeSectionsMayorWord;
+      'home-sections.partners': HomeSectionsPartners;
+      'home-sections.quick-links': HomeSectionsQuickLinks;
+      'home-sections.toggle': HomeSectionsToggle;
+      'homepage.homepage': HomepageHomepage;
       'homepage.key-figure': HomepageKeyFigure;
       'homepage.partner': HomepagePartner;
       'homepage.quick-link': HomepageQuickLink;

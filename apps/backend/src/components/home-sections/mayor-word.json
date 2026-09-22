@@ -1,0 +1,38 @@
+{
+  "collectionName": "components_home_sections_mayor_word",
+  "info": {
+    "displayName": "Mot du maire",
+    "icon": "quote",
+    "description": "Message du maire avec photo et signature"
+  },
+  "options": {},
+  "attributes": {
+    "enabled": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "body": {
+      "type": "json"
+    },
+    "photo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "signature_name": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "signature_role": {
+      "type": "string",
+      "maxLength": 120
+    }
+  }
+}

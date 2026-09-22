@@ -21,7 +21,6 @@ const { site, nav, path } = Astro.props.ctx;
 const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
 const contactHref = SECTIONS.contact.path;
 ---
-<script is:inline>document.documentElement.classList.add('in-js');</script>
 <header class="in-header">
   <div class="in-container in-header-top">
     <a href="/" class="in-brand">
@@ -48,14 +47,14 @@ const contactHref = SECTIONS.contact.path;
 
     <div class="in-header-actions">
       <a href="/recherche" class="in-icon-button"><Search size={22} aria-hidden="true" />Recherche</a>
-      <button type="button" class="in-icon-button in-menu-toggle" aria-expanded="false" aria-controls="menu" data-in-menu-toggle>
+      <button type="button" class="in-icon-button in-menu-toggle cn-js-only" aria-expanded="false" aria-controls="menu" data-cn-menu-toggle>
         <Menu size={22} aria-hidden="true" class="in-menu-open-icon" /><X size={22} aria-hidden="true" class="in-menu-close-icon" />
-        <span data-in-menu-label>Menu</span>
+        <span data-cn-menu-label data-label-open="Fermer">Menu</span>
       </button>
     </div>
   </div>
 
-  <nav id="menu" class="in-nav in-on-dark" aria-label="Menu principal" tabindex="-1" data-in-menu>
+  <nav id="menu" class="in-nav in-on-dark" aria-label="Menu principal" tabindex="-1" data-cn-menu>
     <ul class="in-container in-nav-list">
       <li><a href="/" class="in-nav-link" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
       {nav.main.map((item) =>
@@ -63,7 +62,7 @@ const contactHref = SECTIONS.contact.path;
           <li><a href={item.href} class="in-nav-link" aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
         ) : (
           <li class="in-nav-item">
-            <details name="in-menu" class="in-nav-group">
+            <details name="in-menu" class="in-nav-group" data-cn-menu-group>
               <summary class:list={['in-nav-link', { 'in-nav-current': item.children.some((child) => isCurrent(child.href)) }]}>
                 {item.label}<ChevronDown size={18} aria-hidden="true" class="in-nav-chevron" />
               </summary>
@@ -82,45 +81,11 @@ const contactHref = SECTIONS.contact.path;
         <strong>Mairie{site.contact.phone && <> · <a href={site.contact.phone.href}>{site.contact.phone.label}</a></>}</strong>
       </p>
       <OpeningStatus hours={site.contact.hours} />
-      <p class="in-nav-hint">Touche Échap pour fermer le menu</p>
+      <p class="in-nav-hint cn-js-only">Touche Échap pour fermer le menu</p>
     </div>
   </nav>
 </header>
 
 <script>
-  const toggle = document.querySelector<HTMLButtonElement>('[data-in-menu-toggle]');
-  const menu = document.querySelector<HTMLElement>('[data-in-menu]');
-  const label = toggle?.querySelector<HTMLElement>('[data-in-menu-label]');
-  const groups = () => [...document.querySelectorAll<HTMLDetailsElement>('.in-nav-group')];
-
-  function setMenu(open: boolean) {
-    if (!toggle || !menu || !label) return;
-    toggle.setAttribute('aria-expanded', String(open));
-    label.textContent = open ? 'Fermer' : 'Menu';
-    menu.toggleAttribute('data-open', open);
-  }
-
-  toggle?.addEventListener('click', () => setMenu(toggle.getAttribute('aria-expanded') !== 'true'));
-
-  // Le lien d'évitement « Aller au menu » déplie le menu mobile
-  document.addEventListener('click', (event) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('a[href="#menu"]')) setMenu(true);
-    // Un clic hors d'un sous-menu le referme
-    for (const group of groups()) if (group.open && !group.contains(target)) group.open = false;
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return;
-    const group = groups().find((item) => item.open);
-    if (group) {
-      group.open = false;
-      group.querySelector('summary')?.focus();
-      return;
-    }
-    if (toggle?.getAttribute('aria-expanded') === 'true' && menu?.contains(document.activeElement)) {
-      setMenu(false);
-      toggle.focus();
-    }
-  });
+  import '@communeo/ui-a11y/scripts/menu';
 </script>

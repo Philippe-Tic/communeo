@@ -1,0 +1,33 @@
+---
+/**
+ * Fenêtre d'agrandissement d'une galerie. À placer une fois par page contenant des galeries ;
+ * les vignettes sont des liens `<a href="image" data-cn-lightbox-item data-cn-lightbox-caption="…">`
+ * regroupés dans un conteneur `data-cn-gallery`.
+ *
+ * Le thème habille le tout (classe `cn-lightbox`) et peut remplacer les libellés par des icônes
+ * via les slots `precedente`, `suivante` et `fermer`.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+<dialog class:list={['cn-lightbox', className]} aria-label="Image agrandie" data-cn-lightbox>
+  <figure>
+    <img alt="" data-cn-lightbox-image />
+    <figcaption data-cn-lightbox-caption hidden></figcaption>
+  </figure>
+  <p class="cn-lightbox-actions">
+    <button type="button" data-cn-lightbox-previous><slot name="precedente">Image précédente</slot></button>
+    <span data-cn-lightbox-counter aria-live="polite"></span>
+    <button type="button" data-cn-lightbox-next><slot name="suivante">Image suivante</slot></button>
+  </p>
+  <button type="button" class="cn-lightbox-close" data-cn-lightbox-close>
+    <slot name="fermer">Fermer<span class="cn-sr-only"> l'image agrandie</span></slot>
+  </button>
+</dialog>
+
+<script>
+  import './scripts/lightbox';
+</script>

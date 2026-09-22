@@ -23,7 +23,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     {site.logo ? <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} /> : null}
     <span>{site.name}</span>
   </a>
-  <nav id="menu" aria-label="Menu principal" tabindex="-1">
+  <nav id="menu" aria-label="Menu principal" tabindex="-1" data-cn-menu>
     <ul class="st-menu">
       <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
       {nav.main.map((item) =>
@@ -31,7 +31,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
           <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
         ) : (
           <li>
-            <details>
+            <details data-cn-menu-group>
               <summary>{item.label}</summary>
               <ul>
                 {item.children.map((child) => <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>)}
@@ -92,3 +92,7 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href
     ))}
   </ul>
 </footer>
+
+<script>
+  import '@communeo/ui-a11y/scripts/menu';
+</script>

@@ -56,6 +56,17 @@ Open Graph, JSON-LD), les liens d'évitement et le bandeau cookies. Le thème re
 
 ## Composants partagés (`@communeo/ui-a11y`)
 
-À réutiliser plutôt qu'à réécrire : `RichText`, `Blocks`, `Breadcrumb`, `ConsentEmbed` (vidéos chargées
-après consentement), `OpeningStatus` (statut « ouverte » calculé dans le navigateur), script `disclosure`
-(menus), `styles.css` (utilitaires d'accessibilité).
+À réutiliser plutôt qu'à réécrire : le comportement est écrit une fois, le thème l'habille.
+
+| Élément | Rôle |
+|---|---|
+| `RichText`, `Blocks` | Texte riche et aiguillage des blocs vers les composants du thème |
+| `Breadcrumb` | Fil d'Ariane (`aria-current` sur la page courante) |
+| `ConsentEmbed` | Vidéos et cartes chargées seulement après consentement |
+| `OpeningStatus` | Statut « ouverte · ferme à 12h », calculé dans le navigateur |
+| `Lightbox` + `scripts/lightbox` | Agrandissement d'une galerie : Échap, flèches, focus rendu à la vignette |
+| `scripts/menu` | Menu repliable sur petit écran et sous-menus : `aria-expanded`, Échap, clic à l'extérieur |
+| `styles.css` | Utilitaires d'accessibilité (`cn-sr-only`, `cn-js-only`, `prefers-reduced-motion`) |
+
+Le renderer pose la classe `cn-js` sur `<html>` : tout élément qui n'a de sens qu'avec JavaScript
+(bouton de menu, agrandissement, copie d'un lien) porte la classe `cn-js-only` et disparaît sans lui.

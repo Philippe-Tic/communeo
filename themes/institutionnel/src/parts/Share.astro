@@ -19,7 +19,7 @@ const subject = encodeURIComponent(title);
     Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
   </a>
   <a href={`mailto:?subject=${subject}&body=${encoded}`}><Mail size={18} aria-hidden="true" />Par e-mail</a>
-  <button type="button" class="in-share-copy" data-in-copy={url}>
+  <button type="button" class="in-share-copy cn-js-only" data-in-copy={url}>
     <Copy size={18} aria-hidden="true" />Copier le lien
   </button>
   <span class="cn-sr-only" role="status" data-in-copy-status></span>

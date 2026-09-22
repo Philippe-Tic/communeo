@@ -37,6 +37,14 @@
   display: none !important;
 }
 
+/*
+ * Éléments qui n'ont de sens qu'avec JavaScript (bouton de menu, agrandissement, copie d'un lien) :
+ * le renderer pose la classe `cn-js` sur <html> dès le chargement.
+ */
+html:not(.cn-js) .cn-js-only {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

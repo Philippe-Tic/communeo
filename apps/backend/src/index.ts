@@ -5,6 +5,7 @@ import { blocksValidationMiddleware } from './validation/blocks';
 import { siteValidationMiddleware } from './validation/site';
 import { slugsMiddleware } from './validation/slugs';
 import { publicationDateMiddleware } from './validation/publication-date';
+import { wasteScheduleMiddleware } from './validation/waste-schedule';
 
 export default {
   /**
@@ -19,6 +20,7 @@ export default {
     strapi.documents.use(siteValidationMiddleware());
     strapi.documents.use(slugsMiddleware(strapi));
     strapi.documents.use(publicationDateMiddleware(strapi));
+    strapi.documents.use(wasteScheduleMiddleware(strapi));
 
     // Mise en ligne automatique après une modification visible (debounce dans la file des builds)
     strapi.documents.use(autoDeployMiddleware(strapi));

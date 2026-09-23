@@ -20,13 +20,28 @@
     "collection_day": {
       "type": "enumeration",
       "enum": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
-      "required": true
+      "required": false
     },
     "frequency": {
       "type": "enumeration",
-      "enum": ["hebdomadaire", "bimensuel", "mensuel"],
+      "enum": ["hebdomadaire", "semaines-paires", "semaines-impaires", "bimensuel", "mensuel", "apport-volontaire", "sur-rendez-vous"],
       "default": "hebdomadaire",
       "required": true
+    },
+    "month_rank": {
+      "type": "integer",
+      "min": 1,
+      "max": 5
+    },
+    "season_start_month": {
+      "type": "integer",
+      "min": 1,
+      "max": 12
+    },
+    "season_end_month": {
+      "type": "integer",
+      "min": 1,
+      "max": 12
     },
     "start_date": {
       "type": "date"

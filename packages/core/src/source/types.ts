@@ -42,5 +42,7 @@ export interface ContentSource {
   /** Alertes visibles au moment du build (le navigateur revérifie les dates) */
   alerts(): Promise<AlertVM[]>;
   waste(): Promise<WasteCollectionVM[]>;
+  /** Notes générales de la page Collecte des déchets (horaires de la déchetterie…) */
+  wasteNotes(): Promise<string | null>;
   canteen(): Promise<CanteenWeekVM[]>;
 }

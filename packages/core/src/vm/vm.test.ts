@@ -4,6 +4,7 @@ import { createContentSource } from '../source/content-source';
 import type { RawLoader } from '../source/types';
 import { mapBlocks, parseVideoUrl } from './blocks';
 import { mapArticleCard, mapEvent, mapTeam } from './content';
+import { wasteFrequencyLabel } from './labels';
 import { mapCanteenWeek, nextCollections } from './practical';
 import { mapNavigation, mapSite } from './site';
 
@@ -165,6 +166,27 @@ describe('vie pratique', () => {
     expect(nextCollections({ weekday: 2, frequency: 'hebdomadaire', startDate: null }, now)[0]).toBe('2026-09-22');
     expect(nextCollections({ weekday: 3, frequency: 'bimensuel', startDate: '2026-09-02' }, now)).toEqual(['2026-09-30', '2026-10-14', '2026-10-28']);
     expect(nextCollections({ weekday: 2, frequency: 'mensuel', startDate: '2026-09-08' }, now)).toEqual(['2026-10-13', '2026-11-10', '2026-12-08']);
+  });
+
+  it('semaines paires / impaires, rang dans le mois, saison, sans jour', () => {
+    // 24 septembre 2026 : semaine ISO 39 (impaire)
+    expect(nextCollections({ weekday: 4, frequency: 'semaines-impaires', startDate: null }, now)).toEqual(['2026-09-24', '2026-10-08', '2026-10-22']);
+    expect(nextCollections({ weekday: 4, frequency: 'semaines-paires', startDate: null }, now)).toEqual(['2026-10-01', '2026-10-15', '2026-10-29']);
+    expect(nextCollections({ weekday: 3, frequency: 'mensuel', startDate: null, monthRank: 1 }, now)).toEqual(['2026-10-07', '2026-11-04', '2026-12-02']);
+    expect(nextCollections({ weekday: 5, frequency: 'mensuel', startDate: null, monthRank: 5 }, now)).toEqual(['2026-09-25', '2026-10-30', '2026-11-27']);
+    // D'avril à novembre : après le dernier lundi de novembre, reprise en avril
+    const late = new Date('2026-11-20T10:00:00+01:00');
+    expect(nextCollections({ weekday: 1, frequency: 'hebdomadaire', startDate: null, seasonStart: 4, seasonEnd: 11 }, late)).toEqual(['2026-11-23', '2026-11-30', '2027-04-05']);
+    expect(nextCollections({ weekday: -1, frequency: 'apport-volontaire', startDate: null }, now)).toEqual([]);
+    expect(nextCollections({ weekday: 2, frequency: 'sur-rendez-vous', startDate: null }, now)).toEqual([]);
+  });
+
+  it('libellés de fréquence', () => {
+    expect(wasteFrequencyLabel({ frequency: 'mensuel', collection_day: 'mercredi', month_rank: 1 })).toBe('Le 1er mercredi du mois');
+    expect(wasteFrequencyLabel({ frequency: 'mensuel', collection_day: 'vendredi', month_rank: 5 })).toBe('Le dernier vendredi du mois');
+    expect(wasteFrequencyLabel({ frequency: 'hebdomadaire', season_start_month: 4, season_end_month: 11 })).toBe("Chaque semaine, d'avril à novembre");
+    expect(wasteFrequencyLabel({ frequency: 'semaines-paires', season_start_month: 11, season_end_month: 3 })).toBe('Semaines paires, de novembre à mars');
+    expect(wasteFrequencyLabel({ frequency: 'apport-volontaire' })).toBe("Points d'apport volontaire");
   });
 
   it('prépare la semaine de cantine', () => {

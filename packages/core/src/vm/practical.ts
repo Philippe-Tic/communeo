@@ -11,7 +11,8 @@ import {
   CANTEEN_BADGE_LABELS,
   CANTEEN_COURSES,
   FRENCH_DAYS,
-  WASTE_FREQUENCY_LABELS,
+  WASTE_FREQUENCIES_WITHOUT_DAY,
+  wasteFrequencyLabel,
   WASTE_TYPES,
 } from './labels';
 import { mapFile, mapImage, mapLink } from './media';
@@ -43,24 +44,29 @@ export function mapWasteSchedules(schedules: WasteSchedule[], now: Date): WasteC
     .filter((schedule) => schedule.active)
     .map((schedule) => {
       const type = WASTE_TYPES[schedule.waste_type] ?? { label: schedule.waste_type, abbreviation: schedule.waste_type.slice(0, 3).toUpperCase() };
+      const withoutDay = WASTE_FREQUENCIES_WITHOUT_DAY.includes(schedule.frequency) || !schedule.collection_day;
       const rule: WasteRule = {
-        weekday: FRENCH_DAYS.indexOf(schedule.collection_day),
+        weekday: withoutDay ? -1 : FRENCH_DAYS.indexOf(schedule.collection_day!),
         frequency: schedule.frequency,
         startDate: schedule.start_date,
+        monthRank: schedule.month_rank ?? null,
+        seasonStart: schedule.season_start_month ?? null,
+        seasonEnd: schedule.season_end_month ?? null,
       };
       return {
         key: schedule.waste_type,
         label: type.label,
         abbreviation: type.abbreviation,
-        day: { key: schedule.collection_day, label: schedule.collection_day },
-        frequency: { key: schedule.frequency, label: WASTE_FREQUENCY_LABELS[schedule.frequency] ?? schedule.frequency },
+        day: withoutDay ? null : { key: schedule.collection_day!, label: schedule.collection_day! },
+        frequency: { key: schedule.frequency, label: wasteFrequencyLabel(schedule) },
         zone: schedule.zone?.trim() || null,
         notes: schedule.notes?.trim() || null,
         rule,
         upcoming: nextCollections(rule, now).map((iso) => dateVM(`${iso}T12:00:00.000Z`)),
       };
     })
-    .sort((a, b) => (a.upcoming[0]?.iso ?? '').localeCompare(b.upcoming[0]?.iso ?? ''));
+    // Prochain passage d'abord ; sans date calculée (apport volontaire, rendez-vous) à la fin
+    .sort((a, b) => (a.upcoming[0]?.iso ?? '9999').localeCompare(b.upcoming[0]?.iso ?? '9999'));
 }
 
 // --- Cantine -------------------------------------------------------------------------------------

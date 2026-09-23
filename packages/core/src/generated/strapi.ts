@@ -148,7 +148,7 @@ export type WasteScheduleWasteType = (typeof wasteScheduleWasteTypeValues)[numbe
 export const wasteScheduleCollectionDayValues = ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'] as const;
 export type WasteScheduleCollectionDay = (typeof wasteScheduleCollectionDayValues)[number];
 
-export const wasteScheduleFrequencyValues = ['hebdomadaire', 'bimensuel', 'mensuel'] as const;
+export const wasteScheduleFrequencyValues = ['hebdomadaire', 'semaines-paires', 'semaines-impaires', 'bimensuel', 'mensuel', 'apport-volontaire', 'sur-rendez-vous'] as const;
 export type WasteScheduleFrequency = (typeof wasteScheduleFrequencyValues)[number];
 
 export const userMunicipalityRoleValues = ['super_admin', 'admin', 'editor'] as const;
@@ -614,6 +614,7 @@ export interface Site extends StrapiDocument {
   homepage?: HomepageHomepage | null;
   auto_deploy_enabled: boolean | null;
   auto_deploy_delay: number | null;
+  waste_notes: string | null;
   navigation_config: JsonValue | null;
   newsletter_subscribers?: NewsletterSubscriber[];
   social_links?: SocialSocialLink[];
@@ -641,8 +642,11 @@ export interface TeamMember extends StrapiDocument {
 /** Content-type `api::waste-schedule.waste-schedule` — Planning de collecte des dechets par type et jour */
 export interface WasteSchedule extends StrapiDocument {
   waste_type: WasteScheduleWasteType;
-  collection_day: WasteScheduleCollectionDay;
+  collection_day: WasteScheduleCollectionDay | null;
   frequency: WasteScheduleFrequency;
+  month_rank: number | null;
+  season_start_month: number | null;
+  season_end_month: number | null;
   start_date: string | null;
   zone: string | null;
   notes: string | null;

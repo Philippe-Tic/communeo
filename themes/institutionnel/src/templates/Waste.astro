@@ -5,10 +5,11 @@ import type { PageContext } from '@communeo/theme-contract';
 import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import Layout from '../parts/Layout.astro';
 
-interface Props { ctx: PageContext; collections: WasteCollectionVM[] }
-const { ctx, collections } = Astro.props;
+interface Props { ctx: PageContext; collections: WasteCollectionVM[]; notes: string | null }
+const { ctx, collections, notes } = Astro.props;
 ---
 <Layout ctx={ctx}>
+  {notes && <p class="in-lead">{notes}</p>}
   {collections.length ? (
     <>
       <section aria-labelledby="in-waste-next">
@@ -24,9 +25,9 @@ const { ctx, collections } = Astro.props;
                   <p class="in-waste-date"><NextCollections collection={collection} /></p>
                 </>
               ) : (
-                <p class="in-waste-date">Sur rendez-vous</p>
+                <p class="in-waste-date">{collection.day ? 'Hors saison' : collection.frequency.label}</p>
               )}
-              <p class="in-meta">{collection.frequency.label}, le {collection.day.label}</p>
+              {collection.day && <p class="in-meta">{collection.frequency.label}, le {collection.day.label}</p>}
             </li>
           ))}
         </ul>
@@ -49,7 +50,7 @@ const { ctx, collections } = Astro.props;
                       {collection.label}
                     </span>
                   </th>
-                  <td data-label="Jour">{collection.day.label}</td>
+                  <td data-label="Jour">{collection.day?.label ?? '—'}</td>
                   <td data-label="Fréquence">{collection.frequency.label}</td>
                   <td data-label="Zone">{collection.zone ?? 'Toute la commune'}</td>
                   <td data-label="À savoir">{collection.notes}</td>

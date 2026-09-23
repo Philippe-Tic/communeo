@@ -110,7 +110,7 @@ export interface ThemeTemplates {
   /** Demande d'exercice des droits RGPD (accès, rectification, effacement…) */
   RightsRequest: ThemeComponent<WithContext<{ form: FormConfig }>>;
   Contact: ThemeComponent<WithContext<{ form: FormConfig }>>;
-  Waste: ThemeComponent<WithContext<{ collections: WasteCollectionVM[] }>>;
+  Waste: ThemeComponent<WithContext<{ collections: WasteCollectionVM[]; notes: string | null }>>;
   Canteen: ThemeComponent<WithContext<{ weeks: CanteenWeekVM[] }>>;
   Disruptions: ThemeComponent<WithContext<{ alerts: AlertVM[] }>>;
   /**

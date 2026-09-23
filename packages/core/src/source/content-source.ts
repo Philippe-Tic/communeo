@@ -73,6 +73,7 @@ export function createContentSource(loader: RawLoader, baseCtx: MapContext, opti
     }),
     alerts: memo(async () => (await raw.alerts()).filter((alert) => isAlertVisible(alert, now)).map((alert) => mapAlert(ctx, alert))),
     waste: memo(async () => mapWasteSchedules(await raw.waste(), now)),
+    wasteNotes: memo(async () => (await raw.site()).waste_notes?.trim() || null),
     canteen: memo(async () => {
       // Semaine en cours (commencée il y a moins de 7 jours) et semaines à venir, dans l'ordre
       const weekAgo = isoDay(new Date(now.getTime() - 6 * 24 * 3600 * 1000));

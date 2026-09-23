@@ -565,7 +565,7 @@ function SimpleMenu({
     setError(null);
     setUploading(true);
     try {
-      onFile(await trackUpload(uploadFile(chosen, 'cantine')));
+      onFile(await trackUpload(uploadFile(chosen, 'Cantine')));
     } catch (failure) {
       setError(`${chosen.name} n'a pas pu être envoyé : ${errorText(failure)}`);
     } finally {

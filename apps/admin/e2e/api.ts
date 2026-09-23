@@ -404,6 +404,59 @@ export interface MockOptions {
   alertSet?: 'some' | 'none';
   /** Collectes : 5 (défaut) ou aucune */
   wasteSet?: 'some' | 'none';
+  /** Médiathèque : 5 fichiers (défaut) ou aucun */
+  mediaSet?: 'some' | 'none';
+  /** L'envoi d'un fichier échoue (réponse 400 de Strapi) */
+  failUploadFor?: string;
+}
+
+export type MockMedia = {
+  documentId: string;
+  name: string;
+  folder: string | null;
+  uploaded_by_name: string | null;
+  createdAt: string;
+  file: Record<string, unknown> & { id: number; mime: string; alternativeText: string | null };
+};
+
+function mediaItems(): MockMedia[] {
+  const item = (
+    id: number,
+    name: string,
+    mime: string,
+    folder: string | null,
+    fields: Record<string, unknown> = {},
+  ): MockMedia => ({
+    documentId: `mi-${id}`,
+    name,
+    folder,
+    uploaded_by_name: 'Sophie Leroy',
+    createdAt: new Date(Date.UTC(2026, 8, 20 - id)).toISOString(),
+    file: {
+      id: 500 + id,
+      name,
+      ext: name.slice(name.lastIndexOf('.')),
+      mime,
+      size: 1200,
+      url: `/uploads/${name}`,
+      width: mime.startsWith('image/') ? 1600 : null,
+      height: mime.startsWith('image/') ? 1067 : null,
+      alternativeText: null,
+      caption: null,
+      credit: null,
+      formats: null,
+      ...fields,
+    },
+  });
+  return [
+    item(1, 'salle-des-fetes-exterieur.jpg', 'image/jpeg', 'Bâtiments', {
+      alternativeText: 'Façade de la salle des fêtes Jean-Moulin',
+    }),
+    item(2, 'forum-associations.jpg', 'image/jpeg', 'Événements'),
+    item(3, 'reglement-salle.pdf', 'application/pdf', 'Documents officiels'),
+    item(4, 'blason.svg', 'image/svg+xml', 'Logos et blasons', { alternativeText: 'Blason de la commune' }),
+    item(5, 'conseil-municipal.jpg', 'image/jpeg', null),
+  ];
 }
 
 export type MockMenu = Record<string, unknown> & { documentId: string; week_start: string; school_name: string | null };
@@ -812,8 +865,28 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     failRejectEmail = false,
     alertSet = 'some',
     wasteSet = 'some',
+    mediaSet = 'some',
+    failUploadFor,
   } = options;
   const canteen = menus();
+  const library = mediaSet === 'none' ? [] : mediaItems();
+  // Usages : le fichier 501 (salle des fêtes) est utilisé par une page et une actualité
+  const usage: Record<number, Array<{ uid: string; documentId: string; label: string; path: string }>> = {
+    501: [
+      {
+        uid: 'api::article.article',
+        documentId: 'a-forum',
+        label: 'Actualité — Forum des associations',
+        path: '/actualites/a-forum',
+      },
+      {
+        uid: 'api::page.page',
+        documentId: 'p-salle',
+        label: 'Page — Location de la salle des fêtes',
+        path: '/pages/p-salle',
+      },
+    ],
+  };
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
@@ -972,7 +1045,24 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         url: `/uploads/${name}`,
       };
       posts['upload'] = [...(posts['upload'] ?? []), file];
-      return json({ data: { documentId: `m-${uploads}`, name, file } }, 201);
+      if (failUploadFor === name)
+        return json(
+          { error: { status: 400, message: 'Le contenu du fichier ne correspond pas à un fichier PNG.' } },
+          400,
+        );
+      // Champ texte en UTF-8 (le corps est lu en latin-1 pour les octets du fichier)
+      const folder =
+        /name="folder"\r\n\r\n([^\r]*)/.exec(route.request().postDataBuffer()?.toString('utf8') ?? '')?.[1] ?? null;
+      const item: MockMedia = {
+        documentId: `m-${uploads}`,
+        name,
+        folder,
+        uploaded_by_name: 'Sophie Leroy',
+        createdAt: new Date().toISOString(),
+        file: { ...file, alternativeText: null, caption: null, credit: null, width: null, height: null },
+      };
+      library.unshift(item);
+      return json({ data: item }, 201);
     }
     if (url.pathname === '/api/newsletter-subscribers/stats') {
       const active = newsletter.filter((item) => item.active);
@@ -1172,6 +1262,83 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
           pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) },
         },
       });
+    }
+    if (url.pathname === '/api/media-items/folders') {
+      const counts = new Map<string, number>();
+      for (const item of library) if (item.folder) counts.set(item.folder, (counts.get(item.folder) ?? 0) + 1);
+      return json({
+        data: {
+          total: library.length,
+          bytes: library.length * 1200 * 1024,
+          missingAlt: library.filter((item) => item.file.mime.startsWith('image/') && !item.file.alternativeText)
+            .length,
+          folders: [...counts]
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => a.name.localeCompare(b.name, 'fr')),
+        },
+      });
+    }
+    if (url.pathname === '/api/media-items/usage')
+      return json({ data: usage[Number(url.searchParams.get('file'))] ?? [] });
+    if (url.pathname === '/api/media-items' && method === 'GET') {
+      const q = url.searchParams.get('filters[name][$containsi]')?.toLowerCase();
+      const folder = url.searchParams.get('filters[folder][$eq]');
+      const images = url.searchParams.get('filters[file][mime][$startsWith]') === 'image/';
+      const documents = url.searchParams.has('filters[file][mime][$notContainsi]');
+      const missingAlt = url.searchParams.has('filters[$or][0][file][alternativeText][$null]');
+      const rows = library
+        .filter((item) => !q || item.name.toLowerCase().includes(q))
+        .filter((item) => !folder || item.folder === folder)
+        .filter((item) => !images || item.file.mime.startsWith('image/'))
+        .filter((item) => !documents || !item.file.mime.startsWith('image/'))
+        .filter((item) => !missingAlt || !item.file.alternativeText);
+      const pageNumber = Number(url.searchParams.get('pagination[page]') ?? 1);
+      const pageSize = Number(url.searchParams.get('pagination[pageSize]') ?? 25);
+      return json({
+        data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize),
+        meta: {
+          pagination: {
+            page: pageNumber,
+            pageSize,
+            total: rows.length,
+            pageCount: Math.max(1, Math.ceil(rows.length / pageSize)),
+          },
+        },
+      });
+    }
+    const mediaMatch = /^\/api\/media-items\/([^/]+)$/.exec(url.pathname);
+    if (mediaMatch) {
+      const item = library.find((entry) => entry.documentId === mediaMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, string | null> };
+        bodies.push({ call: `PUT media ${item.documentId}`, body });
+        const { alt_text, caption, credit, ...rest } = body.data;
+        Object.assign(item, rest);
+        Object.assign(item.file, {
+          ...(alt_text !== undefined ? { alternativeText: alt_text || null } : {}),
+          ...(caption !== undefined ? { caption: caption || null } : {}),
+          ...(credit !== undefined ? { credit: credit || null } : {}),
+        });
+        return json({ data: item });
+      }
+      if (method === 'DELETE') {
+        const used = usage[item.file.id] ?? [];
+        if (used.length)
+          return json(
+            {
+              error: {
+                status: 409,
+                message: `Ce fichier est utilisé dans ${used.length} contenus : retirez-le d'abord.`,
+                details: { usages: used },
+              },
+            },
+            409,
+          );
+        library.splice(library.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
     }
     if (url.pathname === '/api/school-menus') {
       if (method === 'POST') {
@@ -1400,6 +1567,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     alertStore,
     waste,
     canteen,
+    library,
     stores,
     publishedByType,
     previewPosts,

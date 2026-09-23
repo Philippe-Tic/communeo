@@ -49,7 +49,7 @@ function FileCard({ file, onReplace, onRemove, busy }: { file: UploadedFile; onR
   );
 }
 
-export function FileField<T extends FieldValues>({ name, label, required, help, types, multiple, addLabel = 'Ajouter un fichier', folder = 'documents' }: Props<T>) {
+export function FileField<T extends FieldValues>({ name, label, required, help, types, multiple, addLabel = 'Ajouter un fichier', folder = 'Documents officiels' }: Props<T>) {
   const { control, setError, clearErrors } = useFormContext<T>();
   const id = fieldId(name);
   const input = useRef<HTMLInputElement>(null);

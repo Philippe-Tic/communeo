@@ -1,6 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { useCallback } from 'react';
+import { MediaScreen, mediaSearch, type MediaSearch } from '@/components/media/media-screen';
 
 export const Route = createFileRoute('/_app/mediatheque')({
-  component: () => <ComingSoon title="Médiathèque" ticket={142} />,
+  validateSearch: mediaSearch,
+  component: function Mediatheque() {
+    const search = Route.useSearch();
+    const navigate = Route.useNavigate();
+    const onSearchChange = useCallback(
+      (patch: Partial<MediaSearch>, options?: { replace?: boolean }) =>
+        void navigate({ search: (previous) => ({ ...previous, ...patch }), replace: options?.replace }),
+      [navigate],
+    );
+    return <MediaScreen search={search} onSearchChange={onSearchChange} />;
+  },
 });

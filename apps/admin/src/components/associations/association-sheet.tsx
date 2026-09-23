@@ -189,7 +189,7 @@ export function AssociationSheet({
                 <FileField
                   name="logo"
                   label="Logo"
-                  folder="associations"
+                  folder="Associations"
                   types={IMAGE_TYPES}
                   help="Facultatif : les initiales le remplacent. JPG, PNG ou WebP."
                 />

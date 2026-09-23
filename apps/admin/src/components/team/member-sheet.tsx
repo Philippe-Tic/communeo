@@ -123,7 +123,7 @@ export function MemberSheet({
                 <TextField name="email" label="E-mail" inputProps={{ type: 'email', inputMode: 'email', autoComplete: 'off' }} />
                 <TextField name="office_hours" label="Permanence" help="Par exemple « Samedi 10 h – 12 h, sur rendez-vous »." />
                 <TextareaField name="bio" label="Présentation" rows={3} />
-                <FileField name="photo" label="Photo" folder="equipe" types={IMAGE_TYPES} help="Facultative : les initiales la remplacent. JPG, PNG ou WebP." />
+                <FileField name="photo" label="Photo" folder="Équipe municipale" types={IMAGE_TYPES} help="Facultative : les initiales la remplacent. JPG, PNG ou WebP." />
               </div>
               <div className="flex flex-wrap items-center gap-2 border-t border-border px-5 py-3">
                 {member && (

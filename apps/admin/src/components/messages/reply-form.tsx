@@ -94,7 +94,7 @@ export function ReplyForm({
     setFileError(null);
     setUploading(true);
     try {
-      const uploaded = await trackUpload(uploadFile(file, 'messages'));
+      const uploaded = await trackUpload(uploadFile(file, 'Réponses aux messages'));
       onDraft((current) => ({ ...current, attachment: uploaded }));
     } catch (failure) {
       setFileError(`${file.name} n'a pas pu être envoyé : ${errorText(failure)}`);

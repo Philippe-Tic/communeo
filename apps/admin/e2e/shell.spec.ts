@@ -132,6 +132,23 @@ test.describe('session et rôles', () => {
     await page.getByLabel('Mot de passe').fill('bon-mot-de-passe');
     await page.getByRole('button', { name: 'Se connecter' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Agenda' })).toBeVisible();
+    // Aucun jeton dans le navigateur : la session est un cookie HttpOnly
+    expect(await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage }))).not.toMatch(/jwt|jeton/i);
+  });
+
+  test('se déconnecter ferme la session et ramène à la connexion', async ({ page }) => {
+    const { calls } = await mockApi(page);
+    await page.goto('/');
+    if (isMobile(page)) {
+      await page.getByRole('button', { name: /^Compte de/ }).click();
+    } else {
+      await page.getByRole('button', { name: 'Compte de Sophie Leroy' }).click();
+    }
+    await page.getByRole('menuitem', { name: 'Se déconnecter' }).click();
+    await expect(page).toHaveURL(/\/connexion/);
+    expect(calls).toContain('POST /api/session/logout');
+    await page.goto('/agenda');
+    await expect(page).toHaveURL(/\/connexion/);
   });
 
   test('un éditeur ne voit ni Utilisateurs ni Apparence', async ({ page }) => {

@@ -3,6 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { auth } from '@/lib/api';
+import { logout as endSession } from '@/lib/session';
 import { displayName, type SessionUser } from '@/lib/session';
 import { cn, initials } from '@/lib/utils';
 
@@ -23,7 +24,7 @@ export function AccountMenu({ user, compact }: { user: SessionUser; compact?: bo
   const name = displayName(user);
 
   const logout = async () => {
-    auth.setToken(null);
+    await endSession().catch(() => undefined);
     auth.setImpersonatedSite(null);
     client.clear();
     await navigate({ to: '/connexion' });

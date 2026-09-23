@@ -3,7 +3,7 @@
  */
 import { queryOptions } from '@tanstack/react-query';
 import { THEMES } from '@communeo/core';
-import { api, auth } from './api';
+import { api } from './api';
 
 export type MunicipalityRole = 'admin' | 'editor' | 'super_admin';
 
@@ -32,7 +32,10 @@ export const sessionQuery = queryOptions({
   retry: false,
 });
 
-export const hasSession = () => auth.token() !== null;
+export const login = (identifier: string, password: string) =>
+  api<{ ok: true; expiresIn: number }>('/api/session/login', { method: 'POST', json: { identifier, password } });
+
+export const logout = () => api('/api/session/logout', { method: 'POST' });
 
 export function displayName(user: Pick<SessionUser, 'first_name' | 'last_name' | 'email'>): string {
   return [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;

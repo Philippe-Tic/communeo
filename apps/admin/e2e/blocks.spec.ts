@@ -92,8 +92,8 @@ test.describe('organiser les blocs', () => {
     const catalog = page.getByRole('dialog', { name: 'Ajouter un bloc' });
     await expect(catalog).toHaveAccessibleDescription('Le bloc sera inséré en position 2 sur 6.');
     await expect(page.getByText('Le bloc sera inséré ici')).toBeVisible();
-    // Blocs de la médiathèque : présents mais pas encore disponibles
-    await expect(catalog.getByRole('button', { name: 'Galerie' })).toHaveAttribute('aria-disabled', 'true');
+    // Blocs de la médiathèque : disponibles
+    await expect(catalog.getByRole('button', { name: 'Galerie' })).not.toHaveAttribute('aria-disabled');
     await catalog.getByRole('button', { name: 'Contact / lieu' }).click();
     await expect(catalog).toBeHidden();
     await expectOrder(page, ['Texte', 'Contact / lieu', 'Encadré', 'Image', 'Questions / réponses', 'Vidéo']);

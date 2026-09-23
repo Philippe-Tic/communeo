@@ -41,6 +41,7 @@ export const ARTICLES_LIST: ContentListConfig<ArticleRow> = {
       title: `${draft.title} (copie)`,
       slug: '',
       summary: draft.summary ?? '',
+      image: draft.image ?? null,
       category: draft.category ?? 'news',
       featured: false,
       publication_day: '',

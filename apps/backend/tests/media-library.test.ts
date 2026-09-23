@@ -77,9 +77,10 @@ describe('texte du fichier, usages, suppression', () => {
       .send({ data: { title: 'Location de la salle', blocks: [{ __component: 'blocks.image', image: media.file.id }] } });
     expect(page.status).toBe(201);
 
-    const edit = await http.put(`/api/media-items/${media.documentId}`).set(auth()).send({ data: { alt_text: 'La mairie vue de la place', caption: 'Mairie', credit: 'J. Martin', folder: 'Patrimoine' } });
+    const edit = await http.put(`/api/media-items/${media.documentId}`).set(auth()).send({ data: { name: 'mairie-place.jpg', alt_text: 'La mairie vue de la place', caption: 'Mairie', credit: 'J. Martin', folder: 'Patrimoine' } });
     expect(edit.status).toBe(200);
-    expect(edit.body.data).toMatchObject({ folder: 'Patrimoine', file: { alternativeText: 'La mairie vue de la place', caption: 'Mairie', credit: 'J. Martin' } });
+    // Renommer la fiche renomme le fichier (nom montré par les blocs et le site public)
+    expect(edit.body.data).toMatchObject({ name: 'mairie-place.jpg', folder: 'Patrimoine', file: { name: 'mairie-place.jpg', alternativeText: 'La mairie vue de la place', caption: 'Mairie', credit: 'J. Martin' } });
 
     // Le contenu lit le fichier : texte alternatif à jour sans toucher la page
     const read = await http.get(`/api/pages/${page.body.data.documentId}?status=draft&populate[blocks][populate]=*`).set(auth());

@@ -10,11 +10,13 @@ import { z } from 'zod';
 import { EVENT_CATEGORY_LABELS } from '@communeo/core';
 import { blocksSchema, BlockEditor, type Block } from '@/components/blocks';
 import { DateField, FormSection, RadioGroupField, SelectField, SwitchField, TextareaField, TextField, TimeField } from '@/components/form';
-import { documentApi, optional, toApiValue, type BaseDocument } from '@/lib/content-api';
+import { ImageField } from '@/components/media/media-fields';
+import { BLOCKS, documentApi, optional, toApiValue, type BaseDocument } from '@/lib/content-api';
 import { dateToParis, formatParisDateTime, parisToDate } from '@/lib/dates';
+import { imageSchema, type LibraryFile } from '@/lib/media-library';
 import type { EditorBodyProps, EditorConfig } from './content-editor';
 import type { OutlineSection } from './form-outline';
-import { ImagePlaceholder, slugSchema, titleSchema } from './page-editor';
+import { slugSchema, titleSchema } from './page-editor';
 
 export const EVENT_CATEGORIES = Object.entries(EVENT_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -33,11 +35,13 @@ export interface EventDocument extends BaseDocument {
   external_link: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  image?: LibraryFile | null;
 }
 
 export type EventValues = {
   title: string;
   slug: string;
+  image: LibraryFile | null;
   category: string;
   featured: boolean;
   start_day: string;
@@ -86,6 +90,7 @@ const publishSchema = z
     external_link: z.string().refine((value) => !value.trim() || /^https?:\/\/\S+$/i.test(value.trim()), 'Le lien doit commencer par https://'),
     contact_email: z.union([z.literal(''), z.email("L'e-mail de contact n'est pas valide")]),
     contact_phone: z.string(),
+    image: imageSchema,
     blocks: blocksSchema('publish'),
   })
   // Règles entre champs : vérifiées même quand un autre champ est en erreur (option `when`)
@@ -129,11 +134,12 @@ export const eventsApi = documentApi<EventDocument, EventValues>('evenements', (
   external_link: optional(values.external_link),
   contact_email: optional(values.contact_email),
   contact_phone: optional(values.contact_phone),
+  image: values.image?.id ?? null,
   blocks: toApiValue(values.blocks),
-}));
+}), { populate: `${BLOCKS}&populate[image]=true` });
 
 const OUTLINE: OutlineSection[] = [
-  { id: 'section-evenement', title: "L'événement", fields: ['title', 'category', 'featured', 'slug'] },
+  { id: 'section-evenement', title: "L'événement", fields: ['title', 'category', 'featured', 'image', 'slug'] },
   { id: 'section-dates', title: 'Dates et lieu', fields: ['start_day', 'start_time', 'end_day', 'end_time', 'location', 'address'] },
   { id: 'section-tarif', title: 'Tarif et inscription', fields: ['price_mode', 'price_amount', 'registration_required', 'registration_deadline', 'max_participants'] },
   { id: 'section-contact', title: 'Organisateur et contact', fields: ['organizer', 'external_link', 'contact_email', 'contact_phone'] },
@@ -167,7 +173,7 @@ function EventBody({ slugField }: EditorBodyProps<EventDocument>) {
             <SwitchField name="featured" label="Mettre à la une sur la page d'accueil" />
           </div>
         </div>
-        <ImagePlaceholder label="Image" />
+        <ImageField name="image" label="Image" folder="Événements" />
         {slugField}
       </FormSection>
 
@@ -237,6 +243,7 @@ export const EVENT_EDITOR: EditorConfig<EventDocument, EventValues> = {
     return {
       title: doc?.title ?? '',
       slug: doc?.slug ?? '',
+      image: doc?.image ?? null,
       category: doc?.category ?? '',
       featured: doc?.featured ?? false,
       start_day: start?.day ?? '',

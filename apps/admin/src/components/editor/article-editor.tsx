@@ -6,11 +6,13 @@ import { z } from 'zod';
 import { ARTICLE_CATEGORY_LABELS } from '@communeo/core';
 import { blocksSchema, BlockEditor, type Block } from '@/components/blocks';
 import { DateField, FormSection, SelectField, SwitchField, TextareaField, TextField } from '@/components/form';
-import { documentApi, optional, toApiValue, type BaseDocument } from '@/lib/content-api';
+import { ImageField } from '@/components/media/media-fields';
+import { BLOCKS, documentApi, optional, toApiValue, type BaseDocument } from '@/lib/content-api';
 import { dateToParis, parisToDate } from '@/lib/dates';
+import { imageSchema, type LibraryFile } from '@/lib/media-library';
 import { displayName } from '@/lib/session';
 import type { EditorBodyProps, EditorConfig } from './content-editor';
-import { ImagePlaceholder, slugSchema, titleSchema } from './page-editor';
+import { slugSchema, titleSchema } from './page-editor';
 
 export type ArticleCategory = keyof typeof ARTICLE_CATEGORY_LABELS;
 export const ARTICLE_CATEGORIES = Object.entries(ARTICLE_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
@@ -22,12 +24,14 @@ export interface ArticleDocument extends BaseDocument {
   publication_date: string | null;
   author: string | null;
   meta_description: string | null;
+  image?: LibraryFile | null;
 }
 
 export type ArticleValues = {
   title: string;
   slug: string;
   summary: string;
+  image: LibraryFile | null;
   category: string;
   featured: boolean;
   /** Jour affiché ; l'heure d'origine est gardée pour l'ordre des actualités du même jour */
@@ -42,6 +46,7 @@ const publishSchema = z.object({
   title: titleSchema,
   slug: slugSchema,
   summary: z.string().max(300, 'Le chapô ne doit pas dépasser 300 caractères'),
+  image: imageSchema,
   category: z.enum(Object.keys(ARTICLE_CATEGORY_LABELS) as [ArticleCategory, ...ArticleCategory[]], 'Choisissez une catégorie'),
   featured: z.boolean(),
   publication_day: z.string(),
@@ -55,6 +60,7 @@ export const articlesApi = documentApi<ArticleDocument, ArticleValues>('articles
   title: values.title.trim(),
   ...(values.slug.trim() ? { slug: values.slug.trim() } : {}),
   summary: optional(values.summary),
+  image: values.image?.id ?? null,
   ...(values.category ? { category: values.category } : {}),
   featured: values.featured,
   // Vide : la date de la première publication est posée par le backend
@@ -62,12 +68,12 @@ export const articlesApi = documentApi<ArticleDocument, ArticleValues>('articles
   author: optional(values.author),
   meta_description: optional(values.meta_description),
   blocks: toApiValue(values.blocks),
-}));
+}), { populate: `${BLOCKS}&populate[image]=true` });
 
 function ArticleBody({ slugField }: EditorBodyProps<ArticleDocument>) {
   return (
     <>
-      <FormSection title="L'actualité" fields={['title', 'category', 'featured', 'summary', 'slug', 'publication_day', 'author']}>
+      <FormSection title="L'actualité" fields={['title', 'category', 'featured', 'summary', 'image', 'slug', 'publication_day', 'author']}>
         <TextField name="title" label="Titre" required inputProps={{ className: 'h-12 text-lg font-semibold md:h-11' }} />
         <div className="grid items-end gap-5 sm:grid-cols-2">
           <SelectField name="category" label="Catégorie" required placeholder="Choisir une catégorie" options={ARTICLE_CATEGORIES} />
@@ -76,7 +82,7 @@ function ArticleBody({ slugField }: EditorBodyProps<ArticleDocument>) {
           </div>
         </div>
         <TextareaField name="summary" label="Chapô" rows={2} help="Une ou deux phrases, reprises dans la liste des actualités et sur l'accueil." />
-        <ImagePlaceholder label="Image" />
+        <ImageField name="image" label="Image" folder="Actualités" />
         {slugField}
         <div className="grid gap-5 sm:grid-cols-2">
           <DateField name="publication_day" label="Date de publication affichée" help="Vide : la date de la première publication." />
@@ -108,6 +114,7 @@ export const ARTICLE_EDITOR: EditorConfig<ArticleDocument, ArticleValues> = {
       title: doc?.title ?? '',
       slug: doc?.slug ?? '',
       summary: doc?.summary ?? '',
+      image: doc?.image ?? null,
       category: doc?.category ?? 'news',
       featured: doc?.featured ?? false,
       publication_day: published?.day ?? '',

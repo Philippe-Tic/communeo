@@ -5,6 +5,7 @@
  */
 import { infiniteQueryOptions, queryOptions, type QueryClient } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
+import { z } from 'zod';
 import { api, ApiError, auth } from './api';
 import { checkFile, DOCUMENT_TYPES, IMAGE_TYPES, type UploadedFile } from './media';
 
@@ -40,6 +41,16 @@ export const needsAlt = (item: MediaItem) => isImage(item.file) && !item.file.al
 export const thumbnailOf = (file: LibraryFile) => file.formats?.small?.url ?? file.formats?.thumbnail?.url ?? file.url;
 
 export const PAGE_SIZE = 48;
+
+/**
+ * Image d'un contenu (image principale) : à la publication, une image sans texte alternatif est
+ * signalée ; l'erreur mène au bouton « Ajouter le texte alternatif » du champ.
+ */
+export const imageSchema = z.custom<LibraryFile | null>().superRefine((file, ctx) => {
+  if (file && isImage(file) && !file.alternativeText?.trim()) {
+    ctx.addIssue({ code: 'custom', path: ['alternativeText'], message: "Texte alternatif manquant sur l'image" });
+  }
+});
 
 export function mediaListUrl({ q, folder, kind, missingAlt }: MediaFilters, page: number): string {
   const search = new URLSearchParams({

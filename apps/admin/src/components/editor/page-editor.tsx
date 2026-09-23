@@ -1,13 +1,14 @@
 /**
  * Éditeur d'une page (handoff 6.3) : en-tête (titre, chapô, image, adresse, menu), blocs, référencement.
  */
-import { Image as ImageIcon } from 'lucide-react';
 import { z } from 'zod';
 import { SLUG_MAX_LENGTH, SLUG_PATTERN } from '@communeo/core';
 import { blocksSchema, BlockEditor } from '@/components/blocks';
 import { FormSection, TextareaField, TextField } from '@/components/form';
+import { ImageField } from '@/components/media/media-fields';
 import { MenuSwitch } from '@/components/menu/menu-switch';
 import { pagesApi, pageToValues, type PageDocument, type PageDraft, type PageValues } from '@/lib/content-api';
+import { imageSchema } from '@/lib/media-library';
 import { ContentEditor, type EditorBodyProps, type EditorConfig } from './content-editor';
 
 export const slugSchema = z
@@ -18,25 +19,11 @@ export const slugSchema = z
 
 export const titleSchema = z.string().trim().min(1, 'Le titre est obligatoire').max(200, 'Le titre ne doit pas dépasser 200 caractères');
 
-/** L'image principale arrive avec la médiathèque (#142) */
-export function ImagePlaceholder({ label }: { label: string }) {
-  return (
-    <div>
-      <p className="font-medium">
-        {label} <span className="font-normal text-secondary">(facultative)</span>
-      </p>
-      <p className="mt-1.5 flex items-center gap-2 rounded-lg border border-dashed border-border-input bg-sidebar p-3 text-[13px] text-secondary">
-        <ImageIcon aria-hidden="true" className="size-4" />
-        Le choix de l'image arrive avec la médiathèque.
-      </p>
-    </div>
-  );
-}
-
 const publishSchema = z.object({
   title: titleSchema,
   slug: slugSchema,
   lead: z.string().max(300, 'Le chapô ne doit pas dépasser 300 caractères'),
+  featured_image: imageSchema,
   meta_description: z.string().max(160, 'La description ne doit pas dépasser 160 caractères'),
   blocks: blocksSchema('publish'),
 });
@@ -44,10 +31,10 @@ const publishSchema = z.object({
 function PageBody({ documentId, slugField }: EditorBodyProps<PageDocument>) {
   return (
     <>
-      <FormSection title="En-tête" fields={['title', 'lead', 'slug']}>
+      <FormSection title="En-tête" fields={['title', 'lead', 'featured_image', 'slug']}>
         <TextField name="title" label="Titre" required inputProps={{ className: 'h-12 text-lg font-semibold md:h-11' }} />
         <TextareaField name="lead" label="Chapô" rows={2} help="Une ou deux phrases qui résument la page." />
-        <ImagePlaceholder label="Image principale" />
+        <ImageField name="featured_image" label="Image principale" folder="Pages" />
         <div className="grid items-end gap-5 sm:grid-cols-[1fr_auto]">
           {slugField}
           <div className="sm:pb-7">

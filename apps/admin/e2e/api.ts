@@ -408,6 +408,8 @@ export interface MockOptions {
   mediaSet?: 'some' | 'none';
   /** L'envoi d'un fichier échoue (réponse 400 de Strapi) */
   failUploadFor?: string;
+  /** La page « Location de la salle des fêtes » contient une image sans texte alternatif */
+  pageImageWithoutAlt?: boolean;
 }
 
 export type MockMedia = {
@@ -867,9 +869,11 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     wasteSet = 'some',
     mediaSet = 'some',
     failUploadFor,
+    pageImageWithoutAlt = false,
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
+
   // Usages : le fichier 501 (salle des fêtes) est utilisé par une page et une actualité
   const usage: Record<number, Array<{ uid: string; documentId: string; label: string; path: string }>> = {
     501: [
@@ -893,7 +897,16 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   let state = publication;
   const pages: Record<string, MockPage> =
     pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
-  // Contenus par type (API Strapi), version en ligne et modifications depuis
+  if (pageImageWithoutAlt && pages['p-salle']) {
+    const forum = library.find((item) => item.documentId === 'mi-2')!;
+    pages['p-salle'].blocks.push({
+      __component: 'blocks.image',
+      id: 30,
+      image: structuredClone(forum.file),
+      caption: null,
+      width: 'normal',
+    });
+  }  // Contenus par type (API Strapi), version en ligne et modifications depuis
   const stores: Record<ContentType, Record<string, Record<string, unknown>>> = {
     pages: pages as unknown as Record<string, Record<string, unknown>>,
     articles: structuredClone(ARTICLES),
@@ -1283,12 +1296,14 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (url.pathname === '/api/media-items' && method === 'GET') {
       const q = url.searchParams.get('filters[name][$containsi]')?.toLowerCase();
       const folder = url.searchParams.get('filters[folder][$eq]');
+      const fileId = url.searchParams.get('filters[file][id][$eq]');
       const images = url.searchParams.get('filters[file][mime][$startsWith]') === 'image/';
       const documents = url.searchParams.has('filters[file][mime][$notContainsi]');
       const missingAlt = url.searchParams.has('filters[$or][0][file][alternativeText][$null]');
       const rows = library
         .filter((item) => !q || item.name.toLowerCase().includes(q))
         .filter((item) => !folder || item.folder === folder)
+        .filter((item) => !fileId || item.file.id === Number(fileId))
         .filter((item) => !images || item.file.mime.startsWith('image/'))
         .filter((item) => !documents || !item.file.mime.startsWith('image/'))
         .filter((item) => !missingAlt || !item.file.alternativeText);

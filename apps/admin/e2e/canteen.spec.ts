@@ -138,3 +138,25 @@ test('mobile : une carte par jour', async ({ page }) => {
   await expect(page.getByRole('table')).toBeHidden();
   await expectNoViolations(page);
 });
+
+test('mobile : une erreur de publication ne recouvre pas la barre « Publier la semaine »', async ({ page }) => {
+  test.skip(!isMobile(page), 'sous 768 px');
+  await mockApi(page);
+  await page.route('**/api/school-menus', (route) =>
+    route.request().method() === 'POST'
+      ? route.fulfill({
+          status: 500,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: { status: 500, message: 'Erreur serveur' } }),
+        })
+      : route.fallback(),
+  );
+  await page.goto(WEEK);
+  await editDish(page, 'Lundi, Plat', 'Couscous');
+  for (const day of [1, 2, 3, 4])
+    await page.getByRole('checkbox', { name: 'Pas de cantine' }).locator('visible=true').nth(day).check();
+  await page.getByRole('button', { name: 'Publier la semaine' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: "Le menu n'a pas pu être publié" })).toBeVisible();
+  // Toujours cliquable : le toast est au-dessus de la barre
+  await page.getByRole('button', { name: 'Publier la semaine' }).click({ trial: true, timeout: 2000 });
+});

@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 /** Boutons du handoff : 36 px (44 en mobile), 14/600, rayon 8. Une seule action principale par écran. */
 export const buttonVariants = cva(
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-colors disabled:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex shrink-0 items-center justify-center gap-2 rounded-lg text-sm font-semibold whitespace-nowrap motion-safe:transition-colors disabled:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {

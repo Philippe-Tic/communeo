@@ -2,17 +2,9 @@
  * Shell de l'admin (#131) : accessibilité (axe, WCAG 2.2 AA) en clair et en sombre, navigation au clavier,
  * barre latérale complète / en icônes / tiroir mobile, état de mise en ligne.
  */
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { mockApi } from './api';
-
-const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
-
-async function expectNoViolations(page: Page) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
-  const violations = results.violations.map((v) => ({ rule: v.id, help: v.help, nodes: v.nodes.slice(0, 3).map((n) => n.target.join(' ')) }));
-  expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
-}
+import { expectNoViolations } from './axe';
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 768;
 
@@ -133,8 +125,9 @@ test.describe('session et rôles', () => {
     await page.getByLabel('Adresse e-mail').fill('sophie.leroy@saint-aubin.fr');
     await page.getByLabel('Mot de passe').fill('mauvais');
     await page.getByRole('button', { name: 'Se connecter' }).click();
-    await expect(page.getByRole('alert')).toContainText('Adresse e-mail ou mot de passe incorrect.');
-    await expect(page.getByRole('alert')).toBeFocused();
+    const error = page.getByRole('alert').filter({ hasText: 'Adresse e-mail ou mot de passe incorrect.' });
+    await expect(error).toBeVisible();
+    await expect(error).toBeFocused();
 
     await page.getByLabel('Mot de passe').fill('bon-mot-de-passe');
     await page.getByRole('button', { name: 'Se connecter' }).click();

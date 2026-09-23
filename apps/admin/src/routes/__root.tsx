@@ -1,5 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Link, Outlet } from '@tanstack/react-router';
+import { Toaster } from '@/components/ui/toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 export interface RouterContext {
@@ -10,6 +11,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <TooltipProvider>
       <Outlet />
+      <Toaster />
     </TooltipProvider>
   ),
   notFoundComponent: () => (

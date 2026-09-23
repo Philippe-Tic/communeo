@@ -36,6 +36,8 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     WORKER_SECRET: 'test-worker-secret',
     STRAPI_API_TOKEN: 'test-build-token',
     PREVIEW_API_TOKEN: 'test-preview-token',
+    PREVIEW_SECRET: 'test-preview-secret',
+    PREVIEW_URL: 'https://preview.test',
     CRON_ENABLED: 'false',
     STRAPI_TELEMETRY_DISABLED: 'true',
     STRAPI_DISABLE_UPDATE_NOTIFICATION: 'true',

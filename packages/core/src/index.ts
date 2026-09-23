@@ -6,3 +6,4 @@ export * from './format';
 export * from './vm';
 export * from './source';
 export * from './demarches';
+export * from './preview';

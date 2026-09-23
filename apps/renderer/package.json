@@ -10,7 +10,9 @@
     "lint": "eslint src e2e playwright.config.ts",
     "typecheck": "astro check",
     "test:e2e": "node e2e/build.mjs && playwright test",
-    "test:parity": "node e2e/parity.mjs"
+    "test:parity": "node e2e/parity.mjs",
+    "test": "vitest run",
+    "test:preview": "node e2e/preview-access.mjs"
   },
   "dependencies": {
     "@astrojs/node": "^11.1.6",
@@ -27,6 +29,7 @@
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   }
 }

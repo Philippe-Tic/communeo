@@ -537,6 +537,7 @@ export interface ApiAssociationAssociation extends Struct.CollectionTypeSchema {
         maxLength: 200;
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    rejection_reason: Schema.Attribute.Text;
     reviewed_at: Schema.Attribute.DateTime;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     status: Schema.Attribute.Enumeration<['pending', 'published', 'rejected']> &

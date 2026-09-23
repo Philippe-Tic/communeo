@@ -52,6 +52,12 @@ const COLLECTION_ROUTES: Record<string, string[]> = {
   'alertes': ['public'],
 };
 
+// Actions custom sur un document (POST /api/<type>/<documentId>/<action>) : propriété vérifiée comme
+// pour une écriture ; toute autre route sous un document reste refusée
+const ITEM_ACTIONS: Record<string, string[]> = {
+  associations: ['publish', 'reject'],
+};
+
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
 const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication'];
 
@@ -204,7 +210,8 @@ export default (config: any, { strapi }: { strapi: any }) => {
 
       const isCollectionRoute = !!id && (COLLECTION_ROUTES[apiId!] || []).includes(id);
       const documentId = isCollectionRoute ? null : id;
-      if (extra.length > 0) return ctx.forbidden('Accès non autorisé');
+      const isItemAction = !!documentId && extra.length === 1 && method === 'POST' && (ITEM_ACTIONS[apiId!] || []).includes(extra[0]!);
+      if (extra.length > 0 && !isItemAction) return ctx.forbidden('Accès non autorisé');
 
       if (method === 'GET' && !documentId) {
         if (!isCollectionRoute) {

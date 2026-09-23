@@ -438,6 +438,7 @@ export interface Association extends StrapiDocument {
   submitted_by_name: string | null;
   submitted_by_email: string | null;
   reviewed_at: string | null;
+  rejection_reason: string | null;
   site?: Site | null;
 }
 

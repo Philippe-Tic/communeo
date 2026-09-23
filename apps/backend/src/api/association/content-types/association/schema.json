@@ -23,7 +23,14 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["sport", "culture", "social", "environnement", "education", "autre"],
+      "enum": [
+        "sport",
+        "culture",
+        "social",
+        "environnement",
+        "education",
+        "autre"
+      ],
       "required": true
     },
     "contact_name": {
@@ -52,18 +59,27 @@
     "logo": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "required": false
     },
     "status": {
       "type": "enumeration",
-      "enum": ["pending", "published", "rejected"],
+      "enum": [
+        "pending",
+        "published",
+        "rejected"
+      ],
       "default": "pending",
       "required": true
     },
     "submission_source": {
       "type": "enumeration",
-      "enum": ["manual", "public_form"],
+      "enum": [
+        "manual",
+        "public_form"
+      ],
       "default": "manual",
       "required": true
     },
@@ -78,6 +94,10 @@
     },
     "reviewed_at": {
       "type": "datetime",
+      "required": false
+    },
+    "rejection_reason": {
+      "type": "text",
       "required": false
     },
     "site": {

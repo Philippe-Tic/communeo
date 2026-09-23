@@ -22,6 +22,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...crud('official-document'),
     ...crud('team-member'),
     ...crud('association'),
+    ...custom('association', ['publish', 'reject']),
     ...crud('alerte'),
     ...crud('waste-schedule'),
     ...crud('school-menu'),

@@ -21,5 +21,15 @@ export default {
       path: '/newsletter-subscribers/stats',
       handler: 'newsletter-subscriber.stats',
     },
+    {
+      method: 'GET',
+      path: '/newsletter-subscribers/export',
+      handler: 'newsletter-subscriber.export',
+    },
+    {
+      method: 'POST',
+      path: '/newsletter-subscribers/:id/unsubscribe',
+      handler: 'newsletter-subscriber.unsubscribe',
+    },
   ],
 };

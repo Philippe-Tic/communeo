@@ -521,6 +521,7 @@ export interface NewsletterSubscriber extends StrapiDocument {
   last_name: string | null;
   subscribed_at: string;
   active: boolean;
+  unsubscribed_at: string | null;
   site?: Site | null;
 }
 

@@ -46,7 +46,7 @@ const DRAFT_AND_PUBLISH_CONTENT_TYPES = new Set([
 // Routes custom de niveau collection (ne sont pas des documentId) : pluralApiId → segments
 const COLLECTION_ROUTES: Record<string, string[]> = {
   'media-items': ['upload'],
-  'newsletter-subscribers': ['stats', 'public', 'unsubscribe'],
+  'newsletter-subscribers': ['stats', 'export', 'public', 'unsubscribe'],
   'contact-submissions': ['public'],
   'associations': ['public'],
   'alertes': ['public'],
@@ -57,6 +57,7 @@ const COLLECTION_ROUTES: Record<string, string[]> = {
 const ITEM_ACTIONS: Record<string, string[]> = {
   associations: ['publish', 'reject'],
   'contact-submissions': ['reply', 'open'],
+  'newsletter-subscribers': ['unsubscribe'],
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles

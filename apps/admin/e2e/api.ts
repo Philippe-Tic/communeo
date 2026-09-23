@@ -171,6 +171,40 @@ export interface MockOptions {
   documentSet?: 'few' | 'many';
   /** Équipe vide */
   emptyTeam?: boolean;
+  /** Abonnés à la newsletter : 45 (défaut) ou aucun */
+  subscriberSet?: 'some' | 'none';
+  /** Export CSV en échec (500) */
+  failExport?: boolean;
+}
+
+export interface MockSubscriber {
+  documentId: string;
+  email: string;
+  first_name: string | null;
+  last_name: string | null;
+  subscribed_at: string;
+  active: boolean;
+  unsubscribed_at: string | null;
+}
+
+/** 45 abonnés : Hélène Garnier la plus récente, une adresse désabonnée, des noms manquants */
+function subscribers(): MockSubscriber[] {
+  const list: MockSubscriber[] = [
+    { documentId: 's-garnier', email: 'h.garnier@example.org', first_name: 'Hélène', last_name: 'Garnier', subscribed_at: '2026-09-20T08:00:00.000Z', active: true, unsubscribed_at: null },
+    { documentId: 's-ancienne', email: 'ancienne.adresse@example.net', first_name: null, last_name: null, subscribed_at: '2024-01-14T08:00:00.000Z', active: false, unsubscribed_at: '2025-06-02T10:00:00.000Z' },
+  ];
+  for (let index = 1; index <= 43; index++) {
+    list.push({
+      documentId: `s-${index}`,
+      email: `habitant${index}@example.fr`,
+      first_name: index % 5 === 0 ? null : `Prénom${index}`,
+      last_name: index % 5 === 0 ? null : `Nom${index}`,
+      subscribed_at: new Date(Date.UTC(2026, 8, 19) - index * 5 * 86_400_000).toISOString(),
+      active: index % 9 !== 0,
+      unsubscribed_at: index % 9 !== 0 ? null : '2026-05-01T10:00:00.000Z',
+    });
+  }
+  return list;
 }
 
 export const NAVIGATION = {
@@ -183,7 +217,7 @@ export const NAVIGATION = {
 };
 
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel', documentSet = 'few', emptyTeam = false } = options;
+  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel', documentSet = 'few', emptyTeam = false, subscriberSet = 'some', failExport = false } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
@@ -197,6 +231,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     'official-documents': officialDocuments(documentSet === 'many'),
   };
   const team = emptyTeam ? [] : structuredClone(TEAM) as Array<Record<string, unknown>>;
+  const newsletter = subscriberSet === 'none' ? [] : subscribers();
   let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
   const publishedByType: Record<ContentType, Set<string>> = {
@@ -300,6 +335,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       posts['upload'] = [...(posts['upload'] ?? []), file];
       return json({ data: { documentId: `m-${uploads}`, name, file } }, 201);
     }
+    if (url.pathname === '/api/newsletter-subscribers/stats') {
+      const active = newsletter.filter((item) => item.active);
+      return json({ data: { total: newsletter.length, active: active.length, thisMonth: active.filter((item) => item.subscribed_at >= '2026-09-01').length } });
+    }
+    if (url.pathname === '/api/newsletter-subscribers/export') {
+      if (failExport) return json({ error: { status: 500, message: 'Internal Server Error' } }, 500);
+      const csv = '\uFEFF"E-mail";"Prénom";"Nom";"Inscrit le";"État";"Désabonné le"\r\n' + newsletter.map((item) => `"${item.email}";"${item.first_name ?? ''}";"${item.last_name ?? ''}";"";"${item.active ? 'Actif' : 'Désabonné'}";""`).join('\r\n');
+      return route.fulfill({ status: 200, contentType: 'text/csv; charset=utf-8', body: csv });
+    }
+    const unsubscribeMatch = /^\/api\/newsletter-subscribers\/([^/]+)\/unsubscribe$/.exec(url.pathname);
+    if (unsubscribeMatch && method === 'POST') {
+      const subscriber = newsletter.find((item) => item.documentId === unsubscribeMatch[1]);
+      if (!subscriber) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      Object.assign(subscriber, { active: false, unsubscribed_at: new Date().toISOString() });
+      return json({ data: subscriber });
+    }
+    if (url.pathname === '/api/newsletter-subscribers') {
+      const q = url.searchParams.get('filters[$or][0][email][$containsi]')?.toLowerCase();
+      const active = url.searchParams.get('filters[active][$eq]');
+      const rows = newsletter
+        .filter((item) => !q || [item.email, item.first_name, item.last_name].some((value) => value?.toLowerCase().includes(q)))
+        .filter((item) => active === null || String(item.active) === active)
+        .sort((a, b) => b.subscribed_at.localeCompare(a.subscribed_at));
+      const pageNumber = Number(url.searchParams.get('pagination[page]') ?? 1);
+      const pageSize = Number(url.searchParams.get('pagination[pageSize]') ?? 25);
+      return json({ data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize), meta: { pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } } });
+    }
     const teamMatch = /^\/api\/team-members(?:\/([^/]+))?$/.exec(url.pathname);
     if (teamMatch) {
       const id = teamMatch[1];
@@ -395,6 +457,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   return {
     site,
     team,
+    newsletter,
     stores,
     publishedByType,
     previewPosts,

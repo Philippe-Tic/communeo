@@ -800,6 +800,7 @@ export interface ApiNewsletterSubscriberNewsletterSubscriber extends Struct.Coll
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     subscribed_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
     unsubscribe_token: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Private;
+    unsubscribed_at: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
   };

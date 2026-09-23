@@ -31,8 +31,9 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     // Données des habitants : pas de création depuis l'admin (formulaires publics)
     ...crud('contact-submission', ['find', 'findOne', 'update', 'delete']),
     ...custom('contact-submission', ['reply', 'open']),
-    ...crud('newsletter-subscriber', ['find', 'findOne', 'update', 'delete']),
-    ...custom('newsletter-subscriber', ['stats']),
+    // Jamais de suppression ni de modification : l'abonné est désabonné, la trace reste (RGPD)
+    ...crud('newsletter-subscriber', ['find', 'findOne']),
+    ...custom('newsletter-subscriber', ['stats', 'export', 'unsubscribe']),
     // Son propre site : lecture et mise à jour uniquement
     ...crud('site', ['find', 'findOne', 'update']),
     // Envoi de fichiers uniquement (ni liste globale, ni suppression, ni remplacement)

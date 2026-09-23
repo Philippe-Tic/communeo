@@ -220,6 +220,10 @@
       "min": 60,
       "max": 3600
     },
+    "waste_notes": {
+      "type": "text",
+      "maxLength": 2000
+    },
     "navigation_config": {
       "type": "json"
     },

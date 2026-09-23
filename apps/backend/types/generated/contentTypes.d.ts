@@ -1080,6 +1080,10 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'institutionnel'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    waste_notes: Schema.Attribute.Text &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 2000;
+      }>;
     waste_schedules: Schema.Attribute.Relation<'oneToMany', 'api::waste-schedule.waste-schedule'>;
   };
 }
@@ -1149,21 +1153,54 @@ export interface ApiWasteScheduleWasteSchedule extends Struct.CollectionTypeSche
     active: Schema.Attribute.Boolean & Schema.Attribute.Required & Schema.Attribute.DefaultTo<true>;
     collection_day: Schema.Attribute.Enumeration<
       ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
-    > &
-      Schema.Attribute.Required;
+    >;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
-    frequency: Schema.Attribute.Enumeration<['hebdomadaire', 'bimensuel', 'mensuel']> &
+    frequency: Schema.Attribute.Enumeration<
+      [
+        'hebdomadaire',
+        'semaines-paires',
+        'semaines-impaires',
+        'bimensuel',
+        'mensuel',
+        'apport-volontaire',
+        'sur-rendez-vous',
+      ]
+    > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'hebdomadaire'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::waste-schedule.waste-schedule'> &
       Schema.Attribute.Private;
+    month_rank: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 5;
+          min: 1;
+        },
+        number
+      >;
     notes: Schema.Attribute.Text &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    season_end_month: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 12;
+          min: 1;
+        },
+        number
+      >;
+    season_start_month: Schema.Attribute.Integer &
+      Schema.Attribute.SetMinMax<
+        {
+          max: 12;
+          min: 1;
+        },
+        number
+      >;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     start_date: Schema.Attribute.Date;
     updatedAt: Schema.Attribute.DateTime;

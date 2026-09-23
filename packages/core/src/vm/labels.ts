@@ -61,9 +61,46 @@ export const WASTE_TYPES: Record<string, { label: string; abbreviation: string }
 
 export const WASTE_FREQUENCY_LABELS: Record<string, string> = {
   hebdomadaire: 'Chaque semaine',
+  'semaines-paires': 'Semaines paires',
+  'semaines-impaires': 'Semaines impaires',
   bimensuel: 'Toutes les deux semaines',
   mensuel: 'Une fois par mois',
+  'apport-volontaire': "Points d'apport volontaire",
+  'sur-rendez-vous': 'Sur rendez-vous',
 };
+
+/** Fréquences sans jour de passage (pas de prochaine collecte calculée) */
+export const WASTE_FREQUENCIES_WITHOUT_DAY = ['apport-volontaire', 'sur-rendez-vous'];
+
+export const MONTH_RANK_LABELS: Record<number, string> = { 1: '1er', 2: '2e', 3: '3e', 4: '4e', 5: 'dernier' };
+
+export const MONTH_NAMES = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+/** « d'avril à novembre », « de novembre à mars » */
+export function seasonLabel(start?: number | null, end?: number | null): string | null {
+  if (!start || !end) return null;
+  const from = MONTH_NAMES[start - 1]!;
+  return `${/^[aeiouyéèêh]/i.test(from) ? "d'" : 'de '}${from} à ${MONTH_NAMES[end - 1]}`;
+}
+
+/**
+ * Fréquence en toutes lettres : « Chaque semaine », « Semaines paires », « Le 1er mercredi du mois »,
+ * « Points d'apport volontaire » ; saison ajoutée : « Chaque semaine, d'avril à novembre ».
+ */
+export function wasteFrequencyLabel(schedule: {
+  frequency: string;
+  collection_day?: string | null;
+  month_rank?: number | null;
+  season_start_month?: number | null;
+  season_end_month?: number | null;
+}): string {
+  const base =
+    schedule.frequency === 'mensuel' && schedule.month_rank && schedule.collection_day
+      ? `Le ${MONTH_RANK_LABELS[schedule.month_rank]} ${schedule.collection_day} du mois`
+      : (WASTE_FREQUENCY_LABELS[schedule.frequency] ?? schedule.frequency);
+  const season = seasonLabel(schedule.season_start_month, schedule.season_end_month);
+  return season ? `${base}, ${season}` : base;
+}
 
 export const FRENCH_DAYS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'] as const;
 

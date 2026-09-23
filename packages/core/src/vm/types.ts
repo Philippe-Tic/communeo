@@ -9,6 +9,7 @@
  */
 import type { RichTextHeading, RichTextList, RichTextParagraph } from '../blocks/rich-text';
 import type { OpeningHours } from '../site/opening-hours';
+import type { WasteRule } from '../site/practical-rules';
 import type { ThemeId } from '../site/themes';
 
 // --- Briques communes ---------------------------------------------------------------------------
@@ -330,12 +331,14 @@ export interface WasteCollectionVM {
   label: string;
   /** « OM », « TRI », « VER » : pastille textuelle, jamais la couleur seule */
   abbreviation: string;
-  day: KeyLabel;
+  /** Jour de passage ; `null` pour l'apport volontaire ou sur rendez-vous */
+  day: KeyLabel | null;
+  /** Libellé complet : « Chaque semaine, d'avril à novembre », « Le 1er mercredi du mois » */
   frequency: KeyLabel;
   zone: string | null;
   notes: string | null;
   /** Règle de calcul des prochains passages (dans le navigateur) */
-  rule: { weekday: number; frequency: 'hebdomadaire' | 'bimensuel' | 'mensuel'; startDate: string | null };
+  rule: WasteRule;
   /** Prochains passages calculés au build (repli sans JavaScript) */
   upcoming: DateVM[];
 }

@@ -3,26 +3,30 @@
  * Le build et la publication sont faits par le worker (apps/worker), qui rend compte à Strapi
  * par les routes internes de `api::build-worker`.
  */
-import type { BuildReason } from '@communeo/pipeline';
-import { enqueueBuild } from './build-queue';
+import type { BuildReason, EnqueueResult } from '@communeo/pipeline';
+import { enqueueBuild, scheduleBuild } from './build-queue';
 import { publisher } from '../utils/publisher';
 import { log } from '../utils/logger';
 
 class DeploymentService {
   /**
-   * Demande une mise en ligne. Renvoie l'identifiant du job, ou `null` si une demande attend déjà
-   * pour ce site (elle prendra en compte les dernières modifications).
+   * Demande une mise en ligne immédiate. Si une demande attend déjà pour ce site, elle part aussi tôt
+   * et prendra en compte les dernières modifications.
    */
-  async requestBuild(siteDocumentId: string, options: { triggeredBy?: string | null; reason: BuildReason }): Promise<string | null> {
-    const jobId = await enqueueBuild({
-      siteDocumentId,
-      triggeredBy: options.triggeredBy ?? null,
-      reason: options.reason,
-    });
-    log.info(jobId
-      ? `📥 [DEPLOYMENT] Build queued for site ${siteDocumentId} (${options.reason}, job ${jobId})`
-      : `⏸️ [DEPLOYMENT] A build is already waiting for site ${siteDocumentId}`);
-    return jobId;
+  async requestBuild(siteDocumentId: string, options: { triggeredBy?: string | null; reason: BuildReason }): Promise<EnqueueResult> {
+    const result = await enqueueBuild({ siteDocumentId, triggeredBy: options.triggeredBy ?? null, reason: options.reason });
+    log.info(`📥 [DEPLOYMENT] Build ${result.status} for site ${siteDocumentId} (${options.reason}, job ${result.jobId})`);
+    return result;
+  }
+
+  /**
+   * Mise en ligne automatique après une modification : part `delaySeconds` après la dernière
+   * modification du site (debounce persistant dans la file).
+   */
+  async scheduleContentBuild(siteDocumentId: string, delaySeconds: number): Promise<EnqueueResult> {
+    const result = await scheduleBuild({ siteDocumentId, triggeredBy: null, reason: 'content' }, delaySeconds);
+    log.info(`⏱️ [DEPLOYMENT] Build ${result.status} for site ${siteDocumentId} in ${delaySeconds}s (job ${result.jobId})`);
+    return result;
   }
 
   /**

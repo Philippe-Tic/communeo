@@ -11,7 +11,7 @@ import { consoleLogger, type Logger } from './logger';
 
 export const BUILD_QUEUE = 'site-build';
 
-export type BuildReason = 'manual' | 'content' | 'scheduled';
+export type BuildReason = 'manual' | 'content' | 'scheduled' | 'domain';
 
 export interface BuildJobData {
   siteDocumentId: string;
@@ -28,21 +28,42 @@ export interface BuildQueueOptions {
   /** Délai avant une nouvelle tentative, en secondes (défaut 15) */
   retryDelaySeconds?: number;
   logger?: Logger;
+  /** Schéma Postgres de pg-boss (défaut `pgboss`) ; les tests en utilisent un chacun */
+  schema?: string;
 }
 
 /** Sans battement de cœur pendant cette durée (worker arrêté), le build est relancé. */
 export const BUILD_HEARTBEAT_SECONDS = 30;
 
+/**
+ * - `queued` : nouvelle demande déposée
+ * - `already-queued` : une demande attend déjà et partira aussi tôt (elle prendra ces modifications)
+ * - `advanced` : une demande différée attendait, elle part maintenant
+ * - `postponed` : une demande différée attendait, son départ est repoussé (debounce)
+ */
+export type EnqueueStatus = 'queued' | 'already-queued' | 'advanced' | 'postponed';
+
+export interface EnqueueResult {
+  jobId: string | null;
+  status: EnqueueStatus;
+}
+
 export interface BuildQueue {
   readonly boss: PgBoss;
-  /** Dépose une demande ; `null` si une demande attend déjà pour ce site. */
-  enqueue(data: BuildJobData): Promise<string | null>;
+  /** Demande une mise en ligne immédiate (une demande différée qui attend part tout de suite). */
+  enqueue(data: BuildJobData): Promise<EnqueueResult>;
+  /**
+   * Demande une mise en ligne dans `delaySeconds` secondes. Chaque nouvel appel pour le même site
+   * repousse le départ de la demande en attente : un seul build part, après la dernière modification.
+   * Une demande immédiate déjà en attente n'est jamais retardée.
+   */
+  schedule(data: BuildJobData, delaySeconds: number): Promise<EnqueueResult>;
   stop(): Promise<void>;
 }
 
 export async function createBuildQueue(connectionString: string, options: BuildQueueOptions = {}): Promise<BuildQueue> {
   const log = options.logger ?? consoleLogger;
-  const boss = new PgBoss({ connectionString, schema: 'pgboss' });
+  const boss = new PgBoss({ connectionString, schema: options.schema ?? 'pgboss' });
   boss.on('error', (error) => log.error('[QUEUE]', error));
   await boss.start();
 
@@ -60,9 +81,44 @@ export async function createBuildQueue(connectionString: string, options: BuildQ
     await boss.createQueue(BUILD_QUEUE, settings);
   }
 
+  /** Demande qui attend (état `created`) pour ce site, s'il y en a une */
+  const waiting = async (siteDocumentId: string) => {
+    const jobs = await boss.findJobs<BuildJobData>(BUILD_QUEUE, { key: siteDocumentId, queued: true });
+    return jobs.find((job) => job.state === 'created') ?? null;
+  };
+
+  /** Change le départ (et éventuellement la demande) d'un job en attente ; faux s'il est déjà parti. */
+  const reschedule = async (id: string, startAfter: Date, data?: BuildJobData) =>
+    (await boss.update(BUILD_QUEUE, data, { id, startAfter })).updated > 0;
+
+  const send = async (data: BuildJobData, delaySeconds: number): Promise<EnqueueResult> => {
+    const jobId = await boss.send(BUILD_QUEUE, data, {
+      singletonKey: data.siteDocumentId,
+      ...(delaySeconds > 0 ? { startAfter: delaySeconds } : {}),
+    });
+    return jobId ? { jobId, status: 'queued' } : { jobId: (await waiting(data.siteDocumentId))?.id ?? null, status: 'already-queued' };
+  };
+
   return {
     boss,
-    enqueue: (data) => boss.send(BUILD_QUEUE, data, { singletonKey: data.siteDocumentId }),
+
+    async enqueue(data) {
+      const job = await waiting(data.siteDocumentId);
+      if (!job) return send(data, 0);
+      if (job.startAfter.getTime() <= Date.now()) return { jobId: job.id, status: 'already-queued' };
+      // Une demande différée attendait : elle part maintenant, au nom de la personne qui publie
+      return (await reschedule(job.id, new Date(), data)) ? { jobId: job.id, status: 'advanced' } : send(data, 0);
+    },
+
+    async schedule(data, delaySeconds) {
+      const job = await waiting(data.siteDocumentId);
+      if (!job) return send(data, delaySeconds);
+      const startAfter = new Date(Date.now() + delaySeconds * 1000);
+      // Demande immédiate (ou partant plus tard que prévu) : on n'y touche pas
+      if (job.data.reason !== 'content' || job.startAfter >= startAfter) return { jobId: job.id, status: 'already-queued' };
+      return (await reschedule(job.id, startAfter)) ? { jobId: job.id, status: 'postponed' } : send(data, delaySeconds);
+    },
+
     stop: () => boss.stop({ graceful: true, timeout: 30_000 }),
   };
 }

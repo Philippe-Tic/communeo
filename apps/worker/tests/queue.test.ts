@@ -76,7 +76,7 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
   });
 
   beforeAll(async () => {
-    queue = await createBuildQueue(url!, { retryLimit: 1, retryDelaySeconds: 0, logger: silent });
+    queue = await createBuildQueue(url!, { retryLimit: 1, retryDelaySeconds: 0, logger: silent, schema: 'pgboss_test_worker' });
   });
   afterAll(async () => {
     await queue?.stop();
@@ -103,9 +103,9 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
     const first = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
     const second = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
     const other = await queue.enqueue({ siteDocumentId: 'nantes', triggeredBy: null, reason: 'manual' });
-    expect(first).toEqual(expect.any(String));
-    expect(second).toBeNull();
-    expect(other).toEqual(expect.any(String));
+    expect(first).toEqual({ jobId: expect.any(String), status: 'queued' });
+    expect(second).toEqual({ jobId: first.jobId, status: 'already-queued' });
+    expect(other).toEqual({ jobId: expect.any(String), status: 'queued' });
   });
 
   it('ne lance jamais deux builds du même site en même temps', async () => {
@@ -116,8 +116,8 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
     await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
     await until(() => starts.length === 1);
     // Pendant le build : une demande de plus attend, la suivante est ignorée
-    expect(await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: 'u', reason: 'manual' })).toEqual(expect.any(String));
-    expect(await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: 'u', reason: 'content' })).toBeNull();
+    expect((await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: 'u', reason: 'manual' })).status).toBe('queued');
+    expect((await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: 'u', reason: 'content' })).status).toBe('already-queued');
 
     await new Promise((resolve) => setTimeout(resolve, 1500));
     expect(starts).toHaveLength(1);
@@ -133,7 +133,7 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
     failNext.add('lyon');
     gate.release();
     workerId = await startWorker(queue, deps());
-    const jobId = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
+    const { jobId } = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
 
     await until(() => finished.length === 1);
     expect(starts).toEqual([
@@ -149,7 +149,7 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
       ...deps(),
       renderer: { build: async () => { throw new Error('thème inconnu'); } },
     });
-    const jobId = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
+    const { jobId } = await queue.enqueue({ siteDocumentId: 'lyon', triggeredBy: null, reason: 'manual' });
 
     await until(() => starts.length === 2);
     await until(() => finished.length === 1);

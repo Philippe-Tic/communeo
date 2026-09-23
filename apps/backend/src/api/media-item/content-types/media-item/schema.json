@@ -17,18 +17,13 @@
       "required": true,
       "maxLength": 255
     },
-    "alt_text": {
-      "type": "string",
-      "maxLength": 255
-    },
-    "caption": {
-      "type": "string",
-      "maxLength": 500
-    },
     "folder": {
       "type": "string",
-      "default": "general",
       "maxLength": 100
+    },
+    "uploaded_by_name": {
+      "type": "string",
+      "maxLength": 200
     },
     "file": {
       "type": "media",

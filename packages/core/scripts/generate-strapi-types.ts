@@ -223,6 +223,8 @@ export interface Media extends StrapiDocument {
   name: string;
   alternativeText: string | null;
   caption: string | null;
+  /** Crédit (photographe, source) : champ ajouté au fichier par la commune (extension upload) */
+  credit?: string | null;
   width: number | null;
   height: number | null;
   formats: Record<string, MediaFormat> | null;

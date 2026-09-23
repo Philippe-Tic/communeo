@@ -45,7 +45,7 @@ const DRAFT_AND_PUBLISH_CONTENT_TYPES = new Set([
 
 // Routes custom de niveau collection (ne sont pas des documentId) : pluralApiId → segments
 const COLLECTION_ROUTES: Record<string, string[]> = {
-  'media-items': ['upload'],
+  'media-items': ['upload', 'folders', 'usage'],
   'newsletter-subscribers': ['stats', 'export', 'public', 'unsubscribe'],
   'contact-submissions': ['public'],
   'associations': ['public'],

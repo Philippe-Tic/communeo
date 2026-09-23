@@ -740,22 +740,13 @@ export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
-    alt_text: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 255;
-      }>;
-    caption: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 500;
-      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     file: Schema.Attribute.Media<'images' | 'files' | 'videos'> & Schema.Attribute.Required;
     folder: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
-      }> &
-      Schema.Attribute.DefaultTo<'general'>;
+      }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::media-item.media-item'> & Schema.Attribute.Private;
     name: Schema.Attribute.String &
@@ -767,6 +758,10 @@ export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    uploaded_by_name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
   };
 }
 
@@ -1424,6 +1419,7 @@ export interface PluginUploadFile extends Struct.CollectionTypeSchema {
     caption: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    credit: Schema.Attribute.String;
     ext: Schema.Attribute.String;
     focalPoint: Schema.Attribute.JSON;
     folder: Schema.Attribute.Relation<'manyToOne', 'plugin::upload.folder'> & Schema.Attribute.Private;

@@ -36,6 +36,8 @@ export interface Media extends StrapiDocument {
   name: string;
   alternativeText: string | null;
   caption: string | null;
+  /** Crédit (photographe, source) : champ ajouté au fichier par la commune (extension upload) */
+  credit?: string | null;
   width: number | null;
   height: number | null;
   formats: Record<string, MediaFormat> | null;
@@ -507,9 +509,8 @@ export interface Evenement extends StrapiPublishableDocument {
 /** Content-type `api::media-item.media-item` — Bibliothèque de médias avec isolation par site */
 export interface MediaItem extends StrapiDocument {
   name: string;
-  alt_text: string | null;
-  caption: string | null;
   folder: string | null;
+  uploaded_by_name: string | null;
   file?: Media | null;
   site?: Site | null;
 }

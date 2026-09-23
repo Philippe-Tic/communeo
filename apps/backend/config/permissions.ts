@@ -27,7 +27,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...crud('waste-schedule'),
     ...crud('school-menu'),
     ...crud('media-item'),
-    ...custom('media-item', ['upload']),
+    ...custom('media-item', ['upload', 'folders', 'usage']),
     // Données des habitants : pas de création depuis l'admin (formulaires publics)
     ...crud('contact-submission', ['find', 'findOne', 'update', 'delete']),
     ...custom('contact-submission', ['reply', 'open']),
@@ -36,8 +36,8 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('newsletter-subscriber', ['stats', 'export', 'unsubscribe']),
     // Son propre site : lecture et mise à jour uniquement
     ...crud('site', ['find', 'findOne', 'update']),
-    // Envoi de fichiers uniquement (ni liste globale, ni suppression, ni remplacement)
-    'plugin::upload.content-api.upload',
+    // Pas d'envoi direct (/api/upload) : tout passe par la médiathèque (formats vérifiés, SVG
+    // nettoyés, fichier rattaché à la commune)
     // Endpoints custom (rôles vérifiés dans les contrôleurs)
     ...custom('deployment', ['trigger', 'state', 'status', 'check', 'debug']),
     ...custom('domain', ['configure', 'verify', 'remove', 'status', 'diagnostic']),

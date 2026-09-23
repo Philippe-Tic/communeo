@@ -24,6 +24,9 @@ const IGNORED_UIDS = new Set([
   'api::pending-change.pending-change',
   'api::contact-submission.contact-submission',
   'api::newsletter-subscriber.newsletter-subscriber',
+  // La médiathèque seule ne change rien : un fichier compte quand un contenu l'utilise (le contrôleur
+  // de la médiathèque note lui-même la modification d'un fichier utilisé)
+  'api::media-item.media-item',
 ]);
 
 /** Champs du Site sans effet sur les pages : les modifier ne reconstruit pas le site */

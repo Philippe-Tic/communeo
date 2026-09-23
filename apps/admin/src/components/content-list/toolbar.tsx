@@ -31,6 +31,9 @@ export function Toolbar({
   order,
   compact,
   onCompact,
+  searchLabel,
+  stacked,
+  toggles = [],
 }: {
   noun: Noun;
   query: string;
@@ -42,6 +45,12 @@ export function Toolbar({
   order?: 'asc' | 'desc';
   compact?: boolean;
   onCompact?: (compact: boolean) => void;
+  /** Libellé de la recherche, s'il précise les champs : « Rechercher (nom, objet, référence) » */
+  searchLabel?: string;
+  /** Volet étroit (boîte de réception) : recherche sur toute la largeur, filtres dessous */
+  stacked?: boolean;
+  /** Bascules avant les filtres (« Non lus ») */
+  toggles?: Array<{ label: string; pressed: boolean; onChange: (pressed: boolean) => void }>;
 }) {
   const searchId = useId();
   const [text, setText] = useState(query);
@@ -59,10 +68,15 @@ export function Toolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2 border-b border-border-row p-3 md:gap-3 md:px-4">
-      <div className="relative w-full md:w-[280px]">
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-2 border-b border-border-row p-3',
+        stacked ? 'md:px-5' : 'md:gap-3 md:px-4',
+      )}
+    >
+      <div className={cn('relative w-full', !stacked && 'md:w-[280px]')}>
         <label htmlFor={searchId} className="sr-only">
-          Rechercher {indefinite(noun)}
+          {searchLabel ?? `Rechercher ${indefinite(noun)}`}
         </label>
         <Search
           aria-hidden="true"
@@ -72,7 +86,7 @@ export function Toolbar({
           id={searchId}
           type="search"
           value={text}
-          placeholder={`Rechercher ${indefinite(noun)}`}
+          placeholder={searchLabel ?? `Rechercher ${indefinite(noun)}`}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === 'Enter') onQuery(text);
@@ -95,6 +109,22 @@ export function Toolbar({
       </div>
 
       <div className="-mx-3 flex max-w-[calc(100%+1.5rem)] flex-1 gap-2 overflow-x-auto px-3 md:mx-0 md:max-w-none md:flex-none md:overflow-visible md:px-0">
+        {toggles.map((toggle) => (
+          <button
+            key={toggle.label}
+            type="button"
+            aria-pressed={toggle.pressed}
+            onClick={() => toggle.onChange(!toggle.pressed)}
+            className={cn(
+              'inline-flex h-11 shrink-0 items-center rounded-full border px-3.5 text-[13px] md:h-8',
+              toggle.pressed
+                ? 'border-brand bg-brand-soft font-semibold text-brand'
+                : 'border-border-input hover:bg-surface-hover',
+            )}
+          >
+            {toggle.label}
+          </button>
+        ))}
         {filters.map((filter) => (
           <FilterPill key={filter.key} filter={filter} onChange={(value) => onFilter(filter.key, value)} />
         ))}

@@ -20,6 +20,8 @@ export interface HistoryEvent {
   from?: string;
   to?: string;
   attachment?: string;
+  /** Texte de la réponse (chaque réponse reste lisible, `response` ne garde que la dernière) */
+  message?: string;
 }
 
 const actor = (ctx: any) => {
@@ -220,7 +222,7 @@ export default factories.createCoreController('api::contact-submission.contact-s
     const updated = await appendHistory(
       strapi,
       message.documentId,
-      { type: 'replied', at, by: actor(ctx), ...(attachment ? { attachment: attachment.filename } : {}) },
+      { type: 'replied', at, by: actor(ctx), message: text, ...(attachment ? { attachment: attachment.filename } : {}) },
       { response: text, responded_at: at, status, ...(message.opened_at ? {} : { opened_at: at }) },
     );
     ctx.body = { data: updated };

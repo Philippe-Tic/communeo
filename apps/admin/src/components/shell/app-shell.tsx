@@ -19,7 +19,7 @@ export const MAIN_ID = 'contenu';
 function useUnreadMessages(): number | undefined {
   const { data } = useQuery({
     queryKey: ['messages', 'unread-count'],
-    queryFn: () => api<{ meta: { pagination: { total: number } } }>('/api/contact-submissions?filters[status][$eq]=received&pagination[pageSize]=1&fields[0]=id'),
+    queryFn: () => api<{ meta: { pagination: { total: number } } }>('/api/contact-submissions?filters[opened_at][$null]=true&pagination[pageSize]=1&fields[0]=id'),
     select: (response) => response.meta.pagination.total,
     refetchInterval: 60_000,
   });

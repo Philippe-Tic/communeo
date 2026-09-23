@@ -63,7 +63,7 @@ describe('réponse par e-mail', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({ status: 'resolved', response: text });
     expect(res.body.data.responded_at).toBeTruthy();
-    expect(res.body.data.history.at(-1)).toMatchObject({ type: 'replied' });
+    expect(res.body.data.history.at(-1)).toMatchObject({ type: 'replied', message: text });
     expect(res.body.data.history.at(-1).by).toBeTruthy();
 
     const mail = sentEmails.at(-1)!;

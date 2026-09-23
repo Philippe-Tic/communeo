@@ -12,22 +12,70 @@ export const SITE = {
 };
 
 export const USERS = {
-  admin: { id: 1, documentId: 'u-sophie', email: 'sophie.leroy@saint-aubin.fr', first_name: 'Sophie', last_name: 'Leroy', municipality_role: 'admin', site: SITE },
-  editor: { id: 2, documentId: 'u-marc', email: 'marc@saint-aubin.fr', first_name: 'Marc', last_name: 'Dubois', municipality_role: 'editor', site: SITE },
-  super_admin: { id: 3, documentId: 'u-equipe', email: 'equipe@communeo.fr', first_name: 'Léa', last_name: 'Communeo', municipality_role: 'super_admin', site: null },
+  admin: {
+    id: 1,
+    documentId: 'u-sophie',
+    email: 'sophie.leroy@saint-aubin.fr',
+    first_name: 'Sophie',
+    last_name: 'Leroy',
+    municipality_role: 'admin',
+    site: SITE,
+  },
+  editor: {
+    id: 2,
+    documentId: 'u-marc',
+    email: 'marc@saint-aubin.fr',
+    first_name: 'Marc',
+    last_name: 'Dubois',
+    municipality_role: 'editor',
+    site: SITE,
+  },
+  super_admin: {
+    id: 3,
+    documentId: 'u-equipe',
+    email: 'equipe@communeo.fr',
+    first_name: 'Léa',
+    last_name: 'Communeo',
+    municipality_role: 'super_admin',
+    site: null,
+  },
 };
 
-export const SITES = [SITE, { documentId: 'site-bellefontaine', name: 'Bellefontaine', slug: 'bellefontaine', theme: 'moderne', live_url: null }];
+export const SITES = [
+  SITE,
+  { documentId: 'site-bellefontaine', name: 'Bellefontaine', slug: 'bellefontaine', theme: 'moderne', live_url: null },
+];
 
 /** Liens reçus par e-mail (GET /api/user-management/invitation?jeton=) */
 export const LINKS: Record<string, object> = {
-  'jeton-invitation': { status: 'valid', purpose: 'invitation', firstName: 'Anne', siteName: 'Saint-Aubin-sur-Loire', role: 'editor', email: 'anne@saint-aubin.fr' },
-  'jeton-reinitialisation': { status: 'valid', purpose: 'reset', firstName: 'Sophie', siteName: 'Saint-Aubin-sur-Loire', role: 'admin', email: 'sophie.leroy@saint-aubin.fr' },
-  'jeton-expire': { status: 'expired', purpose: 'invitation', firstName: 'Anne', siteName: 'Saint-Aubin-sur-Loire', role: 'editor' },
+  'jeton-invitation': {
+    status: 'valid',
+    purpose: 'invitation',
+    firstName: 'Anne',
+    siteName: 'Saint-Aubin-sur-Loire',
+    role: 'editor',
+    email: 'anne@saint-aubin.fr',
+  },
+  'jeton-reinitialisation': {
+    status: 'valid',
+    purpose: 'reset',
+    firstName: 'Sophie',
+    siteName: 'Saint-Aubin-sur-Loire',
+    role: 'admin',
+    email: 'sophie.leroy@saint-aubin.fr',
+  },
+  'jeton-expire': {
+    status: 'expired',
+    purpose: 'invitation',
+    firstName: 'Anne',
+    siteName: 'Saint-Aubin-sur-Loire',
+    role: 'editor',
+  },
 };
 
 export const PASSWORD = 'bon-mot-de-passe';
-export const INVALID_LOGIN = 'E-mail ou mot de passe incorrect. Vérifiez votre saisie ; après 5 essais, le compte est bloqué 15 minutes.';
+export const INVALID_LOGIN =
+  'E-mail ou mot de passe incorrect. Vérifiez votre saisie ; après 5 essais, le compte est bloqué 15 minutes.';
 
 export interface MockPage {
   documentId: string;
@@ -55,17 +103,40 @@ export const PAGES: Record<string, MockPage> = {
     updatedAt: '2026-09-20T10:00:00.000Z',
     blocks: [
       { __component: 'blocks.text', id: 3, body: doc('Réservation en mairie.') },
-      { __component: 'blocks.buttons', id: 4, buttons: [{ id: 9, label: 'Réserver', url: '/contact', style: 'primary' }] },
+      {
+        __component: 'blocks.buttons',
+        id: 4,
+        buttons: [{ id: 9, label: 'Réserver', url: '/contact', style: 'primary' }],
+      },
     ],
   },
 };
 
 const TITLES = [
-  'La mairie et ses horaires', 'État civil : naissance, mariage, décès', "Carte nationale d'identité et passeport", 'Urbanisme : permis de construire',
-  'Inscriptions scolaires 2026-2027', 'Cantine et accueil périscolaire', 'Médiathèque municipale', 'Conseil municipal : les élus', 'Budget de la commune',
-  "Plan local d'urbanisme", 'Collecte des déchets', 'Déchetterie intercommunale', 'Associations sportives', 'Marché du samedi', 'Histoire et patrimoine',
-  'Chemins de randonnée', 'Transport à la demande', 'Aide aux personnes âgées', 'Recensement citoyen', 'Jardins familiaux', 'Accueil des nouveaux habitants',
-  'Salle omnisports', 'Bibliothèque de rue', 'Cimetière communal',
+  'La mairie et ses horaires',
+  'État civil : naissance, mariage, décès',
+  "Carte nationale d'identité et passeport",
+  'Urbanisme : permis de construire',
+  'Inscriptions scolaires 2026-2027',
+  'Cantine et accueil périscolaire',
+  'Médiathèque municipale',
+  'Conseil municipal : les élus',
+  'Budget de la commune',
+  "Plan local d'urbanisme",
+  'Collecte des déchets',
+  'Déchetterie intercommunale',
+  'Associations sportives',
+  'Marché du samedi',
+  'Histoire et patrimoine',
+  'Chemins de randonnée',
+  'Transport à la demande',
+  'Aide aux personnes âgées',
+  'Recensement citoyen',
+  'Jardins familiaux',
+  'Accueil des nouveaux habitants',
+  'Salle omnisports',
+  'Bibliothèque de rue',
+  'Cimetière communal',
 ];
 
 /** 25 pages : « Location de la salle des fêtes » et 24 autres, publiées sauf une sur quatre (brouillons), une programmée */
@@ -76,7 +147,12 @@ function manyPages(): Record<string, MockPage> {
     pages[documentId] = {
       documentId,
       title,
-      slug: title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      slug: title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, ''),
       lead: null,
       meta_description: null,
       scheduled_at: title.startsWith('Inscriptions') ? '2026-11-03T07:00:00.000Z' : null,
@@ -92,39 +168,134 @@ function manyPages(): Record<string, MockPage> {
 /** Actualités : une publiée, un brouillon, une programmée */
 export const ARTICLES: Record<string, Record<string, unknown>> = {
   'a-dechetterie': {
-    documentId: 'a-dechetterie', title: 'Nouveaux horaires de la déchetterie', slug: 'nouveaux-horaires-dechetterie', summary: 'Ouverture du mardi au samedi.', category: 'information', featured: false,
-    publication_date: '2026-09-18T07:30:00.000Z', author: 'Sophie Leroy', meta_description: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-18T07:30:00.000Z', blocks: [], image: null,
+    documentId: 'a-dechetterie',
+    title: 'Nouveaux horaires de la déchetterie',
+    slug: 'nouveaux-horaires-dechetterie',
+    summary: 'Ouverture du mardi au samedi.',
+    category: 'information',
+    featured: false,
+    publication_date: '2026-09-18T07:30:00.000Z',
+    author: 'Sophie Leroy',
+    meta_description: null,
+    scheduled_at: null,
+    publishedAt: null,
+    updatedAt: '2026-09-18T07:30:00.000Z',
+    blocks: [],
+    image: null,
   },
   'a-conseil': {
-    documentId: 'a-conseil', title: 'Compte rendu du conseil municipal', slug: 'compte-rendu-conseil', summary: null, category: 'news', featured: false,
-    publication_date: null, author: 'Claire Martin', meta_description: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-19T09:05:00.000Z', blocks: [], image: null,
+    documentId: 'a-conseil',
+    title: 'Compte rendu du conseil municipal',
+    slug: 'compte-rendu-conseil',
+    summary: null,
+    category: 'news',
+    featured: false,
+    publication_date: null,
+    author: 'Claire Martin',
+    meta_description: null,
+    scheduled_at: null,
+    publishedAt: null,
+    updatedAt: '2026-09-19T09:05:00.000Z',
+    blocks: [],
+    image: null,
   },
   'a-inscriptions': {
-    documentId: 'a-inscriptions', title: 'Inscriptions scolaires 2026-2027', slug: 'inscriptions-scolaires', summary: null, category: 'news', featured: true,
-    publication_date: null, author: 'Sophie Leroy', meta_description: null, scheduled_at: '2026-11-03T07:00:00.000Z', publishedAt: null, updatedAt: '2026-09-20T15:40:00.000Z', blocks: [], image: null,
+    documentId: 'a-inscriptions',
+    title: 'Inscriptions scolaires 2026-2027',
+    slug: 'inscriptions-scolaires',
+    summary: null,
+    category: 'news',
+    featured: true,
+    publication_date: null,
+    author: 'Sophie Leroy',
+    meta_description: null,
+    scheduled_at: '2026-11-03T07:00:00.000Z',
+    publishedAt: null,
+    updatedAt: '2026-09-20T15:40:00.000Z',
+    blocks: [],
+    image: null,
   },
 };
 
 /** Événements : un à venir (publié), un passé (publié) */
 export const EVENTS: Record<string, Record<string, unknown>> = {
   'e-fete': {
-    documentId: 'e-fete', title: 'Fête de la musique', slug: 'fete-de-la-musique', category: 'celebration', featured: true, start_date: '2027-06-21T17:00:00.000Z', end_date: '2027-06-21T23:00:00.000Z',
-    location: 'Place de la Mairie', address: null, price: 'Gratuit', registration_required: false, registration_deadline: null, max_participants: null, organizer: 'Comité des fêtes',
-    external_link: null, contact_email: null, contact_phone: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-15T10:00:00.000Z', blocks: [], image: null,
+    documentId: 'e-fete',
+    title: 'Fête de la musique',
+    slug: 'fete-de-la-musique',
+    category: 'celebration',
+    featured: true,
+    start_date: '2027-06-21T17:00:00.000Z',
+    end_date: '2027-06-21T23:00:00.000Z',
+    location: 'Place de la Mairie',
+    address: null,
+    price: 'Gratuit',
+    registration_required: false,
+    registration_deadline: null,
+    max_participants: null,
+    organizer: 'Comité des fêtes',
+    external_link: null,
+    contact_email: null,
+    contact_phone: null,
+    scheduled_at: null,
+    publishedAt: null,
+    updatedAt: '2026-09-15T10:00:00.000Z',
+    blocks: [],
+    image: null,
   },
   'e-forum': {
-    documentId: 'e-forum', title: 'Forum des associations', slug: 'forum-des-associations', category: 'meeting', featured: false, start_date: '2025-09-06T08:00:00.000Z', end_date: null,
-    location: 'Salle omnisports', address: null, price: 'Free', registration_required: false, registration_deadline: null, max_participants: null, organizer: null,
-    external_link: null, contact_email: null, contact_phone: null, scheduled_at: null, publishedAt: null, updatedAt: '2025-09-01T10:00:00.000Z', blocks: [], image: null,
+    documentId: 'e-forum',
+    title: 'Forum des associations',
+    slug: 'forum-des-associations',
+    category: 'meeting',
+    featured: false,
+    start_date: '2025-09-06T08:00:00.000Z',
+    end_date: null,
+    location: 'Salle omnisports',
+    address: null,
+    price: 'Free',
+    registration_required: false,
+    registration_deadline: null,
+    max_participants: null,
+    organizer: null,
+    external_link: null,
+    contact_email: null,
+    contact_phone: null,
+    scheduled_at: null,
+    publishedAt: null,
+    updatedAt: '2025-09-01T10:00:00.000Z',
+    blocks: [],
+    image: null,
   },
 };
 
-const PDF = { id: 900, name: 'deliberation.pdf', ext: '.pdf', mime: 'application/pdf', size: 310, url: '/uploads/deliberation.pdf' };
+const PDF = {
+  id: 900,
+  name: 'deliberation.pdf',
+  ext: '.pdf',
+  mime: 'application/pdf',
+  size: 310,
+  url: '/uploads/deliberation.pdf',
+};
 const DOCUMENT_TYPES = ['deliberation', 'deliberation', 'deliberation', 'arrete', 'pv-conseil-municipal'];
 
 /** Documents officiels : trois, ou 300 répartis de 2019 à 2026 (critère « plusieurs centaines ») */
 function officialDocuments(many: boolean): Record<string, Record<string, unknown>> {
-  const years = many ? [[2026, 38], [2025, 61], [2024, 57], [2023, 44], [2022, 40], [2021, 30], [2020, 20], [2019, 10]] : [[2026, 2], [2025, 1]];
+  const years = many
+    ? [
+        [2026, 38],
+        [2025, 61],
+        [2024, 57],
+        [2023, 44],
+        [2022, 40],
+        [2021, 30],
+        [2020, 20],
+        [2019, 10],
+      ]
+    : [
+        [2026, 2],
+        [2025, 1],
+      ];
   const docs: Record<string, Record<string, unknown>> = {};
   for (const [year, count] of years as Array<[number, number]>) {
     for (let index = 1; index <= count; index += 1) {
@@ -132,9 +303,20 @@ function officialDocuments(many: boolean): Record<string, Record<string, unknown
       const type = DOCUMENT_TYPES[index % DOCUMENT_TYPES.length]!;
       const month = String(((index * 7) % 12) + 1).padStart(2, '0');
       docs[documentId] = {
-        documentId, title: `${type === 'arrete' ? 'Arrêté' : type === 'deliberation' ? 'Délibération' : 'Procès-verbal'} ${year}-${String(index).padStart(3, '0')}${index === 3 ? ' — Convention avec le SDIS' : ''}`,
-        slug: `${type}-${year}-${index}`, document_type: type, reference_number: `DEL-${year}-${String(index).padStart(3, '0')}`, document_date: `${year}-${month}-15`, session_date: null, year,
-        description: null, file: PDF, additional_files: [], scheduled_at: null, publishedAt: null, updatedAt: `${year}-${month}-16T10:00:00.000Z`,
+        documentId,
+        title: `${type === 'arrete' ? 'Arrêté' : type === 'deliberation' ? 'Délibération' : 'Procès-verbal'} ${year}-${String(index).padStart(3, '0')}${index === 3 ? ' — Convention avec le SDIS' : ''}`,
+        slug: `${type}-${year}-${index}`,
+        document_type: type,
+        reference_number: `DEL-${year}-${String(index).padStart(3, '0')}`,
+        document_date: `${year}-${month}-15`,
+        session_date: null,
+        year,
+        description: null,
+        file: PDF,
+        additional_files: [],
+        scheduled_at: null,
+        publishedAt: null,
+        updatedAt: `${year}-${month}-16T10:00:00.000Z`,
       };
     }
   }
@@ -143,9 +325,45 @@ function officialDocuments(many: boolean): Record<string, Record<string, unknown
 
 /** Équipe : la maire et deux adjoints */
 export const TEAM = [
-  { documentId: 't-martin', first_name: 'Claire', last_name: 'Martin', role: 'maire', title: null, delegation: null, bio: null, email: null, office_hours: null, display_order: 10, photo: null },
-  { documentId: 't-morel', first_name: 'Julien', last_name: 'Morel', role: 'adjoint', title: '1er adjoint', delegation: 'Vie associative, sports', bio: null, email: null, office_hours: null, display_order: 10, photo: null },
-  { documentId: 't-rousseau', first_name: 'Anne', last_name: 'Rousseau', role: 'adjoint', title: '2e adjointe', delegation: 'Affaires scolaires', bio: null, email: null, office_hours: null, display_order: 20, photo: null },
+  {
+    documentId: 't-martin',
+    first_name: 'Claire',
+    last_name: 'Martin',
+    role: 'maire',
+    title: null,
+    delegation: null,
+    bio: null,
+    email: null,
+    office_hours: null,
+    display_order: 10,
+    photo: null,
+  },
+  {
+    documentId: 't-morel',
+    first_name: 'Julien',
+    last_name: 'Morel',
+    role: 'adjoint',
+    title: '1er adjoint',
+    delegation: 'Vie associative, sports',
+    bio: null,
+    email: null,
+    office_hours: null,
+    display_order: 10,
+    photo: null,
+  },
+  {
+    documentId: 't-rousseau',
+    first_name: 'Anne',
+    last_name: 'Rousseau',
+    role: 'adjoint',
+    title: '2e adjointe',
+    delegation: 'Affaires scolaires',
+    bio: null,
+    email: null,
+    office_hours: null,
+    display_order: 20,
+    photo: null,
+  },
 ];
 
 const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Number(documentId.slice(2)) % 4 === 0;
@@ -153,7 +371,6 @@ const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Numb
 export interface MockOptions {
   user?: keyof typeof USERS;
   publication?: 'pending' | 'ok' | 'running' | 'failed';
-  unread?: number;
   loggedIn?: boolean;
   /** Réponse d'erreur à l'enregistrement des pages */
   failPageSaves?: boolean;
@@ -175,6 +392,134 @@ export interface MockOptions {
   subscriberSet?: 'some' | 'none';
   /** Export CSV en échec (500) */
   failExport?: boolean;
+  /** Messages des habitants : 6 dont 3 non lus (défaut) ou aucun */
+  messageSet?: 'some' | 'none';
+  /** L'e-mail de réponse ne part pas (502) */
+  failReply?: boolean;
+}
+
+export type MockMessage = Record<string, unknown> & {
+  documentId: string;
+  history: Array<Record<string, unknown>>;
+  opened_at: string | null;
+  status: string;
+};
+
+/** Messages : dates relatives à maintenant (le délai RGPD se calcule depuis la réception) */
+function messages(): MockMessage[] {
+  const ago = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
+  const base = (id: string, fields: Record<string, unknown>, hours: number): MockMessage => ({
+    documentId: id,
+    email: `${id.slice(2)}@example.fr`,
+    phone: null,
+    response: null,
+    responded_at: null,
+    acknowledgment_sent: true,
+    attachments: [],
+    opened_at: null,
+    status: 'received',
+    createdAt: ago(hours),
+    history: [
+      { type: 'received', at: ago(hours) },
+      { type: 'acknowledged', at: ago(hours) },
+    ],
+    ...fields,
+  });
+  return [
+    base(
+      'm-dubois',
+      {
+        first_name: 'Marc',
+        last_name: 'Dubois',
+        email: 'marc.dubois@example.fr',
+        phone: '06 00 00 00 01',
+        subject: "Demande d'accès à mes données personnelles",
+        message:
+          'Bonjour,\nEn application de l’article 15 du RGPD, je souhaite obtenir une copie de mes données.\nCordialement,\nMarc Dubois',
+        category: 'rgpd',
+        reference_number: 'SVE-2026-0042',
+        attachments: [
+          {
+            id: 501,
+            name: 'piece-identite.pdf',
+            ext: '.pdf',
+            mime: 'application/pdf',
+            size: 620,
+            url: '/uploads/piece-identite.pdf',
+          },
+        ],
+      },
+      2,
+    ),
+    base(
+      'm-petit',
+      {
+        first_name: 'Nathalie',
+        last_name: 'Petit',
+        subject: "Nid-de-poule dangereux à l'angle de la rue du Stade",
+        message: 'Un trou profond devant l’école.',
+        category: 'voirie',
+        reference_number: 'SVE-2026-0041',
+      },
+      26,
+    ),
+    base(
+      'm-benali',
+      {
+        first_name: 'Karim',
+        last_name: 'Benali',
+        subject: "Certificat d'urbanisme pour la parcelle AB 214",
+        message: 'Bonjour, quel délai ?',
+        category: 'urbanisme',
+        reference_number: 'SVE-2026-0039',
+      },
+      96,
+    ),
+    base(
+      'm-girard',
+      {
+        first_name: 'Paul',
+        last_name: 'Girard',
+        subject: 'Éclairage public en panne allée des Tilleuls',
+        message: 'Depuis une semaine.',
+        category: 'voirie',
+        reference_number: 'SVE-2026-0037',
+        status: 'in_progress',
+        opened_at: ago(160),
+      },
+      168,
+    ),
+    base(
+      'm-moreau',
+      {
+        first_name: 'Sandrine',
+        last_name: 'Moreau',
+        subject: "Inscription à la cantine en cours d'année",
+        message: 'Est-ce possible ?',
+        category: 'general',
+        reference_number: 'SVE-2026-0036',
+        status: 'resolved',
+        opened_at: ago(260),
+        response: 'Oui, en mairie.',
+        responded_at: ago(250),
+      },
+      264,
+    ),
+    base(
+      'm-roux',
+      {
+        first_name: 'Julie',
+        last_name: 'Roux',
+        subject: 'Suppression de mon compte newsletter et de mes données',
+        message: 'Merci de supprimer mes données.',
+        category: 'rgpd',
+        reference_number: 'SVE-2026-0021',
+        status: 'in_progress',
+        opened_at: ago(900),
+      },
+      960,
+    ),
+  ];
 }
 
 export interface MockSubscriber {
@@ -190,8 +535,24 @@ export interface MockSubscriber {
 /** 45 abonnés : Hélène Garnier la plus récente, une adresse désabonnée, des noms manquants */
 function subscribers(): MockSubscriber[] {
   const list: MockSubscriber[] = [
-    { documentId: 's-garnier', email: 'h.garnier@example.org', first_name: 'Hélène', last_name: 'Garnier', subscribed_at: '2026-09-20T08:00:00.000Z', active: true, unsubscribed_at: null },
-    { documentId: 's-ancienne', email: 'ancienne.adresse@example.net', first_name: null, last_name: null, subscribed_at: '2024-01-14T08:00:00.000Z', active: false, unsubscribed_at: '2025-06-02T10:00:00.000Z' },
+    {
+      documentId: 's-garnier',
+      email: 'h.garnier@example.org',
+      first_name: 'Hélène',
+      last_name: 'Garnier',
+      subscribed_at: '2026-09-20T08:00:00.000Z',
+      active: true,
+      unsubscribed_at: null,
+    },
+    {
+      documentId: 's-ancienne',
+      email: 'ancienne.adresse@example.net',
+      first_name: null,
+      last_name: null,
+      subscribed_at: '2024-01-14T08:00:00.000Z',
+      active: false,
+      unsubscribed_at: '2025-06-02T10:00:00.000Z',
+    },
   ];
   for (let index = 1; index <= 43; index++) {
     list.push({
@@ -210,19 +571,43 @@ function subscribers(): MockSubscriber[] {
 export const NAVIGATION = {
   main: [
     { type: 'section', section: 'actualites', label: null },
-    { type: 'group', label: 'Vie pratique', children: [{ type: 'page', pageDocumentId: 'p-salle', label: null }, { type: 'section', section: 'dechets', label: null }] },
+    {
+      type: 'group',
+      label: 'Vie pratique',
+      children: [
+        { type: 'page', pageDocumentId: 'p-salle', label: null },
+        { type: 'section', section: 'dechets', label: null },
+      ],
+    },
     { type: 'section', section: 'agenda', label: null },
   ],
   footer: [{ type: 'external', url: 'https://www.service-public.fr', label: 'Service-Public' }],
 };
 
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel', documentSet = 'few', emptyTeam = false, subscriberSet = 'some', failExport = false } = options;
+  const {
+    user = 'admin',
+    publication = 'pending',
+    loggedIn = true,
+    failPageSaves = false,
+    previewUnavailable = false,
+    pageSet = 'one',
+    failPublishFor = [],
+    navigation = NAVIGATION,
+    theme = 'institutionnel',
+    documentSet = 'few',
+    emptyTeam = false,
+    subscriberSet = 'some',
+    failExport = false,
+    messageSet = 'some',
+    failReply = false,
+  } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
   let state = publication;
-  const pages: Record<string, MockPage> = pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
+  const pages: Record<string, MockPage> =
+    pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
   // Contenus par type (API Strapi), version en ligne et modifications depuis
   const stores: Record<ContentType, Record<string, Record<string, unknown>>> = {
     pages: pages as unknown as Record<string, Record<string, unknown>>,
@@ -230,8 +615,9 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     evenements: structuredClone(EVENTS),
     'official-documents': officialDocuments(documentSet === 'many'),
   };
-  const team = emptyTeam ? [] : structuredClone(TEAM) as Array<Record<string, unknown>>;
+  const team = emptyTeam ? [] : (structuredClone(TEAM) as Array<Record<string, unknown>>);
   const newsletter = subscriberSet === 'none' ? [] : subscribers();
+  const inbox = messageSet === 'none' ? [] : messages();
   let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
   const publishedByType: Record<ContentType, Set<string>> = {
@@ -240,11 +626,23 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     evenements: new Set(['e-fete', 'e-forum']),
     'official-documents': new Set(Object.keys(stores['official-documents']).filter((id) => !id.endsWith('-2'))),
   };
-  const modifiedByType: Record<ContentType, Set<string>> = { pages: new Set(), articles: new Set(), evenements: new Set(), 'official-documents': new Set() };
+  const modifiedByType: Record<ContentType, Set<string>> = {
+    pages: new Set(),
+    articles: new Set(),
+    evenements: new Set(),
+    'official-documents': new Set(),
+  };
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
-  const site = { documentId: SITE.documentId, updatedAt: '2026-09-22T14:30:00.000Z', theme, comarquage_enabled: true, open_data_enabled: false, navigation_config: structuredClone(navigation) as unknown };
+  const site = {
+    documentId: SITE.documentId,
+    updatedAt: '2026-09-22T14:30:00.000Z',
+    theme,
+    comarquage_enabled: true,
+    open_data_enabled: false,
+    navigation_config: structuredClone(navigation) as unknown,
+  };
   // Réglages reçus par le serveur de preview (POST de l'admin)
   const previewPosts: Array<Record<string, unknown>> = [];
   // Mots de passe acceptés : celui des comptes de test, et ceux choisis par invitation
@@ -257,7 +655,9 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     let menu = '';
     if (route.request().method() === 'POST') {
       const form = new URLSearchParams(route.request().postData() ?? '');
-      const settings = JSON.parse(form.get('settings') ?? '{}') as { navigation_config?: { main: Array<{ label?: string | null; section?: string }> } };
+      const settings = JSON.parse(form.get('settings') ?? '{}') as {
+        navigation_config?: { main: Array<{ label?: string | null; section?: string }> };
+      };
       previewPosts.push({ token: form.get('token'), ...settings });
       menu = `<nav aria-label="Menu principal"><ul>${(settings.navigation_config?.main ?? []).map((item) => `<li>${item.label ?? item.section ?? 'page'}</li>`).join('')}</ul></nav>`;
     }
@@ -270,13 +670,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     const method = route.request().method();
     const status = url.searchParams.get('status');
     calls.push(`${method} ${url.pathname}${method !== 'GET' && status ? `?status=${status}` : ''}`);
-    const json = (body: unknown, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    const json = (body: unknown, status = 200) =>
+      route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 
     // Comme Strapi : toute écriture de l'admin porte l'en-tête de sécurité
     if (method !== 'GET' && route.request().headers()['x-communeo-csrf'] !== '1') {
       return json({ error: { status: 403, message: 'Requête refusée : en-tête de sécurité manquant' } }, 403);
     }
-    if (method === 'POST' && !url.pathname.endsWith('/upload')) (posts[url.pathname] ??= []).push(route.request().postDataJSON());
+    if (method === 'POST' && !url.pathname.endsWith('/upload'))
+      (posts[url.pathname] ??= []).push(route.request().postDataJSON());
     if (url.pathname === '/api/session/login') {
       const body = route.request().postDataJSON() as { identifier: string; password: string; remember?: boolean };
       if (!passwords.has(body.password)) return json({ error: { status: 400, message: INVALID_LOGIN } }, 400);
@@ -288,14 +690,20 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return route.fulfill({ status: 204 });
     }
     // Écrans d'accès, sans session
-    if (url.pathname === '/api/user-management/invitation') return json(LINKS[url.searchParams.get('jeton') ?? ''] ?? { status: 'invalid' });
+    if (url.pathname === '/api/user-management/invitation')
+      return json(LINKS[url.searchParams.get('jeton') ?? ''] ?? { status: 'invalid' });
     if (url.pathname === '/api/user-management/accept-invitation') {
       const body = route.request().postDataJSON() as { password: string };
-      if (body.password.length < 10) return json({ error: { status: 400, message: 'Le mot de passe doit contenir au moins 10 caractères' } }, 400);
+      if (body.password.length < 10)
+        return json({ error: { status: 400, message: 'Le mot de passe doit contenir au moins 10 caractères' } }, 400);
       passwords.add(body.password);
       return json({ ok: true });
     }
-    if (url.pathname === '/api/user-management/request-invitation' || url.pathname === '/api/user-management/forgot-password') return json({ ok: true });
+    if (
+      url.pathname === '/api/user-management/request-invitation' ||
+      url.pathname === '/api/user-management/forgot-password'
+    )
+      return json({ ok: true });
 
     if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
     if (url.pathname === '/api/users/me') return json(USERS[user]);
@@ -307,15 +715,22 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       }
       return json({ data: site });
     }
-    if (url.pathname === '/api/user-management/admins') return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
-    if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin') return json({ data: SITES });
+    if (url.pathname === '/api/user-management/admins')
+      return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
+    if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin')
+      return json({ data: SITES });
     const siteMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
     if (siteMatch && USERS[user].municipality_role === 'super_admin') {
       const site = SITES.find((candidate) => candidate.documentId === siteMatch[1]);
       return site ? json({ data: site }) : json({ error: { status: 404, message: 'Site not found' } }, 404);
     }
     if (url.pathname === '/api/deployment/state') {
-      return json({ state, pendingCount: state === 'pending' ? 3 : 0, step: state === 'running' ? 'rendering' : null, reference: null });
+      return json({
+        state,
+        pendingCount: state === 'pending' ? 3 : 0,
+        step: state === 'running' ? 'rendering' : null,
+        reference: null,
+      });
     }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
       state = 'running';
@@ -323,7 +738,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     }
     if (url.pathname === '/api/publication/official-documents/years') {
       const counts = new Map<number, number>();
-      for (const doc of Object.values(stores['official-documents'])) if (doc.year) counts.set(doc.year as number, (counts.get(doc.year as number) ?? 0) + 1);
+      for (const doc of Object.values(stores['official-documents']))
+        if (doc.year) counts.set(doc.year as number, (counts.get(doc.year as number) ?? 0) + 1);
       return json({ data: [...counts].sort(([a], [b]) => b - a).map(([year, count]) => ({ year, count })) });
     }
     if (url.pathname === '/api/media-items/upload' && method === 'POST') {
@@ -331,17 +747,37 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       const name = /filename="([^"]+)"/.exec(body)?.[1] ?? 'fichier';
       const mime = /Content-Type: ([^\r\n]+)/.exec(body)?.[1] ?? 'application/octet-stream';
       uploads += 1;
-      const file = { id: 1000 + uploads, name, ext: name.slice(name.lastIndexOf('.')), mime, size: 42, url: `/uploads/${name}` };
+      const file = {
+        id: 1000 + uploads,
+        name,
+        ext: name.slice(name.lastIndexOf('.')),
+        mime,
+        size: 42,
+        url: `/uploads/${name}`,
+      };
       posts['upload'] = [...(posts['upload'] ?? []), file];
       return json({ data: { documentId: `m-${uploads}`, name, file } }, 201);
     }
     if (url.pathname === '/api/newsletter-subscribers/stats') {
       const active = newsletter.filter((item) => item.active);
-      return json({ data: { total: newsletter.length, active: active.length, thisMonth: active.filter((item) => item.subscribed_at >= '2026-09-01').length } });
+      return json({
+        data: {
+          total: newsletter.length,
+          active: active.length,
+          thisMonth: active.filter((item) => item.subscribed_at >= '2026-09-01').length,
+        },
+      });
     }
     if (url.pathname === '/api/newsletter-subscribers/export') {
       if (failExport) return json({ error: { status: 500, message: 'Internal Server Error' } }, 500);
-      const csv = '\uFEFF"E-mail";"Prénom";"Nom";"Inscrit le";"État";"Désabonné le"\r\n' + newsletter.map((item) => `"${item.email}";"${item.first_name ?? ''}";"${item.last_name ?? ''}";"";"${item.active ? 'Actif' : 'Désabonné'}";""`).join('\r\n');
+      const csv =
+        '\uFEFF"E-mail";"Prénom";"Nom";"Inscrit le";"État";"Désabonné le"\r\n' +
+        newsletter
+          .map(
+            (item) =>
+              `"${item.email}";"${item.first_name ?? ''}";"${item.last_name ?? ''}";"";"${item.active ? 'Actif' : 'Désabonné'}";""`,
+          )
+          .join('\r\n');
       return route.fulfill({ status: 200, contentType: 'text/csv; charset=utf-8', body: csv });
     }
     const unsubscribeMatch = /^\/api\/newsletter-subscribers\/([^/]+)\/unsubscribe$/.exec(url.pathname);
@@ -355,25 +791,49 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       const q = url.searchParams.get('filters[$or][0][email][$containsi]')?.toLowerCase();
       const active = url.searchParams.get('filters[active][$eq]');
       const rows = newsletter
-        .filter((item) => !q || [item.email, item.first_name, item.last_name].some((value) => value?.toLowerCase().includes(q)))
+        .filter(
+          (item) =>
+            !q || [item.email, item.first_name, item.last_name].some((value) => value?.toLowerCase().includes(q)),
+        )
         .filter((item) => active === null || String(item.active) === active)
         .sort((a, b) => b.subscribed_at.localeCompare(a.subscribed_at));
       const pageNumber = Number(url.searchParams.get('pagination[page]') ?? 1);
       const pageSize = Number(url.searchParams.get('pagination[pageSize]') ?? 25);
-      return json({ data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize), meta: { pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } } });
+      return json({
+        data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize),
+        meta: {
+          pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) },
+        },
+      });
     }
     const teamMatch = /^\/api\/team-members(?:\/([^/]+))?$/.exec(url.pathname);
     if (teamMatch) {
       const id = teamMatch[1];
-      if (method === 'GET') return json({ data: [...team].sort((a, b) => ((a.display_order as number) ?? 999) - ((b.display_order as number) ?? 999)), meta: { pagination: { page: 1, pageCount: 1, total: team.length } } });
+      if (method === 'GET')
+        return json({
+          data: [...team].sort((a, b) => ((a.display_order as number) ?? 999) - ((b.display_order as number) ?? 999)),
+          meta: { pagination: { page: 1, pageCount: 1, total: team.length } },
+        });
       if (method === 'DELETE' && id) {
-        team.splice(team.findIndex((member) => member.documentId === id), 1);
+        team.splice(
+          team.findIndex((member) => member.documentId === id),
+          1,
+        );
         return route.fulfill({ status: 204 });
       }
       const body = route.request().postDataJSON() as { data: Record<string, unknown> };
       bodies.push({ call: `${method} team`, body });
       const photoId = body.data.photo;
-      const data = { ...body.data, ...(photoId !== undefined ? { photo: photoId ? { id: photoId, name: 'photo.png', ext: '.png', size: 42, url: '/uploads/photo.png' } : null } : {}) };
+      const data = {
+        ...body.data,
+        ...(photoId !== undefined
+          ? {
+              photo: photoId
+                ? { id: photoId, name: 'photo.png', ext: '.png', size: 42, url: '/uploads/photo.png' }
+                : null,
+            }
+          : {}),
+      };
       if (method === 'POST') {
         const member = { documentId: `t-${team.length + 1}`, photo: null, ...data };
         team.push(member);
@@ -393,20 +853,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       if (method === 'GET' && !id) return json(listDocuments(store, url.searchParams));
       if (method === 'GET' && id) {
         const doc = store[id];
-        if (!doc || (status === 'published' && !online.has(id))) return json({ data: null, error: { status: 404, message: 'Not Found' } }, 404);
+        if (!doc || (status === 'published' && !online.has(id)))
+          return json({ data: null, error: { status: 404, message: 'Not Found' } }, 404);
         return json({ data: status === 'published' ? { ...doc, publishedAt: '2026-09-21T08:00:00.000Z' } : doc });
       }
       if (method === 'POST' || method === 'PUT') {
         const body = route.request().postDataJSON() as { data: Record<string, unknown> };
         bodies.push({ call: `${method} ${status ?? 'draft'}`, type, body });
         if (failPageSaves) return json({ error: { status: 500, message: 'Erreur du serveur' } }, 500);
-        if (status === 'published' && id && failPublishFor.includes(id)) return json({ error: { status: 400, message: 'Le bloc 1 (Texte) est vide.' } }, 400);
+        if (status === 'published' && id && failPublishFor.includes(id))
+          return json({ error: { status: 400, message: 'Le bloc 1 (Texte) est vide.' } }, 400);
         const documentId = id ?? `${type.charAt(0)}-nouvelle`;
-        const slug = (body.data.slug as string) || String(body.data.title ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const slug =
+          (body.data.slug as string) ||
+          String(body.data.title ?? '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
         const base = store[documentId] ?? (type === 'pages' ? PAGES['p-salle']! : {});
-        const doc = { ...base, ...body.data, documentId, slug, updatedAt: new Date().toISOString() } as Record<string, unknown>;
+        const doc = { ...base, ...body.data, documentId, slug, updatedAt: new Date().toISOString() } as Record<
+          string,
+          unknown
+        >;
         // Comme le backend : une actualité reçoit sa date à la première publication
-        if (type === 'articles' && status === 'published' && !doc.publication_date) doc.publication_date = new Date().toISOString();
+        if (type === 'articles' && status === 'published' && !doc.publication_date)
+          doc.publication_date = new Date().toISOString();
         store[documentId] = doc;
         if (status === 'published') {
           online.add(documentId);
@@ -427,13 +900,19 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         data: Object.fromEntries(
           Object.values(stores[type]).map((doc) => {
             const documentId = doc.documentId as string;
-            const state = publishedByType[type].has(documentId) ? (modifiedByType[type].has(documentId) ? 'modified' : 'published') : 'draft';
+            const state = publishedByType[type].has(documentId)
+              ? modifiedByType[type].has(documentId)
+                ? 'modified'
+                : 'published'
+              : 'draft';
             return [documentId, { state, scheduledAt: doc.scheduled_at ?? null }];
           }),
         ),
       });
     }
-    const unpublish = /^\/api\/publication\/(pages|articles|evenements|official-documents)\/([^/]+)\/unpublish$/.exec(url.pathname);
+    const unpublish = /^\/api\/publication\/(pages|articles|evenements|official-documents)\/([^/]+)\/unpublish$/.exec(
+      url.pathname,
+    );
     if (unpublish && method === 'POST') {
       const type = unpublish[1] as ContentType;
       publishedByType[type].delete(unpublish[2]!);
@@ -441,15 +920,102 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return json({ data: { documentId: unpublish[2], state: 'draft' } });
     }
     if (url.pathname === '/api/preview/token' && method === 'POST') {
-      if (previewUnavailable) return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
+      if (previewUnavailable)
+        return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
       const body = route.request().postDataJSON() as { type?: string; documentId?: string };
-      const type: ContentType = body.type === 'article' ? 'articles' : body.type === 'evenement' ? 'evenements' : 'pages';
+      const type: ContentType =
+        body.type === 'article' ? 'articles' : body.type === 'evenement' ? 'evenements' : 'pages';
       const prefix = type === 'articles' ? 'actualites/' : type === 'evenements' ? 'agenda/' : '';
       const slug = (body.documentId && (stores[type][body.documentId]?.slug as string | undefined)) ?? '';
-      return json({ url: `http://preview.test/${slug ? prefix : ''}${slug}?token=jeton-signe`, expiresAt: new Date(Date.now() + 1_800_000).toISOString() });
+      return json({
+        url: `http://preview.test/${slug ? prefix : ''}${slug}?token=jeton-signe`,
+        expiresAt: new Date(Date.now() + 1_800_000).toISOString(),
+      });
     }
     if (url.pathname === '/api/contact-submissions') {
-      return json({ data: [], meta: { pagination: { total: unread, page: 1, pageSize: 1, pageCount: unread } } });
+      const q = url.searchParams.get('filters[$or][0][first_name][$containsi]')?.toLowerCase();
+      const category = url.searchParams.get('filters[category][$eq]');
+      const statusFilter = url.searchParams.get('filters[status][$eq]');
+      const rows = inbox
+        .filter(
+          (item) =>
+            !q ||
+            ['first_name', 'last_name', 'subject', 'reference_number', 'email'].some((field) =>
+              String(item[field]).toLowerCase().includes(q),
+            ),
+        )
+        .filter((item) => !url.searchParams.has('filters[opened_at][$null]') || !item.opened_at)
+        .filter((item) => !category || item.category === category)
+        .filter((item) => !statusFilter || item.status === statusFilter)
+        .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+      const pageNumber = Number(url.searchParams.get('pagination[page]') ?? 1);
+      const pageSize = Number(url.searchParams.get('pagination[pageSize]') ?? 25);
+      return json({
+        data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize),
+        meta: {
+          pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) },
+        },
+      });
+    }
+    const messageMatch = /^\/api\/contact-submissions\/([^/]+)(?:\/(open|reply))?$/.exec(url.pathname);
+    if (messageMatch) {
+      const item = inbox.find((entry) => entry.documentId === messageMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      const now = new Date().toISOString();
+      const by = `${USERS[user].first_name} ${USERS[user].last_name}`;
+      if (messageMatch[2] === 'open') {
+        if (!item.opened_at)
+          Object.assign(item, { opened_at: now, history: [...item.history, { type: 'opened', at: now, by }] });
+        return json({ data: item });
+      }
+      if (messageMatch[2] === 'reply') {
+        if (failReply)
+          return json(
+            {
+              error: {
+                status: 502,
+                message: "La réponse n'a pas pu être envoyée par e-mail. Elle n'est pas enregistrée : réessayez.",
+              },
+            },
+            502,
+          );
+        const body = route.request().postDataJSON() as {
+          message: string;
+          resolve?: boolean;
+          attachmentFileId?: number;
+        };
+        const status = body.resolve === false ? (item.status === 'received' ? 'in_progress' : item.status) : 'resolved';
+        Object.assign(item, {
+          response: body.message,
+          responded_at: now,
+          status,
+          history: [
+            ...item.history,
+            {
+              type: 'replied',
+              at: now,
+              by,
+              message: body.message,
+              ...(body.attachmentFileId ? { attachment: 'export.pdf' } : {}),
+            },
+          ],
+        });
+        return json({ data: item });
+      }
+      if (method === 'PUT') {
+        const next = (route.request().postDataJSON() as { data: { status: string } }).data.status;
+        if (next !== item.status)
+          Object.assign(item, {
+            history: [...item.history, { type: 'status', at: now, by, from: item.status, to: next }],
+            status: next,
+          });
+        return json({ data: item });
+      }
+      if (method === 'DELETE') {
+        inbox.splice(inbox.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
     }
     return json({ error: { status: 404, message: 'Not Found' } }, 404);
   });
@@ -458,6 +1024,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     site,
     team,
     newsletter,
+    inbox,
     stores,
     publishedByType,
     previewPosts,
@@ -478,7 +1045,8 @@ export type ContentType = 'pages' | 'articles' | 'evenements' | 'official-docume
 
 /** Liste façon Strapi : recherche, statut par identifiants, catégorie, période, tri, pagination */
 function listDocuments(store: Record<string, Record<string, unknown>>, params: URLSearchParams) {
-  const all = (prefix: string) => [...params.entries()].filter(([key]) => key.startsWith(prefix)).map(([, value]) => value);
+  const all = (prefix: string) =>
+    [...params.entries()].filter(([key]) => key.startsWith(prefix)).map(([, value]) => value);
   const q = params.get('filters[title][$containsi]')?.toLowerCase();
   const inIds = all('filters[documentId][$in]');
   const notIn = all('filters[documentId][$notIn]');
@@ -504,9 +1072,16 @@ function listDocuments(store: Record<string, Record<string, unknown>>, params: U
     return true;
   });
   const [field, order] = (params.get('sort[0]') ?? 'updatedAt:desc').split(':') as [string, string];
-  rows = rows.sort((a, b) => String(a[field] ?? '').localeCompare(String(b[field] ?? ''), 'fr') * (order === 'desc' ? -1 : 1));
+  rows = rows.sort(
+    (a, b) => String(a[field] ?? '').localeCompare(String(b[field] ?? ''), 'fr') * (order === 'desc' ? -1 : 1),
+  );
   const page = Number(params.get('pagination[page]') ?? 1);
   const pageSize = Number(params.get('pagination[pageSize]') ?? 25);
-  const data = rows.slice((page - 1) * pageSize, page * pageSize).map(({ blocks: _blocks, ...row }) => ({ featured_image: null, image: null, ...row }));
-  return { data, meta: { pagination: { page, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } } };
+  const data = rows
+    .slice((page - 1) * pageSize, page * pageSize)
+    .map(({ blocks: _blocks, ...row }) => ({ featured_image: null, image: null, ...row }));
+  return {
+    data,
+    meta: { pagination: { page, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } },
+  };
 }

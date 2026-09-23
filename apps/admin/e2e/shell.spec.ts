@@ -85,7 +85,7 @@ test.describe('structure et clavier', () => {
 
   test('barre latérale en icônes à 1366 px, avec des noms accessibles', async ({ page }) => {
     test.skip(page.viewportSize()?.width !== 1366, 'largeur 1366 seulement');
-    await mockApi(page, { unread: 3 });
+    await mockApi(page);
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Navigation principale' });
     const box = await nav.boundingBox();

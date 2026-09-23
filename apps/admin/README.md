@@ -30,3 +30,13 @@ Chaque écran commence par `<PageHeader title=…>` (titre h1, titre du document
 
 - `ConfirmDialog` (suppression : `alertdialog`, focus sur « Annuler », retour du focus au déclencheur) ; jamais `window.confirm`.
 - `toast.success / error / network` : succès 6 s dans une région `status`, erreurs persistantes dans une région `alert`.
+
+## Éditeur de blocs (`src/components/blocks`)
+
+- `<BlockEditor name="blocks" />` dans un `Form` : liste de blocs (useFieldArray), catalogue, déplacement (glisser-déposer,
+  Espace + flèches, boutons), duplication, suppression annulable, annonces des positions.
+- Schéma : `blocks: blocksSchema('publish' | 'draft')` (règles de `@communeo/core`, les mêmes que le backend) ; récapitulatif :
+  `describeError={(name, message) => describeBlockError(name, message, blocks)}` (« Bloc 5 (Vidéo) : … »).
+- Texte riche : `RichTextField` (TipTap limité aux nœuds acceptés par core : un H1 ou du HTML collé est ramené à H2 / H3,
+  paragraphes, listes, gras, italique, liens sûrs). Barre d'outils à une tabulation (flèches), Ctrl+K pour les liens.
+- Page de référence : `/editeur-de-blocs`. Blocs Image, Galerie et Documents : modifiables avec la médiathèque (#142).

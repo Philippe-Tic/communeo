@@ -184,3 +184,33 @@
 @theme {
   --breakpoint-wide: 90rem;
 }
+
+/* Texte riche de l'éditeur de blocs : aperçu sobre de la structure (le rendu final est celui du thème) */
+.prose-admin h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+}
+.prose-admin h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+}
+.prose-admin p {
+  margin: 0.4em 0;
+}
+.prose-admin ul {
+  list-style: disc;
+  padding-left: 1.5em;
+}
+.prose-admin ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+.prose-admin a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+.prose-admin :first-child {
+  margin-top: 0;
+}

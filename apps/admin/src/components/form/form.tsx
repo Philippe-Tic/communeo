@@ -31,7 +31,18 @@ export function flattenErrors(errors: FieldErrors, prefix = ''): ErrorEntry[] {
 
 const plural = (count: number, one: string, many: string) => `${count} ${count > 1 ? many : one}`;
 
-export function ErrorSummary({ errors, title, focusKey }: { errors: ErrorEntry[]; title: (count: number) => string; focusKey: number }) {
+export function ErrorSummary({
+  errors,
+  title,
+  focusKey,
+  describe = (_name, message) => message,
+}: {
+  errors: ErrorEntry[];
+  title: (count: number) => string;
+  focusKey: number;
+  /** Libellé d'une erreur dans le récapitulatif (ex. préfixé par le bloc concerné) */
+  describe?: (name: string, message: string) => string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (errors.length && focusKey) ref.current?.focus();
@@ -41,8 +52,9 @@ export function ErrorSummary({ errors, title, focusKey }: { errors: ErrorEntry[]
   if (!errors.length) return null;
 
   const focusField = (name: string) => {
-    const target = document.getElementById(fieldId(name));
-    const control = target?.matches('fieldset') ? target.querySelector<HTMLElement>('input, select, textarea, button') : target;
+    // Champ, groupe ou liste : le premier contrôle qu'il contient (le bloc parent doit être ouvert)
+    const target = document.getElementById(fieldId(name)) ?? document.querySelector<HTMLElement>(`[data-field="${CSS.escape(name)}"]`);
+    const control = target && !target.matches('input, select, textarea, [contenteditable="true"]') ? (target.querySelector<HTMLElement>('input, select, textarea, [contenteditable="true"], button') ?? target) : target;
     control?.focus();
     control?.scrollIntoView({ block: 'center' });
   };
@@ -63,7 +75,7 @@ export function ErrorSummary({ errors, title, focusKey }: { errors: ErrorEntry[]
                   focusField(error.name);
                 }}
               >
-                {error.message}
+                {describe(error.name, error.message)}
               </a>
             </li>
           ))}
@@ -81,6 +93,7 @@ export function Form<T extends FieldValues>({
   children,
   id,
   requiredNote = true,
+  describeError,
 }: {
   form: UseFormReturn<T>;
   onSubmit: SubmitHandler<T>;
@@ -90,6 +103,7 @@ export function Form<T extends FieldValues>({
   id?: string;
   /** Phrase expliquant l'astérisque (à omettre s'il n'y a aucun champ obligatoire) */
   requiredNote?: boolean;
+  describeError?: (name: string, message: string) => string;
 }) {
   const errors = flattenErrors(form.formState.errors);
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -99,7 +113,7 @@ export function Form<T extends FieldValues>({
   return (
     <FormProvider {...form}>
       <form id={id} noValidate onSubmit={submit} className={className}>
-        <ErrorSummary errors={errors} title={summaryTitle} focusKey={form.formState.submitCount} />
+        <ErrorSummary errors={errors} title={summaryTitle} focusKey={form.formState.submitCount} describe={describeError} />
         {requiredNote && <RequiredNote />}
         {children}
       </form>

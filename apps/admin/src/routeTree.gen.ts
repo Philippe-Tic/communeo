@@ -21,6 +21,7 @@ import { Route as AppComposantsRouteImport } from './routes/_app/composants'
 import { Route as AppConformiteRouteImport } from './routes/_app/conformite'
 import { Route as AppDechetsRouteImport } from './routes/_app/dechets'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
+import { Route as AppEditeurDeBlocsRouteImport } from './routes/_app/editeur-de-blocs'
 import { Route as AppEquipeRouteImport } from './routes/_app/equipe'
 import { Route as AppMediathequeRouteImport } from './routes/_app/mediatheque'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
@@ -96,6 +97,11 @@ const AppDechetsRoute = AppDechetsRouteImport.update({
 const AppDocumentsRoute = AppDocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEditeurDeBlocsRoute = AppEditeurDeBlocsRouteImport.update({
+  id: '/editeur-de-blocs',
+  path: '/editeur-de-blocs',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEquipeRoute = AppEquipeRouteImport.update({
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/conformite': typeof AppConformiteRoute
   '/dechets': typeof AppDechetsRoute
   '/documents': typeof AppDocumentsRoute
+  '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/conformite': typeof AppConformiteRoute
   '/dechets': typeof AppDechetsRoute
   '/documents': typeof AppDocumentsRoute
+  '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/_app/conformite': typeof AppConformiteRoute
   '/_app/dechets': typeof AppDechetsRoute
   '/_app/documents': typeof AppDocumentsRoute
+  '/_app/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/_app/equipe': typeof AppEquipeRoute
   '/_app/mediatheque': typeof AppMediathequeRoute
   '/_app/messages': typeof AppMessagesRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/conformite'
     | '/dechets'
     | '/documents'
+    | '/editeur-de-blocs'
     | '/equipe'
     | '/mediatheque'
     | '/messages'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/conformite'
     | '/dechets'
     | '/documents'
+    | '/editeur-de-blocs'
     | '/equipe'
     | '/mediatheque'
     | '/messages'
@@ -350,6 +361,7 @@ export interface FileRouteTypes {
     | '/_app/conformite'
     | '/_app/dechets'
     | '/_app/documents'
+    | '/_app/editeur-de-blocs'
     | '/_app/equipe'
     | '/_app/mediatheque'
     | '/_app/messages'
@@ -459,6 +471,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/editeur-de-blocs': {
+      id: '/_app/editeur-de-blocs'
+      path: '/editeur-de-blocs'
+      fullPath: '/editeur-de-blocs'
+      preLoaderRoute: typeof AppEditeurDeBlocsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/equipe': {
@@ -593,6 +612,7 @@ interface AppRouteChildren {
   AppConformiteRoute: typeof AppConformiteRoute
   AppDechetsRoute: typeof AppDechetsRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
+  AppEditeurDeBlocsRoute: typeof AppEditeurDeBlocsRoute
   AppEquipeRoute: typeof AppEquipeRoute
   AppMediathequeRoute: typeof AppMediathequeRoute
   AppMessagesRoute: typeof AppMessagesRoute
@@ -623,6 +643,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppConformiteRoute: AppConformiteRoute,
   AppDechetsRoute: AppDechetsRoute,
   AppDocumentsRoute: AppDocumentsRoute,
+  AppEditeurDeBlocsRoute: AppEditeurDeBlocsRoute,
   AppEquipeRoute: AppEquipeRoute,
   AppMediathequeRoute: AppMediathequeRoute,
   AppMessagesRoute: AppMessagesRoute,

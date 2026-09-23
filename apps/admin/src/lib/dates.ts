@@ -70,3 +70,13 @@ export function dateToParis(date: Date): { day: string; time: string } {
   );
   return { day: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
 }
+
+/** Date courte avec l'année : « 20 sept. 2026 » (inscriptions, messages) */
+export function formatShortDate(date: Date): string {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+}
+
+/** Nom du mois en cours à Paris : « septembre » */
+export function currentMonthName(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, month: 'long' }).format(now);
+}

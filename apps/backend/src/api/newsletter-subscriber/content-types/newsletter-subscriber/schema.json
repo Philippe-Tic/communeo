@@ -31,6 +31,9 @@
       "default": true,
       "required": true
     },
+    "unsubscribed_at": {
+      "type": "datetime"
+    },
     "unsubscribe_token": {
       "type": "string",
       "required": true,

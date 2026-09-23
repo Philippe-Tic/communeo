@@ -4,7 +4,13 @@
  */
 import { ArrowDown, ArrowUp, ChevronDown, Rows3, Search, X } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { indefinite, type Noun } from './types';
 
@@ -31,10 +37,11 @@ export function Toolbar({
   onQuery: (value: string) => void;
   filters: PillFilter[];
   onFilter: (key: string, value: string | undefined) => void;
-  sortText: string;
-  order: 'asc' | 'desc';
-  compact: boolean;
-  onCompact: (compact: boolean) => void;
+  /** Tri et densité : absents des listes simples (abonnés) */
+  sortText?: string;
+  order?: 'asc' | 'desc';
+  compact?: boolean;
+  onCompact?: (compact: boolean) => void;
 }) {
   const searchId = useId();
   const [text, setText] = useState(query);
@@ -57,7 +64,10 @@ export function Toolbar({
         <label htmlFor={searchId} className="sr-only">
           Rechercher {indefinite(noun)}
         </label>
-        <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary" />
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-secondary"
+        />
         <input
           id={searchId}
           type="search"
@@ -90,24 +100,32 @@ export function Toolbar({
         ))}
       </div>
 
-      <div className="ml-auto hidden items-center gap-3 text-[13px] text-secondary md:flex">
-        <span>
-          Trié par {sortText}{' '}
-          {order === 'desc' ? <ArrowDown aria-label="décroissant" className="inline size-3.5" /> : <ArrowUp aria-label="croissant" className="inline size-3.5" />}
-        </span>
-        <button
-          type="button"
-          aria-pressed={compact}
-          onClick={() => onCompact(!compact)}
-          className={cn(
-            'inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 font-medium',
-            compact ? 'border-brand bg-brand-soft text-brand' : 'border-border-input text-text hover:bg-surface-hover',
-          )}
-        >
-          <Rows3 aria-hidden="true" className="size-4" />
-          Compact
-        </button>
-      </div>
+      {sortText && onCompact && (
+        <div className="ml-auto hidden items-center gap-3 text-[13px] text-secondary md:flex">
+          <span>
+            Trié par {sortText}{' '}
+            {order === 'desc' ? (
+              <ArrowDown aria-label="décroissant" className="inline size-3.5" />
+            ) : (
+              <ArrowUp aria-label="croissant" className="inline size-3.5" />
+            )}
+          </span>
+          <button
+            type="button"
+            aria-pressed={compact}
+            onClick={() => onCompact(!compact)}
+            className={cn(
+              'inline-flex h-8 items-center gap-1.5 rounded-lg border px-2.5 font-medium',
+              compact
+                ? 'border-brand bg-brand-soft text-brand'
+                : 'border-border-input text-text hover:bg-surface-hover',
+            )}
+          >
+            <Rows3 aria-hidden="true" className="size-4" />
+            Compact
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -123,7 +141,12 @@ function FilterPill({ filter, onChange }: { filter: PillFilter; onChange: (value
           </DropdownMenuTrigger>
           <FilterOptions filter={filter} onChange={onChange} />
         </DropdownMenu>
-        <button type="button" aria-label={`Retirer le filtre ${filter.label} : ${active.label}`} onClick={() => onChange(undefined)} className="grid h-full place-items-center rounded-r-full pr-2.5 pl-1">
+        <button
+          type="button"
+          aria-label={`Retirer le filtre ${filter.label} : ${active.label}`}
+          onClick={() => onChange(undefined)}
+          className="grid h-full place-items-center rounded-r-full pr-2.5 pl-1"
+        >
           <X aria-hidden="true" className="size-3.5" />
         </button>
       </span>

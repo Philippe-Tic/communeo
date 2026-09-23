@@ -17,6 +17,7 @@ import { Route as AppAgendaRouteImport } from './routes/_app/agenda'
 import { Route as AppAlertesRouteImport } from './routes/_app/alertes'
 import { Route as AppAssociationsRouteImport } from './routes/_app/associations'
 import { Route as AppCantineRouteImport } from './routes/_app/cantine'
+import { Route as AppComposantsRouteImport } from './routes/_app/composants'
 import { Route as AppConformiteRouteImport } from './routes/_app/conformite'
 import { Route as AppDechetsRouteImport } from './routes/_app/dechets'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
@@ -75,6 +76,11 @@ const AppAssociationsRoute = AppAssociationsRouteImport.update({
 const AppCantineRoute = AppCantineRouteImport.update({
   id: '/cantine',
   path: '/cantine',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppComposantsRoute = AppComposantsRouteImport.update({
+  id: '/composants',
+  path: '/composants',
   getParentRoute: () => AppRoute,
 } as any)
 const AppConformiteRoute = AppConformiteRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/alertes': typeof AppAlertesRoute
   '/associations': typeof AppAssociationsRoute
   '/cantine': typeof AppCantineRoute
+  '/composants': typeof AppComposantsRoute
   '/conformite': typeof AppConformiteRoute
   '/dechets': typeof AppDechetsRoute
   '/documents': typeof AppDocumentsRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/alertes': typeof AppAlertesRoute
   '/associations': typeof AppAssociationsRoute
   '/cantine': typeof AppCantineRoute
+  '/composants': typeof AppComposantsRoute
   '/conformite': typeof AppConformiteRoute
   '/dechets': typeof AppDechetsRoute
   '/documents': typeof AppDocumentsRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/_app/alertes': typeof AppAlertesRoute
   '/_app/associations': typeof AppAssociationsRoute
   '/_app/cantine': typeof AppCantineRoute
+  '/_app/composants': typeof AppComposantsRoute
   '/_app/conformite': typeof AppConformiteRoute
   '/_app/dechets': typeof AppDechetsRoute
   '/_app/documents': typeof AppDocumentsRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/alertes'
     | '/associations'
     | '/cantine'
+    | '/composants'
     | '/conformite'
     | '/dechets'
     | '/documents'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
     | '/alertes'
     | '/associations'
     | '/cantine'
+    | '/composants'
     | '/conformite'
     | '/dechets'
     | '/documents'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '/_app/alertes'
     | '/_app/associations'
     | '/_app/cantine'
+    | '/_app/composants'
     | '/_app/conformite'
     | '/_app/dechets'
     | '/_app/documents'
@@ -419,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/cantine'
       fullPath: '/cantine'
       preLoaderRoute: typeof AppCantineRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/composants': {
+      id: '/_app/composants'
+      path: '/composants'
+      fullPath: '/composants'
+      preLoaderRoute: typeof AppComposantsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/conformite': {
@@ -570,6 +589,7 @@ interface AppRouteChildren {
   AppAlertesRoute: typeof AppAlertesRoute
   AppAssociationsRoute: typeof AppAssociationsRoute
   AppCantineRoute: typeof AppCantineRoute
+  AppComposantsRoute: typeof AppComposantsRoute
   AppConformiteRoute: typeof AppConformiteRoute
   AppDechetsRoute: typeof AppDechetsRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
@@ -599,6 +619,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAlertesRoute: AppAlertesRoute,
   AppAssociationsRoute: AppAssociationsRoute,
   AppCantineRoute: AppCantineRoute,
+  AppComposantsRoute: AppComposantsRoute,
   AppConformiteRoute: AppConformiteRoute,
   AppDechetsRoute: AppDechetsRoute,
   AppDocumentsRoute: AppDocumentsRoute,

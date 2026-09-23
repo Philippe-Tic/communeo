@@ -12,7 +12,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
-  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium' },
+  use: { baseURL: `http://127.0.0.1:${PORT}`, browserName: 'chromium', locale: 'fr-FR', timezoneId: 'Europe/Paris' },
   projects: [
     { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
     { name: 'laptop-1366', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 768 } } },

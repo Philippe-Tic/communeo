@@ -124,7 +124,7 @@ export class NetlifyPublisher implements SitePublisher {
 
   // Publication
 
-  async publish(site: PublisherSite, dir: string): Promise<PublishResult> {
+  async publish(site: PublisherSite, dir: string, options: { onUploaded?: () => Promise<void> | void } = {}): Promise<PublishResult> {
     const host = await this.ensureSite(site);
     if (site.customDomain) await this.redirectDefaultDomain(dir, host, site.customDomain);
     const zip = await zipDirectory(dir);
@@ -136,6 +136,7 @@ export class NetlifyPublisher implements SitePublisher {
       body: zip,
     });
 
+    await options.onUploaded?.();
     const state = await this.waitForDeploy(host.hostId, deploy.id);
     return { ...host, deployId: deploy.id, state };
   }

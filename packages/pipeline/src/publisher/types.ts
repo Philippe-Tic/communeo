@@ -68,8 +68,11 @@ export interface SitePublisher {
 
   /** Crée le site chez l'hébergeur s'il n'existe pas encore (idempotent). */
   ensureSite(site: PublisherSite): Promise<HostSite>;
-  /** Publie en production le contenu du dossier `dir` (le site statique généré). */
-  publish(site: PublisherSite, dir: string): Promise<PublishResult>;
+  /**
+   * Publie en production le contenu du dossier `dir` (le site statique généré). `onUploaded` est
+   * appelé quand les fichiers sont chez l'hébergeur, avant qu'il ait fini de les traiter.
+   */
+  publish(site: PublisherSite, dir: string, options?: { onUploaded?: () => Promise<void> | void }): Promise<PublishResult>;
   /** État d'un dépôt renvoyé par `publish`. */
   status(deployId: string): Promise<DeployStatus>;
 

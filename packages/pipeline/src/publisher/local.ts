@@ -26,7 +26,7 @@ export class LocalPublisher implements SitePublisher {
     return { hostId: site.slug, defaultUrl: `${base}/${site.slug}` };
   }
 
-  async publish(site: PublisherSite, dir: string): Promise<PublishResult> {
+  async publish(site: PublisherSite, dir: string, options: { onUploaded?: () => Promise<void> | void } = {}): Promise<PublishResult> {
     const host = await this.ensureSite(site);
     // Remplacement en deux temps : le site précédent reste en place jusqu'à la copie complète
     const target = this.dir(site);
@@ -34,6 +34,7 @@ export class LocalPublisher implements SitePublisher {
     await fs.cp(dir, next, { recursive: true });
     await fs.rm(target, { recursive: true, force: true });
     await fs.rename(next, target);
+    await options.onUploaded?.();
     return { ...host, deployId: `local-${Date.now()}`, state: 'ready' };
   }
 

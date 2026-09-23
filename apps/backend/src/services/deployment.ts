@@ -5,6 +5,7 @@
  */
 import type { BuildReason, EnqueueResult } from '@communeo/pipeline';
 import { enqueueBuild, scheduleBuild } from './build-queue';
+import { clearPendingChanges } from './pending-changes';
 import { publisher } from '../utils/publisher';
 import { log } from '../utils/logger';
 
@@ -23,8 +24,8 @@ class DeploymentService {
    * Mise en ligne automatique après une modification : part `delaySeconds` après la dernière
    * modification du site (debounce persistant dans la file).
    */
-  async scheduleContentBuild(siteDocumentId: string, delaySeconds: number): Promise<EnqueueResult> {
-    const result = await scheduleBuild({ siteDocumentId, triggeredBy: null, reason: 'content' }, delaySeconds);
+  async scheduleContentBuild(siteDocumentId: string, delaySeconds: number, reason: 'content' | 'scheduled' = 'content'): Promise<EnqueueResult> {
+    const result = await scheduleBuild({ siteDocumentId, triggeredBy: null, reason }, delaySeconds);
     log.info(`⏱️ [DEPLOYMENT] Build ${result.status} for site ${siteDocumentId} in ${delaySeconds}s (job ${result.jobId})`);
     return result;
   }
@@ -34,7 +35,8 @@ class DeploymentService {
    */
   async checkDeploymentStatus(deploymentId: string): Promise<any> {
     const deployments = await strapi.documents('api::deployment.deployment').findMany({
-      filters: { deployment_id: deploymentId }
+      filters: { deployment_id: deploymentId },
+      populate: ['site'],
     });
     const deployment = deployments?.[0];
     if (!deployment) {
@@ -48,10 +50,14 @@ class DeploymentService {
       await strapi.documents('api::deployment.deployment').update({ documentId: deployment.documentId,
         data: {
           status,
-          ...(status === 'building' ? {} : { completed_at: new Date() }),
+          ...(status === 'building' ? {} : { completed_at: new Date(), step: null }),
           ...(hostStatus.error ? { error_message: hostStatus.error } : {}),
         } as any
       });
+    }
+
+    if (status === 'ready' && deployment.status !== 'ready' && (deployment as any).site) {
+      await clearPendingChanges((deployment as any).site.documentId, new Date(deployment.triggered_at as any));
     }
 
     return { ...deployment, status, host_status: hostStatus };

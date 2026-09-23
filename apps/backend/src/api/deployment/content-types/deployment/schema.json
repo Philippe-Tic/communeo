@@ -37,6 +37,28 @@
       "default": "building",
       "required": true
     },
+    "reason": {
+      "type": "enumeration",
+      "enum": [
+        "manual",
+        "content",
+        "scheduled",
+        "domain"
+      ],
+      "default": "manual"
+    },
+    "step": {
+      "type": "enumeration",
+      "enum": [
+        "checking",
+        "rendering",
+        "publishing",
+        "cache"
+      ]
+    },
+    "reference": {
+      "type": "string"
+    },
     "triggered_by": {
       "type": "relation",
       "relation": "manyToOne",

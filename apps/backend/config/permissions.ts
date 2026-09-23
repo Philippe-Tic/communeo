@@ -36,7 +36,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     // Envoi de fichiers uniquement (ni liste globale, ni suppression, ni remplacement)
     'plugin::upload.content-api.upload',
     // Endpoints custom (rôles vérifiés dans les contrôleurs)
-    ...custom('deployment', ['trigger', 'status', 'check', 'debug']),
+    ...custom('deployment', ['trigger', 'state', 'status', 'check', 'debug']),
     ...custom('domain', ['configure', 'verify', 'remove', 'status', 'diagnostic']),
     ...custom('user-management', [
       'find',

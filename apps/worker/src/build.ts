@@ -7,7 +7,7 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import type { BuildJob, BuildSite, Logger, PublisherSite, SitePublisher } from '@communeo/pipeline';
+import type { BuildJob, BuildSite, BuildStep, Logger, PublisherSite, SitePublisher } from '@communeo/pipeline';
 import type { Renderer } from './renderer';
 import type { StrapiReporter } from './strapi';
 
@@ -28,9 +28,17 @@ export async function processBuild(job: BuildJob, deps: BuildDeps): Promise<void
   const started = now();
   const lastAttempt = job.retryCount >= job.retryLimit;
   const log = deps.logger;
-  const { siteDocumentId, triggeredBy } = job.data;
+  const { siteDocumentId, triggeredBy, reason } = job.data;
+  const step = async (name: BuildStep) => {
+    try {
+      await deps.strapi.progress(job.id, name);
+    } catch (error) {
+      log.warn(`[BUILD] Étape ${name} non transmise à Strapi :`, error);
+    }
+  };
 
-  const { site } = await deps.strapi.start(job.id, { siteDocumentId, triggeredBy, attempt: job.retryCount });
+  // Strapi ouvre l'enregistrement à l'étape « vérification des contenus »
+  const { site } = await deps.strapi.start(job.id, { siteDocumentId, triggeredBy, reason, attempt: job.retryCount });
   log.info(`[BUILD] ${site.slug} : début (job ${job.id}, essai ${job.retryCount + 1}/${job.retryLimit + 1})`);
 
   await fs.mkdir(deps.workDir, { recursive: true });
@@ -43,9 +51,11 @@ export async function processBuild(job: BuildJob, deps: BuildDeps): Promise<void
     hostId = host.hostId;
     const siteUrl = site.customDomain ? `https://${site.customDomain}` : host.defaultUrl;
 
+    await step('rendering');
     await deps.renderer.build({ site, outDir, siteUrl, signal });
     signal.throwIfAborted();
-    const result = await deps.publisher.publish(toPublisherSite({ ...site, hostId }), outDir);
+    await step('publishing');
+    const result = await deps.publisher.publish(toPublisherSite({ ...site, hostId }), outDir, { onUploaded: () => step('cache') });
 
     const buildSeconds = (now() - started) / 1000;
     await deps.strapi.finish(job.id, {

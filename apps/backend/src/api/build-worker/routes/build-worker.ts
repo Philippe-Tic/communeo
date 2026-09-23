@@ -12,6 +12,12 @@ export default {
     },
     {
       method: 'POST',
+      path: '/build-worker/jobs/:jobId/progress',
+      handler: 'build-worker.progress',
+      config: { auth: false },
+    },
+    {
+      method: 'POST',
       path: '/build-worker/jobs/:jobId/finish',
       handler: 'build-worker.finish',
       config: { auth: false },

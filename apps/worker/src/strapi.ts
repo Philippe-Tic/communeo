@@ -3,6 +3,7 @@
  */
 import {
   workerRoutes,
+  type BuildStep,
   type FinishBuildRequest,
   type StartBuildRequest,
   type StartBuildResponse,
@@ -10,6 +11,8 @@ import {
 
 export interface StrapiReporter {
   start(jobId: string, request: StartBuildRequest): Promise<StartBuildResponse>;
+  /** Étape en cours (affichée dans l'admin) ; un échec ici n'arrête pas le build */
+  progress(jobId: string, step: BuildStep): Promise<void>;
   finish(jobId: string, request: FinishBuildRequest): Promise<void>;
 }
 
@@ -25,6 +28,9 @@ export function createStrapiReporter(baseUrl: string, secret: string, fetchImpl:
   };
   return {
     start: (jobId, request) => post(workerRoutes.start(jobId), request) as Promise<StartBuildResponse>,
+    progress: async (jobId, step) => {
+      await post(workerRoutes.progress(jobId), { step });
+    },
     finish: async (jobId, request) => {
       await post(workerRoutes.finish(jobId), request);
     },

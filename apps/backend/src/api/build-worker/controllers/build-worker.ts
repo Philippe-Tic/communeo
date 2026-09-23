@@ -7,7 +7,8 @@
  */
 import crypto from 'crypto';
 import { DEFAULT_THEME } from '@communeo/core';
-import type { BuildSite, FinishBuildRequest, StartBuildRequest } from '@communeo/pipeline';
+import { BUILD_STEPS, type BuildSite, type FinishBuildRequest, type ProgressBuildRequest, type StartBuildRequest } from '@communeo/pipeline';
+import { clearPendingChanges } from '../../../services/pending-changes';
 import { log } from '../../../utils/logger';
 
 const DEPLOYMENT = 'api::deployment.deployment';
@@ -20,6 +21,18 @@ function authorized(ctx): boolean {
   const given = crypto.createHash('sha256').update(header.slice(7)).digest();
   const expected = crypto.createHash('sha256').update(secret).digest();
   return crypto.timingSafeEqual(given, expected);
+}
+
+const REASONS = new Set(['manual', 'content', 'scheduled', 'domain']);
+
+/** Référence donnée à l'assistance en cas d'échec : MEL-2026-0918-1120 (heure de Paris) */
+export function deploymentReference(date: Date): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+      .formatToParts(date)
+      .map((part) => [part.type, part.value]),
+  );
+  return `MEL-${parts.year}-${parts.month}${parts.day}-${parts.hour}${parts.minute}`;
 }
 
 async function findDeployment(jobId: string) {
@@ -46,7 +59,7 @@ export default {
       // Nouvelle tentative du même job
       deployment = await strapi.documents(DEPLOYMENT).update({
         documentId: deployment.documentId,
-        data: { status: 'building', error_message: null, completed_at: null } as any,
+        data: { status: 'building', step: 'checking', error_message: null, completed_at: null } as any,
       });
     } else {
       deployment = await strapi.documents(DEPLOYMENT).create({
@@ -54,6 +67,9 @@ export default {
           site: site.documentId,
           job_id: jobId,
           status: 'building',
+          step: 'checking',
+          reason: REASONS.has(body.reason) ? body.reason : 'manual',
+          reference: deploymentReference(now),
           triggered_at: now,
           ...(body.triggeredBy ? { triggered_by: body.triggeredBy } : {}),
         } as any,
@@ -85,6 +101,19 @@ export default {
   },
 
   /**
+   * POST /api/build-worker/jobs/:jobId/progress
+   */
+  async progress(ctx) {
+    if (!authorized(ctx)) return ctx.unauthorized('Secret du worker invalide');
+    const { step } = (ctx.request.body ?? {}) as ProgressBuildRequest;
+    if (!(BUILD_STEPS as readonly string[]).includes(step)) return ctx.badRequest('Étape inconnue');
+    const deployment: any = await findDeployment(ctx.params.jobId);
+    if (!deployment) return ctx.notFound('Déploiement non trouvé');
+    await strapi.documents(DEPLOYMENT).update({ documentId: deployment.documentId, data: { step } as any });
+    ctx.body = { ok: true };
+  },
+
+  /**
    * POST /api/build-worker/jobs/:jobId/finish
    */
   async finish(ctx) {
@@ -105,8 +134,15 @@ export default {
         ...(body.deployId ? { deployment_id: body.deployId } : {}),
         ...(body.defaultUrl ? { deployment_url: body.defaultUrl } : {}),
         completed_at: body.status === 'building' ? null : new Date(),
+        // En cours chez l'hébergeur : on reste sur « vidage du cache »
+        step: body.status === 'building' ? 'cache' : null,
       } as any,
     });
+
+    // Mise en ligne réussie : ce qui a été modifié avant son début est en ligne
+    if (body.status === 'ready' && deployment.site) {
+      await clearPendingChanges(deployment.site.documentId, new Date(deployment.triggered_at));
+    }
 
     // Champs techniques du Site : requête bas niveau, sans passer par les middlewares de documents
     // (qui programmeraient un nouveau build pour cette simple mise à jour)

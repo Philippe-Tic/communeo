@@ -150,14 +150,17 @@ function ImageCard({
   altId,
   onAlt,
   actions,
+  describe = true,
 }: {
   file: LibraryFile;
   altId: string;
   onAlt: (file: LibraryFile) => void;
   actions?: React.ReactNode;
+  /** `false` : pas de texte alternatif (logo, favicon), le format du fichier à la place */
+  describe?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
-  const missing = missingAlt(file);
+  const missing = describe && missingAlt(file);
   return (
     <div
       className={cn(
@@ -172,7 +175,9 @@ function ImageCard({
       />
       <div className="min-w-0 flex-1">
         <p className="truncate text-[13px] font-semibold">{file.name}</p>
-        {missing ? (
+        {!describe ? (
+          <p className="mt-0.5 text-[13px] text-secondary">{describeFile(file)}</p>
+        ) : missing ? (
           <p className="mt-0.5 flex items-center gap-1 text-[13px] font-medium text-warning">
             <TriangleAlert aria-hidden="true" className="size-3.5" />
             Texte alternatif manquant
@@ -181,20 +186,22 @@ function ImageCard({
           <p className="mt-0.5 line-clamp-2 text-[13px] text-secondary">« {file.alternativeText} »</p>
         )}
         <div className="mt-1.5 flex flex-wrap gap-1.5">
-          <Button
-            id={altId}
-            type="button"
-            size="sm"
-            variant={missing ? 'primary' : 'secondary'}
-            onClick={() => setEditing(true)}
-          >
-            <Pencil aria-hidden="true" />
-            {missing ? 'Ajouter le texte alternatif' : 'Modifier le texte alternatif'}
-          </Button>
+          {describe && (
+            <Button
+              id={altId}
+              type="button"
+              size="sm"
+              variant={missing ? 'primary' : 'secondary'}
+              onClick={() => setEditing(true)}
+            >
+              <Pencil aria-hidden="true" />
+              {missing ? 'Ajouter le texte alternatif' : 'Modifier le texte alternatif'}
+            </Button>
+          )}
           {actions}
         </div>
       </div>
-      <AltTextDialog file={file} open={editing} onOpenChange={setEditing} onSaved={onAlt} />
+      {describe && <AltTextDialog file={file} open={editing} onOpenChange={setEditing} onSaved={onAlt} />}
     </div>
   );
 }
@@ -206,12 +213,15 @@ export function ImageField<T extends FieldValues>({
   required,
   help,
   folder,
+  describe = true,
 }: {
   name: Path<T>;
   label: string;
   required?: boolean;
   help?: string;
   folder?: string;
+  /** `false` : image sans texte alternatif (logo, favicon) */
+  describe?: boolean;
 }) {
   const { control } = useFormContext<T>();
   // Deux erreurs possibles : pas d'image, ou image sans texte alternatif
@@ -240,11 +250,11 @@ export function ImageField<T extends FieldValues>({
                 </>
               )}
             </legend>
-            {help && <p className="mt-0.5 text-[13px] text-secondary">{help}</p>}
             <div className="mt-2">
               {file ? (
                 <ImageCard
                   file={file}
+                  describe={describe}
                   altId={fieldId(`${name}.alternativeText`)}
                   onAlt={(updated) => onChange(updated)}
                   actions={
@@ -277,6 +287,7 @@ export function ImageField<T extends FieldValues>({
                 </Button>
               )}
             </div>
+            {help && <p className="mt-1.5 text-[13px] text-secondary">{help}</p>}
             <FieldError id={id} message={error} />
             <MediaPicker
               open={picking}
@@ -285,6 +296,7 @@ export function ImageField<T extends FieldValues>({
               title="Choisir une image"
               confirmLabel="Insérer l'image"
               folder={folder}
+              describe={describe}
               onInsert={(files) => onChange(files[0] ?? null)}
             />
           </fieldset>

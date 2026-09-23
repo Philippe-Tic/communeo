@@ -26,6 +26,7 @@ const ROUTES = [
   '/newsletter',
   '/mediatheque',
   '/mon-site/menu',
+  '/mon-site/informations',
   '/mise-en-ligne',
   '/mon-compte',
 ];

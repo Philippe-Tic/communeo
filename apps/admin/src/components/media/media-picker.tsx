@@ -37,6 +37,7 @@ export function MediaPicker({
   title,
   confirmLabel,
   folder,
+  describe = true,
   onInsert,
 }: {
   open: boolean;
@@ -48,6 +49,8 @@ export function MediaPicker({
   confirmLabel: string;
   /** Dossier des fichiers envoyés depuis la fenêtre */
   folder?: string;
+  /** `false` : image sans texte alternatif (logo, favicon : le site fournit leur description) */
+  describe?: boolean;
   onInsert: (files: LibraryFile[]) => void;
 }) {
   const client = useQueryClient();
@@ -98,7 +101,7 @@ export function MediaPicker({
   };
 
   const insert = async () => {
-    if (kind === 'image') {
+    if (kind === 'image' && describe) {
       const missing = selected.filter((item) => !altOf(item).trim());
       if (missing.length) {
         setFocused(missing[0]!);
@@ -117,7 +120,7 @@ export function MediaPicker({
       const files: LibraryFile[] = [];
       for (const item of selected) {
         const alt = altOf(item).trim();
-        if (kind === 'image' && alt !== (item.file.alternativeText ?? '')) {
+        if (kind === 'image' && describe && alt !== (item.file.alternativeText ?? '')) {
           const updated = await updateMedia(item.documentId, { alt_text: alt });
           files.push(updated.file);
         } else files.push(item.file);
@@ -320,7 +323,7 @@ export function MediaPicker({
                         .join(' · ')}
                     </p>
                   </div>
-                  {kind === 'image' && (
+                  {kind === 'image' && describe && (
                     <div>
                       <label htmlFor={`${id}-alt`} className="font-medium">
                         Texte alternatif{' '}

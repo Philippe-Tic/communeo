@@ -402,6 +402,43 @@ export interface MockOptions {
   failRejectEmail?: boolean;
   /** Alertes : une active, une programmée, deux passées (défaut) ou aucune */
   alertSet?: 'some' | 'none';
+  /** Collectes : 5 (défaut) ou aucune */
+  wasteSet?: 'some' | 'none';
+}
+
+export type MockWaste = Record<string, unknown> & { documentId: string; waste_type: string };
+
+function wasteSchedules(): MockWaste[] {
+  const base = (id: string, fields: Record<string, unknown>): MockWaste => ({
+    documentId: id,
+    waste_type: 'ordures-menageres',
+    collection_day: null,
+    frequency: 'hebdomadaire',
+    month_rank: null,
+    season_start_month: null,
+    season_end_month: null,
+    start_date: null,
+    zone: null,
+    notes: null,
+    active: true,
+    ...fields,
+  });
+  return [
+    base('w-om', {
+      waste_type: 'ordures-menageres',
+      collection_day: 'mardi',
+      notes: 'Sortir les bacs la veille au soir.',
+    }),
+    base('w-tri', { waste_type: 'tri-selectif', collection_day: 'jeudi', frequency: 'semaines-paires', zone: 'Bourg' }),
+    base('w-verre', { waste_type: 'verre', frequency: 'apport-volontaire', zone: '4 points' }),
+    base('w-verts', {
+      waste_type: 'dechets-verts',
+      collection_day: 'lundi',
+      season_start_month: 4,
+      season_end_month: 11,
+    }),
+    base('w-enc', { waste_type: 'encombrants', frequency: 'sur-rendez-vous' }),
+  ];
 }
 
 export type MockAlert = Record<string, unknown> & {
@@ -732,6 +769,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     associationSet = 'some',
     failRejectEmail = false,
     alertSet = 'some',
+    wasteSet = 'some',
   } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
@@ -751,6 +789,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const inbox = messageSet === 'none' ? [] : messages();
   const directory = associationSet === 'none' ? [] : associations();
   const alertStore = alertSet === 'none' ? [] : alerts();
+  const waste = wasteSet === 'none' ? [] : wasteSchedules();
   let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
   const publishedByType: Record<ContentType, Set<string>> = {
@@ -775,6 +814,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     comarquage_enabled: true,
     open_data_enabled: false,
     navigation_config: structuredClone(navigation) as unknown,
+    waste_notes: 'Déchetterie ouverte du mardi au samedi.' as string | null,
   };
   // Réglages reçus par le serveur de preview (POST de l'admin)
   const previewPosts: Array<Record<string, unknown>> = [];
@@ -1090,6 +1130,31 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    if (url.pathname === '/api/waste-schedules') {
+      if (method === 'POST') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: 'POST waste', body });
+        const created = { documentId: `w-${waste.length + 1}`, ...(body.data as { waste_type: string }) };
+        waste.push(created);
+        return json({ data: created }, 201);
+      }
+      return json({ data: waste, meta: { pagination: { page: 1, pageSize: 100, total: waste.length, pageCount: 1 } } });
+    }
+    const wasteMatch = /^\/api\/waste-schedules\/([^/]+)$/.exec(url.pathname);
+    if (wasteMatch) {
+      const item = waste.find((entry) => entry.documentId === wasteMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `PUT waste ${item.documentId}`, body });
+        Object.assign(item, body.data);
+      }
+      if (method === 'DELETE') {
+        waste.splice(waste.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
+    }
     if (url.pathname === '/api/alertes' && method === 'GET') {
       return json({
         data: alertStore,
@@ -1251,6 +1316,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     inbox,
     directory,
     alertStore,
+    waste,
     stores,
     publishedByType,
     previewPosts,

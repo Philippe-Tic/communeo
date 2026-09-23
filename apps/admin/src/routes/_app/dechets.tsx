@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { WasteScreen } from '@/components/waste/waste-screen';
 
-export const Route = createFileRoute('/_app/dechets')({
-  component: () => <ComingSoon title="Collecte des déchets" ticket={141} />,
-});
+export const Route = createFileRoute('/_app/dechets')({ component: WasteScreen });

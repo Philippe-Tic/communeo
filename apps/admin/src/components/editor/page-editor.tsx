@@ -11,11 +11,12 @@ import { useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { SLUG_MAX_LENGTH, SLUG_PATTERN, slugify } from '@communeo/core';
 import { blocksSchema, BlockEditor, describeBlockError, type Block } from '@/components/blocks';
-import { Form, FormSection, SwitchField, TextareaField, TextField, UnsavedChangesGuard, useZodForm } from '@/components/form';
+import { Form, FormSection, TextareaField, TextField, UnsavedChangesGuard, useZodForm } from '@/components/form';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, UnsavedChangesDialog } from '@/components/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PublicationBadge } from '@/components/content-list/publication-badge';
+import { MenuSwitch } from '@/components/menu/menu-switch';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import { refreshContent } from '@/lib/content-list';
@@ -41,7 +42,6 @@ const publishSchema = z.object({
     .refine((value) => !value || SLUG_PATTERN.test(value), "L'adresse ne peut contenir que des lettres minuscules, des chiffres et des tirets"),
   lead: z.string().max(300, 'Le chapô ne doit pas dépasser 300 caractères'),
   meta_description: z.string().max(160, 'La description ne doit pas dépasser 160 caractères'),
-  show_in_menu: z.boolean(),
   blocks: blocksSchema('publish'),
 });
 
@@ -262,7 +262,7 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
       <div className="flex items-start">
       <div className="min-w-0 flex-1">
       <div className="mx-auto max-w-[760px] space-y-6 px-4 pt-6 pb-28 md:px-8 md:py-7">
-        <FormSection title="En-tête" fields={['title', 'lead', 'slug', 'show_in_menu']}>
+        <FormSection title="En-tête" fields={['title', 'lead', 'slug']}>
           <TextField name="title" label="Titre" required inputProps={{ className: 'h-12 text-lg font-semibold md:h-11' }} />
           <TextareaField name="lead" label="Chapô" rows={2} help="Une ou deux phrases qui résument la page." />
           <div>
@@ -283,7 +283,7 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
               <TextField name="slug" label="Adresse de la page" hideOptional prefix={`${siteHost(session?.site?.live_url, session?.site?.slug)}/`} help="Générée depuis le titre, modifiable." />
             </div>
             <div className="sm:pb-7">
-              <SwitchField name="show_in_menu" label="Afficher dans le menu" />
+              <MenuSwitch pageDocumentId={documentId} />
             </div>
           </div>
         </FormSection>

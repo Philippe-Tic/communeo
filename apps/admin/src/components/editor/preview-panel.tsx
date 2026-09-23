@@ -2,10 +2,14 @@
  * Panneau de preview (handoff 6.3, #136) : la vraie page rendue par le serveur de preview, dans le thème
  * de la commune, à la largeur choisie (mobile 390, tablette 768, bureau 1280) réduite pour tenir dans le
  * panneau. Rechargée après chaque enregistrement ; la preview reste en clair, même en mode sombre.
+ * Écrans de réglages (`settings`) : les réglages non enregistrés partent au serveur de preview par un
+ * formulaire POST dont la cible est l'iframe (voir apps/renderer/src/lib/preview.ts).
  */
 import { Dialog } from 'radix-ui';
+import type React from 'react';
 import { Maximize2, Monitor, PanelRightClose, RotateCw, Smartphone, Tablet, X, type LucideIcon } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { PREVIEW_FORM } from '@communeo/core';
 import { Button } from '@/components/ui/button';
 import { withVersion } from '@/lib/preview';
 import { cn } from '@/lib/utils';
@@ -25,6 +29,10 @@ export interface PreviewState {
   version: number;
   title: string;
   themeName: string;
+  /** Réglages non enregistrés (JSON) à montrer : envoyés en POST avec le jeton */
+  settings?: string;
+  /** Légende de la barre d'outils (par défaut « Aperçu du brouillon — thème … ») */
+  caption?: string;
 }
 
 /** Choix de la largeur : groupe de boutons radio, flèches pour changer */
@@ -90,18 +98,43 @@ function ScaledFrame({ state, device, fit }: { state: PreviewState; device: Devi
           className={cn('overflow-hidden bg-white', phone && 'rounded-[18px] border-[6px] border-[#1C1B18]')}
           style={{ width: deviceWidth * scale + (phone ? 12 : 0), height: '100%' }}
         >
-          <iframe
-            key={device}
-            title={`Aperçu de « ${state.title} »`}
-            src={withVersion(state.url, state.version)}
-            className="origin-top-left border-0 bg-white"
-            style={{ width: deviceWidth, height: Math.max(frameHeight, 0), transform: `scale(${scale})` }}
-          />
+          {state.settings === undefined ? (
+            <iframe
+              key={device}
+              title={`Aperçu de « ${state.title} »`}
+              src={withVersion(state.url, state.version)}
+              className="origin-top-left border-0 bg-white"
+              style={{ width: deviceWidth, height: Math.max(frameHeight, 0), transform: `scale(${scale})` }}
+            />
+          ) : (
+            <SettingsFrame key={device} url={state.url} settings={state.settings} version={state.version} title={state.title} style={{ width: deviceWidth, height: Math.max(frameHeight, 0), transform: `scale(${scale})` }} />
+          )}
         </div>
       ) : (
         <p className="m-auto max-w-72 text-center text-[13px] text-secondary">{state.unavailable ?? "Chargement de l'aperçu…"}</p>
       )}
     </div>
+  );
+}
+
+/** Iframe remplie par un POST : jeton (tiré du lien signé) et réglages, renvoyés à chaque changement */
+function SettingsFrame({ url, settings, version, title, style }: { url: string; settings: string; version: number; title: string; style: React.CSSProperties }) {
+  const name = `apercu-${useId().replace(/:/g, '')}`;
+  const form = useRef<HTMLFormElement>(null);
+  const target = new URL(url);
+  const token = target.searchParams.get('token') ?? '';
+  target.searchParams.delete('token');
+  useEffect(() => {
+    form.current?.submit();
+  }, [settings, version]);
+  return (
+    <>
+      <form ref={form} method="post" action={target.toString()} target={name} hidden>
+        <input type="hidden" name={PREVIEW_FORM.token} value={token} />
+        <input type="hidden" name={PREVIEW_FORM.settings} value={settings} />
+      </form>
+      <iframe name={name} title={`Aperçu de « ${title} »`} className="origin-top-left border-0 bg-white" style={style} />
+    </>
   );
 }
 
@@ -123,7 +156,7 @@ function PreviewToolbar({
   return (
     <div className="flex items-center gap-2 border-b border-border px-3 py-2">
       <DevicePicker device={device} onChange={onDevice} />
-      <p className="min-w-0 flex-1 truncate text-[13px] text-secondary">Aperçu du brouillon — thème {state.themeName}</p>
+      <p className="min-w-0 flex-1 truncate text-[13px] text-secondary">{state.caption ?? `Aperçu du brouillon — thème ${state.themeName}`}</p>
       <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Recharger l'aperçu" onClick={onReload} disabled={!state.url}>
         <RotateCw aria-hidden="true" />
       </Button>

@@ -51,6 +51,15 @@ try {
 
   const withCookie = await get('/', { cookie: `communeo_preview=${encodeURIComponent(valid)}` });
   check('avec le cookie : accès accordé (le contenu vient ensuite de Strapi)', withCookie.status !== 401, `(${withCookie.status})`);
+
+  // Réglages non enregistrés envoyés par l'admin (autre origine) : jeton obligatoire dans le formulaire
+  const post = (fields, headers = {}) =>
+    fetch(`${base}/`, { method: 'POST', redirect: 'manual', headers: { 'content-type': 'application/x-www-form-urlencoded', origin: 'https://admin.test', ...headers }, body: new URLSearchParams(fields) });
+  const settings = JSON.stringify({ navigation_config: { main: [{ type: 'section', section: 'agenda' }], footer: [] } });
+  check('POST de réglages sans jeton : 401, même avec le cookie', (await post({ settings }, { cookie: `communeo_preview=${encodeURIComponent(valid)}` })).status === 401);
+  check('POST de réglages hors liste : 400', (await post({ token: valid, settings: JSON.stringify({ name: 'x' }) })).status === 400);
+  const accepted = await post({ token: valid, settings });
+  check("POST de réglages depuis l'admin : accepté (pas de blocage d'origine)", ![401, 403, 400].includes(accepted.status), `(${accepted.status})`);
 } finally {
   server.kill();
 }

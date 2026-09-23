@@ -62,7 +62,6 @@ export async function seedDevelopment(strapi: any) {
       data: {
         title: 'Page de test',
         slug: 'page-de-test',
-        show_in_menu: true,
         site: site.documentId,
         blocks: [
           {

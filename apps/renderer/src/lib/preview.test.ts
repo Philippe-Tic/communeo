@@ -61,3 +61,30 @@ describe('resolvePreview', () => {
     });
   });
 });
+
+describe('réglages non enregistrés (POST depuis l’admin)', () => {
+  const settings = { navigation_config: { main: [{ type: 'section', section: 'agenda', label: 'Sorties' }], footer: [] } };
+  const post = (fields: Record<string, string>, cookies: Record<string, string> = {}) =>
+    new Request('http://preview.test/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded', cookie: Object.entries(cookies).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('; ') },
+      body: new URLSearchParams(fields),
+    });
+
+  it('affiche les réglages avec un jeton valide dans le formulaire, et range le jeton en cookie', async () => {
+    const decision = await resolvePreview(post({ token: await token(), settings: JSON.stringify(settings) }), env, now);
+    expect(decision).toMatchObject({ kind: 'allow', access: { siteDocumentId: 'site-a', settings } });
+    if (decision.kind === 'allow') expect(decision.cookies?.[0]).toMatch(new RegExp(`^${TOKEN_COOKIE}=`));
+  });
+
+  it('refuse un POST sans jeton dans le formulaire, même avec le cookie', async () => {
+    expect(await resolvePreview(post({ settings: JSON.stringify(settings) }, { [TOKEN_COOKIE]: await token() }), env, now)).toEqual({ kind: 'deny' });
+    expect(await resolvePreview(post({ token: 'abc.def', settings: '{}' }), env, now)).toEqual({ kind: 'deny' });
+  });
+
+  it('refuse des réglages hors liste ou invalides', async () => {
+    const valid = await token();
+    expect(await resolvePreview(post({ token: valid, settings: JSON.stringify({ name: 'Autre commune' }) }), env, now)).toMatchObject({ kind: 'invalid' });
+    expect(await resolvePreview(post({ token: valid, settings: '{pas du json' }), env, now)).toMatchObject({ kind: 'invalid' });
+  });
+});

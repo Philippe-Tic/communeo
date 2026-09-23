@@ -545,8 +545,6 @@ export interface Page extends StrapiPublishableDocument {
   blocks?: Array<DynamicZoneEntry<'blocks.text', BlocksText> | DynamicZoneEntry<'blocks.image', BlocksImage> | DynamicZoneEntry<'blocks.buttons', BlocksButtons> | DynamicZoneEntry<'blocks.callout', BlocksCallout> | DynamicZoneEntry<'blocks.documents', BlocksDocuments> | DynamicZoneEntry<'blocks.gallery', BlocksGallery> | DynamicZoneEntry<'blocks.faq', BlocksFaq> | DynamicZoneEntry<'blocks.contact', BlocksContact> | DynamicZoneEntry<'blocks.video', BlocksVideo>>;
   meta_description: string | null;
   featured_image?: Media | null;
-  menu_order: number | null;
-  show_in_menu: boolean | null;
   scheduled_at: string | null;
   seo_keywords: string | null;
   site?: Site | null;

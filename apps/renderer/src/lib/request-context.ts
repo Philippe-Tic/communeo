@@ -3,12 +3,14 @@
  * de contenus de la requête. Posé par le middleware ; en build statique, il n'y en a pas.
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
-import type { ContentSource } from '@communeo/core';
+import type { ContentSource, PreviewSettings } from '@communeo/core';
 
 export interface RequestContext {
   siteDocumentId: string;
   /** Thème à afficher ; à défaut celui de la commune */
   theme?: string;
+  /** Réglages du Site non enregistrés, envoyés par l'admin (preview des écrans « Mon site ») */
+  settings?: PreviewSettings;
   /** Source de contenus partagée par toute la requête (chaque type chargé une fois) */
   source?: ContentSource;
 }

@@ -1,3 +1,4 @@
+import { syncHosting } from '../services/hosting';
 import { ensureBuildToken } from './build-token';
 import { applyPermissions, disablePublicRegistration } from './permissions';
 import { seedDevelopment, seedProduction } from './seed';
@@ -13,4 +14,5 @@ export default async ({ strapi }: { strapi: any }) => {
   }
 
   await ensureBuildToken(strapi);
+  await syncHosting(strapi);
 };

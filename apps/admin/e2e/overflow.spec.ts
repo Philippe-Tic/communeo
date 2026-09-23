@@ -27,6 +27,11 @@ const ROUTES = [
   '/mediatheque',
   '/mon-site/menu',
   '/mon-site/informations',
+  '/mon-site/legal',
+  '/mon-site/accessibilite',
+  '/mon-site/reseaux',
+  '/mon-site/demarches',
+  '/mon-site/open-data',
   '/mise-en-ligne',
   '/mon-compte',
 ];

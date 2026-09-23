@@ -97,7 +97,7 @@ export function Field({ name, label, required, help, error, badge, hideOptional,
 }
 
 /** Groupe de contrôles (radios, date et heure…) : fieldset et légende */
-export function FieldSet({ name, legend, required, help, error, className, hideOptional, children }: Omit<FieldProps, 'label'> & { legend: ReactNode; children: ReactNode }) {
+export function FieldSet({ name, legend, required, help, error, badge, className, hideOptional, children }: Omit<FieldProps, 'label'> & { legend: ReactNode; children: ReactNode }) {
   const id = fieldId(name);
   const describedBy = [help && `${id}-aide`, error && `${id}-erreur`].filter(Boolean).join(' ') || undefined;
   return (
@@ -105,6 +105,7 @@ export function FieldSet({ name, legend, required, help, error, className, hideO
       <legend className="font-medium">
         {legend}
         <RequirementMark required={required} hideOptional={hideOptional} />
+        {badge && <span className="ml-2 inline-block align-middle">{badge}</span>}
       </legend>
       <div className="mt-2">{children}</div>
       {help && <FieldHelp id={id}>{help}</FieldHelp>}

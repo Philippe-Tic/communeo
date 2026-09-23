@@ -18,25 +18,58 @@ export function parisToDate(day: string, time: string): Date {
 
 function parisOffsetMinutes(date: Date): number {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', { timeZone: ZONE, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: ZONE,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
       .formatToParts(date)
       .map((part) => [part.type, part.value]),
   );
-  const asUtc = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute));
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+  );
   return Math.round((asUtc - date.getTime()) / 60_000);
 }
 
 /** « vendredi 3 octobre à 9 h 00 » */
 export function formatParisDateTime(date: Date): string {
-  const day = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, weekday: 'long', day: 'numeric', month: 'long' }).format(date);
-  const [hour, minute] = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date).split(':');
+  const day = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date);
+  const [hour, minute] = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+    .format(date)
+    .split(':');
   return `${day} à ${Number(hour)} h ${minute}`;
 }
 
 /** « 3 nov. à 8h » (badges) */
 export function formatShortParisDateTime(date: Date): string {
   const day = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short' }).format(date);
-  const [hour, minute] = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date).split(':');
+  const [hour, minute] = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  })
+    .format(date)
+    .split(':');
   return `${day} à ${Number(hour)}h${minute === '00' ? '' : minute}`;
 }
 
@@ -52,19 +85,38 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
 
 /** Colonne « Modifiée » des listes : « Aujourd'hui, 09:12 », « Hier, 17:40 », « 18 sept., 11:05 », « 3 mars 2025 » */
 export function formatListDate(date: Date, now: Date = new Date()): string {
-  const day = (value: Date) => new Intl.DateTimeFormat('fr-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
-  const time = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+  const day = (value: Date) =>
+    new Intl.DateTimeFormat('fr-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+      value,
+    );
+  const time = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(date);
   if (day(date) === day(now)) return `Aujourd'hui, ${time}`;
   if (day(date) === day(new Date(now.getTime() - 86_400_000))) return `Hier, ${time}`;
   const sameYear = day(date).slice(0, 4) === day(now).slice(0, 4);
-  if (!sameYear) return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+  if (!sameYear)
+    return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(
+      date,
+    );
   return `${new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short' }).format(date)}, ${time}`;
 }
 
 /** Jour (AAAA-MM-JJ) et heure (HH:MM) à Paris d'un instant : l'inverse de `parisToDate` */
 export function dateToParis(date: Date): { day: string; time: string } {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', { timeZone: ZONE, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: ZONE,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
       .formatToParts(date)
       .map((part) => [part.type, part.value]),
   );
@@ -73,10 +125,51 @@ export function dateToParis(date: Date): { day: string; time: string } {
 
 /** Date courte avec l'année : « 20 sept. 2026 » (inscriptions, messages) */
 export function formatShortDate(date: Date): string {
-  return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+  return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(
+    date,
+  );
 }
 
 /** Nom du mois en cours à Paris : « septembre » */
 export function currentMonthName(now: Date = new Date()): string {
   return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, month: 'long' }).format(now);
+}
+
+/** Date d'un message dans la boîte : « il y a 2 h », « hier », « 19 sept. », « 3 mars 2025 » */
+export function formatInboxDate(date: Date, now: Date = new Date()): string {
+  const day = (value: Date) =>
+    new Intl.DateTimeFormat('fr-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+      value,
+    );
+  const minutes = Math.max(0, Math.round((now.getTime() - date.getTime()) / 60_000));
+  if (day(date) === day(now))
+    return minutes < 1
+      ? "à l'instant"
+      : minutes < 60
+        ? `il y a ${minutes} min`
+        : `il y a ${Math.round(minutes / 60)} h`;
+  if (day(date) === day(new Date(now.getTime() - 86_400_000))) return 'hier';
+  if (day(date).slice(0, 4) === day(now).slice(0, 4))
+    return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short' }).format(date);
+  return formatShortDate(date);
+}
+
+/** « 22 septembre à 09:14 » (année ajoutée si ce n'est pas l'année en cours) */
+export function formatDayTime(date: Date, now: Date = new Date()): string {
+  const sameYear =
+    new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, year: 'numeric' }).format(date) ===
+    new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, year: 'numeric' }).format(now);
+  const day = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    day: 'numeric',
+    month: 'long',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  }).format(date);
+  const time = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(date);
+  return `${day} à ${time}`;
 }

@@ -17,6 +17,7 @@ import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalList
 import { CSS as DndCSS } from '@dnd-kit/utilities';
 import { ArrowDown, ArrowUp, ChevronDown, Copy, GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useId, useRef, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { useFieldArray, useFormContext, useFormState, useWatch, type FieldErrors } from 'react-hook-form';
 import { flattenErrors } from '@/components/form/form';
 import { Button } from '@/components/ui/button';
@@ -286,7 +287,9 @@ export function BlockEditor({
     requestAnimationFrame(() => {
       const key = document.querySelectorAll<HTMLElement>('[data-block-key]')[at]?.dataset.blockKey;
       if (!key) return;
-      setExpanded((current) => new Set(current).add(key));
+      // Rendu immédiat : hors d'un événement React, le bloc ouvert n'existerait pas encore à l'image
+      // suivante sur une machine lente, et le focus tomberait sur son en-tête au lieu du premier champ
+      flushSync(() => setExpanded((current) => new Set(current).add(key)));
       focusBlock(key, 'content');
     });
   };

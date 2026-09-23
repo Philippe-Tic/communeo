@@ -32,6 +32,9 @@ export function rgpdDaysLeft(receivedAt: Date | string, now: Date = new Date()):
   return Math.round((day(rgpdDeadline(receivedAt)) - day(now)) / 86_400_000);
 }
 
+/** Passage du modèle à remplacer : l'admin refuse d'envoyer tant qu'il reste dans la réponse */
+export const RGPD_TEMPLATE_BLANK = '[les données vous concernant / la confirmation de leur rectification / de leur suppression]';
+
 /** Modèle de réponse à une demande d'accès (art. 15), à compléter avant l'envoi */
 export function rgpdReplyTemplate({ firstName, lastName, siteName }: { firstName: string; lastName: string; siteName: string }): string {
   return [
@@ -39,7 +42,7 @@ export function rgpdReplyTemplate({ firstName, lastName, siteName }: { firstName
     '',
     `Nous avons bien reçu votre demande relative à vos données personnelles, adressée à la mairie de ${siteName}.`,
     '',
-    'Vous trouverez ci-joint [les données vous concernant / la confirmation de leur rectification / de leur suppression].',
+    `Vous trouverez ci-joint ${RGPD_TEMPLATE_BLANK}.`,
     '',
     "Si cette réponse ne vous satisfait pas, vous pouvez introduire une réclamation auprès de la CNIL (www.cnil.fr).",
     '',

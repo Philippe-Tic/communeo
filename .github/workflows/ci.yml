@@ -113,6 +113,35 @@ jobs:
           path: apps/renderer/test-results
           retention-days: 7
 
+  admin:
+    name: Admin (accessibilité, clavier)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run build --filter "@communeo/admin..."
+
+      - run: pnpm --filter @communeo/admin exec playwright install --with-deps chromium
+
+      - name: Shell et écrans de l'admin (axe WCAG 2.2 AA, clavier) en 1440, 1366 et 390 px
+        run: pnpm --filter @communeo/admin exec playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-playwright-admin
+          path: apps/admin/test-results
+          retention-days: 7
+
   docker:
     name: Image Docker (${{ matrix.app }})
     runs-on: ubuntu-latest

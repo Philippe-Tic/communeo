@@ -5,6 +5,8 @@
 import { isApexDomain, isPublisherUnavailable, type DnsInstructions } from '@communeo/pipeline';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { log } from '../utils/logger';
+import { isBuildQueueConfigured } from './build-queue';
+import deploymentService from './deployment';
 
 interface DomainConfiguration {
   domain: string;
@@ -102,6 +104,7 @@ class DomainService {
       });
 
       log.info(`Custom domain ${domain} activated successfully`);
+      await this.rebuildForDomain(site.documentId);
       return { success: true, url: customUrl };
 
     } catch (error: any) {
@@ -115,6 +118,19 @@ class DomainService {
       });
 
       return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Le domaine change l'adresse canonique des pages (liens, sitemap, redirection) : on remet le site
+   * en ligne. Les champs techniques du Site ne déclenchent pas de build automatique.
+   */
+  private async rebuildForDomain(siteDocumentId: string): Promise<void> {
+    if (!isBuildQueueConfigured()) return;
+    try {
+      await deploymentService.requestBuild(siteDocumentId, { reason: 'domain' });
+    } catch (error) {
+      log.warn(`Could not queue a build after the domain change:`, error);
     }
   }
 
@@ -152,6 +168,7 @@ class DomainService {
       });
 
       log.info(`Custom domain removed for site ${siteId}`);
+      if (domain) await this.rebuildForDomain(site.documentId);
       return { success: true, defaultUrl };
 
     } catch (error: any) {

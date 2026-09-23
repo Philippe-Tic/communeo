@@ -86,6 +86,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `src/utils/publisher.ts` — the backend's access to the host (`@communeo/pipeline` publisher with Strapi's logger)
 - `src/services/deployment.ts` / `build-queue.ts` — « Mettre en ligne » enqueues a build (Strapi never builds sites); `domain.ts` — custom domains through the publisher
 - `src/api/build-worker/` — internal routes of the build worker (shared secret)
+- `src/services/auto-deploy.ts` — automatic publication: a document middleware (`changesPublicSite`) schedules a build `auto_deploy_delay` s after the **last** visible change (persistent debounce in the queue, `BuildQueue.schedule`). Drafts, technical Site fields (host, domain, auto-deploy settings), public submissions and non-published associations never trigger; a manual « Mettre en ligne » starts a waiting delayed build now.
 - `src/api/*/content-types/*/schema.json` — content type schemas
 
 ## Content Types

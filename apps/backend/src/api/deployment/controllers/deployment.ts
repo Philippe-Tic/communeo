@@ -59,16 +59,17 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       }
 
       // Dépôt dans la file : le worker construit et publie le site
-      const jobId = await deploymentService.requestBuild(siteId, { triggeredBy: userId, reason: 'manual' });
+      const { jobId, status } = await deploymentService.requestBuild(siteId, { triggeredBy: userId, reason: 'manual' });
 
       ctx.status = 202;
       ctx.body = {
         success: true,
-        queued: !!jobId,
+        queued: status === 'queued' || status === 'advanced',
+        status,
         jobId,
-        message: jobId
-          ? 'Mise en ligne demandée'
-          : 'Une mise en ligne est déjà en attente : elle prendra en compte vos dernières modifications',
+        message: status === 'already-queued'
+          ? 'Une mise en ligne est déjà en attente : elle prendra en compte vos dernières modifications'
+          : 'Mise en ligne demandée',
         site: {
           id: siteId,
           name: (siteData as any).name,

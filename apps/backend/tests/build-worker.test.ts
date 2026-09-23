@@ -4,7 +4,6 @@
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Core } from '@strapi/strapi';
-import autoDeployService from '../src/services/auto-deploy';
 import { stopBuildQueue } from '../src/services/build-queue';
 import { setupStrapi, teardownStrapi } from './strapi';
 
@@ -72,10 +71,7 @@ describe('routes internes du worker', () => {
     expect(byJob['job-2']).toMatchObject({ status: 'building' });
   });
 
-  it("enregistrent le résultat et l'adresse du site sans programmer de nouveau build", async () => {
-    await strapi.documents('api::site.site').update({ documentId: siteId, data: { auto_deploy_enabled: true, auto_deploy_delay: 3600 } as any });
-    autoDeployService.cancelPending(siteId);
-
+  it("enregistrent le résultat et l'adresse du site", async () => {
     const res = await http.post('/api/build-worker/jobs/job-2/finish').set(worker).send({
       status: 'ready',
       buildSeconds: 12.4,
@@ -91,10 +87,6 @@ describe('routes internes du worker', () => {
 
     const site: any = await strapi.documents('api::site.site').findOne({ documentId: siteId });
     expect(site).toMatchObject({ netlify_site_id: 'netlify-site-1', live_url: 'https://dev-test-site-mairie.netlify.app' });
-    expect(autoDeployService.hasPending(siteId)).toBe(false);
-
-    await strapi.documents('api::site.site').update({ documentId: siteId, data: { auto_deploy_enabled: false } as any });
-    autoDeployService.cancelPending(siteId);
   });
 
   it("enregistrent l'erreur d'un build en échec", async () => {
@@ -119,11 +111,11 @@ describe.skipIf(!process.env.TEST_QUEUE_DATABASE_URL)('demande de mise en ligne 
 
       const first = await http.post('/api/deployment/trigger').set(auth(admin));
       expect(first.status).toBe(202);
-      expect(first.body).toMatchObject({ queued: true, jobId: expect.any(String) });
+      expect(first.body).toMatchObject({ queued: true, status: 'queued', jobId: expect.any(String) });
 
       const second = await http.post('/api/deployment/trigger').set(auth(admin));
       expect(second.status).toBe(202);
-      expect(second.body.queued).toBe(false);
+      expect(second.body).toMatchObject({ queued: false, status: 'already-queued', jobId: first.body.jobId });
 
       const job = await queue.boss.getJobById(BUILD_QUEUE, first.body.jobId);
       expect(job?.data).toEqual({ siteDocumentId: siteId, triggeredBy: adminUser.documentId, reason: 'manual' });

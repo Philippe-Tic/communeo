@@ -20,13 +20,13 @@
     "@communeo/theme-institutionnel": "workspace:*",
     "@communeo/theme-starter": "workspace:*",
     "@communeo/ui-a11y": "workspace:*",
-    "astro": "^7.3.3"
+    "astro": "^7.3.3",
+    "pagefind": "^1.5.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
-    "pagefind": "^1.5.2",
     "typescript": "^5.9.2"
   }
 }

@@ -65,6 +65,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `STRAPI_API_TOKEN` — read-only build token (created at first boot when unset, see logs)
 - `PREVIEW_API_TOKEN` — read-only token of the preview server (drafts), created the same way
 - `PREVIEW_SECRET` — HMAC secret of the signed preview tokens (same value on the preview server); `PREVIEW_URL` — preview server base URL
+- `HOSTING_NAME`, `HOSTING_ADDRESS`, `HOSTING_PHONE` — host shown in every commune's legal notice (`config/platform.ts`); enforced on each Site write and synced at boot, never editable by communes. Unset: values already stored are kept
 
 ### Worker (`apps/worker/.env.example`)
 - `QUEUE_DATABASE_URL`, `WORKER_SECRET`, `STRAPI_URL`, `STRAPI_PUBLIC_URL`, `STRAPI_API_TOKEN` (passed to the renderer)

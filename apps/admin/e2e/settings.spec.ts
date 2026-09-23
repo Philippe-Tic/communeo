@@ -180,3 +180,164 @@ test('quitter avec des modifications : rester, ou enregistrer et quitter', async
   await expect(page).toHaveURL(/\/$/);
   expect((sent(bodies)!.infos_pratiques as { population: number }).population).toBe(3300);
 });
+
+test('mentions légales : hébergeur non modifiable, SIRET vérifié, politique en texte riche', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/legal');
+  await expect(page.getByRole('heading', { level: 1, name: 'Mentions légales et RGPD' })).toBeVisible();
+  await expect(page.getByText('Netlify, Inc.')).toBeVisible();
+  await expect(page.getByText('Renseigné par Communeo, pour toutes les communes.')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: /Hébergeur/ })).toHaveCount(0);
+  await expectNoViolations(page);
+
+  await page.getByRole('textbox', { name: /^SIRET/ }).fill('215 803');
+  await save(page).click();
+  await expect(page.getByRole('textbox', { name: /^SIRET/ })).toHaveAccessibleDescription(
+    /Le SIRET compte 14 chiffres/,
+  );
+  await page.getByRole('textbox', { name: /^SIRET/ }).fill('21580320500017');
+  await page.getByRole('textbox', { name: /^Délégué/ }).fill('Syndicat mixte Nièvre Numérique');
+  await page.getByRole('textbox', { name: /^E-mail du DPO/ }).fill('dpo@nievre-numerique.fr');
+  await page.getByRole('textbox', { name: 'Politique de données personnelles' }).click();
+  await page.keyboard.type('Les données du formulaire de contact sont conservées 12 mois.');
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Mentions légales enregistrées.' })).toBeVisible();
+  const data = sent(bodies)!;
+  // L'hébergeur n'est jamais envoyé : le serveur le fixe
+  expect(data.mentions_legales).toEqual({
+    siret: '21580320500017',
+    publication_director: 'Claire Martin',
+    publication_director_title: 'Maire',
+    credits: null,
+    mentions_legales_extra: null,
+  });
+  expect(data.rgpd).toMatchObject({
+    dpo_name: 'Syndicat mixte Nièvre Numérique',
+    dpo_email: 'dpo@nievre-numerique.fr',
+    dpo_phone: null,
+    rgpd_policy: {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Les données du formulaire de contact sont conservées 12 mois.' }],
+        },
+      ],
+    },
+  });
+});
+
+test('mentions légales : réservées aux administrateurs, absentes du sommaire pour un éditeur', async ({ page }) => {
+  await mockApi(page, { user: 'editor' });
+  await page.goto('/mon-site/legal');
+  await expect(page.getByRole('heading', { level: 1, name: /réservée aux administrateurs/i })).toBeVisible();
+  await page.goto('/mon-site/reseaux');
+  await expect(page.getByRole('heading', { level: 1, name: 'Réseaux sociaux' })).toBeVisible();
+  if (wide(page)) await expect(page.getByRole('navigation', { name: 'Mon site' }).getByRole('link')).toHaveCount(5);
+});
+
+test('accessibilité : niveau déclaré, schéma pluriannuel exigé sauf totale conformité', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/accessibilite');
+  await expect(page.getByRole('radio', { name: /Partiellement conforme/ })).toBeChecked();
+  await expect(page.getByRole('textbox', { name: /schéma pluriannuel/ })).toHaveAccessibleDescription(
+    /Obligatoire dès que/,
+  );
+  await expectNoViolations(page);
+  await page.getByRole('textbox', { name: /plan d’action/ }).fill('plan.pdf');
+  await save(page).click();
+  const summary = page.getByRole('alert').filter({ hasText: "2 erreurs empêchent l'enregistrement" });
+  await expect(summary).toContainText('Le lien vers le schéma pluriannuel est obligatoire');
+  await expect(summary).toContainText('Indiquez une adresse commençant par https://');
+
+  // Totalement conforme : le schéma n'est plus exigé
+  await page.getByRole('radio', { name: /Totalement conforme/ }).check();
+  await page.getByRole('textbox', { name: /plan d’action/ }).fill('https://saint-aubin-sur-loire.fr/plan-2026.pdf');
+  await expect(page.getByRole('textbox', { name: /schéma pluriannuel/ })).toHaveAccessibleDescription(
+    /planifie la mise en accessibilité/,
+  );
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Déclaration d’accessibilité enregistrée.' })).toBeVisible();
+  expect(sent(bodies)!.accessibilite).toEqual({
+    accessibility_level: 'conforme',
+    accessibility_declaration: null,
+    accessibility_schema_url: null,
+    accessibility_action_plan_url: 'https://saint-aubin-sur-loire.fr/plan-2026.pdf',
+  });
+  if (wide(page))
+    await expect(
+      page.getByRole('navigation', { name: 'Mon site' }).getByRole('link', { name: 'Accessibilité', exact: true }),
+    ).toBeVisible();
+});
+
+test('réseaux sociaux : plateforme ajoutée depuis la liste, adresse complétée, lignes vides ignorées', async ({
+  page,
+}) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/reseaux');
+  await expect(page.getByRole('textbox', { name: 'Facebook' })).toBeVisible();
+  await page.getByRole('textbox', { name: 'Facebook' }).fill('facebook.com/mairiesaintaubin');
+  await page.getByRole('button', { name: 'Ajouter une plateforme' }).click();
+  await expect(page.getByRole('menuitem')).toHaveText(['YouTube', 'LinkedIn', 'X', 'TikTok', 'Autre']);
+  await page.getByRole('menuitem', { name: 'Autre' }).click();
+  await expect(page.getByRole('textbox', { name: 'Nom du réseau' })).toBeFocused();
+  await page.getByRole('textbox', { name: 'Adresse de la page' }).fill('mastodon.social/@mairie');
+  await save(page).click();
+  await expect(page.getByRole('textbox', { name: 'Nom du réseau' })).toHaveAccessibleDescription(
+    /Indiquez le nom du réseau/,
+  );
+  await page.getByRole('textbox', { name: 'Nom du réseau' }).fill('Mastodon');
+  await page.getByRole('textbox', { name: 'Instagram' }).fill('instagram');
+  await save(page).click();
+  await expect(page.getByRole('textbox', { name: 'Instagram' })).toHaveAccessibleDescription(
+    /Indiquez l’adresse de la page/,
+  );
+  await page.getByRole('button', { name: 'Retirer Instagram' }).click();
+  await expect(page.getByRole('button', { name: 'Ajouter une plateforme' })).toBeFocused();
+  await expectNoViolations(page);
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Réseaux sociaux enregistrés.' })).toBeVisible();
+  expect(sent(bodies)!.social_links).toEqual([
+    { platform: 'facebook', url: 'https://facebook.com/mairiesaintaubin', label: null },
+    { platform: 'autre', url: 'https://mastodon.social/@mairie', label: 'Mastodon' },
+  ]);
+});
+
+test('démarches et open data : champs affichés à l’activation, vérifiés', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/demarches');
+  await expect(page.getByRole('switch', { name: 'Afficher les démarches sur le site' })).toBeChecked();
+  await page.getByRole('textbox', { name: 'Code INSEE' }).fill('58');
+  await page.getByRole('checkbox', { name: /Particuliers/ }).uncheck();
+  await save(page).click();
+  const summary = page.getByRole('alert').filter({ hasText: "2 erreurs empêchent l'enregistrement" });
+  await expect(summary).toContainText('Le code INSEE compte 5 caractères');
+  await expect(summary).toContainText('Choisissez au moins un public');
+  await page.getByRole('textbox', { name: 'Code INSEE' }).fill('2a004');
+  await page.getByRole('checkbox', { name: /Professionnels/ }).check();
+  await expectNoViolations(page);
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Démarches enregistrées.' })).toBeVisible();
+  expect(sent(bodies)).toEqual({
+    comarquage_enabled: true,
+    code_insee: '2A004',
+    comarquage_audiences: ['professionnels'],
+  });
+
+  await page.goto('/mon-site/open-data');
+  await expect(page.getByRole('combobox', { name: 'Plateforme' })).toHaveCount(0);
+  await page.getByRole('switch', { name: 'Afficher un lien vers vos données publiques' }).click();
+  await save(page).click();
+  await expect(page.getByRole('alert').filter({ hasText: "2 erreurs empêchent l'enregistrement" })).toBeVisible();
+  await page.getByRole('combobox', { name: 'Plateforme' }).selectOption({ label: 'data.gouv.fr' });
+  await page
+    .getByRole('textbox', { name: 'Adresse des jeux de données' })
+    .fill('https://www.data.gouv.fr/fr/organizations/saint-aubin/');
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Open data enregistré.' })).toBeVisible();
+  expect(sent(bodies)).toEqual({
+    open_data_enabled: true,
+    open_data_platform: 'data-gouv-fr',
+    open_data_url: 'https://www.data.gouv.fr/fr/organizations/saint-aubin/',
+  });
+});

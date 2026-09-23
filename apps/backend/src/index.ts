@@ -7,6 +7,7 @@ import { slugsMiddleware } from './validation/slugs';
 import { publicationDateMiddleware } from './validation/publication-date';
 import { wasteScheduleMiddleware } from './validation/waste-schedule';
 import { mediaOwnershipMiddleware } from './validation/media-ownership';
+import { hostingMiddleware } from './services/hosting';
 
 export default {
   /**
@@ -19,6 +20,8 @@ export default {
     // Validation des blocs de contenu, avant tout le reste (y compris l'auto-deploy)
     strapi.documents.use(blocksValidationMiddleware(strapi));
     strapi.documents.use(siteValidationMiddleware());
+    // Hébergeur des mentions légales : réglage de la plateforme, jamais celui d'une commune
+    strapi.documents.use(hostingMiddleware(strapi));
     strapi.documents.use(slugsMiddleware(strapi));
     strapi.documents.use(publicationDateMiddleware(strapi));
     strapi.documents.use(wasteScheduleMiddleware(strapi));

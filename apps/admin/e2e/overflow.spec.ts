@@ -27,11 +27,18 @@ const ROUTES = [
   '/mediatheque',
   '/mon-site/menu',
   '/mon-site/informations',
+  '/mon-site/legal',
+  '/mon-site/accessibilite',
+  '/mon-site/reseaux',
+  '/mon-site/demarches',
+  '/mon-site/open-data',
   '/mise-en-ligne',
   '/mon-compte',
 ];
 test('aucun défilement horizontal', async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) > 400);
+  // Une route après l'autre : jusqu'à ~2 s chacune sur les machines de CI
+  test.setTimeout(ROUTES.length * 3_000);
   await mockApi(page);
   const wide: string[] = [];
   for (const route of ROUTES) {

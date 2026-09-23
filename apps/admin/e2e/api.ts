@@ -89,6 +89,36 @@ function manyPages(): Record<string, MockPage> {
   return pages;
 }
 
+/** Actualités : une publiée, un brouillon, une programmée */
+export const ARTICLES: Record<string, Record<string, unknown>> = {
+  'a-dechetterie': {
+    documentId: 'a-dechetterie', title: 'Nouveaux horaires de la déchetterie', slug: 'nouveaux-horaires-dechetterie', summary: 'Ouverture du mardi au samedi.', category: 'information', featured: false,
+    publication_date: '2026-09-18T07:30:00.000Z', author: 'Sophie Leroy', meta_description: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-18T07:30:00.000Z', blocks: [], image: null,
+  },
+  'a-conseil': {
+    documentId: 'a-conseil', title: 'Compte rendu du conseil municipal', slug: 'compte-rendu-conseil', summary: null, category: 'news', featured: false,
+    publication_date: null, author: 'Claire Martin', meta_description: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-19T09:05:00.000Z', blocks: [], image: null,
+  },
+  'a-inscriptions': {
+    documentId: 'a-inscriptions', title: 'Inscriptions scolaires 2026-2027', slug: 'inscriptions-scolaires', summary: null, category: 'news', featured: true,
+    publication_date: null, author: 'Sophie Leroy', meta_description: null, scheduled_at: '2026-11-03T07:00:00.000Z', publishedAt: null, updatedAt: '2026-09-20T15:40:00.000Z', blocks: [], image: null,
+  },
+};
+
+/** Événements : un à venir (publié), un passé (publié) */
+export const EVENTS: Record<string, Record<string, unknown>> = {
+  'e-fete': {
+    documentId: 'e-fete', title: 'Fête de la musique', slug: 'fete-de-la-musique', category: 'celebration', featured: true, start_date: '2027-06-21T17:00:00.000Z', end_date: '2027-06-21T23:00:00.000Z',
+    location: 'Place de la Mairie', address: null, price: 'Gratuit', registration_required: false, registration_deadline: null, max_participants: null, organizer: 'Comité des fêtes',
+    external_link: null, contact_email: null, contact_phone: null, scheduled_at: null, publishedAt: null, updatedAt: '2026-09-15T10:00:00.000Z', blocks: [], image: null,
+  },
+  'e-forum': {
+    documentId: 'e-forum', title: 'Forum des associations', slug: 'forum-des-associations', category: 'meeting', featured: false, start_date: '2025-09-06T08:00:00.000Z', end_date: null,
+    location: 'Salle omnisports', address: null, price: 'Free', registration_required: false, registration_deadline: null, max_participants: null, organizer: null,
+    external_link: null, contact_email: null, contact_phone: null, scheduled_at: null, publishedAt: null, updatedAt: '2025-09-01T10:00:00.000Z', blocks: [], image: null,
+  },
+};
+
 const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Number(documentId.slice(2)) % 4 === 0;
 
 export interface MockOptions {
@@ -122,13 +152,19 @@ export const NAVIGATION = {
 export async function mockApi(page: Page, options: MockOptions = {}) {
   const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel' } = options;
   const calls: string[] = [];
-  const bodies: Array<{ call: string; body: { data: Record<string, unknown> } }> = [];
+  const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
   let state = publication;
   const pages: Record<string, MockPage> = pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
+  // Contenus par type (API Strapi), version en ligne et modifications depuis
+  const stores: Record<ContentType, Record<string, Record<string, unknown>>> = {
+    pages: pages as unknown as Record<string, Record<string, unknown>>,
+    articles: structuredClone(ARTICLES),
+    evenements: structuredClone(EVENTS),
+  };
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
-  // Pages en ligne modifiées depuis leur publication
-  const modified = new Set<string>();
+  const publishedByType: Record<ContentType, Set<string>> = { pages: published, articles: new Set(['a-dechetterie']), evenements: new Set(['e-fete', 'e-forum']) };
+  const modifiedByType: Record<ContentType, Set<string>> = { pages: new Set(), articles: new Set(), evenements: new Set() };
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
@@ -209,56 +245,69 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       state = 'running';
       return json({ status: 'queued', queued: true }, 202);
     }
-    const pageMatch = /^\/api\/pages(?:\/([^/]+))?$/.exec(url.pathname);
-    if (pageMatch) {
-      const id = pageMatch[1];
-      if (method === 'GET' && !id) return json(listPages(pages, url.searchParams));
+    const contentMatch = /^\/api\/(pages|articles|evenements)(?:\/([^/]+))?$/.exec(url.pathname);
+    if (contentMatch) {
+      const type = contentMatch[1] as ContentType;
+      const id = contentMatch[2];
+      const store = stores[type];
+      const online = publishedByType[type];
+      if (method === 'GET' && !id) return json(listDocuments(store, url.searchParams));
       if (method === 'GET' && id) {
-        const page = pages[id];
-        if (!page || (status === 'published' && !published.has(id))) return json({ data: null, error: { status: 404, message: 'Not Found' } }, 404);
-        return json({ data: status === 'published' ? { ...page, publishedAt: '2026-09-21T08:00:00.000Z' } : page });
+        const doc = store[id];
+        if (!doc || (status === 'published' && !online.has(id))) return json({ data: null, error: { status: 404, message: 'Not Found' } }, 404);
+        return json({ data: status === 'published' ? { ...doc, publishedAt: '2026-09-21T08:00:00.000Z' } : doc });
       }
       if (method === 'POST' || method === 'PUT') {
-        const body = route.request().postDataJSON() as { data: Partial<MockPage> };
-        bodies.push({ call: `${method} ${status ?? 'draft'}`, body });
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `${method} ${status ?? 'draft'}`, type, body });
         if (failPageSaves) return json({ error: { status: 500, message: 'Erreur du serveur' } }, 500);
         if (status === 'published' && id && failPublishFor.includes(id)) return json({ error: { status: 400, message: 'Le bloc 1 (Texte) est vide.' } }, 400);
-        const documentId = id ?? 'p-nouvelle';
-        const slug = body.data.slug || String(body.data.title ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-        const page: MockPage = { ...(pages[documentId] ?? PAGES['p-salle']!), ...body.data, documentId, slug, updatedAt: new Date().toISOString() } as MockPage;
-        pages[documentId] = page;
+        const documentId = id ?? `${type.charAt(0)}-nouvelle`;
+        const slug = (body.data.slug as string) || String(body.data.title ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const base = store[documentId] ?? (type === 'pages' ? PAGES['p-salle']! : {});
+        const doc = { ...base, ...body.data, documentId, slug, updatedAt: new Date().toISOString() } as Record<string, unknown>;
+        // Comme le backend : une actualité reçoit sa date à la première publication
+        if (type === 'articles' && status === 'published' && !doc.publication_date) doc.publication_date = new Date().toISOString();
+        store[documentId] = doc;
         if (status === 'published') {
-          published.add(documentId);
-          modified.delete(documentId);
-        } else if (published.has(documentId)) modified.add(documentId);
-        return json({ data: page }, method === 'POST' ? 201 : 200);
+          online.add(documentId);
+          modifiedByType[type].delete(documentId);
+        } else if (online.has(documentId)) modifiedByType[type].add(documentId);
+        return json({ data: doc }, method === 'POST' ? 201 : 200);
       }
       if (method === 'DELETE' && id) {
-        delete pages[id];
+        delete store[id];
+        online.delete(id);
         return route.fulfill({ status: 204 });
       }
     }
-    if (url.pathname === '/api/publication/pages') {
+    const statesMatch = /^\/api\/publication\/(pages|articles|evenements)$/.exec(url.pathname);
+    if (statesMatch) {
+      const type = statesMatch[1] as ContentType;
       return json({
         data: Object.fromEntries(
-          Object.values(pages).map((page) => [
-            page.documentId,
-            { state: published.has(page.documentId) ? (modified.has(page.documentId) ? 'modified' : 'published') : 'draft', scheduledAt: page.scheduled_at },
-          ]),
+          Object.values(stores[type]).map((doc) => {
+            const documentId = doc.documentId as string;
+            const state = publishedByType[type].has(documentId) ? (modifiedByType[type].has(documentId) ? 'modified' : 'published') : 'draft';
+            return [documentId, { state, scheduledAt: doc.scheduled_at ?? null }];
+          }),
         ),
       });
     }
-    const unpublish = /^\/api\/publication\/pages\/([^/]+)\/unpublish$/.exec(url.pathname);
+    const unpublish = /^\/api\/publication\/(pages|articles|evenements)\/([^/]+)\/unpublish$/.exec(url.pathname);
     if (unpublish && method === 'POST') {
-      published.delete(unpublish[1]!);
-      modified.delete(unpublish[1]!);
-      return json({ data: { documentId: unpublish[1], state: 'draft' } });
+      const type = unpublish[1] as ContentType;
+      publishedByType[type].delete(unpublish[2]!);
+      modifiedByType[type].delete(unpublish[2]!);
+      return json({ data: { documentId: unpublish[2], state: 'draft' } });
     }
     if (url.pathname === '/api/preview/token' && method === 'POST') {
       if (previewUnavailable) return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
-      const body = route.request().postDataJSON() as { documentId?: string };
-      const slug = (body.documentId && pages[body.documentId]?.slug) ?? '';
-      return json({ url: `http://preview.test/${slug}?token=jeton-signe`, expiresAt: new Date(Date.now() + 1_800_000).toISOString() });
+      const body = route.request().postDataJSON() as { type?: string; documentId?: string };
+      const type: ContentType = body.type === 'article' ? 'articles' : body.type === 'evenement' ? 'evenements' : 'pages';
+      const prefix = type === 'articles' ? 'actualites/' : type === 'evenements' ? 'agenda/' : '';
+      const slug = (body.documentId && (stores[type][body.documentId]?.slug as string | undefined)) ?? '';
+      return json({ url: `http://preview.test/${slug ? prefix : ''}${slug}?token=jeton-signe`, expiresAt: new Date(Date.now() + 1_800_000).toISOString() });
     }
     if (url.pathname === '/api/contact-submissions') {
       return json({ data: [], meta: { pagination: { total: unread, page: 1, pageSize: 1, pageCount: unread } } });
@@ -268,6 +317,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
 
   return {
     site,
+    stores,
+    publishedByType,
     previewPosts,
     published,
     calls,
@@ -282,24 +333,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   };
 }
 
-/** Liste façon Strapi : recherche, filtres de statut par identifiants, tri, pagination */
-function listPages(pages: Record<string, MockPage>, params: URLSearchParams) {
+export type ContentType = 'pages' | 'articles' | 'evenements';
+
+/** Liste façon Strapi : recherche, statut par identifiants, catégorie, période, tri, pagination */
+function listDocuments(store: Record<string, Record<string, unknown>>, params: URLSearchParams) {
   const all = (prefix: string) => [...params.entries()].filter(([key]) => key.startsWith(prefix)).map(([, value]) => value);
   const q = params.get('filters[title][$containsi]')?.toLowerCase();
   const inIds = all('filters[documentId][$in]');
   const notIn = all('filters[documentId][$notIn]');
-  let rows = Object.values(pages).filter((page) => {
-    if (q && !page.title.toLowerCase().includes(q)) return false;
-    if (params.has('filters[documentId][$in][0]') && !inIds.includes(page.documentId)) return false;
-    if (notIn.includes(page.documentId)) return false;
-    if (params.has('filters[scheduled_at][$notNull]') && !page.scheduled_at) return false;
-    if (params.has('filters[scheduled_at][$null]') && page.scheduled_at) return false;
+  const category = params.get('filters[category][$eq]');
+  const upcoming = params.get('filters[$or][0][end_date][$gte]');
+  const past = params.get('filters[$or][0][end_date][$lt]');
+  const lastDay = (doc: Record<string, unknown>) => String(doc.end_date ?? doc.start_date ?? '');
+  let rows = Object.values(store).filter((doc) => {
+    if (q && !String(doc.title).toLowerCase().includes(q)) return false;
+    if (params.has('filters[documentId][$in][0]') && !inIds.includes(doc.documentId as string)) return false;
+    if (notIn.includes(doc.documentId as string)) return false;
+    if (params.has('filters[scheduled_at][$notNull]') && !doc.scheduled_at) return false;
+    if (params.has('filters[scheduled_at][$null]') && doc.scheduled_at) return false;
+    if (category && doc.category !== category) return false;
+    if (upcoming && lastDay(doc) < upcoming) return false;
+    if (past && lastDay(doc) >= past) return false;
     return true;
   });
-  const [field, order] = (params.get('sort[0]') ?? 'updatedAt:desc').split(':') as [keyof MockPage, string];
+  const [field, order] = (params.get('sort[0]') ?? 'updatedAt:desc').split(':') as [string, string];
   rows = rows.sort((a, b) => String(a[field] ?? '').localeCompare(String(b[field] ?? ''), 'fr') * (order === 'desc' ? -1 : 1));
   const page = Number(params.get('pagination[page]') ?? 1);
   const pageSize = Number(params.get('pagination[pageSize]') ?? 25);
-  const data = rows.slice((page - 1) * pageSize, page * pageSize).map(({ blocks: _blocks, ...row }) => ({ ...row, featured_image: null }));
+  const data = rows.slice((page - 1) * pageSize, page * pageSize).map(({ blocks: _blocks, ...row }) => ({ featured_image: null, image: null, ...row }));
   return { data, meta: { pagination: { page, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } } };
 }

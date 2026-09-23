@@ -587,6 +587,7 @@ export interface ApiContactSubmissionContactSubmission extends Struct.Collection
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
+    history: Schema.Attribute.JSON;
     last_name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -596,6 +597,7 @@ export interface ApiContactSubmissionContactSubmission extends Struct.Collection
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::contact-submission.contact-submission'> &
       Schema.Attribute.Private;
     message: Schema.Attribute.Text & Schema.Attribute.Required;
+    opened_at: Schema.Attribute.DateTime;
     phone: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 20;

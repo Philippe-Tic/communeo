@@ -459,6 +459,8 @@ export interface ContactSubmission extends StrapiDocument {
   responded_at: string | null;
   attachments?: Media[];
   site?: Site | null;
+  opened_at: string | null;
+  history: JsonValue | null;
 }
 
 /** Content-type `api::deployment.deployment` — Mises en ligne : un enregistrement par job de build */

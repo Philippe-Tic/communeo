@@ -56,6 +56,7 @@ const COLLECTION_ROUTES: Record<string, string[]> = {
 // pour une écriture ; toute autre route sous un document reste refusée
 const ITEM_ACTIONS: Record<string, string[]> = {
   associations: ['publish', 'reject'],
+  'contact-submissions': ['reply', 'open'],
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles

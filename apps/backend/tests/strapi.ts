@@ -16,7 +16,7 @@ const DB_FILE = `.tmp/test-${process.pid}.db`;
 let instance: Core.Strapi | undefined;
 
 /** E-mails que Strapi aurait envoyés pendant les tests */
-export const sentEmails: Array<{ to: string; subject: string; text?: string; html?: string }> = [];
+export const sentEmails: Array<{ to: string; subject: string; text?: string; html?: string; replyTo?: string; attachments?: Array<{ filename: string; content?: string; path?: string }> }> = [];
 // Écouteurs du processus avant le démarrage de Strapi (ceux de Vitest)
 let baselineListeners: Array<readonly [string | symbol, Function[]]> = [];
 

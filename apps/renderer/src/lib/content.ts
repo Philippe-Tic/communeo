@@ -1,11 +1,12 @@
 /**
  * Accès aux contenus de la commune. Au build (sites statiques), une seule source est partagée par toutes
  * les pages : chaque type de contenu n'est chargé qu'une fois. En preview (serveur), chaque requête
- * recharge les brouillons.
+ * recharge les brouillons de la commune de la requête (voir request-context.ts).
  */
 import { breadcrumb, createContentSource, createStrapiLoader, seo, type ContentSource, type LinkVM, type SeoVM } from '@communeo/core';
 import { createFixtureLoader, FIXTURE_CONTEXT, FIXTURE_NOW, type FixtureVariant } from '@communeo/fixtures';
 import type { PageContext } from '@communeo/theme-contract';
+import { requestContext } from './request-context';
 
 const env = process.env;
 const isServer = env.RENDER_MODE === 'server';
@@ -23,7 +24,7 @@ function createSource(): ContentSource {
       createStrapiLoader({
         apiUrl,
         token: required('STRAPI_TOKEN'),
-        siteDocumentId: required('SITE_DOCUMENT_ID'),
+        siteDocumentId: requestContext()?.siteDocumentId ?? required('SITE_DOCUMENT_ID'),
         status: env.CONTENT_STATUS === 'draft' ? 'draft' : 'published',
       }),
       { siteUrl: (env.SITE_URL ?? '').replace(/\/$/, ''), mediaUrl: env.STRAPI_PUBLIC_URL ?? apiUrl },
@@ -37,7 +38,12 @@ function createSource(): ContentSource {
 }
 
 let shared: ContentSource | undefined;
-export const getSource = (): ContentSource => (isServer ? createSource() : (shared ??= createSource()));
+/** Build statique : une source pour tout le site. Preview : une source par requête (brouillons à jour). */
+export const getSource = (): ContentSource => {
+  if (!isServer) return (shared ??= createSource());
+  const context = requestContext();
+  return context ? (context.source ??= createSource()) : createSource();
+};
 
 /** Contexte commun passé à chaque template du thème. */
 export async function pageContext(

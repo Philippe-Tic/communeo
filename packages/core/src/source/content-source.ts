@@ -25,8 +25,9 @@ export interface ContentSourceOptions {
   now?: Date;
 }
 
-export function createContentSource(loader: RawLoader, ctx: MapContext, options: ContentSourceOptions = {}): ContentSource {
+export function createContentSource(loader: RawLoader, baseCtx: MapContext, options: ContentSourceOptions = {}): ContentSource {
   const now = options.now ?? new Date();
+  const ctx: MapContext = { ...baseCtx, now: baseCtx.now ?? now.toISOString() };
   const raw = {
     site: memo(() => loader.site()),
     pages: memo(() => loader.pages()),

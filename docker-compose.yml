@@ -91,17 +91,39 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  preview:
+    image: communeo-preview:latest
+    build:
+      context: .
+      dockerfile: apps/renderer/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      strapi:
+        condition: service_started
+    environment:
+      STRAPI_URL: http://strapi:1337
+      STRAPI_PUBLIC_URL: https://${DOMAIN}
+      # Lecture seule, brouillons compris (« Preview Token » créé au premier démarrage de Strapi)
+      STRAPI_TOKEN: ${PREVIEW_API_TOKEN}
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   nginx:
     image: nginx:alpine
     restart: unless-stopped
     depends_on:
       - strapi
+      - preview
     ports:
       - "80:80"
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
-      # Seul DOMAIN est substitué dans les templates, les variables nginx ($host etc.) sont préservées
+      PREVIEW_DOMAIN: ${PREVIEW_DOMAIN}
+      # Seuls DOMAIN et PREVIEW_DOMAIN sont substitués dans les templates, les variables nginx ($host etc.) sont préservées
       NGINX_ENVSUBST_FILTER: "DOMAIN"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro

@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [backend, worker]
+        app: [backend, worker, renderer]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3

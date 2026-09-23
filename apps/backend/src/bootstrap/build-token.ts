@@ -1,6 +1,8 @@
 /**
- * Token d'API utilisé par les builds des sites : lecture seule, limitée aux contenus publiés
- * (aucune donnée personnelle). Créé une seule fois si STRAPI_API_TOKEN n'est pas fourni.
+ * Tokens d'API en lecture seule (aucune donnée personnelle), créés une seule fois s'ils ne sont pas fournis :
+ * - « Build Token » (STRAPI_API_TOKEN) : builds des sites publiés, par le worker ;
+ * - « Preview Token » (PREVIEW_API_TOKEN) : serveur de preview, qui lit les brouillons. Séparé pour être
+ *   révocable sans toucher aux builds, et pour que le worker n'ait pas le jeton de la preview.
  */
 
 const READABLE_CONTENT_TYPES = [
@@ -25,25 +27,48 @@ export const BUILD_TOKEN_PERMISSIONS = [
   'plugin::upload.content-api.findOne',
 ];
 
-export async function ensureBuildToken(strapi: any) {
-  if (process.env.STRAPI_API_TOKEN) return;
+interface ReadOnlyToken {
+  name: string;
+  envVar: string;
+  description: string;
+}
 
-  const existing = await strapi.db.query('admin::api-token').findOne({ where: { name: 'Build Token' } });
+const BUILD_TOKEN: ReadOnlyToken = {
+  name: 'Build Token',
+  envVar: 'STRAPI_API_TOKEN',
+  description: 'Lecture seule des contenus publiés, pour les builds des sites',
+};
+
+const PREVIEW_TOKEN: ReadOnlyToken = {
+  name: 'Preview Token',
+  envVar: 'PREVIEW_API_TOKEN',
+  description: 'Lecture seule des contenus, brouillons compris, pour le serveur de preview',
+};
+
+async function ensureReadOnlyToken(strapi: any, { name, envVar, description }: ReadOnlyToken) {
+  if (process.env[envVar]) return;
+
+  const existing = await strapi.db.query('admin::api-token').findOne({ where: { name } });
   if (existing) {
     if (existing.type === 'full-access') {
-      strapi.log.warn('[build-token] Le « Build Token » existant a tous les droits : le supprimer dans l’admin Strapi et redémarrer.');
+      strapi.log.warn(`[api-token] Le « ${name} » existant a tous les droits : le supprimer dans l’admin Strapi et redémarrer.`);
     }
-    strapi.log.info('[build-token] Build Token présent, mais STRAPI_API_TOKEN n’est pas défini.');
+    strapi.log.info(`[api-token] ${name} présent, mais ${envVar} n’est pas défini.`);
     return;
   }
 
   const token = await strapi.service('admin::api-token').create({
-    name: 'Build Token',
+    name,
     type: 'custom',
     lifespan: null,
-    description: 'Lecture seule des contenus publiés, pour les builds des sites',
+    description,
     permissions: BUILD_TOKEN_PERMISSIONS,
   });
   // Affiché une seule fois, à la création : à reporter dans le .env du serveur
-  strapi.log.info(`[build-token] Token de build créé. À définir dans .env : STRAPI_API_TOKEN=${token.accessKey}`);
+  strapi.log.info(`[api-token] ${name} créé. À définir dans .env : ${envVar}=${token.accessKey}`);
+}
+
+export async function ensureBuildToken(strapi: any) {
+  await ensureReadOnlyToken(strapi, BUILD_TOKEN);
+  await ensureReadOnlyToken(strapi, PREVIEW_TOKEN);
 }

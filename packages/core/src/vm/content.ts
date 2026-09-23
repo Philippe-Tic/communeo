@@ -89,7 +89,12 @@ export function mapPage(ctx: MapContext, page: Page): PageVM {
 
 // --- Actualités ----------------------------------------------------------------------------------
 
-const articleDate = (article: Article) => article.publication_date ?? article.publishedAt ?? article.createdAt;
+/**
+ * Date affichée d'un article : sa date de publication (remplie par Strapi à la première publication).
+ * Un brouillon jamais publié (preview) prend la date qu'il aura s'il est publié maintenant.
+ */
+const articleDate = (ctx: MapContext, article: Article) =>
+  article.publication_date ?? article.publishedAt ?? ctx.now ?? article.createdAt;
 
 export function mapArticleCard(ctx: MapContext, article: Article): ArticleCardVM {
   return {
@@ -98,7 +103,7 @@ export function mapArticleCard(ctx: MapContext, article: Article): ArticleCardVM
     href: `${SECTIONS.actualites.path}/${article.slug}`,
     summary: text(article.summary),
     image: mapImage(ctx, article.image),
-    date: dateVM(articleDate(article)),
+    date: dateVM(articleDate(ctx, article)),
     category: { key: article.category, label: ARTICLE_CATEGORY_LABELS[article.category] },
     featured: !!article.featured,
   };

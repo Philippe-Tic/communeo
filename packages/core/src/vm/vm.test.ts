@@ -3,7 +3,7 @@ import type { Article, Evenement, Media, Page, SchoolMenu, Site, TeamMember } fr
 import { createContentSource } from '../source/content-source';
 import type { RawLoader } from '../source/types';
 import { mapBlocks, parseVideoUrl } from './blocks';
-import { mapEvent, mapTeam } from './content';
+import { mapArticleCard, mapEvent, mapTeam } from './content';
 import { mapCanteenWeek, nextCollections } from './practical';
 import { mapNavigation, mapSite } from './site';
 
@@ -218,5 +218,20 @@ describe('source de contenus', () => {
     expect(articles[0]?.seo.canonical).toBe('https://saint-aubin.example/actualites/reouverture');
     expect(calls.filter((c) => c === 'site')).toHaveLength(1);
     expect(calls.filter((c) => c === 'articles')).toHaveLength(1);
+  });
+});
+
+describe('date des articles', () => {
+  const article = (extra: Partial<Article>) =>
+    ({ documentId: 'a1', title: 'Brocante', slug: 'brocante', category: 'vie-locale', createdAt: '2026-01-02T10:00:00.000Z', ...extra }) as Article;
+
+  it('prend la date de publication, puis la date où le document a été publié', () => {
+    expect(mapArticleCard(ctx, article({ publication_date: '2026-03-01T08:00:00.000Z', publishedAt: '2026-03-05T08:00:00.000Z' })).date.iso).toBe('2026-03-01T08:00:00.000Z');
+    expect(mapArticleCard(ctx, article({ publishedAt: '2026-03-05T08:00:00.000Z' })).date.iso).toBe('2026-03-05T08:00:00.000Z');
+  });
+
+  it("montre en preview la date qu'aura un brouillon jamais publié s'il est publié maintenant", () => {
+    const draft = article({ publishedAt: null as unknown as string });
+    expect(mapArticleCard({ ...ctx, now: '2026-04-10T09:30:00.000Z' }, draft).date.iso).toBe('2026-04-10T09:30:00.000Z');
   });
 });

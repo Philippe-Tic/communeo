@@ -48,6 +48,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
       'resetPassword',
       'updateMe',
       'requestPasswordReset',
+      'admins',
     ]),
     ...custom('site-management', ['find', 'findOne', 'stats', 'create', 'update', 'delete']),
     ...custom('comarquage', ['categories', 'fiche', 'search', 'invalidateCache', 'cacheStatus']),

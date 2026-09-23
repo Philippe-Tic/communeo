@@ -31,6 +31,42 @@ function safeSet(storage: Storage, key: string, value: string | null) {
   }
 }
 
+/**
+ * Session perdue en cours de travail (expirée, déconnexion ailleurs) : l'admin ouvre la fenêtre
+ * de reconnexion sans quitter la page ; une fois reconnecté, les enregistrements en échec repartent.
+ */
+type SessionEvent = 'lost' | 'restored';
+const listeners = new Set<(event: SessionEvent) => void>();
+
+export const sessionEvents = {
+  subscribe(listener: (event: SessionEvent) => void) {
+    listeners.add(listener);
+    return () => void listeners.delete(listener);
+  },
+  emit(event: SessionEvent) {
+    for (const listener of listeners) listener(event);
+  },
+};
+
+// Routes où un 401/403 ne signifie pas « session perdue » (connexion, liens reçus par e-mail)
+const OUTSIDE_SESSION = ['/api/session/', '/api/users/me', '/api/user-management/invitation', '/api/user-management/request-invitation', '/api/user-management/forgot-password', '/api/user-management/accept-invitation'];
+
+let probing: Promise<void> | null = null;
+
+/** 403 : droits insuffisants ou session perdue (rôle public) ; on vérifie la session pour les distinguer */
+function checkSession(status: number) {
+  if (listeners.size === 0) return;
+  if (status === 401) return sessionEvents.emit('lost');
+  probing ??= fetch('/api/users/me', { credentials: 'same-origin' })
+    .then((response) => {
+      if (response.status === 401 || response.status === 403) sessionEvents.emit('lost');
+    })
+    .catch(() => undefined)
+    .finally(() => {
+      probing = null;
+    });
+}
+
 /** Pas (ou plus) de session : Strapi répond 401 (jeton invalide) ou 403 (rôle public) */
 export const isUnauthenticated = (error: unknown) => error instanceof ApiError && (error.status === 401 || error.status === 403);
 
@@ -60,6 +96,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
   const text = await response.text();
   const data = text ? safeJson(text) : null;
   if (!response.ok) {
+    if ((response.status === 401 || response.status === 403) && !OUTSIDE_SESSION.some((prefix) => path.startsWith(prefix))) checkSession(response.status);
     const error = (data as { error?: { message?: string; details?: unknown } } | null)?.error;
     throw new ApiError(response.status, error?.message ?? response.statusText, error?.details);
   }

@@ -29,7 +29,9 @@ describe('POST /api/session/login', () => {
     expect(cookie).toMatch(/HttpOnly/i);
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/path=\/api/i);
-    expect(cookie).toMatch(/Max-Age=43200|expires=/i);
+    const hours = (new Date(/expires=([^;]+)/i.exec(cookie)![1]!).getTime() - Date.now()) / 3_600_000;
+    expect(hours).toBeGreaterThan(11);
+    expect(hours).toBeLessThanOrEqual(12);
   });
 
   it('même réponse pour un mauvais mot de passe et un compte inconnu', async () => {
@@ -95,10 +97,14 @@ describe('authentification par le cookie', () => {
 });
 
 describe('limitation des tentatives', () => {
-  it('bloque après 10 tentatives pour un même compte', async () => {
+  it('bloque après 5 tentatives pour un même compte', async () => {
     const identifier = 'cible@example.com';
     let last = 0;
-    for (let i = 0; i < 11; i += 1) last = (await agent().post('/api/session/login').send({ identifier, password: 'x' })).status;
+    for (let i = 0; i < 6; i += 1) last = (await agent().post('/api/session/login').send({ identifier, password: 'x' })).status;
     expect(last).toBe(429);
+  });
+
+  it('les connexions réussies ne comptent pas (plusieurs agents derrière une même adresse)', async () => {
+    for (let i = 0; i < 8; i += 1) expect((await agent().post('/api/session/login').send(credentials)).status).toBe(200);
   });
 });

@@ -2,24 +2,26 @@
  * Connexion à l'administration : vérifie les identifiants et pose la session dans un cookie HttpOnly
  * (voir utils/session-cookie.ts et le middleware session-cookie). Le jeton n'est pas renvoyé.
  */
-import { createRateLimiter } from '../../../utils/security';
-import { CSRF_HEADER, SESSION_COOKIE, SESSION_DURATION_SECONDS, sessionCookieOptions } from '../../../utils/session-cookie';
+import { createFailureLimiter } from '../../../utils/security';
+import { CSRF_HEADER, REMEMBERED_SESSION_SECONDS, SESSION_COOKIE, SESSION_DURATION_SECONDS, sessionCookieOptions } from '../../../utils/session-cookie';
 
-const isRateLimited = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
-const INVALID = 'Adresse e-mail ou mot de passe incorrect.';
+// 5 échecs par compte (message de la maquette 6.19), 20 par adresse IP, sur 15 minutes
+const accountFailures = createFailureLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
+const ipFailures = createFailureLimiter({ windowMs: 15 * 60 * 1000, max: 20 });
+const INVALID = 'E-mail ou mot de passe incorrect. Vérifiez votre saisie ; après 5 essais, le compte est bloqué 15 minutes.';
 
 export default {
   /**
    * POST /api/session/login — { identifier, password }
    */
   async login(ctx) {
-    const { identifier, password } = (ctx.request.body ?? {}) as { identifier?: unknown; password?: unknown };
+    const { identifier, password, remember } = (ctx.request.body ?? {}) as { identifier?: unknown; password?: unknown; remember?: unknown };
     if (typeof identifier !== 'string' || typeof password !== 'string' || !identifier.trim() || !password) {
       return ctx.badRequest(INVALID);
     }
     const email = identifier.trim().toLowerCase();
-    if (isRateLimited(`login:${ctx.request.ip}`) || isRateLimited(`login:${email}`)) {
-      return ctx.tooManyRequests('Trop de tentatives de connexion. Réessayez dans quelques minutes.');
+    if (ipFailures.isLimited(ctx.request.ip) || accountFailures.isLimited(email)) {
+      return ctx.tooManyRequests('Trop de tentatives : le compte est bloqué 15 minutes. Réessayez plus tard ou utilisez « Mot de passe oublié ».');
     }
 
     const user = await strapi.db.query('plugin::users-permissions.user').findOne({
@@ -28,11 +30,18 @@ export default {
     const userService = strapi.plugin('users-permissions').service('user');
     const valid = !!user?.password && (await userService.validatePassword(password, user.password));
     // Même réponse pour un compte inconnu, un mauvais mot de passe ou un compte non activé
-    if (!valid || user.blocked || user.confirmed === false) return ctx.badRequest(INVALID);
+    if (!valid || user.blocked || user.confirmed === false) {
+      ipFailures.fail(ctx.request.ip);
+      accountFailures.fail(email);
+      return ctx.badRequest(INVALID);
+    }
+    accountFailures.reset(email);
 
-    const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id }, { expiresIn: `${SESSION_DURATION_SECONDS}s` });
-    ctx.cookies.set(SESSION_COOKIE, jwt, sessionCookieOptions(ctx, SESSION_DURATION_SECONDS));
-    ctx.body = { ok: true, expiresIn: SESSION_DURATION_SECONDS };
+    // « Rester connecté sur cet ordinateur » : 30 jours, sinon 12 h
+    const duration = remember === true ? REMEMBERED_SESSION_SECONDS : SESSION_DURATION_SECONDS;
+    const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id }, { expiresIn: `${duration}s` });
+    ctx.cookies.set(SESSION_COOKIE, jwt, sessionCookieOptions(ctx, duration));
+    ctx.body = { ok: true, expiresIn: duration };
   },
 
   /**

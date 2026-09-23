@@ -3,6 +3,7 @@
  * immédiatement sur demande (`flush`, avant de quitter la page ou de publier).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { sessionEvents } from '@/lib/api';
 
 export type SaveState = { status: 'idle' } | { status: 'saving' } | { status: 'saved'; at: Date } | { status: 'error'; message: string };
 
@@ -59,6 +60,15 @@ export function useAutosave<T>({ values, save, delay = 5000, enabled = true }: {
   useEffect(() => () => {
     if (timer.current) clearTimeout(timer.current);
   }, []);
+
+  // Reconnexion après une session expirée : le brouillon resté en échec est enregistré aussitôt
+  useEffect(
+    () =>
+      sessionEvents.subscribe((event) => {
+        if (event === 'restored' && enabled && isDirty()) void flush();
+      }),
+    [enabled, flush],
+  );
 
   /** Après un enregistrement fait ailleurs (publication, programmation) : ces valeurs sont à jour */
   const markSaved = useCallback((value: T) => {

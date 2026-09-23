@@ -62,6 +62,38 @@ export const PAGES: Record<string, MockPage> = {
   },
 };
 
+const TITLES = [
+  'La mairie et ses horaires', 'État civil : naissance, mariage, décès', "Carte nationale d'identité et passeport", 'Urbanisme : permis de construire',
+  'Inscriptions scolaires 2026-2027', 'Cantine et accueil périscolaire', 'Médiathèque municipale', 'Conseil municipal : les élus', 'Budget de la commune',
+  "Plan local d'urbanisme", 'Collecte des déchets', 'Déchetterie intercommunale', 'Associations sportives', 'Marché du samedi', 'Histoire et patrimoine',
+  'Chemins de randonnée', 'Transport à la demande', 'Aide aux personnes âgées', 'Recensement citoyen', 'Jardins familiaux', 'Accueil des nouveaux habitants',
+  'Salle omnisports', 'Bibliothèque de rue', 'Cimetière communal',
+];
+
+/** 25 pages : « Location de la salle des fêtes » et 24 autres, publiées sauf une sur quatre (brouillons), une programmée */
+function manyPages(): Record<string, MockPage> {
+  const pages: Record<string, MockPage> = { 'p-salle': structuredClone(PAGES['p-salle']!) };
+  TITLES.forEach((title, index) => {
+    const documentId = `p-${index + 1}`;
+    pages[documentId] = {
+      documentId,
+      title,
+      slug: title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      lead: null,
+      meta_description: null,
+      show_in_menu: index % 3 === 0,
+      scheduled_at: title.startsWith('Inscriptions') ? '2026-11-03T07:00:00.000Z' : null,
+      publishedAt: null,
+      // Du plus récent (p-1) au plus ancien
+      updatedAt: new Date(Date.UTC(2026, 8, 20, 12) - index * 3_600_000).toISOString(),
+      blocks: [],
+    };
+  });
+  return pages;
+}
+
+const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Number(documentId.slice(2)) % 4 === 0;
+
 export interface MockOptions {
   user?: keyof typeof USERS;
   publication?: 'pending' | 'ok' | 'running' | 'failed';
@@ -71,16 +103,22 @@ export interface MockOptions {
   failPageSaves?: boolean;
   /** Serveur de preview non configuré (503 sur le jeton) */
   previewUnavailable?: boolean;
+  /** Pages de la commune : une (défaut), 25, ou aucune */
+  pageSet?: 'one' | 'many' | 'none';
+  /** Pages dont la publication échoue (champs incomplets) */
+  failPublishFor?: string[];
 }
 
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false } = options;
+  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [] } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
   let state = publication;
-  const pages = structuredClone(PAGES);
-  const published = new Set<string>(['p-salle']);
+  const pages: Record<string, MockPage> = pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
+  const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
+  // Pages en ligne modifiées depuis leur publication
+  const modified = new Set<string>();
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
@@ -145,6 +183,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     const pageMatch = /^\/api\/pages(?:\/([^/]+))?$/.exec(url.pathname);
     if (pageMatch) {
       const id = pageMatch[1];
+      if (method === 'GET' && !id) return json(listPages(pages, url.searchParams));
       if (method === 'GET' && id) {
         const page = pages[id];
         if (!page || (status === 'published' && !published.has(id))) return json({ data: null, error: { status: 404, message: 'Not Found' } }, 404);
@@ -154,17 +193,37 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         const body = route.request().postDataJSON() as { data: Partial<MockPage> };
         bodies.push({ call: `${method} ${status ?? 'draft'}`, body });
         if (failPageSaves) return json({ error: { status: 500, message: 'Erreur du serveur' } }, 500);
+        if (status === 'published' && id && failPublishFor.includes(id)) return json({ error: { status: 400, message: 'Le bloc 1 (Texte) est vide.' } }, 400);
         const documentId = id ?? 'p-nouvelle';
         const slug = body.data.slug || String(body.data.title ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         const page: MockPage = { ...(pages[documentId] ?? PAGES['p-salle']!), ...body.data, documentId, slug, updatedAt: new Date().toISOString() } as MockPage;
         pages[documentId] = page;
-        if (status === 'published') published.add(documentId);
+        if (status === 'published') {
+          published.add(documentId);
+          modified.delete(documentId);
+        } else if (published.has(documentId)) modified.add(documentId);
         return json({ data: page }, method === 'POST' ? 201 : 200);
       }
       if (method === 'DELETE' && id) {
         delete pages[id];
         return route.fulfill({ status: 204 });
       }
+    }
+    if (url.pathname === '/api/publication/pages') {
+      return json({
+        data: Object.fromEntries(
+          Object.values(pages).map((page) => [
+            page.documentId,
+            { state: published.has(page.documentId) ? (modified.has(page.documentId) ? 'modified' : 'published') : 'draft', scheduledAt: page.scheduled_at },
+          ]),
+        ),
+      });
+    }
+    const unpublish = /^\/api\/publication\/pages\/([^/]+)\/unpublish$/.exec(url.pathname);
+    if (unpublish && method === 'POST') {
+      published.delete(unpublish[1]!);
+      modified.delete(unpublish[1]!);
+      return json({ data: { documentId: unpublish[1], state: 'draft' } });
     }
     if (url.pathname === '/api/preview/token' && method === 'POST') {
       if (previewUnavailable) return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
@@ -179,6 +238,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   });
 
   return {
+    published,
     calls,
     bodies,
     pages,
@@ -189,4 +249,26 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       session = false;
     },
   };
+}
+
+/** Liste façon Strapi : recherche, filtres de statut par identifiants, tri, pagination */
+function listPages(pages: Record<string, MockPage>, params: URLSearchParams) {
+  const all = (prefix: string) => [...params.entries()].filter(([key]) => key.startsWith(prefix)).map(([, value]) => value);
+  const q = params.get('filters[title][$containsi]')?.toLowerCase();
+  const inIds = all('filters[documentId][$in]');
+  const notIn = all('filters[documentId][$notIn]');
+  let rows = Object.values(pages).filter((page) => {
+    if (q && !page.title.toLowerCase().includes(q)) return false;
+    if (params.has('filters[documentId][$in][0]') && !inIds.includes(page.documentId)) return false;
+    if (notIn.includes(page.documentId)) return false;
+    if (params.has('filters[scheduled_at][$notNull]') && !page.scheduled_at) return false;
+    if (params.has('filters[scheduled_at][$null]') && page.scheduled_at) return false;
+    return true;
+  });
+  const [field, order] = (params.get('sort[0]') ?? 'updatedAt:desc').split(':') as [keyof MockPage, string];
+  rows = rows.sort((a, b) => String(a[field] ?? '').localeCompare(String(b[field] ?? ''), 'fr') * (order === 'desc' ? -1 : 1));
+  const page = Number(params.get('pagination[page]') ?? 1);
+  const pageSize = Number(params.get('pagination[pageSize]') ?? 25);
+  const data = rows.slice((page - 1) * pageSize, page * pageSize).map(({ blocks: _blocks, ...row }) => ({ ...row, featured_image: null }));
+  return { data, meta: { pagination: { page, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) } } };
 }

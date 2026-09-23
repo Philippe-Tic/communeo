@@ -49,3 +49,14 @@ export function relativeTime(date: Date, now: Date = new Date()): string {
   if (minutes < 60) return `il y a ${minutes} min`;
   return `il y a ${Math.round(minutes / 60)} h`;
 }
+
+/** Colonne « Modifiée » des listes : « Aujourd'hui, 09:12 », « Hier, 17:40 », « 18 sept., 11:05 », « 3 mars 2025 » */
+export function formatListDate(date: Date, now: Date = new Date()): string {
+  const day = (value: Date) => new Intl.DateTimeFormat('fr-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(value);
+  const time = new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(date);
+  if (day(date) === day(now)) return `Aujourd'hui, ${time}`;
+  if (day(date) === day(new Date(now.getTime() - 86_400_000))) return `Hier, ${time}`;
+  const sameYear = day(date).slice(0, 4) === day(now).slice(0, 4);
+  if (!sameYear) return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+  return `${new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short' }).format(date)}, ${time}`;
+}

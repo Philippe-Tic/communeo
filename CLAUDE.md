@@ -84,6 +84,7 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `config/permissions.ts` — role permissions as code, synced at every boot (missing ones created, undeclared ones removed; in Strapi 5 a permission row = granted)
 - `src/middlewares/site-isolation.ts` — Multi-tenant query filtering, fail-closed (critical)
 - `src/api/session/` + `src/middlewares/session-cookie.ts` — admin session: `POST /api/session/login` sets an HttpOnly cookie (`SameSite=Strict`, `/api`, 12 h) turned into the usual `Authorization` header; cookie-authenticated writes require `X-Communeo-Csrf: 1`. Without a session `/api/users/me` answers 403 (public role): the admin treats 401 and 403 as logged out
+- `src/api/publication/` — what Strapi 5 REST lacks for the admin lists: `GET /api/publication/:type` (state `draft | published | modified` + `scheduledAt` of every document of the commune) and `POST /api/publication/:type/:documentId/unpublish`. Never use REST `DELETE ?status=published`: it deletes the whole document, draft included
 - `src/validation/` — blocks, homepage, per-site slugs (document service middlewares)
 - `src/bootstrap/` — closes public registration, syncs permissions, dev accounts (`test@example.com` / `super@example.com`), read-only build token
 - `database/migrations/` — data migrations (never in bootstrap)

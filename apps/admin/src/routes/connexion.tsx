@@ -7,7 +7,8 @@ import { CircleAlert } from 'lucide-react';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { CommuneoLogo } from '@/components/shell/logo';
 import { Button } from '@/components/ui/button';
-import { api, ApiError, auth } from '@/lib/api';
+import { ApiError } from '@/lib/api';
+import { login } from '@/lib/session';
 
 export const Route = createFileRoute('/connexion')({
   validateSearch: (search: Record<string, unknown>): { retour?: string } => (typeof search.retour === 'string' ? { retour: search.retour } : {}),
@@ -38,17 +39,19 @@ function LoginPage() {
     setPending(true);
     setError(null);
     try {
-      const { jwt } = await api<{ jwt: string }>('/api/auth/local', {
-        method: 'POST',
-        json: { identifier: form.get('email'), password: form.get('password') },
-      });
-      auth.setToken(jwt);
+      await login(String(form.get('email') ?? ''), String(form.get('password') ?? ''));
       client.clear();
       // Retour à la page demandée, seulement dans l'admin
       const target = retour && retour.startsWith('/') && !retour.startsWith('//') ? retour : '/';
       await navigate({ href: target });
     } catch (caught) {
-      setError(caught instanceof ApiError && caught.status === 400 ? 'Adresse e-mail ou mot de passe incorrect.' : 'Connexion impossible pour le moment. Réessayez dans un instant.');
+      setError(
+        caught instanceof ApiError && caught.status === 400
+          ? 'Adresse e-mail ou mot de passe incorrect.'
+          : caught instanceof ApiError && caught.status === 429
+            ? 'Trop de tentatives de connexion. Réessayez dans quelques minutes.'
+            : 'Connexion impossible pour le moment. Réessayez dans un instant.',
+      );
     } finally {
       setPending(false);
     }

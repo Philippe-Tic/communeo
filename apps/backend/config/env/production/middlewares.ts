@@ -38,7 +38,7 @@ export default [
         return false;
       },
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
-      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Site-Document-Id'],
+      headers: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Site-Document-Id', 'X-Communeo-Csrf'],
       keepHeaderOnError: true,
     },
   },
@@ -46,6 +46,7 @@ export default [
   'strapi::query',
   'strapi::body',
   'strapi::session',
+  'global::session-cookie',
   'global::site-isolation',
   'strapi::favicon',
   'strapi::public',

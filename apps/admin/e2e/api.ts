@@ -68,7 +68,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const pages = structuredClone(PAGES);
   const published = new Set<string>(['p-salle']);
 
-  if (loggedIn) await page.addInitScript(() => localStorage.setItem('communeo.jwt', 'jeton-de-test'));
+  // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
+  let session = loggedIn;
 
   // Serveur de preview simulé : la page demandée, avec le numéro de version reçu
   await page.route('http://preview.test/**', (route) => {
@@ -84,16 +85,22 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     calls.push(`${method} ${url.pathname}${method !== 'GET' && status ? `?status=${status}` : ''}`);
     const json = (body: unknown, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 
-    if (url.pathname === '/api/users/me') {
-      const auth = route.request().headers().authorization;
-      return auth ? json(USERS[user]) : json({ error: { status: 401, message: 'Missing or invalid credentials' } }, 401);
+    // Comme Strapi : toute écriture de l'admin porte l'en-tête de sécurité
+    if (method !== 'GET' && route.request().headers()['x-communeo-csrf'] !== '1') {
+      return json({ error: { status: 403, message: 'Requête refusée : en-tête de sécurité manquant' } }, 403);
     }
-    if (url.pathname === '/api/auth/local') {
+    if (url.pathname === '/api/session/login') {
       const body = route.request().postDataJSON() as { identifier: string; password: string };
-      return body.password === 'bon-mot-de-passe'
-        ? json({ jwt: 'jeton-de-test', user: USERS[user] })
-        : json({ error: { status: 400, message: 'Invalid identifier or password' } }, 400);
+      if (body.password !== 'bon-mot-de-passe') return json({ error: { status: 400, message: 'Adresse e-mail ou mot de passe incorrect.' } }, 400);
+      session = true;
+      return json({ ok: true, expiresIn: 43200 });
     }
+    if (url.pathname === '/api/session/logout') {
+      session = false;
+      return route.fulfill({ status: 204 });
+    }
+    if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
+    if (url.pathname === '/api/users/me') return json(USERS[user]);
     if (url.pathname === '/api/deployment/state') {
       return json({ state, pendingCount: state === 'pending' ? 3 : 0, step: state === 'running' ? 'rendering' : null, reference: null });
     }

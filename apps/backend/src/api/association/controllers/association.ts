@@ -61,6 +61,8 @@ export default factories.createCoreController('api::association.association', ({
       try {
         await strapi.plugin('email').service('email').send({
           to: association.submitted_by_email,
+          // Le demandeur peut répondre directement à la mairie (informations manquantes)
+          ...(association.site?.contact_mail ? { replyTo: association.site.contact_mail } : {}),
           subject: `Votre proposition « ${association.name} » — ${siteName}`,
           text: `Bonjour ${name},\n\nVotre proposition d'association « ${association.name} » n'a pas été publiée sur le site de ${siteName}.\n\nMotif :\n${reason}\n\nVous pouvez soumettre une nouvelle proposition depuis le site.`,
           html: `<p>Bonjour ${escapeHtml(name)},</p><p>Votre proposition d'association « ${escapeHtml(association.name)} » n'a pas été publiée sur le site de ${escapeHtml(siteName)}.</p><p><strong>Motif :</strong></p><p>${escapeHtml(reason).replace(/\n/g, '<br>')}</p><p>Vous pouvez soumettre une nouvelle proposition depuis le site.</p>`,

@@ -50,6 +50,7 @@ describe('refus motivé', () => {
     expect(res.body).toMatchObject({ data: { status: 'rejected', rejection_reason: reason }, emailed: true });
     const mail = sentEmails.find((message) => message.to === 'h.garnier@example.test')!;
     expect(mail.subject).toContain('Les Jardins partagés de la Loire');
+    expect(mail.replyTo).toBeTruthy();
     expect(mail.text).toContain(reason);
     expect(mail.html).toContain('&lt;script&gt;');
     expect(mail.html).not.toContain('<script>');

@@ -1,4 +1,5 @@
 import { DropdownMenu as Menu } from 'radix-ui';
+import { Check } from 'lucide-react';
 import type { ComponentProps } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -41,4 +42,24 @@ export function DropdownMenuLabel({ className, ...props }: ComponentProps<typeof
 
 export function DropdownMenuSeparator({ className, ...props }: ComponentProps<typeof Menu.Separator>) {
   return <Menu.Separator className={cn('my-1.5 h-px bg-border-row', className)} {...props} />;
+}
+
+export const DropdownMenuRadioGroup = Menu.RadioGroup;
+
+/** Choix exclusif (filtre) : coche devant l'option retenue */
+export function DropdownMenuRadioItem({ className, children, ...props }: ComponentProps<typeof Menu.RadioItem>) {
+  return (
+    <Menu.RadioItem
+      className={cn(
+        'flex cursor-pointer items-center gap-2.5 rounded-md py-2 pr-2.5 pl-8 text-sm outline-none select-none data-[highlighted]:bg-sidebar data-[state=checked]:font-semibold relative',
+        className,
+      )}
+      {...props}
+    >
+      <Menu.ItemIndicator className="absolute left-2.5">
+        <Check aria-hidden="true" className="size-4 text-brand" />
+      </Menu.ItemIndicator>
+      {children}
+    </Menu.RadioItem>
+  );
 }

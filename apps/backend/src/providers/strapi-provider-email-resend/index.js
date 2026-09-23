@@ -10,12 +10,22 @@ module.exports = {
   init(providerOptions, settings) {
     const apiKey = providerOptions.apiKey;
 
+    // En développement sans clé : les e-mails (invitations, liens de mot de passe) sont écrits
+    // dans le journal de Strapi au lieu d'être envoyés
+    const logOnly = !apiKey && process.env.NODE_ENV !== 'production';
+
     if (!apiKey) {
-      global.strapi?.log.warn('Resend provider: RESEND_API_KEY not set — emails will fail');
+      global.strapi?.log.warn(
+        logOnly ? 'Resend provider: RESEND_API_KEY not set — emails are logged, not sent' : 'Resend provider: RESEND_API_KEY not set — emails will fail',
+      );
     }
 
     return {
       async send(options) {
+        if (logOnly) {
+          global.strapi?.log.info(`[email] À : ${options.to} — ${options.subject}\n${options.text ?? ''}`);
+          return;
+        }
         if (!apiKey) {
           throw new Error('Resend provider: RESEND_API_KEY is required to send emails');
         }

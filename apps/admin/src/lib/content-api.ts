@@ -31,9 +31,10 @@ export interface PageDocument {
   blocks: Block[] | null;
 }
 
-/** Brouillon avec ses blocs, et savoir s'il existe une version publiée */
+/** Brouillon avec ses blocs, et savoir s'il existe une version publiée (modifiée depuis ou non) */
 export interface PageDraft extends PageDocument {
   published: boolean;
+  modified: boolean;
 }
 
 const POPULATE = 'populate[blocks][populate]=*';
@@ -44,9 +45,11 @@ export const pageQuery = (documentId: string) =>
     queryFn: async (): Promise<PageDraft> => {
       const [draft, published] = await Promise.all([
         api<{ data: PageDocument }>(`/api/pages/${documentId}?status=draft&${POPULATE}`),
-        api<{ data: PageDocument | null }>(`/api/pages/${documentId}?status=published&fields[0]=publishedAt`).catch(() => ({ data: null })),
+        api<{ data: PageDocument | null }>(`/api/pages/${documentId}?status=published&fields[0]=updatedAt`).catch(() => ({ data: null })),
       ]);
-      return { ...draft.data, published: !!published.data };
+      // Même règle que GET /api/publication : un brouillon plus récent que la version en ligne est une modification
+      const modified = !!published.data && new Date(draft.data.updatedAt).getTime() > new Date(published.data.updatedAt).getTime();
+      return { ...draft.data, published: !!published.data, modified };
     },
     staleTime: Infinity,
   });

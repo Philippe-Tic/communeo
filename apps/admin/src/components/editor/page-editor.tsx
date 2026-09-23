@@ -15,9 +15,10 @@ import { Form, FormSection, SwitchField, TextareaField, TextField, UnsavedChange
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, UnsavedChangesDialog } from '@/components/ui/confirm-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { StatusBadge } from '@/components/ui/status-badge';
+import { PublicationBadge } from '@/components/content-list/publication-badge';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
+import { refreshContent } from '@/lib/content-list';
 import { deletePage, pageQuery, pageToValues, publishPage, savePageDraft, schedulePage, type PageDraft, type PageValues } from '@/lib/content-api';
 import { formatShortParisDateTime } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
@@ -91,7 +92,9 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
     enabled: !!documentId || values.title.trim().length > 0,
     save: async (snapshot) => {
       const doc = await savePageDraft(id.current, snapshot);
-      remember({ ...doc, published: page?.published ?? false });
+      // Brouillon d'une page en ligne : ses modifications ne sont pas encore publiées
+      remember({ ...doc, published: page?.published ?? false, modified: page?.published ?? false });
+      void refreshContent(client, 'pages', { draftOnly: true });
       if (!snapshot.slug && doc.slug) form.setValue('slug', doc.slug);
     },
   });
@@ -116,7 +119,8 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
     try {
       const doc = await publishPage(id.current, valid as PageValues);
       autosave.markSaved(form.getValues());
-      remember({ ...doc, published: true, scheduled_at: null });
+      remember({ ...doc, published: true, modified: false, scheduled_at: null });
+      void refreshContent(client, 'pages');
       setJustPublished(true);
       setTimeout(() => setJustPublished(false), 3000);
       slugTouched.current = true;
@@ -137,13 +141,15 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
     }
     const doc = await schedulePage(id.current, form.getValues(), at);
     autosave.markSaved(form.getValues());
-    remember({ ...doc, published: page?.published ?? false });
+    remember({ ...doc, published: page?.published ?? false, modified: page?.published ?? false });
+    void refreshContent(client, 'pages');
     toast.success(`Publication programmée le ${formatShortParisDateTime(at)}.`);
   };
 
   const remove = async () => {
     if (id.current) await deletePage(id.current);
     autosave.markSaved(form.getValues());
+    void refreshContent(client, 'pages');
     toast.success(`« ${title} » a été supprimée.`);
     await navigate({ to: '/pages' });
   };
@@ -162,16 +168,7 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
     localStorageSet('communeo.preview.shown', String(shown));
   };
 
-  const scheduledAt = page?.scheduled_at ? new Date(page.scheduled_at) : null;
-  const status = scheduledAt ? (
-    <StatusBadge tone="info" icon={<Clock aria-hidden="true" className="size-3" />}>
-      Programmé le {formatShortParisDateTime(scheduledAt)}
-    </StatusBadge>
-  ) : page?.published ? (
-    <StatusBadge tone="success">Publié</StatusBadge>
-  ) : (
-    <StatusBadge tone="neutral">Brouillon</StatusBadge>
-  );
+  const status = <PublicationBadge state={page?.published ? (page.modified ? 'modified' : 'published') : 'draft'} scheduledAt={page?.scheduled_at} />;
 
   return (
     <Form

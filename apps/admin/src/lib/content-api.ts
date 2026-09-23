@@ -50,13 +50,14 @@ function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string
   return queryOptions({
     queryKey: [type, documentId],
     queryFn: async (): Promise<Draft<D>> => {
-      const [draft, published] = await Promise.all([
+      // L'état de publication vient de /api/publication : demander la version en ligne d'un contenu
+      // jamais publié répondrait 404 (erreur inutile dans la console)
+      const [draft, states] = await Promise.all([
         api<{ data: D }>(`/api/${type}/${documentId}?status=draft&${populate}`),
-        api<{ data: D | null }>(`/api/${type}/${documentId}?status=published&fields[0]=updatedAt`).catch(() => ({ data: null })),
+        api<{ data: Record<string, { state: 'draft' | 'published' | 'modified' }> }>(`/api/publication/${type}`),
       ]);
-      // Même règle que GET /api/publication : un brouillon plus récent que la version en ligne est une modification
-      const modified = !!published.data && new Date(draft.data.updatedAt).getTime() > new Date(published.data.updatedAt).getTime();
-      return { ...draft.data, published: !!published.data, modified };
+      const state = states.data[documentId]?.state ?? 'draft';
+      return { ...draft.data, published: state !== 'draft', modified: state === 'modified' };
     },
     staleTime: Infinity,
   });

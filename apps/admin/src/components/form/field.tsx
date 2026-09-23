@@ -97,14 +97,14 @@ export function Field({ name, label, required, help, error, badge, hideOptional,
 }
 
 /** Groupe de contrôles (radios, date et heure…) : fieldset et légende */
-export function FieldSet({ name, legend, required, help, error, className, children }: Omit<FieldProps, 'label'> & { legend: ReactNode; children: ReactNode }) {
+export function FieldSet({ name, legend, required, help, error, className, hideOptional, children }: Omit<FieldProps, 'label'> & { legend: ReactNode; children: ReactNode }) {
   const id = fieldId(name);
   const describedBy = [help && `${id}-aide`, error && `${id}-erreur`].filter(Boolean).join(' ') || undefined;
   return (
     <fieldset id={id} className={className} aria-describedby={describedBy} aria-invalid={error ? true : undefined} data-field={name} tabIndex={-1}>
       <legend className="font-medium">
         {legend}
-        <RequirementMark required={required} />
+        <RequirementMark required={required} hideOptional={hideOptional} />
       </legend>
       <div className="mt-2">{children}</div>
       {help && <FieldHelp id={id}>{help}</FieldHelp>}

@@ -5,9 +5,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/toast';
+import { ApiError } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { publicationQuery, usePublish } from '@/lib/publication';
 import { cn } from '@/lib/utils';
+
+const formatTime = (date: Date) => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: '2-digit' }).format(date).replace(':', ' h ');
 
 export function PublicationStatus({ className, stacked }: { className?: string; stacked?: boolean }) {
   const { data } = useQuery(publicationQuery);
@@ -24,7 +28,10 @@ export function PublicationStatus({ className, stacked }: { className?: string; 
       La dernière mise en ligne a échoué
     </StatusBadge>
   ) : data.state === 'pending' ? (
-    <StatusBadge size="md" tone="warning">Modifications en attente de mise en ligne</StatusBadge>
+    <StatusBadge size="md" tone="warning">
+      Modifications en attente de mise en ligne
+      {data.scheduledAt && <span className="font-normal"> · automatique à {formatTime(new Date(data.scheduledAt))}</span>}
+    </StatusBadge>
   ) : (
     <StatusBadge size="md" tone="success">Site à jour</StatusBadge>
   );
@@ -36,7 +43,15 @@ export function PublicationStatus({ className, stacked }: { className?: string; 
         {badge}
       </div>
       {action && (
-        <Button size={stacked ? 'lg' : 'sm'} onClick={() => publish.mutate()}>
+        <Button
+          size={stacked ? 'lg' : 'sm'}
+          disabled={publish.isPending}
+          onClick={() =>
+            publish.mutate(undefined, {
+              onError: (error) => toast.error(`La mise en ligne n'a pas pu démarrer : ${error instanceof ApiError ? error.message : 'le serveur ne répond pas'}.`),
+            })
+          }
+        >
           {data.state === 'failed' ? 'Réessayer la mise en ligne' : 'Mettre en ligne'}
         </Button>
       )}

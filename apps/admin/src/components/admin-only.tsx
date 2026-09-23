@@ -21,7 +21,7 @@ export function AdminOnly({ subject, children }: { subject: string; children: Re
 
 function NotAllowed({ subject }: { subject: string }) {
   const heading = useRef<HTMLHeadingElement>(null);
-  const { data: admins } = useQuery({
+  const { data: admins, isPending } = useQuery({
     queryKey: ['administrateurs'],
     queryFn: () => api<{ data: { name: string }[] }>('/api/user-management/admins'),
     select: (response) => response.data.map((admin) => admin.name),
@@ -39,7 +39,8 @@ function NotAllowed({ subject }: { subject: string }) {
       </h1>
       <p className="mt-2 text-secondary">
         {subject} n'est pas accessible avec votre rôle d'éditeur.{' '}
-        {admins && admins.length > 0 ? `Demandez à ${listFormatter.format(admins)}.` : 'Demandez à un administrateur de votre commune.'}
+        {/* Pas de phrase provisoire : les noms arrivent vite, et la phrase ne change pas sous les yeux */}
+        {isPending ? null : admins && admins.length > 0 ? `Demandez à ${listFormatter.format(admins)}.` : 'Demandez à un administrateur de votre commune.'}
       </p>
       <Link to="/" className="mt-5 inline-block font-semibold text-brand underline underline-offset-2">
         Retour au tableau de bord

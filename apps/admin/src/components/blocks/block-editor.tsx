@@ -331,7 +331,7 @@ export function BlockEditor({
         catalogAt === null ? (
           <div className="rounded-xl border-2 border-dashed border-border-input p-8 text-center">
             <p className="font-semibold">{emptyTitle}</p>
-            <p className="mx-auto mt-1 max-w-md text-secondary">Un bloc est un élément de la page : un texte, une image, des documents à télécharger…</p>
+            <p className="mx-auto mt-1 max-w-md text-secondary">Un bloc est un élément du contenu : un texte, une image, des documents à télécharger…</p>
             <Button type="button" id={`${headingId}-ajout`} className="mt-4" onClick={() => openCatalog(0)}>
               <Plus aria-hidden="true" />
               Ajouter un bloc

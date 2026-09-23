@@ -28,7 +28,7 @@ export interface BaseDocument {
   scheduled_at: string | null;
   publishedAt: string | null;
   updatedAt: string;
-  blocks: Block[] | null;
+  blocks?: Block[] | null;
 }
 
 /** Brouillon, et savoir s'il existe une version publiée (modifiée depuis ou non) */
@@ -43,14 +43,15 @@ export interface DocumentApi<D extends BaseDocument, V> {
   remove: (documentId: string) => Promise<void>;
 }
 
-const POPULATE = 'populate[blocks][populate]=*';
+/** Relations lues avec le brouillon : les blocs par défaut */
+const BLOCKS = 'populate[blocks][populate]=*';
 
-function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string) {
+function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string, populate = BLOCKS) {
   return queryOptions({
     queryKey: [type, documentId],
     queryFn: async (): Promise<Draft<D>> => {
       const [draft, published] = await Promise.all([
-        api<{ data: D }>(`/api/${type}/${documentId}?status=draft&${POPULATE}`),
+        api<{ data: D }>(`/api/${type}/${documentId}?status=draft&${populate}`),
         api<{ data: D | null }>(`/api/${type}/${documentId}?status=published&fields[0]=updatedAt`).catch(() => ({ data: null })),
       ]);
       // Même règle que GET /api/publication : un brouillon plus récent que la version en ligne est une modification
@@ -62,7 +63,11 @@ function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string
 }
 
 /** API d'un type : `payload` transforme les valeurs du formulaire en données Strapi */
-export function documentApi<D extends BaseDocument, V>(type: ContentApi, payload: (values: V) => Record<string, unknown>): DocumentApi<D, V> {
+export function documentApi<D extends BaseDocument, V>(
+  type: ContentApi,
+  payload: (values: V) => Record<string, unknown>,
+  { populate = BLOCKS }: { populate?: string } = {},
+): DocumentApi<D, V> {
   const body = (values: V, extra: Record<string, unknown> = {}) => ({ data: { ...payload(values), ...extra } });
   const write = async (documentId: string | null, data: unknown, status?: 'published') => {
     const query = status ? `?status=${status}` : '';
@@ -73,7 +78,7 @@ export function documentApi<D extends BaseDocument, V>(type: ContentApi, payload
   };
   return {
     type,
-    query: (documentId) => draftQuery<D>(type, documentId),
+    query: (documentId) => draftQuery<D>(type, documentId, populate),
     saveDraft: (documentId, values) => write(documentId, body(values)),
     publish: (documentId, values) => write(documentId, body(values, { scheduled_at: null }), 'published'),
     schedule: (documentId, values, at) => write(documentId, body(values, { scheduled_at: at.toISOString() })),

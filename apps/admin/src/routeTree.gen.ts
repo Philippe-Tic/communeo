@@ -36,6 +36,7 @@ import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppActualitesDocumentIdRouteImport } from './routes/_app/actualites_.$documentId'
 import { Route as AppAgendaDocumentIdRouteImport } from './routes/_app/agenda_.$documentId'
+import { Route as AppDocumentsDocumentIdRouteImport } from './routes/_app/documents_.$documentId'
 import { Route as AppMonSiteAccessibiliteRouteImport } from './routes/_app/mon-site/accessibilite'
 import { Route as AppMonSiteAccueilRouteImport } from './routes/_app/mon-site/accueil'
 import { Route as AppMonSiteApparenceRouteImport } from './routes/_app/mon-site/apparence'
@@ -181,6 +182,11 @@ const AppAgendaDocumentIdRoute = AppAgendaDocumentIdRouteImport.update({
   path: '/agenda/$documentId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDocumentsDocumentIdRoute = AppDocumentsDocumentIdRouteImport.update({
+  id: '/documents_/$documentId',
+  path: '/documents/$documentId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMonSiteAccessibiliteRoute = AppMonSiteAccessibiliteRouteImport.update({
   id: '/mon-site/accessibilite',
   path: '/mon-site/accessibilite',
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
+  '/documents/$documentId': typeof AppDocumentsDocumentIdRoute
   '/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/mon-site/apparence': typeof AppMonSiteApparenceRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
+  '/documents/$documentId': typeof AppDocumentsDocumentIdRoute
   '/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/mon-site/apparence': typeof AppMonSiteApparenceRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/actualites_/$documentId': typeof AppActualitesDocumentIdRoute
   '/_app/agenda_/$documentId': typeof AppAgendaDocumentIdRoute
+  '/_app/documents_/$documentId': typeof AppDocumentsDocumentIdRoute
   '/_app/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/_app/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/_app/mon-site/apparence': typeof AppMonSiteApparenceRoute
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
+    | '/documents/$documentId'
     | '/mon-site/accessibilite'
     | '/mon-site/accueil'
     | '/mon-site/apparence'
@@ -415,6 +425,7 @@ export interface FileRouteTypes {
     | '/'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
+    | '/documents/$documentId'
     | '/mon-site/accessibilite'
     | '/mon-site/accueil'
     | '/mon-site/apparence'
@@ -454,6 +465,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/actualites_/$documentId'
     | '/_app/agenda_/$documentId'
+    | '/_app/documents_/$documentId'
     | '/_app/mon-site/accessibilite'
     | '/_app/mon-site/accueil'
     | '/_app/mon-site/apparence'
@@ -666,6 +678,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAgendaDocumentIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/documents_/$documentId': {
+      id: '/_app/documents_/$documentId'
+      path: '/documents/$documentId'
+      fullPath: '/documents/$documentId'
+      preLoaderRoute: typeof AppDocumentsDocumentIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mon-site/accessibilite': {
       id: '/_app/mon-site/accessibilite'
       path: '/mon-site/accessibilite'
@@ -761,6 +780,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppActualitesDocumentIdRoute: typeof AppActualitesDocumentIdRoute
   AppAgendaDocumentIdRoute: typeof AppAgendaDocumentIdRoute
+  AppDocumentsDocumentIdRoute: typeof AppDocumentsDocumentIdRoute
   AppMonSiteAccessibiliteRoute: typeof AppMonSiteAccessibiliteRoute
   AppMonSiteAccueilRoute: typeof AppMonSiteAccueilRoute
   AppMonSiteApparenceRoute: typeof AppMonSiteApparenceRoute
@@ -795,6 +815,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppActualitesDocumentIdRoute: AppActualitesDocumentIdRoute,
   AppAgendaDocumentIdRoute: AppAgendaDocumentIdRoute,
+  AppDocumentsDocumentIdRoute: AppDocumentsDocumentIdRoute,
   AppMonSiteAccessibiliteRoute: AppMonSiteAccessibiliteRoute,
   AppMonSiteAccueilRoute: AppMonSiteAccueilRoute,
   AppMonSiteApparenceRoute: AppMonSiteApparenceRoute,

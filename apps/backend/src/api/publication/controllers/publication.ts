@@ -8,6 +8,9 @@
  * - `modified` : en ligne, avec des modifications enregistrées en brouillon ;
  * `scheduledAt` : publication programmée du brouillon, s'il y en a une.
  *
+ * GET /api/publication/official-documents/years → { data: [{ year, count }] } : onglets par année des
+ * documents officiels (un conseil municipal en publie des centaines), sans tout charger.
+ *
  * POST /api/publication/:type/:documentId/unpublish : retire la version en ligne et garde le
  * brouillon (en REST, `DELETE ?status=published` supprime tout le document).
  */
@@ -67,6 +70,24 @@ export default {
       data[documentId] = { state, scheduledAt: draft.scheduled_at ? new Date(draft.scheduled_at).toISOString() : null };
     }
     ctx.body = { data };
+  },
+
+  async years(ctx) {
+    const target = await resolve(ctx);
+    if (!target) return;
+    if (target.uid !== 'api::official-document.official-document') return ctx.notFound('Pas de classement par année pour ce type');
+
+    // Brouillon et version en ligne sont deux lignes d'un même document : on compte les documents
+    // (l'année du brouillon, la plus récente, l'emporte)
+    const rows: Array<{ documentId: string; year: number | null; publishedAt: string | null }> = await strapi.db.query(target.uid as any).findMany({
+      where: { site: { documentId: target.siteDocumentId } },
+      select: ['documentId', 'year', 'publishedAt'],
+    });
+    const yearOf = new Map<string, number | null>();
+    for (const row of rows) if (!row.publishedAt || !yearOf.has(row.documentId)) yearOf.set(row.documentId, row.year);
+    const counts = new Map<number, number>();
+    for (const year of yearOf.values()) if (year) counts.set(year, (counts.get(year) ?? 0) + 1);
+    ctx.body = { data: [...counts].sort(([a], [b]) => b - a).map(([year, count]) => ({ year, count })) };
   },
 
   async unpublish(ctx) {

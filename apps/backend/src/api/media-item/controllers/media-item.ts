@@ -1,5 +1,22 @@
 import { factories } from '@strapi/strapi';
+import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
+
+/** Formats acceptés dans la médiathèque : images, PDF, bureautique (Word, Excel, OpenDocument) */
+export const ALLOWED_MEDIA_TYPES: Record<string, string> = {
+  'image/jpeg': 'JPG',
+  'image/png': 'PNG',
+  'image/webp': 'WebP',
+  'image/svg+xml': 'SVG',
+  'application/pdf': 'PDF',
+  'application/msword': 'Word',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word',
+  'application/vnd.ms-excel': 'Excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'Excel',
+  'application/vnd.oasis.opendocument.text': 'OpenDocument',
+  'application/vnd.oasis.opendocument.spreadsheet': 'OpenDocument',
+};
+export const MAX_MEDIA_BYTES = 20 * 1024 * 1024;
 
 export default factories.createCoreController('api::media-item.media-item' as any, ({ strapi }) => ({
   /**
@@ -17,12 +34,8 @@ export default factories.createCoreController('api::media-item.media-item' as an
       return ctx.unauthorized('Vous devez être connecté');
     }
 
-    // Ensure we have the user's site
-    let userSite = user.site;
-    if (!userSite) {
-      const completeUser = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: user.id }, populate: ['site'] });
-      userSite = (completeUser as any)?.site;
-    }
+    // Commune de l'utilisateur, ou celle consultée par un super admin
+    const userSite = await getEffectiveSite(ctx);
 
     if (!userSite) {
       return ctx.forbidden('Aucun site associé à votre compte');
@@ -32,8 +45,15 @@ export default factories.createCoreController('api::media-item.media-item' as an
     const files = ctx.request.files;
     const uploadedFile = files?.files || files?.file;
 
-    if (!uploadedFile) {
-      return ctx.badRequest('Aucun fichier fourni');
+    if (!uploadedFile || Array.isArray(uploadedFile)) {
+      return ctx.badRequest(uploadedFile ? 'Un seul fichier à la fois' : 'Aucun fichier fourni');
+    }
+    const mime = (uploadedFile as any).mimetype ?? (uploadedFile as any).type;
+    if (!ALLOWED_MEDIA_TYPES[mime]) {
+      return ctx.badRequest('Format non accepté : images (JPG, PNG, WebP, SVG), PDF, Word, Excel ou OpenDocument.');
+    }
+    if ((uploadedFile as any).size > MAX_MEDIA_BYTES) {
+      return ctx.badRequest('Fichier trop lourd : 20 Mo au maximum.');
     }
 
     const body = ctx.request.body;

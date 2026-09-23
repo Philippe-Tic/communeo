@@ -55,6 +55,25 @@ export interface FilterDef {
 export const filterQuery = (filter: FilterDef, value: string): Record<string, string> =>
   filter.query ? filter.query(value) : { [`filters[${filter.field}][$eq]`]: value };
 
+export interface TabOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
+/** Onglets rapides au-dessus de la liste (années des documents officiels) */
+export interface TabsDef {
+  /** Paramètre d'adresse (?annee=2025) */
+  key: string;
+  label: string;
+  /** Onglets disponibles (chargés), `undefined` pendant le chargement */
+  useOptions: () => TabOption[] | undefined;
+  /** Onglet ouvert quand l'adresse n'en dit rien */
+  defaultValue: (options: TabOption[]) => string;
+  /** Paramètres Strapi de l'onglet */
+  query: (value: string, options: TabOption[]) => Record<string, string>;
+}
+
 export interface ContentListConfig<T extends ListRow> {
   source: ListSource;
   title: string;
@@ -64,6 +83,9 @@ export interface ContentListConfig<T extends ListRow> {
   editTo: string;
   /** Colonnes propres au type, entre le statut et la date de modification */
   columns: ColumnDef<T>[];
+  tabs?: TabsDef;
+  /** Icône devant le titre à la place de la vignette (documents : format du fichier) */
+  rowIcon?: (row: T) => ReactNode;
   /** Vignette 56 × 40 dans la colonne Titre (icône d'image à défaut) */
   thumbnail?: (row: T) => Media | null | undefined;
   /** Ligne d'informations des cartes (mobile) */
@@ -91,7 +113,7 @@ export interface ListSearch {
 
 const STATUSES: StatusFilter[] = ['brouillon', 'publie', 'programme'];
 
-export function listSearch(filters: FilterDef[] = []) {
+export function listSearch(filters: FilterDef[] = [], tabs?: TabsDef) {
   return (raw: Record<string, unknown>): ListSearch => {
     const search: ListSearch = {};
     if (typeof raw.q === 'string' && raw.q.trim()) search.q = raw.q;
@@ -100,6 +122,8 @@ export function listSearch(filters: FilterDef[] = []) {
     if (Number.isInteger(page) && page > 1) search.page = page;
     if (typeof raw.tri === 'string') search.tri = raw.tri;
     if (raw.ordre === 'asc' || raw.ordre === 'desc') search.ordre = raw.ordre;
+    if (tabs && typeof raw[tabs.key] === 'string' && /^[\w-]{1,20}$/.test(raw[tabs.key] as string)) search[tabs.key] = raw[tabs.key] as string;
+    if (tabs && typeof raw[tabs.key] === 'number') search[tabs.key] = raw[tabs.key] as number;
     for (const filter of filters) {
       const value = raw[filter.key];
       if (typeof value === 'string' && filter.options.some((option) => option.value === value)) search[filter.key] = value;
@@ -115,3 +139,6 @@ export function agree(noun: Noun, word: string, count: number) {
 
 export const countOf = (noun: Noun, count: number) => `${count} ${count > 1 ? noun.many : noun.one}`;
 export const indefinite = (noun: Noun) => `${noun.feminine ? 'une' : 'un'} ${noun.one}`;
+
+/** « Nouvelle page », « Nouvel événement », « Nouveau document » */
+export const newOf = (noun: Noun) => `${noun.feminine ? 'Nouvelle' : /^[aeiouyéèêh]/i.test(noun.one) ? 'Nouvel' : 'Nouveau'} ${noun.one}`;

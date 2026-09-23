@@ -264,9 +264,10 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
           </Button>
           {config.layout === 'preview' &&
             (previewShown ? (
-              <Button type="button" variant="tertiary" className="hidden min-[1200px]:inline-flex" onClick={() => setDialog('preview-fullscreen')}>
+              // Sous 1440 px (écran 1366 des maquettes), l'icône seule : la place va à Programmer et Publier
+              <Button type="button" variant="tertiary" aria-label="Aperçu plein écran" className="hidden min-[1200px]:inline-flex" onClick={() => setDialog('preview-fullscreen')}>
                 <Maximize2 aria-hidden="true" />
-                Aperçu plein écran
+                <span className="hidden wide:inline">Aperçu plein écran</span>
               </Button>
             ) : (
               <Button type="button" variant="tertiary" className="hidden min-[1200px]:inline-flex" onClick={() => togglePreview(true)}>

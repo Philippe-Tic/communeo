@@ -206,21 +206,24 @@ export function MenuEditor({ site, pages, unpublished }: { site: SiteSettings; p
           <Eye aria-hidden="true" />
           Aperçu
         </Button>
-        <Button type="button" variant="secondary" className="md:hidden" onClick={() => setPreview('fullscreen')}>
+        <Button type="button" variant="tertiary" className="md:hidden" onClick={() => setPreview('fullscreen')}>
           <Eye aria-hidden="true" />
           Aperçu
         </Button>
-        <Button type="button" variant="secondary" disabled={!dirty || saving} onClick={cancel}>
-          Annuler les modifications
-        </Button>
-        <Button type="button" disabled={!dirty || saving} onClick={() => void save()}>
-          {saving && <Loader2 aria-hidden="true" className="animate-spin" />}
-          Enregistrer
-        </Button>
+        {/* Enregistrement : dans la barre sur ordinateur, fixé en bas de l'écran sur mobile */}
+        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-surface p-3 md:static md:z-auto md:border-0 md:bg-transparent md:p-0 dark:bg-sidebar md:dark:bg-transparent">
+          <Button type="button" variant="secondary" aria-label="Annuler les modifications" className="max-md:h-11 max-md:flex-1" disabled={!dirty || saving} onClick={cancel}>
+            Annuler<span className="max-md:hidden">&nbsp;les modifications</span>
+          </Button>
+          <Button type="button" className="max-md:h-11 max-md:flex-1" disabled={!dirty || saving} onClick={() => void save()}>
+            {saving && <Loader2 aria-hidden="true" className="animate-spin" />}
+            Enregistrer
+          </Button>
+        </div>
       </div>
 
       <div className="flex">
-        <div className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-7">
+        <div className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 md:py-7">
           <div className="mx-auto max-w-[760px]">
             <div role="status" className="sr-only">
               {message}
@@ -461,8 +464,9 @@ function EntryRow({
         </button>
         <span className={cn('shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold', badge.className)}>{badge.label}</span>
         <span className="flex min-w-0 flex-1 basis-40 items-baseline gap-3">
-          <span className={cn('min-w-0 truncate', group ? 'font-semibold' : 'font-medium')}>{label}</span>
-          <span title={target} className="ml-auto min-w-0 shrink truncate text-[13px] text-secondary">
+          <span className={cn('min-w-0 md:truncate', group ? 'font-semibold' : 'font-medium')}>{label}</span>
+          {/* La cible prend la place du libellé sur petit écran : on ne la montre qu'à partir de 640 px */}
+          <span title={target} className="ml-auto hidden min-w-0 shrink truncate text-[13px] text-secondary sm:inline">
             {target}
           </span>
         </span>
@@ -483,7 +487,8 @@ function EntryRow({
 
 /**
  * Bouton icône. Une action bloquée par une règle (indenter sans groupe au-dessus…) reste focalisable
- * (`aria-disabled`) : sa raison est dans l'info-bulle et dans son nom accessible.
+ * (`aria-disabled`) : sa raison est dans l'info-bulle, dans son nom accessible, et dans un message
+ * si on l'active quand même.
  */
 function IconButton({ action, label, icon, onClick, disabled, blocker, danger }: { action: string; label: string; icon: ReactNode; onClick: () => void; disabled?: boolean; blocker?: string | null; danger?: boolean }) {
   const button = (
@@ -495,7 +500,8 @@ function IconButton({ action, label, icon, onClick, disabled, blocker, danger }:
       aria-label={blocker ? `${label} — impossible : ${blocker}` : label}
       aria-disabled={blocker ? true : undefined}
       disabled={disabled}
-      onClick={blocker ? undefined : onClick}
+      // Action bloquée : la raison s'affiche aussi au toucher (l'info-bulle n'existe pas sur mobile)
+      onClick={blocker ? () => toast.error(`Impossible : ${blocker}`) : onClick}
       className={cn('size-8 disabled:opacity-35 aria-disabled:cursor-not-allowed aria-disabled:opacity-35', danger && 'text-danger')}
     >
       {icon}

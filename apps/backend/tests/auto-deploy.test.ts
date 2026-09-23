@@ -141,4 +141,18 @@ describe.skipIf(!process.env.TEST_QUEUE_DATABASE_URL)('debounce dans la file (Po
     expect(now!.startAfter.getTime()).toBeLessThanOrEqual(Date.now());
     expect(now!.data.reason).toBe('manual');
   });
+
+  it("l'état dit « en cours » dès la demande, avant que le worker la prenne (pas de second clic)", async () => {
+    const admin = (await http.post('/api/auth/local').send({ identifier: 'test@example.com', password: 'test123' })).body.jwt;
+    const auth = { Authorization: `Bearer ${admin}` };
+    await strapi.documents('api::team-member.team-member').create({ data: { first_name: 'Louis', last_name: 'Pasteur', role: 'adjoint', site: siteId } as any });
+    await waiting();
+    // Mise en ligne automatique prévue : en attente, avec son heure
+    const before = (await http.get('/api/deployment/state').set(auth)).body;
+    expect(before).toMatchObject({ state: 'pending' });
+    expect(new Date(before.scheduledAt).getTime()).toBeGreaterThan(Date.now() + 60_000);
+
+    await http.post('/api/deployment/trigger').set(auth);
+    expect((await http.get('/api/deployment/state').set(auth)).body).toMatchObject({ state: 'running', step: 'queued', scheduledAt: null });
+  });
 });

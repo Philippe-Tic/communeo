@@ -46,8 +46,8 @@ export function SessionExpiredDialog({ email }: { email: string }) {
 
   const otherAccount = async () => {
     setOpen(false);
-    client.clear();
     await navigate({ to: '/connexion', search: { retour: href } });
+    client.clear();
   };
 
   return (

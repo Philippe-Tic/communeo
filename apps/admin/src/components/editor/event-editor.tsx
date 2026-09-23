@@ -178,10 +178,11 @@ function EventBody({ slugField }: EditorBodyProps<EventDocument>) {
             <TimeField name="start_time" label="Heure de début" required />
           </div>
           <div className="space-y-3">
-            <DateField name="end_day" label="Fin" required help="Un événement peut durer plusieurs jours." />
+            <DateField name="end_day" label="Fin" required />
             <TimeField name="end_time" label="Heure de fin" required />
           </div>
         </div>
+        <p className="-mt-2 text-[13px] text-secondary">Un événement peut durer plusieurs jours : la fin est préremplie avec le début.</p>
         <div className="grid gap-5 sm:grid-cols-2">
           <TextField name="location" label="Lieu" help="Par exemple « Place de la Mairie »." />
           <TextareaField name="address" label="Adresse" rows={2} />

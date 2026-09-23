@@ -31,6 +31,18 @@ export async function scheduleBuild(data: BuildJobData, delaySeconds: number): P
   return (await buildQueue()).schedule(data, delaySeconds);
 }
 
+/** Demande de mise en ligne qui attend le worker pour ce site ; `null` si aucune (ou file injoignable) */
+export async function waitingBuild(siteDocumentId: string): Promise<{ startAfter: Date; reason: string } | null> {
+  if (!isBuildQueueConfigured()) return null;
+  try {
+    return await (await buildQueue()).waitingFor(siteDocumentId);
+  } catch (error) {
+    // L'état de la mise en ligne reste lisible sans la file (elle n'en est qu'un complément)
+    log.warn('[build-queue] État de la file indisponible', error);
+    return null;
+  }
+}
+
 export async function stopBuildQueue(): Promise<void> {
   if (!queue) return;
   const current = queue;

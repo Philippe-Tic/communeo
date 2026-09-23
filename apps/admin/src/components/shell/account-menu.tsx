@@ -26,8 +26,10 @@ export function AccountMenu({ user, compact }: { user: SessionUser; compact?: bo
   const logout = async () => {
     await endSession().catch(() => undefined);
     auth.setImpersonatedSite(null);
-    client.clear();
+    // Quitter l'administration d'abord : vider le cache avec l'en-tête encore affiché relancerait ses
+    // requêtes, refusées faute de session
     await navigate({ to: '/connexion' });
+    client.clear();
   };
 
   return (

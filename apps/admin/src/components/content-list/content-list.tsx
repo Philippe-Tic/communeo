@@ -224,7 +224,7 @@ export function ContentList<T extends ListRow>({
       <PageHeader title={config.title} description={counters} actions={!empty && newButton('hidden md:inline-flex')} />
 
       {config.tabs && tabOptions && !empty && (
-        <nav aria-label={config.tabs.label} className="-mt-2 mb-4 flex flex-wrap items-center gap-x-1 border-b border-border">
+        <nav aria-label={config.tabs.label} className="-mx-4 -mt-2 mb-4 flex items-center gap-x-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:flex-wrap md:px-0">
           {tabOptions.map((option) => {
             const active = option.value === tab;
             return (
@@ -234,7 +234,7 @@ export function ContentList<T extends ListRow>({
                 aria-current={active ? 'true' : undefined}
                 // Année en nombre : l'adresse reste ?annee=2025 (une chaîne serait mise entre guillemets)
                 onClick={() => onSearchChange({ [config.tabs!.key]: /^\d+$/.test(option.value) ? Number(option.value) : option.value, page: undefined })}
-                className={cn('-mb-px border-b-2 px-3.5 py-2.5 text-sm', active ? 'border-brand font-semibold text-brand' : 'border-transparent text-text hover:text-brand')}
+                className={cn('-mb-px shrink-0 border-b-2 px-3.5 py-2.5 text-sm whitespace-nowrap', active ? 'border-brand font-semibold text-brand' : 'border-transparent text-text hover:text-brand')}
               >
                 {option.label}
                 {option.count !== undefined && (

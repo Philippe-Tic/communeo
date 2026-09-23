@@ -240,7 +240,8 @@ function MemberRow({ member, index, total, onMove, onEdit }: { member: TeamMembe
         {...attributes}
         {...listeners}
         aria-label={`Déplacer ${name}, ${rank(index, total)}`}
-        className="grid size-8 shrink-0 cursor-grab place-items-center rounded-md text-border-input hover:bg-surface-hover hover:text-text active:cursor-grabbing"
+        // Sur mobile, Monter / Descendre suffisent : la place va au nom
+        className="hidden size-8 shrink-0 cursor-grab place-items-center rounded-md text-border-input hover:bg-surface-hover hover:text-text active:cursor-grabbing md:grid"
       >
         <GripVertical aria-hidden="true" className="size-4" />
       </button>
@@ -252,8 +253,8 @@ function MemberRow({ member, index, total, onMove, onEdit }: { member: TeamMembe
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold">{name}</p>
-        <p className="truncate text-[13px] text-secondary">{subtitle(member)}</p>
+        <p className="font-semibold md:truncate">{name}</p>
+        <p className="text-[13px] text-secondary md:truncate">{subtitle(member)}</p>
       </div>
       <Button type="button" variant="ghost" size="icon" className="size-8 disabled:opacity-35" data-action="monter" aria-label={`Monter ${name}`} disabled={index === 0} onClick={() => onMove(index, index - 1, { key: member.documentId, action: 'monter' })}>
         <ArrowUp aria-hidden="true" />

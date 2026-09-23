@@ -74,6 +74,8 @@ export default defineConfig({
   // Aucune page ne traite de formulaire ; le middleware n'accepte ce POST qu'avec un jeton de preview
   // dans le formulaire (src/lib/preview.ts), ce qui remplace la vérification d'origine d'Astro.
   security: { checkOrigin: false },
+  // La barre d'outils d'Astro (dev) s'afficherait dans l'aperçu de l'admin et dans les pages testées
+  devToolbar: { enabled: false },
   trailingSlash: 'never',
   // `actualites.html` plutôt que `actualites/index.html` : les hébergeurs servent la page à `/actualites`
   // sans redirection vers `/actualites/` (adresses des liens, canoniques et sitemap sans slash final)

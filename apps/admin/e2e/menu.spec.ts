@@ -7,6 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { mockApi } from './api';
 import { expectNoViolations } from './axe';
 
+const isTouch = (page: Page) => (page.viewportSize()?.width ?? 1440) < 768;
 const desktopOnly = (page: Page) => test.skip((page.viewportSize()?.width ?? 1440) < 1200, 'aperçu en colonne : 1200 px et plus');
 const entry = (page: Page, label: string) => page.locator('li[data-entry]').filter({ has: page.getByText(label, { exact: true }) }).first();
 const save = (page: Page) => page.getByRole('button', { name: 'Enregistrer', exact: true });
@@ -84,13 +85,21 @@ test.describe('arbre du menu', () => {
     await expect(page.getByRole('button', { name: /^Désindenter « Agenda »/ })).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page.getByText('3 entrées sur 7')).toBeVisible();
+    // Le focus suit « Agenda », sorti du groupe (image suivante) : l'attendre avant d'aller ailleurs
+    await expect(page.getByRole('button', { name: /^Indenter « Agenda »/ })).toBeFocused();
 
     // « Actualités » n'a pas de groupe au-dessus : action bloquée, raison lisible, toujours focalisable
     const blocked = page.getByRole('button', { name: /^Indenter « Actualités »/ });
     await expect(blocked).toHaveAttribute('aria-disabled', 'true');
     await expect(blocked).toHaveAccessibleName(/placez cette entrée juste sous un groupe/);
-    await blocked.focus();
-    await expect(page.getByRole('tooltip')).toContainText('placez cette entrée juste sous un groupe');
+    if (!isTouch(page)) {
+      await blocked.focus();
+      await expect(page.getByRole('tooltip')).toContainText('placez cette entrée juste sous un groupe');
+    }
+    // Activée quand même (toucher sur mobile, où il n'y a pas d'info-bulle) : la raison s'affiche
+    await blocked.click({ force: true });
+    await expect(page.getByRole('alert').filter({ hasText: 'Impossible : Pour indenter, placez cette entrée juste sous un groupe.' })).toBeVisible();
+    await expect(page.getByText('3 entrées sur 7')).toBeVisible();
   });
 
   test('monter / descendre au clavier, annoncé, focus conservé', async ({ page }) => {

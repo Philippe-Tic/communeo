@@ -61,6 +61,11 @@ export interface BuildQueue {
    * Une demande immédiate déjà en attente n'est jamais retardée.
    */
   schedule(data: BuildJobData, delaySeconds: number): Promise<EnqueueResult>;
+  /**
+   * Demande qui attend le worker pour ce site (immédiate ou différée), avec son heure de départ :
+   * entre le clic sur « Mettre en ligne » et le début du build, l'admin l'affiche comme en cours.
+   */
+  waitingFor(siteDocumentId: string): Promise<{ jobId: string; startAfter: Date; reason: BuildReason } | null>;
   stop(): Promise<void>;
 }
 
@@ -120,6 +125,11 @@ export async function createBuildQueue(connectionString: string, options: BuildQ
       // Demande immédiate (ou partant plus tard que prévu) : on n'y touche pas
       if (!DEFERRED_REASONS.has(job.data.reason) || job.startAfter >= startAfter) return { jobId: job.id, status: 'already-queued' };
       return (await reschedule(job.id, startAfter)) ? { jobId: job.id, status: 'postponed' } : send(data, delaySeconds);
+    },
+
+    async waitingFor(siteDocumentId) {
+      const job = await waiting(siteDocumentId);
+      return job ? { jobId: job.id, startAfter: job.startAfter, reason: job.data.reason } : null;
     },
 
     stop: () => boss.stop({ graceful: true, timeout: 30_000 }),

@@ -9,8 +9,11 @@ export type PublicationState = 'idle' | 'pending' | 'running' | 'failed' | 'ok';
 export interface PublicationStatus {
   state: PublicationState;
   pendingCount: number;
-  step: 'checking' | 'rendering' | 'publishing' | 'cache' | null;
+  /** `queued` : demande déposée, le worker ne l'a pas encore prise */
+  step: 'queued' | 'checking' | 'rendering' | 'publishing' | 'cache' | null;
   reference: string | null;
+  /** Mise en ligne automatique prévue (modifications en attente) */
+  scheduledAt?: string | null;
 }
 
 export const publicationQuery = queryOptions({
@@ -24,6 +27,10 @@ export function usePublish() {
   const client = useQueryClient();
   return useMutation({
     mutationFn: () => api<{ status: string }>('/api/deployment/trigger', { method: 'POST' }),
+    // Demande acceptée : « en cours » tout de suite, sans attendre la prochaine lecture de l'état
+    // (le bouton ne doit pas réapparaître entre le clic et le départ du build)
+    onSuccess: () =>
+      client.setQueryData(publicationQuery.queryKey, (current) => (current ? { ...current, state: 'running' as const, step: current.step ?? ('queued' as const) } : current)),
     onSettled: () => client.invalidateQueries({ queryKey: publicationQuery.queryKey }),
   });
 }

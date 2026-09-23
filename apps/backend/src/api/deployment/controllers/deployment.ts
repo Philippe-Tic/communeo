@@ -4,7 +4,7 @@
 
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
-import { isBuildQueueConfigured } from '../../../services/build-queue';
+import { isBuildQueueConfigured, waitingBuild } from '../../../services/build-queue';
 import { listPendingChanges } from '../../../services/pending-changes';
 import { publisher } from '../../../utils/publisher';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
@@ -101,9 +101,12 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       limit: 1,
       populate: { triggered_by: { fields: ['first_name', 'last_name'] } } as any,
     });
-    const pending = await listPendingChanges(site.documentId);
+    const [pending, waiting] = await Promise.all([listPendingChanges(site.documentId), waitingBuild(site.documentId)]);
+    // Demande déposée que le worker n'a pas encore prise : déjà « en cours » pour la personne qui a cliqué
+    // (sinon « Mettre en ligne » réapparaît et invite à cliquer une seconde fois)
+    const queued = !!waiting && waiting.startAfter.getTime() <= Date.now() + 5_000;
 
-    const state = latest?.status === 'building'
+    const state = latest?.status === 'building' || queued
       ? 'running'
       : latest?.status === 'error'
         ? 'failed'
@@ -117,7 +120,9 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
     ctx.body = {
       state,
       pendingCount: pending.length,
-      step: state === 'running' ? (latest as any).step ?? 'checking' : null,
+      step: state === 'running' ? (latest?.status === 'building' ? ((latest as any).step ?? 'checking') : 'queued') : null,
+      // Mise en ligne automatique prévue (modifications en attente)
+      scheduledAt: state === 'pending' && waiting && !queued ? waiting.startAfter.toISOString() : null,
       reference: state === 'failed' ? (latest as any).reference ?? null : null,
       lastDeployment: latest
         ? {

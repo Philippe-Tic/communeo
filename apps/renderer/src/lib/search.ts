@@ -72,7 +72,8 @@ export function initSearch() {
     if (empty) empty.hidden = results.length > 0;
 
     for (const page of shown) {
-      const path = new URL(page.url, location.origin).pathname.replace(/\/$/, '') || '/';
+      // Pagefind donne le chemin du fichier (`/actualites/brocante.html`) : adresse de la page sans `.html`
+      const path = new URL(page.url, location.origin).pathname.replace(/(\/index)?\.html$/, '').replace(/\/$/, '') || '/';
       const item = document.createElement('li');
       const link = document.createElement('a');
       link.href = path;

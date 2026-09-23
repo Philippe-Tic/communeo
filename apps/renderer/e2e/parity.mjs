@@ -42,7 +42,7 @@ for (const theme of themes) {
   const pages = JSON.parse(readFileSync(`${staticDir}pages.json`, 'utf8'));
   let different = 0;
   for (const path of pages) {
-    const expected = normalize(readFileSync(`${staticDir}${path === '/' ? '' : path.slice(1) + '/'}index.html`, 'utf8'));
+    const expected = normalize(readFileSync(`${staticDir}${path === '/' ? 'index' : path.slice(1)}.html`, 'utf8'));
     const actual = normalize(await fetch(`http://127.0.0.1:${port}${path}`).then((r) => r.text()));
     if (expected.length < 500 || !expected.includes('id="contenu"')) {
       different += 1;

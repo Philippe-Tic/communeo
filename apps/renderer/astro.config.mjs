@@ -71,6 +71,9 @@ export default defineConfig({
   output: server ? 'server' : 'static',
   adapter: server ? node({ mode: 'standalone' }) : undefined,
   trailingSlash: 'never',
+  // `actualites.html` plutôt que `actualites/index.html` : les hébergeurs servent la page à `/actualites`
+  // sans redirection vers `/actualites/` (adresses des liens, canoniques et sitemap sans slash final)
+  build: { format: 'file' },
   // Espaces entre éléments en ligne conservés (« <b>Mairie</b> <span>ouverte</span> »)
   compressHTML: true,
   integrations: fixtures ? [fixtureAssets()] : [],

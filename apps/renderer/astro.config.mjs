@@ -70,6 +70,10 @@ export default defineConfig({
   outDir: process.env.OUT_DIR || './dist',
   output: server ? 'server' : 'static',
   adapter: server ? node({ mode: 'standalone' }) : undefined,
+  // Preview : l'admin (autre origine) envoie ses réglages non enregistrés par un POST de formulaire.
+  // Aucune page ne traite de formulaire ; le middleware n'accepte ce POST qu'avec un jeton de preview
+  // dans le formulaire (src/lib/preview.ts), ce qui remplace la vérification d'origine d'Astro.
+  security: { checkOrigin: false },
   trailingSlash: 'never',
   // `actualites.html` plutôt que `actualites/index.html` : les hébergeurs servent la page à `/actualites`
   // sans redirection vers `/actualites/` (adresses des liens, canoniques et sitemap sans slash final)

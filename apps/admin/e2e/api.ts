@@ -35,7 +35,6 @@ export interface MockPage {
   slug: string;
   lead: string | null;
   meta_description: string | null;
-  show_in_menu: boolean;
   scheduled_at: string | null;
   publishedAt: string | null;
   updatedAt: string;
@@ -51,7 +50,6 @@ export const PAGES: Record<string, MockPage> = {
     slug: 'location-salle-des-fetes',
     lead: 'La salle accueille jusqu’à 180 personnes.',
     meta_description: null,
-    show_in_menu: true,
     scheduled_at: null,
     publishedAt: null,
     updatedAt: '2026-09-20T10:00:00.000Z',
@@ -81,7 +79,6 @@ function manyPages(): Record<string, MockPage> {
       slug: title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
       lead: null,
       meta_description: null,
-      show_in_menu: index % 3 === 0,
       scheduled_at: title.startsWith('Inscriptions') ? '2026-11-03T07:00:00.000Z' : null,
       publishedAt: null,
       // Du plus récent (p-1) au plus ancien
@@ -107,10 +104,23 @@ export interface MockOptions {
   pageSet?: 'one' | 'many' | 'none';
   /** Pages dont la publication échoue (champs incomplets) */
   failPublishFor?: string[];
+  /** Menu du site (Site.navigation_config) ; par défaut deux rubriques et un groupe */
+  navigation?: unknown;
+  /** Thème de la commune */
+  theme?: string;
 }
 
+export const NAVIGATION = {
+  main: [
+    { type: 'section', section: 'actualites', label: null },
+    { type: 'group', label: 'Vie pratique', children: [{ type: 'page', pageDocumentId: 'p-salle', label: null }, { type: 'section', section: 'dechets', label: null }] },
+    { type: 'section', section: 'agenda', label: null },
+  ],
+  footer: [{ type: 'external', url: 'https://www.service-public.fr', label: 'Service-Public' }],
+};
+
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [] } = options;
+  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel' } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
@@ -122,13 +132,24 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
+  const site = { documentId: SITE.documentId, updatedAt: '2026-09-22T14:30:00.000Z', theme, comarquage_enabled: true, open_data_enabled: false, navigation_config: structuredClone(navigation) as unknown };
+  // Réglages reçus par le serveur de preview (POST de l'admin)
+  const previewPosts: Array<Record<string, unknown>> = [];
   // Mots de passe acceptés : celui des comptes de test, et ceux choisis par invitation
   const passwords = new Set([PASSWORD]);
 
   // Serveur de preview simulé : la page demandée, avec le numéro de version reçu
   await page.route('http://preview.test/**', (route) => {
     const url = new URL(route.request().url());
-    const html = `<!doctype html><html lang="fr"><head><title>Aperçu</title></head><body><main><h1>Aperçu de ${url.pathname}</h1><p id="version">version ${url.searchParams.get('v')}</p></main></body></html>`;
+    // Réglages non enregistrés : le menu reçu est affiché (libellés des entrées)
+    let menu = '';
+    if (route.request().method() === 'POST') {
+      const form = new URLSearchParams(route.request().postData() ?? '');
+      const settings = JSON.parse(form.get('settings') ?? '{}') as { navigation_config?: { main: Array<{ label?: string | null; section?: string }> } };
+      previewPosts.push({ token: form.get('token'), ...settings });
+      menu = `<nav aria-label="Menu principal"><ul>${(settings.navigation_config?.main ?? []).map((item) => `<li>${item.label ?? item.section ?? 'page'}</li>`).join('')}</ul></nav>`;
+    }
+    const html = `<!doctype html><html lang="fr"><head><title>Aperçu</title></head><body>${menu}<main><h1>Aperçu de ${url.pathname}</h1><p id="version">version ${url.searchParams.get('v')}</p></main></body></html>`;
     return route.fulfill({ contentType: 'text/html; charset=utf-8', body: html });
   });
 
@@ -166,6 +187,14 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
 
     if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
     if (url.pathname === '/api/users/me') return json(USERS[user]);
+    if (url.pathname === `/api/sites/${SITE.documentId}`) {
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: 'PUT site', body });
+        Object.assign(site, body.data, { updatedAt: new Date().toISOString() });
+      }
+      return json({ data: site });
+    }
     if (url.pathname === '/api/user-management/admins') return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
     if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin') return json({ data: SITES });
     const siteMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
@@ -238,6 +267,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   });
 
   return {
+    site,
+    previewPosts,
     published,
     calls,
     bodies,

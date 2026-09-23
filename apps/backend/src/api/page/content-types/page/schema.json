@@ -52,14 +52,6 @@
         "images"
       ]
     },
-    "menu_order": {
-      "type": "integer",
-      "default": 0
-    },
-    "show_in_menu": {
-      "type": "boolean",
-      "default": true
-    },
     "scheduled_at": {
       "type": "datetime"
     },

@@ -24,7 +24,6 @@ export interface PageDocument {
   slug: string;
   lead: string | null;
   meta_description: string | null;
-  show_in_menu: boolean | null;
   scheduled_at: string | null;
   publishedAt: string | null;
   updatedAt: string;
@@ -59,7 +58,6 @@ export type PageValues = {
   slug: string;
   lead: string;
   meta_description: string;
-  show_in_menu: boolean;
   blocks: Block[];
 };
 
@@ -69,7 +67,6 @@ export function pageToValues(page: PageDocument | undefined): PageValues {
     slug: page?.slug ?? '',
     lead: page?.lead ?? '',
     meta_description: page?.meta_description ?? '',
-    show_in_menu: page?.show_in_menu ?? false,
     blocks: page?.blocks ?? [],
   };
 }
@@ -82,7 +79,6 @@ function payload(values: PageValues, extra: Record<string, unknown> = {}) {
       ...(values.slug.trim() ? { slug: values.slug.trim() } : {}),
       lead: values.lead.trim() || null,
       meta_description: values.meta_description.trim() || null,
-      show_in_menu: values.show_in_menu,
       blocks: toApiValue(values.blocks),
       ...extra,
     },

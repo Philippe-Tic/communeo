@@ -893,7 +893,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       }>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> & Schema.Attribute.Private;
-    menu_order: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     meta_description: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 160;
@@ -904,7 +903,6 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 255;
       }>;
-    show_in_menu: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     slug: Schema.Attribute.String &
       Schema.Attribute.Required &

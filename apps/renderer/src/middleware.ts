@@ -7,7 +7,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { getSource } from './lib/content';
 import { resolvePreview } from './lib/preview';
-import { withRequestContext, type RequestContext } from './lib/request-context';
+import { requestContext, withRequestContext, type RequestContext } from './lib/request-context';
 
 const PREVIEW_HEADERS = {
   'X-Robots-Tag': 'noindex, nofollow, noarchive',
@@ -30,6 +30,8 @@ addEventListener('pagehide', () => sessionStorage.setItem(key, String(scrollY)))
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   if (process.env.RENDER_MODE !== 'server') return next();
+  // Déjà dans une requête autorisée (réécriture interne d'Astro) : rien à revérifier
+  if (requestContext()) return next();
 
   const decision = await resolvePreview(request);
   if (decision.kind === 'deny') {
@@ -38,6 +40,9 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
       headers: { ...PREVIEW_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' },
     });
   }
+  if (decision.kind === 'invalid') {
+    return new Response(decision.message, { status: 400, headers: { ...PREVIEW_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' } });
+  }
   if (decision.kind === 'redirect') {
     const headers = new Headers({ ...PREVIEW_HEADERS, Location: decision.location });
     for (const value of decision.cookies) headers.append('Set-Cookie', value);
@@ -45,10 +50,11 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   }
 
   const { access } = decision;
-  const context: RequestContext = { siteDocumentId: access.siteDocumentId, theme: access.theme };
+  const context: RequestContext = { siteDocumentId: access.siteDocumentId, theme: access.theme, settings: access.settings };
   return withRequestContext(context, async () => {
     // Thème demandé, sinon celui forcé pour le serveur (tests de parité), sinon celui de la commune
     context.theme ??= process.env.THEME || (await getSource().site()).theme;
+    // POST de réglages : les pages Astro se rendent pour toute méthode et ne lisent aucun formulaire
     const response = await next();
     const headers = new Headers(response.headers);
     let body: ArrayBuffer | string = await response.arrayBuffer();
@@ -56,6 +62,7 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
       body = new TextDecoder().decode(body).replace('</body>', `${KEEP_SCROLL}</body>`);
     }
     for (const [name, value] of Object.entries(PREVIEW_HEADERS)) headers.set(name, value);
+    for (const value of decision.cookies ?? []) headers.append('Set-Cookie', value);
     return new Response(body, { status: response.status, statusText: response.statusText, headers });
   });
 });

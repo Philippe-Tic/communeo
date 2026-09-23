@@ -190,7 +190,7 @@ test.describe('actions', () => {
     await page.getByRole('button', { name: 'Actions pour « Location de la salle des fêtes »' }).click();
     await page.getByRole('menuitem', { name: 'Dupliquer' }).click();
     await expect(page).toHaveURL(/\/pages\/p-nouvelle$/);
-    expect(bodies.at(-1)).toMatchObject({ call: 'POST draft', body: { data: { title: 'Location de la salle des fêtes (copie)', show_in_menu: false } } });
+    expect(bodies.at(-1)).toMatchObject({ call: 'POST draft', body: { data: { title: 'Location de la salle des fêtes (copie)' } } });
     expect(bodies.at(-1)!.body.data).not.toHaveProperty('slug');
   });
 

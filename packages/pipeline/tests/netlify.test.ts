@@ -15,13 +15,13 @@ interface Call {
   contentType?: string;
 }
 
-type Handler = (call: Call) => { status?: number; body?: unknown } | undefined;
+type Handler = (call: Call) => { status?: number; body?: unknown; headers?: Record<string, string> } | undefined;
 
 /** Fausse API Netlify : chaque requête est journalisée puis confiée au handler. */
 function fakeNetlify(handler: Handler) {
   const calls: Call[] = [];
   const fetch: typeof globalThis.fetch = (async (url: string, init: RequestInit = {}) => {
-    const headers = init.headers as Record<string, string>;
+    const headers = (init.headers ?? {}) as Record<string, string>;
     const call: Call = {
       method: init.method ?? 'GET',
       path: url.replace('https://api.netlify.com/api/v1', ''),
@@ -31,7 +31,7 @@ function fakeNetlify(handler: Handler) {
     calls.push(call);
     const res = handler(call) ?? { status: 404, body: 'Not Found' };
     const text = res.body === undefined ? '' : typeof res.body === 'string' ? res.body : JSON.stringify(res.body);
-    return new Response(text || null, { status: res.status ?? 200 });
+    return new Response(text || null, { status: res.status ?? 200, headers: res.headers });
   }) as typeof globalThis.fetch;
   return { calls, fetch };
 }
@@ -193,13 +193,24 @@ describe('domaines', () => {
       ok: false,
       errors: ['Enregistrement A non configuré ou ne pointe pas vers 75.2.60.5'],
     });
-    expect(api.calls).toHaveLength(0);
+    // Seule la vérification HTTP a eu lieu : aucun appel à l'API Netlify
+    expect(api.calls.map((c) => [c.method, c.path])).toEqual([['HEAD', 'http://mairie-lyon.fr/']]);
+    api.calls.length = 0;
 
     expect(await p.verifyDomain(hosted, 'www.mairie-lyon.fr')).toEqual({ ok: true, errors: [] });
     expect(api.calls.map((c) => [c.method, c.path, c.body])).toEqual([
       ['POST', '/sites/site-lyon/ssl', undefined],
       ['PATCH', '/sites/site-lyon', { force_ssl: true }],
     ]);
+  });
+
+  it('accepte un domaine servi par Netlify sans CNAME (DNS Netlify, ALIAS)', async () => {
+    const answer = (server: string | null): Handler => ({ path }) =>
+      path.startsWith('http://') ? { status: 301, body: '', ...(server ? { headers: { server } } : {}) } : { body: {} };
+    const verify = (server: string | null) => publisher(answer(server), { resolveCname: async () => [] }).p.verifyDomain(hosted, 'demo.communeo.fr');
+    expect(await verify('Netlify')).toEqual({ ok: true, errors: [] });
+    expect((await verify('nginx')).ok).toBe(false);
+    expect((await verify(null)).ok).toBe(false);
   });
 
   it("traite un nom absent du DNS comme non pointé", async () => {

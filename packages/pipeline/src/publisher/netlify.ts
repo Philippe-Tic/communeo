@@ -181,9 +181,13 @@ export class NetlifyPublisher implements SitePublisher {
   async verifyDomain(site: PublisherSite, domain: string): Promise<DomainCheck> {
     const hostId = requireHostId(site);
     const apex = isApexDomain(domain);
-    const pointed = apex
-      ? (await lookup(() => this.resolve4(domain))).includes(NETLIFY_LOAD_BALANCER_IP)
-      : (await lookup(() => this.resolveCname(domain))).some((record) => record.endsWith(DNS_SUFFIX));
+    const pointed =
+      (apex
+        ? (await lookup(() => this.resolve4(domain))).includes(NETLIFY_LOAD_BALANCER_IP)
+        : (await lookup(() => this.resolveCname(domain))).some((record) => record.replace(/\.$/, '').endsWith(DNS_SUFFIX))) ||
+      // DNS Netlify, ALIAS ou CNAME « aplati » : pas d'enregistrement reconnaissable, mais le domaine répond
+      // par Netlify. Netlify ne rattachant un domaine qu'à un seul site, c'est le nôtre.
+      (await this.servedByNetlify(domain));
 
     if (!pointed) {
       return {
@@ -233,6 +237,16 @@ export class NetlifyPublisher implements SitePublisher {
   }
 
   // Interne
+
+  /** Le domaine répond-il par Netlify ? (HTTP simple : le certificat n'existe peut-être pas encore) */
+  private async servedByNetlify(domain: string): Promise<boolean> {
+    try {
+      const response = await this.fetch(`http://${domain}/`, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(5000) });
+      return (response.headers.get('server') ?? '').toLowerCase() === 'netlify';
+    } catch {
+      return false;
+    }
+  }
 
   /** L'adresse *.netlify.app redirige vers le domaine personnalisé (règle en tête de `_redirects`). */
   private async redirectDefaultDomain(dir: string, host: HostSite, domain: string): Promise<void> {

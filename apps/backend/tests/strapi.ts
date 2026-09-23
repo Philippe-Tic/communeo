@@ -35,6 +35,7 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     QUEUE_DATABASE_URL: '',
     WORKER_SECRET: 'test-worker-secret',
     STRAPI_API_TOKEN: 'test-build-token',
+    PREVIEW_API_TOKEN: 'test-preview-token',
     CRON_ENABLED: 'false',
     STRAPI_TELEMETRY_DISABLED: 'true',
     STRAPI_DISABLE_UPDATE_NOTIFICATION: 'true',

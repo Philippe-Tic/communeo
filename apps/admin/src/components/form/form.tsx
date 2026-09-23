@@ -110,6 +110,9 @@ export function Form<T extends FieldValues>({
 }) {
   const errors = flattenErrors(form.formState.errors);
   const submit = (event: FormEvent<HTMLFormElement>) => {
+    // Une fenêtre (portail) peut contenir son propre formulaire : React propage l'envoi à travers les
+    // portails jusqu'au formulaire parent (« Programmer » publiait aussi le contenu). Il s'arrête ici.
+    event.stopPropagation();
     // Les erreurs sont annoncées par le récapitulatif : pas de focus automatique sur le premier champ
     void form.handleSubmit(onSubmit)(event);
   };

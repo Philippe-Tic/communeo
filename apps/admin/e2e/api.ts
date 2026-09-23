@@ -396,6 +396,68 @@ export interface MockOptions {
   messageSet?: 'some' | 'none';
   /** L'e-mail de réponse ne part pas (502) */
   failReply?: boolean;
+  /** Associations : 3 publiées, 2 propositions (défaut) ou aucune */
+  associationSet?: 'some' | 'none';
+  /** L'e-mail de refus ne part pas (`emailed: false`) */
+  failRejectEmail?: boolean;
+}
+
+export type MockAssociation = Record<string, unknown> & { documentId: string; name: string; status: string };
+
+function associations(): MockAssociation[] {
+  const base = (id: string, fields: Record<string, unknown>): MockAssociation => ({
+    documentId: id,
+    description: null,
+    contact_name: null,
+    contact_email: null,
+    contact_phone: null,
+    website: null,
+    address: null,
+    logo: null,
+    status: 'published',
+    submission_source: 'manual',
+    submitted_by_name: null,
+    submitted_by_email: null,
+    reviewed_at: null,
+    rejection_reason: null,
+    createdAt: '2026-03-01T10:00:00.000Z',
+    name: '',
+    category: 'autre',
+    ...fields,
+  });
+  return [
+    base('as-comite', {
+      name: 'Comité des fêtes',
+      category: 'culture',
+      contact_name: 'Claire Martin',
+      contact_email: 'comite@example.fr',
+      contact_phone: '02 00 00 00 01',
+      website: 'https://comite.example.fr',
+    }),
+    base('as-amis', { name: 'Les Amis du Vieux Bourg', category: 'culture', contact_email: 'amis@example.fr' }),
+    base('as-restos', { name: 'Restos du cœur', category: 'social' }),
+    base('as-jardins', {
+      name: 'Les Jardins partagés de la Loire',
+      category: 'environnement',
+      status: 'pending',
+      submission_source: 'public_form',
+      description: 'Ateliers de jardinage, compost collectif.',
+      contact_phone: '06 00 00 00 02',
+      address: '12 chemin des Vignes',
+      submitted_by_name: 'Hélène Garnier',
+      submitted_by_email: 'h.garnier@example.org',
+      createdAt: '2026-09-19T08:00:00.000Z',
+    }),
+    base('as-petanque', {
+      name: 'Club de pétanque saint-aubinois',
+      category: 'sport',
+      status: 'pending',
+      submission_source: 'public_form',
+      submitted_by_name: 'René Dupont',
+      submitted_by_email: null,
+      createdAt: '2026-09-17T08:00:00.000Z',
+    }),
+  ];
 }
 
 export type MockMessage = Record<string, unknown> & {
@@ -601,6 +663,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     failExport = false,
     messageSet = 'some',
     failReply = false,
+    associationSet = 'some',
+    failRejectEmail = false,
   } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
@@ -618,6 +682,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const team = emptyTeam ? [] : (structuredClone(TEAM) as Array<Record<string, unknown>>);
   const newsletter = subscriberSet === 'none' ? [] : subscribers();
   const inbox = messageSet === 'none' ? [] : messages();
+  const directory = associationSet === 'none' ? [] : associations();
   let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
   const publishedByType: Record<ContentType, Set<string>> = {
@@ -957,6 +1022,65 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    if (url.pathname === '/api/associations' && method === 'GET') {
+      const statusFilter = url.searchParams.get('filters[status][$eq]');
+      const q = url.searchParams.get('filters[name][$containsi]')?.toLowerCase();
+      const [field, order] = (url.searchParams.get('sort[0]') ?? 'name:asc').split(':') as [string, string];
+      const rows = directory
+        .filter((item) => !statusFilter || item.status === statusFilter)
+        .filter((item) => !q || item.name.toLowerCase().includes(q))
+        .sort((a, b) => String(a[field]).localeCompare(String(b[field]), 'fr') * (order === 'desc' ? -1 : 1));
+      const pageNumber = Number(url.searchParams.get('pagination[page]') ?? 1);
+      const pageSize = Number(url.searchParams.get('pagination[pageSize]') ?? 25);
+      return json({
+        data: rows.slice((pageNumber - 1) * pageSize, pageNumber * pageSize),
+        meta: {
+          pagination: { page: pageNumber, pageSize, total: rows.length, pageCount: Math.ceil(rows.length / pageSize) },
+        },
+      });
+    }
+    if (url.pathname === '/api/associations' && method === 'POST') {
+      const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+      bodies.push({ call: 'POST associations', body });
+      const created: MockAssociation = {
+        documentId: `as-${directory.length + 1}`,
+        createdAt: new Date().toISOString(),
+        ...(body.data as { name: string; status: string }),
+        logo: null,
+      };
+      directory.push(created);
+      return json({ data: created }, 201);
+    }
+    const associationMatch = /^\/api\/associations\/([^/]+)(?:\/(publish|reject))?$/.exec(url.pathname);
+    if (associationMatch) {
+      const item = directory.find((entry) => entry.documentId === associationMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      const now = new Date().toISOString();
+      if (associationMatch[2] === 'publish') {
+        Object.assign(item, { status: 'published', reviewed_at: now, rejection_reason: null });
+        return json({ data: item });
+      }
+      if (associationMatch[2] === 'reject') {
+        const { reason } = route.request().postDataJSON() as { reason: string };
+        Object.assign(item, { status: 'rejected', reviewed_at: now, rejection_reason: reason });
+        return json({ data: item, emailed: !!item.submitted_by_email && !failRejectEmail });
+      }
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: 'PUT associations', body });
+        Object.assign(item, body.data, {
+          logo: body.data.logo
+            ? { id: body.data.logo, name: 'logo.png', ext: '.png', size: 12, url: '/uploads/logo.png' }
+            : null,
+        });
+        return json({ data: item });
+      }
+      if (method === 'DELETE') {
+        directory.splice(directory.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
+    }
     const messageMatch = /^\/api\/contact-submissions\/([^/]+)(?:\/(open|reply))?$/.exec(url.pathname);
     if (messageMatch) {
       const item = inbox.find((entry) => entry.documentId === messageMatch[1]);
@@ -1025,6 +1149,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     team,
     newsletter,
     inbox,
+    directory,
     stores,
     publishedByType,
     previewPosts,

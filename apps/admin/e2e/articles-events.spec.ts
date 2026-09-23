@@ -70,6 +70,9 @@ test.describe('actualités', () => {
     await expect(dialog).toBeHidden();
     await expect(page.getByText(/^Programmé le .* à 8h$/)).toBeVisible();
     expect(writes(bodies, 'articles').at(-1)!.body.data.scheduled_at).toMatch(/T0[67]:00:00\.000Z$/);
+    // Programmer ne publie pas : l'envoi du formulaire de la fenêtre n'atteint pas celui de l'éditeur
+    expect(writes(bodies, 'articles').map((entry) => entry.call)).toEqual(['PUT draft']);
+    await expect(page.getByText('Publié', { exact: true })).toHaveCount(0);
   });
 });
 

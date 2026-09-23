@@ -88,3 +88,4 @@ export const formatFileType = (ext: string | null | undefined) => (ext ?? '').re
 
 /** Libellé de téléchargement accessible : « PDF – 1,2 Mo » */
 export const formatFileLabel = (ext: string | null | undefined, sizeInKb: number) => `${formatFileType(ext)} – ${formatFileSize(sizeInKb)}`;
+export * from './rgpd';

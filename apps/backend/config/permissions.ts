@@ -30,6 +30,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('media-item', ['upload']),
     // Données des habitants : pas de création depuis l'admin (formulaires publics)
     ...crud('contact-submission', ['find', 'findOne', 'update', 'delete']),
+    ...custom('contact-submission', ['reply', 'open']),
     ...crud('newsletter-subscriber', ['find', 'findOne', 'update', 'delete']),
     ...custom('newsletter-subscriber', ['stats']),
     // Son propre site : lecture et mise à jour uniquement

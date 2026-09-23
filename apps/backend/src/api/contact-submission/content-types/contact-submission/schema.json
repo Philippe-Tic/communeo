@@ -39,13 +39,26 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["general", "urbanisme", "etat-civil", "voirie", "associations", "rgpd", "autre"],
+      "enum": [
+        "general",
+        "urbanisme",
+        "etat-civil",
+        "voirie",
+        "associations",
+        "rgpd",
+        "autre"
+      ],
       "required": true,
       "default": "general"
     },
     "status": {
       "type": "enumeration",
-      "enum": ["received", "in_progress", "resolved", "closed"],
+      "enum": [
+        "received",
+        "in_progress",
+        "resolved",
+        "closed"
+      ],
       "required": true,
       "default": "received"
     },
@@ -69,7 +82,10 @@
     "attachments": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": ["images", "files"]
+      "allowedTypes": [
+        "images",
+        "files"
+      ]
     },
     "site": {
       "type": "relation",
@@ -77,6 +93,12 @@
       "target": "api::site.site",
       "inversedBy": "contact_submissions",
       "required": true
+    },
+    "opened_at": {
+      "type": "datetime"
+    },
+    "history": {
+      "type": "json"
     }
   }
 }

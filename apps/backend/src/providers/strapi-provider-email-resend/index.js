@@ -23,7 +23,8 @@ module.exports = {
     return {
       async send(options) {
         if (logOnly) {
-          global.strapi?.log.info(`[email] À : ${options.to} — ${options.subject}\n${options.text ?? ''}`);
+          const files = options.attachments?.length ? `\n[pièces jointes : ${options.attachments.map((file) => file.filename).join(', ')}]` : '';
+          global.strapi?.log.info(`[email] À : ${options.to} — ${options.subject}\n${options.text ?? ''}${files}`);
           return;
         }
         if (!apiKey) {
@@ -45,6 +46,8 @@ module.exports = {
         }
         if (text) body.text = text;
         if (html) body.html = html;
+        // Pièces jointes : { filename, content (base64) } ou { filename, path (adresse publique) }
+        if (options.attachments?.length) body.attachments = options.attachments;
 
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST',

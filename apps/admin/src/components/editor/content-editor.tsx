@@ -239,11 +239,12 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
         </Button>
         <div className="min-w-0 flex-1 max-md:basis-[calc(100%-56px)]">
           <p className="text-xs text-secondary">{config.section.label}</p>
-          <div className="flex min-w-0 items-center gap-2">
-            <h1 ref={heading} className="truncate text-[15px] leading-tight font-semibold tracking-normal outline-none">
+          {/* Le statut ne se comprime jamais : il passe sous le titre s'il manque de place (mobile) */}
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+            <h1 ref={heading} className="max-w-full truncate text-[15px] leading-tight font-semibold tracking-normal outline-none">
               {title}
             </h1>
-            {status}
+            <span className="shrink-0 whitespace-nowrap">{status}</span>
           </div>
         </div>
         <SaveStatus state={autosave.state} onRetry={() => void autosave.flush()} />

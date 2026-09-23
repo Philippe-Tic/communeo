@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { AlertsScreen } from '@/components/alerts/alerts-screen';
 
-export const Route = createFileRoute('/_app/alertes')({
-  component: () => <ComingSoon title="Alertes et perturbations" ticket={141} />,
-});
+export const Route = createFileRoute('/_app/alertes')({ component: AlertsScreen });

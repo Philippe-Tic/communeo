@@ -189,7 +189,7 @@ Remplir le `.env` avec :
 - Les secrets générés ci-dessus
 - Ton domaine (`DOMAIN=cms.tondomaine.fr`)
 - Ton token Netlify (`NETLIFY_TOKEN=...`)
-- Le domaine de la preview des brouillons (`PREVIEW_DOMAIN=preview.tondomaine.fr`, certificat : `certbot certonly --webroot -w /var/www/certbot -d preview.tondomaine.fr`) `PREVIEW_API_TOKEN` (comme `STRAPI_API_TOKEN`, affiché dans les logs au premier démarrage de Strapi) et le secret des jetons de preview (`PREVIEW_SECRET=$(openssl rand -hex 32)`)
+- Le domaine de la preview des brouillons (`PREVIEW_DOMAIN=preview.tondomaine.fr`, certificat : `certbot certonly --webroot -w /var/www/certbot -d preview.tondomaine.fr`) `PREVIEW_API_TOKEN` (comme `STRAPI_API_TOKEN`, affiché dans les logs au premier démarrage de Strapi) et le secret des jetons de preview (`PREVIEW_SECRET=$(openssl rand -hex 32)`). L'administration et la preview doivent partager le même domaine (`app.tondomaine.fr` et `preview.tondomaine.fr`) : le cookie de la preview est ainsi envoyé dans le panneau d'aperçu de l'éditeur
 - Un secret partagé Strapi ⇄ worker de build (`WORKER_SECRET=$(openssl rand -hex 32)`) : le service `worker` du docker-compose construit et publie les sites
 - Les identifiants SMTP Resend (voir Phase 4)
 - Laisser `STRAPI_API_TOKEN=` vide pour l'instant (sera rempli à l'étape 3.7)

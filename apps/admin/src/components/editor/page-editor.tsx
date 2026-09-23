@@ -5,7 +5,7 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Check, Clock, ExternalLink, Image as ImageIcon, MoreHorizontal, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Clock, ExternalLink, Eye, Image as ImageIcon, Maximize2, MoreHorizontal, PanelRightOpen, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -21,9 +21,11 @@ import { ApiError } from '@/lib/api';
 import { deletePage, pageQuery, pageToValues, publishPage, savePageDraft, schedulePage, type PageDraft, type PageValues } from '@/lib/content-api';
 import { formatShortParisDateTime } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
+import { previewQuery } from '@/lib/preview';
 import { publicationQuery } from '@/lib/publication';
-import { sessionQuery } from '@/lib/session';
+import { sessionQuery, themeName } from '@/lib/session';
 import { cn } from '@/lib/utils';
+import { localStorageGet, localStorageSet, PreviewDrawer, PreviewFullscreen, PreviewView, ResizeHandle, type PreviewState } from './preview-panel';
 import { SaveStatus } from './save-status';
 import { ScheduleDialog } from './schedule-dialog';
 import { useAutosave } from './use-autosave';
@@ -63,12 +65,18 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
   const [documentId, setDocumentId] = useState(initialId);
   const [page, setPage] = useState<PageDraft | undefined>(initial);
   const [justPublished, setJustPublished] = useState(false);
-  const [dialog, setDialog] = useState<'schedule' | 'delete' | null>(null);
+  const [dialog, setDialog] = useState<'schedule' | 'delete' | 'preview-drawer' | 'preview-fullscreen' | null>(null);
+  // Preview : rechargée après chaque enregistrement, panneau masquable et redimensionnable (mémorisés)
+  const [version, setVersion] = useState(0);
+  const [previewShown, setPreviewShown] = useState(() => localStorageGet('communeo.preview.shown') !== 'false');
+  // 520 px par défaut, 420 px sous 1440 px (écran 1366 des maquettes)
+  const [previewWidth, setPreviewWidth] = useState(() => Number(localStorageGet('communeo.preview.width')) || (window.innerWidth < 1440 ? 420 : 520));
   const slugTouched = useRef(!!initial?.published);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const remember = (doc: PageDraft) => {
     setPage(doc);
+    setVersion((value) => value + 1);
     client.setQueryData(pageQuery(doc.documentId).queryKey, doc);
     if (!id.current) {
       id.current = doc.documentId;
@@ -140,6 +148,20 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
     await navigate({ to: '/pages' });
   };
 
+  const preview = useQuery(previewQuery(documentId ? { type: 'page', documentId } : null, { slug: page?.slug }));
+  const previewState: PreviewState = {
+    url: preview.data?.url,
+    unavailable: !documentId ? "L'aperçu s'affichera après le premier enregistrement." : preview.isError ? 'Aperçu indisponible pour le moment.' : undefined,
+    version,
+    title,
+    themeName: themeName(session?.site?.theme),
+  };
+  const reloadPreview = () => setVersion((value) => value + 1);
+  const togglePreview = (shown: boolean) => {
+    setPreviewShown(shown);
+    localStorageSet('communeo.preview.shown', String(shown));
+  };
+
   const scheduledAt = page?.scheduled_at ? new Date(page.scheduled_at) : null;
   const status = scheduledAt ? (
     <StatusBadge tone="info" icon={<Clock aria-hidden="true" className="size-3" />}>
@@ -179,6 +201,26 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
         <SaveStatus state={autosave.state} onRetry={() => void autosave.flush()} />
         {/* Actions : dans la barre sur ordinateur, fixées en bas de l'écran sur mobile */}
         <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-surface p-3 md:static md:z-auto md:border-0 md:bg-transparent md:p-0 dark:bg-sidebar md:dark:bg-transparent">
+        {/* Aperçu : plein écran sur mobile, tiroir sous 1200 px, panneau (ou plein écran) au-delà */}
+        <Button type="button" variant="secondary" className="max-md:h-11 max-md:flex-1 md:hidden" onClick={() => setDialog('preview-fullscreen')}>
+          <Eye aria-hidden="true" />
+          Aperçu
+        </Button>
+        <Button type="button" variant="tertiary" className="hidden md:max-[1199px]:inline-flex" onClick={() => setDialog('preview-drawer')}>
+          <Eye aria-hidden="true" />
+          Aperçu
+        </Button>
+        {previewShown ? (
+          <Button type="button" variant="tertiary" className="hidden min-[1200px]:inline-flex" onClick={() => setDialog('preview-fullscreen')}>
+            <Maximize2 aria-hidden="true" />
+            Aperçu plein écran
+          </Button>
+        ) : (
+          <Button type="button" variant="tertiary" className="hidden min-[1200px]:inline-flex" onClick={() => togglePreview(true)}>
+            <PanelRightOpen aria-hidden="true" />
+            Afficher l'aperçu
+          </Button>
+        )}
         <Button type="button" variant="secondary" className="max-md:h-11 max-md:flex-1" onClick={() => setDialog('schedule')}>
           <Clock aria-hidden="true" />
           Programmer
@@ -220,7 +262,9 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
         </div>
       </div>
 
-      <div className="max-w-[760px] space-y-6 px-4 pt-6 pb-28 md:px-8 md:py-7">
+      <div className="flex items-start">
+      <div className="min-w-0 flex-1">
+      <div className="mx-auto max-w-[760px] space-y-6 px-4 pt-6 pb-28 md:px-8 md:py-7">
         <FormSection title="En-tête" fields={['title', 'lead', 'slug', 'show_in_menu']}>
           <TextField name="title" label="Titre" required inputProps={{ className: 'h-12 text-lg font-semibold md:h-11' }} />
           <TextareaField name="lead" label="Chapô" rows={2} help="Une ou deux phrases qui résument la page." />
@@ -256,7 +300,27 @@ export function PageEditor({ documentId: initialId, initial, onCreated }: { docu
           </div>
         </details>
       </div>
+      </div>
+      {previewShown && (
+        <div className="sticky top-[117px] hidden h-[calc(100dvh-117px)] min-[1200px]:flex" style={{ width: previewWidth }}>
+          <ResizeHandle
+            width={previewWidth}
+            min={380}
+            max={900}
+            onChange={(width) => {
+              setPreviewWidth(width);
+              localStorageSet('communeo.preview.width', String(width));
+            }}
+          />
+          <aside aria-label="Aperçu du brouillon" className="min-w-0 flex-1 bg-surface dark:bg-sidebar">
+            <PreviewView state={previewState} onReload={reloadPreview} onFullscreen={() => setDialog('preview-fullscreen')} onHide={() => togglePreview(false)} />
+          </aside>
+        </div>
+      )}
+      </div>
 
+      <PreviewDrawer open={dialog === 'preview-drawer'} onOpenChange={(open) => setDialog(open ? 'preview-drawer' : null)} state={previewState} onReload={reloadPreview} onFullscreen={() => setDialog('preview-fullscreen')} />
+      <PreviewFullscreen open={dialog === 'preview-fullscreen'} onOpenChange={(open) => setDialog(open ? 'preview-fullscreen' : null)} state={previewState} onReload={reloadPreview} />
       <ScheduleDialog open={dialog === 'schedule'} onOpenChange={(open) => setDialog(open ? 'schedule' : null)} onSchedule={schedule} />
       <ConfirmDialog
         open={dialog === 'delete'}

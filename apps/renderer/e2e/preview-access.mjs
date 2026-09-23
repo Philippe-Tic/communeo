@@ -17,7 +17,7 @@ const base = `http://127.0.0.1:${port}`;
 rmSync(dir, { recursive: true, force: true });
 execSync('pnpm astro build', { stdio: ['ignore', 'ignore', 'inherit'], env: { ...process.env, RENDER_MODE: 'server', DATA_SOURCE: 'strapi', OUT_DIR: dir } });
 const server = spawn('node', [`${dir}server/entry.mjs`], {
-  env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), RENDER_MODE: 'server', DATA_SOURCE: 'strapi', CONTENT_STATUS: 'draft', PREVIEW_SECRET: secret, STRAPI_URL: 'http://127.0.0.1:9', STRAPI_TOKEN: 'x' },
+  env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), RENDER_MODE: 'server', DATA_SOURCE: 'strapi', CONTENT_STATUS: 'draft', PREVIEW_SECRET: secret, PREVIEW_FRAME_ANCESTORS: 'https://admin.test', STRAPI_URL: 'http://127.0.0.1:9', STRAPI_TOKEN: 'x' },
   stdio: 'ignore',
 });
 for (let i = 0; i < 50; i += 1) {
@@ -46,6 +46,8 @@ try {
   const setCookie = entry.headers.get('set-cookie') ?? '';
   check('jeton valide : redirection sans le jeton', entry.status === 302 && entry.headers.get('location') === '/actualites/brocante', `(${entry.status} ${entry.headers.get('location')})`);
   check('jeton rangé dans un cookie HttpOnly', /communeo_preview=[^;]+;.*HttpOnly/.test(setCookie), setCookie);
+
+  check("affichable seulement dans l'administration (frame-ancestors)", (anonymous.headers.get('content-security-policy') ?? '').includes("frame-ancestors 'self' https://admin.test"), anonymous.headers.get('content-security-policy') ?? '');
 
   const withCookie = await get('/', { cookie: `communeo_preview=${encodeURIComponent(valid)}` });
   check('avec le cookie : accès accordé (le contenu vient ensuite de Strapi)', withCookie.status !== 401, `(${withCookie.status})`);

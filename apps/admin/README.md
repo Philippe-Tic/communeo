@@ -40,3 +40,13 @@ Chaque écran commence par `<PageHeader title=…>` (titre h1, titre du document
 - Texte riche : `RichTextField` (TipTap limité aux nœuds acceptés par core : un H1 ou du HTML collé est ramené à H2 / H3,
   paragraphes, listes, gras, italique, liens sûrs). Barre d'outils à une tabulation (flèches), Ctrl+K pour les liens.
 - Page de référence : `/editeur-de-blocs`. Blocs Image, Galerie et Documents : modifiables avec la médiathèque (#142).
+
+## Éditeur de contenu et preview (`src/components/editor`)
+
+- `/pages/$documentId` (`nouvelle` pour créer) : `PageEditor` — enregistrement automatique (`useAutosave`, ~5 s), Publier / Programmer
+  (heure de Paris, `lib/dates.ts`), suppression. Écriture vers Strapi : `lib/content-api.ts` (blocs sans `id`, médias par identifiant).
+- Preview : jeton signé (`lib/preview.ts`, `POST /api/preview/token`), iframe du vrai serveur de preview (`PreviewView`),
+  largeurs 390 / 768 / 1280 réduites pour tenir, rechargée après chaque enregistrement (paramètre `v`), panneau
+  redimensionnable (`role="separator"`) et masquable à partir de 1200 px, tiroir en dessous, plein écran sur mobile.
+  En développement : lancer le renderer en mode serveur (`PREVIEW_SECRET`, `PREVIEW_FRAME_ANCESTORS=http://localhost:5173`)
+  et Strapi avec le même `PREVIEW_SECRET` et `PREVIEW_URL`.

@@ -56,10 +56,12 @@ export interface MockOptions {
   loggedIn?: boolean;
   /** Réponse d'erreur à l'enregistrement des pages */
   failPageSaves?: boolean;
+  /** Serveur de preview non configuré (503 sur le jeton) */
+  previewUnavailable?: boolean;
 }
 
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false } = options;
+  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; body: { data: Record<string, unknown> } }> = [];
   let state = publication;
@@ -67,6 +69,13 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const published = new Set<string>(['p-salle']);
 
   if (loggedIn) await page.addInitScript(() => localStorage.setItem('communeo.jwt', 'jeton-de-test'));
+
+  // Serveur de preview simulé : la page demandée, avec le numéro de version reçu
+  await page.route('http://preview.test/**', (route) => {
+    const url = new URL(route.request().url());
+    const html = `<!doctype html><html lang="fr"><head><title>Aperçu</title></head><body><main><h1>Aperçu de ${url.pathname}</h1><p id="version">version ${url.searchParams.get('v')}</p></main></body></html>`;
+    return route.fulfill({ contentType: 'text/html; charset=utf-8', body: html });
+  });
 
   await page.route('**/api/**', async (route) => {
     const url = new URL(route.request().url());
@@ -115,6 +124,12 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         delete pages[id];
         return route.fulfill({ status: 204 });
       }
+    }
+    if (url.pathname === '/api/preview/token' && method === 'POST') {
+      if (previewUnavailable) return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
+      const body = route.request().postDataJSON() as { documentId?: string };
+      const slug = (body.documentId && pages[body.documentId]?.slug) ?? '';
+      return json({ url: `http://preview.test/${slug}?token=jeton-signe`, expiresAt: new Date(Date.now() + 1_800_000).toISOString() });
     }
     if (url.pathname === '/api/contact-submissions') {
       return json({ data: [], meta: { pagination: { total: unread, page: 1, pageSize: 1, pageCount: unread } } });

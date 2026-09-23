@@ -36,6 +36,7 @@ export function BlockCatalog({ open, position, onSelect, onClose }: { open: bool
                   <button
                     type="button"
                     aria-disabled={!type.available || undefined}
+                    aria-labelledby={`${descriptionId}-nom`}
                     aria-describedby={descriptionId}
                     onClick={() => type.available && onSelect(type.create())}
                     className="flex h-full w-full items-start gap-3 rounded-[10px] border border-border p-3 text-left hover:border-brand hover:bg-surface-hover aria-disabled:cursor-not-allowed aria-disabled:opacity-60 aria-disabled:hover:border-border aria-disabled:hover:bg-transparent"
@@ -44,7 +45,9 @@ export function BlockCatalog({ open, position, onSelect, onClose }: { open: bool
                       <Icon className="size-4" />
                     </span>
                     <span>
-                      <span className="block font-semibold">{type.label}</span>
+                      <span id={`${descriptionId}-nom`} className="block font-semibold">
+                        {type.label}
+                      </span>
                       <span id={descriptionId} className="mt-0.5 block text-[13px] text-secondary">
                         {type.available ? type.description : `${type.description} Arrive avec la médiathèque.`}
                       </span>

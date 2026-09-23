@@ -17,6 +17,8 @@ export interface FieldProps {
   error?: string;
   /** Badge à côté du libellé (ex. « Requis pour la conformité ») */
   badge?: ReactNode;
+  /** Ne pas afficher « (facultatif) » : champ rempli automatiquement (adresse générée depuis le titre…) */
+  hideOptional?: boolean;
   className?: string;
 }
 
@@ -43,7 +45,8 @@ export function controlProps({ name, help, error, required }: Pick<FieldProps, '
  * Obligatoire : astérisque visible (expliqué en tête de formulaire, voir RequiredNote) et aria-required
  * sur le contrôle (RGAA 11.10). Facultatif : mention « (facultatif) » dans le libellé.
  */
-export function RequirementMark({ required }: { required?: boolean }) {
+export function RequirementMark({ required, hideOptional }: { required?: boolean; hideOptional?: boolean }) {
+  if (!required && hideOptional) return null;
   return required ? (
     <span aria-hidden="true" className="ml-0.5 text-danger">
       *
@@ -75,14 +78,14 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
 }
 
 /** Champ simple : le contrôle est rendu par `children` avec les attributs de controlProps */
-export function Field({ name, label, required, help, error, badge, className, children }: FieldProps & { children: (props: ControlProps) => ReactNode }) {
+export function Field({ name, label, required, help, error, badge, hideOptional, className, children }: FieldProps & { children: (props: ControlProps) => ReactNode }) {
   const id = fieldId(name);
   return (
     <div className={className} data-field={name}>
       <div className="flex flex-wrap items-center gap-2">
         <label htmlFor={id} className="font-medium">
           {label}
-          <RequirementMark required={required} />
+          <RequirementMark required={required} hideOptional={hideOptional} />
         </label>
         {badge}
       </div>

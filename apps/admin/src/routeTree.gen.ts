@@ -39,6 +39,7 @@ import { Route as AppMonSiteLegalRouteImport } from './routes/_app/mon-site/lega
 import { Route as AppMonSiteMenuRouteImport } from './routes/_app/mon-site/menu'
 import { Route as AppMonSiteOpenDataRouteImport } from './routes/_app/mon-site/open-data'
 import { Route as AppMonSiteReseauxRouteImport } from './routes/_app/mon-site/reseaux'
+import { Route as AppPagesDocumentIdRouteImport } from './routes/_app/pages_.$documentId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -189,6 +190,11 @@ const AppMonSiteReseauxRoute = AppMonSiteReseauxRouteImport.update({
   path: '/mon-site/reseaux',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPagesDocumentIdRoute = AppPagesDocumentIdRouteImport.update({
+  id: '/pages_/$documentId',
+  path: '/pages/$documentId',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/mon-site/menu': typeof AppMonSiteMenuRoute
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/pages/$documentId': typeof AppPagesDocumentIdRoute
 }
 export interface FileRoutesByTo {
   '/connexion': typeof ConnexionRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/mon-site/menu': typeof AppMonSiteMenuRoute
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/pages/$documentId': typeof AppPagesDocumentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -284,6 +292,7 @@ export interface FileRoutesById {
   '/_app/mon-site/menu': typeof AppMonSiteMenuRoute
   '/_app/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/_app/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/_app/pages_/$documentId': typeof AppPagesDocumentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/mon-site/menu'
     | '/mon-site/open-data'
     | '/mon-site/reseaux'
+    | '/pages/$documentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/connexion'
@@ -348,6 +358,7 @@ export interface FileRouteTypes {
     | '/mon-site/menu'
     | '/mon-site/open-data'
     | '/mon-site/reseaux'
+    | '/pages/$documentId'
   id:
     | '__root__'
     | '/_app'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/_app/mon-site/menu'
     | '/_app/mon-site/open-data'
     | '/_app/mon-site/reseaux'
+    | '/_app/pages_/$documentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -599,6 +611,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonSiteReseauxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/pages_/$documentId': {
+      id: '/_app/pages_/$documentId'
+      path: '/pages/$documentId'
+      fullPath: '/pages/$documentId'
+      preLoaderRoute: typeof AppPagesDocumentIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -631,6 +650,7 @@ interface AppRouteChildren {
   AppMonSiteMenuRoute: typeof AppMonSiteMenuRoute
   AppMonSiteOpenDataRoute: typeof AppMonSiteOpenDataRoute
   AppMonSiteReseauxRoute: typeof AppMonSiteReseauxRoute
+  AppPagesDocumentIdRoute: typeof AppPagesDocumentIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -662,6 +682,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonSiteMenuRoute: AppMonSiteMenuRoute,
   AppMonSiteOpenDataRoute: AppMonSiteOpenDataRoute,
   AppMonSiteReseauxRoute: AppMonSiteReseauxRoute,
+  AppPagesDocumentIdRoute: AppPagesDocumentIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

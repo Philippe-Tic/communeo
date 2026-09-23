@@ -15,3 +15,7 @@ docs
 v2
 **/*.test.ts
 d
+**/test-results
+**/playwright-report
+apps/renderer/e2e
+**/tests

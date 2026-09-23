@@ -31,25 +31,35 @@ const INHERITED = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'NODE_OPTIONS', 'HTTP_PROXY
 
 export function createAstroRenderer(options: AstroRendererOptions): Renderer {
   return {
-    async build({ site, outDir, siteUrl, signal }) {
-      const env: NodeJS.ProcessEnv = { NODE_ENV: 'production' };
-      for (const key of INHERITED) if (process.env[key] !== undefined) env[key] = process.env[key];
-      Object.assign(env, {
-        THEME: site.theme,
-        RENDER_MODE: 'static',
-        DATA_SOURCE: 'strapi',
-        OUT_DIR: outDir,
-        SITE_URL: siteUrl,
-        SITE_DOCUMENT_ID: site.documentId,
-        STRAPI_URL: options.strapiUrl,
-        STRAPI_PUBLIC_URL: options.strapiPublicUrl,
-        STRAPI_TOKEN: options.strapiBuildToken,
-      });
-
+    async build(request) {
+      const { signal } = request;
+      const env = rendererEnv(options, request);
       const astro = astroBin(options.rendererDir);
       await run(process.execPath, [astro, 'build'], { cwd: options.rendererDir, env, signal });
-      await run(process.execPath, ['scripts/pagefind.mjs', outDir], { cwd: options.rendererDir, env, signal });
+      await run(process.execPath, ['scripts/pagefind.mjs', request.outDir], { cwd: options.rendererDir, env, signal });
     },
+  };
+}
+
+/** Environnement du build : quelques variables système et les données du site, rien d'autre. */
+export function rendererEnv(
+  options: AstroRendererOptions,
+  { site, outDir, siteUrl }: Pick<RenderRequest, 'site' | 'outDir' | 'siteUrl'>,
+  parent: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { NODE_ENV: 'production' };
+  for (const key of INHERITED) if (parent[key] !== undefined) env[key] = parent[key];
+  return {
+    ...env,
+    THEME: site.theme,
+    RENDER_MODE: 'static',
+    DATA_SOURCE: 'strapi',
+    OUT_DIR: outDir,
+    SITE_URL: siteUrl,
+    SITE_DOCUMENT_ID: site.documentId,
+    STRAPI_URL: options.strapiUrl,
+    STRAPI_PUBLIC_URL: options.strapiPublicUrl,
+    STRAPI_TOKEN: options.strapiBuildToken,
   };
 }
 

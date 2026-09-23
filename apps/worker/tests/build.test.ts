@@ -7,7 +7,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BuildJob, BuildSite, FinishBuildRequest, SitePublisher } from '@communeo/pipeline';
 import { cleanText, cleanWorkDir, processBuild, type BuildDeps } from '../src/build';
-import { run, type RenderRequest } from '../src/renderer';
+import { rendererEnv, run, type RenderRequest } from '../src/renderer';
 
 const site: BuildSite = { documentId: 'doc-lyon', slug: 'lyon', name: 'Lyon', theme: 'institutionnel', hostId: null, customDomain: null };
 const silent = { debug() {}, info() {}, warn() {}, error() {} };
@@ -162,5 +162,29 @@ describe('run', () => {
     const pending = run(process.execPath, ['-e', 'setTimeout(() => {}, 60_000)'], opts(controller.signal));
     controller.abort();
     await expect(pending).rejects.toThrow('Build interrompu');
+  });
+});
+
+describe('rendererEnv', () => {
+  it("ne transmet au build que le token en lecture seule, jamais les secrets du worker", () => {
+    const env = rendererEnv(
+      { rendererDir: '/r', strapiUrl: 'http://strapi:1337', strapiPublicUrl: 'https://cms.test', strapiBuildToken: 'lecture-seule' },
+      { site: { ...site, theme: 'starter' }, outDir: '/tmp/out', siteUrl: 'https://lyon.fr' },
+      { PATH: '/bin', HOME: '/home/node', NETLIFY_TOKEN: 'secret', WORKER_SECRET: 'secret', QUEUE_DATABASE_URL: 'postgres://secret', DATABASE_PASSWORD: 'secret' },
+    );
+    expect(env).toEqual({
+      NODE_ENV: 'production',
+      PATH: '/bin',
+      HOME: '/home/node',
+      THEME: 'starter',
+      RENDER_MODE: 'static',
+      DATA_SOURCE: 'strapi',
+      OUT_DIR: '/tmp/out',
+      SITE_URL: 'https://lyon.fr',
+      SITE_DOCUMENT_ID: 'doc-lyon',
+      STRAPI_URL: 'http://strapi:1337',
+      STRAPI_PUBLIC_URL: 'https://cms.test',
+      STRAPI_TOKEN: 'lecture-seule',
+    });
   });
 });

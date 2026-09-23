@@ -17,7 +17,8 @@ if (!existsSync(dir)) {
 
 const { index, errors } = await pagefind.createIndex({ forceLanguage: 'fr' });
 if (!index) throw new Error(errors.join('\n'));
-await index.addDirectory({ path: dir });
-const { page_count: pages } = await index.writeFiles({ outputPath: `${dir.replace(/\/$/, '')}/pagefind` });
+const { page_count: pages, errors: indexErrors } = await index.addDirectory({ path: dir });
+if (indexErrors?.length) throw new Error(indexErrors.join('\n'));
+await index.writeFiles({ outputPath: `${dir.replace(/\/$/, '')}/pagefind` });
 await pagefind.close();
 console.log(`  index de recherche : ${pages} pages`);

@@ -27,7 +27,7 @@ export type StatusFilter = 'brouillon' | 'publie' | 'programme';
 export interface ListParams {
   q: string;
   statut?: StatusFilter;
-  /** Filtres propres au type : champ Strapi → valeur */
+  /** Filtres propres au type, en paramètres Strapi (`filters[category][$eq]` → `culture`) */
   filters: Record<string, string>;
   sort: string;
   order: 'asc' | 'desc';
@@ -58,7 +58,7 @@ export function listUrl(source: ListSource, params: ListParams, states: Publicat
     ['url', 'formats', 'alternativeText'].forEach((attribute, index) => search.set(`populate[${field}][fields][${index}]`, attribute));
   }
   if (params.q.trim()) search.set(`filters[${source.searchField}][$containsi]`, params.q.trim());
-  for (const [field, value] of Object.entries(params.filters)) search.set(`filters[${field}][$eq]`, value);
+  for (const [key, value] of Object.entries(params.filters)) search.set(key, value);
 
   // Statut : l'état de publication vient de /api/publication ; on filtre par identifiants.
   // Les brouillons jamais publiés sont peu nombreux : c'est cette liste qui part dans l'adresse.
@@ -115,3 +115,16 @@ export const publishDocument = (type: ContentApi, documentId: string) =>
 export const unpublishDocument = (type: ContentApi, documentId: string) => api(`/api/publication/${type}/${documentId}/unpublish`, { method: 'POST' });
 
 export const deleteDocument = (type: ContentApi, documentId: string) => api(`/api/${type}/${documentId}`, { method: 'DELETE' });
+
+/**
+ * Contenu tout juste publié ou programmé depuis l'éditeur : sa ligne est surlignée un instant au
+ * retour dans la liste (parcours A, étape 6).
+ */
+const recent = new Map<ContentApi, { documentId: string; at: number }>();
+export const markRecent = (type: ContentApi, documentId: string) => recent.set(type, { documentId, at: Date.now() });
+/** Lu une seule fois, dans les 10 minutes */
+export function takeRecent(type: ContentApi): string | null {
+  const entry = recent.get(type);
+  recent.delete(type);
+  return entry && Date.now() - entry.at < 10 * 60_000 ? entry.documentId : null;
+}

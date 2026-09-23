@@ -76,7 +76,7 @@ test('publier : erreurs d’abord, puis une seule publication', async ({ page })
 
   await title(page).fill('Location de la salle des fêtes');
   await page.getByRole('button', { name: 'Publier', exact: true }).click();
-  await expect(page.getByRole('status').filter({ hasText: 'Publié. Votre site sera mis à jour dans quelques instants.' })).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: '« Location de la salle des fêtes » est publiée. Votre site sera mis à jour dans quelques instants.' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Publié', exact: true })).toBeVisible();
   expect(calls.filter((call) => call.includes('status=published'))).toEqual(['PUT /api/pages/p-salle?status=published']);
   // La publication vaut enregistrement : pas d'autosave derrière

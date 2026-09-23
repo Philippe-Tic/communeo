@@ -60,3 +60,13 @@ export function formatListDate(date: Date, now: Date = new Date()): string {
   if (!sameYear) return new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short', year: 'numeric' }).format(date);
   return `${new Intl.DateTimeFormat('fr-FR', { timeZone: ZONE, day: 'numeric', month: 'short' }).format(date)}, ${time}`;
 }
+
+/** Jour (AAAA-MM-JJ) et heure (HH:MM) à Paris d'un instant : l'inverse de `parisToDate` */
+export function dateToParis(date: Date): { day: string; time: string } {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', { timeZone: ZONE, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+      .formatToParts(date)
+      .map((part) => [part.type, part.value]),
+  );
+  return { day: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}` };
+}

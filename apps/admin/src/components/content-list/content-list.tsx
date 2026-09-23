@@ -26,6 +26,7 @@ import {
   unpublishDocument,
   type ListParams,
   type Publication,
+  takeRecent,
   type StatusFilter,
 } from '@/lib/content-list';
 import { formatListDate } from '@/lib/dates';
@@ -34,7 +35,7 @@ import { cn } from '@/lib/utils';
 import { Pagination } from './pagination';
 import { PublicationBadge } from './publication-badge';
 import { Toolbar, type PillFilter } from './toolbar';
-import { agree, countOf, type ContentListConfig, type ListRow, type ListSearch } from './types';
+import { agree, countOf, filterQuery, type ContentListConfig, type ListRow, type ListSearch } from './types';
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
   { value: 'brouillon', label: 'Brouillon' },
@@ -90,9 +91,7 @@ export function ContentList<T extends ListRow>({
   const order = search.ordre ?? (search.tri ? (sortField === 'title' ? 'asc' : 'desc') : sort.order);
   const sortText = sortable.find((entry) => entry.field === sortField)?.label ?? sortField;
 
-  const filterValues = Object.fromEntries(
-    (config.filters ?? []).flatMap((filter) => (typeof search[filter.key] === 'string' ? [[filter.field, search[filter.key] as string]] : [])),
-  );
+  const filterValues = Object.assign({}, ...(config.filters ?? []).map((filter) => (typeof search[filter.key] === 'string' ? filterQuery(filter, search[filter.key] as string) : {}))) as Record<string, string>;
   const params: ListParams = {
     q: search.q ?? '',
     statut: search.statut,
@@ -123,6 +122,14 @@ export function ContentList<T extends ListRow>({
   const selected = selection.key === paramsKey ? selection.ids.filter((id) => rows.some((row) => row.documentId === id)) : [];
   const select = (ids: string[]) => setSelection({ key: paramsKey, ids });
   const [confirm, setConfirm] = useState<{ ids: string[]; title: string } | null>(null);
+
+  // Contenu tout juste publié depuis l'éditeur : sa ligne est surlignée deux secondes
+  const [recent, setRecent] = useState(() => takeRecent(source.type));
+  useEffect(() => {
+    if (!recent) return;
+    const timer = setTimeout(() => setRecent(null), 2000);
+    return () => clearTimeout(timer);
+  }, [recent]);
 
   const refresh = () => refreshContent(client, source.type);
   const titleOf = (id: string) => rows.find((row) => row.documentId === id)?.title ?? '';
@@ -293,7 +300,15 @@ export function ContentList<T extends ListRow>({
                     const isSelected = selected.includes(row.documentId);
                     const pub = publication(row);
                     return (
-                      <tr key={row.documentId} className={cn('relative border-b border-border-row last:border-b-0 hover:bg-surface-hover', isSelected && 'bg-selected-row hover:bg-selected-row')}>
+                      <tr
+                        key={row.documentId}
+                        data-recent={row.documentId === recent || undefined}
+                        className={cn(
+                          'relative border-b border-border-row last:border-b-0 hover:bg-surface-hover',
+                          isSelected && 'bg-selected-row hover:bg-selected-row',
+                          row.documentId === recent && 'bg-success-bg outline-2 -outline-offset-2 outline-success motion-safe:transition-colors motion-safe:duration-700',
+                        )}
+                      >
                         <td className={cn('relative z-[1] pl-4', compact ? 'py-1.5' : 'py-3')}>
                           <input
                             type="checkbox"

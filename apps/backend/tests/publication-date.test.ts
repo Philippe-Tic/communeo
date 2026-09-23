@@ -4,6 +4,7 @@
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Core } from '@strapi/strapi';
+import { publishDueDocuments } from '../src/services/scheduled-publication';
 import { setupStrapi, teardownStrapi } from './strapi';
 
 let strapi: Core.Strapi;
@@ -59,5 +60,26 @@ describe('date de publication des articles', () => {
     const chosen = '2026-05-01T08:00:00.000Z';
     const other = await http.post('/api/articles?status=published').set(auth).send({ data: { title: 'Fête', publication_date: chosen } });
     expect(iso((await versions(other.body.data.documentId)).published.publication_date)).toBe(chosen);
+  });
+
+  it("un article programmé depuis l'admin est publié à l'heure prévue, daté de sa publication", async () => {
+    const auth = { Authorization: `Bearer ${admin}` };
+    const at = new Date(Date.now() + 60 * 60_000);
+    // Comme l'éditeur : brouillon avec la date de publication programmée
+    const created = await http.post('/api/articles').set(auth).send({ data: { title: 'Inscriptions scolaires', category: 'news', scheduled_at: at.toISOString() } });
+    expect(created.status).toBe(201);
+    const { documentId } = created.body.data;
+
+    // Avant l'heure : rien n'est publié
+    expect(await publishDueDocuments(strapi, new Date(at.getTime() - 60_000))).toBe(0);
+    expect((await versions(documentId)).published).toBeUndefined();
+
+    // À l'heure prévue (tâche cron de la minute) : publié, date remplie, plus programmé
+    expect(await publishDueDocuments(strapi, new Date(at.getTime() + 30_000))).toBe(1);
+    const { draft, published } = await versions(documentId);
+    expect(published?.publication_date).toBeTruthy();
+    expect(published.scheduled_at).toBeNull();
+    expect(draft.scheduled_at).toBeNull();
+    expect((await http.get(`/api/articles/${documentId}?status=published`).set(auth)).status).toBe(200);
   });
 });

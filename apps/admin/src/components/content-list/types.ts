@@ -44,10 +44,16 @@ export interface FilterDef {
   /** Paramètre d'adresse (?categorie=travaux) */
   key: string;
   label: string;
-  /** Champ Strapi filtré */
-  field: string;
+  /** Champ Strapi filtré par égalité… */
+  field?: string;
+  /** …ou paramètres Strapi calculés depuis la valeur choisie (périodes, plages) */
+  query?: (value: string) => Record<string, string>;
   options: { value: string; label: string }[];
 }
+
+/** Paramètres Strapi d'un filtre choisi */
+export const filterQuery = (filter: FilterDef, value: string): Record<string, string> =>
+  filter.query ? filter.query(value) : { [`filters[${filter.field}][$eq]`]: value };
 
 export interface ContentListConfig<T extends ListRow> {
   source: ListSource;

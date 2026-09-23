@@ -187,7 +187,15 @@ function ActionButton({ action, label, disabled, onClick, className, children }:
   );
 }
 
-export function BlockEditor({ name = 'blocks', heading = 'Contenu de la page' }: { name?: string; heading?: string }) {
+export function BlockEditor({
+  name = 'blocks',
+  heading = 'Contenu de la page',
+  emptyTitle = 'Cette page est vide. Ajoutez un premier bloc.',
+}: {
+  name?: string;
+  heading?: string;
+  emptyTitle?: string;
+}) {
   const { control, getValues } = useFormContext();
   /** Valeur actuelle d'un bloc au moment d'une action (useWatch peut avoir un rendu de retard) */
   const current = (index: number) => getValues(`${name}.${index}`) as Block;
@@ -322,7 +330,7 @@ export function BlockEditor({ name = 'blocks', heading = 'Contenu de la page' }:
       {items.length === 0 ? (
         catalogAt === null ? (
           <div className="rounded-xl border-2 border-dashed border-border-input p-8 text-center">
-            <p className="font-semibold">Cette page est vide. Ajoutez un premier bloc.</p>
+            <p className="font-semibold">{emptyTitle}</p>
             <p className="mx-auto mt-1 max-w-md text-secondary">Un bloc est un élément de la page : un texte, une image, des documents à télécharger…</p>
             <Button type="button" id={`${headingId}-ajout`} className="mt-4" onClick={() => openCatalog(0)}>
               <Plus aria-hidden="true" />

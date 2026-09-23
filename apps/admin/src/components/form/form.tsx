@@ -4,7 +4,7 @@
  */
 import { CircleAlert } from 'lucide-react';
 import { useEffect, useRef, type FormEvent, type ReactNode } from 'react';
-import { FormProvider, useFormState, type FieldErrors, type FieldValues, type SubmitHandler, type UseFormReturn } from 'react-hook-form';
+import { FormProvider, useFormContext, useFormState, type FieldErrors, type FieldValues, type SubmitHandler, type UseFormReturn } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { fieldId, RequiredNote } from './field';
 
@@ -94,6 +94,7 @@ export function Form<T extends FieldValues>({
   id,
   requiredNote = true,
   describeError,
+  summary = true,
 }: {
   form: UseFormReturn<T>;
   onSubmit: SubmitHandler<T>;
@@ -104,6 +105,8 @@ export function Form<T extends FieldValues>({
   /** Phrase expliquant l'astérisque (à omettre s'il n'y a aucun champ obligatoire) */
   requiredNote?: boolean;
   describeError?: (name: string, message: string) => string;
+  /** `false` : le récapitulatif est placé ailleurs dans le formulaire (<FormErrorSummary />) */
+  summary?: boolean;
 }) {
   const errors = flattenErrors(form.formState.errors);
   const submit = (event: FormEvent<HTMLFormElement>) => {
@@ -113,7 +116,7 @@ export function Form<T extends FieldValues>({
   return (
     <FormProvider {...form}>
       <form id={id} noValidate onSubmit={submit} className={className}>
-        <ErrorSummary errors={errors} title={summaryTitle} focusKey={form.formState.submitCount} describe={describeError} />
+        {summary && <ErrorSummary errors={errors} title={summaryTitle} focusKey={form.formState.submitCount} describe={describeError} />}
         {requiredNote && <RequiredNote />}
         {children}
       </form>
@@ -122,6 +125,12 @@ export function Form<T extends FieldValues>({
 }
 
 export { plural };
+
+/** Récapitulatif d'erreurs placé librement dans un <Form summary={false}> (en tête de la colonne d'édition) */
+export function FormErrorSummary({ title, describe }: { title: (count: number) => string; describe?: (name: string, message: string) => string }) {
+  const { formState } = useFormContext();
+  return <ErrorSummary errors={flattenErrors(formState.errors)} title={title} focusKey={formState.submitCount} describe={describe} />;
+}
 
 /**
  * Section de formulaire en carte : titre 16/600 et nombre d'erreurs de ses champs (« ● 1 erreur »),

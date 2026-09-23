@@ -1,10 +1,12 @@
 /**
- * Contenus en Draft & Publish (pages ; actualités et événements ensuite) : lecture du brouillon,
- * enregistrement (brouillon par défaut, voir le middleware site-isolation), publication, suppression.
+ * Contenus en Draft & Publish (pages, actualités, événements) : lecture du brouillon, enregistrement
+ * (brouillon par défaut, voir le middleware site-isolation), publication, programmation, suppression.
+ * Chaque type décrit ses valeurs de formulaire et leur envoi (`payload`) ; le reste est commun.
  */
 import { queryOptions } from '@tanstack/react-query';
 import type { Block } from '@/components/blocks';
 import { api } from './api';
+import type { ContentApi } from './content-list';
 
 /** Strapi 5 refuse les `id` des composants en écriture : la zone de blocs est réécrite à chaque fois */
 export function toApiValue(value: unknown): unknown {
@@ -18,33 +20,38 @@ export function toApiValue(value: unknown): unknown {
   return value;
 }
 
-export interface PageDocument {
+/** Champs communs aux contenus éditables */
+export interface BaseDocument {
   documentId: string;
   title: string;
   slug: string;
-  lead: string | null;
-  meta_description: string | null;
   scheduled_at: string | null;
   publishedAt: string | null;
   updatedAt: string;
   blocks: Block[] | null;
 }
 
-/** Brouillon avec ses blocs, et savoir s'il existe une version publiée (modifiée depuis ou non) */
-export interface PageDraft extends PageDocument {
-  published: boolean;
-  modified: boolean;
+/** Brouillon, et savoir s'il existe une version publiée (modifiée depuis ou non) */
+export type Draft<D extends BaseDocument> = D & { published: boolean; modified: boolean };
+
+export interface DocumentApi<D extends BaseDocument, V> {
+  type: ContentApi;
+  query: (documentId: string) => ReturnType<typeof draftQuery<D>>;
+  saveDraft: (documentId: string | null, values: V) => Promise<D>;
+  publish: (documentId: string | null, values: V) => Promise<D>;
+  schedule: (documentId: string | null, values: V, at: Date) => Promise<D>;
+  remove: (documentId: string) => Promise<void>;
 }
 
 const POPULATE = 'populate[blocks][populate]=*';
 
-export const pageQuery = (documentId: string) =>
-  queryOptions({
-    queryKey: ['pages', documentId],
-    queryFn: async (): Promise<PageDraft> => {
+function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string) {
+  return queryOptions({
+    queryKey: [type, documentId],
+    queryFn: async (): Promise<Draft<D>> => {
       const [draft, published] = await Promise.all([
-        api<{ data: PageDocument }>(`/api/pages/${documentId}?status=draft&${POPULATE}`),
-        api<{ data: PageDocument | null }>(`/api/pages/${documentId}?status=published&fields[0]=updatedAt`).catch(() => ({ data: null })),
+        api<{ data: D }>(`/api/${type}/${documentId}?status=draft&${POPULATE}`),
+        api<{ data: D | null }>(`/api/${type}/${documentId}?status=published&fields[0]=updatedAt`).catch(() => ({ data: null })),
       ]);
       // Même règle que GET /api/publication : un brouillon plus récent que la version en ligne est une modification
       const modified = !!published.data && new Date(draft.data.updatedAt).getTime() > new Date(published.data.updatedAt).getTime();
@@ -52,6 +59,40 @@ export const pageQuery = (documentId: string) =>
     },
     staleTime: Infinity,
   });
+}
+
+/** API d'un type : `payload` transforme les valeurs du formulaire en données Strapi */
+export function documentApi<D extends BaseDocument, V>(type: ContentApi, payload: (values: V) => Record<string, unknown>): DocumentApi<D, V> {
+  const body = (values: V, extra: Record<string, unknown> = {}) => ({ data: { ...payload(values), ...extra } });
+  const write = async (documentId: string | null, data: unknown, status?: 'published') => {
+    const query = status ? `?status=${status}` : '';
+    const response = documentId
+      ? await api<{ data: D }>(`/api/${type}/${documentId}${query}`, { method: 'PUT', json: data })
+      : await api<{ data: D }>(`/api/${type}${query}`, { method: 'POST', json: data });
+    return response.data;
+  };
+  return {
+    type,
+    query: (documentId) => draftQuery<D>(type, documentId),
+    saveDraft: (documentId, values) => write(documentId, body(values)),
+    publish: (documentId, values) => write(documentId, body(values, { scheduled_at: null }), 'published'),
+    schedule: (documentId, values, at) => write(documentId, body(values, { scheduled_at: at.toISOString() })),
+    remove: async (documentId) => {
+      await api(`/api/${type}/${documentId}`, { method: 'DELETE' });
+    },
+  };
+}
+
+/** Texte facultatif : vide → null */
+export const optional = (value: string | null | undefined) => value?.trim() || null;
+
+// --- Pages -----------------------------------------------------------------------------------------
+
+export interface PageDocument extends BaseDocument {
+  lead: string | null;
+  meta_description: string | null;
+}
+export type PageDraft = Draft<PageDocument>;
 
 export type PageValues = {
   title: string;
@@ -71,43 +112,14 @@ export function pageToValues(page: PageDocument | undefined): PageValues {
   };
 }
 
-function payload(values: PageValues, extra: Record<string, unknown> = {}) {
-  return {
-    data: {
-      title: values.title.trim(),
-      // Adresse vide : le backend la génère depuis le titre
-      ...(values.slug.trim() ? { slug: values.slug.trim() } : {}),
-      lead: values.lead.trim() || null,
-      meta_description: values.meta_description.trim() || null,
-      blocks: toApiValue(values.blocks),
-      ...extra,
-    },
-  };
-}
+export const pagesApi = documentApi<PageDocument, PageValues>('pages', (values) => ({
+  title: values.title.trim(),
+  // Adresse vide : le backend la génère depuis le titre
+  ...(values.slug.trim() ? { slug: values.slug.trim() } : {}),
+  lead: optional(values.lead),
+  meta_description: optional(values.meta_description),
+  blocks: toApiValue(values.blocks),
+}));
 
-export async function savePageDraft(documentId: string | null, values: PageValues): Promise<PageDocument> {
-  const response = documentId
-    ? await api<{ data: PageDocument }>(`/api/pages/${documentId}`, { method: 'PUT', json: payload(values) })
-    : await api<{ data: PageDocument }>('/api/pages', { method: 'POST', json: payload(values) });
-  return response.data;
-}
-
-export async function publishPage(documentId: string | null, values: PageValues): Promise<PageDocument> {
-  const body = payload(values, { scheduled_at: null });
-  const response = documentId
-    ? await api<{ data: PageDocument }>(`/api/pages/${documentId}?status=published`, { method: 'PUT', json: body })
-    : await api<{ data: PageDocument }>('/api/pages?status=published', { method: 'POST', json: body });
-  return response.data;
-}
-
-export async function schedulePage(documentId: string | null, values: PageValues, at: Date): Promise<PageDocument> {
-  const body = payload(values, { scheduled_at: at.toISOString() });
-  const response = documentId
-    ? await api<{ data: PageDocument }>(`/api/pages/${documentId}`, { method: 'PUT', json: body })
-    : await api<{ data: PageDocument }>('/api/pages', { method: 'POST', json: body });
-  return response.data;
-}
-
-export async function deletePage(documentId: string): Promise<void> {
-  await api(`/api/pages/${documentId}`, { method: 'DELETE' });
-}
+export const pageQuery = pagesApi.query;
+export const savePageDraft = pagesApi.saveDraft;

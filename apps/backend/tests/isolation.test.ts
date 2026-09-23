@@ -265,11 +265,13 @@ describe('contenus des autres communes', () => {
 });
 
 describe('fichiers et endpoints réservés', () => {
-  it('interdit de lister, supprimer ou remplacer des fichiers', async () => {
+  it("interdit de lister, supprimer, remplacer ou envoyer des fichiers hors de la médiathèque", async () => {
     expect((await http.get('/api/upload/files').set(auth(adminA))).status).toBe(403);
     expect((await http.delete('/api/upload/files/1').set(auth(adminA))).status).toBe(403);
     const replace = await http.post('/api/upload?id=1').set(auth(adminA)).attach('files', Buffer.from('x'), 'x.txt');
     expect(replace.status).toBe(403);
+    const direct = await http.post('/api/upload').set(auth(adminA)).attach('files', Buffer.from('<svg onload="alert(1)"/>'), 'x.svg');
+    expect(direct.status).toBe(403);
   });
 
   it('réserve le debug de déploiement et le cache comarquage au super admin', async () => {

@@ -20,7 +20,7 @@ export function mapImage(ctx: MapContext, media: Media | null | undefined, optio
     height: media.height ?? null,
     srcset,
     caption: options.caption?.trim() || media.caption?.trim() || null,
-    credit: null,
+    credit: media.credit?.trim() || null,
   };
 }
 

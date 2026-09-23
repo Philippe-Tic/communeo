@@ -27,11 +27,13 @@ function job(overrides: Partial<BuildJob> = {}): BuildJob {
 let workDir: string;
 let finished: FinishBuildRequest[];
 let rendered: RenderRequest[];
+let steps: string[];
 
 function deps(overrides: Partial<BuildDeps> = {}, siteOverrides: Partial<BuildSite> = {}): BuildDeps {
   const publisher = {
     ensureSite: vi.fn(async () => ({ hostId: 'host-lyon', defaultUrl: 'https://lyon-mairie.netlify.app' })),
-    publish: vi.fn(async (_site, dir: string) => {
+    publish: vi.fn(async (_site, dir: string, options?: { onUploaded?: () => Promise<void> | void }) => {
+      await options?.onUploaded?.();
       // Le dossier publié contient bien le site construit
       expect(fs.readFileSync(path.join(dir, 'index.html'), 'utf8')).toContain('Lyon');
       return { hostId: 'host-lyon', defaultUrl: 'https://lyon-mairie.netlify.app', deployId: 'dep-1', state: 'ready' as const };
@@ -40,6 +42,9 @@ function deps(overrides: Partial<BuildDeps> = {}, siteOverrides: Partial<BuildSi
   return {
     strapi: {
       start: vi.fn(async () => ({ deploymentId: 'deployment-1', site: { ...site, ...siteOverrides } })),
+      progress: vi.fn(async (_jobId: string, step: string) => {
+        steps.push(step);
+      }),
       finish: vi.fn(async (_jobId: string, request: FinishBuildRequest) => {
         finished.push(request);
       }),
@@ -64,6 +69,7 @@ beforeEach(() => {
   workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'worker-test-'));
   finished = [];
   rendered = [];
+  steps = [];
 });
 afterEach(() => fs.rmSync(workDir, { recursive: true, force: true }));
 
@@ -72,12 +78,22 @@ describe('processBuild', () => {
     const d = deps();
     await processBuild(job(), d);
 
-    expect(d.strapi.start).toHaveBeenCalledWith('job-1', { siteDocumentId: 'doc-lyon', triggeredBy: 'user-1', attempt: 0 });
+    expect(d.strapi.start).toHaveBeenCalledWith('job-1', { siteDocumentId: 'doc-lyon', triggeredBy: 'user-1', reason: 'manual', attempt: 0 });
+    expect(steps).toEqual(['rendering', 'publishing', 'cache']);
     expect(rendered[0]?.siteUrl).toBe('https://lyon-mairie.netlify.app');
     expect(finished).toEqual([
       { status: 'ready', buildSeconds: expect.any(Number), deployId: 'dep-1', hostId: 'host-lyon', defaultUrl: 'https://lyon-mairie.netlify.app' },
     ]);
     expect(buildDirs()).toEqual([]);
+  });
+
+  it("continue quand l'étape en cours ne peut pas être transmise", async () => {
+    const d = deps();
+    d.strapi.progress = async () => {
+      throw new Error('Strapi 502');
+    };
+    await processBuild(job(), d);
+    expect(finished[0]?.status).toBe('ready');
   });
 
   it('construit avec le domaine personnalisé vérifié comme adresse canonique', async () => {

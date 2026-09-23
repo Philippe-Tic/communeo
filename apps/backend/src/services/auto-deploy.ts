@@ -10,14 +10,18 @@
  */
 import deploymentService from './deployment';
 import { isBuildQueueConfigured } from './build-queue';
+import { isScheduledPublication, recordPendingChange, type PendingAction } from './pending-changes';
 import { log } from '../utils/logger';
 
 const SITE = 'api::site.site';
 const DEFAULT_DELAY_SECONDS = 300;
+/** Publications programmées : mises en ligne sans attendre le délai du site (regroupées sur une minute) */
+const SCHEDULED_DELAY_SECONDS = 60;
 
 /** Contenus qui n'apparaissent jamais sur le site public */
 const IGNORED_UIDS = new Set([
   'api::deployment.deployment',
+  'api::pending-change.pending-change',
   'api::contact-submission.contact-submission',
   'api::newsletter-subscriber.newsletter-subscriber',
 ]);
@@ -78,6 +82,12 @@ export function changesPublicSite(change: ChangeContext): boolean {
   return true;
 }
 
+/** Action notée dans la liste des modifications en attente */
+export function pendingAction(change: ChangeContext): PendingAction {
+  if ((change.action === 'create' || change.action === 'update') && change.draftAndPublish) return 'publish';
+  return change.action as PendingAction;
+}
+
 class AutoDeployService {
   /**
    * Programme la mise en ligne du site si l'auto-deploy est activé (repoussée à chaque modification).
@@ -85,12 +95,18 @@ class AutoDeployService {
   async scheduleDeployIfEnabled(siteDocumentId: string): Promise<void> {
     try {
       const site: any = await strapi.documents(SITE).findFirst({ filters: { documentId: siteDocumentId } as any });
-      if (!site?.auto_deploy_enabled) return;
+      const scheduledPublication = isScheduledPublication();
+      // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
+      if (!site?.auto_deploy_enabled && !scheduledPublication) return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;
       }
-      await deploymentService.scheduleContentBuild(siteDocumentId, site.auto_deploy_delay || DEFAULT_DELAY_SECONDS);
+      if (scheduledPublication) {
+        await deploymentService.scheduleContentBuild(siteDocumentId, SCHEDULED_DELAY_SECONDS, 'scheduled');
+      } else {
+        await deploymentService.scheduleContentBuild(siteDocumentId, site.auto_deploy_delay || DEFAULT_DELAY_SECONDS);
+      }
     } catch (error) {
       log.error(`❌ [AUTO-DEPLOY] Could not schedule a build for site ${siteDocumentId}:`, error);
     }
@@ -147,6 +163,13 @@ export function autoDeployMiddleware(strapi: any) {
 
       if (siteId && changesPublicSite(change)) {
         log.info(`📝 [AUTO-DEPLOY] Content changed (${ctx.action} on ${ctx.uid})`);
+        await recordPendingChange({
+          uid: ctx.uid,
+          documentId: ctx.uid === SITE ? siteId : (result?.documentId ?? documentId),
+          siteDocumentId: siteId,
+          action: pendingAction(change),
+          entry: change.after ?? change.before ?? (ctx.uid === SITE ? null : result),
+        }).catch((error) => log.error('[PENDING] Could not record the change:', error));
         await autoDeployService.scheduleDeployIfEnabled(siteId);
       }
     } catch (error) {

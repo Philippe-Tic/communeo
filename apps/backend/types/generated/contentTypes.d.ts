@@ -640,10 +640,14 @@ export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::deployment.deployment'> & Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    reason: Schema.Attribute.Enumeration<['manual', 'content', 'scheduled', 'domain']> &
+      Schema.Attribute.DefaultTo<'manual'>;
+    reference: Schema.Attribute.String;
     site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
     status: Schema.Attribute.Enumeration<['building', 'ready', 'error']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'building'>;
+    step: Schema.Attribute.Enumeration<['checking', 'rendering', 'publishing', 'cache']>;
     triggered_at: Schema.Attribute.DateTime & Schema.Attribute.Required & Schema.Attribute.DefaultTo<'now'>;
     triggered_by: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>;
     updatedAt: Schema.Attribute.DateTime;
@@ -912,6 +916,48 @@ export interface ApiPagePage extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPendingChangePendingChange extends Struct.CollectionTypeSchema {
+  collectionName: 'pending_changes';
+  info: {
+    description: 'Modifications visibles sur le site public, en attente de la prochaine mise en ligne r\u00E9ussie';
+    displayName: 'Modification en attente';
+    pluralName: 'pending-changes';
+    singularName: 'pending-change';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    action: Schema.Attribute.Enumeration<['publish', 'unpublish', 'delete', 'create', 'update']> &
+      Schema.Attribute.Required;
+    author: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>;
+    content_document_id: Schema.Attribute.String & Schema.Attribute.Required;
+    content_type: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::pending-change.pending-change'> &
+      Schema.Attribute.Private;
+    occurred_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
+    source: Schema.Attribute.Enumeration<['person', 'scheduled']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'person'>;
+    title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
   };
@@ -1561,6 +1607,7 @@ declare module '@strapi/strapi' {
       'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
+      'api::pending-change.pending-change': ApiPendingChangePendingChange;
       'api::school-menu.school-menu': ApiSchoolMenuSchoolMenu;
       'api::site.site': ApiSiteSite;
       'api::team-member.team-member': ApiTeamMemberTeamMember;

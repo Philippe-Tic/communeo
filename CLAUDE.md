@@ -88,7 +88,8 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `database/migrations/` — data migrations (never in bootstrap)
 - `src/utils/publisher.ts` — the backend's access to the host (`@communeo/pipeline` publisher with Strapi's logger)
 - `src/services/deployment.ts` / `build-queue.ts` — « Mettre en ligne » enqueues a build (Strapi never builds sites); `domain.ts` — custom domains through the publisher
-- `src/api/build-worker/` — internal routes of the build worker (shared secret)
+- `src/api/build-worker/` — internal routes of the build worker (shared secret): start (Deployment with `reason`, `reference` `MEL-…`), progress (`step`: checking → rendering → publishing → cache), finish
+- `src/services/pending-changes.ts` — changes waiting to go live (`api::pending-change`, no REST access): one entry per content item, recorded by the auto-deploy middleware with its author (or `scheduled` for the cron); a successful publication clears what changed before it started, a failure keeps the list. `GET /api/deployment/state` → `idle | pending | running(step) | failed(reference) | ok` + the list, for the admin header and « Mise en ligne » screen
 - `src/services/auto-deploy.ts` — automatic publication: a document middleware (`changesPublicSite`) schedules a build `auto_deploy_delay` s after the **last** visible change (persistent debounce in the queue, `BuildQueue.schedule`). Drafts, technical Site fields (host, domain, auto-deploy settings), public submissions and non-published associations never trigger; a manual « Mettre en ligne » starts a waiting delayed build now.
 - `src/api/*/content-types/*/schema.json` — content type schemas
 
@@ -101,7 +102,8 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 | Article | `api::article.article` | title, slug, summary, **blocks**, image, category, featured, scheduled_at |
 | Event | `api::evenement.evenement` | title, **blocks**, start_date, end_date, location, registration, scheduled_at |
 | Official document | `api::official-document.official-document` | title, document_type, dates, file, scheduled_at |
-| Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain; one Deployment per build job (`job_id`, status, host `deployment_id`) |
+| Domain / Deployment | `api::domain.domain`, `api::deployment.deployment` | Custom domain; one Deployment per build job (`job_id`, status, `step`, `reason`, `reference`, host `deployment_id`) |
+| Pending change | `api::pending-change.pending-change` | site, content_type, content_document_id, title, action, source (person / scheduled), author |
 
 - **Draft & Publish** is enabled on page, article, event and official document. Writes from commune users default to the draft (`?status=published` to publish); `scheduled_at` is published by a cron task every minute (`src/services/scheduled-publication.ts`).
 - **Homepage in intents**: `homepage.homepage` holds 15 fixed sections (`home-sections.*`), each with an `enabled` flag and its data; no order or position, the theme decides the layout. Section ids and the theme registry (`THEMES`) live in `@communeo/core`; the Site `theme` enum must match `THEME_IDS` (tested). Only admins can change the theme.

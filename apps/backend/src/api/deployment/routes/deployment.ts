@@ -15,6 +15,15 @@ export default {
     },
     {
       method: 'GET',
+      path: '/deployment/state',
+      handler: 'deployment.state',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/deployment/status',
       handler: 'deployment.status',
       config: {

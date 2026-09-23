@@ -49,6 +49,7 @@ describe.skipIf(!url)('file des builds (Postgres)', () => {
         const slug = request.siteDocumentId;
         return { deploymentId: `dep-${jobId}`, site: { documentId: slug, slug, name: slug, theme: 'starter', hostId: 'h', customDomain: null } };
       },
+      progress: async () => {},
       finish: async (jobId, request) => {
         finished.push({ jobId, request });
       },

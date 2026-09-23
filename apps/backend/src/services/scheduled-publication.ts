@@ -1,4 +1,5 @@
 import { log } from '../utils/logger';
+import { runAsScheduledPublication } from './pending-changes';
 /**
  * Publication programmée : publie les brouillons dont la date `scheduled_at` est passée.
  * Appelé chaque minute par la tâche cron (config/cron-tasks.ts). La publication déclenche
@@ -28,7 +29,8 @@ export async function publishDueDocuments(strapi: any, now: Date = new Date()): 
         // Vider la date d'abord : la version publiée ne doit pas rester « programmée »
         await strapi.documents(uid).update({ documentId: doc.documentId, data: { scheduled_at: null } });
         try {
-          await strapi.documents(uid).publish({ documentId: doc.documentId });
+          // Notée « Publication programmée » dans l'historique, mise en ligne sans attendre
+          await runAsScheduledPublication(() => strapi.documents(uid).publish({ documentId: doc.documentId }));
         } catch (error) {
           // Remettre la date pour réessayer à la prochaine exécution
           await strapi.documents(uid).update({ documentId: doc.documentId, data: { scheduled_at: doc.scheduled_at } });

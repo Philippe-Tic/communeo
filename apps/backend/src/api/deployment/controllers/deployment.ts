@@ -5,6 +5,7 @@
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
 import { isBuildQueueConfigured } from '../../../services/build-queue';
+import { listPendingChanges } from '../../../services/pending-changes';
 import { publisher } from '../../../utils/publisher';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
@@ -82,6 +83,64 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       log.error('Trigger deployment error:', error);
       ctx.internalServerError('Erreur lors du lancement du déploiement');
     }
+  },
+
+  /**
+   * État de la mise en ligne pour l'en-tête et l'écran « Mise en ligne » de l'admin :
+   * `idle | pending(n) | running(step) | failed(ref) | ok`, et la liste des modifications en attente.
+   * GET /api/deployment/state
+   */
+  async state(ctx) {
+    if (!ctx.state.user) return ctx.unauthorized('Authentification requise');
+    const site = await getEffectiveSite(ctx);
+    if (!site) return ctx.badRequest('Utilisateur sans site assigné');
+
+    const [latest] = await strapi.documents('api::deployment.deployment').findMany({
+      filters: { site: { documentId: site.documentId } } as any,
+      sort: { triggered_at: 'desc' } as any,
+      limit: 1,
+      populate: { triggered_by: { fields: ['first_name', 'last_name'] } } as any,
+    });
+    const pending = await listPendingChanges(site.documentId);
+
+    const state = latest?.status === 'building'
+      ? 'running'
+      : latest?.status === 'error'
+        ? 'failed'
+        : pending.length > 0
+          ? 'pending'
+          : latest
+            ? 'ok'
+            : 'idle';
+
+    const person = (user: any) => (user ? { firstName: user.first_name ?? null, lastName: user.last_name ?? null } : null);
+    ctx.body = {
+      state,
+      pendingCount: pending.length,
+      step: state === 'running' ? (latest as any).step ?? 'checking' : null,
+      reference: state === 'failed' ? (latest as any).reference ?? null : null,
+      lastDeployment: latest
+        ? {
+            status: latest.status,
+            reason: (latest as any).reason ?? null,
+            reference: (latest as any).reference ?? null,
+            step: (latest as any).step ?? null,
+            triggeredAt: latest.triggered_at,
+            completedAt: latest.completed_at ?? null,
+            buildTime: latest.build_time ?? null,
+            triggeredBy: person((latest as any).triggered_by),
+          }
+        : null,
+      pending: pending.map((change: any) => ({
+        type: change.content_type,
+        documentId: change.content_document_id,
+        title: change.title,
+        action: change.action,
+        source: change.source,
+        author: person(change.author),
+        occurredAt: change.occurred_at,
+      })),
+    };
   },
 
   /**

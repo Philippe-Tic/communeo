@@ -2,6 +2,7 @@
  * Échanges entre le worker de build et Strapi (routes internes, protégées par WORKER_SECRET).
  * Strapi reste seul maître de sa base : le worker lui annonce le début et la fin de chaque build.
  */
+import type { BuildReason } from './queue';
 
 /** Ce dont le worker a besoin pour construire et publier une commune. */
 export interface BuildSite {
@@ -18,6 +19,7 @@ export interface BuildSite {
 export interface StartBuildRequest {
   siteDocumentId: string;
   triggeredBy: string | null;
+  reason: BuildReason;
   /** 0 pour le premier essai */
   attempt: number;
 }
@@ -26,6 +28,17 @@ export interface StartBuildResponse {
   /** documentId de l'enregistrement Deployment (réutilisé par les nouvelles tentatives du même job) */
   deploymentId: string;
   site: BuildSite;
+}
+
+/**
+ * Étapes d'une mise en ligne, dans l'ordre : vérification des contenus, préparation des pages,
+ * publication sur le site, vidage du cache (l'hébergeur termine le traitement)
+ */
+export const BUILD_STEPS = ['checking', 'rendering', 'publishing', 'cache'] as const;
+export type BuildStep = (typeof BUILD_STEPS)[number];
+
+export interface ProgressBuildRequest {
+  step: BuildStep;
 }
 
 export interface FinishBuildRequest {
@@ -42,5 +55,6 @@ export interface FinishBuildRequest {
 
 export const workerRoutes = {
   start: (jobId: string) => `/api/build-worker/jobs/${encodeURIComponent(jobId)}/start`,
+  progress: (jobId: string) => `/api/build-worker/jobs/${encodeURIComponent(jobId)}/progress`,
   finish: (jobId: string) => `/api/build-worker/jobs/${encodeURIComponent(jobId)}/finish`,
 };

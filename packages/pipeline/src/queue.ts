@@ -13,6 +13,9 @@ export const BUILD_QUEUE = 'site-build';
 
 export type BuildReason = 'manual' | 'content' | 'scheduled' | 'domain';
 
+/** Demandes différées (repoussées à chaque modification) ; les autres partent dès que possible */
+const DEFERRED_REASONS = new Set<BuildReason>(['content', 'scheduled']);
+
 export interface BuildJobData {
   siteDocumentId: string;
   /** documentId de l'utilisateur qui a demandé la mise en ligne, `null` pour une demande automatique */
@@ -115,7 +118,7 @@ export async function createBuildQueue(connectionString: string, options: BuildQ
       if (!job) return send(data, delaySeconds);
       const startAfter = new Date(Date.now() + delaySeconds * 1000);
       // Demande immédiate (ou partant plus tard que prévu) : on n'y touche pas
-      if (job.data.reason !== 'content' || job.startAfter >= startAfter) return { jobId: job.id, status: 'already-queued' };
+      if (!DEFERRED_REASONS.has(job.data.reason) || job.startAfter >= startAfter) return { jobId: job.id, status: 'already-queued' };
       return (await reschedule(job.id, startAfter)) ? { jobId: job.id, status: 'postponed' } : send(data, delaySeconds);
     },
 

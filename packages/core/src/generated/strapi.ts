@@ -106,11 +106,23 @@ export type ContactSubmissionStatus = (typeof contactSubmissionStatusValues)[num
 export const deploymentStatusValues = ['building', 'ready', 'error'] as const;
 export type DeploymentStatus = (typeof deploymentStatusValues)[number];
 
+export const deploymentReasonValues = ['manual', 'content', 'scheduled', 'domain'] as const;
+export type DeploymentReason = (typeof deploymentReasonValues)[number];
+
+export const deploymentStepValues = ['checking', 'rendering', 'publishing', 'cache'] as const;
+export type DeploymentStep = (typeof deploymentStepValues)[number];
+
 export const evenementCategoryValues = ['cultural', 'sport', 'meeting', 'celebration', 'workshop', 'conference'] as const;
 export type EvenementCategory = (typeof evenementCategoryValues)[number];
 
 export const officialDocumentDocumentTypeValues = ['pv-conseil-municipal', 'deliberation', 'arrete', 'plu', 'scot', 'carte-communale', 'budget-primitif', 'compte-administratif', 'rapport-orientations-budgetaires', 'autre'] as const;
 export type OfficialDocumentDocumentType = (typeof officialDocumentDocumentTypeValues)[number];
+
+export const pendingChangeActionValues = ['publish', 'unpublish', 'delete', 'create', 'update'] as const;
+export type PendingChangeAction = (typeof pendingChangeActionValues)[number];
+
+export const pendingChangeSourceValues = ['person', 'scheduled'] as const;
+export type PendingChangeSource = (typeof pendingChangeSourceValues)[number];
 
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
@@ -454,6 +466,9 @@ export interface Deployment extends StrapiDocument {
   job_id: string | null;
   deployment_id: string | null;
   status: DeploymentStatus;
+  reason: DeploymentReason | null;
+  step: DeploymentStep | null;
+  reference: string | null;
   triggered_by?: User | null;
   build_time: number | null;
   error_message: string | null;
@@ -535,6 +550,18 @@ export interface Page extends StrapiPublishableDocument {
   scheduled_at: string | null;
   seo_keywords: string | null;
   site?: Site | null;
+}
+
+/** Content-type `api::pending-change.pending-change` — Modifications visibles sur le site public, en attente de la prochaine mise en ligne réussie */
+export interface PendingChange extends StrapiDocument {
+  site?: Site | null;
+  content_type: string;
+  content_document_id: string;
+  title: string | null;
+  action: PendingChangeAction;
+  source: PendingChangeSource;
+  author?: User | null;
+  occurred_at: string;
 }
 
 /** Content-type `api::school-menu.school-menu` — Menus de cantine scolaire par semaine */
@@ -649,6 +676,7 @@ export const pluralNames = {
   'api::newsletter-subscriber.newsletter-subscriber': 'newsletter-subscribers',
   'api::official-document.official-document': 'official-documents',
   'api::page.page': 'pages',
+  'api::pending-change.pending-change': 'pending-changes',
   'api::school-menu.school-menu': 'school-menus',
   'api::site.site': 'sites',
   'api::team-member.team-member': 'team-members',
@@ -668,6 +696,7 @@ export interface ContentTypes {
   'api::newsletter-subscriber.newsletter-subscriber': NewsletterSubscriber;
   'api::official-document.official-document': OfficialDocument;
   'api::page.page': Page;
+  'api::pending-change.pending-change': PendingChange;
   'api::school-menu.school-menu': SchoolMenu;
   'api::site.site': Site;
   'api::team-member.team-member': TeamMember;

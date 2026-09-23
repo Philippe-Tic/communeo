@@ -92,7 +92,7 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
   },
 
   /**
-   * Modification d'une fiche : nom et dossier (fiche), texte alternatif, légende et crédit (fichier).
+   * Modification d'une fiche : nom (fiche et fichier), dossier (fiche), texte alternatif, légende et crédit (fichier).
    * PUT /api/media-items/:id { data: { name?, folder?, alt_text?, caption?, credit? } }
    */
   async update(ctx: any) {
@@ -109,6 +109,8 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
     if ('folder' in data) itemData.folder = text(data.folder, 100) || null;
 
     const fileData: Record<string, unknown> = {};
+    // Le nom est aussi celui du fichier : c'est lui que montrent les blocs et le site public
+    if (itemData.name && itemData.name !== item.file.name) fileData.name = itemData.name;
     if ('alt_text' in data) fileData.alternativeText = text(data.alt_text, 255) || null;
     if ('caption' in data) fileData.caption = text(data.caption, 500) || null;
     if ('credit' in data) fileData.credit = text(data.credit, 200) || null;

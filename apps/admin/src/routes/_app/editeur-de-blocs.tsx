@@ -24,7 +24,7 @@ export const SAMPLE_BLOCKS: Block[] = [
     },
   },
   { __component: 'blocks.callout', id: 12, variant: 'warning', title: 'Caution', body: { type: 'doc', content: [p('Une caution de 500 € est demandée à la réservation.')] } },
-  { __component: 'blocks.image', id: 13, image: { id: 4, alternativeText: 'La salle des fêtes vue de la place', mime: 'image/jpeg' }, caption: 'La salle rénovée en 2024', width: 'normal' },
+  { __component: 'blocks.image', id: 13, image: { id: 4, name: 'salle-des-fetes.svg', url: '/favicon.svg', ext: '.svg', size: 1, alternativeText: 'La salle des fêtes vue de la place', mime: 'image/svg+xml' }, caption: 'La salle rénovée en 2024', width: 'normal' },
   {
     __component: 'blocks.faq',
     id: 14,

@@ -8,6 +8,7 @@ import { BLOCK_LIMITS } from '@communeo/core';
 import { RadioGroupField, SwitchField, TextareaField, TextField } from '@/components/form';
 import { FieldError, fieldId } from '@/components/form/field';
 import { Button } from '@/components/ui/button';
+import { DocumentsField, GalleryField, ImageField } from '@/components/media/media-fields';
 import { emptyDoc, type Block } from './catalog';
 import { RichTextField } from './rich-text';
 
@@ -176,13 +177,38 @@ export function VideoBlockForm({ path }: BlockFormProps) {
   );
 }
 
-/** Blocs qui dépendent de la médiathèque (#142) : visibles, déplaçables, pas encore modifiables */
-export function MediaBlockPending({ block }: { block: Block }) {
+export function ImageBlockForm({ path }: BlockFormProps) {
   return (
-    <p className="rounded-lg border border-dashed border-border-input bg-sidebar p-4 text-secondary">
-      Ce bloc se modifiera depuis la médiathèque, bientôt disponible. Vous pouvez déjà le déplacer, le dupliquer ou le supprimer.
-      {block.__component === 'blocks.image' && ' Le texte alternatif de l’image y sera obligatoire.'}
-    </p>
+    <div className="space-y-5">
+      <ImageField name={`${path}.image`} label="Image" required />
+      <TextField name={`${path}.caption`} label="Légende" help="Affichée sous l'image. Vide : la légende enregistrée avec le fichier, s'il en a une." />
+      <RadioGroupField
+        name={`${path}.width`}
+        label="Largeur"
+        options={[
+          { value: 'normal', label: 'Largeur du texte' },
+          { value: 'full', label: 'Pleine largeur' },
+        ]}
+      />
+    </div>
+  );
+}
+
+export function GalleryBlockForm({ path }: BlockFormProps) {
+  return (
+    <div className="space-y-5">
+      <TextField name={`${path}.title`} label="Titre de la galerie" />
+      <GalleryField name={`${path}.images`} />
+    </div>
+  );
+}
+
+export function DocumentsBlockForm({ path }: BlockFormProps) {
+  return (
+    <div className="space-y-5">
+      <TextField name={`${path}.title`} label="Titre" help="Par exemple « Documents à télécharger »." />
+      <DocumentsField name={`${path}.files`} />
+    </div>
   );
 }
 
@@ -200,7 +226,13 @@ export function BlockForm({ block, path }: { block: Block; path: string }) {
       return <ContactBlockForm path={path} />;
     case 'blocks.video':
       return <VideoBlockForm path={path} />;
+    case 'blocks.image':
+      return <ImageBlockForm path={path} />;
+    case 'blocks.gallery':
+      return <GalleryBlockForm path={path} />;
+    case 'blocks.documents':
+      return <DocumentsBlockForm path={path} />;
     default:
-      return <MediaBlockPending block={block} />;
+      return null;
   }
 }

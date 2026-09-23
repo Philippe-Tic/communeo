@@ -7,6 +7,7 @@ import { queryOptions } from '@tanstack/react-query';
 import type { Block } from '@/components/blocks';
 import { api } from './api';
 import type { ContentApi } from './content-list';
+import type { LibraryFile } from './media-library';
 
 /** Strapi 5 refuse les `id` des composants en écriture : la zone de blocs est réécrite à chaque fois */
 export function toApiValue(value: unknown): unknown {
@@ -44,7 +45,7 @@ export interface DocumentApi<D extends BaseDocument, V> {
 }
 
 /** Relations lues avec le brouillon : les blocs par défaut */
-const BLOCKS = 'populate[blocks][populate]=*';
+export const BLOCKS = 'populate[blocks][populate]=*';
 
 function draftQuery<D extends BaseDocument>(type: ContentApi, documentId: string, populate = BLOCKS) {
   return queryOptions({
@@ -97,6 +98,7 @@ export const optional = (value: string | null | undefined) => value?.trim() || n
 export interface PageDocument extends BaseDocument {
   lead: string | null;
   meta_description: string | null;
+  featured_image?: LibraryFile | null;
 }
 export type PageDraft = Draft<PageDocument>;
 
@@ -104,6 +106,7 @@ export type PageValues = {
   title: string;
   slug: string;
   lead: string;
+  featured_image: LibraryFile | null;
   meta_description: string;
   blocks: Block[];
 };
@@ -113,6 +116,7 @@ export function pageToValues(page: PageDocument | undefined): PageValues {
     title: page?.title ?? '',
     slug: page?.slug ?? '',
     lead: page?.lead ?? '',
+    featured_image: page?.featured_image ?? null,
     meta_description: page?.meta_description ?? '',
     blocks: page?.blocks ?? [],
   };
@@ -123,9 +127,10 @@ export const pagesApi = documentApi<PageDocument, PageValues>('pages', (values) 
   // Adresse vide : le backend la génère depuis le titre
   ...(values.slug.trim() ? { slug: values.slug.trim() } : {}),
   lead: optional(values.lead),
+  featured_image: values.featured_image?.id ?? null,
   meta_description: optional(values.meta_description),
   blocks: toApiValue(values.blocks),
-}));
+}), { populate: `${BLOCKS}&populate[featured_image]=true` });
 
 export const pageQuery = pagesApi.query;
 export const savePageDraft = pagesApi.saveDraft;

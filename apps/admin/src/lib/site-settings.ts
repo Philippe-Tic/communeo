@@ -13,21 +13,35 @@ export interface SiteSettings {
   comarquage_enabled: boolean | null;
   open_data_enabled: boolean | null;
   navigation_config: Partial<NavigationConfig> | null;
+  /** Notes de la page Collecte des déchets */
+  waste_notes: string | null;
 }
 
-const FIELDS = ['updatedAt', 'theme', 'comarquage_enabled', 'open_data_enabled', 'navigation_config'];
+const FIELDS = ['updatedAt', 'theme', 'comarquage_enabled', 'open_data_enabled', 'navigation_config', 'waste_notes'];
 
 export const siteSettingsQuery = (siteDocumentId: string) =>
   queryOptions({
     queryKey: ['site-settings', siteDocumentId],
     queryFn: async () =>
-      (await api<{ data: SiteSettings }>(`/api/sites/${siteDocumentId}?${FIELDS.map((field, index) => `fields[${index}]=${field}`).join('&')}`)).data,
+      (
+        await api<{ data: SiteSettings }>(
+          `/api/sites/${siteDocumentId}?${FIELDS.map((field, index) => `fields[${index}]=${field}`).join('&')}`,
+        )
+      ).data,
     staleTime: 60_000,
   });
 
-export async function saveSiteSettings(client: QueryClient, siteDocumentId: string, data: Partial<Omit<SiteSettings, 'documentId' | 'updatedAt'>>) {
+export async function saveSiteSettings(
+  client: QueryClient,
+  siteDocumentId: string,
+  data: Partial<Omit<SiteSettings, 'documentId' | 'updatedAt'>>,
+) {
   const response = await api<{ data: SiteSettings }>(`/api/sites/${siteDocumentId}`, { method: 'PUT', json: { data } });
-  client.setQueryData(siteSettingsQuery(siteDocumentId).queryKey, (current) => ({ ...current!, ...data, updatedAt: response.data.updatedAt }));
+  client.setQueryData(siteSettingsQuery(siteDocumentId).queryKey, (current) => ({
+    ...current!,
+    ...data,
+    updatedAt: response.data.updatedAt,
+  }));
   // État de mise en ligne de l'en-tête : un réglage enregistré attend la prochaine mise en ligne
   void client.invalidateQueries({ queryKey: ['publication'] });
 }

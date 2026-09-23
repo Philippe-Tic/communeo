@@ -3,7 +3,7 @@
  */
 
 import { factories } from '@strapi/strapi';
-import { createRateLimiter } from '../../../utils/security';
+import { createRateLimiter, escapeHtml } from '../../../utils/security';
 import { log } from '../../../utils/logger';
 
 // 3 propositions par heure et par IP
@@ -13,7 +13,67 @@ const VALID_CATEGORIES = ['sport', 'culture', 'social', 'environnement', 'educat
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2 Mo
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
+const REASON_MAX = 2000;
+
+/** Modération : seules les propositions en attente (ou refusées, réexaminées) peuvent être publiées */
+async function findForReview(strapi: any, documentId: string) {
+  return strapi.documents('api::association.association').findOne({ documentId, populate: ['site'] });
+}
+
 export default factories.createCoreController('api::association.association', ({ strapi }) => ({
+  /**
+   * Publie une association (proposition acceptée ou fiche saisie par la commune).
+   * POST /api/associations/:id/publish — commune vérifiée par site-isolation
+   */
+  async publish(ctx) {
+    const association = await findForReview(strapi, ctx.params.id);
+    if (!association) return ctx.notFound();
+    if (association.status === 'published') return ctx.badRequest('Cette association est déjà publiée');
+    const updated = await strapi.documents('api::association.association').update({
+      documentId: association.documentId,
+      data: { status: 'published', reviewed_at: new Date().toISOString(), rejection_reason: null } as any,
+    });
+    ctx.body = { data: updated };
+  },
+
+  /**
+   * Refuse une proposition avec un motif, envoyé par e-mail au demandeur (#187).
+   * POST /api/associations/:id/reject { reason }
+   */
+  async reject(ctx) {
+    const reason = typeof ctx.request.body?.reason === 'string' ? ctx.request.body.reason.trim() : '';
+    if (!reason) return ctx.badRequest('Le motif du refus est obligatoire : il est envoyé au demandeur.');
+    if (reason.length > REASON_MAX) return ctx.badRequest(`Le motif ne doit pas dépasser ${REASON_MAX} caractères`);
+
+    const association = await findForReview(strapi, ctx.params.id);
+    if (!association) return ctx.notFound();
+    if (association.status !== 'pending') return ctx.badRequest('Seule une proposition en attente peut être refusée');
+
+    const updated = await strapi.documents('api::association.association').update({
+      documentId: association.documentId,
+      data: { status: 'rejected', reviewed_at: new Date().toISOString(), rejection_reason: reason } as any,
+    });
+
+    let emailed = false;
+    if (association.submitted_by_email) {
+      const siteName = association.site?.name ?? 'la mairie';
+      const name = association.submitted_by_name ?? '';
+      try {
+        await strapi.plugin('email').service('email').send({
+          to: association.submitted_by_email,
+          subject: `Votre proposition « ${association.name} » — ${siteName}`,
+          text: `Bonjour ${name},\n\nVotre proposition d'association « ${association.name} » n'a pas été publiée sur le site de ${siteName}.\n\nMotif :\n${reason}\n\nVous pouvez soumettre une nouvelle proposition depuis le site.`,
+          html: `<p>Bonjour ${escapeHtml(name)},</p><p>Votre proposition d'association « ${escapeHtml(association.name)} » n'a pas été publiée sur le site de ${escapeHtml(siteName)}.</p><p><strong>Motif :</strong></p><p>${escapeHtml(reason).replace(/\n/g, '<br>')}</p><p>Vous pouvez soumettre une nouvelle proposition depuis le site.</p>`,
+        });
+        emailed = true;
+      } catch (error) {
+        // Le refus est enregistré ; l'admin est prévenu que l'e-mail n'est pas parti
+        log.error('[association] Motif de refus non envoyé :', error);
+      }
+    }
+    ctx.body = { data: updated, emailed };
+  },
+
   async publicCreate(ctx) {
     if (isRateLimited(ctx.request.ip)) {
       return ctx.tooManyRequests('Trop de demandes. Veuillez réessayer plus tard.');

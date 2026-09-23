@@ -103,6 +103,9 @@ jobs:
       - name: Parité build statique / mode serveur
         run: pnpm --filter @communeo/renderer test:parity
 
+      - name: Accès à la preview (jetons signés)
+        run: pnpm --filter @communeo/renderer test:preview
+
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

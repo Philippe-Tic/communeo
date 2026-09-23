@@ -6,7 +6,7 @@
  */
 import { defineMiddleware } from 'astro:middleware';
 import { getSource } from './lib/content';
-import { resolvePreviewAccess } from './lib/preview';
+import { resolvePreview } from './lib/preview';
 import { withRequestContext, type RequestContext } from './lib/request-context';
 
 const PREVIEW_HEADERS = {
@@ -18,11 +18,20 @@ const PREVIEW_HEADERS = {
 export const onRequest = defineMiddleware(async ({ request }, next) => {
   if (process.env.RENDER_MODE !== 'server') return next();
 
-  const access = resolvePreviewAccess(request);
-  if (!access) {
-    return new Response('Preview non autorisée', { status: 401, headers: { ...PREVIEW_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' } });
+  const decision = await resolvePreview(request);
+  if (decision.kind === 'deny') {
+    return new Response('Preview non autorisée : ouvrez-la depuis l’administration de votre commune.', {
+      status: 401,
+      headers: { ...PREVIEW_HEADERS, 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
+  if (decision.kind === 'redirect') {
+    const headers = new Headers({ ...PREVIEW_HEADERS, Location: decision.location });
+    for (const value of decision.cookies) headers.append('Set-Cookie', value);
+    return new Response(null, { status: 302, headers });
   }
 
+  const { access } = decision;
   const context: RequestContext = { siteDocumentId: access.siteDocumentId, theme: access.theme };
   return withRequestContext(context, async () => {
     // Thème demandé, sinon celui forcé pour le serveur (tests de parité), sinon celui de la commune

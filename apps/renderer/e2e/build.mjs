@@ -8,11 +8,18 @@ import { readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { outDir, themes } from './themes.mjs';
 
+/** Pages du site : `actualites.html` → `/actualites` (index.html seulement à la racine). */
 function pages(dir, prefix = '') {
   return readdirSync(dir).flatMap((name) => {
     const path = `${dir}/${name}`;
-    if (statSync(path).isDirectory()) return name.startsWith('_') || name === 'fixtures' ? [] : pages(path, `${prefix}/${name}`);
-    return name === 'index.html' ? [prefix || '/'] : [];
+    if (statSync(path).isDirectory()) return name.startsWith('_') || ['fixtures', 'pagefind'].includes(name) ? [] : pages(path, `${prefix}/${name}`);
+    if (!name.endsWith('.html') || name === '404.html') return [];
+    if (name === 'index.html') {
+      // Une page en dossier/index.html serait redirigée par l'hébergeur vers dossier/ (voir astro.config.mjs)
+      if (prefix) throw new Error(`Page générée en ${prefix}/index.html : elle doit être ${prefix}.html`);
+      return ['/'];
+    }
+    return [`${prefix}/${name.slice(0, -'.html'.length)}`];
   });
 }
 

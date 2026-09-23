@@ -400,6 +400,72 @@ export interface MockOptions {
   associationSet?: 'some' | 'none';
   /** L'e-mail de refus ne part pas (`emailed: false`) */
   failRejectEmail?: boolean;
+  /** Alertes : une active, une programmée, deux passées (défaut) ou aucune */
+  alertSet?: 'some' | 'none';
+}
+
+export type MockAlert = Record<string, unknown> & {
+  documentId: string;
+  title: string;
+  active: boolean;
+  display_until: string | null;
+};
+
+/** Alertes, dates relatives à maintenant */
+function alerts(): MockAlert[] {
+  const at = (hours: number) => new Date(Date.now() + hours * 3_600_000).toISOString();
+  const base = (id: string, fields: Record<string, unknown>): MockAlert => ({
+    documentId: id,
+    title: '',
+    message: '',
+    severity: 'info',
+    active: true,
+    display_from: at(-1),
+    display_until: at(3),
+    link_url: null,
+    link_label: null,
+    alert_type: null,
+    affected_area: null,
+    start_date: null,
+    end_date: null,
+    createdAt: at(-1),
+    updatedAt: at(-1),
+    ...fields,
+  });
+  return [
+    base('al-eau', {
+      title: "Coupure d'eau rue des Lilas",
+      message: "Intervention sur le réseau. Pensez à faire vos réserves d'eau.",
+      severity: 'warning',
+      alert_type: 'coupure-eau',
+      affected_area: 'Rue des Lilas',
+    }),
+    base('al-marche', {
+      title: 'Marché déplacé place de l’Église',
+      message: 'Travaux sur la place du marché.',
+      severity: 'info',
+      alert_type: 'travaux',
+      display_from: at(48),
+      display_until: at(56),
+    }),
+    base('al-route', {
+      title: 'Route de Nevers fermée après un accident',
+      message: 'Déviation par la D12.',
+      severity: 'critical',
+      alert_type: 'deviation',
+      display_from: at(-200),
+      display_until: at(-190),
+      active: false,
+    }),
+    base('al-canicule', {
+      title: 'Vigilance orange canicule',
+      message: 'Hydratez-vous.',
+      severity: 'warning',
+      alert_type: 'intemperie',
+      display_from: at(-400),
+      display_until: at(-380),
+    }),
+  ];
 }
 
 export type MockAssociation = Record<string, unknown> & { documentId: string; name: string; status: string };
@@ -665,6 +731,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     failReply = false,
     associationSet = 'some',
     failRejectEmail = false,
+    alertSet = 'some',
   } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
@@ -683,6 +750,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const newsletter = subscriberSet === 'none' ? [] : subscribers();
   const inbox = messageSet === 'none' ? [] : messages();
   const directory = associationSet === 'none' ? [] : associations();
+  const alertStore = alertSet === 'none' ? [] : alerts();
   let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
   const publishedByType: Record<ContentType, Set<string>> = {
@@ -1022,6 +1090,38 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    if (url.pathname === '/api/alertes' && method === 'GET') {
+      return json({
+        data: alertStore,
+        meta: { pagination: { page: 1, pageSize: 100, total: alertStore.length, pageCount: 1 } },
+      });
+    }
+    if (url.pathname === '/api/alertes' && method === 'POST') {
+      const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+      bodies.push({ call: 'POST alertes', body });
+      const created = {
+        documentId: `al-${alertStore.length + 1}`,
+        createdAt: new Date().toISOString(),
+        ...(body.data as { title: string; active: boolean; display_until: string }),
+      };
+      alertStore.unshift(created);
+      return json({ data: created }, 201);
+    }
+    const alertMatch = /^\/api\/alertes\/([^/]+)$/.exec(url.pathname);
+    if (alertMatch && alertMatch[1] !== 'public') {
+      const item = alertStore.find((entry) => entry.documentId === alertMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `PUT alertes ${item.documentId}`, body });
+        Object.assign(item, body.data);
+      }
+      if (method === 'DELETE') {
+        alertStore.splice(alertStore.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
+    }
     if (url.pathname === '/api/associations' && method === 'GET') {
       const statusFilter = url.searchParams.get('filters[status][$eq]');
       const q = url.searchParams.get('filters[name][$containsi]')?.toLowerCase();
@@ -1150,6 +1250,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     newsletter,
     inbox,
     directory,
+    alertStore,
     stores,
     publishedByType,
     previewPosts,

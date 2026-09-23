@@ -36,6 +36,7 @@ import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as AppActualitesDocumentIdRouteImport } from './routes/_app/actualites_.$documentId'
 import { Route as AppAgendaDocumentIdRouteImport } from './routes/_app/agenda_.$documentId'
+import { Route as AppAlertesDocumentIdRouteImport } from './routes/_app/alertes_.$documentId'
 import { Route as AppDocumentsDocumentIdRouteImport } from './routes/_app/documents_.$documentId'
 import { Route as AppMonSiteAccessibiliteRouteImport } from './routes/_app/mon-site/accessibilite'
 import { Route as AppMonSiteAccueilRouteImport } from './routes/_app/mon-site/accueil'
@@ -182,6 +183,11 @@ const AppAgendaDocumentIdRoute = AppAgendaDocumentIdRouteImport.update({
   path: '/agenda/$documentId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAlertesDocumentIdRoute = AppAlertesDocumentIdRouteImport.update({
+  id: '/alertes_/$documentId',
+  path: '/alertes/$documentId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDocumentsDocumentIdRoute = AppDocumentsDocumentIdRouteImport.update({
   id: '/documents_/$documentId',
   path: '/documents/$documentId',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
+  '/alertes/$documentId': typeof AppAlertesDocumentIdRoute
   '/documents/$documentId': typeof AppDocumentsDocumentIdRoute
   '/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
+  '/alertes/$documentId': typeof AppAlertesDocumentIdRoute
   '/documents/$documentId': typeof AppDocumentsDocumentIdRoute
   '/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/actualites_/$documentId': typeof AppActualitesDocumentIdRoute
   '/_app/agenda_/$documentId': typeof AppAgendaDocumentIdRoute
+  '/_app/alertes_/$documentId': typeof AppAlertesDocumentIdRoute
   '/_app/documents_/$documentId': typeof AppDocumentsDocumentIdRoute
   '/_app/mon-site/accessibilite': typeof AppMonSiteAccessibiliteRoute
   '/_app/mon-site/accueil': typeof AppMonSiteAccueilRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
+    | '/alertes/$documentId'
     | '/documents/$documentId'
     | '/mon-site/accessibilite'
     | '/mon-site/accueil'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
+    | '/alertes/$documentId'
     | '/documents/$documentId'
     | '/mon-site/accessibilite'
     | '/mon-site/accueil'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/actualites_/$documentId'
     | '/_app/agenda_/$documentId'
+    | '/_app/alertes_/$documentId'
     | '/_app/documents_/$documentId'
     | '/_app/mon-site/accessibilite'
     | '/_app/mon-site/accueil'
@@ -678,6 +690,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAgendaDocumentIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/alertes_/$documentId': {
+      id: '/_app/alertes_/$documentId'
+      path: '/alertes/$documentId'
+      fullPath: '/alertes/$documentId'
+      preLoaderRoute: typeof AppAlertesDocumentIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/documents_/$documentId': {
       id: '/_app/documents_/$documentId'
       path: '/documents/$documentId'
@@ -780,6 +799,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppActualitesDocumentIdRoute: typeof AppActualitesDocumentIdRoute
   AppAgendaDocumentIdRoute: typeof AppAgendaDocumentIdRoute
+  AppAlertesDocumentIdRoute: typeof AppAlertesDocumentIdRoute
   AppDocumentsDocumentIdRoute: typeof AppDocumentsDocumentIdRoute
   AppMonSiteAccessibiliteRoute: typeof AppMonSiteAccessibiliteRoute
   AppMonSiteAccueilRoute: typeof AppMonSiteAccueilRoute
@@ -815,6 +835,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppActualitesDocumentIdRoute: AppActualitesDocumentIdRoute,
   AppAgendaDocumentIdRoute: AppAgendaDocumentIdRoute,
+  AppAlertesDocumentIdRoute: AppAlertesDocumentIdRoute,
   AppDocumentsDocumentIdRoute: AppDocumentsDocumentIdRoute,
   AppMonSiteAccessibiliteRoute: AppMonSiteAccessibiliteRoute,
   AppMonSiteAccueilRoute: AppMonSiteAccueilRoute,

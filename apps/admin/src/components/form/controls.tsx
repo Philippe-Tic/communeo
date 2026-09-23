@@ -11,7 +11,7 @@ import { controlClass, controlProps, Field, FieldSet, fieldId, RequirementMark, 
 
 type Base<T extends FieldValues> = Omit<FieldProps, 'name' | 'error'> & { name: Path<T> };
 
-function useFieldError(name: string): string | undefined {
+export function useFieldError(name: string): string | undefined {
   const { formState, getFieldState } = useFormContext();
   return getFieldState(name, formState).error?.message;
 }

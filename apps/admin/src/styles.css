@@ -1,0 +1,186 @@
+/*
+ * Design system de l'admin (handoff « Admin Communeo », v2/Design Admin Handoff/README.md).
+ * Les couleurs sont des variables CSS redéfinies en mode sombre (classe `dark` sur <html>) ;
+ * Tailwind les expose en utilitaires : bg-surface, text-secondary, border-input…
+ */
+@import 'tailwindcss';
+@import '@fontsource-variable/dm-sans';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --brand: #004643;
+  --brand-hover: #00332f;
+  --brand-soft: #e2e8e4;
+  --brand-button: #004643;
+  --on-brand: #ffffff;
+  --accent: #004643;
+  --bg: #efede4;
+  --bg-sidebar: #f7f6f1;
+  --surface: #ffffff;
+  --surface-hover: #f7f6f1;
+  --border: #d9d6c9;
+  --border-row: #eceae2;
+  --border-input: #8f8c7e;
+  --border-dialog: transparent;
+  --muted: #b9b6a8;
+  --text: #1c1b18;
+  --text-secondary: #4a4942;
+  --selected-row: #f3f6f4;
+  --overlay: rgb(28 27 24 / 0.4);
+
+  --success: #0e5a34;
+  --success-bg: #dcefe3;
+  --info: #2b4a9b;
+  --info-bg: #e3e8f5;
+  --warning: #7a4b00;
+  --warning-bg: #fbebd0;
+  --danger: #9b2c1f;
+  --danger-bg: #f8e1de;
+  --danger-alert-bg: #fbf3f2;
+  --neutral: #4a4942;
+  --neutral-bg: #eceae2;
+  --destructive: #9b2c1f;
+  --on-destructive: #ffffff;
+
+  --shadow-menu: 0 1px 2px rgb(28 27 24 / 0.06), 0 4px 16px rgb(28 27 24 / 0.12);
+  --shadow-dialog: 0 8px 32px rgb(28 27 24 / 0.18);
+  --shadow-toast: 0 8px 24px rgb(28 27 24 / 0.2);
+}
+
+/* Mode sombre : aucune ombre, les niveaux passent par la valeur du fond et la bordure */
+.dark {
+  color-scheme: dark;
+  --brand: #7fbdb4;
+  --brand-hover: #0a4d48;
+  --brand-soft: #123d38;
+  --brand-button: #0b5c56;
+  --on-brand: #f1efe6;
+  --accent: #7fbdb4;
+  --bg: #12120e;
+  --bg-sidebar: #1b1a15;
+  --surface: #26251e;
+  --surface-hover: #2e2d25;
+  --border: #3c3a31;
+  --border-row: #3c3a31;
+  --border-input: #8b887a;
+  --border-dialog: #4c4a3f;
+  --muted: #3c3a31;
+  --text: #f1efe6;
+  --text-secondary: #b4b1a4;
+  --selected-row: #1c3733;
+  --overlay: rgb(0 0 0 / 0.6);
+
+  --success: #8fd3a9;
+  --success-bg: #163425;
+  --info: #a9beeb;
+  --info-bg: #1d2742;
+  --warning: #f0c384;
+  --warning-bg: #3a2a10;
+  --danger: #f5a597;
+  --danger-bg: #3a1c17;
+  --danger-alert-bg: #2a1a16;
+  --neutral: #cfccbe;
+  --neutral-bg: #2e2d25;
+  --destructive: #7a2b21;
+  --on-destructive: #fbe9e6;
+
+  --shadow-menu: none;
+  --shadow-dialog: none;
+  --shadow-toast: none;
+}
+
+@theme inline {
+  --font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-button: var(--brand-button);
+  --color-on-brand: var(--on-brand);
+  --color-accent: var(--accent);
+  --color-bg: var(--bg);
+  --color-sidebar: var(--bg-sidebar);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-border-row: var(--border-row);
+  --color-border-input: var(--border-input);
+  --color-border-dialog: var(--border-dialog);
+  --color-muted: var(--muted);
+  --color-text: var(--text);
+  --color-secondary: var(--text-secondary);
+  --color-selected-row: var(--selected-row);
+  --color-overlay: var(--overlay);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-alert-bg: var(--danger-alert-bg);
+  --color-neutral: var(--neutral);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-destructive: var(--destructive);
+  --color-on-destructive: var(--on-destructive);
+
+  --shadow-menu: var(--shadow-menu);
+  --shadow-dialog: var(--shadow-dialog);
+  --shadow-toast: var(--shadow-toast);
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Corps 14 px (16 sur mobile) ; la base des rem reste 16 px (espacements, points de rupture, zoom) */
+  body {
+    min-height: 100dvh;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 48rem) {
+    body {
+      font-size: 14px;
+    }
+  }
+
+  /* Focus visible, identique sur tous les composants, jamais supprimé */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    transition:
+      background-color 150ms,
+      color 150ms;
+  }
+}
+
+/* Points de rupture du handoff : barre latérale complète à partir de 1440 px, en icônes en dessous */
+@theme {
+  --breakpoint-wide: 90rem;
+}

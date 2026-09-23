@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as CommunesRouteImport } from './routes/communes'
 import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as InvitationRouteImport } from './routes/invitation'
+import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
+import { Route as NouveauMotDePasseRouteImport } from './routes/nouveau-mot-de-passe'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppActualitesRouteImport } from './routes/_app/actualites'
 import { Route as AppAgendaRouteImport } from './routes/_app/agenda'
@@ -45,9 +49,29 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CommunesRoute = CommunesRouteImport.update({
+  id: '/communes',
+  path: '/communes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvitationRoute = InvitationRouteImport.update({
+  id: '/invitation',
+  path: '/invitation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
+  id: '/mot-de-passe-oublie',
+  path: '/mot-de-passe-oublie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NouveauMotDePasseRoute = NouveauMotDePasseRouteImport.update({
+  id: '/nouveau-mot-de-passe',
+  path: '/nouveau-mot-de-passe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -198,7 +222,11 @@ const AppPagesDocumentIdRoute = AppPagesDocumentIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/invitation': typeof InvitationRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/actualites': typeof AppActualitesRoute
   '/agenda': typeof AppAgendaRoute
   '/alertes': typeof AppAlertesRoute
@@ -229,7 +257,11 @@ export interface FileRoutesByFullPath {
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
 }
 export interface FileRoutesByTo {
+  '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/invitation': typeof InvitationRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/actualites': typeof AppActualitesRoute
   '/agenda': typeof AppAgendaRoute
   '/alertes': typeof AppAlertesRoute
@@ -263,7 +295,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/invitation': typeof InvitationRoute
+  '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
+  '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
   '/_app/actualites': typeof AppActualitesRoute
   '/_app/agenda': typeof AppAgendaRoute
   '/_app/alertes': typeof AppAlertesRoute
@@ -298,7 +334,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/communes'
     | '/connexion'
+    | '/invitation'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/actualites'
     | '/agenda'
     | '/alertes'
@@ -329,7 +369,11 @@ export interface FileRouteTypes {
     | '/pages/$documentId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/communes'
     | '/connexion'
+    | '/invitation'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/actualites'
     | '/agenda'
     | '/alertes'
@@ -362,7 +406,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/communes'
     | '/connexion'
+    | '/invitation'
+    | '/mot-de-passe-oublie'
+    | '/nouveau-mot-de-passe'
     | '/_app/actualites'
     | '/_app/agenda'
     | '/_app/alertes'
@@ -396,7 +444,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  CommunesRoute: typeof CommunesRoute
   ConnexionRoute: typeof ConnexionRoute
+  InvitationRoute: typeof InvitationRoute
+  MotDePasseOublieRoute: typeof MotDePasseOublieRoute
+  NouveauMotDePasseRoute: typeof NouveauMotDePasseRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -408,11 +460,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/communes': {
+      id: '/communes'
+      path: '/communes'
+      fullPath: '/communes'
+      preLoaderRoute: typeof CommunesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connexion': {
       id: '/connexion'
       path: '/connexion'
       fullPath: '/connexion'
       preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invitation': {
+      id: '/invitation'
+      path: '/invitation'
+      fullPath: '/invitation'
+      preLoaderRoute: typeof InvitationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mot-de-passe-oublie': {
+      id: '/mot-de-passe-oublie'
+      path: '/mot-de-passe-oublie'
+      fullPath: '/mot-de-passe-oublie'
+      preLoaderRoute: typeof MotDePasseOublieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/nouveau-mot-de-passe': {
+      id: '/nouveau-mot-de-passe'
+      path: '/nouveau-mot-de-passe'
+      fullPath: '/nouveau-mot-de-passe'
+      preLoaderRoute: typeof NouveauMotDePasseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -689,7 +769,11 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  CommunesRoute: CommunesRoute,
   ConnexionRoute: ConnexionRoute,
+  InvitationRoute: InvitationRoute,
+  MotDePasseOublieRoute: MotDePasseOublieRoute,
+  NouveauMotDePasseRoute: NouveauMotDePasseRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

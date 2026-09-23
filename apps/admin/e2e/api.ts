@@ -14,7 +14,20 @@ export const SITE = {
 export const USERS = {
   admin: { id: 1, documentId: 'u-sophie', email: 'sophie.leroy@saint-aubin.fr', first_name: 'Sophie', last_name: 'Leroy', municipality_role: 'admin', site: SITE },
   editor: { id: 2, documentId: 'u-marc', email: 'marc@saint-aubin.fr', first_name: 'Marc', last_name: 'Dubois', municipality_role: 'editor', site: SITE },
+  super_admin: { id: 3, documentId: 'u-equipe', email: 'equipe@communeo.fr', first_name: 'Léa', last_name: 'Communeo', municipality_role: 'super_admin', site: null },
 };
+
+export const SITES = [SITE, { documentId: 'site-bellefontaine', name: 'Bellefontaine', slug: 'bellefontaine', theme: 'moderne', live_url: null }];
+
+/** Liens reçus par e-mail (GET /api/user-management/invitation?jeton=) */
+export const LINKS: Record<string, object> = {
+  'jeton-invitation': { status: 'valid', purpose: 'invitation', firstName: 'Anne', siteName: 'Saint-Aubin-sur-Loire', role: 'editor', email: 'anne@saint-aubin.fr' },
+  'jeton-reinitialisation': { status: 'valid', purpose: 'reset', firstName: 'Sophie', siteName: 'Saint-Aubin-sur-Loire', role: 'admin', email: 'sophie.leroy@saint-aubin.fr' },
+  'jeton-expire': { status: 'expired', purpose: 'invitation', firstName: 'Anne', siteName: 'Saint-Aubin-sur-Loire', role: 'editor' },
+};
+
+export const PASSWORD = 'bon-mot-de-passe';
+export const INVALID_LOGIN = 'E-mail ou mot de passe incorrect. Vérifiez votre saisie ; après 5 essais, le compte est bloqué 15 minutes.';
 
 export interface MockPage {
   documentId: string;
@@ -64,12 +77,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; body: { data: Record<string, unknown> } }> = [];
+  const posts: Record<string, unknown[]> = {};
   let state = publication;
   const pages = structuredClone(PAGES);
   const published = new Set<string>(['p-salle']);
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
+  // Mots de passe acceptés : celui des comptes de test, et ceux choisis par invitation
+  const passwords = new Set([PASSWORD]);
 
   // Serveur de preview simulé : la page demandée, avec le numéro de version reçu
   await page.route('http://preview.test/**', (route) => {
@@ -89,18 +105,36 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (method !== 'GET' && route.request().headers()['x-communeo-csrf'] !== '1') {
       return json({ error: { status: 403, message: 'Requête refusée : en-tête de sécurité manquant' } }, 403);
     }
+    if (method === 'POST') (posts[url.pathname] ??= []).push(route.request().postDataJSON());
     if (url.pathname === '/api/session/login') {
-      const body = route.request().postDataJSON() as { identifier: string; password: string };
-      if (body.password !== 'bon-mot-de-passe') return json({ error: { status: 400, message: 'Adresse e-mail ou mot de passe incorrect.' } }, 400);
+      const body = route.request().postDataJSON() as { identifier: string; password: string; remember?: boolean };
+      if (!passwords.has(body.password)) return json({ error: { status: 400, message: INVALID_LOGIN } }, 400);
       session = true;
-      return json({ ok: true, expiresIn: 43200 });
+      return json({ ok: true, expiresIn: body.remember ? 2_592_000 : 43200 });
     }
     if (url.pathname === '/api/session/logout') {
       session = false;
       return route.fulfill({ status: 204 });
     }
+    // Écrans d'accès, sans session
+    if (url.pathname === '/api/user-management/invitation') return json(LINKS[url.searchParams.get('jeton') ?? ''] ?? { status: 'invalid' });
+    if (url.pathname === '/api/user-management/accept-invitation') {
+      const body = route.request().postDataJSON() as { password: string };
+      if (body.password.length < 10) return json({ error: { status: 400, message: 'Le mot de passe doit contenir au moins 10 caractères' } }, 400);
+      passwords.add(body.password);
+      return json({ ok: true });
+    }
+    if (url.pathname === '/api/user-management/request-invitation' || url.pathname === '/api/user-management/forgot-password') return json({ ok: true });
+
     if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
     if (url.pathname === '/api/users/me') return json(USERS[user]);
+    if (url.pathname === '/api/user-management/admins') return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
+    if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin') return json({ data: SITES });
+    const siteMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
+    if (siteMatch && USERS[user].municipality_role === 'super_admin') {
+      const site = SITES.find((candidate) => candidate.documentId === siteMatch[1]);
+      return site ? json({ data: site }) : json({ error: { status: 404, message: 'Site not found' } }, 404);
+    }
     if (url.pathname === '/api/deployment/state') {
       return json({ state, pendingCount: state === 'pending' ? 3 : 0, step: state === 'running' ? 'rendering' : null, reference: null });
     }
@@ -144,5 +178,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     return json({ error: { status: 404, message: 'Not Found' } }, 404);
   });
 
-  return { calls, bodies, pages };
+  return {
+    calls,
+    bodies,
+    pages,
+    /** Corps des POST reçus, par route */
+    posts,
+    /** La session expire côté serveur (le cookie n'est plus valable) */
+    expireSession: () => {
+      session = false;
+    },
+  };
 }

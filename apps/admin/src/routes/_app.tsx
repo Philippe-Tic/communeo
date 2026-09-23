@@ -4,17 +4,24 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { AppShell } from '@/components/shell/app-shell';
-import { isUnauthenticated } from '@/lib/api';
-import { sessionQuery } from '@/lib/session';
+import { ApiError, auth, isUnauthenticated } from '@/lib/api';
+import { needsSitePicker, sessionQuery } from '@/lib/session';
 
 export const Route = createFileRoute('/_app')({
   beforeLoad: async ({ context, location }) => {
+    let user;
     try {
-      await context.queryClient.ensureQueryData(sessionQuery);
+      user = await context.queryClient.ensureQueryData(sessionQuery);
     } catch (error) {
       if (isUnauthenticated(error)) throw redirect({ to: '/connexion', search: { retour: location.href } });
+      // Commune consultée supprimée entre-temps : retour à la liste
+      if (error instanceof ApiError && error.status === 404 && auth.impersonatedSite()) {
+        auth.setImpersonatedSite(null);
+        throw redirect({ to: '/communes' });
+      }
       throw error;
     }
+    if (needsSitePicker(user)) throw redirect({ to: '/communes' });
   },
   component: AppLayout,
 });

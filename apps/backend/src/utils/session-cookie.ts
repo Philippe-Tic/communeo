@@ -4,6 +4,8 @@
  */
 export const SESSION_COOKIE = 'communeo_session';
 export const SESSION_DURATION_SECONDS = 12 * 60 * 60;
+/** « Rester connecté sur cet ordinateur » */
+export const REMEMBERED_SESSION_SECONDS = 30 * 24 * 60 * 60;
 /** En-tête exigé pour toute écriture authentifiée par le cookie (protection CSRF en plus de SameSite) */
 export const CSRF_HEADER = 'x-communeo-csrf';
 

@@ -14,6 +14,9 @@ const { compileStrapi, createStrapi } = createRequire(import.meta.url)('@strapi/
 const DB_FILE = `.tmp/test-${process.pid}.db`;
 
 let instance: Core.Strapi | undefined;
+
+/** E-mails que Strapi aurait envoyés pendant les tests */
+export const sentEmails: Array<{ to: string; subject: string; text?: string; html?: string }> = [];
 // Écouteurs du processus avant le démarrage de Strapi (ceux de Vitest)
 let baselineListeners: Array<readonly [string | symbol, Function[]]> = [];
 
@@ -32,6 +35,8 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     ENCRYPTION_KEY: 'test-encryption-key',
     // Aucun hébergeur : Strapi doit démarrer, seules les actions de publication répondent 503
     NETLIFY_TOKEN: '',
+    // Aucun envoi d'e-mail réel : les messages sont gardés dans `sentEmails`
+    RESEND_API_KEY: '',
     QUEUE_DATABASE_URL: '',
     WORKER_SECRET: 'test-worker-secret',
     STRAPI_API_TOKEN: 'test-build-token',
@@ -47,6 +52,10 @@ export async function setupStrapi(): Promise<Core.Strapi> {
   baselineListeners = process.eventNames().map((event) => [event, process.rawListeners(event as any)] as const);
   const appContext = await compileStrapi();
   instance = await createStrapi(appContext).load();
+  const email = instance.plugin('email').service('email');
+  email.send = async (message: (typeof sentEmails)[number]) => {
+    sentEmails.push(message);
+  };
   instance.server.mount();
   return instance;
 }

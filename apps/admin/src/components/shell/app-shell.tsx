@@ -11,6 +11,7 @@ import { requestHeadingFocus } from '@/lib/focus';
 import type { SessionUser } from '@/lib/session';
 import { Header } from './header';
 import { ImpersonationBanner } from './impersonation-banner';
+import { SessionExpiredDialog } from './session-expired-dialog';
 import { Sidebar, type NavCounters } from './sidebar';
 
 export const MAIN_ID = 'contenu';
@@ -44,7 +45,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
   const quitImpersonation = async () => {
     auth.setImpersonatedSite(null);
     client.clear();
-    await navigate({ to: '/' });
+    await navigate({ to: '/communes' });
   };
 
   return (
@@ -66,6 +67,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
           </main>
         </div>
       </div>
+      <SessionExpiredDialog email={user.email} />
     </div>
   );
 }

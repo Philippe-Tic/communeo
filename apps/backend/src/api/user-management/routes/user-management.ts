@@ -1,6 +1,18 @@
 export default {
   routes: [
     {
+      method: 'GET',
+      path: '/user-management/invitation',
+      handler: 'user-management.invitationInfo',
+      config: { auth: false },
+    },
+    {
+      method: 'POST',
+      path: '/user-management/request-invitation',
+      handler: 'user-management.requestInvitation',
+      config: { auth: false },
+    },
+    {
       method: 'POST',
       path: '/user-management/forgot-password',
       handler: 'user-management.forgotPassword',
@@ -19,6 +31,12 @@ export default {
         policies: [],
         middlewares: [],
       },
+    },
+    {
+      method: 'GET',
+      path: '/user-management/admins',
+      handler: 'user-management.admins',
+      config: { policies: [], middlewares: [] },
     },
     {
       method: 'PUT',

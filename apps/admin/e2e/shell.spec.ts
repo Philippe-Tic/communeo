@@ -3,7 +3,7 @@
  * barre latérale complète / en icônes / tiroir mobile, état de mise en ligne.
  */
 import { expect, test, type Page } from '@playwright/test';
-import { mockApi } from './api';
+import { INVALID_LOGIN, mockApi } from './api';
 import { expectNoViolations } from './axe';
 
 const isMobile = (page: Page) => (page.viewportSize()?.width ?? 1440) < 768;
@@ -122,14 +122,14 @@ test.describe('session et rôles', () => {
     await mockApi(page, { loggedIn: false });
     await page.goto('/agenda');
     await expect(page).toHaveURL(/\/connexion/);
-    await page.getByLabel('Adresse e-mail').fill('sophie.leroy@saint-aubin.fr');
-    await page.getByLabel('Mot de passe').fill('mauvais');
+    await page.getByRole('textbox', { name: 'E-mail' }).fill('sophie.leroy@saint-aubin.fr');
+    await page.getByLabel('Mot de passe', { exact: true }).fill('mauvais');
     await page.getByRole('button', { name: 'Se connecter' }).click();
-    const error = page.getByRole('alert').filter({ hasText: 'Adresse e-mail ou mot de passe incorrect.' });
+    const error = page.getByRole('alert').filter({ hasText: INVALID_LOGIN });
     await expect(error).toBeVisible();
     await expect(error).toBeFocused();
 
-    await page.getByLabel('Mot de passe').fill('bon-mot-de-passe');
+    await page.getByLabel('Mot de passe', { exact: true }).fill('bon-mot-de-passe');
     await page.getByRole('button', { name: 'Se connecter' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Agenda' })).toBeVisible();
     // Aucun jeton dans le navigateur : la session est un cookie HttpOnly

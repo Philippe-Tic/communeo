@@ -7,6 +7,9 @@ import crypto from 'crypto';
 import {
   INVITATION_EXPIRY_DAYS,
   MIN_PASSWORD_LENGTH,
+  RESET_EXPIRY_HOURS,
+  RESET_TTL_MS,
+  lookupInvitationToken,
   createInvitationToken,
   createRateLimiter,
   escapeHtml,
@@ -58,7 +61,7 @@ async function sendInvitationEmail(email: string, rawFirstName: string, token: s
   const firstName = escapeHtml(rawFirstName);
   const siteName = escapeHtml(rawSiteName);
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
-  const invitationLink = `${adminUrl}/accept-invitation?token=${token}`;
+  const invitationLink = `${adminUrl}/invitation?jeton=${token}`;
 
   await strapi.plugin('email').service('email').send({
     to: email,
@@ -80,7 +83,7 @@ async function sendPasswordResetEmail(email: string, rawFirstName: string, token
   const firstName = escapeHtml(rawFirstName);
   const siteName = escapeHtml(rawSiteName);
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
-  const resetLink = `${adminUrl}/accept-invitation?token=${token}&type=reset`;
+  const resetLink = `${adminUrl}/nouveau-mot-de-passe?jeton=${token}`;
 
   await strapi.plugin('email').service('email').send({
     to: email,
@@ -91,10 +94,10 @@ async function sendPasswordResetEmail(email: string, rawFirstName: string, token
       <p>Une demande de réinitialisation de mot de passe a été effectuée pour votre compte sur <strong>${siteName}</strong>.</p>
       <p>Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</p>
       <p><a href="${resetLink}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Réinitialiser mon mot de passe</a></p>
-      <p>Ce lien est valable pendant ${INVITATION_EXPIRY_DAYS} jours.</p>
+      <p>Ce lien est valable pendant ${RESET_EXPIRY_HOURS} heure.</p>
       <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
     `,
-    text: `Bonjour ${rawFirstName}, une demande de réinitialisation de mot de passe a été effectuée. Cliquez sur ce lien pour choisir un nouveau mot de passe : ${resetLink} (valable ${INVITATION_EXPIRY_DAYS} jours).`,
+    text: `Bonjour ${rawFirstName}, une demande de réinitialisation de mot de passe a été effectuée. Cliquez sur ce lien pour choisir un nouveau mot de passe : ${resetLink} (valable ${RESET_EXPIRY_HOURS} heure).`,
   });
 }
 
@@ -118,6 +121,26 @@ async function getAuthenticatedUserBasic(ctx) {
 }
 
 export default {
+  /**
+   * Administrateurs actifs de la commune (nom seulement), pour qu'un éditeur sache qui contacter.
+   * GET /api/user-management/admins
+   */
+  async admins(ctx) {
+    const currentUser = await getAuthenticatedUserBasic(ctx);
+    if (!currentUser.site) {
+      ctx.body = { data: [] };
+      return;
+    }
+    const admins = await strapi.query('plugin::users-permissions.user').findMany({
+      where: { site: { documentId: currentUser.site.documentId }, municipality_role: 'admin', blocked: false },
+      select: ['first_name', 'last_name', 'email'],
+      orderBy: { first_name: 'asc' },
+    });
+    ctx.body = {
+      data: admins.map((admin) => ({ name: [admin.first_name, admin.last_name].filter(Boolean).join(' ') || admin.email })),
+    };
+  },
+
   /**
    * Self-service endpoint — update own profile.
    * PUT /api/user-management/me
@@ -152,7 +175,7 @@ export default {
       ctx.throw(400, "Votre compte n'est pas encore activé.");
     }
 
-    const { token: newToken, stored } = createInvitationToken();
+    const { token: newToken, stored } = createInvitationToken(RESET_TTL_MS);
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: currentUser.id },
@@ -419,7 +442,7 @@ export default {
       return;
     }
 
-    const { token: newToken, stored } = createInvitationToken();
+    const { token: newToken, stored } = createInvitationToken(RESET_TTL_MS);
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: user.id },
@@ -559,7 +582,7 @@ export default {
     }
 
     // Generate new token
-    const { token: newToken, stored } = createInvitationToken();
+    const { token: newToken, stored } = createInvitationToken(RESET_TTL_MS);
 
     await strapi.query('plugin::users-permissions.user').update({
       where: { id: user.id },
@@ -573,6 +596,67 @@ export default {
       ctx.throw(500, "Erreur lors de l'envoi de l'email");
     }
 
+    ctx.body = { ok: true };
+  },
+
+  /**
+   * Public — décrit un lien d'invitation ou de réinitialisation, pour afficher le bon écran.
+   * GET /api/user-management/invitation?jeton=…
+   */
+  async invitationInfo(ctx) {
+    if (isRateLimited(`invitation-info:${ctx.request.ip}`)) {
+      return ctx.tooManyRequests('Trop de demandes, réessayez plus tard');
+    }
+    const lookup = lookupInvitationToken(ctx.query.jeton);
+    const user = lookup
+      ? await strapi.query('plugin::users-permissions.user').findOne({ where: { resetPasswordToken: lookup.stored }, populate: ['site'] })
+      : null;
+    if (!lookup || !user) {
+      ctx.body = { status: 'invalid' };
+      return;
+    }
+    ctx.body = {
+      status: lookup.expired ? 'expired' : 'valid',
+      purpose: user.blocked ? 'invitation' : 'reset',
+      firstName: user.first_name || null,
+      siteName: user.site?.name || null,
+      role: user.municipality_role || null,
+      // L'adresse n'est donnée qu'avec un lien valable (connexion automatique après le choix du mot de passe)
+      ...(lookup.expired ? { sentAt: null } : { email: user.email }),
+    };
+  },
+
+  /**
+   * Public — invitation expirée : prévient les administrateurs de la commune, qui pourront la renvoyer.
+   * Répond toujours de la même façon (rien n'est révélé sur le lien).
+   * POST /api/user-management/request-invitation — { jeton }
+   */
+  async requestInvitation(ctx) {
+    if (isRateLimited(`request-invitation:${ctx.request.ip}`)) {
+      return ctx.tooManyRequests('Trop de demandes, réessayez plus tard');
+    }
+    const lookup = lookupInvitationToken((ctx.request.body ?? {}).jeton);
+    const user = lookup
+      ? await strapi.query('plugin::users-permissions.user').findOne({ where: { resetPasswordToken: lookup.stored }, populate: ['site'] })
+      : null;
+    if (lookup?.expired && user?.blocked && user.site) {
+      const admins = await strapi.query('plugin::users-permissions.user').findMany({
+        where: { site: { documentId: user.site.documentId }, municipality_role: 'admin', blocked: false },
+      });
+      const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
+      for (const admin of admins) {
+        try {
+          await strapi.plugin('email').service('email').send({
+            to: admin.email,
+            subject: `${name} demande une nouvelle invitation — ${user.site.name}`,
+            text: `Bonjour, l'invitation envoyée à ${name} (${user.email}) a expiré. Renvoyez-la depuis l'écran Utilisateurs de l'administration.`,
+            html: `<p>Bonjour,</p><p>L'invitation envoyée à <strong>${escapeHtml(name)}</strong> (${escapeHtml(user.email)}) a expiré.</p><p>Renvoyez-la depuis l'écran <strong>Utilisateurs</strong> de l'administration.</p>`,
+          });
+        } catch (error) {
+          log.error('Failed to notify admin of an invitation request:', error);
+        }
+      }
+    }
     ctx.body = { ok: true };
   },
 };

@@ -406,6 +406,48 @@ export interface MockOptions {
   wasteSet?: 'some' | 'none';
 }
 
+export type MockMenu = Record<string, unknown> & { documentId: string; week_start: string; school_name: string | null };
+
+/** Menus : semaine du 14 septembre (à dupliquer), une autre école la semaine du 21 */
+function menus(): MockMenu[] {
+  const meal = (day: string, main: string, extra: Record<string, unknown> = {}) => ({
+    day,
+    starter: null,
+    main_course: main,
+    side_dish: null,
+    dairy: null,
+    dessert: null,
+    snack: null,
+    labels: null,
+    ...extra,
+  });
+  return [
+    {
+      documentId: 'cm-14',
+      week_start: '2026-09-14',
+      school_name: null,
+      menu_mode: 'manual',
+      menu_image: null,
+      menu_pdf: null,
+      meals: [
+        meal('lundi', 'Hachis parmentier', { starter: 'Carottes râpées', labels: { starter: ['bio'] } }),
+        meal('mardi', 'Poisson pané'),
+        meal('jeudi', 'Omelette', { labels: { main: ['vegetarien'] } }),
+        meal('vendredi', 'Poulet rôti'),
+      ],
+    },
+    {
+      documentId: 'cm-jf',
+      week_start: '2026-09-21',
+      school_name: 'École Jules-Ferry',
+      menu_mode: 'manual',
+      menu_image: null,
+      menu_pdf: null,
+      meals: [meal('lundi', 'Couscous')],
+    },
+  ];
+}
+
 export type MockWaste = Record<string, unknown> & { documentId: string; waste_type: string };
 
 function wasteSchedules(): MockWaste[] {
@@ -771,6 +813,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     alertSet = 'some',
     wasteSet = 'some',
   } = options;
+  const canteen = menus();
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
@@ -1130,6 +1173,45 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    if (url.pathname === '/api/school-menus') {
+      if (method === 'POST') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: 'POST menu', body });
+        const created = {
+          documentId: `cm-${canteen.length + 1}`,
+          menu_image: null,
+          menu_pdf: null,
+          ...(body.data as { week_start: string; school_name: string | null }),
+        };
+        canteen.push(created);
+        return json({ data: created }, 201);
+      }
+      const week = url.searchParams.get('filters[week_start][$eq]');
+      const school = url.searchParams.get('filters[school_name][$eq]');
+      const rows = canteen
+        .filter((menu) => !week || menu.week_start === week)
+        .filter((menu) =>
+          school !== null
+            ? menu.school_name === school
+            : !url.searchParams.has('filters[school_name][$null]') || !menu.school_name,
+        );
+      return json({ data: rows, meta: { pagination: { page: 1, pageSize: 100, total: rows.length, pageCount: 1 } } });
+    }
+    const menuMatch = /^\/api\/school-menus\/([^/]+)$/.exec(url.pathname);
+    if (menuMatch) {
+      const item = canteen.find((entry) => entry.documentId === menuMatch[1]);
+      if (!item) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      if (method === 'PUT') {
+        const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `PUT menu ${item.documentId}`, body });
+        Object.assign(item, body.data);
+      }
+      if (method === 'DELETE') {
+        canteen.splice(canteen.indexOf(item), 1);
+        return route.fulfill({ status: 204 });
+      }
+      return json({ data: item });
+    }
     if (url.pathname === '/api/waste-schedules') {
       if (method === 'POST') {
         const body = route.request().postDataJSON() as { data: Record<string, unknown> };
@@ -1317,6 +1399,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     directory,
     alertStore,
     waste,
+    canteen,
     stores,
     publishedByType,
     previewPosts,

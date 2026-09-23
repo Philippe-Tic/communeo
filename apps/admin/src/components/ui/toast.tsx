@@ -61,13 +61,23 @@ export function Toaster() {
   );
 
   return (
-    <div className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-[calc(100vw-32px)] max-w-[420px] flex-col gap-2">
+    // Mobile : au-dessus des barres d'action fixées en bas (Publier, Répondre…), qu'une erreur
+    // persistante ne doit pas recouvrir
+    <div className="pointer-events-none fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[60] flex w-[calc(100vw-32px)] max-w-[420px] flex-col gap-2 md:bottom-4">
       {/* Régions toujours présentes : les annonces fonctionnent dès la première notification */}
       <div role="status" aria-live="polite" className="flex flex-col gap-2">
-        {items.filter((t) => t.kind === 'success').map((t) => <ToastItem key={t.id} toast={t} />)}
+        {items
+          .filter((t) => t.kind === 'success')
+          .map((t) => (
+            <ToastItem key={t.id} toast={t} />
+          ))}
       </div>
       <div role="alert" aria-live="assertive" className="flex flex-col gap-2">
-        {items.filter((t) => t.kind !== 'success').map((t) => <ToastItem key={t.id} toast={t} />)}
+        {items
+          .filter((t) => t.kind !== 'success')
+          .map((t) => (
+            <ToastItem key={t.id} toast={t} />
+          ))}
       </div>
     </div>
   );
@@ -96,7 +106,12 @@ function ToastItem({ toast: item }: { toast: Toast }) {
           </>
         )}
       </p>
-      <button type="button" aria-label="Fermer la notification" className="grid size-6 shrink-0 place-items-center rounded" onClick={() => dismissToast(item.id)}>
+      <button
+        type="button"
+        aria-label="Fermer la notification"
+        className="grid size-6 shrink-0 place-items-center rounded"
+        onClick={() => dismissToast(item.id)}
+      >
         <X aria-hidden="true" className="size-4" />
       </button>
     </div>

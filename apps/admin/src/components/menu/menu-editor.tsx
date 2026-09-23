@@ -11,16 +11,16 @@ import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS as DndCSS } from '@dnd-kit/utilities';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Eye, GripVertical, IndentDecrease, IndentIncrease, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Eye, GripVertical, IndentDecrease, IndentIncrease, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { SECTIONS, THEMES } from '@communeo/core';
 import { PreviewDrawer, PreviewFullscreen, PreviewView, type PreviewState } from '@/components/editor/preview-panel';
 import { UnsavedChangesGuard } from '@/components/form';
+import { SettingsBar } from '@/components/settings/settings-bar';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
 import { Tooltip } from '@/components/ui/tooltip';
 import { ApiError } from '@/lib/api';
-import { formatListDate } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { previewQuery } from '@/lib/preview';
 import { saveSiteSettings, type PageSummary, type SiteSettings } from '@/lib/site-settings';
@@ -194,14 +194,7 @@ export function MenuEditor({ site, pages, unpublished }: { site: SiteSettings; p
 
   return (
     <div className="-mx-4 -mt-6 md:-mx-8 md:-mt-7">
-      {/* Barre d'enregistrement (écrans de réglages) */}
-      <div className="sticky top-14 z-20 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface px-4 py-2.5 md:px-8 dark:bg-sidebar">
-        <h1 ref={heading} className="flex-1 text-[15px] leading-tight font-semibold tracking-normal outline-none">
-          Menu du site
-        </h1>
-        <p role="status" className="text-[13px] text-secondary">
-          {dirty ? <span className="font-medium text-warning">Modifications non enregistrées</span> : `Dernier enregistrement : ${formatListDate(new Date(savedAt)).replace(/^./, (c) => c.toLowerCase())}`}
-        </p>
+      <SettingsBar title="Menu du site" headingRef={heading} dirty={dirty} saving={saving} savedAt={savedAt} onCancel={cancel} onSave={() => void save()}>
         <Button type="button" variant="tertiary" className="hidden md:max-[1199px]:inline-flex" onClick={() => setPreview('drawer')}>
           <Eye aria-hidden="true" />
           Aperçu
@@ -210,17 +203,7 @@ export function MenuEditor({ site, pages, unpublished }: { site: SiteSettings; p
           <Eye aria-hidden="true" />
           Aperçu
         </Button>
-        {/* Enregistrement : dans la barre sur ordinateur, fixé en bas de l'écran sur mobile */}
-        <div className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-2 border-t border-border bg-surface p-3 md:static md:z-auto md:border-0 md:bg-transparent md:p-0 dark:bg-sidebar md:dark:bg-transparent">
-          <Button type="button" variant="secondary" aria-label="Annuler les modifications" className="max-md:h-11 max-md:flex-1" disabled={!dirty || saving} onClick={cancel}>
-            Annuler<span className="max-md:hidden">&nbsp;les modifications</span>
-          </Button>
-          <Button type="button" className="max-md:h-11 max-md:flex-1" disabled={!dirty || saving} onClick={() => void save()}>
-            {saving && <Loader2 aria-hidden="true" className="animate-spin" />}
-            Enregistrer
-          </Button>
-        </div>
-      </div>
+      </SettingsBar>
 
       <div className="flex">
         <div className="min-w-0 flex-1 px-4 pt-6 pb-28 md:px-8 md:py-7">

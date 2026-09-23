@@ -40,6 +40,28 @@ describe('horaires de la mairie', () => {
     expect(status.open).toBe(false);
   });
 
+  it('fermeture sur une période : fermée pendant, réouverture datée au-delà d\'une semaine', () => {
+    const holidays: OpeningHours = { ...mairie, closures: [{ date: '2026-12-24', end: '2027-01-02', label: "Congés de fin d'année" }] };
+    const during = openingStatusAt(holidays, new Date('2026-12-28T10:00:00+01:00'));
+    expect(during).toMatchObject({ open: false, closure: "Congés de fin d'année" });
+    expect(openingStatusLabel(during)).toBe('Fermée · ouvre le 4 janvier à 9h');
+    // Veille de la période : réouverture le 4 janvier (lundi), plus d'une semaine après
+    expect(openingStatusLabel(openingStatusAt(holidays, new Date('2026-12-23T18:00:00+01:00')))).toBe('Fermée · ouvre le 4 janvier à 9h');
+    // Le jour suivant fermé n'est pas annoncé comme « demain »
+    expect(openingStatusLabel(openingStatusAt(mairie, new Date('2026-12-24T18:00:00+01:00')))).toBe('Fermée · ouvre samedi à 9h');
+  });
+
+  it('refuse une période qui finit avant de commencer', () => {
+    expect(openingHoursSchema.safeParse({ ...mairie, closures: [{ date: '2026-12-24', end: '2026-12-20' }] }).success).toBe(false);
+  });
+
+  it('refuse deux plages qui se chevauchent', () => {
+    const overlap = { ...mairie, days: { ...mairie.days, monday: [{ open: '09:00', close: '12:00' }, { open: '11:00', close: '13:00' }] } };
+    const result = openingHoursSchema.safeParse(overlap);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]).toMatchObject({ message: 'Deux plages se chevauchent', path: ['days', 'monday', 1] });
+  });
+
   it('refuse une plage incohérente', () => {
     const invalid = { ...mairie, days: { ...mairie.days, monday: [{ open: '14:00', close: '09:00' }] } };
     expect(openingHoursSchema.safeParse(invalid).success).toBe(false);

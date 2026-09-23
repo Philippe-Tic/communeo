@@ -21,7 +21,8 @@ export interface TimeRange {
 
 export interface OpeningHours {
   days: Record<Weekday, TimeRange[]>;
-  closures: Array<{ date: string; label?: string | null }>;
+  /** Fermetures exceptionnelles : un jour (`date`) ou une période (`date` → `end`, inclus) */
+  closures: Array<{ date: string; end?: string | null; label?: string | null }>;
   note?: string | null;
 }
 
@@ -60,6 +61,14 @@ export function summarizeWeek(hours: OpeningHours): { days: string; hours: strin
   }));
 }
 
+const MONTHS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+/** « 2026-01-03 » → « 3 janvier », « 1er janvier » */
+export function formatDay(isoDate: string): string {
+  const [, month, day] = isoDate.split('-').map(Number);
+  return `${day === 1 ? '1er' : day} ${MONTHS[month! - 1]}`;
+}
+
 /** Composantes date/heure dans le fuseau de la commune (Europe/Paris par défaut). */
 function zoned(date: Date, timeZone: string) {
   const parts = Object.fromEntries(
@@ -85,12 +94,31 @@ function zoned(date: Date, timeZone: string) {
 
 export type OpeningStatus =
   | { open: true; closesAt: string }
-  | { open: false; closure?: string | null; next?: { day: Weekday; time: string; today: boolean; tomorrow: boolean } };
+  | {
+      open: false;
+      closure?: string | null;
+      /** `date` (AAAA-MM-JJ) : réouverture à plus d'une semaine, après une fermeture exceptionnelle */
+      next?: { day: Weekday; time: string; today: boolean; tomorrow: boolean; date?: string };
+    };
+
+/** Fermeture exceptionnelle qui couvre ce jour (AAAA-MM-JJ) */
+export const closureOn = (hours: OpeningHours, isoDate: string) =>
+  hours.closures.find((closure) => closure.date <= isoDate && isoDate <= (closure.end || closure.date));
+
+/** Jour civil décalé de `offset` jours (calcul sur la date seule, sans effet des changements d'heure) */
+function shiftDay(isoDate: string, offset: number): { isoDate: string; weekday: Weekday } {
+  const day = new Date(`${isoDate}T12:00:00Z`);
+  day.setUTCDate(day.getUTCDate() + offset);
+  return { isoDate: day.toISOString().slice(0, 10), weekday: WEEKDAYS[(day.getUTCDay() + 6) % 7]! };
+}
+
+/** Jours examinés pour trouver la réouverture (fermetures de fin d'année comprises) */
+const LOOKAHEAD_DAYS = 62;
 
 /** Statut à un instant donné (à appeler dans le navigateur avec `new Date()`). */
 export function openingStatusAt(hours: OpeningHours, date: Date, timeZone = 'Europe/Paris'): OpeningStatus {
   const now = zoned(date, timeZone);
-  const closure = hours.closures.find((c) => c.date === now.isoDate);
+  const closure = closureOn(hours, now.isoDate);
   const todayRanges = closure ? [] : hours.days[now.weekday];
 
   const current = todayRanges.find((r) => r.open <= now.time && now.time < r.close);
@@ -99,11 +127,16 @@ export function openingStatusAt(hours: OpeningHours, date: Date, timeZone = 'Eur
   const laterToday = todayRanges.find((r) => r.open > now.time);
   if (laterToday) return { open: false, closure: closure?.label, next: { day: now.weekday, time: laterToday.open, today: true, tomorrow: false } };
 
-  const start = WEEKDAYS.indexOf(now.weekday);
-  for (let offset = 1; offset <= 7; offset += 1) {
-    const day = WEEKDAYS[(start + offset) % 7]!;
-    const first = hours.days[day][0];
-    if (first) return { open: false, closure: closure?.label, next: { day, time: first.open, today: false, tomorrow: offset === 1 } };
+  for (let offset = 1; offset <= LOOKAHEAD_DAYS; offset += 1) {
+    const day = shiftDay(now.isoDate, offset);
+    const first = closureOn(hours, day.isoDate) ? undefined : hours.days[day.weekday][0];
+    if (first) {
+      return {
+        open: false,
+        closure: closure?.label,
+        next: { day: day.weekday, time: first.open, today: false, tomorrow: offset === 1, ...(offset > 6 ? { date: day.isoDate } : {}) },
+      };
+    }
   }
   return { open: false, closure: closure?.label };
 }
@@ -114,7 +147,13 @@ export function openingStatusLabel(status: OpeningStatus, feminine = true): stri
   const closed = feminine ? 'Fermée' : 'Fermé';
   if (status.open) return `${open} · ferme à ${formatTime(status.closesAt)}`;
   if (!status.next) return closed;
-  const when = status.next.today ? '' : status.next.tomorrow ? 'demain ' : `${WEEKDAY_LABELS[status.next.day].long} `;
+  const when = status.next.today
+    ? ''
+    : status.next.tomorrow
+      ? 'demain '
+      : status.next.date
+        ? `le ${formatDay(status.next.date)} `
+        : `${WEEKDAY_LABELS[status.next.day].long} `;
   return `${closed} · ouvre ${when}à ${formatTime(status.next.time)}`;
 }
 

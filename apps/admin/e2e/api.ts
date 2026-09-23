@@ -906,7 +906,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       caption: null,
       width: 'normal',
     });
-  }  // Contenus par type (API Strapi), version en ligne et modifications depuis
+  } // Contenus par type (API Strapi), version en ligne et modifications depuis
   const stores: Record<ContentType, Record<string, Record<string, unknown>>> = {
     pages: pages as unknown as Record<string, Record<string, unknown>>,
     articles: structuredClone(ARTICLES),
@@ -939,7 +939,43 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const site = {
     documentId: SITE.documentId,
     updatedAt: '2026-09-22T14:30:00.000Z',
+    name: SITE.name,
     theme,
+    logo: null as unknown,
+    favicon: null as unknown,
+    contact_mail: 'mairie@saint-aubin-sur-loire.fr',
+    contact_phone: '03 86 00 00 00' as string | null,
+    address: '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire' as string | null,
+    infos_pratiques: {
+      opening_hours: {
+        days: {
+          monday: [
+            { open: '09:00', close: '12:00' },
+            { open: '14:00', close: '17:00' },
+          ],
+          tuesday: [{ open: '09:00', close: '12:00' }],
+          wednesday: [],
+          thursday: [{ open: '09:00', close: '12:00' }],
+          friday: [{ open: '09:00', close: '12:00' }],
+          saturday: [],
+          sunday: [],
+        },
+        closures: [{ date: '2026-11-11', end: null, label: 'Armistice' }],
+        note: 'Permanence du maire sur rendez-vous.',
+      },
+      population: 3240,
+      contact_form_intro: 'Une question ? Le secrétariat vous répond sous 48 heures ouvrées.',
+      latitude: 46.7412,
+      longitude: 3.7891,
+    } as unknown,
+    mentions_legales: { publication_director: 'Claire Martin', publication_director_title: 'Maire' } as unknown,
+    rgpd: null as unknown,
+    accessibilite: { accessibility_level: 'partiellement-conforme', accessibility_schema_url: null } as unknown,
+    social_links: [] as unknown[],
+    code_insee: '58236' as string | null,
+    comarquage_audiences: ['particuliers'] as string[] | null,
+    open_data_url: null as string | null,
+    open_data_platform: null as string | null,
     comarquage_enabled: true,
     open_data_enabled: false,
     navigation_config: structuredClone(navigation) as unknown,

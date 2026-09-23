@@ -41,6 +41,8 @@ export interface ListSource {
   fields: string[];
   /** Images : champ média → vignette */
   media?: string[];
+  /** Autres relations lues, avec leurs champs (fichier d'un document : format, poids) */
+  populate?: Record<string, string[]>;
   searchField: string;
 }
 
@@ -56,6 +58,9 @@ export function listUrl(source: ListSource, params: ListParams, states: Publicat
   [...new Set(['documentId', 'updatedAt', 'scheduled_at', ...source.fields])].forEach((field, index) => search.set(`fields[${index}]`, field));
   for (const field of source.media ?? []) {
     ['url', 'formats', 'alternativeText'].forEach((attribute, index) => search.set(`populate[${field}][fields][${index}]`, attribute));
+  }
+  for (const [field, attributes] of Object.entries(source.populate ?? {})) {
+    attributes.forEach((attribute, index) => search.set(`populate[${field}][fields][${index}]`, attribute));
   }
   if (params.q.trim()) search.set(`filters[${source.searchField}][$containsi]`, params.q.trim());
   for (const [key, value] of Object.entries(params.filters)) search.set(key, value);
@@ -101,6 +106,7 @@ export const listQuery = <T>(client: QueryClient, source: ListSource, params: Li
 export async function refreshContent(client: QueryClient, type: ContentApi, { draftOnly = false } = {}) {
   await Promise.all([
     client.invalidateQueries({ queryKey: ['publication-states', type] }),
+    client.invalidateQueries({ queryKey: ['publication-years', type] }),
     client.invalidateQueries({ queryKey: ['list', type] }),
     // État de mise en ligne de l'en-tête (lib/publication.ts)
     draftOnly ? undefined : client.invalidateQueries({ queryKey: ['publication'] }),

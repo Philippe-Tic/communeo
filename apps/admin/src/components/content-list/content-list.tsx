@@ -91,7 +91,15 @@ export function ContentList<T extends ListRow>({
   const order = search.ordre ?? (search.tri ? (sortField === 'title' ? 'asc' : 'desc') : sort.order);
   const sortText = sortable.find((entry) => entry.field === sortField)?.label ?? sortField;
 
-  const filterValues = Object.assign({}, ...(config.filters ?? []).map((filter) => (typeof search[filter.key] === 'string' ? filterQuery(filter, search[filter.key] as string) : {}))) as Record<string, string>;
+  // Onglets : attendre leur chargement pour savoir lequel est ouvert (l'année la plus récente par défaut)
+  const tabOptions = config.tabs?.useOptions();
+  const tabParam = config.tabs ? search[config.tabs.key] : undefined;
+  const tab = config.tabs && tabOptions ? (tabParam !== undefined ? String(tabParam) : config.tabs.defaultValue(tabOptions)) : undefined;
+  const filterValues = Object.assign(
+    {},
+    ...(config.filters ?? []).map((filter) => (typeof search[filter.key] === 'string' ? filterQuery(filter, search[filter.key] as string) : {})),
+    config.tabs && tab && tabOptions ? config.tabs.query(tab, tabOptions) : {},
+  ) as Record<string, string>;
   const params: ListParams = {
     q: search.q ?? '',
     statut: search.statut,
@@ -103,7 +111,7 @@ export function ContentList<T extends ListRow>({
   };
   const filtered = Boolean(params.q || params.statut || Object.keys(filterValues).length);
 
-  const list = useQuery(listQuery<T>(client, source, params));
+  const list = useQuery({ ...listQuery<T>(client, source, params), enabled: !config.tabs || !!tabOptions });
   const states = useQuery(publicationStatesQuery(source.type));
   const { data: session } = useQuery(sessionQuery);
   const liveUrl = session?.site?.live_url?.replace(/\/$/, '');
@@ -196,6 +204,7 @@ export function ContentList<T extends ListRow>({
     ...(config.filters ?? []).map((filter) => ({ key: filter.key, label: filter.label, value: search[filter.key] as string | undefined, options: filter.options })),
   ];
   const clearAll = () => onSearchChange(Object.fromEntries(['q', 'statut', 'page', ...(config.filters ?? []).map((filter) => filter.key)].map((key) => [key, undefined])));
+  const tabLabel = tabOptions?.find((option) => option.value === tab)?.label;
 
   const newButton = (className?: string) => (
     <Button asChild className={className}>
@@ -207,11 +216,40 @@ export function ContentList<T extends ListRow>({
   );
 
   const counters = states.data ? summary(noun, Object.values(states.data)) : undefined;
-  const empty = list.isSuccess && !filtered && list.data.total === 0;
+  // Liste vide « premier usage » : aucun contenu du tout (un onglet vide n'en est pas un)
+  const empty = list.isSuccess && !filtered && list.data.total === 0 && (!config.tabs || (!!states.data && Object.keys(states.data).length === 0));
 
   return (
     <div className="pb-24 md:pb-0">
       <PageHeader title={config.title} description={counters} actions={!empty && newButton('hidden md:inline-flex')} />
+
+      {config.tabs && tabOptions && !empty && (
+        <nav aria-label={config.tabs.label} className="-mt-2 mb-4 flex flex-wrap items-center gap-x-1 border-b border-border">
+          {tabOptions.map((option) => {
+            const active = option.value === tab;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                aria-current={active ? 'true' : undefined}
+                // Année en nombre : l'adresse reste ?annee=2025 (une chaîne serait mise entre guillemets)
+                onClick={() => onSearchChange({ [config.tabs!.key]: /^\d+$/.test(option.value) ? Number(option.value) : option.value, page: undefined })}
+                className={cn('-mb-px border-b-2 px-3.5 py-2.5 text-sm', active ? 'border-brand font-semibold text-brand' : 'border-transparent text-text hover:text-brand')}
+              >
+                {option.label}
+                {option.count !== undefined && (
+                  <>
+                    <span aria-hidden="true" className="ml-1.5 font-normal text-secondary">
+                      {option.count}
+                    </span>
+                    <span className="sr-only">{` (${countOf(noun, option.count)})`}</span>
+                  </>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {empty ? (
         <EmptyState icon={EmptyIcon} title={config.empty.title} text={config.empty.text} action={newButton()} />
@@ -258,12 +296,18 @@ export function ContentList<T extends ListRow>({
           ) : list.data.total === 0 ? (
             <div className="px-6 py-12 text-center">
               <p className="text-[15px] font-semibold">
-                Aucun{noun.feminine ? 'e' : ''} {noun.one} ne correspond {params.q ? `à « ${params.q} »` : 'aux filtres choisis'}
+                {filtered || !tabLabel
+                  ? `Aucun${noun.feminine ? 'e' : ''} ${noun.one} ne correspond ${params.q ? `à « ${params.q} »` : 'aux filtres choisis'}`
+                  : `Aucun${noun.feminine ? 'e' : ''} ${noun.one} pour ${tabLabel}`}
               </p>
-              <p className="mt-1.5 text-secondary">Vérifiez l'orthographe ou élargissez la recherche.</p>
-              <Button variant="secondary" className="mt-4" onClick={clearAll}>
-                Effacer la recherche et les filtres
-              </Button>
+              {filtered && (
+                <>
+                  <p className="mt-1.5 text-secondary">Vérifiez l'orthographe ou élargissez la recherche.</p>
+                  <Button variant="secondary" className="mt-4" onClick={clearAll}>
+                    Effacer la recherche et les filtres
+                  </Button>
+                </>
+              )}
             </div>
           ) : (
             <div aria-busy={list.isFetching} className={cn(list.isPlaceholderData && 'opacity-60 motion-safe:transition-opacity')}>
@@ -320,6 +364,7 @@ export function ContentList<T extends ListRow>({
                         </td>
                         <td className={cn('px-3', compact ? 'py-1.5' : 'py-3')}>
                           <div className="flex items-center gap-3">
+                            {config.rowIcon?.(row)}
                             {config.thumbnail && !compact && <Thumbnail media={config.thumbnail(row)} />}
                             <TitleLink config={config} row={row} className="line-clamp-2 max-w-[420px]" />
                           </div>

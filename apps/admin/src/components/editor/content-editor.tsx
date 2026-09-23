@@ -16,7 +16,7 @@ import type { z } from 'zod';
 import { slugify } from '@communeo/core';
 import { describeBlockError, type Block } from '@/components/blocks';
 import { PublicationBadge } from '@/components/content-list/publication-badge';
-import { agree, type Noun } from '@/components/content-list/types';
+import { agree, newOf, type Noun } from '@/components/content-list/types';
 import { Form, FormErrorSummary, TextField, useZodForm } from '@/components/form';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog, UnsavedChangesDialog } from '@/components/ui/confirm-dialog';
@@ -25,6 +25,7 @@ import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import type { BaseDocument, DocumentApi, Draft } from '@/lib/content-api';
 import { markRecent, refreshContent } from '@/lib/content-list';
+import { usePendingUploads } from '@/lib/media';
 import { formatShortParisDateTime } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { previewQuery, type PreviewTarget } from '@/lib/preview';
@@ -48,7 +49,7 @@ export interface EditorConfig<D extends BaseDocument, V extends FieldValues> {
   api: DocumentApi<D, V>;
   previewType: Exclude<PreviewTarget['type'], 'home'>;
   /** Rubrique de l'admin : fil de la barre, retour, titre du document */
-  section: { label: string; to: '/pages' | '/actualites' | '/agenda'; back: string };
+  section: { label: string; to: '/pages' | '/actualites' | '/agenda' | '/documents'; back: string };
   noun: Noun;
   /** Règles de publication (le brouillon, lui, s'enregistre tel quel) */
   schema: z.ZodType<V, V>;
@@ -75,7 +76,7 @@ function siteHost(liveUrl: string | null | undefined, slug: string | undefined) 
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-export function ContentEditor<D extends BaseDocument, V extends FieldValues & { title: string; slug: string; blocks: Block[] }>({
+export function ContentEditor<D extends BaseDocument, V extends FieldValues & { title: string; slug: string }>({
   config,
   documentId: initialId,
   initial,
@@ -106,6 +107,8 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
   const slugTouched = useRef(!!initial?.published);
   const heading = useRef<HTMLHeadingElement>(null);
   const withPreviewPanel = config.layout === 'preview' && previewShown;
+  // Un fichier en cours d'envoi : la publication attend qu'il soit arrivé
+  const uploading = usePendingUploads() > 0;
 
   const remember = (next: Draft<D>) => {
     setDoc(next);
@@ -138,7 +141,7 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
     if (generated !== (form.getValues('slug' as never) as unknown)) form.setValue('slug' as never, generated as never);
   }, [values.title, form]);
 
-  const title = values.title?.trim() || (documentId ? `${capitalize(noun.one)} sans titre` : `${noun.feminine ? 'Nouvelle' : 'Nouvel'} ${noun.one}`);
+  const title = values.title?.trim() || (documentId ? `${capitalize(noun.one)} sans titre` : newOf(noun));
   useEffect(() => {
     document.title = `${title} — ${config.section.label} · Communeo`;
   }, [title, config.section.label]);
@@ -275,8 +278,10 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
             <Clock aria-hidden="true" />
             Programmer
           </Button>
-          <Button type="submit" disabled={form.formState.isSubmitting} className={cn('max-md:h-11 max-md:flex-1', justPublished && 'bg-success text-white hover:bg-success')}>
-            {justPublished ? (
+          <Button type="submit" disabled={form.formState.isSubmitting || uploading} className={cn('max-md:h-11 max-md:flex-1', justPublished && 'bg-success text-white hover:bg-success')}>
+            {uploading ? (
+              'Envoi du fichier…'
+            ) : justPublished ? (
               <>
                 <Check aria-hidden="true" />
                 Publié

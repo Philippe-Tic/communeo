@@ -7,7 +7,7 @@
  * - aperçu en direct : la vraie page d'accueil du thème avec le menu non enregistré ;
  * - réglage : bouton « Enregistrer » explicite, garde des modifications non enregistrées.
  */
-import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type Announcements, type DragEndEvent, type KeyboardCoordinateGetter } from '@dnd-kit/core';
+import { closestCenter, DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type Announcements, type DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS as DndCSS } from '@dnd-kit/utilities';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -25,12 +25,12 @@ import { focusHeadingIfRequested } from '@/lib/focus';
 import { previewQuery } from '@/lib/preview';
 import { saveSiteSettings, type PageSummary, type SiteSettings } from '@/lib/site-settings';
 import { themeName } from '@/lib/session';
+import { rank, stepCoordinates } from '@/lib/dnd';
 import { cn } from '@/lib/utils';
 import { EntryDialog } from './entry-dialog';
 import * as model from './model';
 import type { ListId, MenuEntry, MenuState } from './model';
 
-const rank = (index: number, total: number) => `position ${index + 1} sur ${total}`;
 const sameList = (a: ListId, b: ListId) => (typeof a === 'string' || typeof b === 'string' ? a === b : a.group === b.group);
 
 const TYPE_BADGES: Record<MenuEntry['type'], { label: string; className: string }> = {
@@ -356,23 +356,6 @@ export function MenuEditor({ site, pages, unpublished }: { site: SiteSettings; p
     </div>
   );
 }
-
-/**
- * Clavier : une flèche = une position, même quand une entrée voisine est haute (groupe ouvert).
- * Le déplacement par défaut de dnd-kit (coins les plus proches) sauterait par-dessus le groupe.
- */
-const stepCoordinates =
-  (keys: string[]): KeyboardCoordinateGetter =>
-  (event, { context: { active, over, droppableRects, collisionRect } }) => {
-    const direction = event.code === 'ArrowDown' ? 1 : event.code === 'ArrowUp' ? -1 : 0;
-    if (!direction || !active || !collisionRect) return undefined;
-    event.preventDefault();
-    const target = keys[keys.indexOf(String(over?.id ?? active.id)) + direction];
-    const rect = target ? droppableRects.get(target) : undefined;
-    if (!rect) return undefined;
-    // Centre de l'entrée déplacée sur le centre de la voisine : c'est elle que vise closestCenter
-    return { x: collisionRect.left, y: rect.top + rect.height / 2 - collisionRect.height / 2 };
-  };
 
 function SortableEntries({ list, entries, lookup, onMove, children }: { list: ListId; entries: MenuEntry[]; lookup: Lookup; onMove: (from: number, to: number) => void; children: ReactNode }) {
   const keys = entries.map((entry) => entry.key);

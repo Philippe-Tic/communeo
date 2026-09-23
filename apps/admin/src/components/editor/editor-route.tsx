@@ -6,11 +6,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { FieldValues } from 'react-hook-form';
-import type { Block } from '@/components/blocks';
 import type { BaseDocument, Draft } from '@/lib/content-api';
 import { ContentEditor, type EditorConfig } from './content-editor';
 
-export function EditorRoute<D extends BaseDocument, V extends FieldValues & { title: string; slug: string; blocks: Block[] }>({ config, documentId }: { config: EditorConfig<D, V>; documentId: string }) {
+export function EditorRoute<D extends BaseDocument, V extends FieldValues & { title: string; slug: string }>({ config, documentId }: { config: EditorConfig<D, V>; documentId: string }) {
   const navigate = useNavigate();
   const client = useQueryClient();
   // Contenu créé ici : l'adresse change, l'éditeur reste le même (pas de rechargement pendant la saisie)

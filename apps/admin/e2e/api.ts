@@ -119,6 +119,35 @@ export const EVENTS: Record<string, Record<string, unknown>> = {
   },
 };
 
+const PDF = { id: 900, name: 'deliberation.pdf', ext: '.pdf', mime: 'application/pdf', size: 310, url: '/uploads/deliberation.pdf' };
+const DOCUMENT_TYPES = ['deliberation', 'deliberation', 'deliberation', 'arrete', 'pv-conseil-municipal'];
+
+/** Documents officiels : trois, ou 300 répartis de 2019 à 2026 (critère « plusieurs centaines ») */
+function officialDocuments(many: boolean): Record<string, Record<string, unknown>> {
+  const years = many ? [[2026, 38], [2025, 61], [2024, 57], [2023, 44], [2022, 40], [2021, 30], [2020, 20], [2019, 10]] : [[2026, 2], [2025, 1]];
+  const docs: Record<string, Record<string, unknown>> = {};
+  for (const [year, count] of years as Array<[number, number]>) {
+    for (let index = 1; index <= count; index += 1) {
+      const documentId = `d-${year}-${index}`;
+      const type = DOCUMENT_TYPES[index % DOCUMENT_TYPES.length]!;
+      const month = String(((index * 7) % 12) + 1).padStart(2, '0');
+      docs[documentId] = {
+        documentId, title: `${type === 'arrete' ? 'Arrêté' : type === 'deliberation' ? 'Délibération' : 'Procès-verbal'} ${year}-${String(index).padStart(3, '0')}${index === 3 ? ' — Convention avec le SDIS' : ''}`,
+        slug: `${type}-${year}-${index}`, document_type: type, reference_number: `DEL-${year}-${String(index).padStart(3, '0')}`, document_date: `${year}-${month}-15`, session_date: null, year,
+        description: null, file: PDF, additional_files: [], scheduled_at: null, publishedAt: null, updatedAt: `${year}-${month}-16T10:00:00.000Z`,
+      };
+    }
+  }
+  return docs;
+}
+
+/** Équipe : la maire et deux adjoints */
+export const TEAM = [
+  { documentId: 't-martin', first_name: 'Claire', last_name: 'Martin', role: 'maire', title: null, delegation: null, bio: null, email: null, office_hours: null, display_order: 10, photo: null },
+  { documentId: 't-morel', first_name: 'Julien', last_name: 'Morel', role: 'adjoint', title: '1er adjoint', delegation: 'Vie associative, sports', bio: null, email: null, office_hours: null, display_order: 10, photo: null },
+  { documentId: 't-rousseau', first_name: 'Anne', last_name: 'Rousseau', role: 'adjoint', title: '2e adjointe', delegation: 'Affaires scolaires', bio: null, email: null, office_hours: null, display_order: 20, photo: null },
+];
+
 const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Number(documentId.slice(2)) % 4 === 0;
 
 export interface MockOptions {
@@ -138,6 +167,10 @@ export interface MockOptions {
   navigation?: unknown;
   /** Thème de la commune */
   theme?: string;
+  /** Documents officiels : 3 (défaut) ou 300 */
+  documentSet?: 'few' | 'many';
+  /** Équipe vide */
+  emptyTeam?: boolean;
 }
 
 export const NAVIGATION = {
@@ -150,7 +183,7 @@ export const NAVIGATION = {
 };
 
 export async function mockApi(page: Page, options: MockOptions = {}) {
-  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel' } = options;
+  const { user = 'admin', publication = 'pending', unread = 3, loggedIn = true, failPageSaves = false, previewUnavailable = false, pageSet = 'one', failPublishFor = [], navigation = NAVIGATION, theme = 'institutionnel', documentSet = 'few', emptyTeam = false } = options;
   const calls: string[] = [];
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
@@ -161,10 +194,18 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     pages: pages as unknown as Record<string, Record<string, unknown>>,
     articles: structuredClone(ARTICLES),
     evenements: structuredClone(EVENTS),
+    'official-documents': officialDocuments(documentSet === 'many'),
   };
+  const team = emptyTeam ? [] : structuredClone(TEAM) as Array<Record<string, unknown>>;
+  let uploads = 0;
   const published = new Set<string>(Object.keys(pages).filter((id) => !isDraftOnly(id) && !pages[id]!.scheduled_at));
-  const publishedByType: Record<ContentType, Set<string>> = { pages: published, articles: new Set(['a-dechetterie']), evenements: new Set(['e-fete', 'e-forum']) };
-  const modifiedByType: Record<ContentType, Set<string>> = { pages: new Set(), articles: new Set(), evenements: new Set() };
+  const publishedByType: Record<ContentType, Set<string>> = {
+    pages: published,
+    articles: new Set(['a-dechetterie']),
+    evenements: new Set(['e-fete', 'e-forum']),
+    'official-documents': new Set(Object.keys(stores['official-documents']).filter((id) => !id.endsWith('-2'))),
+  };
+  const modifiedByType: Record<ContentType, Set<string>> = { pages: new Set(), articles: new Set(), evenements: new Set(), 'official-documents': new Set() };
 
   // Session côté « serveur » (cookie HttpOnly en vrai) : l'admin ne voit jamais de jeton
   let session = loggedIn;
@@ -200,7 +241,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (method !== 'GET' && route.request().headers()['x-communeo-csrf'] !== '1') {
       return json({ error: { status: 403, message: 'Requête refusée : en-tête de sécurité manquant' } }, 403);
     }
-    if (method === 'POST') (posts[url.pathname] ??= []).push(route.request().postDataJSON());
+    if (method === 'POST' && !url.pathname.endsWith('/upload')) (posts[url.pathname] ??= []).push(route.request().postDataJSON());
     if (url.pathname === '/api/session/login') {
       const body = route.request().postDataJSON() as { identifier: string; password: string; remember?: boolean };
       if (!passwords.has(body.password)) return json({ error: { status: 400, message: INVALID_LOGIN } }, 400);
@@ -245,7 +286,43 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       state = 'running';
       return json({ status: 'queued', queued: true }, 202);
     }
-    const contentMatch = /^\/api\/(pages|articles|evenements)(?:\/([^/]+))?$/.exec(url.pathname);
+    if (url.pathname === '/api/publication/official-documents/years') {
+      const counts = new Map<number, number>();
+      for (const doc of Object.values(stores['official-documents'])) if (doc.year) counts.set(doc.year as number, (counts.get(doc.year as number) ?? 0) + 1);
+      return json({ data: [...counts].sort(([a], [b]) => b - a).map(([year, count]) => ({ year, count })) });
+    }
+    if (url.pathname === '/api/media-items/upload' && method === 'POST') {
+      const body = route.request().postDataBuffer()?.toString('latin1') ?? '';
+      const name = /filename="([^"]+)"/.exec(body)?.[1] ?? 'fichier';
+      const mime = /Content-Type: ([^\r\n]+)/.exec(body)?.[1] ?? 'application/octet-stream';
+      uploads += 1;
+      const file = { id: 1000 + uploads, name, ext: name.slice(name.lastIndexOf('.')), mime, size: 42, url: `/uploads/${name}` };
+      posts['upload'] = [...(posts['upload'] ?? []), file];
+      return json({ data: { documentId: `m-${uploads}`, name, file } }, 201);
+    }
+    const teamMatch = /^\/api\/team-members(?:\/([^/]+))?$/.exec(url.pathname);
+    if (teamMatch) {
+      const id = teamMatch[1];
+      if (method === 'GET') return json({ data: [...team].sort((a, b) => ((a.display_order as number) ?? 999) - ((b.display_order as number) ?? 999)), meta: { pagination: { page: 1, pageCount: 1, total: team.length } } });
+      if (method === 'DELETE' && id) {
+        team.splice(team.findIndex((member) => member.documentId === id), 1);
+        return route.fulfill({ status: 204 });
+      }
+      const body = route.request().postDataJSON() as { data: Record<string, unknown> };
+      bodies.push({ call: `${method} team`, body });
+      const photoId = body.data.photo;
+      const data = { ...body.data, ...(photoId !== undefined ? { photo: photoId ? { id: photoId, name: 'photo.png', ext: '.png', size: 42, url: '/uploads/photo.png' } : null } : {}) };
+      if (method === 'POST') {
+        const member = { documentId: `t-${team.length + 1}`, photo: null, ...data };
+        team.push(member);
+        return json({ data: member }, 201);
+      }
+      const member = team.find((item) => item.documentId === id);
+      if (!member) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      Object.assign(member, data);
+      return json({ data: member });
+    }
+    const contentMatch = /^\/api\/(pages|articles|evenements|official-documents)(?:\/([^/]+))?$/.exec(url.pathname);
     if (contentMatch) {
       const type = contentMatch[1] as ContentType;
       const id = contentMatch[2];
@@ -281,7 +358,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         return route.fulfill({ status: 204 });
       }
     }
-    const statesMatch = /^\/api\/publication\/(pages|articles|evenements)$/.exec(url.pathname);
+    const statesMatch = /^\/api\/publication\/(pages|articles|evenements|official-documents)$/.exec(url.pathname);
     if (statesMatch) {
       const type = statesMatch[1] as ContentType;
       return json({
@@ -294,7 +371,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         ),
       });
     }
-    const unpublish = /^\/api\/publication\/(pages|articles|evenements)\/([^/]+)\/unpublish$/.exec(url.pathname);
+    const unpublish = /^\/api\/publication\/(pages|articles|evenements|official-documents)\/([^/]+)\/unpublish$/.exec(url.pathname);
     if (unpublish && method === 'POST') {
       const type = unpublish[1] as ContentType;
       publishedByType[type].delete(unpublish[2]!);
@@ -317,6 +394,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
 
   return {
     site,
+    team,
     stores,
     publishedByType,
     previewPosts,
@@ -333,7 +411,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   };
 }
 
-export type ContentType = 'pages' | 'articles' | 'evenements';
+export type ContentType = 'pages' | 'articles' | 'evenements' | 'official-documents';
 
 /** Liste façon Strapi : recherche, statut par identifiants, catégorie, période, tri, pagination */
 function listDocuments(store: Record<string, Record<string, unknown>>, params: URLSearchParams) {
@@ -342,6 +420,9 @@ function listDocuments(store: Record<string, Record<string, unknown>>, params: U
   const inIds = all('filters[documentId][$in]');
   const notIn = all('filters[documentId][$notIn]');
   const category = params.get('filters[category][$eq]');
+  const documentType = params.get('filters[document_type][$eq]');
+  const year = params.get('filters[year][$eq]');
+  const yearBefore = params.get('filters[year][$lt]');
   const upcoming = params.get('filters[$or][0][end_date][$gte]');
   const past = params.get('filters[$or][0][end_date][$lt]');
   const lastDay = (doc: Record<string, unknown>) => String(doc.end_date ?? doc.start_date ?? '');
@@ -352,6 +433,9 @@ function listDocuments(store: Record<string, Record<string, unknown>>, params: U
     if (params.has('filters[scheduled_at][$notNull]') && !doc.scheduled_at) return false;
     if (params.has('filters[scheduled_at][$null]') && doc.scheduled_at) return false;
     if (category && doc.category !== category) return false;
+    if (documentType && doc.document_type !== documentType) return false;
+    if (year && String(doc.year) !== year) return false;
+    if (yearBefore && Number(doc.year) >= Number(yearBefore)) return false;
     if (upcoming && lastDay(doc) < upcoming) return false;
     if (past && lastDay(doc) >= past) return false;
     return true;

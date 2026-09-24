@@ -14,7 +14,7 @@ const { ctx, home } = Astro.props;
 const { site } = ctx;
 ---
 <Layout ctx={ctx} heading={false}>
-  <section class="st-hero" aria-labelledby="st-hero-title">
+  <section class="st-hero" aria-labelledby="st-hero-title" data-cn-home="hero">
     <h1 id="st-hero-title">{home.hero?.title ?? site.name}</h1>
     {home.hero?.subtitle && <p>{home.hero.subtitle}</p>}
     {home.hero?.image && <img src={home.hero.image.src} alt={home.hero.image.alt} width={home.hero.image.width ?? undefined} height={home.hero.image.height ?? undefined} />}
@@ -27,14 +27,14 @@ const { site } = ctx;
   </section>
 
   {home.quickLinks && (
-    <section aria-labelledby="st-quick">
+    <section aria-labelledby="st-quick" data-cn-home="quick_links">
       <h2 id="st-quick">Accès rapides</h2>
       <ul>{home.quickLinks.map((link) => <li><a href={link.href}>{link.label}</a>{link.description && <span> – {link.description}</span>}</li>)}</ul>
     </section>
   )}
 
   {home.featuredNews && (
-    <section aria-labelledby="st-news">
+    <section aria-labelledby="st-news" data-cn-home="featured_news">
       <h2 id="st-news">Actualités</h2>
       {home.featuredNews.map((article) => <ArticleCard article={article} />)}
       <p><a href="/actualites">Toutes les actualités</a></p>
@@ -42,7 +42,7 @@ const { site } = ctx;
   )}
 
   {home.agenda && (
-    <section aria-labelledby="st-agenda">
+    <section aria-labelledby="st-agenda" data-cn-home="agenda">
       <h2 id="st-agenda">Agenda</h2>
       {home.agenda.map((event) => <EventCard event={event} />)}
       <p><a href="/agenda">Tout l'agenda</a></p>
@@ -50,7 +50,7 @@ const { site } = ctx;
   )}
 
   {home.practicalInfo && (
-    <section aria-labelledby="st-info">
+    <section aria-labelledby="st-info" data-cn-home="practical_info">
       <h2 id="st-info">Mairie</h2>
       <OpeningStatus hours={site.contact.hours} />
       {site.contact.address && <p>{site.contact.address}</p>}
@@ -60,20 +60,20 @@ const { site } = ctx;
   )}
 
   {home.disruptions && (
-    <section aria-labelledby="st-disruptions">
+    <section aria-labelledby="st-disruptions" data-cn-home="disruptions">
       <h2 id="st-disruptions">Perturbations en cours</h2>
       <ul>{home.disruptions.map((alert) => <li><strong>{alert.title}</strong> – {alert.message}</li>)}</ul>
     </section>
   )}
 
   {home.weather && (
-    <Weather position={home.weather}>
+    <Weather position={home.weather} data-cn-home="weather">
       <h2 slot="titre">Météo</h2>
     </Weather>
   )}
 
   {home.wasteCollection && (
-    <section aria-labelledby="st-waste">
+    <section aria-labelledby="st-waste" data-cn-home="waste_collection">
       <h2 id="st-waste">Prochaines collectes</h2>
       <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming.length > 0 && <> : <NextCollections collection={c} /></>}</li>)}</ul>
       <p><a href="/collecte-des-dechets">Tout le calendrier</a></p>
@@ -81,7 +81,7 @@ const { site } = ctx;
   )}
 
   {home.canteen && (
-    <section aria-labelledby="st-canteen">
+    <section aria-labelledby="st-canteen" data-cn-home="canteen">
       <h2 id="st-canteen">Cantine</h2>
       <p>{home.canteen.label}</p>
       <p><a href="/cantine">Voir le menu</a></p>
@@ -89,7 +89,7 @@ const { site } = ctx;
   )}
 
   {home.mayorWord && (
-    <section aria-labelledby="st-mayor">
+    <section aria-labelledby="st-mayor" data-cn-home="mayor_word">
       <h2 id="st-mayor">{home.mayorWord.title}</h2>
       {home.mayorWord.photo && <img src={home.mayorWord.photo.src} alt={home.mayorWord.photo.alt} width={home.mayorWord.photo.width ?? undefined} height={home.mayorWord.photo.height ?? undefined} />}
       <RichText doc={home.mayorWord.body} />
@@ -98,35 +98,35 @@ const { site } = ctx;
   )}
 
   {home.keyFigures && (
-    <section aria-labelledby="st-figures">
+    <section aria-labelledby="st-figures" data-cn-home="key_figures">
       <h2 id="st-figures">La commune en chiffres</h2>
       <ul>{home.keyFigures.map((figure) => <li><strong>{figure.value}</strong> {figure.label}</li>)}</ul>
     </section>
   )}
 
   {home.associations && (
-    <section aria-labelledby="st-assos">
+    <section aria-labelledby="st-assos" data-cn-home="associations">
       <h2 id="st-assos">Associations</h2>
       <ul>{home.associations.map((a) => <li><a href={a.href}>{a.name}</a> – {a.category.label}</li>)}</ul>
     </section>
   )}
 
   {home.freeContent && (
-    <section aria-labelledby="st-free">
+    <section aria-labelledby="st-free" data-cn-home="free_content">
       <h2 id="st-free">{home.freeContent.title ?? site.name}</h2>
       <RichText doc={home.freeContent.body} />
     </section>
   )}
 
   {home.newsletter && (
-    <section aria-labelledby="st-newsletter">
+    <section aria-labelledby="st-newsletter" data-cn-home="newsletter">
       <h2 id="st-newsletter">Lettre d'information</h2>
       <p><a href="/contact">S'inscrire à la lettre d'information</a></p>
     </section>
   )}
 
   {home.partners && (
-    <section aria-labelledby="st-partners">
+    <section aria-labelledby="st-partners" data-cn-home="partners">
       <h2 id="st-partners">Partenaires</h2>
       <ul>{home.partners.map((p) => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}</ul>
     </section>

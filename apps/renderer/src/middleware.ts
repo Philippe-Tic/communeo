@@ -5,6 +5,7 @@
  * En build statique, le middleware ne fait rien.
  */
 import { defineMiddleware } from 'astro:middleware';
+import { HOMEPAGE_SECTION_IDS } from '@communeo/core';
 import { getSource } from './lib/content';
 import { resolvePreview } from './lib/preview';
 import { requestContext, withRequestContext, type RequestContext } from './lib/request-context';
@@ -26,6 +27,16 @@ const key = 'communeo-preview-scroll:' + location.pathname;
 const saved = sessionStorage.getItem(key);
 if (saved) requestAnimationFrame(() => scrollTo(0, Number(saved)));
 addEventListener('pagehide', () => sessionStorage.setItem(key, String(scrollY)));
+</script>`;
+
+/**
+ * Section d'accueil en cours de modification dans l'admin (`?section=hero`) : mise en évidence et
+ * affichée en haut de la preview, à la place de la position de défilement conservée.
+ */
+const focusSection = (id: string) => `<style>[data-cn-home="${id}"]{outline:3px solid #d97706;outline-offset:-3px}</style>
+<script type="module">
+const section = document.querySelector('[data-cn-home="${id}"]');
+if (section) requestAnimationFrame(() => section.scrollIntoView({ block: 'start' }));
 </script>`;
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
@@ -59,7 +70,9 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const headers = new Headers(response.headers);
     let body: ArrayBuffer | string = await response.arrayBuffer();
     if (headers.get('content-type')?.includes('text/html')) {
-      body = new TextDecoder().decode(body).replace('</body>', `${KEEP_SCROLL}</body>`);
+      const section = new URL(request.url).searchParams.get('section');
+      const script = section && (HOMEPAGE_SECTION_IDS as string[]).includes(section) ? focusSection(section) : KEEP_SCROLL;
+      body = new TextDecoder().decode(body).replace('</body>', `${script}</body>`);
     }
     for (const [name, value] of Object.entries(PREVIEW_HEADERS)) headers.set(name, value);
     for (const value of decision.cookies ?? []) headers.append('Set-Cookie', value);

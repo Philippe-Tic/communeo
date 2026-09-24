@@ -38,6 +38,12 @@ liens prêts, champs absents à `null`. Un thème ne fait jamais d'appel à Stra
 Le `<main>` du thème porte les attributs de `searchAttributes(ctx)` : l'index de recherche du site
 (Pagefind, construit après le build) ne retient alors que le contenu propre à chaque page.
 
+Dans `Home`, chaque section d'accueil porte `data-cn-home="<id>"` (identifiants de `HOMEPAGE_SECTIONS`,
+ex. `hero`, `quick_links`) sur son élément englobant : la preview de l'écran « Page d'accueil » de
+l'admin met en évidence et fait défiler jusqu'à la section en cours de modification. Les sections
+d'accueil que le thème sait afficher sont déclarées dans le registre `THEMES` de `@communeo/core`
+(`homeSections`), repris par le manifest.
+
 `Frame` est le cadre des pages dont le contenu est commun à tous les thèmes (mentions légales, données
 personnelles, déclaration d'accessibilité, plan du site, recherche, démarches) : le renderer fournit le
 contenu dans le slot par défaut, le thème ne fait que l'habiller.

@@ -31,7 +31,7 @@ const severityIcons = { info: Info, warning: TriangleAlert, critical: OctagonAle
 const today = home.canteen?.days.find((day) => !day.closed) ?? null;
 ---
 <Layout ctx={ctx} heading={false} full>
-  <section class="in-section in-section-plain in-hero" aria-labelledby="in-hero-title">
+  <section class="in-section in-section-plain in-hero" aria-labelledby="in-hero-title" data-cn-home="hero">
     <div class:list={['in-container', 'in-hero-grid', { 'in-hero-with-image': hero?.image }]}>
       <div>
         <h1 id="in-hero-title">{hero?.title ?? site.name}</h1>
@@ -58,7 +58,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
   </section>
 
   {home.quickLinks && (
-    <section class="in-section in-section-tint" aria-labelledby="in-quick">
+    <section class="in-section in-section-tint" aria-labelledby="in-quick" data-cn-home="quick_links">
       <div class="in-container">
         <h2 id="in-quick">Accès rapides</h2>
         <ul class="in-tiles">
@@ -77,7 +77,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
   )}
 
   {home.featuredNews && (
-    <section class="in-section" aria-labelledby="in-news">
+    <section class="in-section" aria-labelledby="in-news" data-cn-home="featured_news">
       <div class="in-container">
         <div class="in-section-head">
           <h2 id="in-news">Actualités</h2>
@@ -94,7 +94,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
     <section class="in-section in-section-plain" aria-label="Agenda et informations pratiques">
       <div class:list={['in-container', 'in-split', { 'in-split-aside': home.agenda && aside }]}>
         {home.agenda && (
-          <div>
+          <div data-cn-home="agenda">
             <div class="in-section-head">
               <h2 id="in-agenda">Agenda</h2>
               <a href="/agenda" class="in-more">Tout l'agenda<ArrowRight size={20} aria-hidden="true" /></a>
@@ -106,7 +106,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
         {aside && (
           <div class="in-aside">
             {home.practicalInfo && (
-              <section class="in-box" aria-labelledby="in-practical">
+              <section class="in-box" aria-labelledby="in-practical" data-cn-home="practical_info">
                 <h2 id="in-practical" class="in-box-title">Mairie</h2>
                 <OpeningStatus hours={site.contact.hours} class="in-box-status" />
                 <address>
@@ -123,13 +123,13 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
             )}
 
             {home.weather && (
-              <Weather position={home.weather} class="in-box in-weather">
+              <Weather position={home.weather} class="in-box in-weather" data-cn-home="weather">
                 <h2 slot="titre" class="in-box-title">Météo</h2>
               </Weather>
             )}
 
             {home.wasteCollection && (
-              <section class="in-box" aria-labelledby="in-waste">
+              <section class="in-box" aria-labelledby="in-waste" data-cn-home="waste_collection">
                 <h2 id="in-waste" class="in-box-title">Prochaines collectes</h2>
                 <ul class="in-waste-list">
                   {home.wasteCollection.map((collection) => (
@@ -152,7 +152,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
   )}
 
   {home.mayorWord && (
-    <section class="in-section" aria-labelledby="in-mayor">
+    <section class="in-section" aria-labelledby="in-mayor" data-cn-home="mayor_word">
       <div class:list={['in-container', 'in-mayor', { 'in-mayor-with-photo': home.mayorWord.photo }]}>
         {home.mayorWord.photo && (
           <img
@@ -179,7 +179,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
   )}
 
   {home.keyFigures && (
-    <section class="in-section in-section-invert in-on-dark" aria-labelledby="in-figures">
+    <section class="in-section in-section-invert in-on-dark" aria-labelledby="in-figures" data-cn-home="key_figures">
       <div class="in-container">
         <h2 id="in-figures" class="cn-sr-only">La commune en chiffres</h2>
         <ul class="in-figures">
@@ -199,7 +199,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
     <section class="in-section in-section-plain" aria-label="Perturbations et cantine">
       <div class:list={['in-container', 'in-split', { 'in-split-half': home.disruptions && home.canteen }]}>
         {home.disruptions && (
-          <div>
+          <div data-cn-home="disruptions">
             <div class="in-section-head">
               <h2 id="in-disruptions">Perturbations en cours</h2>
               <a href="/perturbations" class="in-more">Toutes<ArrowRight size={20} aria-hidden="true" /></a>
@@ -223,7 +223,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
         )}
 
         {home.canteen && (
-          <div>
+          <div data-cn-home="canteen">
             <div class="in-section-head">
               <h2 id="in-canteen">Cantine</h2>
               <a href="/cantine" class="in-more">Toute la semaine<ArrowRight size={20} aria-hidden="true" /></a>
@@ -255,7 +255,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
   )}
 
   {home.associations && (
-    <section class="in-section" aria-labelledby="in-assos">
+    <section class="in-section" aria-labelledby="in-assos" data-cn-home="associations">
       <div class="in-container">
         <div class="in-section-head">
           <h2 id="in-assos">Associations</h2>
@@ -284,7 +284,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
     <section class="in-section in-section-plain" aria-label="La commune">
       <div class:list={['in-container', 'in-split', { 'in-split-half': home.freeContent && (home.newsletter || home.partners) }]}>
         {home.freeContent && (
-          <div>
+          <div data-cn-home="free_content">
             <h2 id="in-free">{home.freeContent.title ?? `Découvrir ${site.name}`}</h2>
             <RichText doc={home.freeContent.body} class="in-prose in-free" />
           </div>
@@ -293,7 +293,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
         {(home.newsletter || home.partners) && (
           <div class="in-aside">
             {home.newsletter && (
-              <section class="in-box" aria-labelledby="in-newsletter">
+              <section class="in-box" aria-labelledby="in-newsletter" data-cn-home="newsletter">
                 <h2 id="in-newsletter" class="in-box-title">Lettre d'information</h2>
                 <p>Recevez l'actualité de la commune une fois par mois, par e-mail.</p>
                 <p><a href="/contact" class="in-button">S'inscrire à la lettre d'information</a></p>
@@ -302,7 +302,7 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
             )}
 
             {home.partners && (
-              <section aria-labelledby="in-partners">
+              <section aria-labelledby="in-partners" data-cn-home="partners">
                 <h2 id="in-partners" class="in-box-title">Partenaires</h2>
                 <ul class="in-partners">
                   {home.partners.map((partner) => (

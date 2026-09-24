@@ -1,0 +1,34 @@
+---
+/** Partage en pilules : liens simples ; « Copier le lien » n'apparaît qu'avec JavaScript. */
+interface Props {
+  title: string;
+  url: string;
+}
+
+const { title, url } = Astro.props;
+const encoded = encodeURIComponent(url);
+const subject = encodeURIComponent(title);
+---
+<p class="jo-share">
+  <span class="jo-share-label">Partager</span>
+  <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">
+    Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
+  </a>
+  <a href={`mailto:?subject=${subject}&body=${encoded}`}>E-mail<span class="cn-sr-only"> : partager par e-mail</span></a>
+  <button type="button" class="cn-js-only" data-jo-copy={url}>Copier le lien</button>
+  <span class="cn-sr-only" role="status" data-jo-copy-status></span>
+</p>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-jo-copy]')) {
+    button.addEventListener('click', async () => {
+      const status = document.querySelector<HTMLElement>('[data-jo-copy-status]');
+      try {
+        await navigator.clipboard.writeText(button.dataset.joCopy!);
+        if (status) status.textContent = 'Lien copié dans le presse-papiers.';
+      } catch {
+        if (status) status.textContent = "La copie a échoué : le lien est dans la barre d'adresse.";
+      }
+    });
+  }
+</script>

@@ -1,30 +1,74 @@
 ---
+/** Événement : date sur un filet bleu à côté du titre, photo, contenu, informations pratiques à droite. */
 import type { EventVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+import CalendarPlus from '@lucide/astro/icons/calendar-plus';
 import Content from '../parts/Content.astro';
+import Layout from '../parts/Layout.astro';
+import { dateBadge } from '../lib/date';
 
 interface Props { ctx: PageContext; event: EventVM }
 const { ctx, event } = Astro.props;
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<Layout ctx={ctx}>
-  <p class="st-meta">{event.category.label}</p>
-  <dl class="st-facts">
-    <dt>Dates et horaires</dt><dd><time datetime={event.start.iso}>{event.period}</time></dd>
-    {(event.location || event.address) && <><dt>Lieu</dt><dd>{event.location}{event.address && <><br />{event.address}</>}</dd></>}
-    {event.price && <><dt>Tarif</dt><dd>{event.price}</dd></>}
-    {event.registration && (
-      <><dt>Inscription</dt><dd>{event.registration.required ? 'Obligatoire' : 'Conseillée'}{event.registration.deadline && <> · avant le {event.registration.deadline.label}</>}{event.registration.places && <> · {event.registration.places} places</>}</dd></>
-    )}
-    {event.organizer && <><dt>Organisateur</dt><dd>{event.organizer}</dd></>}
-    {(event.contact.email || event.contact.phone) && (
-      <><dt>Contact</dt><dd>{event.contact.email && <a href={event.contact.email.href}>{event.contact.email.label}</a>}{event.contact.phone && <> · <a href={event.contact.phone.href}>{event.contact.phone.label}</a></>}</dd></>
-    )}
-  </dl>
-  <p>
-    <a href={event.icsHref} download>Ajouter à mon agenda<span class="cn-sr-only"> (fichier .ics)</span></a>
-    {event.externalLink && <> · <a href={event.externalLink.href} target="_blank" rel="noopener noreferrer">{event.externalLink.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></>}
-  </p>
-  {event.image && <img src={event.image.src} alt={event.image.alt} width={event.image.width ?? undefined} height={event.image.height ?? undefined} />}
-  <Content blocks={event.blocks} toc={event.toc} />
+<Layout ctx={ctx} heading={false}>
+  <div class="jo-event-layout">
+    <article class="jo-event-article">
+      <header class="jo-event-header">
+        <p class="jo-event-date jo-event-date-large" aria-hidden="true">
+          <span class="jo-event-day">{badge.day}</span>
+          <span class="jo-event-month">{badge.month}</span>
+        </p>
+        <div>
+          <p class="jo-kicker jo-card-category">{event.category.label}</p>
+          <h1>{event.title}</h1>
+          <p class="jo-lead jo-event-when"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
+        </div>
+      </header>
+      {event.image && (
+        <figure class="jo-cover">
+          <img src={event.image.src} srcset={event.image.srcset ?? undefined} alt={event.image.alt} width={event.image.width ?? undefined} height={event.image.height ?? undefined} />
+          {event.image.caption && <figcaption>{event.image.caption}</figcaption>}
+        </figure>
+      )}
+      <Content blocks={event.blocks} />
+    </article>
+
+    <aside class="jo-facts-card" aria-labelledby="jo-event-facts">
+      <h2 id="jo-event-facts" class="jo-kicker">Informations pratiques</h2>
+      <dl class="jo-facts">
+        <div><dt>Dates et horaires</dt><dd><time datetime={event.start.iso}>{event.period}</time></dd></div>
+        {(event.location || event.address) && (
+          <div><dt>Lieu</dt><dd>{event.location}{event.address && <><br />{event.address}</>}</dd></div>
+        )}
+        {event.price && <div><dt>Tarif</dt><dd>{event.price}</dd></div>}
+        {event.registration && (
+          <div>
+            <dt>Inscription</dt>
+            <dd>
+              {event.registration.required ? 'Obligatoire' : 'Conseillée'}
+              {event.registration.deadline && <> · avant le {event.registration.deadline.label}</>}
+              {event.registration.places && <><br /><span class="jo-muted">{event.registration.places} places</span></>}
+            </dd>
+          </div>
+        )}
+        {(event.organizer || event.contact.email || event.contact.phone || event.externalLink) && (
+          <div>
+            <dt>Organisateur</dt>
+            <dd>
+              {event.organizer}
+              {event.contact.email && <><br /><a href={event.contact.email.href}>{event.contact.email.label}</a></>}
+              {event.contact.phone && <><br /><a href={event.contact.phone.href}>{event.contact.phone.label}</a></>}
+              {event.externalLink && (
+                <><br /><a href={event.externalLink.href} target="_blank" rel="noopener noreferrer">{event.externalLink.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></>
+              )}
+            </dd>
+          </div>
+        )}
+      </dl>
+      <a href={event.icsHref} class="jo-button jo-button-secondary" download>
+        <CalendarPlus size={20} aria-hidden="true" />Ajouter à mon agenda<span class="cn-sr-only"> (fichier .ics)</span>
+      </a>
+    </aside>
+  </div>
 </Layout>

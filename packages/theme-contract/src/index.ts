@@ -132,6 +132,12 @@ export type ThemeBlocks = { [T in BlockType]: ThemeComponent<{ block: BlockOf<T>
 
 export interface Theme {
   manifest: ThemeManifest;
+  /**
+   * URL de la feuille de styles du thème : `import stylesheet from './styles.css?url'`. Le document
+   * du renderer la lie dans le <head> ; en preview, où tous les thèmes sont chargés, seule celle du
+   * thème de la requête est envoyée (un `import './styles.css'` la mêlerait à celles des autres).
+   */
+  stylesheet: string;
   templates: ThemeTemplates;
   blocks: ThemeBlocks;
 }

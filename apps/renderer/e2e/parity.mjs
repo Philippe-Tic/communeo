@@ -11,11 +11,14 @@ import { readFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { outDir, themes } from './themes.mjs';
 
-/** Retire ce qui dépend légitimement du mode de build : chemins des bundles JS/CSS. */
+/**
+ * Retire ce qui dépend légitimement du mode de build : chemins des bundles JS, styles de composants.
+ * Les feuilles de styles liées restent comparées : en mode serveur, où tous les thèmes sont chargés,
+ * une page ne doit lier que celle de son thème (noms par empreinte de contenu, identiques d'un build à l'autre).
+ */
 const normalize = (html) =>
   html
     .replace(/<script\b[^>]*\bsrc="[^"]*"[^>]*><\/script>/g, '')
-    .replace(/<link\b[^>]*rel="stylesheet"[^>]*>/g, '')
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '')
     .replace(/<script type="module"[^>]*>[\s\S]*?<\/script>/g, '')
     .replace(/\s+/g, ' ')
@@ -59,5 +62,25 @@ for (const theme of themes) {
   console.log(`${different ? '✗' : '✓'} ${theme} : ${pages.length - different}/${pages.length} pages identiques en statique et en mode serveur`);
   failures += different;
 }
+
+// Un seul serveur, tous les thèmes : chaque page ne lie que la feuille de styles de son thème (#290)
+const stylesheets = (html) => [...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*>/g)].map((match) => match[0]).join(' ');
+const shared = fileURLToPath(new URL(`../.e2e/${themes.at(-1)}-server/`, import.meta.url));
+const server = spawn('node', [`${shared}server/entry.mjs`], {
+  env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), RENDER_MODE: 'server', DATA_SOURCE: 'fixtures' },
+  stdio: 'ignore',
+});
+for (let i = 0; i < 50; i += 1) {
+  if (await fetch(`http://127.0.0.1:${port}/`).then((r) => r.ok).catch(() => false)) break;
+  await new Promise((resolve) => setTimeout(resolve, 200));
+}
+for (const theme of themes) {
+  const expected = stylesheets(readFileSync(`${fileURLToPath(outDir(theme))}contact.html`, 'utf8'));
+  const actual = stylesheets(await fetch(`http://127.0.0.1:${port}/contact`, { headers: { Cookie: `communeo_preview_theme=${theme}` } }).then((r) => r.text()));
+  const ok = expected !== '' && actual === expected;
+  console.log(`${ok ? '✓' : '✗'} ${theme} : seule sa feuille de styles en preview${ok ? '' : `\n  attendu : ${expected}\n  reçu    : ${actual}`}`);
+  if (!ok) failures += 1;
+}
+server.kill();
 
 process.exit(failures ? 1 : 0);

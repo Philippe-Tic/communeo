@@ -22,12 +22,13 @@ puis lancez `pnpm gen:types`.
 
 ## Ce que fournit un thème
 
-`src/index.ts` exporte `defineTheme({ manifest, templates, blocks })`. TypeScript refuse un thème
+`src/index.ts` exporte `defineTheme({ manifest, stylesheet, templates, blocks })`. TypeScript refuse un thème
 auquel il manque un template ou un bloc, ou dont les props ne correspondent pas au contrat (`pnpm typecheck`).
 
 | Élément | Rôle |
 |---|---|
 | `manifest` | Identifiant, nom, description, vignette (`thumbnail.png`, 1200 × 800), sections d'accueil gérées, menus |
+| `stylesheet` | URL de la feuille de styles du thème : `import stylesheet from './styles.css?url'` |
 | `templates` | 19 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `RightsRequest`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
 | `blocks` | 9 composants de blocs : `text`, `image`, `buttons`, `callout`, `documents`, `gallery`, `faq`, `contact`, `video` |
 
@@ -43,6 +44,11 @@ ex. `hero`, `quick_links`) sur son élément englobant : la preview de l'écran 
 l'admin met en évidence et fait défiler jusqu'à la section en cours de modification. Les sections
 d'accueil que le thème sait afficher sont déclarées dans le registre `THEMES` de `@communeo/core`
 (`homeSections`), repris par le manifest.
+
+Les styles du thème passent **uniquement** par `stylesheet`, jamais par un `import './styles.css'` dans
+un composant : le renderer lie la feuille dans le `<head>`. Le serveur de preview charge tous les thèmes
+à la fois ; un import de CSS dans un composant se retrouverait dans les pages de tous les thèmes
+(le test de parité le vérifie). Les `<style>` d'un composant Astro, limités au composant, restent possibles.
 
 `Frame` est le cadre des pages dont le contenu est commun à tous les thèmes (mentions légales, données
 personnelles, déclaration d'accessibilité, plan du site, recherche, démarches) : le renderer fournit le

@@ -29,6 +29,7 @@ import {
   deleteUser,
   fullName,
   inviteUser,
+  lastLoginText,
   refreshUsers,
   resendInvitation,
   roleLabel,
@@ -367,6 +368,9 @@ export function UsersScreen() {
                 <th scope="col" className="px-3 py-2.5 font-semibold">
                   État
                 </th>
+                <th scope="col" className="px-3 py-2.5 font-semibold">
+                  Dernière connexion
+                </th>
                 <th scope="col" className="w-14 px-3 py-2.5">
                   <span className="sr-only">Actions</span>
                 </th>
@@ -390,6 +394,9 @@ export function UsersScreen() {
                       </p>
                     )}
                   </td>
+                  <td className="px-3 py-3 text-secondary">
+                    {stateOf(user) === 'invited' ? '—' : lastLoginText(user, formatListDate)}
+                  </td>
                   <td className="px-3 py-3 text-right">
                     {user.id !== session.id && (
                       <UserActions user={user} onRole={() => setRole(user)} onConfirm={setPending} />
@@ -408,6 +415,11 @@ export function UsersScreen() {
                     {roleLabel(user.municipality_role)}
                     <StateBadge user={user} />
                   </p>
+                  {stateOf(user) !== 'invited' && (
+                    <p className="text-[12px] text-secondary">
+                      Dernière connexion : {lastLoginText(user, formatListDate).toLowerCase()}
+                    </p>
+                  )}
                 </div>
                 {user.id !== session.id && (
                   <UserActions user={user} onRole={() => setRole(user)} onConfirm={setPending} />

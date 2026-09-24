@@ -9,6 +9,7 @@ import { createInvitationToken } from '../../../utils/security';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';
+import { recordActivity } from '../../../services/activity-log';
 
 async function requireSuperAdmin(ctx) {
   const user = ctx.state.user;
@@ -36,7 +37,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 async function summarize(site: any) {
   const documentId = site.documentId;
   const [users, [lastDeployment], pendingCount, [lastPage], [lastArticle]] = await Promise.all([
-    strapi.query('plugin::users-permissions.user').findMany({ where: { site: { documentId } }, select: ['blocked', 'active'] }),
+    strapi.query('plugin::users-permissions.user').findMany({ where: { site: { documentId } }, select: ['blocked', 'active', 'last_login_at'] }),
     strapi.documents('api::deployment.deployment').findMany({ filters: { site: { documentId } } as any, sort: { triggered_at: 'desc' } as any, limit: 1 }),
     strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId } } }),
     strapi.query('api::page.page').findMany({ where: { site: { documentId } }, orderBy: { updatedAt: 'desc' }, limit: 1, select: ['updatedAt'] }),
@@ -52,7 +53,9 @@ async function summarize(site: any) {
         : pendingCount > 0
           ? 'pending'
           : 'ok';
-  const dates = [site.updatedAt, deployment?.triggered_at, lastPage?.updatedAt, lastArticle?.updatedAt].filter(Boolean).map((date) => new Date(date).getTime());
+  // Dernière activité : modification, mise en ligne ou connexion d'un utilisateur de la commune
+  const lastLogin = users.map((user: any) => user.last_login_at).filter(Boolean);
+  const dates = [site.updatedAt, deployment?.triggered_at, lastPage?.updatedAt, lastArticle?.updatedAt, ...lastLogin].filter(Boolean).map((date) => new Date(date).getTime());
   return {
     documentId,
     name: site.name,
@@ -262,6 +265,13 @@ export default {
       log.error('Failed to send invitation email for new site:', error);
     }
 
+    await recordActivity({
+      action: 'commune_create',
+      siteDocumentId: site.documentId,
+      target: { type: 'site', id: site.documentId, label: name },
+      details: { admin: email },
+    });
+
     ctx.body = { data: await summarize(await strapi.documents('api::site.site').findOne({ documentId: site.documentId, populate: ['infos_pratiques'] as any })) };
   },
 
@@ -281,6 +291,12 @@ export default {
     if (typeof data.name === 'string' && data.name.trim()) update.name = data.name.trim();
     if (typeof data.suspended === 'boolean') update.suspended = data.suspended;
     const updated = await strapi.documents('api::site.site').update({ documentId, data: update as any, populate: ['infos_pratiques'] as any });
+    if (typeof data.suspended === 'boolean' && data.suspended !== !!site.suspended)
+      await recordActivity({
+        action: data.suspended ? 'commune_suspend' : 'commune_unsuspend',
+        siteDocumentId: documentId,
+        target: { type: 'site', id: documentId, label: updated.name },
+      });
     ctx.body = { data: await summarize(updated) };
   },
 

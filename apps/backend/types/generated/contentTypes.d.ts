@@ -375,6 +375,64 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
+  collectionName: 'activity_logs';
+  info: {
+    description: 'Actions sensibles (connexions, publications, suppressions, r\u00F4les, th\u00E8me, domaine, communes), gard\u00E9es 6 mois';
+    displayName: "Journal d'activit\u00E9";
+    pluralName: 'activity-logs';
+    singularName: 'activity-log';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    action: Schema.Attribute.Enumeration<
+      [
+        'login',
+        'publish',
+        'unpublish',
+        'delete',
+        'theme_change',
+        'domain_change',
+        'user_invite',
+        'role_change',
+        'user_deactivate',
+        'user_reactivate',
+        'user_delete',
+        'commune_create',
+        'commune_suspend',
+        'commune_unsuspend',
+      ]
+    > &
+      Schema.Attribute.Required;
+    actor: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>;
+    actor_name: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    details: Schema.Attribute.JSON;
+    ip: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::activity-log.activity-log'> & Schema.Attribute.Private;
+    on_behalf: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'>;
+    target_id: Schema.Attribute.String;
+    target_label: Schema.Attribute.String;
+    target_type: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiAlerteAlerte extends Struct.CollectionTypeSchema {
   collectionName: 'alertes';
   info: {
@@ -1605,6 +1663,7 @@ export interface PluginUsersPermissionsUser extends Struct.CollectionTypeSchema 
         minLength: 6;
       }>;
     first_name: Schema.Attribute.String & Schema.Attribute.Required;
+    last_login_at: Schema.Attribute.DateTime;
     last_name: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'plugin::users-permissions.user'> & Schema.Attribute.Private;
@@ -1644,6 +1703,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::activity-log.activity-log': ApiActivityLogActivityLog;
       'api::alerte.alerte': ApiAlerteAlerte;
       'api::article.article': ApiArticleArticle;
       'api::association.association': ApiAssociationAssociation;

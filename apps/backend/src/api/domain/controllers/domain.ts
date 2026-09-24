@@ -7,6 +7,7 @@ import { isPublisherUnavailable } from '@communeo/pipeline';
 import domainValidationService from '../../../services/domain-validation';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
+import { recordActivity } from '../../../services/activity-log';
 
 /** Hébergeur non configuré : 503 plutôt qu'une erreur générique */
 function unavailable(ctx, error: unknown): boolean {
@@ -58,6 +59,12 @@ export default {
 
       // 2. Configuration du domaine
       const config = await domainService.configureDomain(siteId, customDomain);
+      await recordActivity({
+        action: 'domain_change',
+        siteDocumentId: site.documentId,
+        target: { type: 'domain', label: config.domain },
+        details: { change: 'configure' },
+      });
 
       ctx.body = {
         success: true,
@@ -155,6 +162,12 @@ export default {
       const result = await domainService.removeDomain(siteId);
 
       if (result.success) {
+        await recordActivity({
+          action: 'domain_change',
+          siteDocumentId: site.documentId,
+          target: { type: 'domain', label: site.custom_domain ?? null },
+          details: { change: 'remove' },
+        });
         ctx.body = {
           success: true,
           defaultUrl: result.defaultUrl,

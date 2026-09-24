@@ -28,6 +28,7 @@ import { Route as AppDechetsRouteImport } from './routes/_app/dechets'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppEditeurDeBlocsRouteImport } from './routes/_app/editeur-de-blocs'
 import { Route as AppEquipeRouteImport } from './routes/_app/equipe'
+import { Route as AppJournalRouteImport } from './routes/_app/journal'
 import { Route as AppMediathequeRouteImport } from './routes/_app/mediatheque'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
 import { Route as AppMiseEnLigneRouteImport } from './routes/_app/mise-en-ligne'
@@ -36,6 +37,7 @@ import { Route as AppNewsletterRouteImport } from './routes/_app/newsletter'
 import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
+import { Route as PlateformeJournalRouteImport } from './routes/plateforme/journal'
 import { Route as PlateformeStatistiquesRouteImport } from './routes/plateforme/statistiques'
 import { Route as PlateformeUtilisateursRouteImport } from './routes/plateforme/utilisateurs'
 import { Route as AppActualitesDocumentIdRouteImport } from './routes/_app/actualites_.$documentId'
@@ -148,6 +150,11 @@ const AppEquipeRoute = AppEquipeRouteImport.update({
   path: '/equipe',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJournalRoute = AppJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMediathequeRoute = AppMediathequeRouteImport.update({
   id: '/mediatheque',
   path: '/mediatheque',
@@ -186,6 +193,11 @@ const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
 const PlateformeIndexRoute = PlateformeIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => PlateformeRoute,
+} as any)
+const PlateformeJournalRoute = PlateformeJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
   getParentRoute: () => PlateformeRoute,
 } as any)
 const PlateformeStatistiquesRoute = PlateformeStatistiquesRouteImport.update({
@@ -294,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AppDocumentsRoute
   '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
+  '/journal': typeof AppJournalRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
   '/mise-en-ligne': typeof AppMiseEnLigneRoute
@@ -301,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
   '/plateforme/': typeof PlateformeIndexRoute
@@ -337,6 +351,7 @@ export interface FileRoutesByTo {
   '/documents': typeof AppDocumentsRoute
   '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
+  '/journal': typeof AppJournalRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
   '/mise-en-ligne': typeof AppMiseEnLigneRoute
@@ -344,6 +359,7 @@ export interface FileRoutesByTo {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
   '/': typeof AppIndexRoute
@@ -384,6 +400,7 @@ export interface FileRoutesById {
   '/_app/documents': typeof AppDocumentsRoute
   '/_app/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/_app/equipe': typeof AppEquipeRoute
+  '/_app/journal': typeof AppJournalRoute
   '/_app/mediatheque': typeof AppMediathequeRoute
   '/_app/messages': typeof AppMessagesRoute
   '/_app/mise-en-ligne': typeof AppMiseEnLigneRoute
@@ -391,6 +408,7 @@ export interface FileRoutesById {
   '/_app/newsletter': typeof AppNewsletterRoute
   '/_app/pages': typeof AppPagesRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
   '/_app/': typeof AppIndexRoute
@@ -432,6 +450,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/editeur-de-blocs'
     | '/equipe'
+    | '/journal'
     | '/mediatheque'
     | '/messages'
     | '/mise-en-ligne'
@@ -439,6 +458,7 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
     | '/plateforme/'
@@ -475,6 +495,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/editeur-de-blocs'
     | '/equipe'
+    | '/journal'
     | '/mediatheque'
     | '/messages'
     | '/mise-en-ligne'
@@ -482,6 +503,7 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
     | '/'
@@ -521,6 +543,7 @@ export interface FileRouteTypes {
     | '/_app/documents'
     | '/_app/editeur-de-blocs'
     | '/_app/equipe'
+    | '/_app/journal'
     | '/_app/mediatheque'
     | '/_app/messages'
     | '/_app/mise-en-ligne'
@@ -528,6 +551,7 @@ export interface FileRouteTypes {
     | '/_app/newsletter'
     | '/_app/pages'
     | '/_app/utilisateurs'
+    | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
     | '/_app/'
@@ -694,6 +718,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEquipeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/journal': {
+      id: '/_app/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AppJournalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mediatheque': {
       id: '/_app/mediatheque'
       path: '/mediatheque'
@@ -748,6 +779,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/plateforme/'
       preLoaderRoute: typeof PlateformeIndexRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
+    '/plateforme/journal': {
+      id: '/plateforme/journal'
+      path: '/journal'
+      fullPath: '/plateforme/journal'
+      preLoaderRoute: typeof PlateformeJournalRouteImport
       parentRoute: typeof PlateformeRoute
     }
     '/plateforme/statistiques': {
@@ -884,6 +922,7 @@ interface AppRouteChildren {
   AppDocumentsRoute: typeof AppDocumentsRoute
   AppEditeurDeBlocsRoute: typeof AppEditeurDeBlocsRoute
   AppEquipeRoute: typeof AppEquipeRoute
+  AppJournalRoute: typeof AppJournalRoute
   AppMediathequeRoute: typeof AppMediathequeRoute
   AppMessagesRoute: typeof AppMessagesRoute
   AppMiseEnLigneRoute: typeof AppMiseEnLigneRoute
@@ -920,6 +959,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDocumentsRoute: AppDocumentsRoute,
   AppEditeurDeBlocsRoute: AppEditeurDeBlocsRoute,
   AppEquipeRoute: AppEquipeRoute,
+  AppJournalRoute: AppJournalRoute,
   AppMediathequeRoute: AppMediathequeRoute,
   AppMessagesRoute: AppMessagesRoute,
   AppMiseEnLigneRoute: AppMiseEnLigneRoute,
@@ -947,6 +987,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PlateformeRouteChildren {
+  PlateformeJournalRoute: typeof PlateformeJournalRoute
   PlateformeStatistiquesRoute: typeof PlateformeStatistiquesRoute
   PlateformeUtilisateursRoute: typeof PlateformeUtilisateursRoute
   PlateformeIndexRoute: typeof PlateformeIndexRoute
@@ -954,6 +995,7 @@ interface PlateformeRouteChildren {
 }
 
 const PlateformeRouteChildren: PlateformeRouteChildren = {
+  PlateformeJournalRoute: PlateformeJournalRoute,
   PlateformeStatistiquesRoute: PlateformeStatistiquesRoute,
   PlateformeUtilisateursRoute: PlateformeUtilisateursRoute,
   PlateformeIndexRoute: PlateformeIndexRoute,

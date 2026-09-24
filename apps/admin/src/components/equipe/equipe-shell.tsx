@@ -5,7 +5,7 @@
  */
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
-import { BarChart3, Building2, LogOut, Users } from 'lucide-react';
+import { BarChart3, Building2, History, LogOut, Users } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { ColorSchemeToggle } from '@/components/shell/color-scheme-toggle';
 import { SessionExpiredDialog } from '@/components/shell/session-expired-dialog';
@@ -19,6 +19,7 @@ const LINKS = [
   { to: '/plateforme', label: 'Communes', icon: Building2 },
   { to: '/plateforme/utilisateurs', label: 'Utilisateurs', icon: Users },
   { to: '/plateforme/statistiques', label: 'Statistiques', icon: BarChart3 },
+  { to: '/plateforme/journal', label: 'Journal', icon: History },
 ] as const;
 
 function isCurrent(pathname: string, to: string) {

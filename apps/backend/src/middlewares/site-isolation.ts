@@ -64,7 +64,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [

@@ -3,6 +3,7 @@
  * Implements invitation flow: new users receive an email to set their password.
  */
 
+import { recordActivity } from '../../../services/activity-log';
 import crypto from 'crypto';
 import {
   INVITATION_EXPIRY_DAYS,
@@ -329,6 +330,13 @@ export default {
       log.error('Failed to send invitation email:', emailError);
     }
 
+    await recordActivity({
+      action: 'user_invite',
+      siteDocumentId: newUser.site?.documentId ?? null,
+      target: { type: 'user', id: newUser.id, label: newUser.email },
+      details: { role: newUser.municipality_role },
+    });
+
     const { password, resetPasswordToken, confirmationToken, ...sanitized } = newUser;
     ctx.body = { data: sanitized };
   },
@@ -386,6 +394,18 @@ export default {
       populate: ['site'],
     });
 
+    const target = { type: 'user', id: updatedUser.id, label: updatedUser.email };
+    const siteDocumentId = updatedUser.site?.documentId ?? null;
+    if (data.municipality_role !== undefined && data.municipality_role !== existingUser.municipality_role)
+      await recordActivity({
+        action: 'role_change',
+        siteDocumentId,
+        target,
+        details: { from: existingUser.municipality_role, to: data.municipality_role },
+      });
+    if (data.active !== undefined && (data.active !== false) !== (existingUser.active !== false))
+      await recordActivity({ action: data.active === false ? 'user_deactivate' : 'user_reactivate', siteDocumentId, target });
+
     const { password, resetPasswordToken, confirmationToken, ...sanitized } = updatedUser;
     ctx.body = { data: sanitized };
   },
@@ -426,6 +446,11 @@ export default {
     }
 
     await strapi.query('plugin::users-permissions.user').delete({ where: { id } });
+    await recordActivity({
+      action: 'user_delete',
+      siteDocumentId: userToDelete.site?.documentId ?? null,
+      target: { type: 'user', id: userToDelete.id, label: userToDelete.email },
+    });
     ctx.body = { data: { id: Number(id) } };
   },
 

@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "activity_logs",
+  "info": {
+    "singularName": "activity-log",
+    "pluralName": "activity-logs",
+    "displayName": "Journal d'activité",
+    "description": "Actions sensibles (connexions, publications, suppressions, rôles, thème, domaine, communes), gardées 6 mois"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "site": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::site.site"
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": [
+        "login",
+        "publish",
+        "unpublish",
+        "delete",
+        "theme_change",
+        "domain_change",
+        "user_invite",
+        "role_change",
+        "user_deactivate",
+        "user_reactivate",
+        "user_delete",
+        "commune_create",
+        "commune_suspend",
+        "commune_unsuspend"
+      ],
+      "required": true
+    },
+    "actor": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "actor_name": {
+      "type": "string"
+    },
+    "on_behalf": {
+      "type": "boolean",
+      "default": false
+    },
+    "target_type": {
+      "type": "string"
+    },
+    "target_id": {
+      "type": "string"
+    },
+    "target_label": {
+      "type": "string"
+    },
+    "ip": {
+      "type": "string"
+    },
+    "details": {
+      "type": "json"
+    }
+  }
+}

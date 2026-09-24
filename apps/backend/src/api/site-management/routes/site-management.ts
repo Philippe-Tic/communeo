@@ -8,6 +8,12 @@ export default {
     },
     {
       method: 'GET',
+      path: '/site-management/slug-available',
+      handler: 'site-management.slugAvailable',
+      config: { policies: [], middlewares: [] },
+    },
+    {
+      method: 'GET',
       path: '/site-management',
       handler: 'site-management.find',
       config: { policies: [], middlewares: [] },

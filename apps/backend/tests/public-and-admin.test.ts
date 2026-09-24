@@ -118,14 +118,19 @@ describe('gestion des communes (super admin)', () => {
     const created = await http
       .post('/api/site-management')
       .set(auth(superAdmin))
-      .send({ data: { name: 'Commune Nouvelle', slug: 'commune-nouvelle', admin_email: 'maire@commune-nouvelle.test' } });
+      .send({ data: { name: 'Commune Nouvelle', slug: 'commune-nouvelle', admin_email: 'Maire@Commune-Nouvelle.test', admin_first_name: 'Claire', admin_last_name: 'Martin' } });
     expect(created.status).toBe(200);
     const documentId = created.body.data.documentId;
     expect(created.body.data.theme).toBe('institutionnel');
 
     const found = await http.get(`/api/site-management/${documentId}`).set(auth(superAdmin));
     expect(found.status).toBe(200);
-    expect(found.body.data._users.map((u: any) => u.email)).toContain('maire@commune-nouvelle.test');
+    expect(found.body.data.users).toEqual([expect.objectContaining({ email: 'maire@commune-nouvelle.test', first_name: 'Claire', municipality_role: 'admin', blocked: true })]);
+    expect(found.body.data).toMatchObject({ users: expect.any(Array), counts: { pages: 0, articles: 0, documents: 0 }, publication: { state: 'new' } });
+    // L'adresse est prise, un e-mail existant aussi
+    expect((await http.get('/api/site-management/slug-available?slug=commune-nouvelle').set(auth(superAdmin))).body).toEqual({ available: false, reason: 'Adresse déjà utilisée' });
+    expect((await http.get('/api/site-management/slug-available?slug=Mauvais Slug').set(auth(superAdmin))).body.available).toBe(false);
+    expect((await http.get('/api/site-management/slug-available?slug=nouvelle-commune').set(auth(superAdmin))).body).toEqual({ available: true });
 
     const updated = await http.put(`/api/site-management/${documentId}`).set(auth(superAdmin)).send({ data: { name: 'Commune Renommée' } });
     expect(updated.status).toBe(200);
@@ -133,6 +138,24 @@ describe('gestion des communes (super admin)', () => {
 
     expect((await http.delete(`/api/site-management/${documentId}`).set(auth(superAdmin))).status).toBeLessThan(300);
     expect((await http.get(`/api/site-management/${documentId}`).set(auth(superAdmin))).status).toBe(404);
+  });
+
+  it('suspendre : utilisateurs refusés et coupés, mise en ligne refusée ; réactiver rend l’accès', async () => {
+    // L'admin de la commune A est connecté ; l'équipe suspend sa commune
+    expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(200);
+    const pendingBefore = await strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId: siteA } } });
+    expect((await http.put(`/api/site-management/${siteA}`).set(auth(superAdmin)).send({ data: { suspended: true } })).body.data.suspended).toBe(true);
+    // Suspendre ne change rien au site public : aucune modification en attente
+    expect(await strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId: siteA } } })).toBe(pendingBefore);
+    expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(401);
+    const login = await http.post('/api/session/login').send({ identifier: 'test@example.com', password: 'test123' });
+    expect(login.status).toBe(403);
+    expect(login.body.error.message).toBe("Cette commune est suspendue : contactez l'équipe Communeo.");
+    // Une commune ne peut pas se lever elle-même la suspension
+    await http.put(`/api/site-management/${siteA}`).set(auth(superAdmin)).send({ data: { suspended: false } });
+    expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(200);
+    await http.put(`/api/sites/${siteA}`).set(auth(admin)).send({ data: { suspended: true } });
+    expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(200);
   });
 
   it("est interdite à un admin de commune", async () => {

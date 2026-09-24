@@ -102,6 +102,10 @@
       "default": true,
       "required": false
     },
+    "suspended": {
+      "type": "boolean",
+      "default": false
+    },
     "pages": {
       "type": "relation",
       "relation": "oneToMany",

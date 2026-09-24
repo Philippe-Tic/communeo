@@ -26,7 +26,9 @@ test.describe('connexion', () => {
     await page.getByRole('checkbox', { name: /Rester connecté/ }).check();
     await page.getByRole('button', { name: 'Se connecter' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
-    expect(posts['/api/session/login']).toEqual([{ identifier: 'sophie.leroy@saint-aubin.fr', password: PASSWORD, remember: true }]);
+    expect(posts['/api/session/login']).toEqual([
+      { identifier: 'sophie.leroy@saint-aubin.fr', password: PASSWORD, remember: true },
+    ]);
   });
 
   test('champs vides : récapitulatif des erreurs', async ({ page }) => {
@@ -87,8 +89,12 @@ test.describe('invitation et nouveau mot de passe', () => {
     await password(page, 'Confirmer le mot de passe').fill('loire jardin tilleul');
     await page.getByRole('button', { name: 'Créer mon compte' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
-    expect(posts['/api/user-management/accept-invitation']).toEqual([{ token: 'jeton-invitation', password: 'loire jardin tilleul', passwordConfirmation: 'loire jardin tilleul' }]);
-    expect(posts['/api/session/login']).toEqual([{ identifier: 'anne@saint-aubin.fr', password: 'loire jardin tilleul', remember: false }]);
+    expect(posts['/api/user-management/accept-invitation']).toEqual([
+      { token: 'jeton-invitation', password: 'loire jardin tilleul', passwordConfirmation: 'loire jardin tilleul' },
+    ]);
+    expect(posts['/api/session/login']).toEqual([
+      { identifier: 'anne@saint-aubin.fr', password: 'loire jardin tilleul', remember: false },
+    ]);
   });
 
   test('nouveau mot de passe : le compte est nommé', async ({ page }) => {
@@ -147,7 +153,11 @@ test.describe('session expirée', () => {
     await expect(dialog).toBeHidden();
     await expect(title).toHaveValue('Location de la salle des fêtes municipale');
     // Refusé pendant l'expiration (non reçu), le brouillon est renvoyé dès la reconnexion
-    await expect.poll(() => bodies.filter((entry) => entry.body.data.title === 'Location de la salle des fêtes municipale').length).toBe(1);
+    await expect
+      .poll(
+        () => bodies.filter((entry) => entry.body.data.title === 'Location de la salle des fêtes municipale').length,
+      )
+      .toBe(1);
     await expect(page.getByText(/Brouillon enregistré/).first()).toBeVisible();
   });
 });
@@ -156,8 +166,14 @@ test.describe('rôles', () => {
   test('un éditeur qui ouvre une page réservée sait qui contacter', async ({ page }) => {
     await mockApi(page, { user: 'editor' });
     await page.goto('/utilisateurs');
-    await expect(page.getByRole('heading', { level: 1, name: 'Cette page est réservée aux administrateurs' })).toBeVisible();
-    await expect(page.getByText("La gestion des utilisateurs n'est pas accessible avec votre rôle d'éditeur. Demandez à Sophie Leroy ou Claire Martin.")).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Cette page est réservée aux administrateurs' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        "La gestion des utilisateurs n'est pas accessible avec votre rôle d'éditeur. Demandez à Sophie Leroy ou Claire Martin.",
+      ),
+    ).toBeVisible();
     await expectNoViolations(page);
     await page.getByRole('link', { name: 'Retour au tableau de bord' }).click();
     await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
@@ -170,20 +186,21 @@ test.describe('rôles', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Apparence' })).toBeVisible();
   });
 
-  test('équipe Communeo : choix de la commune, bandeau, retour à la liste', async ({ page }) => {
+  test('équipe Communeo : espace équipe, entrer dans une commune, bandeau, retour à sa fiche', async ({ page }) => {
     await mockApi(page, { user: 'super_admin' });
     await page.goto('/actualites');
-    await expect(page).toHaveURL(/\/communes$/);
-    await expect(page.getByRole('heading', { level: 1, name: 'Choisir une commune' })).toBeVisible();
-    await expectNoViolations(page);
-    await page.getByRole('searchbox', { name: 'Rechercher' }).fill('belle');
-    await expect(page.getByRole('button', { name: /Saint-Aubin/ })).toHaveCount(0);
-    await page.getByRole('button', { name: /Bellefontaine/ }).click();
+    await expect(page).toHaveURL(/\/plateforme$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Communes' })).toBeVisible();
+    await page.getByRole('button', { name: "Entrer dans l'administration de Bellefontaine" }).click();
 
     const banner = page.getByRole('region', { name: 'Mode équipe Communeo' });
     await expect(banner).toContainText("Vous consultez l'administration de Bellefontaine");
     await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
     await banner.getByRole('button', { name: 'Quitter' }).click();
-    await expect(page).toHaveURL(/\/communes$/);
+    await expect(page).toHaveURL(/\/plateforme\/communes\/site-bellefontaine$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Bellefontaine' })).toBeVisible();
+    // L'ancienne adresse mène à l'espace équipe
+    await page.goto('/communes');
+    await expect(page).toHaveURL(/\/plateforme$/);
   });
 });

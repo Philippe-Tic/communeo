@@ -40,6 +40,8 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'ssl_enabled',
   'auto_deploy_enabled',
   'auto_deploy_delay',
+  // Suspension par l'équipe Communeo : ne change rien au site public
+  'suspended',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */
@@ -101,6 +103,8 @@ class AutoDeployService {
       const scheduledPublication = isScheduledPublication();
       // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
       if (!site?.auto_deploy_enabled && !scheduledPublication) return;
+      // Commune suspendue : plus aucune mise en ligne
+      if (site.suspended) return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;

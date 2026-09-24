@@ -53,6 +53,10 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.notFound('Site non trouvé');
       }
 
+      if ((siteData as any).suspended) {
+        return ctx.forbidden("Cette commune est suspendue : la mise en ligne n'est pas possible");
+      }
+
       if (!isBuildQueueConfigured()) {
         ctx.status = 503;
         ctx.body = { error: { status: 503, message: "Publication indisponible : QUEUE_DATABASE_URL n'est pas défini" } };

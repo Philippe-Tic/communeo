@@ -17,6 +17,7 @@ interface StrapiUser {
   site?: {
     id: number;
     documentId: string;
+    suspended?: boolean;
   };
 }
 
@@ -75,6 +76,8 @@ const PROTECTED_SITE_FIELDS = [
   'domain_type',
   'domain_configured_at',
   'ssl_enabled',
+  // suspension : décidée par l'équipe Communeo (site-management)
+  'suspended',
   // relations : empêchent de rattacher les contenus d'une autre commune
   'pages',
   'articles',
@@ -143,8 +146,9 @@ export default (config: any, { strapi }: { strapi: any }) => {
     }
 
     if (!user || user.blocked) return next();
-    // Compte désactivé par un administrateur : la session en cours ne vaut plus rien
+    // Compte désactivé par un administrateur, ou commune suspendue : la session en cours ne vaut plus rien
     if (user.active === false) return ctx.unauthorized('Compte désactivé');
+    if (user.municipality_role !== 'super_admin' && user.site?.suspended) return ctx.unauthorized('Commune suspendue');
     ctx.state.user = user;
 
     // Routes d'authentification et profil courant : toujours accessibles

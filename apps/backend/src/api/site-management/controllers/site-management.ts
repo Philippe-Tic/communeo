@@ -5,7 +5,8 @@
 
 import crypto from 'crypto';
 import { publisher as getPublisher, toPublisherSite } from '../../../utils/publisher';
-import { createInvitationToken, escapeHtml } from '../../../utils/security';
+import { createInvitationToken } from '../../../utils/security';
+import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';
 
@@ -25,6 +26,50 @@ async function requireSuperAdmin(ctx) {
   }
 
   return fullUser;
+}
+
+
+const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Ligne de suivi d'une commune (liste et fiche) */
+async function summarize(site: any) {
+  const documentId = site.documentId;
+  const [users, [lastDeployment], pendingCount, [lastPage], [lastArticle]] = await Promise.all([
+    strapi.query('plugin::users-permissions.user').findMany({ where: { site: { documentId } }, select: ['blocked', 'active'] }),
+    strapi.documents('api::deployment.deployment').findMany({ filters: { site: { documentId } } as any, sort: { triggered_at: 'desc' } as any, limit: 1 }),
+    strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId } } }),
+    strapi.query('api::page.page').findMany({ where: { site: { documentId } }, orderBy: { updatedAt: 'desc' }, limit: 1, select: ['updatedAt'] }),
+    strapi.query('api::article.article').findMany({ where: { site: { documentId } }, orderBy: { updatedAt: 'desc' }, limit: 1, select: ['updatedAt'] }),
+  ]);
+  const deployment: any = lastDeployment ?? null;
+  const publication = !deployment
+    ? 'new'
+    : deployment.status === 'building'
+      ? 'running'
+      : deployment.status === 'error'
+        ? 'failed'
+        : pendingCount > 0
+          ? 'pending'
+          : 'ok';
+  const dates = [site.updatedAt, deployment?.triggered_at, lastPage?.updatedAt, lastArticle?.updatedAt].filter(Boolean).map((date) => new Date(date).getTime());
+  return {
+    documentId,
+    name: site.name,
+    slug: site.slug,
+    theme: site.theme ?? null,
+    liveUrl: site.live_url ?? null,
+    customDomain: site.custom_domain ?? null,
+    population: site.infos_pratiques?.population ?? null,
+    suspended: !!site.suspended,
+    createdAt: site.createdAt,
+    lastActivity: dates.length ? new Date(Math.max(...dates)).toISOString() : site.createdAt,
+    publication: { state: publication, at: deployment?.completed_at ?? deployment?.triggered_at ?? null, pendingCount },
+    users: {
+      active: users.filter((user: any) => !user.blocked && user.active !== false).length,
+      invited: users.filter((user: any) => user.blocked && user.active !== false).length,
+    },
+  };
 }
 
 export default {
@@ -55,254 +100,157 @@ export default {
   },
 
   /**
-   * GET /api/site-management — list all sites with stats
+   * GET /api/site-management — communes de la plateforme, avec de quoi les suivre : thème, état de
+   * mise en ligne, utilisateurs (actifs et invités), dernière activité.
    */
   async find(ctx) {
     await requireSuperAdmin(ctx);
-
-    const sites = await strapi.documents('api::site.site').findMany({
-      populate: ['logo'],
-    });
-
-    // Enrich with stats
-    const enriched = await Promise.all(
-      sites.map(async (site) => {
-        const [pagesCount, articlesCount, usersCount] = await Promise.all([
-          // Draft & Publish : une ligne brouillon par document (la version publiée est une ligne de plus)
-          strapi.query('api::page.page').count({
-            where: { site: { documentId: site.documentId }, publishedAt: null },
-          }),
-          // Draft & Publish : une ligne brouillon par document (la version publiée est une ligne de plus)
-          strapi.query('api::article.article').count({
-            where: { site: { documentId: site.documentId }, publishedAt: null },
-          }),
-          strapi.query('plugin::users-permissions.user').count({
-            where: { site: { documentId: site.documentId } },
-          }),
-        ]);
-
-        // Last deployment
-        const deployments = await strapi.documents('api::deployment.deployment').findMany({
-          filters: { site: { documentId: site.documentId } } as any,
-          sort: { createdAt: 'desc' } as any,
-          limit: 1,
-        });
-
-        return {
-          ...site,
-          _stats: {
-            pages: pagesCount,
-            articles: articlesCount,
-            users: usersCount,
-            lastDeployment: deployments?.[0] || null,
-          },
-        };
-      })
-    );
-
-    ctx.body = { data: enriched };
+    const sites = await strapi.documents('api::site.site').findMany({ populate: ['infos_pratiques'] as any });
+    ctx.body = { data: await Promise.all(sites.map((site) => summarize(site))) };
   },
 
   /**
-   * GET /api/site-management/:documentId — site detail with users
+   * GET /api/site-management/slug-available?slug= — adresse libre et valide pour une nouvelle commune
+   */
+  async slugAvailable(ctx) {
+    await requireSuperAdmin(ctx);
+    const slug = String(ctx.query?.slug ?? '').trim();
+    if (!SLUG.test(slug)) {
+      ctx.body = { available: false, reason: 'Lettres minuscules, chiffres et tirets seulement' };
+      return;
+    }
+    const taken = await strapi.query('api::site.site').count({ where: { slug } });
+    ctx.body = taken ? { available: false, reason: 'Adresse déjà utilisée' } : { available: true };
+  },
+
+  /**
+   * GET /api/site-management/:documentId — fiche d'une commune : suivi, utilisateurs, contenus, mises en ligne
    */
   async findOne(ctx) {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
-
-    const sites = await strapi.documents('api::site.site').findMany({
+    const site = await strapi.documents('api::site.site').findFirst({
       filters: { documentId: { $eq: documentId } } as any,
-      populate: ['logo'],
+      populate: ['infos_pratiques'] as any,
     });
+    if (!site) ctx.throw(404, 'Commune introuvable');
 
-    if (!sites || sites.length === 0) {
-      ctx.throw(404, 'Site not found');
-    }
-
-    const site = sites[0];
-
-    // Get users for this site
-    const users = await strapi.query('plugin::users-permissions.user').findMany({
-      where: { site: { documentId } },
-      populate: ['site'],
-    });
-
-    const sanitizedUsers = users.map(({ password, resetPasswordToken, confirmationToken, ...rest }) => rest);
-
-    // Get stats (Draft & Publish : on compte les lignes brouillon, une par document)
-    const [pagesCount, articlesCount, eventsCount] = await Promise.all([
-      strapi.query('api::page.page').count({
-        where: { site: { documentId }, publishedAt: null },
-      }),
-      strapi.query('api::article.article').count({
-        where: { site: { documentId }, publishedAt: null },
-      }),
-      strapi.query('api::evenement.evenement').count({
-        where: { site: { documentId }, publishedAt: null },
-      }),
+    const users = await strapi.query('plugin::users-permissions.user').findMany({ where: { site: { documentId } } });
+    // Draft & Publish : une ligne brouillon par document
+    const [pages, articles, documents, succeeded, failed] = await Promise.all([
+      strapi.query('api::page.page').count({ where: { site: { documentId }, publishedAt: null } }),
+      strapi.query('api::article.article').count({ where: { site: { documentId }, publishedAt: null } }),
+      strapi.query('api::official-document.official-document').count({ where: { site: { documentId }, publishedAt: null } }),
+      strapi.query('api::deployment.deployment').count({ where: { site: { documentId }, status: 'ready' } }),
+      strapi.query('api::deployment.deployment').count({ where: { site: { documentId }, status: 'error' } }),
     ]);
-
-    // Last deployments
-    const deployments = await strapi.documents('api::deployment.deployment').findMany({
-      filters: { site: { documentId } } as any,
-      sort: { createdAt: 'desc' } as any,
-      limit: 5,
-    });
 
     ctx.body = {
       data: {
-        ...site,
-        _users: sanitizedUsers,
-        _stats: {
-          pages: pagesCount,
-          articles: articlesCount,
-          events: eventsCount,
-        },
-        _deployments: deployments || [],
+        ...(await summarize(site)),
+        domainStatus: (site as any).domain_status ?? null,
+        sslEnabled: (site as any).ssl_enabled !== false,
+        users: users.map((user: any) => ({
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          municipality_role: user.municipality_role,
+          blocked: !!user.blocked,
+          active: user.active,
+          createdAt: user.createdAt,
+        })),
+        counts: { pages, articles, documents },
+        deployments: { succeeded, failed },
       },
     };
   },
 
   /**
-   * POST /api/site-management — create a new municipality
+   * POST /api/site-management — nouvelle commune : le premier administrateur reçoit l'invitation
+   * { name, slug, admin_email, admin_first_name, admin_last_name }
    */
   async create(ctx) {
     await requireSuperAdmin(ctx);
-    const data = ctx.request.body?.data || ctx.request.body;
+    const data = ctx.request.body?.data || ctx.request.body || {};
+    const name = String(data.name ?? '').trim();
+    const slug = String(data.slug ?? '').trim();
+    const email = String(data.admin_email ?? '').trim().toLowerCase();
+    const firstName = String(data.admin_first_name ?? '').trim();
+    const lastName = String(data.admin_last_name ?? '').trim();
 
-    if (!data.name || !data.slug) {
-      ctx.throw(400, 'Missing required fields: name, slug');
+    if (!name || !SLUG.test(slug) || !EMAIL.test(email) || !firstName || !lastName) {
+      ctx.throw(400, "Nom, adresse du site, prénom, nom et e-mail de l'administrateur sont obligatoires");
+    }
+    if (await strapi.query('api::site.site').count({ where: { slug } })) ctx.throw(400, 'Adresse déjà utilisée par une autre commune');
+    if (await strapi.query('plugin::users-permissions.user').count({ where: { $or: [{ email }, { username: email }] } })) {
+      ctx.throw(400, 'Un compte existe déjà avec cet e-mail');
     }
 
-    // Check slug uniqueness
-    const existing = await strapi.documents('api::site.site').findMany({
-      filters: { slug: { $eq: data.slug } },
-    });
-
-    if (existing && existing.length > 0) {
-      ctx.throw(400, 'Un site avec ce slug existe déjà');
-    }
-
-    // 1. Create the site in Strapi
+    // 1. La commune (contact de la mairie = l'administrateur, à préciser ensuite)
     const site = await strapi.documents('api::site.site').create({
-      data: {
-        name: data.name,
-        slug: data.slug,
-        theme: DEFAULT_THEME,
-        contact_mail: data.admin_email || '',
-        contact_phone: data.contact_phone || '',
-        address: data.address || '',
-      },
+      data: { name, slug, theme: DEFAULT_THEME, contact_mail: email } as any,
     });
 
-    // 2. Create the site at the host (otherwise done on first publication)
+    // 2. Le site chez l'hébergeur (sinon créé à la première mise en ligne)
     const publisher = getPublisher();
     if (publisher.configured) {
       try {
         const host = await publisher.ensureSite(toPublisherSite(site));
-        await strapi.documents('api::site.site').update({ documentId: site.documentId,
-          data: { netlify_site_id: host.hostId, live_url: host.defaultUrl } as any,
-        });
+        await strapi.documents('api::site.site').update({ documentId: site.documentId, data: { netlify_site_id: host.hostId, live_url: host.defaultUrl } as any });
       } catch (error) {
         log.error('Failed to create host site:', error);
-        // Don't fail the whole operation — the host site is created again on first publication
       }
     }
 
-    // 3. Create initial admin user if email provided
-    if (data.admin_email) {
-      try {
-        const userService = strapi.plugin('users-permissions').service('user');
-        const randomPassword = crypto.randomBytes(32).toString('hex');
-        const hashedPassword = (await userService.ensureHashedPasswords({ password: randomPassword })).password;
-        const { token: invitationToken, stored: storedInvitationToken } = createInvitationToken();
-
-        const authenticatedRole = await strapi.query('plugin::users-permissions.role').findOne({
-          where: { type: 'authenticated' },
-        });
-
-        await strapi.query('plugin::users-permissions.user').create({
-          data: {
-            username: data.admin_email,
-            email: data.admin_email,
-            password: hashedPassword,
-            first_name: data.admin_first_name || 'Admin',
-            last_name: data.admin_last_name || data.name,
-            municipality_role: 'admin',
-            active: true,
-            confirmed: true,
-            blocked: true, // Blocked until invitation accepted
-            provider: 'local',
-            role: authenticatedRole.id,
-            site: site.id,
-            resetPasswordToken: storedInvitationToken,
-          },
-        });
-
-        // Send invitation email
-        try {
-          const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
-          const invitationLink = `${adminUrl}/accept-invitation?token=${invitationToken}`;
-
-          await strapi.plugin('email').service('email').send({
-            to: data.admin_email,
-            subject: `Invitation à administrer ${data.name} — Communeo`,
-            html: `
-              <h2>Bienvenue sur Communeo</h2>
-              <p>Votre espace d'administration pour <strong>${escapeHtml(data.name)}</strong> a été créé.</p>
-              <p>Cliquez sur le lien ci-dessous pour définir votre mot de passe et accéder à votre espace :</p>
-              <p><a href="${invitationLink}" style="display:inline-block;padding:12px 24px;background-color:#2563eb;color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Activer mon compte</a></p>
-            `,
-            text: `Votre espace d'administration pour ${data.name} a été créé. Activez votre compte : ${invitationLink}`,
-          });
-        } catch (emailError) {
-          log.error('Failed to send invitation email for new site:', emailError);
-        }
-      } catch (error) {
-        log.error('Failed to create initial admin user:', error);
-      }
-    }
-
-    // Re-fetch the complete site
-    const completeSite = await strapi.documents('api::site.site').findOne({
-      documentId: site.documentId,
-      populate: ['logo'],
+    // 3. Le premier administrateur, invité (compte bloqué jusqu'au choix du mot de passe)
+    const userService = strapi.plugin('users-permissions').service('user');
+    const hashed = (await userService.ensureHashedPasswords({ password: crypto.randomBytes(32).toString('hex') })).password;
+    const { token, stored } = createInvitationToken();
+    const authenticated = await strapi.query('plugin::users-permissions.role').findOne({ where: { type: 'authenticated' } });
+    await strapi.query('plugin::users-permissions.user').create({
+      data: {
+        username: email,
+        email,
+        password: hashed,
+        first_name: firstName,
+        last_name: lastName,
+        municipality_role: 'admin',
+        active: true,
+        confirmed: true,
+        blocked: true,
+        provider: 'local',
+        role: authenticated.id,
+        site: site.id,
+        resetPasswordToken: stored,
+      },
     });
+    try {
+      await sendInvitationEmail(email, firstName, token, name);
+    } catch (error) {
+      log.error('Failed to send invitation email for new site:', error);
+    }
 
-    ctx.body = { data: completeSite };
+    ctx.body = { data: await summarize(await strapi.documents('api::site.site').findOne({ documentId: site.documentId, populate: ['infos_pratiques'] as any })) };
   },
 
   /**
-   * PUT /api/site-management/:documentId — update site
+   * PUT /api/site-management/:documentId — { name?, suspended? }
+   * Suspendre : les utilisateurs de la commune ne peuvent plus se connecter (session coupée) et
+   * rien n'est plus mis en ligne ; le site public reste en ligne tel quel.
    */
   async update(ctx) {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
-    const data = ctx.request.body?.data || ctx.request.body;
+    const data = ctx.request.body?.data || ctx.request.body || {};
+    const site = await strapi.documents('api::site.site').findFirst({ filters: { documentId: { $eq: documentId } } as any });
+    if (!site) ctx.throw(404, 'Commune introuvable');
 
-    const sites = await strapi.documents('api::site.site').findMany({
-      filters: { documentId: { $eq: documentId } } as any,
-    });
-
-    if (!sites || sites.length === 0) {
-      ctx.throw(404, 'Site not found');
-    }
-
-    const site = sites[0];
-
-    const updateData: Record<string, any> = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.slug !== undefined) updateData.slug = data.slug;
-    if (data.contact_mail !== undefined) updateData.contact_mail = data.contact_mail;
-    if (data.contact_phone !== undefined) updateData.contact_phone = data.contact_phone;
-    if (data.address !== undefined) updateData.address = data.address;
-
-    const updated = await strapi.documents('api::site.site').update({ documentId: site.documentId,
-      data: updateData,
-      populate: ['logo'],
-    });
-
-    ctx.body = { data: updated };
+    const update: Record<string, unknown> = {};
+    if (typeof data.name === 'string' && data.name.trim()) update.name = data.name.trim();
+    if (typeof data.suspended === 'boolean') update.suspended = data.suspended;
+    const updated = await strapi.documents('api::site.site').update({ documentId, data: update as any, populate: ['infos_pratiques'] as any });
+    ctx.body = { data: await summarize(updated) };
   },
 
   /**

@@ -1080,6 +1080,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     social_links: Schema.Attribute.Component<'social.social-link', true>;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    suspended: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     team_members: Schema.Attribute.Relation<'oneToMany', 'api::team-member.team-member'>;
     theme: Schema.Attribute.Enumeration<['institutionnel', 'moderne', 'journal', 'bourg']> &
       Schema.Attribute.Required &

@@ -51,6 +51,22 @@ describe('commune complète', () => {
   });
 });
 
+describe('infos pratiques de chaque page', () => {
+  it("reprennent les sections d'accueil activées", async () => {
+    const s = source();
+    const [home, practical] = await Promise.all([s.home(), s.practical()]);
+    expect(practical.quickLinks?.length).toBeGreaterThan(0);
+    expect(practical.wasteCollection?.length).toBeGreaterThan(0);
+    expect(practical.weather).not.toBeNull();
+    expect(practical).toEqual({ quickLinks: home.quickLinks, weather: home.weather, wasteCollection: home.wasteCollection });
+  });
+
+  it("section d'accueil désactivée : rien sur les autres pages non plus", async () => {
+    const s = source({ variant: 'minimal' });
+    expect((await s.practical()).quickLinks).toBeNull();
+  });
+});
+
 describe('variantes', () => {
   it("minimale : accueil réduit et aucune image", async () => {
     const s = source({ variant: 'minimal' });

@@ -390,3 +390,9 @@ export interface HomeVM {
   freeContent: { title: string | null; body: RichTextVM } | null;
   seo: SeoVM;
 }
+
+/**
+ * Infos pratiques données à chaque page (panneau « Pratique » d'un thème, par exemple) : les mêmes
+ * que les sections d'accueil du même nom, `null` si la commune les a désactivées ou n'a rien à montrer.
+ */
+export type PracticalVM = Pick<HomeVM, 'quickLinks' | 'weather' | 'wasteCollection'>;

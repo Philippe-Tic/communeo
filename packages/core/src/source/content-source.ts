@@ -9,7 +9,7 @@ import {
   mapPage,
   mapTeam,
 } from '../vm/content';
-import { mapHome } from '../vm/home';
+import { mapHome, mapPractical } from '../vm/home';
 import { isAlertVisible, mapAlert, mapCanteenWeek, mapWasteSchedules } from '../vm/practical';
 import { mapNavigation, mapSite } from '../vm/site';
 import type { ContentSource, RawLoader } from './types';
@@ -61,6 +61,7 @@ export function createContentSource(loader: RawLoader, baseCtx: MapContext, opti
       ]);
       return mapHome(ctx, site, { articles: articleList, events, alerts, waste, canteen, associations }, now);
     }),
+    practical: memo(async () => mapPractical(ctx, await raw.site(), await raw.waste(), now)),
     pages: memo(async () => (await raw.pages()).map((page) => mapPage(ctx, page))),
     articles,
     events: memo(async () => (await raw.events()).map((event) => mapEvent(ctx, event))),

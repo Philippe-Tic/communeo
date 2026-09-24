@@ -58,8 +58,8 @@ export async function pageContext(
   path: string,
   page: { title: string; seo: SeoVM; breadcrumb?: LinkVM[] },
 ): Promise<PageContext> {
-  const [site, nav, alerts] = await Promise.all([source.site(), source.navigation(), source.alerts()]);
-  return { site, nav, alerts, path, title: page.title, seo: page.seo, breadcrumb: page.breadcrumb ?? [] };
+  const [site, nav, alerts, practical] = await Promise.all([source.site(), source.navigation(), source.alerts(), source.practical()]);
+  return { site, nav, alerts, practical, path, title: page.title, seo: page.seo, breadcrumb: page.breadcrumb ?? [] };
 }
 
 /** Réponse 404 en preview ; au build, les routes dynamiques ne génèrent que les chemins existants. */

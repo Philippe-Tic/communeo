@@ -5,7 +5,7 @@ import { associationSlugs, mapArticleCard, mapAssociationCard, mapEventCard, seo
 import { mapImage, mapLink } from './media';
 import { isAlertVisible, mapAlert, mapCanteenWeek, mapWasteSchedules } from './practical';
 import { AnchorRegistry, mapRichText } from './rich-text';
-import type { HomeVM } from './types';
+import type { HomeVM, PracticalVM } from './types';
 
 export interface HomeData {
   articles: Article[];
@@ -18,6 +18,26 @@ export interface HomeData {
 
 const enabled = (section: { enabled?: boolean | null } | null | undefined) => !!section?.enabled;
 const nonEmpty = <T>(list: T[]) => (list.length ? list : null);
+
+/** Accès rapides, météo et prochaines collectes : sections d'accueil, reprises sur chaque page. */
+export function mapPractical(ctx: MapContext, site: Site, waste: WasteSchedule[], now: Date): PracticalVM {
+  const home: Partial<HomepageHomepage> = site.homepage ?? {};
+  return {
+    quickLinks: enabled(home.quick_links)
+      ? nonEmpty(
+          (home.quick_links!.items ?? []).flatMap((item) => {
+            const link = mapLink(ctx, item.label, item.url);
+            return link ? [{ ...link, description: item.description?.trim() || null, icon: item.icon ?? null }] : [];
+          }),
+        )
+      : null,
+    weather:
+      enabled(home.weather) && site.infos_pratiques?.latitude != null && site.infos_pratiques?.longitude != null
+        ? { lat: site.infos_pratiques.latitude, lng: site.infos_pratiques.longitude }
+        : null,
+    wasteCollection: enabled(home.waste_collection) ? nonEmpty(mapWasteSchedules(waste, now)) : null,
+  };
+}
 
 /**
  * Accueil : chaque section vaut `null` si la commune l'a désactivée ou si elle n'a rien à montrer.
@@ -38,6 +58,7 @@ export function mapHome(ctx: MapContext, site: Site, data: HomeData, now: Date):
   const today = isoDay(now);
   const upcomingEvents = data.events.filter((event) => isoDay(event.end_date ?? event.start_date) >= today);
   const slugs = associationSlugs(data.associations);
+  const practical = mapPractical(ctx, site, data.waste, now);
   const currentMenu = data.canteen
     .filter((menu) => menu.week_start <= today)
     .sort((a, b) => b.week_start.localeCompare(a.week_start))[0];
@@ -52,14 +73,7 @@ export function mapHome(ctx: MapContext, site: Site, data: HomeData, now: Date):
           secondary: mapLink(ctx, hero!.secondary_label, hero!.secondary_url),
         }
       : null,
-    quickLinks: enabled(home.quick_links)
-      ? nonEmpty(
-          (home.quick_links!.items ?? []).flatMap((item) => {
-            const link = mapLink(ctx, item.label, item.url);
-            return link ? [{ ...link, description: item.description?.trim() || null, icon: item.icon ?? null }] : [];
-          }),
-        )
-      : null,
+    quickLinks: practical.quickLinks,
     featuredNews: enabled(home.featured_news)
       ? nonEmpty(articles.slice(0, home.featured_news!.count ?? 3).map((article) => mapArticleCard(ctx, article)))
       : null,
@@ -76,11 +90,8 @@ export function mapHome(ctx: MapContext, site: Site, data: HomeData, now: Date):
       ? nonEmpty((home.key_figures!.items ?? []).map((item) => ({ value: item.value, label: item.label, icon: item.icon ?? null })))
       : null,
     practicalInfo: enabled(home.practical_info),
-    weather:
-      enabled(home.weather) && site.infos_pratiques?.latitude != null && site.infos_pratiques?.longitude != null
-        ? { lat: site.infos_pratiques.latitude, lng: site.infos_pratiques.longitude }
-        : null,
-    wasteCollection: enabled(home.waste_collection) ? nonEmpty(mapWasteSchedules(data.waste, now)) : null,
+    weather: practical.weather,
+    wasteCollection: practical.wasteCollection,
     disruptions: enabled(home.disruptions)
       ? nonEmpty(data.alerts.filter((alert) => isAlertVisible(alert, now)).map((alert) => mapAlert(ctx, alert)))
       : null,

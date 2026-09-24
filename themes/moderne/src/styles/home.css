@@ -39,11 +39,6 @@
   font-size: 1.125rem;
 }
 
-.mo-prose {
-  display: grid;
-  gap: 1rem;
-}
-
 /* Accroche ------------------------------------------------------------------------------------- */
 .mo-hero {
   display: grid;

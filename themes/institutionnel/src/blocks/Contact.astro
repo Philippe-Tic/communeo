@@ -27,6 +27,6 @@ const osmUrl = query ? `https://www.openstreetmap.org/search?query=${query}` : n
     </div>
   </div>
   {mapUrl && osmUrl && (
-    <ConsentEmbed title={`Carte : ${block.name}`} src={mapUrl} provider="OpenStreetMap" href={osmUrl} class="in-contact-map" />
+    <ConsentEmbed title={`Carte : ${block.name}`} src={mapUrl} provider="OpenStreetMap" href={osmUrl} kind="map" class="in-contact-map" />
   )}
 </section>

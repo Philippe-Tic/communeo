@@ -1,12 +1,35 @@
 ---
+/** Documents à télécharger : un fichier seul en carte, plusieurs en liste de pilules (format et poids). */
 import type { BlockOf } from '@communeo/core';
+import Download from '@lucide/astro/icons/download';
 
 interface Props { block: BlockOf<'documents'> }
 const { block } = Astro.props;
+const single = block.files.length === 1;
+const type = (label: string) => label.split(' – ')[0];
+const size = (label: string) => label.split(' – ')[1] ?? '';
 ---
-<section class="st-documents" aria-label={block.title ?? 'Documents à télécharger'}>
+<section class="mo-documents" aria-label={block.title ?? 'Documents à télécharger'}>
   {block.title && <h2>{block.title}</h2>}
-  <ul>
-    {block.files.map((file) => <li><a href={file.href} download>{file.name}<span> ({file.label})</span></a></li>)}
-  </ul>
+  {single ? (
+    <a href={block.files[0]!.href} class="mo-document-single" download>
+      <span class="mo-document-icon" aria-hidden="true"><Download size={22} /></span>
+      <span>
+        <strong class="mo-document-name">{block.files[0]!.name}</strong>
+        <span class="mo-document-meta">{block.files[0]!.label}</span>
+      </span>
+    </a>
+  ) : (
+    <ul class="mo-document-list">
+      {block.files.map((file) => (
+        <li>
+          <a href={file.href} download>
+            <span class="mo-document-type" aria-hidden="true">{type(file.label)}</span>
+            <span class="mo-document-name">{file.name}</span>
+            <span class="mo-document-meta"><span class="cn-sr-only">{type(file.label)} – </span>{size(file.label)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
 </section>

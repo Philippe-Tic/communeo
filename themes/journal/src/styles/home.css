@@ -1,0 +1,649 @@
+/* Accueil « une de journal ». */
+
+.jo-page-full {
+  padding-top: 1.5rem;
+}
+
+.jo-masthead {
+  padding-bottom: 0.875rem;
+  border-bottom: 3px solid var(--jo-ink);
+}
+
+.jo-masthead-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1.5rem;
+}
+
+.jo-masthead h1 {
+  font-size: 1.75rem;
+}
+
+.jo-masthead-date {
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+.jo-masthead-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-top: 0.625rem;
+  color: var(--jo-muted);
+}
+
+.jo-masthead-intro > p:first-child {
+  max-width: 44rem;
+}
+
+.jo-masthead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.jo-front {
+  display: grid;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.jo-front-news {
+  min-width: 0;
+}
+
+.jo-front-main {
+  display: grid;
+  gap: 2rem;
+  align-content: start;
+  min-width: 0;
+}
+
+.jo-front-aside-column {
+  display: grid;
+  gap: 1.75rem;
+  align-content: start;
+}
+
+@media (min-width: 64rem) {
+  .jo-page-full {
+    padding-top: 2rem;
+  }
+
+  .jo-masthead h1 {
+    font-size: 2.125rem;
+  }
+
+  /* Ordre du DOM (mobile) : actualités, colonne de droite, suite ; sur ordinateur, la colonne de
+     droite occupe toute la hauteur à côté des actualités et de la suite */
+  .jo-front-aside {
+    grid-template-columns: minmax(0, 1fr) 21.25rem;
+    grid-template-rows: auto 1fr;
+    gap: 2rem 2.5rem;
+  }
+
+  .jo-front-aside .jo-front-aside-column {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .jo-front-aside .jo-front-news,
+  .jo-front-aside .jo-front-main {
+    grid-column: 1;
+  }
+
+  .jo-front-aside-column {
+    padding-top: 1rem;
+  }
+}
+
+.jo-news-columns {
+  display: grid;
+  gap: 0 2rem;
+}
+
+@media (min-width: 48rem) {
+  .jo-news-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.jo-more-line {
+  padding-top: 0.375rem;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-more-line a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--jo-target);
+  font-weight: 600;
+}
+
+.jo-prose > * + * {
+  margin-top: 0.875rem;
+}
+
+/* Mot du maire : encart blanc filet fin */
+.jo-mayor {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+  padding: 1.5rem;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-mayor img {
+  width: 100%;
+  max-width: 10rem;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--jo-radius);
+}
+
+.jo-mayor-title {
+  margin-top: 0.375rem;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.jo-mayor-body {
+  margin-top: 0.75rem;
+}
+
+.jo-mayor-signature {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 48rem) {
+  .jo-mayor-photo {
+    grid-template-columns: 10rem minmax(0, 1fr);
+  }
+}
+
+/* Paires de sections côte à côte */
+.jo-pair {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .jo-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.jo-ruled-list {
+  padding: 0;
+  list-style: none;
+}
+
+.jo-ruled-list > li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-disruption {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 1rem;
+}
+
+.jo-disruption-info {
+  --jo-sign: var(--jo-info);
+}
+
+.jo-disruption-warning {
+  --jo-sign: var(--jo-warning);
+}
+
+.jo-disruption-critical {
+  --jo-sign: var(--jo-danger);
+}
+
+.jo-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--jo-sign);
+  border: 2px solid var(--jo-sign);
+  border-radius: var(--jo-radius);
+}
+
+.jo-disruption-info .jo-sign {
+  border-radius: 50%;
+}
+
+.jo-disruption-kind {
+  color: var(--jo-sign);
+}
+
+.jo-strong-link {
+  font-weight: 600;
+  color: var(--jo-ink);
+}
+
+.jo-canteen-day {
+  margin-top: 0.75rem;
+}
+
+.jo-canteen-menu > li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.jo-canteen-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.jo-badge {
+  color: var(--jo-slate);
+}
+
+/* Associations en liste sur trois colonnes */
+.jo-assos {
+  display: grid;
+  gap: 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .jo-assos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .jo-assos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.jo-assos a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.75rem;
+  padding: 0.5rem 0;
+  color: var(--jo-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-assos a:hover strong {
+  color: var(--jo-slate);
+  text-decoration: underline;
+}
+
+.jo-assos img,
+.jo-initials {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
+  border-radius: var(--jo-radius);
+}
+
+.jo-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--jo-font-title);
+  font-weight: 600;
+  color: var(--jo-slate);
+  background: var(--jo-pale);
+}
+
+.jo-assos-category {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--jo-muted);
+}
+
+/* La commune : texte et chiffres */
+.jo-free {
+  margin-top: 0.75rem;
+}
+
+.jo-figures {
+  margin-top: 1rem;
+}
+
+.jo-figures ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.jo-figures li {
+  display: grid;
+  justify-items: center;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-figure-value {
+  font-family: var(--jo-font-title);
+  font-size: 1.625rem;
+  font-weight: 600;
+  color: var(--jo-slate);
+}
+
+.jo-figure-label {
+  font-size: 0.8125rem;
+  color: var(--jo-muted);
+}
+
+/* Lettre d'information : encart encre */
+.jo-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.jo-newsletter {
+  padding: 1.5rem;
+  color: #fff;
+  background: var(--jo-ink);
+  border-radius: var(--jo-radius);
+}
+
+.jo-newsletter h2 {
+  color: #fff;
+}
+
+.jo-newsletter > p {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: var(--jo-muted-dark);
+}
+
+.jo-newsletter a {
+  color: #9ec1ea;
+}
+
+.jo-newsletter-form {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.875rem;
+}
+
+.jo-newsletter-form .cn-newsletter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.jo-newsletter-form .cn-newsletter-row {
+  display: flex;
+}
+
+.jo-newsletter-form .cn-newsletter-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--jo-radius) 0 0 var(--jo-radius);
+}
+
+.jo-newsletter-form .cn-newsletter-input[aria-invalid='true'] {
+  border: 3px solid #e58a79;
+  border-right: 0;
+}
+
+.jo-newsletter-form .cn-newsletter-submit {
+  flex: none;
+  min-height: 3rem;
+  padding: 0 1.125rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--jo-slate);
+  border: 0;
+  border-radius: 0 var(--jo-radius) var(--jo-radius) 0;
+  cursor: pointer;
+}
+
+.jo-newsletter-form .cn-newsletter-submit:hover {
+  background: var(--jo-slate-dark);
+}
+
+.jo-newsletter-form .cn-newsletter-status {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  background: var(--jo-ink-soft);
+  border-left: 4px solid var(--jo-open);
+}
+
+.jo-newsletter-form[data-state='success'] .cn-newsletter-status::before {
+  content: '✓';
+}
+
+.jo-newsletter-form[data-state='error'] .cn-newsletter-status {
+  border-left-color: #e58a79;
+}
+
+.jo-newsletter-form[data-state='error'] .cn-newsletter-status::before {
+  content: '⚠';
+}
+
+.jo-newsletter-note {
+  font-size: 0.875rem;
+  color: var(--jo-muted-dark);
+}
+
+.jo-partners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.jo-partners a,
+.jo-partners li > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7rem;
+  min-height: 3.5rem;
+  padding: 0.375rem 0.75rem;
+  font-weight: 600;
+  color: var(--jo-ink);
+  text-align: center;
+  text-decoration: none;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-partners img {
+  width: auto;
+  max-height: 2.5rem;
+}
+
+/* Colonne de droite */
+.jo-quick {
+  padding: 0;
+  list-style: none;
+}
+
+.jo-quick a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.375rem 0;
+  font-weight: 600;
+  color: var(--jo-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-quick a:hover {
+  color: var(--jo-slate);
+  text-decoration: underline;
+}
+
+.jo-quick-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--jo-slate);
+  background: var(--jo-pale);
+  border-radius: var(--jo-radius);
+}
+
+.jo-box {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.125rem 1.25rem;
+  font-size: 1rem;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-box address {
+  display: grid;
+  justify-items: start;
+  font-style: normal;
+}
+
+.jo-box-phone {
+  font-weight: 600;
+}
+
+.jo-box-hours {
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+.jo-status-light {
+  color: var(--jo-ink);
+}
+
+.jo-status-light::before {
+  background: var(--jo-muted);
+}
+
+.jo-status-light[data-open='true']::before {
+  background: #1e8a4c;
+}
+
+.jo-box-more {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--jo-target);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.jo-waste-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.jo-waste-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* Pastille textuelle (OM, TRI…) : la couleur n'est qu'un repère en plus */
+.jo-waste-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 1.5rem;
+  padding: 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--jo-muted);
+  border-radius: 2px;
+}
+
+.jo-waste-tri-selectif {
+  background: #7a5a00;
+}
+
+.jo-waste-verre {
+  background: var(--jo-slate);
+}
+
+.jo-waste-dechets-verts {
+  background: #3f5f1f;
+}
+
+.jo-waste-encombrants {
+  background: var(--jo-info);
+}
+
+.jo-weather .cn-weather-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0;
+  font-size: 0.9375rem;
+  text-align: center;
+  list-style: none;
+}
+
+.jo-weather .cn-weather-days li {
+  display: grid;
+}
+
+.jo-weather .cn-weather-days strong {
+  font-family: var(--jo-font-title);
+  font-size: 1.375rem;
+}
+
+.jo-weather .cn-weather-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.625rem;
+}
+
+.jo-weather .cn-weather-temp {
+  font-family: var(--jo-font-title);
+  font-size: 1.75rem;
+}

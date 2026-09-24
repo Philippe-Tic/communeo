@@ -1,0 +1,53 @@
+---
+/** Icônes des accès rapides et des chiffres clés : les clés viennent des listes de Strapi. */
+import Book from '@lucide/astro/icons/book-open';
+import Building from '@lucide/astro/icons/building';
+import Calendar from '@lucide/astro/icons/calendar-days';
+import Clock from '@lucide/astro/icons/clock';
+import Document from '@lucide/astro/icons/file-text';
+import Folder from '@lucide/astro/icons/folder';
+import Globe from '@lucide/astro/icons/globe';
+import Heart from '@lucide/astro/icons/heart';
+import Identity from '@lucide/astro/icons/id-card';
+import Info from '@lucide/astro/icons/info';
+import Mail from '@lucide/astro/icons/mail';
+import Map from '@lucide/astro/icons/map';
+import Phone from '@lucide/astro/icons/phone';
+import Shield from '@lucide/astro/icons/shield';
+import Star from '@lucide/astro/icons/star';
+import Tree from '@lucide/astro/icons/trees';
+import TriangleAlert from '@lucide/astro/icons/triangle-alert';
+import Users from '@lucide/astro/icons/users';
+
+interface Props {
+  name: string | null;
+  fallback?: 'link' | 'figure';
+  size?: number;
+  class?: string;
+}
+
+const icons: Record<string, unknown> = {
+  alert: TriangleAlert,
+  book: Book,
+  building: Building,
+  calendar: Calendar,
+  clock: Clock,
+  document: Document,
+  folder: Folder,
+  globe: Globe,
+  heart: Heart,
+  identity: Identity,
+  info: Info,
+  mail: Mail,
+  map: Map,
+  phone: Phone,
+  shield: Shield,
+  star: Star,
+  tree: Tree,
+  users: Users,
+};
+
+const { name, fallback = 'link', size = 24, class: className } = Astro.props;
+const Component = (icons[name ?? ''] ?? (fallback === 'figure' ? Star : Folder)) as typeof Star;
+---
+<Component size={size} aria-hidden="true" class={className} />

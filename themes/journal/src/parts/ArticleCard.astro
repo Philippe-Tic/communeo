@@ -1,13 +1,40 @@
 ---
+/**
+ * Carte d'actualité « journal » : pas de cadre, un filet au-dessus. À la une : grande image puis
+ * titre ; sinon vignette à gauche (ou pas d'image). Catégorie en capitales, date, titre, chapô.
+ */
 import type { ArticleCardVM } from '@communeo/core';
 
-interface Props { article: ArticleCardVM; level?: 2 | 3 }
-const { article, level = 3 } = Astro.props;
+interface Props {
+  article: ArticleCardVM;
+  level?: 2 | 3;
+  /** Article à la une : image pleine largeur, titre en grand */
+  featured?: boolean;
+  /** Afficher le chapô (à la une, listes) */
+  summary?: boolean;
+}
+
+const { article, level = 3, featured = false, summary = featured } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
 ---
-<article class="st-card">
-  <Heading><a href={article.href}>{article.title}</a></Heading>
-  <p class="st-meta"><span>{article.category.label}</span> · <time datetime={article.date.iso}>{article.date.label}</time></p>
-  {article.summary && <p>{article.summary}</p>}
-  {article.image && <img src={article.image.src} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} loading="lazy" />}
+<article class:list={['jo-card', { 'jo-card-featured': featured, 'jo-card-thumb': !featured && article.image }]}>
+  {article.image && (
+    <img
+      class="jo-card-image"
+      src={article.image.src}
+      alt={article.image.alt}
+      srcset={article.image.srcset ?? undefined}
+      width={article.image.width ?? undefined}
+      height={article.image.height ?? undefined}
+      loading="lazy"
+    />
+  )}
+  <div class="jo-card-body">
+    <p class="jo-card-meta">
+      <span class="jo-card-category">{article.category.label}</span>
+      <time datetime={article.date.iso}>{article.date.label}</time>
+    </p>
+    <Heading class="jo-card-title"><a href={article.href}>{article.title}</a></Heading>
+    {summary && article.summary && <p class="jo-card-summary">{article.summary}</p>}
+  </div>
 </article>

@@ -365,9 +365,11 @@
 
 /* Ordinateur : barre latérale collante à gauche, plus d'en-tête ni d'onglets */
 @media (min-width: 64rem) {
+  /* La colonne de gauche reste sombre sur toute la hauteur de la page */
   .jo-shell {
     display: grid;
     grid-template-columns: var(--jo-sidebar) minmax(0, 1fr);
+    background: linear-gradient(to right, var(--jo-ink) var(--jo-sidebar), var(--jo-page) var(--jo-sidebar));
   }
 
   .jo-topbar,

@@ -232,6 +232,9 @@ importers:
       '@communeo/theme-institutionnel':
         specifier: workspace:*
         version: link:../../themes/institutionnel
+      '@communeo/theme-journal':
+        specifier: workspace:*
+        version: link:../../themes/journal
       '@communeo/theme-moderne':
         specifier: workspace:*
         version: link:../../themes/moderne
@@ -396,6 +399,37 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@fontsource-variable/source-serif-4':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@lucide/astro':
+        specifier: ^1.47.0
+        version: 1.47.0(astro@7.3.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@types/node@22.20.4)(ioredis@5.11.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+    devDependencies:
+      '@astrojs/check':
+        specifier: ^0.9.10
+        version: 0.9.10(@emnapi/runtime@1.11.3)(prettier@3.9.8)(typescript@5.9.3)
+      astro:
+        specifier: ^7.3.3
+        version: 7.3.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(@types/node@22.20.4)(ioredis@5.11.1)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1)
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
+  themes/journal:
+    dependencies:
+      '@communeo/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@communeo/theme-contract':
+        specifier: workspace:*
+        version: link:../../packages/theme-contract
+      '@communeo/ui-a11y':
+        specifier: workspace:*
+        version: link:../../packages/ui-a11y
+      '@fontsource-variable/lora':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource-variable/public-sans':
         specifier: ^5.3.0
         version: 5.3.0
       '@lucide/astro':
@@ -1882,8 +1916,14 @@ packages:
   '@fontsource-variable/figtree@5.3.0':
     resolution: {integrity: sha512-VRVodD7OiG7apQwE8/2fMjaqpY/a0qRJqL5HtYj8CKIVps+9amaFcdfKmDIf7iqYQx6iPLlArVXAfKeIZmVcNQ==}
 
+  '@fontsource-variable/lora@5.3.0':
+    resolution: {integrity: sha512-2ph8KiZ8Bn141hWuC3ErtpJ+Ui8p2MJQn8TJNRSRmLmnCIOCtHfiBM9R7WLRPeUG/q6hXyHOxWQ8DvRSX+ixvQ==}
+
   '@fontsource-variable/newsreader@5.3.0':
     resolution: {integrity: sha512-rrzYi43qMpbzwuFtf9OkWH8sxAPVPcQQQEwXpPtwaKYeJ8yVg5aLs5kawmo1f2Q1t1M38TLmEKCkGVDsYwgdFw==}
+
+  '@fontsource-variable/public-sans@5.3.0':
+    resolution: {integrity: sha512-AVfkmAt50BMXWpOO21FAntiJFKGX6xTc2dSL8dxtDteONe9IuRXJWGbs0EbG955vAMCq23ENeuopuW87cGWDSQ==}
 
   '@fontsource-variable/source-sans-3@5.3.0':
     resolution: {integrity: sha512-dpi0GZk7EQe2tYpg6Q0Fx0OmUgnuGu+0rHPgtXqtKhglYmJuP7jZ12Mu1uN+NfRaJRY1Emn8AQJEWzmoZ4wa9g==}
@@ -12915,7 +12955,11 @@ snapshots:
 
   '@fontsource-variable/figtree@5.3.0': {}
 
+  '@fontsource-variable/lora@5.3.0': {}
+
   '@fontsource-variable/newsreader@5.3.0': {}
+
+  '@fontsource-variable/public-sans@5.3.0': {}
 
   '@fontsource-variable/source-sans-3@5.3.0': {}
 

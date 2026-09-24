@@ -1,0 +1,18 @@
+---
+import type { BlockOf } from '@communeo/core';
+
+interface Props { block: BlockOf<'contact'> }
+const { block } = Astro.props;
+---
+<section class="st-contact" aria-label={block.name}>
+  <h2>{block.name}</h2>
+  <address>
+    {block.address && <p>{block.address}</p>}
+    {block.phone && <p>Téléphone : <a href={block.phone.href}>{block.phone.label}</a></p>}
+    {block.email && <p>E-mail : <a href={block.email.href}>{block.email.label}</a></p>}
+  </address>
+  {block.hours && <p>{block.hours}</p>}
+  {block.map && (
+    <p><a href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(block.map.query)}`} target="_blank" rel="noopener noreferrer">Voir sur la carte<span class="cn-sr-only"> (OpenStreetMap, nouvelle fenêtre)</span></a></p>
+  )}
+</section>

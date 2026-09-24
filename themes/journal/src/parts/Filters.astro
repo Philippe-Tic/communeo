@@ -1,0 +1,22 @@
+---
+/** Filtres en onglets soulignés ; le filtre courant est souligné en bleu et marqué aria-current. */
+import type { FilterOption } from '@communeo/theme-contract';
+
+interface Props { label: string; options: FilterOption[]; allHref: string }
+const { label, options, allHref } = Astro.props;
+const anyCurrent = options.some((option) => option.current);
+---
+{options.length > 1 && (
+  <nav class="jo-filters" aria-label={label}>
+    <ul>
+      <li><a href={allHref} class="jo-filter" aria-current={anyCurrent ? undefined : 'page'}>Toutes</a></li>
+      {options.map((option) => (
+        <li>
+          <a href={option.href} class="jo-filter" aria-current={option.current ? 'page' : undefined}>
+            {option.label}<span class="jo-filter-count">({option.count})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

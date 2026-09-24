@@ -1,0 +1,20 @@
+---
+/** Pagination : boutons à coins droits, page courante pleine, « Page 2 sur 12 ». */
+import type { PaginationLinks } from '@communeo/theme-contract';
+
+interface Props { pagination: PaginationLinks }
+const { pagination } = Astro.props;
+const current = pagination.pages.find((page) => page.current)?.page;
+---
+{pagination.pageCount > 1 && (
+  <nav class="jo-pagination" aria-label="Pagination">
+    <ul>
+      {pagination.previous && <li><a href={pagination.previous} rel="prev" class="jo-pagination-step"><span aria-hidden="true">←</span> Précédent<span class="cn-sr-only"> : page précédente</span></a></li>}
+      {pagination.pages.map((page) => (
+        <li><a href={page.href} class="jo-pagination-page" aria-current={page.current ? 'page' : undefined}><span class="cn-sr-only">Page </span>{page.page}</a></li>
+      ))}
+      {pagination.next && <li><a href={pagination.next} rel="next" class="jo-pagination-step">Suivant <span aria-hidden="true">→</span><span class="cn-sr-only"> : page suivante</span></a></li>}
+    </ul>
+    {current && <p class="jo-pagination-status">Page {current} sur {pagination.pageCount}</p>}
+  </nav>
+)}

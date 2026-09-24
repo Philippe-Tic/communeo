@@ -1,0 +1,12 @@
+---
+import type { BlockOf } from '@communeo/core';
+
+interface Props { block: BlockOf<'documents'> }
+const { block } = Astro.props;
+---
+<section class="st-documents" aria-label={block.title ?? 'Documents à télécharger'}>
+  {block.title && <h2>{block.title}</h2>}
+  <ul>
+    {block.files.map((file) => <li><a href={file.href} download>{file.name}<span> ({file.label})</span></a></li>)}
+  </ul>
+</section>

@@ -1,0 +1,36 @@
+---
+/** Mobile : onglets fixés en bas (Accueil, Actualités, Agenda, Démarches, Menu). */
+import type { PageContext } from '@communeo/theme-contract';
+import MenuIcon from '@lucide/astro/icons/menu';
+import NavIcon from './NavIcon.astro';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { path } = Astro.props.ctx;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+const tabs = [
+  { href: '/', label: 'Accueil' },
+  { href: '/actualites', label: 'Actualités' },
+  { href: '/agenda', label: 'Agenda' },
+  { href: '/demarches', label: 'Démarches' },
+];
+---
+<nav class="jo-tabbar" aria-label="Raccourcis">
+  <ul>
+    {tabs.map((tab) => (
+      <li>
+        <a href={tab.href} class="jo-tab" aria-current={isCurrent(tab.href) ? 'page' : undefined}>
+          <NavIcon href={tab.href} size={22} />{tab.label}
+        </a>
+      </li>
+    ))}
+    <li>
+      <button type="button" class="jo-tab cn-js-only" aria-expanded="false" aria-controls="menu" data-cn-menu-toggle>
+        <MenuIcon size={22} aria-hidden="true" /><span data-cn-menu-label data-label-open="Fermer">Menu</span>
+      </button>
+      <a href="#menu" class="jo-tab cn-no-js-only"><MenuIcon size={22} aria-hidden="true" />Menu</a>
+    </li>
+  </ul>
+</nav>

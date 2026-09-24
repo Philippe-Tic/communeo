@@ -1,0 +1,27 @@
+---
+import type { TeamVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; team: TeamVM }
+const { ctx, team } = Astro.props;
+---
+<Layout ctx={ctx}>
+  {team.groups.length ? team.groups.map((group) => (
+    <section aria-labelledby={`st-team-${group.key}`}>
+      <h2 id={`st-team-${group.key}`}>{group.label}</h2>
+      <ul class="st-team">
+        {group.members.map((member) => (
+          <li>
+            {member.photo ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} /> : <span aria-hidden="true" class="st-initials">{member.initials}</span>}
+            <h3>{member.name}</h3>
+            <p>{member.title}{member.delegation && <> – {member.delegation}</>}</p>
+            {member.bio && <p>{member.bio}</p>}
+            {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
+            {member.officeHours && <p>{member.officeHours}</p>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )) : <p>La composition de l'équipe municipale sera bientôt publiée.</p>}
+</Layout>

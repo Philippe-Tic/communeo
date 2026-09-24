@@ -1,0 +1,29 @@
+---
+import type { FormConfig } from '@communeo/theme-contract';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import ApiForm from '../parts/ApiForm.astro';
+
+interface Props { ctx: PageContext; form: FormConfig }
+const { ctx, form } = Astro.props;
+const { contact } = ctx.site;
+---
+<Layout ctx={ctx}>
+  <address>
+    {contact.address && <p>{contact.address}</p>}
+    {contact.phone && <p>Téléphone : <a href={contact.phone.href}>{contact.phone.label}</a></p>}
+    <p>E-mail : <a href={contact.email.href}>{contact.email.label}</a></p>
+  </address>
+  {contact.formIntro && <p>{contact.formIntro}</p>}
+  <ApiForm form={form} submitLabel="Envoyer" success="Votre message a bien été envoyé. Un accusé de réception vous sera adressé par e-mail.">
+    <p><label for="ct-first">Prénom (obligatoire)</label><input id="ct-first" name="first_name" required autocomplete="given-name" /></p>
+    <p><label for="ct-last">Nom (obligatoire)</label><input id="ct-last" name="last_name" required autocomplete="family-name" /></p>
+    <p><label for="ct-email">E-mail (obligatoire)</label><input id="ct-email" name="email" type="email" required autocomplete="email" /></p>
+    <p><label for="ct-phone">Téléphone</label><input id="ct-phone" name="phone" type="tel" autocomplete="tel" /></p>
+    <p><label for="ct-category">Catégorie (obligatoire)</label>
+      <select id="ct-category" name="category" required>{(form.options ?? []).map((o) => <option value={o.key}>{o.label}</option>)}</select></p>
+    <p><label for="ct-subject">Objet (obligatoire)</label><input id="ct-subject" name="subject" required /></p>
+    <p><label for="ct-message">Message (obligatoire)</label><textarea id="ct-message" name="message" rows="6" required></textarea></p>
+    <p class="st-meta">Vos données servent uniquement à traiter votre demande. <a href="/donnees-personnelles">En savoir plus</a></p>
+  </ApiForm>
+</Layout>

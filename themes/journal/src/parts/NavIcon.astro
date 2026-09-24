@@ -1,0 +1,30 @@
+---
+/** Icône d'une entrée du menu : selon la rubrique (adresse) ou, pour un sous-menu, son libellé. */
+import Building from '@lucide/astro/icons/landmark';
+import Calendar from '@lucide/astro/icons/calendar-days';
+import File from '@lucide/astro/icons/file-text';
+import Folder from '@lucide/astro/icons/folder';
+import Home from '@lucide/astro/icons/house';
+import Mail from '@lucide/astro/icons/mail';
+import Newspaper from '@lucide/astro/icons/newspaper';
+import Users from '@lucide/astro/icons/users';
+
+interface Props {
+  href?: string;
+  group?: string;
+  size?: number;
+}
+
+const { href, group, size = 22 } = Astro.props;
+const sections: Record<string, typeof Home> = {
+  '/': Home,
+  '/actualites': Newspaper,
+  '/agenda': Calendar,
+  '/demarches': File,
+  '/contact': Mail,
+  '/equipe-municipale': Users,
+};
+const label = group?.toLowerCase() ?? '';
+const Icon = href ? (sections[href] ?? File) : label.includes('mairie') ? Building : label.includes('vi') ? Users : Folder;
+---
+<Icon size={size} aria-hidden="true" class="jo-nav-icon" />

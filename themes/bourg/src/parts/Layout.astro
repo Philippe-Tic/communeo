@@ -1,0 +1,43 @@
+---
+/**
+ * Mise en page du thème : en-tête, alertes, puis deux colonnes sur ordinateur (le contenu, et le
+ * panneau « Pratique » collant à droite), pied de page. Sur mobile, le panneau s'ouvre depuis la
+ * barre du bas. Le document (<html>, <head>, liens d'évitement, bandeau cookies) vient du renderer.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import Alerts from '@communeo/ui-a11y/Alerts.astro';
+import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import { searchAttributes } from '@communeo/ui-a11y/search';
+import Footer from './Footer.astro';
+import Header from './Header.astro';
+import Pratique from './Pratique.astro';
+import PratiqueBar from './PratiqueBar.astro';
+
+interface Props {
+  ctx: PageContext;
+  /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
+  heading?: string | false;
+  /** Sans fil d'Ariane : le template gère lui-même le haut de page (accueil) */
+  full?: boolean;
+}
+
+const { ctx, heading = ctx.title, full = false } = Astro.props;
+---
+<Header ctx={ctx} />
+
+<div class="bo-container bo-page">
+  <Alerts alerts={ctx.alerts} class="bo-alerts" />
+  <div class="bo-columns">
+    <div class="bo-content">
+      {!full && <Breadcrumb items={ctx.breadcrumb} class="bo-breadcrumb" />}
+      <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="bo-main">
+        {heading && <h1 class="bo-title">{heading}</h1>}
+        <slot />
+      </main>
+    </div>
+    <Pratique ctx={ctx} />
+  </div>
+</div>
+
+<Footer ctx={ctx} />
+<PratiqueBar ctx={ctx} />

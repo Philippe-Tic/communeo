@@ -1,0 +1,979 @@
+/* Structure de page : en-tête, menu, alertes, colonnes, panneau « Pratique », barre mobile, pied de page. */
+.bo-container {
+  width: 100%;
+  max-width: var(--bo-max);
+  margin-inline: auto;
+  padding-inline: var(--bo-gutter);
+}
+
+.bo-page {
+  padding-block: var(--bo-space-2) var(--bo-space-5);
+}
+
+.bo-columns {
+  display: grid;
+  gap: var(--bo-space-4);
+}
+
+.bo-content {
+  min-width: 0;
+}
+
+.bo-main {
+  display: grid;
+  gap: var(--bo-space-3);
+  padding-top: var(--bo-space-2);
+}
+
+.bo-main:focus {
+  outline: none;
+}
+
+@media (min-width: 64rem) {
+  .bo-page {
+    padding-top: var(--bo-space-3);
+  }
+
+  .bo-columns {
+    grid-template-columns: minmax(0, 1fr) var(--bo-aside);
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+/* En-tête ------------------------------------------------------------------------------------------ */
+.bo-header {
+  background: var(--bo-page);
+  border-bottom: 1px solid var(--bo-line);
+}
+
+.bo-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-block: 0.625rem;
+}
+
+.bo-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  min-height: var(--bo-target);
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-brand:hover {
+  color: var(--bo-ink);
+}
+
+.bo-brand-logo {
+  flex: none;
+  width: auto;
+  max-width: 5.25rem;
+  max-height: 2.25rem;
+  object-fit: contain;
+}
+
+.bo-brand-name {
+  font-family: var(--bo-font-title);
+  font-size: 1.0625rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.bo-header-search {
+  display: none;
+}
+
+.bo-header-actions {
+  display: flex;
+  flex: none;
+  gap: 0.375rem;
+}
+
+.bo-icon-button,
+.bo-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: var(--bo-target);
+  min-height: var(--bo-target);
+  padding: 0 0.75rem;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  color: var(--bo-ink);
+  text-decoration: none;
+  background: var(--bo-sand);
+  border: 0;
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.bo-icon-button {
+  padding: 0;
+}
+
+.bo-icon-button:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+}
+
+/* Le bouton Menu n'existe qu'avec JavaScript (classe cn-js-only) : sans lui, le menu reste déplié */
+.bo-menu-toggle {
+  color: #fff;
+  background: var(--bo-primary);
+}
+
+.bo-menu-toggle:hover {
+  background: var(--bo-primary-dark);
+}
+
+.bo-menu-close-icon,
+.bo-menu-toggle[aria-expanded='true'] .bo-menu-open-icon {
+  display: none;
+}
+
+.bo-menu-toggle[aria-expanded='true'] .bo-menu-close-icon {
+  display: block;
+}
+
+/* Menu principal : mobile d'abord (liste empilée sous l'en-tête) */
+.bo-nav {
+  background: var(--bo-surface);
+  border-top: 1px solid var(--bo-line);
+}
+
+.bo-nav:focus {
+  outline: none;
+}
+
+.cn-js .bo-nav:not([data-open]) {
+  display: none;
+}
+
+.bo-nav-list {
+  display: grid;
+  gap: 0.25rem;
+  margin-block: 0;
+  padding-block: 0.5rem 1.25rem;
+  font-size: 1.125rem;
+  list-style: none;
+}
+
+.bo-nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 3.25rem;
+  padding: 0 1rem;
+  font-weight: 700;
+  color: var(--bo-ink);
+  text-decoration: none;
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.bo-nav-link:hover {
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+}
+
+.bo-nav-link[aria-current='page'],
+.bo-nav-current {
+  background: var(--bo-mint);
+}
+
+summary.bo-nav-link {
+  list-style: none;
+}
+
+summary.bo-nav-link::-webkit-details-marker {
+  display: none;
+}
+
+.bo-nav-chevron {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.bo-nav-group[open] .bo-nav-chevron {
+  transform: rotate(180deg);
+}
+
+.bo-subnav {
+  display: grid;
+  gap: 0.125rem;
+  margin: 0;
+  padding: 0 0 0.375rem 2rem;
+  font-size: 1.0625rem;
+  list-style: none;
+}
+
+.bo-subnav a {
+  display: flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-subnav a:hover {
+  color: var(--bo-ink);
+  text-decoration: underline;
+}
+
+.bo-subnav a[aria-current='page'] {
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+@media (min-width: 64rem) {
+  .bo-header-top {
+    gap: var(--bo-space-3);
+    padding-block: 0.875rem 0.5rem;
+  }
+
+  .bo-brand {
+    gap: 0.875rem;
+  }
+
+  .bo-brand-logo {
+    max-width: 9.5rem;
+    max-height: 2.875rem;
+  }
+
+  .bo-brand-name {
+    font-size: 1.5rem;
+  }
+
+  .bo-header-actions,
+  .bo-menu-toggle {
+    display: none;
+  }
+
+  .bo-header-search {
+    display: flex;
+    width: 22rem;
+  }
+
+  .bo-header-search input {
+    min-height: 2.875rem;
+    border-right: 0;
+    border-radius: var(--bo-radius) 0 0 var(--bo-radius);
+  }
+
+  .bo-header-search button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2.875rem;
+    color: #fff;
+    background: var(--bo-primary);
+    border: 0;
+    border-radius: 0 var(--bo-radius) var(--bo-radius) 0;
+    cursor: pointer;
+  }
+
+  .bo-header-search button:hover {
+    background: var(--bo-primary-dark);
+  }
+
+  .cn-js .bo-nav:not([data-open]),
+  .bo-nav {
+    display: block;
+    background: transparent;
+    border-top: 0;
+  }
+
+  .bo-nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    padding-block: 0 0.625rem;
+    font-size: 1.0625rem;
+  }
+
+  .bo-nav-item {
+    position: relative;
+  }
+
+  .bo-nav-link {
+    justify-content: flex-start;
+    min-height: 2.875rem;
+    padding: 0 1.125rem;
+  }
+
+  .bo-subnav {
+    position: absolute;
+    top: calc(100% + 0.375rem);
+    left: 0;
+    z-index: 20;
+    min-width: 17.5rem;
+    padding: 0.5rem;
+    background: var(--bo-surface);
+    border: 1px solid var(--bo-line);
+    border-radius: var(--bo-radius-card);
+    box-shadow: var(--bo-shadow);
+  }
+
+  .bo-subnav a {
+    padding: 0 0.875rem;
+    font-weight: 600;
+    border-radius: var(--bo-radius);
+  }
+
+  .bo-subnav a:hover {
+    text-decoration: none;
+    background: var(--bo-mint);
+  }
+}
+
+/* Alertes : bandeaux arrondis, l'urgence en rouge plein (non fermable) ------------------------------- */
+.bo-alerts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bo-alerts:not(:empty) {
+  margin-bottom: var(--bo-space-1);
+}
+
+.bo-alerts .cn-alert {
+  color: var(--bo-alert-ink);
+  background: var(--bo-alert-bg);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-alerts .cn-alert-info {
+  --bo-alert-ink: var(--bo-info);
+  --bo-alert-bg: var(--bo-info-bg);
+}
+
+.bo-alerts .cn-alert-warning {
+  --bo-alert-ink: var(--bo-warning);
+  --bo-alert-bg: var(--bo-warning-bg);
+}
+
+.bo-alerts .cn-alert-critical {
+  --bo-alert-ink: #fff;
+  --bo-alert-bg: var(--bo-danger);
+}
+
+.bo-alerts .cn-alert-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Pastille de sévérité : i, ! ou !! (le libellé de la sévérité est dans le texte) */
+.bo-alerts .cn-alert-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-alert-ink);
+  border-radius: 50%;
+}
+
+.bo-alerts .cn-alert-info .cn-alert-icon::before {
+  content: 'i';
+}
+
+.bo-alerts .cn-alert-warning .cn-alert-icon::before {
+  content: '!';
+}
+
+.bo-alerts .cn-alert-critical .cn-alert-icon {
+  color: var(--bo-danger);
+  background: #fff;
+}
+
+.bo-alerts .cn-alert-critical .cn-alert-icon::before {
+  content: '!!';
+}
+
+.bo-alerts .cn-alert-text {
+  flex: 1;
+}
+
+.bo-alerts .cn-alert a {
+  font-weight: 700;
+  color: inherit;
+}
+
+.bo-alerts .cn-alert-critical :focus-visible {
+  outline-color: #fff;
+}
+
+.bo-alerts .cn-alert-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--bo-target);
+  height: var(--bo-target);
+  margin: -0.375rem -0.25rem;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--bo-alert-ink);
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.bo-alerts .cn-alert-close:hover {
+  background: rgb(255 255 255 / 60%);
+}
+
+@media (min-width: 64rem) {
+  .bo-alerts .cn-alert-inner {
+    padding: 0.75rem 1.125rem;
+  }
+}
+
+/* Fil d'Ariane ------------------------------------------------------------------------------------- */
+.bo-breadcrumb {
+  padding-top: var(--bo-space-1);
+  font-size: 0.9375rem;
+}
+
+.bo-breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-breadcrumb li + li::before {
+  margin-inline: 0.625rem;
+  color: var(--bo-muted);
+  content: '›';
+}
+
+.bo-breadcrumb a {
+  color: var(--bo-primary);
+}
+
+.bo-breadcrumb [aria-current='page'] {
+  color: var(--bo-muted);
+}
+
+/* Titre de page */
+.bo-title {
+  font-size: var(--bo-h1);
+}
+
+/* Panneau « Pratique » : encarts teintés empilés ---------------------------------------------------- */
+.bo-pratique {
+  display: grid;
+  gap: 0.875rem;
+  align-content: start;
+}
+
+.bo-pratique:focus {
+  outline: none;
+}
+
+.bo-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.125rem 1.25rem;
+  font-size: 0.9375rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-card h3 {
+  font-size: 1.125rem;
+}
+
+.bo-card-mint {
+  background: var(--bo-mint);
+  border-color: var(--bo-mint);
+}
+
+.bo-card-peach {
+  background: var(--bo-peach);
+  border-color: var(--bo-peach);
+}
+
+.bo-card-lavender {
+  background: var(--bo-lavender);
+  border-color: var(--bo-lavender);
+}
+
+.bo-card-sky {
+  background: var(--bo-sky);
+  border-color: var(--bo-sky);
+}
+
+.bo-card address {
+  display: grid;
+  justify-items: start;
+  font-style: normal;
+}
+
+.bo-pratique-phone {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: var(--bo-ink);
+}
+
+.bo-pratique-hours {
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+.bo-button-block {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+/* Statut d'ouverture : pastille devant le libellé calculé dans le navigateur */
+.bo-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+}
+
+.bo-status::before {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  content: '';
+  background: var(--bo-muted);
+  border-radius: 50%;
+}
+
+.bo-status[data-open='true']::before {
+  background: var(--bo-open);
+}
+
+.bo-pratique-alerts,
+.bo-pratique-waste,
+.bo-pratique-links ul {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-pratique-alert {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+}
+
+.bo-pratique-alert a {
+  color: inherit;
+  font-weight: 700;
+}
+
+.bo-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-sign, var(--bo-warning));
+  border-radius: 50%;
+}
+
+.bo-pratique-alert-info {
+  --bo-sign: var(--bo-info);
+}
+
+.bo-pratique-alert-critical {
+  --bo-sign: var(--bo-danger);
+}
+
+.bo-pratique-waste li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+}
+
+.bo-pratique-waste-label {
+  flex: 1;
+}
+
+.bo-pratique-waste-date {
+  font-weight: 800;
+  text-align: right;
+}
+
+.bo-dot {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--bo-bin, var(--bo-muted));
+  border-radius: 50%;
+}
+
+/* Couleur de chaque collecte, toujours accompagnée de son nom */
+.bo-bin-ordures-menageres {
+  --bo-bin: #6b615a;
+}
+
+.bo-bin-tri-selectif {
+  --bo-bin: #8a6d00;
+}
+
+.bo-bin-verre {
+  --bo-bin: #1f6f6b;
+}
+
+.bo-bin-dechets-verts {
+  --bo-bin: #3f6b2a;
+}
+
+.bo-bin-encombrants {
+  --bo-bin: #2e5c8a;
+}
+
+.bo-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--bo-target);
+  font-weight: 700;
+}
+
+.bo-card-lavender .bo-more {
+  color: var(--bo-violet);
+}
+
+/* Météo : la section partagée reste masquée tant que la prévision n'est pas chargée */
+.bo-weather[hidden] {
+  display: none;
+}
+
+.bo-weather .cn-weather-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0;
+  list-style: none;
+  color: var(--bo-muted);
+}
+
+.bo-pratique-links {
+  gap: 0.25rem;
+}
+
+.bo-pratique-links li + li {
+  border-top: 1px solid var(--bo-line);
+}
+
+.bo-pratique-links ul {
+  gap: 0;
+}
+
+.bo-pratique-links a {
+  display: flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  font-weight: 700;
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-pratique-links a:hover {
+  color: var(--bo-primary);
+  text-decoration: underline;
+}
+
+@media (min-width: 64rem) {
+  .bo-pratique {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding-top: var(--bo-space-2);
+  }
+}
+
+/* Barre « Pratique » (mobile) et tiroir ----------------------------------------------------------- */
+.bo-bar {
+  display: none;
+}
+
+@media (max-width: 63.99rem) {
+  .cn-js body {
+    padding-bottom: var(--bo-bar);
+  }
+
+  /* Avec JavaScript, le panneau vit dans le tiroir ; sans, il suit le contenu */
+  .cn-js .bo-columns > .bo-pratique {
+    display: none;
+  }
+
+  .bo-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: var(--bo-bar);
+    padding: 0.625rem var(--bo-gutter);
+    background: var(--bo-surface);
+    border-top: 1px solid var(--bo-line);
+    box-shadow: 0 -4px 16px rgb(46 42 38 / 8%);
+  }
+
+  .bo-bar-status {
+    display: grid;
+    min-width: 0;
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+
+  .bo-bar-status .bo-status {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .bo-bar-status .bo-status::before {
+    display: inline-block;
+    margin-right: 0.5rem;
+    vertical-align: 0.0625rem;
+  }
+
+  .bo-bar-alerts {
+    padding-left: 1.125rem;
+    font-size: 0.875rem;
+    color: var(--bo-muted);
+  }
+
+  .bo-bar-button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: var(--bo-target);
+    padding: 0 1rem;
+    font-weight: 800;
+    color: var(--bo-primary-dark);
+    text-decoration: none;
+    background: var(--bo-mint);
+    border-radius: var(--bo-radius);
+  }
+
+  .bo-bar-button:hover {
+    color: var(--bo-primary-dark);
+    background: #c9ddd1;
+  }
+}
+
+/* Tiroir : feuille qui monte du bas, le panneau y est déplacé à l'ouverture */
+.bo-drawer {
+  width: 100%;
+  max-width: 100%;
+  max-height: 88vh;
+  margin: auto 0 0;
+  padding: 0;
+  color: var(--bo-ink);
+  background: var(--bo-page);
+  border: 0;
+  border-radius: var(--bo-radius-large) var(--bo-radius-large) 0 0;
+}
+
+.bo-drawer::backdrop {
+  background: rgb(46 42 38 / 55%);
+}
+
+.bo-drawer-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--bo-gutter) 0.75rem;
+  background: var(--bo-page);
+}
+
+.bo-drawer-head h2 {
+  font-size: 1.375rem;
+}
+
+.bo-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--bo-target);
+  padding: 0 1rem;
+  font: inherit;
+  font-weight: 800;
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+  border: 0;
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.bo-drawer-close:hover {
+  background: var(--bo-line);
+}
+
+.bo-drawer-body {
+  padding: 0 var(--bo-gutter) 1.25rem;
+}
+
+/* Dans le tiroir, le titre du tiroir remplace celui du panneau */
+.bo-drawer .bo-pratique-title {
+  display: none;
+}
+
+/* Pied de page ------------------------------------------------------------------------------------- */
+.bo-footer {
+  font-size: 1rem;
+  line-height: 1.55;
+  background: var(--bo-sand);
+}
+
+.bo-footer a {
+  color: var(--bo-primary-dark);
+}
+
+.bo-footer-grid {
+  display: grid;
+  gap: var(--bo-space-3);
+  padding-block: var(--bo-space-4) var(--bo-space-3);
+}
+
+.bo-footer-title {
+  margin-bottom: 0.625rem;
+  font-size: 1.25rem;
+}
+
+.bo-footer-heading {
+  margin-bottom: 0.375rem;
+  font-size: 1.0625rem;
+}
+
+.bo-footer address {
+  display: grid;
+  justify-items: start;
+  font-style: normal;
+}
+
+.bo-footer address a[href^='tel:'] {
+  font-weight: 800;
+  color: var(--bo-ink);
+}
+
+.bo-footer-address {
+  white-space: pre-line;
+}
+
+.bo-footer-hours div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+}
+
+.bo-footer-hours dt {
+  font-weight: 700;
+}
+
+.bo-footer-hours dd {
+  margin: 0;
+}
+
+.bo-footer-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-footer-list a {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.375rem;
+  min-height: var(--bo-target);
+}
+
+.bo-footer-new {
+  font-size: 0.875rem;
+}
+
+.bo-footer-legal {
+  border-top: 1px solid var(--bo-line);
+}
+
+.bo-footer-legal ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin-block: 0;
+  padding-block: var(--bo-space-2) var(--bo-space-3);
+  font-size: 0.9375rem;
+  list-style: none;
+}
+
+.bo-footer-legal a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  color: var(--bo-ink);
+}
+
+@media (min-width: 64rem) {
+  .bo-footer-grid {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 2.5rem;
+    padding-block: 2.5rem 2rem;
+  }
+
+  .bo-footer-list {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .bo-footer-list a {
+    min-height: 2rem;
+  }
+
+  .bo-footer-legal ul {
+    padding-block: 1rem;
+  }
+
+  .bo-footer-legal a {
+    min-height: 2rem;
+  }
+}

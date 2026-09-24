@@ -18,6 +18,7 @@
     "@astrojs/node": "^11.1.6",
     "@communeo/core": "workspace:*",
     "@communeo/fixtures": "workspace:*",
+    "@communeo/theme-bourg": "workspace:*",
     "@communeo/theme-contract": "workspace:*",
     "@communeo/theme-institutionnel": "workspace:*",
     "@communeo/theme-journal": "workspace:*",

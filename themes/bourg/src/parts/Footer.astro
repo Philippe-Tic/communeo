@@ -1,0 +1,65 @@
+---
+/** Pied de page sable : coordonnées, horaires, liens utiles, réseaux sociaux, liens légaux. */
+import type { PageContext } from '@communeo/theme-contract';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav } = Astro.props.ctx;
+---
+<footer class="bo-footer">
+  <div class="bo-container bo-footer-grid">
+    <section aria-labelledby="bo-footer-mairie">
+      <h2 id="bo-footer-mairie" class="bo-footer-title">Mairie de {site.name}</h2>
+      <address>
+        {site.contact.address && <span class="bo-footer-address">{site.contact.address}</span>}
+        {site.contact.phone && <a href={site.contact.phone.href}>{site.contact.phone.label}</a>}
+        <a href={site.contact.email.href}>{site.contact.email.label}</a>
+      </address>
+    </section>
+
+    {site.contact.hoursSummary.length > 0 && (
+      <section aria-labelledby="bo-footer-hours">
+        <h2 id="bo-footer-hours" class="bo-footer-heading">Horaires</h2>
+        <dl class="bo-footer-hours">
+          {site.contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
+        </dl>
+      </section>
+    )}
+
+    {nav.footer.length > 0 && (
+      <nav aria-labelledby="bo-footer-links">
+        <h2 id="bo-footer-links" class="bo-footer-heading">Liens utiles</h2>
+        <ul class="bo-footer-list">
+          {nav.footer.map((link) => (
+            <li>
+              <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+                {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    {site.social.length > 0 && (
+      <section aria-labelledby="bo-footer-social">
+        <h2 id="bo-footer-social" class="bo-footer-heading">Suivre la commune</h2>
+        <ul class="bo-footer-list">
+          {site.social.map((link) => (
+            <li><a href={link.href} target="_blank" rel="noopener noreferrer">{link.label} <span class="bo-footer-new">(nouvelle fenêtre)</span></a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+
+  <div class="bo-footer-legal">
+    <ul class="bo-container" aria-label="Informations légales">
+      {nav.legal.map((link) => (
+        <li><a href={link.href} data-cn-cookie-preferences={link.href === '/gestion-des-cookies' ? '' : undefined}>{link.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</footer>

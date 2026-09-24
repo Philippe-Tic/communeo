@@ -1,0 +1,281 @@
+/* Jetons et styles de base. Contrastes vérifiés (maquette « Fondations ») sur blanc et sur le fond. */
+/* Jetons et styles de base. Contrastes vérifiés sur blanc et sur le fond crème (AA au minimum). */
+:root {
+  color-scheme: light;
+
+  /* Couleurs */
+  --bo-ink: #2e2a26; /* texte : 12,9:1 sur le fond */
+  --bo-muted: #6b615a; /* texte secondaire : 5,5:1 sur le fond, 4,7:1 au moins sur les encarts teintés */
+  --bo-page: #f8f3ed; /* fond crème */
+  --bo-surface: #fff;
+  --bo-sand: #f1eae1; /* boutons discrets, pied de page */
+  --bo-line: #e7dfd5;
+  --bo-field: #857a6e; /* bordure des champs : 4,3:1 sur blanc (3:1 exigé) */
+  --bo-primary: #1f6f6b; /* sarcelle, actions et liens : blanc dessus 5,9:1 */
+  --bo-primary-dark: #174d4a;
+  --bo-mint: #dcebe2; /* encart mairie, élément courant du menu */
+  --bo-lavender: #e6e0f3; /* encart collectes, chiffres de la commune */
+  --bo-violet: #4a3b7a;
+  --bo-sky: #dce9f5; /* encart météo, alertes d'information */
+  --bo-info: #2e5c8a;
+  --bo-info-bg: #dce9f5;
+  --bo-peach: #fbe3d0; /* encart « En ce moment », alertes « Attention » */
+  --bo-warning: #8a4b1c;
+  --bo-warning-bg: #fbe3d0;
+  --bo-danger: #b23a3a; /* urgence : blanc dessus 5,9:1 */
+  --bo-danger-bg: #f9e1e1;
+  --bo-open: #1f6f6b;
+
+  /* Typographie */
+  --bo-font: 'Nunito Sans Variable', 'Nunito Sans', system-ui, sans-serif;
+  --bo-font-title: 'Nunito Variable', 'Nunito', system-ui, sans-serif;
+  --bo-h1: 1.875rem;
+  --bo-h2: 1.4375rem;
+  --bo-h3: 1.1875rem;
+  --bo-h4: 1.0625rem;
+
+  /* Espacements, formes */
+  --bo-space-1: 0.5rem;
+  --bo-space-2: 1rem;
+  --bo-space-3: 1.5rem;
+  --bo-space-4: 2rem;
+  --bo-space-5: 3rem;
+  --bo-radius: 12px;
+  --bo-radius-card: 16px;
+  --bo-radius-large: 20px;
+  --bo-pill: 999px;
+  --bo-shadow: 0 8px 24px rgb(46 42 38 / 12%);
+  --bo-max: 76rem;
+  --bo-aside: 18.75rem;
+  --bo-gutter: 1rem;
+  --bo-target: 2.75rem;
+  --bo-bar: 4.25rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --bo-gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --bo-h1: 2.375rem;
+    --bo-h2: 1.625rem;
+    --bo-h3: 1.25rem;
+    --bo-h4: 1.125rem;
+    --bo-gutter: 2.5rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Le bandeau cookies, fixé en bas, ne doit pas masquer l'élément qui reçoit le focus */
+html:has([data-cn-cookie-banner]:not([hidden])) {
+  scroll-padding-bottom: 18rem;
+}
+
+body {
+  margin: 0;
+  font-family: var(--bo-font);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--bo-ink);
+  background: var(--bo-page);
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--bo-font-title);
+  font-weight: 800;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: var(--bo-h1);
+}
+
+h2 {
+  font-size: var(--bo-h2);
+}
+
+h3 {
+  font-size: var(--bo-h3);
+}
+
+h4 {
+  font-size: var(--bo-h4);
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+
+a {
+  color: var(--bo-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--bo-ink);
+  text-decoration-thickness: 2px;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 3px solid var(--bo-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Sur fond sombre, le focus passe en blanc */
+.bo-on-dark :focus-visible {
+  outline-color: #fff;
+}
+
+/* Kicker : capitales espacées, gras, gris */
+.bo-kicker {
+  margin: 0;
+  font-family: var(--bo-font);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bo-muted);
+}
+
+/* Titre de rubrique, lien « Tout voir » à droite */
+.bo-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.bo-section-head a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+/* Boutons arrondis, texte gras */
+.bo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.125rem;
+  font: inherit;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background: var(--bo-primary);
+  border: 2px solid var(--bo-primary);
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.bo-button:hover {
+  color: #fff;
+  background: var(--bo-primary-dark);
+  border-color: var(--bo-primary-dark);
+}
+
+.bo-button-secondary {
+  color: var(--bo-primary);
+  background: var(--bo-surface);
+}
+
+.bo-button-secondary:hover {
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+}
+
+/* Formulaires : champs arrondis, bordure 2 px ; erreur en bordure 3 px */
+input:not([type='checkbox'], [type='radio'], [type='file']),
+select,
+textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.875rem;
+  font: inherit;
+  color: var(--bo-ink);
+  background: var(--bo-surface);
+  border: 2px solid var(--bo-field);
+  border-radius: var(--bo-radius);
+}
+
+textarea {
+  min-height: 9rem;
+  padding: 0.75rem 0.875rem;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--bo-ink);
+}
+
+[aria-invalid='true'] {
+  border-width: 3px;
+  border-color: var(--bo-danger);
+}
+
+input:not([type='checkbox'], [type='radio'], [type='file']):disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--bo-muted);
+  background: var(--bo-page);
+  border-style: dashed;
+  border-color: var(--bo-line);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.375rem;
+  height: 1.375rem;
+  accent-color: var(--bo-primary);
+}
+
+label {
+  font-weight: 600;
+}

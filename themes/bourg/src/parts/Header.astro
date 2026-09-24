@@ -1,0 +1,72 @@
+---
+/**
+ * En-tête clair : identité et recherche, puis le menu en pastilles (rubriques en sous-menus).
+ * Sous 1024 px : loupe et bouton « Menu », le menu se déplie sous l'en-tête.
+ *
+ * Sans JavaScript : sous-menus en <details> natifs, menu mobile toujours déplié.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import Menu from '@lucide/astro/icons/menu';
+import Search from '@lucide/astro/icons/search';
+import X from '@lucide/astro/icons/x';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav, path } = Astro.props.ctx;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+---
+<header class="bo-header">
+  <div class="bo-container bo-header-top">
+    <a href="/" class="bo-brand">
+      {site.logo && (
+        <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="bo-brand-logo" />
+      )}
+      <span class="bo-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
+    </a>
+
+    <form role="search" action="/recherche" class="bo-header-search">
+      <label for="bo-search-q" class="cn-sr-only">Rechercher sur le site</label>
+      <input id="bo-search-q" name="q" type="search" placeholder="Rechercher…" />
+      <button type="submit"><Search size={20} aria-hidden="true" /><span class="cn-sr-only">Lancer la recherche</span></button>
+    </form>
+
+    <div class="bo-header-actions">
+      <a href="/recherche" class="bo-icon-button"><Search size={20} aria-hidden="true" /><span class="cn-sr-only">Rechercher</span></a>
+      <button type="button" class="bo-menu-toggle cn-js-only" aria-expanded="false" aria-controls="menu" data-cn-menu-toggle>
+        <Menu size={20} aria-hidden="true" class="bo-menu-open-icon" /><X size={20} aria-hidden="true" class="bo-menu-close-icon" />
+        <span data-cn-menu-label data-label-open="Fermer">Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <nav id="menu" class="bo-nav" aria-label="Menu principal" tabindex="-1" data-cn-menu>
+    <ul class="bo-container bo-nav-list">
+      <li><a href="/" class="bo-nav-link" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
+      {nav.main.map((item) =>
+        item.kind === 'link' ? (
+          <li><a href={item.href} class="bo-nav-link" aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ) : (
+          <li class="bo-nav-item">
+            <details name="bo-menu" class="bo-nav-group" data-cn-menu-group>
+              <summary class:list={['bo-nav-link', { 'bo-nav-current': item.children.some((child) => isCurrent(child.href)) }]}>
+                {item.label}<ChevronDown size={18} aria-hidden="true" class="bo-nav-chevron" />
+              </summary>
+              <ul class="bo-subnav">
+                {item.children.map((child) => (
+                  <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>
+                ))}
+              </ul>
+            </details>
+          </li>
+        ),
+      )}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  import '@communeo/ui-a11y/scripts/menu';
+</script>

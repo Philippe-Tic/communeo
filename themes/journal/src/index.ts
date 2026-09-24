@@ -27,10 +27,10 @@ export default defineTheme({
     id: 'journal',
     name: 'Journal',
     description:
-      'Le journal de la commune : barre latérale de navigation, une de journal, rubriques en colonnes. Titres Lora, bleu ardoise, filets.',
+      'Le journal de la commune : navigation en barre latérale, une de journal, rubriques en colonnes. Titres Lora, bleu ardoise, filets.',
     homeSections: [...themeHomeSections('journal')],
     menus: { main: true, footer: true },
-    thumbnail: '',
+    thumbnail: 'thumbnail.png',
   },
   templates: {
     Home,

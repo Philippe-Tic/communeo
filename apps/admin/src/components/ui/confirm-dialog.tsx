@@ -60,9 +60,11 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   /** Peut être asynchrone : le bouton affiche l'attente et la fenêtre reste ouverte en cas d'erreur */
   onConfirm: () => void | Promise<void>;
+  /** Contenu sous la description (option à cocher…) */
+  children?: ReactNode;
 }
 
-export function ConfirmDialog({ open, onOpenChange, tone = 'danger', icon, title, description, confirmLabel, cancelLabel = 'Annuler', onConfirm }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, onOpenChange, tone = 'danger', icon, title, description, confirmLabel, cancelLabel = 'Annuler', onConfirm, children }: ConfirmDialogProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const returnFocus = useReturnFocus();
@@ -92,6 +94,7 @@ export function ConfirmDialog({ open, onOpenChange, tone = 'danger', icon, title
               <AlertDialog.Description className="mt-1.5 text-secondary">{description}</AlertDialog.Description>
             </div>
           </div>
+          {children && <div className="mt-4">{children}</div>}
           {error && (
             <p role="alert" className="mt-4 flex gap-2 text-[13px] text-danger">
               <CircleAlert aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />

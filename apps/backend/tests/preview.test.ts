@@ -52,10 +52,14 @@ describe('POST /api/preview/token', () => {
     expect((await http.post('/api/preview/token').set(auth(admin)).send({ type: 'utilisateur', documentId: 'x' })).status).toBe(400);
   });
 
-  it('accepte un thème connu et le met dans le jeton', async () => {
-    const res = await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'moderne' });
-    expect((await claimsOf(res.body.url))?.theme).toBe('moderne');
+  it('accepte un thème disponible et le met dans le jeton', async () => {
+    const res = await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'institutionnel' });
+    expect((await claimsOf(res.body.url))?.theme).toBe('institutionnel');
     expect((await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'inconnu' })).status).toBe(400);
+    // Thème du registre pas encore construit : ni prévisualisable ni choisissable
+    const unbuilt = await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'moderne' });
+    expect(unbuilt.status).toBe(400);
+    expect(unbuilt.body.error.message).toBe("Ce thème n'est pas encore disponible");
   });
 
   it('répond 503 sans PREVIEW_SECRET', async () => {

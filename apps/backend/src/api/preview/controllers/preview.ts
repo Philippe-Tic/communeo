@@ -3,7 +3,7 @@
  * et l'adresse de la page à ouvrir sur le serveur de preview.
  * La commune vient toujours du compte (jamais de la requête) : un jeton ne montre qu'elle.
  */
-import { PREVIEW_PATHS, signPreviewToken, THEME_IDS, type PreviewableType } from '@communeo/core';
+import { isThemeAvailable, PREVIEW_PATHS, signPreviewToken, THEME_IDS, type PreviewableType } from '@communeo/core';
 import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 
 const CONTENT_TYPES: Record<PreviewableType, string> = {
@@ -31,6 +31,7 @@ export default {
 
     const { type, documentId, theme } = (ctx.request.body ?? {}) as { type?: string; documentId?: string; theme?: string };
     if (theme !== undefined && !(THEME_IDS as string[]).includes(theme)) return ctx.badRequest('Thème inconnu');
+    if (theme !== undefined && !isThemeAvailable(theme)) return ctx.badRequest("Ce thème n'est pas encore disponible");
 
     // Page d'arrivée : le contenu demandé (brouillon compris), s'il appartient à la commune
     let path = '/';

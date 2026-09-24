@@ -66,7 +66,7 @@ async function prepare() {
   siteA = (await http.get('/api/users/me').set(auth(adminA))).body.site.documentId;
 
   const siteBDoc = await strapi.documents('api::site.site').create({
-    data: { name: 'Commune B', slug: 'commune-b', contact_mail: 'b@example.test', theme: 'moderne' },
+    data: { name: 'Commune B', slug: 'commune-b', contact_mail: 'b@example.test', theme: 'institutionnel' },
   });
   siteB = siteBDoc.documentId;
 

@@ -6,6 +6,7 @@ import { richTextDocumentSchema } from '../blocks/rich-text';
 import { validateHomepage } from './homepage';
 import { navigationConfigSchema } from './navigation';
 import { openingHoursSchema } from './opening-hours';
+import { isThemeAvailable, THEMES } from './themes';
 
 export type SettingsIssue = { path: (string | number)[]; message: string };
 
@@ -23,6 +24,12 @@ type SettingsData = Record<string, unknown> & {
 export function validateSiteSettings(data: SettingsData | null | undefined): { success: boolean; issues: SettingsIssue[] } {
   const issues: SettingsIssue[] = [];
   if (!data) return { success: true, issues };
+
+  // Thème : seulement un thème construit (les autres ne peuvent être ni prévisualisés ni mis en ligne)
+  const theme = data.theme as unknown;
+  if (typeof theme === 'string' && THEMES.some((entry) => entry.id === theme) && !isThemeAvailable(theme)) {
+    issues.push({ path: ['theme'], message: "Ce thème n'est pas encore disponible" });
+  }
 
   if (data.homepage !== undefined) {
     for (const issue of validateHomepage(data.homepage).issues) issues.push({ ...issue, path: ['homepage', ...issue.path] });

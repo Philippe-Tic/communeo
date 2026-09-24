@@ -371,6 +371,10 @@ const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Numb
 export interface MockOptions {
   user?: keyof typeof USERS;
   publication?: 'pending' | 'ok' | 'running' | 'failed';
+  /** Domaine personnalisé : aucun, en attente de DNS, vérifié ; `unavailable` : hébergeur non configuré (503) */
+  domain?: 'none' | 'pending' | 'verified' | 'unavailable';
+  /** Vérification du domaine : le DNS renvoie une autre adresse */
+  domainMismatch?: boolean;
   loggedIn?: boolean;
   /** Réponse d'erreur à l'enregistrement des pages */
   failPageSaves?: boolean;
@@ -850,6 +854,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const {
     user = 'admin',
     publication = 'pending',
+    domainMismatch = false,
     loggedIn = true,
     failPageSaves = false,
     previewUnavailable = false,
@@ -895,6 +900,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
   let state = publication;
+  let domainState = options.domain ?? 'none';
   const pages: Record<string, MockPage> =
     pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
   if (pageImageWithoutAlt && pages['p-salle']) {
@@ -1110,12 +1116,165 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return site ? json({ data: site }) : json({ error: { status: 404, message: 'Site not found' } }, 404);
     }
     if (url.pathname === '/api/deployment/state') {
+      const sophie = { firstName: 'Sophie', lastName: 'Leroy' };
       return json({
         state,
         pendingCount: state === 'pending' ? 3 : 0,
         step: state === 'running' ? 'rendering' : null,
-        reference: null,
+        reference: state === 'failed' ? 'MEL-2026-0922-1120' : null,
+        scheduledAt: null,
+        lastDeployment: {
+          status: state === 'running' ? 'building' : state === 'failed' ? 'error' : 'ready',
+          reason: 'manual',
+          reference: state === 'failed' ? 'MEL-2026-0922-1120' : 'MEL-2026-0922-0745',
+          step: state === 'running' ? 'rendering' : null,
+          triggeredAt: '2026-09-22T07:45:00.000Z',
+          completedAt: state === 'running' ? null : '2026-09-22T07:45:24.000Z',
+          buildTime: state === 'running' ? null : 24,
+          triggeredBy: sophie,
+        },
+        pending:
+          state === 'pending'
+            ? [
+                {
+                  type: 'page',
+                  documentId: 'p-salle',
+                  title: 'Location de la salle des fêtes',
+                  action: 'update',
+                  source: 'person',
+                  author: sophie,
+                  occurredAt: '2026-09-22T09:00:00.000Z',
+                },
+                {
+                  type: 'article',
+                  documentId: 'a-conseil',
+                  title: 'Conseil municipal du 3 octobre',
+                  action: 'publish',
+                  source: 'person',
+                  author: sophie,
+                  occurredAt: '2026-09-22T09:10:00.000Z',
+                },
+                {
+                  type: 'site',
+                  documentId: SITE.documentId,
+                  title: 'Informations du site',
+                  action: 'update',
+                  source: 'person',
+                  author: sophie,
+                  occurredAt: '2026-09-22T09:20:00.000Z',
+                },
+              ]
+            : [],
       });
+    }
+    if (url.pathname === '/api/deployment/status') {
+      const by = (first: string, last: string) => ({ first_name: first, last_name: last });
+      return json({
+        data: [
+          {
+            documentId: 'd-3',
+            status: 'ready',
+            reason: 'manual',
+            reference: 'MEL-2026-0922-0745',
+            error_message: null,
+            triggered_at: '2026-09-22T07:45:00.000Z',
+            completed_at: '2026-09-22T07:45:24.000Z',
+            build_time: 24,
+            triggered_by: by('Sophie', 'Leroy'),
+          },
+          {
+            documentId: 'd-2',
+            status: 'error',
+            reason: 'scheduled',
+            reference: 'MEL-2026-0918-1120',
+            error_message: 'Timeout',
+            triggered_at: '2026-09-18T09:20:00.000Z',
+            completed_at: '2026-09-18T09:22:10.000Z',
+            build_time: 130,
+            triggered_by: null,
+          },
+          {
+            documentId: 'd-1',
+            status: 'ready',
+            reason: 'domain',
+            reference: 'MEL-2026-0912-1540',
+            error_message: null,
+            triggered_at: '2026-09-12T13:40:00.000Z',
+            completed_at: '2026-09-12T13:40:26.000Z',
+            build_time: 26,
+            triggered_by: null,
+          },
+        ],
+        meta: { pagination: { page: 1, pageSize: 30, pageCount: 1, total: 3 } },
+      });
+    }
+    if (url.pathname.startsWith('/api/domain/')) {
+      if (domainState === 'unavailable')
+        return json({ error: { status: 503, message: 'Hébergeur non configuré' } }, 503);
+      const records = (domain: string) => [
+        {
+          type: 'A',
+          name: domain,
+          displayName: '@',
+          value: '75.2.60.5',
+          purpose: 'Pointage du domaine',
+          description: '',
+        },
+        {
+          type: 'CNAME',
+          name: `www.${domain}`,
+          displayName: 'www',
+          value: 'saint-aubin-mairie.netlify.app',
+          purpose: 'Redirection www',
+          description: '',
+        },
+      ];
+      if (url.pathname === '/api/domain/status') {
+        const domain = domainState === 'none' ? null : 'saint-aubin-sur-loire.fr';
+        return json({
+          hasCustomDomain: !!domain,
+          customDomain: domain,
+          domainStatus: domainState === 'verified' ? 'verified' : 'pending',
+          domainType: domain ? 'apex' : null,
+          dnsInstructions:
+            domainState === 'pending'
+              ? {
+                  isApex: true,
+                  baseDomain: domain,
+                  target: 'saint-aubin-mairie.netlify.app',
+                  records: records(domain!),
+                }
+              : null,
+          liveUrl: domainState === 'verified' ? `https://${domain}` : 'https://saint-aubin-mairie.netlify.app',
+          sslEnabled: true,
+          domainConfiguredAt: domainState === 'verified' ? '2026-09-12T13:40:00.000Z' : null,
+        });
+      }
+      if (url.pathname === '/api/domain/configure' && method === 'POST') {
+        const { customDomain } = route.request().postDataJSON() as { customDomain: string };
+        posts['domain'] = [customDomain];
+        if (customDomain === 'mairie-deja-prise.fr')
+          return json({ error: { status: 400, message: 'Ce domaine est déjà utilisé par un autre site' } }, 400);
+        domainState = 'pending';
+        return json({ success: true, domain: customDomain });
+      }
+      if (url.pathname === '/api/domain/verify' && method === 'POST') {
+        calls.push('POST /api/domain/verify');
+        if (domainMismatch) {
+          return json({
+            success: false,
+            error: 'Enregistrement A non configuré',
+            mismatch: { type: 'A', name: 'saint-aubin-sur-loire.fr', expected: '75.2.60.5', found: ['92.243.16.8'] },
+            checkedAt: '2026-09-22T09:14:00.000Z',
+          });
+        }
+        domainState = 'verified';
+        return json({ success: true, url: 'https://saint-aubin-sur-loire.fr' });
+      }
+      if (url.pathname === '/api/domain/remove' && method === 'DELETE') {
+        domainState = 'none';
+        return json({ success: true, defaultUrl: 'https://saint-aubin-mairie.netlify.app' });
+      }
     }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
       state = 'running';

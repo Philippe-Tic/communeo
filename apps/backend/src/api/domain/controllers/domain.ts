@@ -50,8 +50,7 @@ export default {
       const validation = await domainValidationService.validateDomainConfiguration(customDomain, siteId);
 
       if (!validation.isValid) {
-        return ctx.badRequest({
-          message: 'Configuration du domaine impossible',
+        return ctx.badRequest(validation.errors.join(' ') || 'Configuration du domaine impossible', {
           errors: validation.errors,
           warnings: validation.warnings
         });
@@ -115,6 +114,9 @@ export default {
           success: false,
           message: 'Vérification du domaine échouée',
           error: result.error,
+          // Ce qui est attendu et ce que le DNS renvoie (encarts « Attendu / Trouvé » de l'admin)
+          mismatch: result.mismatch ?? null,
+          checkedAt: new Date().toISOString(),
           hint: result.hint || 'La propagation DNS peut prendre jusqu\'à 48 heures. Si vous venez de configurer vos enregistrements DNS, réessayez plus tard.'
         };
       }

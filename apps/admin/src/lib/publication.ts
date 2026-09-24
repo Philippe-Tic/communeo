@@ -14,7 +14,56 @@ export interface PublicationStatus {
   reference: string | null;
   /** Mise en ligne automatique prévue (modifications en attente) */
   scheduledAt?: string | null;
+  lastDeployment?: {
+    status: DeploymentStatus;
+    reason: DeploymentReason | null;
+    reference: string | null;
+    step: string | null;
+    triggeredAt: string;
+    completedAt: string | null;
+    /** Durée en secondes */
+    buildTime: number | null;
+    triggeredBy: Person | null;
+  } | null;
+  /** Ce qui sera mis en ligne */
+  pending?: PendingChange[];
 }
+
+export type DeploymentStatus = 'building' | 'ready' | 'error';
+export type DeploymentReason = 'manual' | 'content' | 'scheduled' | 'domain';
+export type Person = { firstName: string | null; lastName: string | null };
+
+export interface PendingChange {
+  /** UID Strapi du contenu (api::page.page…) */
+  type: string;
+  documentId: string | null;
+  title: string;
+  action: 'create' | 'update' | 'publish' | 'unpublish' | 'delete' | string;
+  source: 'person' | 'scheduled' | string;
+  author: Person | null;
+  occurredAt: string;
+}
+
+/** Une mise en ligne de l'historique (GET /api/deployment/status) */
+export interface Deployment {
+  documentId: string;
+  status: DeploymentStatus;
+  reason: DeploymentReason | null;
+  reference: string | null;
+  error_message: string | null;
+  triggered_at: string;
+  completed_at: string | null;
+  build_time: number | null;
+  triggered_by: { first_name: string | null; last_name: string | null } | null;
+}
+
+export const HISTORY_SIZE = 30;
+
+export const deploymentHistoryQuery = queryOptions({
+  queryKey: ['publication', 'historique'],
+  queryFn: () => api<{ data: Deployment[] }>(`/api/deployment/status?pageSize=${HISTORY_SIZE}`).then((response) => response.data),
+  refetchInterval: (query) => (query.state.data?.some((deployment) => deployment.status === 'building') ? 3000 : false),
+});
 
 export const publicationQuery = queryOptions({
   queryKey: ['publication'],

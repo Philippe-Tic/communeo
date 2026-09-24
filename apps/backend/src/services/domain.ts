@@ -2,7 +2,7 @@
  * Domain Service - Gestion des domaines personnalisés
  */
 
-import { isApexDomain, isPublisherUnavailable, type DnsInstructions } from '@communeo/pipeline';
+import { isApexDomain, isPublisherUnavailable, type DnsInstructions, type DomainCheck } from '@communeo/pipeline';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { log } from '../utils/logger';
 import { isBuildQueueConfigured } from './build-queue';
@@ -74,7 +74,7 @@ class DomainService {
   /**
    * Active un domaine personnalisé une fois le pointage DNS vérifié par l'hébergeur (qui active aussi HTTPS).
    */
-  async activateCustomDomain(siteId: string): Promise<{ success: boolean; url?: string; error?: string; hint?: string }> {
+  async activateCustomDomain(siteId: string): Promise<{ success: boolean; url?: string; error?: string; hint?: string; mismatch?: DomainCheck['mismatch'] }> {
     const site = await this.findSiteByDocumentId(siteId);
 
     if (!site || !(site as any).custom_domain) {
@@ -90,6 +90,7 @@ class DomainService {
         return {
           success: false,
           error: check.errors.join(', '),
+          mismatch: check.mismatch,
           hint: 'La propagation DNS peut prendre jusqu\'à 48 heures. Si vous venez de configurer vos enregistrements DNS, réessayez plus tard.'
         };
       }

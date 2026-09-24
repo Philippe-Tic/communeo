@@ -31,6 +31,8 @@ const IGNORED_UIDS = new Set([
 
 /** Champs du Site sans effet sur les pages : les modifier ne reconstruit pas le site */
 export const TECHNICAL_SITE_FIELDS = new Set([
+  // Progression de l'assistant de création : rien de visible sur le site
+  'onboarding',
   'netlify_site_id',
   'live_url',
   'custom_domain',

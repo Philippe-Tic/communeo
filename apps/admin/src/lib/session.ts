@@ -13,6 +13,8 @@ export interface SessionSite {
   slug: string;
   theme: string | null;
   live_url: string | null;
+  /** Assistant de création en cours (commune créée par l'équipe Communeo) */
+  onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null } | null;
 }
 
 export interface SessionUser {
@@ -38,7 +40,7 @@ export const sessionQuery = queryOptions({
     // Fiche de l'espace équipe : adresse du site en `liveUrl` (domaine personnalisé compris)
     const { data: site } = await api<{ data: SessionSite & { liveUrl?: string | null; customDomain?: string | null } }>(`/api/site-management/${impersonated}`);
     const liveUrl = site.customDomain ? `https://${site.customDomain}` : (site.liveUrl ?? site.live_url ?? null);
-    return { ...user, site: { documentId: site.documentId, name: site.name, slug: site.slug, theme: site.theme, live_url: liveUrl } };
+    return { ...user, site: { documentId: site.documentId, name: site.name, slug: site.slug, theme: site.theme, live_url: liveUrl, onboarding: site.onboarding ?? null } };
   },
   staleTime: 5 * 60 * 1000,
   retry: false,

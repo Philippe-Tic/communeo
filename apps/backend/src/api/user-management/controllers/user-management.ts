@@ -57,7 +57,7 @@ async function getAuthenticatedUser(ctx) {
   return fullUser;
 }
 
-async function sendInvitationEmail(email: string, rawFirstName: string, token: string, rawSiteName: string) {
+export async function sendInvitationEmail(email: string, rawFirstName: string, token: string, rawSiteName: string) {
   const firstName = escapeHtml(rawFirstName);
   const siteName = escapeHtml(rawSiteName);
   const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';

@@ -35,8 +35,10 @@ export const sessionQuery = queryOptions({
     const user = await api<SessionUser>('/api/users/me');
     const impersonated = auth.impersonatedSite();
     if (user.municipality_role !== 'super_admin' || !impersonated) return user;
-    const { data: site } = await api<{ data: SessionSite }>(`/api/site-management/${impersonated}`);
-    return { ...user, site: { documentId: site.documentId, name: site.name, slug: site.slug, theme: site.theme, live_url: site.live_url } };
+    // Fiche de l'espace équipe : adresse du site en `liveUrl` (domaine personnalisé compris)
+    const { data: site } = await api<{ data: SessionSite & { liveUrl?: string | null; customDomain?: string | null } }>(`/api/site-management/${impersonated}`);
+    const liveUrl = site.customDomain ? `https://${site.customDomain}` : (site.liveUrl ?? site.live_url ?? null);
+    return { ...user, site: { documentId: site.documentId, name: site.name, slug: site.slug, theme: site.theme, live_url: liveUrl } };
   },
   staleTime: 5 * 60 * 1000,
   retry: false,

@@ -17,11 +17,11 @@ export const Route = createFileRoute('/_app')({
       // Commune consultée supprimée entre-temps : retour à la liste
       if (error instanceof ApiError && error.status === 404 && auth.impersonatedSite()) {
         auth.setImpersonatedSite(null);
-        throw redirect({ to: '/communes' });
+        throw redirect({ to: '/plateforme' });
       }
       throw error;
     }
-    if (needsSitePicker(user)) throw redirect({ to: '/communes' });
+    if (needsSitePicker(user)) throw redirect({ to: '/plateforme' });
   },
   component: AppLayout,
 });

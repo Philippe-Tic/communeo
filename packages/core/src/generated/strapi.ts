@@ -594,6 +594,7 @@ export interface Site extends StrapiDocument {
   domain_type: SiteDomainType | null;
   domain_configured_at: string | null;
   ssl_enabled: boolean | null;
+  suspended: boolean | null;
   pages?: Page[];
   articles?: Article[];
   evenements?: Evenement[];

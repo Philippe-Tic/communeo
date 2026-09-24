@@ -42,10 +42,12 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
   }, [pathname]);
 
   const impersonating = user.municipality_role === 'super_admin' && auth.impersonatedSite() !== null;
+  // Quitter : retour à la fiche de la commune consultée, dans l'espace de l'équipe
   const quitImpersonation = async () => {
+    const documentId = auth.impersonatedSite();
     auth.setImpersonatedSite(null);
     client.clear();
-    await navigate({ to: '/communes' });
+    await navigate(documentId ? { to: '/plateforme/communes/$documentId', params: { documentId } } : { to: '/plateforme' });
   };
 
   return (

@@ -15,6 +15,7 @@ import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as InvitationRouteImport } from './routes/invitation'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as NouveauMotDePasseRouteImport } from './routes/nouveau-mot-de-passe'
+import { Route as PlateformeRouteImport } from './routes/plateforme'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppActualitesRouteImport } from './routes/_app/actualites'
 import { Route as AppAgendaRouteImport } from './routes/_app/agenda'
@@ -34,6 +35,9 @@ import { Route as AppMonCompteRouteImport } from './routes/_app/mon-compte'
 import { Route as AppNewsletterRouteImport } from './routes/_app/newsletter'
 import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
+import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
+import { Route as PlateformeStatistiquesRouteImport } from './routes/plateforme/statistiques'
+import { Route as PlateformeUtilisateursRouteImport } from './routes/plateforme/utilisateurs'
 import { Route as AppActualitesDocumentIdRouteImport } from './routes/_app/actualites_.$documentId'
 import { Route as AppAgendaDocumentIdRouteImport } from './routes/_app/agenda_.$documentId'
 import { Route as AppAlertesDocumentIdRouteImport } from './routes/_app/alertes_.$documentId'
@@ -48,6 +52,7 @@ import { Route as AppMonSiteMenuRouteImport } from './routes/_app/mon-site/menu'
 import { Route as AppMonSiteOpenDataRouteImport } from './routes/_app/mon-site/open-data'
 import { Route as AppMonSiteReseauxRouteImport } from './routes/_app/mon-site/reseaux'
 import { Route as AppPagesDocumentIdRouteImport } from './routes/_app/pages_.$documentId'
+import { Route as PlateformeCommunesDocumentIdRouteImport } from './routes/plateforme/communes.$documentId'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -76,6 +81,11 @@ const MotDePasseOublieRoute = MotDePasseOublieRouteImport.update({
 const NouveauMotDePasseRoute = NouveauMotDePasseRouteImport.update({
   id: '/nouveau-mot-de-passe',
   path: '/nouveau-mot-de-passe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlateformeRoute = PlateformeRouteImport.update({
+  id: '/plateforme',
+  path: '/plateforme',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -173,6 +183,21 @@ const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
   path: '/utilisateurs',
   getParentRoute: () => AppRoute,
 } as any)
+const PlateformeIndexRoute = PlateformeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PlateformeRoute,
+} as any)
+const PlateformeStatistiquesRoute = PlateformeStatistiquesRouteImport.update({
+  id: '/statistiques',
+  path: '/statistiques',
+  getParentRoute: () => PlateformeRoute,
+} as any)
+const PlateformeUtilisateursRoute = PlateformeUtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
+  getParentRoute: () => PlateformeRoute,
+} as any)
 const AppActualitesDocumentIdRoute = AppActualitesDocumentIdRouteImport.update({
   id: '/actualites_/$documentId',
   path: '/actualites/$documentId',
@@ -243,6 +268,12 @@ const AppPagesDocumentIdRoute = AppPagesDocumentIdRouteImport.update({
   path: '/pages/$documentId',
   getParentRoute: () => AppRoute,
 } as any)
+const PlateformeCommunesDocumentIdRoute =
+  PlateformeCommunesDocumentIdRouteImport.update({
+    id: '/communes/$documentId',
+    path: '/communes/$documentId',
+    getParentRoute: () => PlateformeRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -251,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/invitation': typeof InvitationRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
+  '/plateforme': typeof PlateformeRouteWithChildren
   '/actualites': typeof AppActualitesRoute
   '/agenda': typeof AppAgendaRoute
   '/alertes': typeof AppAlertesRoute
@@ -269,6 +301,9 @@ export interface FileRoutesByFullPath {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
+  '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
+  '/plateforme/': typeof PlateformeIndexRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
   '/alertes/$documentId': typeof AppAlertesDocumentIdRoute
@@ -283,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
+  '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
 export interface FileRoutesByTo {
   '/communes': typeof CommunesRoute
@@ -308,7 +344,10 @@ export interface FileRoutesByTo {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
+  '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
   '/': typeof AppIndexRoute
+  '/plateforme': typeof PlateformeIndexRoute
   '/actualites/$documentId': typeof AppActualitesDocumentIdRoute
   '/agenda/$documentId': typeof AppAgendaDocumentIdRoute
   '/alertes/$documentId': typeof AppAlertesDocumentIdRoute
@@ -323,6 +362,7 @@ export interface FileRoutesByTo {
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
+  '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -332,6 +372,7 @@ export interface FileRoutesById {
   '/invitation': typeof InvitationRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
+  '/plateforme': typeof PlateformeRouteWithChildren
   '/_app/actualites': typeof AppActualitesRoute
   '/_app/agenda': typeof AppAgendaRoute
   '/_app/alertes': typeof AppAlertesRoute
@@ -350,7 +391,10 @@ export interface FileRoutesById {
   '/_app/newsletter': typeof AppNewsletterRoute
   '/_app/pages': typeof AppPagesRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
+  '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
+  '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
   '/_app/': typeof AppIndexRoute
+  '/plateforme/': typeof PlateformeIndexRoute
   '/_app/actualites_/$documentId': typeof AppActualitesDocumentIdRoute
   '/_app/agenda_/$documentId': typeof AppAgendaDocumentIdRoute
   '/_app/alertes_/$documentId': typeof AppAlertesDocumentIdRoute
@@ -365,6 +409,7 @@ export interface FileRoutesById {
   '/_app/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/_app/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/_app/pages_/$documentId': typeof AppPagesDocumentIdRoute
+  '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -375,6 +420,7 @@ export interface FileRouteTypes {
     | '/invitation'
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
+    | '/plateforme'
     | '/actualites'
     | '/agenda'
     | '/alertes'
@@ -393,6 +439,9 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/plateforme/statistiques'
+    | '/plateforme/utilisateurs'
+    | '/plateforme/'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
     | '/alertes/$documentId'
@@ -407,6 +456,7 @@ export interface FileRouteTypes {
     | '/mon-site/open-data'
     | '/mon-site/reseaux'
     | '/pages/$documentId'
+    | '/plateforme/communes/$documentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/communes'
@@ -432,7 +482,10 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/plateforme/statistiques'
+    | '/plateforme/utilisateurs'
     | '/'
+    | '/plateforme'
     | '/actualites/$documentId'
     | '/agenda/$documentId'
     | '/alertes/$documentId'
@@ -447,6 +500,7 @@ export interface FileRouteTypes {
     | '/mon-site/open-data'
     | '/mon-site/reseaux'
     | '/pages/$documentId'
+    | '/plateforme/communes/$documentId'
   id:
     | '__root__'
     | '/_app'
@@ -455,6 +509,7 @@ export interface FileRouteTypes {
     | '/invitation'
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
+    | '/plateforme'
     | '/_app/actualites'
     | '/_app/agenda'
     | '/_app/alertes'
@@ -473,7 +528,10 @@ export interface FileRouteTypes {
     | '/_app/newsletter'
     | '/_app/pages'
     | '/_app/utilisateurs'
+    | '/plateforme/statistiques'
+    | '/plateforme/utilisateurs'
     | '/_app/'
+    | '/plateforme/'
     | '/_app/actualites_/$documentId'
     | '/_app/agenda_/$documentId'
     | '/_app/alertes_/$documentId'
@@ -488,6 +546,7 @@ export interface FileRouteTypes {
     | '/_app/mon-site/open-data'
     | '/_app/mon-site/reseaux'
     | '/_app/pages_/$documentId'
+    | '/plateforme/communes/$documentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -497,6 +556,7 @@ export interface RootRouteChildren {
   InvitationRoute: typeof InvitationRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   NouveauMotDePasseRoute: typeof NouveauMotDePasseRoute
+  PlateformeRoute: typeof PlateformeRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -541,6 +601,13 @@ declare module '@tanstack/react-router' {
       path: '/nouveau-mot-de-passe'
       fullPath: '/nouveau-mot-de-passe'
       preLoaderRoute: typeof NouveauMotDePasseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plateforme': {
+      id: '/plateforme'
+      path: '/plateforme'
+      fullPath: '/plateforme'
+      preLoaderRoute: typeof PlateformeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -676,6 +743,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUtilisateursRouteImport
       parentRoute: typeof AppRoute
     }
+    '/plateforme/': {
+      id: '/plateforme/'
+      path: '/'
+      fullPath: '/plateforme/'
+      preLoaderRoute: typeof PlateformeIndexRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
+    '/plateforme/statistiques': {
+      id: '/plateforme/statistiques'
+      path: '/statistiques'
+      fullPath: '/plateforme/statistiques'
+      preLoaderRoute: typeof PlateformeStatistiquesRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
+    '/plateforme/utilisateurs': {
+      id: '/plateforme/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/plateforme/utilisateurs'
+      preLoaderRoute: typeof PlateformeUtilisateursRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
     '/_app/actualites_/$documentId': {
       id: '/_app/actualites_/$documentId'
       path: '/actualites/$documentId'
@@ -774,6 +862,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagesDocumentIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/plateforme/communes/$documentId': {
+      id: '/plateforme/communes/$documentId'
+      path: '/communes/$documentId'
+      fullPath: '/plateforme/communes/$documentId'
+      preLoaderRoute: typeof PlateformeCommunesDocumentIdRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
   }
 }
 
@@ -851,6 +946,24 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PlateformeRouteChildren {
+  PlateformeStatistiquesRoute: typeof PlateformeStatistiquesRoute
+  PlateformeUtilisateursRoute: typeof PlateformeUtilisateursRoute
+  PlateformeIndexRoute: typeof PlateformeIndexRoute
+  PlateformeCommunesDocumentIdRoute: typeof PlateformeCommunesDocumentIdRoute
+}
+
+const PlateformeRouteChildren: PlateformeRouteChildren = {
+  PlateformeStatistiquesRoute: PlateformeStatistiquesRoute,
+  PlateformeUtilisateursRoute: PlateformeUtilisateursRoute,
+  PlateformeIndexRoute: PlateformeIndexRoute,
+  PlateformeCommunesDocumentIdRoute: PlateformeCommunesDocumentIdRoute,
+}
+
+const PlateformeRouteWithChildren = PlateformeRoute._addFileChildren(
+  PlateformeRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   CommunesRoute: CommunesRoute,
@@ -858,6 +971,7 @@ const rootRouteChildren: RootRouteChildren = {
   InvitationRoute: InvitationRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   NouveauMotDePasseRoute: NouveauMotDePasseRoute,
+  PlateformeRoute: PlateformeRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -901,6 +901,37 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const posts: Record<string, unknown[]> = {};
   let state = publication;
   let domainState = options.domain ?? 'none';
+  const communeSummary = (documentId: string, name: string, slug: string, theme: string | null) => ({
+    documentId,
+    name,
+    slug,
+    theme,
+    liveUrl: `https://${slug}-mairie.netlify.app`,
+    customDomain: null as string | null,
+    population: null as number | null,
+    suspended: false,
+    createdAt: '2025-03-04T09:00:00.000Z',
+    lastActivity: '2026-09-22T07:12:00.000Z',
+    publication: { state: 'ok', at: '2026-09-22T05:45:00.000Z', pendingCount: 0 },
+    users: { active: 3, invited: 1 },
+  });
+  const communes = [
+    {
+      ...communeSummary(SITE.documentId, SITE.name, SITE.slug, 'institutionnel'),
+      customDomain: 'saint-aubin-sur-loire.fr',
+      population: 3240,
+    },
+    {
+      ...communeSummary('site-bellefontaine', 'Bellefontaine', 'bellefontaine', 'moderne'),
+      publication: { state: 'pending', at: null, pendingCount: 12 },
+      users: { active: 2, invited: 0 },
+    },
+    {
+      ...communeSummary('site-champvert', 'Champvert', 'champvert', 'institutionnel'),
+      lastActivity: '2026-07-03T10:00:00.000Z',
+      users: { active: 2, invited: 0 },
+    },
+  ];
   const members: Array<{
     id: number;
     email: string;
@@ -1182,6 +1213,11 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     const memberMatch = /^\/api\/user-management\/(\d+)(?:\/([a-z-]+))?$/.exec(url.pathname);
     if (memberMatch) {
       const member = members.find((entry) => entry.id === Number(memberMatch[1]));
+      // Équipe Communeo : comptes d'autres communes (fiche d'une commune)
+      if (!member && memberMatch[2] && USERS[user].municipality_role === 'super_admin') {
+        calls.push(`POST ${memberMatch[2]} ${memberMatch[1]}`);
+        return json({ ok: true });
+      }
       if (!member) return json({ error: { status: 404, message: 'Utilisateur introuvable' } }, 404);
       if (memberMatch[2]) {
         calls.push(`POST ${memberMatch[2]} ${member.id}`);
@@ -1210,12 +1246,64 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         return json({ data: { id: member.id } });
       }
     }
-    if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin')
-      return json({ data: SITES });
-    const siteMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
-    if (siteMatch && USERS[user].municipality_role === 'super_admin') {
-      const site = SITES.find((candidate) => candidate.documentId === siteMatch[1]);
-      return site ? json({ data: site }) : json({ error: { status: 404, message: 'Site not found' } }, 404);
+    // Espace équipe Communeo (super admin)
+    if (url.pathname.startsWith('/api/site-management') && USERS[user].municipality_role === 'super_admin') {
+      if (url.pathname === '/api/site-management/slug-available') {
+        const slug = url.searchParams.get('slug') ?? '';
+        if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug))
+          return json({ available: false, reason: 'Lettres minuscules, chiffres et tirets seulement' });
+        return json(
+          communes.some((commune) => commune.slug === slug)
+            ? { available: false, reason: 'Adresse déjà utilisée' }
+            : { available: true },
+        );
+      }
+      if (url.pathname === '/api/site-management' && method === 'GET') return json({ data: communes });
+      if (url.pathname === '/api/site-management' && method === 'POST') {
+        const { data } = route.request().postDataJSON() as { data: Record<string, string> };
+        bodies.push({ call: 'POST commune', body: { data } });
+        const created = {
+          ...communeSummary(`site-${data.slug}`, data.name!, data.slug!, null),
+          publication: { state: 'new', at: null, pendingCount: 0 },
+          users: { active: 0, invited: 1 },
+        };
+        communes.push(created);
+        return json({ data: created });
+      }
+      const communeMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
+      const commune = communeMatch && communes.find((candidate) => candidate.documentId === communeMatch[1]);
+      if (!commune) return json({ error: { status: 404, message: 'Commune introuvable' } }, 404);
+      if (method === 'PUT') {
+        const { data } = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `PUT commune ${commune.documentId}`, body: { data } });
+        Object.assign(commune, data);
+        return json({ data: commune });
+      }
+      return json({
+        data: {
+          ...commune,
+          live_url: commune.liveUrl,
+          domainStatus: commune.customDomain ? 'verified' : null,
+          sslEnabled: true,
+          users:
+            commune.documentId === SITE.documentId
+              ? members
+              : [
+                  {
+                    id: 60,
+                    email: 'maire@bellefontaine.fr',
+                    first_name: 'Paul',
+                    last_name: 'Girard',
+                    municipality_role: 'admin',
+                    blocked: true,
+                    active: true,
+                    createdAt: '2026-09-18T09:00:00.000Z',
+                  },
+                ],
+          counts: { pages: 12, articles: 48, documents: 214 },
+          deployments: { succeeded: 142, failed: 1 },
+        },
+      });
     }
     if (url.pathname === '/api/deployment/state') {
       const sophie = { firstName: 'Sophie', lastName: 'Leroy' };

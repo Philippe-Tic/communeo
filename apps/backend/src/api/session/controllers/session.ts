@@ -26,6 +26,7 @@ export default {
 
     const user = await strapi.db.query('plugin::users-permissions.user').findOne({
       where: { $or: [{ email }, { username: identifier.trim() }] },
+      populate: ['site'],
     });
     const userService = strapi.plugin('users-permissions').service('user');
     const valid = !!user?.password && (await userService.validatePassword(password, user.password));
@@ -36,6 +37,10 @@ export default {
       return ctx.badRequest(INVALID);
     }
     accountFailures.reset(email);
+    // Commune suspendue par l'équipe Communeo : le mot de passe est bon, on peut le dire
+    if (user.municipality_role !== 'super_admin' && user.site?.suspended) {
+      return ctx.forbidden("Cette commune est suspendue : contactez l'équipe Communeo.");
+    }
 
     // « Rester connecté sur cet ordinateur » : 30 jours, sinon 12 h
     const duration = remember === true ? REMEMBERED_SESSION_SECONDS : SESSION_DURATION_SECONDS;

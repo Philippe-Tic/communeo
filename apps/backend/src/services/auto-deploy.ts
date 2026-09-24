@@ -101,6 +101,8 @@ class AutoDeployService {
       const scheduledPublication = isScheduledPublication();
       // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
       if (!site?.auto_deploy_enabled && !scheduledPublication) return;
+      // Commune suspendue : plus aucune mise en ligne
+      if (site.suspended) return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;

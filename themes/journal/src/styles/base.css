@@ -1,0 +1,275 @@
+/* Jetons et styles de base. Contrastes vérifiés (maquette « Fondations ») sur blanc et sur le fond. */
+:root {
+  color-scheme: light;
+
+  /* Couleurs */
+  --jo-ink: #1b2430; /* texte, barre latérale : blanc dessus 15,4:1 */
+  --jo-ink-soft: #232e3d; /* champs dans la barre latérale */
+  --jo-ink-line: #34404f;
+  --jo-slate: #2b4c7e; /* actions, liens : blanc dessus 7,9:1, sur le fond 7,1:1 */
+  --jo-slate-dark: #1f3a63;
+  --jo-pale: #e4ebf4; /* encarts, pied de page, étiquettes : encre dessus 13,2:1 */
+  --jo-page: #f4f6f9;
+  --jo-surface: #fff;
+  --jo-line: #d3dae3;
+  --jo-muted: #52606d; /* 6,3:1 sur le fond */
+  --jo-muted-dark: #d3dae3; /* texte secondaire dans la barre latérale */
+  --jo-field: #52606d;
+  --jo-open: #6fcf97; /* pastille « ouvert », jamais seule */
+  --jo-info: #0b4f8a;
+  --jo-info-bg: #e3f0fa;
+  --jo-warning: #7a4a00;
+  --jo-warning-bg: #fff1d6;
+  --jo-danger: #a5341f; /* rouille, réservée à l'urgence : blanc dessus 6,9:1 */
+  --jo-danger-bg: #fbe7e3;
+
+  /* Typographie */
+  --jo-font: 'Public Sans Variable', 'Public Sans', system-ui, sans-serif;
+  --jo-font-title: 'Lora Variable', 'Lora', Georgia, serif;
+  --jo-h1: 1.875rem;
+  --jo-h2: 1.4375rem;
+  --jo-h3: 1.1875rem;
+  --jo-h4: 1.0625rem;
+
+  /* Espacements, formes */
+  --jo-space-1: 0.5rem;
+  --jo-space-2: 1rem;
+  --jo-space-3: 1.5rem;
+  --jo-space-4: 2rem;
+  --jo-space-5: 3rem;
+  --jo-radius: 4px;
+  --jo-sidebar: 17.5rem;
+  --jo-max: 72.5rem;
+  --jo-gutter: 1rem;
+  --jo-target: 2.75rem;
+  --jo-tabbar: 4.25rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --jo-gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --jo-h1: 2.5rem;
+    --jo-h2: 1.625rem;
+    --jo-h3: 1.25rem;
+    --jo-h4: 1.125rem;
+    --jo-gutter: 2.5rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Le bandeau cookies, fixé en bas, ne doit pas masquer l'élément qui reçoit le focus */
+html:has([data-cn-cookie-banner]:not([hidden])) {
+  scroll-padding-bottom: 18rem;
+}
+
+body {
+  margin: 0;
+  font-family: var(--jo-font);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  color: var(--jo-ink);
+  background: var(--jo-page);
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--jo-font-title);
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: var(--jo-h1);
+}
+
+h2 {
+  font-size: var(--jo-h2);
+}
+
+h3 {
+  font-size: var(--jo-h3);
+}
+
+h4 {
+  font-size: var(--jo-h4);
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+
+a {
+  color: var(--jo-slate);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--jo-ink);
+  text-decoration-thickness: 2px;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 3px solid var(--jo-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Sur fond sombre, le focus passe en blanc */
+.jo-on-dark :focus-visible {
+  outline-color: #fff;
+}
+
+/* Kicker : capitales espacées, gras, gris */
+.jo-kicker {
+  margin: 0;
+  font-family: var(--jo-font);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--jo-muted);
+}
+
+/* Titre de rubrique : souligné d'un trait épais, lien « Tout voir » à droite */
+.jo-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 3px solid var(--jo-ink);
+}
+
+.jo-section-head a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--jo-target);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+/* Boutons à coins presque droits */
+.jo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.125rem;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  color: #fff;
+  background: var(--jo-slate);
+  border: 2px solid var(--jo-slate);
+  border-radius: var(--jo-radius);
+  cursor: pointer;
+}
+
+.jo-button:hover {
+  color: #fff;
+  background: var(--jo-slate-dark);
+  border-color: var(--jo-slate-dark);
+}
+
+.jo-button-secondary {
+  color: var(--jo-slate);
+  background: var(--jo-surface);
+}
+
+.jo-button-secondary:hover {
+  color: var(--jo-slate-dark);
+  background: var(--jo-pale);
+}
+
+/* Formulaires : champs à coins droits, bordure 1 px ; erreur en bordure 3 px */
+input:not([type='checkbox'], [type='radio'], [type='file']),
+select,
+textarea {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0 0.875rem;
+  font: inherit;
+  color: var(--jo-ink);
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-field);
+  border-radius: var(--jo-radius);
+}
+
+textarea {
+  min-height: 9rem;
+  padding: 0.75rem 0.875rem;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--jo-ink);
+}
+
+[aria-invalid='true'] {
+  border-width: 3px;
+  border-color: var(--jo-danger);
+}
+
+input:not([type='checkbox'], [type='radio'], [type='file']):disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--jo-muted);
+  background: var(--jo-page);
+  border-style: dashed;
+  border-color: var(--jo-line);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.375rem;
+  height: 1.375rem;
+  accent-color: var(--jo-slate);
+}
+
+label {
+  font-weight: 600;
+}

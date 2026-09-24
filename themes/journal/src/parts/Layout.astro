@@ -1,0 +1,58 @@
+---
+/**
+ * Mise en page du thème : barre latérale de navigation à gauche (ordinateur), colonne de contenu à
+ * droite (alertes, fil d'Ariane, contenu, pied de page). Mobile : en-tête minimal, contenu, onglets
+ * fixés en bas. Le document (<html>, <head>, liens d'évitement, bandeau cookies) vient du renderer.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import Alerts from '@communeo/ui-a11y/Alerts.astro';
+import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import { searchAttributes } from '@communeo/ui-a11y/search';
+import Search from '@lucide/astro/icons/search';
+import Footer from './Footer.astro';
+import Sidebar from './Sidebar.astro';
+import TabBar from './TabBar.astro';
+import '../styles.css';
+
+interface Props {
+  ctx: PageContext;
+  /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
+  heading?: string | false;
+  /** Pleine largeur : le template gère lui-même sa mise en page (accueil) */
+  full?: boolean;
+}
+
+const { ctx, heading = ctx.title, full = false } = Astro.props;
+const { site } = ctx;
+---
+<div class="jo-shell">
+  <header class="jo-topbar jo-on-dark">
+    <a href="/" class="jo-brand jo-brand-small">
+      {site.logo && (
+        <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="jo-brand-logo" />
+      )}
+      <span class="jo-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
+    </a>
+    <a href="/recherche" class="jo-topbar-search"><Search size={20} aria-hidden="true" /><span class="cn-sr-only">Rechercher</span></a>
+  </header>
+
+  <Sidebar ctx={ctx} />
+
+  <div class="jo-column">
+    <Alerts alerts={ctx.alerts} class="jo-alerts" />
+    <div class:list={['jo-page', { 'jo-page-full': full }]}>
+      {!full && <Breadcrumb items={ctx.breadcrumb} class="jo-breadcrumb" />}
+      <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="jo-main">
+        {heading && <h1 class="jo-title">{heading}</h1>}
+        <slot />
+      </main>
+    </div>
+    <Footer ctx={ctx} />
+  </div>
+
+  <TabBar ctx={ctx} />
+</div>
+
+<script>
+  import '@communeo/ui-a11y/scripts/menu';
+</script>

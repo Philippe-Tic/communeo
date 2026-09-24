@@ -1,0 +1,28 @@
+---
+import type { DocumentVM, KeyLabel } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; documents: DocumentVM[]; types: KeyLabel[]; years: number[] }
+const { ctx, documents } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <p>Procès-verbaux, délibérations, arrêtés et documents budgétaires publiés par la commune.</p>
+  {documents.length ? (
+    <table>
+      <caption>Liste des documents officiels, du plus récent au plus ancien</caption>
+      <thead><tr><th scope="col">Date</th><th scope="col">Type</th><th scope="col">Titre</th><th scope="col">Référence</th><th scope="col">Fichier</th></tr></thead>
+      <tbody>
+        {documents.map((doc) => (
+          <tr>
+            <td><time datetime={doc.date.iso}>{doc.date.label}</time></td>
+            <td>{doc.type.label}</td>
+            <th scope="row"><a href={doc.href}>{doc.title}</a></th>
+            <td>{doc.reference}</td>
+            <td>{doc.file && <a href={doc.file.href} download>Télécharger<span class="cn-sr-only"> {doc.title}</span> ({doc.file.label})</a>}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ) : <p>Aucun document publié.</p>}
+</Layout>

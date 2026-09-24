@@ -1,0 +1,13 @@
+/*
+ * Thème Journal : le journal de la commune. Barre latérale sombre de navigation, contenu en grille
+ * éditoriale, titres en Lora, texte en Public Sans à 17 px, filets fins et titres de rubrique
+ * soulignés d'un trait épais. Bleu ardoise pour les actions, rouille réservée à l'urgence.
+ */
+@import '@communeo/ui-a11y/styles.css';
+@import '@fontsource-variable/public-sans/wght.css';
+@import '@fontsource-variable/public-sans/wght-italic.css';
+@import '@fontsource-variable/lora/wght.css';
+@import '@fontsource-variable/lora/wght-italic.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';

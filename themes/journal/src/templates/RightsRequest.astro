@@ -1,0 +1,22 @@
+---
+import type { FormConfig } from '@communeo/theme-contract';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import ApiForm from '../parts/ApiForm.astro';
+
+interface Props { ctx: PageContext; form: FormConfig }
+const { ctx, form } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <p>Vous pouvez demander l'accès, la rectification ou l'effacement des données que la commune détient sur vous. La mairie répond dans un délai d'un mois.</p>
+  <ApiForm form={form} submitLabel="Envoyer ma demande" success="Votre demande a bien été envoyée. Un accusé de réception vous sera adressé par e-mail.">
+    <p><label for="rg-type">Type de demande (obligatoire)</label>
+      <select id="rg-type" name="subject" required>{(form.options ?? []).map((o) => <option value={o.label}>{o.label}</option>)}</select></p>
+    <p><label for="rg-first">Prénom (obligatoire)</label><input id="rg-first" name="first_name" required autocomplete="given-name" /></p>
+    <p><label for="rg-last">Nom (obligatoire)</label><input id="rg-last" name="last_name" required autocomplete="family-name" /></p>
+    <p><label for="rg-email">E-mail (obligatoire)</label><input id="rg-email" name="email" type="email" required autocomplete="email" /></p>
+    <p><label for="rg-message">Précisez votre demande (obligatoire)</label><textarea id="rg-message" name="message" rows="5" required></textarea></p>
+    <input type="hidden" name="category" value="rgpd" />
+    <p class="st-meta">Vos coordonnées servent uniquement à traiter cette demande. <a href="/donnees-personnelles">En savoir plus</a></p>
+  </ApiForm>
+</Layout>

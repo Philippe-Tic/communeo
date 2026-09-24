@@ -8,11 +8,13 @@ interface Props {
   /** Coordonnées de la mairie (infos pratiques du site) */
   position: { lat: number; lng: number };
   class?: string;
+  /** Repère de la section d'accueil (`data-cn-home`), pour la preview */
+  [attribute: `data-${string}`]: string;
 }
 
-const { position, class: className } = Astro.props;
+const { position, class: className, ...attributes } = Astro.props;
 ---
-<section class:list={['cn-weather', className]} aria-label="Météo" data-cn-weather={JSON.stringify(position)} hidden>
+<section class:list={['cn-weather', className]} aria-label="Météo" data-cn-weather={JSON.stringify(position)} hidden {...attributes}>
   <slot name="titre" />
   <div data-cn-weather-content></div>
 </section>

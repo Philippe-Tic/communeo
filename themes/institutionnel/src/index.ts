@@ -1,6 +1,6 @@
 /** Thème Institutionnel. */
 import { defineTheme } from '@communeo/theme-contract';
-import { HOMEPAGE_SECTION_IDS } from '@communeo/core';
+import { themeHomeSections } from '@communeo/core';
 import { blocks } from './blocks/index';
 import Article from './templates/Article.astro';
 import ArticleList from './templates/ArticleList.astro';
@@ -28,7 +28,7 @@ export default defineTheme({
     name: 'Institutionnel',
     description:
       'Sobre et très lisible : un site « guichet » pour trouver vite une démarche, un horaire ou une actualité. Vert forêt, titres à empattements, texte en grand.',
-    homeSections: HOMEPAGE_SECTION_IDS,
+    homeSections: [...themeHomeSections('institutionnel')],
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
   },

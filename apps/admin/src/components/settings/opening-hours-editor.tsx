@@ -5,7 +5,7 @@
  */
 import { Dialog } from 'radix-ui';
 import { CalendarX2, ChevronDown, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { formatDay, WEEKDAY_LABELS, WEEKDAYS, type Weekday } from '@communeo/core/client';
@@ -96,6 +96,15 @@ function DayRow({ name, day }: { name: string; day: Weekday }) {
   const dayErrors = flattenErrors(errors).filter((error) => error.name.startsWith(`${path}.`));
   const errorId = `horaires-${day}-erreur`;
   const addRef = useRef<HTMLButtonElement>(null);
+  // Focus après ajout (nouvelle plage) ou retrait (bouton d'ajout, réaffiché sous 4 plages), posé
+  // juste après le rendu : pas d'image différée qui le reprendrait pendant la saisie
+  const pendingFocus = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    if (!pendingFocus.current) return;
+    const target = pendingFocus.current === 'ajout' ? addRef.current : document.getElementById(pendingFocus.current);
+    pendingFocus.current = null;
+    target?.focus();
+  });
 
   return (
     <div
@@ -152,7 +161,7 @@ function DayRow({ name, day }: { name: string; day: Weekday }) {
                   className="size-9 text-secondary md:size-8"
                   onClick={() => {
                     remove(index);
-                    requestAnimationFrame(() => addRef.current?.focus());
+                    pendingFocus.current = 'ajout';
                   }}
                 >
                   <X aria-hidden="true" />
@@ -170,7 +179,7 @@ function DayRow({ name, day }: { name: string; day: Weekday }) {
               className="border border-dashed border-border-input max-md:h-11"
               onClick={() => {
                 append(nextRange(ranges));
-                requestAnimationFrame(() => document.getElementById(fieldId(`${path}.${fields.length}`))?.focus());
+                pendingFocus.current = fieldId(`${path}.${fields.length}`);
               }}
             >
               <Plus aria-hidden="true" />

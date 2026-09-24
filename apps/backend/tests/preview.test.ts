@@ -57,7 +57,7 @@ describe('POST /api/preview/token', () => {
     expect((await claimsOf(res.body.url))?.theme).toBe('institutionnel');
     expect((await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'inconnu' })).status).toBe(400);
     // Thème du registre pas encore construit : ni prévisualisable ni choisissable
-    const unbuilt = await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'journal' });
+    const unbuilt = await http.post('/api/preview/token').set(auth(admin)).send({ theme: 'bourg' });
     expect(unbuilt.status).toBe(400);
     expect(unbuilt.body.error.message).toBe("Ce thème n'est pas encore disponible");
   });

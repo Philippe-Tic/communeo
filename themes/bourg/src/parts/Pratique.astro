@@ -16,14 +16,18 @@ interface Props {
   ctx: PageContext;
 }
 
-const { site, alerts, practical } = Astro.props.ctx;
+const { site, alerts, practical, path } = Astro.props.ctx;
+// Sur l'accueil, les encarts portent le repère de leur section (mise en évidence dans la preview de
+// l'admin) ; les accès rapides y sont déjà en grand, le panneau ne les répète pas
+const home = path === '/';
+const section = (id: string) => (home ? { 'data-cn-home': id } : {});
 const { contact } = site;
 const signs = { info: 'i', warning: '!', critical: '!!' } as const;
 ---
 <aside id="pratique" class="bo-pratique" aria-labelledby="bo-pratique-title" tabindex="-1">
   <h2 id="bo-pratique-title" class="bo-kicker bo-pratique-title">Pratique</h2>
 
-  <section class="bo-card bo-card-mint" aria-labelledby="bo-pratique-mairie">
+  <section class="bo-card bo-card-mint" aria-labelledby="bo-pratique-mairie" {...section('practical_info')}>
     <h3 id="bo-pratique-mairie">Mairie</h3>
     <OpeningStatus hours={contact.hours} class="bo-status" />
     <address>
@@ -37,7 +41,7 @@ const signs = { info: 'i', warning: '!', critical: '!!' } as const;
   </section>
 
   {alerts.length > 0 && (
-    <section class="bo-card bo-card-peach" aria-labelledby="bo-pratique-now">
+    <section class="bo-card bo-card-peach" aria-labelledby="bo-pratique-now" {...section('disruptions')}>
       <h3 id="bo-pratique-now">En ce moment</h3>
       <ul class="bo-pratique-alerts">
         {alerts.map((alert) => (
@@ -63,7 +67,7 @@ const signs = { info: 'i', warning: '!', critical: '!!' } as const;
   )}
 
   {practical.wasteCollection && (
-    <section class="bo-card bo-card-lavender" aria-labelledby="bo-pratique-waste">
+    <section class="bo-card bo-card-lavender" aria-labelledby="bo-pratique-waste" {...section('waste_collection')}>
       <h3 id="bo-pratique-waste">Prochaines collectes</h3>
       <ul class="bo-pratique-waste">
         {practical.wasteCollection.map((collection) => (
@@ -83,12 +87,12 @@ const signs = { info: 'i', warning: '!', critical: '!!' } as const;
   )}
 
   {practical.weather && (
-    <Weather position={practical.weather} class="bo-card bo-card-sky bo-weather">
+    <Weather position={practical.weather} class="bo-card bo-card-sky bo-weather" {...section('weather')}>
       <h3 slot="titre">Météo</h3>
     </Weather>
   )}
 
-  {practical.quickLinks && (
+  {practical.quickLinks && !home && (
     <nav class="bo-card bo-pratique-links" aria-labelledby="bo-pratique-quick">
       <h3 id="bo-pratique-quick">Accès rapides</h3>
       <ul>

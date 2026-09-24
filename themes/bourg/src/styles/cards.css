@@ -1,0 +1,263 @@
+/* Cartes : actualité, événement, pastilles de catégorie, teintes de décor. */
+
+/* Teintes de décor (icônes, initiales), texte toujours foncé sur fond clair */
+.bo-tone-0 {
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+}
+
+.bo-tone-1 {
+  color: var(--bo-info);
+  background: var(--bo-sky);
+}
+
+.bo-tone-2 {
+  color: var(--bo-violet);
+  background: var(--bo-lavender);
+}
+
+.bo-tone-3 {
+  color: var(--bo-warning);
+  background: var(--bo-peach);
+}
+
+.bo-tone-4 {
+  color: var(--bo-danger);
+  background: var(--bo-danger-bg);
+}
+
+.bo-tone-5 {
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+}
+
+/* Catégorie d'actualité : pastille teintée selon le thème de l'article */
+.bo-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.625rem;
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-radius: var(--bo-pill);
+}
+
+.bo-pill-travaux,
+.bo-pill-sante-solidarite {
+  color: var(--bo-warning);
+  background: var(--bo-peach);
+}
+
+.bo-pill-culture-loisirs,
+.bo-pill-ecoles-jeunesse {
+  color: var(--bo-violet);
+  background: var(--bo-lavender);
+}
+
+.bo-pill-vie-pratique,
+.bo-pill-vie-municipale {
+  color: var(--bo-info);
+  background: var(--bo-sky);
+}
+
+/* Carte d'actualité */
+.bo-card-news {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-card-news-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.bo-card-news-body {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0.875rem 1.125rem 1.125rem;
+}
+
+.bo-card-news-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.625rem;
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+.bo-card-news-title {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.bo-card-news-title a {
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+/* Toute la carte est cliquable, le lien reste le titre */
+.bo-card-news-title a::after,
+.bo-card-event-title a::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.bo-card-news:hover .bo-card-news-title a,
+.bo-card-event:hover .bo-card-event-title a {
+  text-decoration: underline;
+}
+
+.bo-card-news:has(a:focus-visible),
+.bo-card-event:has(a:focus-visible) {
+  outline: 3px solid var(--bo-ink);
+  outline-offset: 3px;
+}
+
+.bo-card-news a:focus-visible,
+.bo-card-event a:focus-visible {
+  outline: none;
+}
+
+.bo-card-news-summary {
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-card-news-featured .bo-card-news-title {
+  font-size: 1.375rem;
+}
+
+.bo-card-news-featured .bo-card-news-body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+/* Compacte : vignette carrée à gauche */
+.bo-card-news-compact {
+  flex-direction: row;
+}
+
+.bo-card-news-compact .bo-card-news-image {
+  flex: none;
+  width: 6.5rem;
+  aspect-ratio: auto;
+  height: auto;
+  min-height: 100%;
+}
+
+.bo-card-news-compact .bo-card-news-body {
+  align-content: start;
+  padding: 0.75rem 1rem;
+}
+
+.bo-card-news-compact .bo-card-news-title {
+  font-size: 1rem;
+}
+
+@media (min-width: 48rem) {
+  .bo-card-news-compact .bo-card-news-image {
+    width: 8rem;
+  }
+}
+
+/* Carte d'événement : pavé de date lavande */
+.bo-card-event {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1rem 1.125rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-date {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.25rem;
+  min-height: 3.75rem;
+  padding: 0.375rem 0.5rem;
+  line-height: 1.1;
+  color: var(--bo-violet);
+  text-align: center;
+  background: var(--bo-lavender);
+  border-radius: var(--bo-radius);
+}
+
+.bo-date-day {
+  font-family: var(--bo-font-title);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.bo-date-month {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bo-card-event-body {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.bo-card-event-title {
+  margin-bottom: 0.125rem;
+  font-size: 1.0625rem;
+  line-height: 1.3;
+}
+
+.bo-card-event-title a {
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-card-event-meta {
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-grid-2 {
+  display: grid;
+  gap: 0.875rem;
+}
+
+@media (min-width: 48rem) {
+  .bo-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.bo-muted {
+  color: var(--bo-muted);
+}
+
+/* Label de plat (Bio, Local…) écrit en toutes lettres */
+.bo-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-radius: var(--bo-pill);
+}

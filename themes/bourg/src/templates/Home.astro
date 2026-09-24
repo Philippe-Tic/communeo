@@ -1,137 +1,231 @@
 ---
-import type { HomeVM } from '@communeo/core';
+/**
+ * Accueil « bourg » : accroche dans un grand encart menthe, accès rapides en tuiles, actualités (une
+ * grande carte et des compactes), agenda, mot du maire, cantine du jour et chiffres de la commune,
+ * associations, lettre d'information et partenaires. Mairie, alertes, collectes et météo sont dans le
+ * panneau « Pratique » (colonne de droite ou tiroir). Chaque section est facultative.
+ */
 import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import type { HomeVM } from '@communeo/core';
 import NewsletterForm from '@communeo/ui-a11y/NewsletterForm.astro';
 import RichText from '@communeo/ui-a11y/RichText.astro';
-import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
-import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
-import Weather from '@communeo/ui-a11y/Weather.astro';
-import Layout from '../parts/Layout.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import ArticleCard from '../parts/ArticleCard.astro';
 import EventCard from '../parts/EventCard.astro';
+import Icon from '../parts/Icon.astro';
+import Layout from '../parts/Layout.astro';
 
-interface Props { ctx: PageContext; home: HomeVM; newsletterForm: FormConfig }
+interface Props {
+  ctx: PageContext;
+  home: HomeVM;
+  newsletterForm: FormConfig;
+}
+
 const { ctx, home, newsletterForm } = Astro.props;
 const { site } = ctx;
+const hero = home.hero;
+const [lead, ...news] = home.featuredNews ?? [];
+// Premier jour de cantine de la semaine affichée (le site est statique : pas de « aujourd'hui » fiable)
+const today = home.canteen?.days.find((day) => !day.closed) ?? null;
+const initials = (name: string) =>
+  name
+    .split(/[\s-]+/)
+    .filter((word) => word.length > 2 || /^[A-Z]/.test(word))
+    .slice(0, 2)
+    .map((word) => word[0]!.toUpperCase())
+    .join('');
 ---
-<Layout ctx={ctx} heading={false}>
-  <section class="st-hero" aria-labelledby="st-hero-title" data-cn-home="hero">
-    <h1 id="st-hero-title">{home.hero?.title ?? site.name}</h1>
-    {home.hero?.subtitle && <p>{home.hero.subtitle}</p>}
-    {home.hero?.image && <img src={home.hero.image.src} alt={home.hero.image.alt} width={home.hero.image.width ?? undefined} height={home.hero.image.height ?? undefined} />}
-    {(home.hero?.primary || home.hero?.secondary) && (
-      <p>
-        {home.hero.primary && <a class="st-button st-button-primary" href={home.hero.primary.href}>{home.hero.primary.label}</a>}
-        {home.hero.secondary && <a class="st-button st-button-secondary" href={home.hero.secondary.href}>{home.hero.secondary.label}</a>}
-      </p>
+<Layout ctx={ctx} heading={false} full>
+  <section class:list={['bo-hero', { 'bo-hero-image': hero?.image }]} aria-labelledby="bo-hero-title" data-cn-home="hero">
+    <div class="bo-hero-text">
+      {site.population && <p class="bo-kicker bo-hero-kicker">Commune de {site.population.toLocaleString('fr-FR')} habitants</p>}
+      <h1 id="bo-hero-title">{hero?.title ?? site.name}</h1>
+      {hero?.subtitle && <p class="bo-hero-subtitle">{hero.subtitle}</p>}
+      {(hero?.primary || hero?.secondary) && (
+        <p class="bo-hero-actions">
+          {hero?.primary && <a class="bo-button" href={hero.primary.href}>{hero.primary.label}</a>}
+          {hero?.secondary && <a class="bo-button bo-button-light" href={hero.secondary.href}>{hero.secondary.label}</a>}
+        </p>
+      )}
+    </div>
+    {hero?.image && (
+      <img
+        class="bo-hero-photo"
+        src={hero.image.src}
+        alt={hero.image.alt}
+        srcset={hero.image.srcset ?? undefined}
+        width={hero.image.width ?? undefined}
+        height={hero.image.height ?? undefined}
+      />
     )}
   </section>
 
   {home.quickLinks && (
-    <section aria-labelledby="st-quick" data-cn-home="quick_links">
-      <h2 id="st-quick">Accès rapides</h2>
-      <ul>{home.quickLinks.map((link) => <li><a href={link.href}>{link.label}</a>{link.description && <span> – {link.description}</span>}</li>)}</ul>
+    <section class="bo-home-section" aria-labelledby="bo-quick" data-cn-home="quick_links">
+      <h2 id="bo-quick" class="bo-home-title">Accès rapides</h2>
+      <ul class="bo-tiles">
+        {home.quickLinks.map((link, index) => (
+          <li>
+            <a href={link.href} class="bo-tile" target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+              <span class={`bo-tile-icon bo-tone-${index % 6}`}><Icon name={link.icon} size={20} /></span>
+              <span>{link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )}
 
-  {home.featuredNews && (
-    <section aria-labelledby="st-news" data-cn-home="featured_news">
-      <h2 id="st-news">Actualités</h2>
-      {home.featuredNews.map((article) => <ArticleCard article={article} />)}
-      <p><a href="/actualites">Toutes les actualités</a></p>
+  {lead && (
+    <section class="bo-home-section" aria-labelledby="bo-news" data-cn-home="featured_news">
+      <div class="bo-section-head">
+        <h2 id="bo-news" class="bo-home-title">Actualités</h2>
+        <a href="/actualites">Toutes les actualités<ArrowRight size={16} aria-hidden="true" /></a>
+      </div>
+      <div class:list={['bo-home-news', { 'bo-home-news-split': news.length > 0 }]}>
+        <ArticleCard article={lead} featured />
+        {news.length > 0 && (
+          <div class="bo-home-news-list">
+            {news.map((article) => <ArticleCard article={article} compact />)}
+          </div>
+        )}
+      </div>
     </section>
   )}
 
   {home.agenda && (
-    <section aria-labelledby="st-agenda" data-cn-home="agenda">
-      <h2 id="st-agenda">Agenda</h2>
-      {home.agenda.map((event) => <EventCard event={event} />)}
-      <p><a href="/agenda">Tout l'agenda</a></p>
-    </section>
-  )}
-
-  {home.practicalInfo && (
-    <section aria-labelledby="st-info" data-cn-home="practical_info">
-      <h2 id="st-info">Mairie</h2>
-      <OpeningStatus hours={site.contact.hours} />
-      {site.contact.address && <p>{site.contact.address}</p>}
-      {site.contact.phone && <p><a href={site.contact.phone.href}>{site.contact.phone.label}</a></p>}
-      {site.contact.hoursSummary.length > 0 && <dl>{site.contact.hoursSummary.map((line) => <><dt>{line.days}</dt><dd>{line.hours}</dd></>)}</dl>}
-    </section>
-  )}
-
-  {home.disruptions && (
-    <section aria-labelledby="st-disruptions" data-cn-home="disruptions">
-      <h2 id="st-disruptions">Perturbations en cours</h2>
-      <ul>{home.disruptions.map((alert) => <li><strong>{alert.title}</strong> – {alert.message}</li>)}</ul>
-    </section>
-  )}
-
-  {home.weather && (
-    <Weather position={home.weather} data-cn-home="weather">
-      <h2 slot="titre">Météo</h2>
-    </Weather>
-  )}
-
-  {home.wasteCollection && (
-    <section aria-labelledby="st-waste" data-cn-home="waste_collection">
-      <h2 id="st-waste">Prochaines collectes</h2>
-      <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming.length > 0 && <> : <NextCollections collection={c} /></>}</li>)}</ul>
-      <p><a href="/collecte-des-dechets">Tout le calendrier</a></p>
-    </section>
-  )}
-
-  {home.canteen && (
-    <section aria-labelledby="st-canteen" data-cn-home="canteen">
-      <h2 id="st-canteen">Cantine</h2>
-      <p>{home.canteen.label}</p>
-      <p><a href="/cantine">Voir le menu</a></p>
+    <section class="bo-home-section" aria-labelledby="bo-agenda" data-cn-home="agenda">
+      <div class="bo-section-head">
+        <h2 id="bo-agenda" class="bo-home-title">Agenda</h2>
+        <a href="/agenda">Tout l'agenda<ArrowRight size={16} aria-hidden="true" /></a>
+      </div>
+      <div class="bo-grid-2">{home.agenda.map((event) => <EventCard event={event} />)}</div>
     </section>
   )}
 
   {home.mayorWord && (
-    <section aria-labelledby="st-mayor" data-cn-home="mayor_word">
-      <h2 id="st-mayor">{home.mayorWord.title}</h2>
-      {home.mayorWord.photo && <img src={home.mayorWord.photo.src} alt={home.mayorWord.photo.alt} width={home.mayorWord.photo.width ?? undefined} height={home.mayorWord.photo.height ?? undefined} />}
-      <RichText doc={home.mayorWord.body} />
-      {home.mayorWord.signature.name && <p>{home.mayorWord.signature.name}{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}</p>}
+    <section class:list={['bo-mayor', { 'bo-mayor-photo': home.mayorWord.photo }]} aria-labelledby="bo-mayor" data-cn-home="mayor_word">
+      {home.mayorWord.photo && (
+        <img
+          src={home.mayorWord.photo.src}
+          alt={home.mayorWord.photo.alt}
+          width={home.mayorWord.photo.width ?? undefined}
+          height={home.mayorWord.photo.height ?? undefined}
+          loading="lazy"
+        />
+      )}
+      <div>
+        <h2 id="bo-mayor" class="bo-kicker">{home.mayorWord.title}</h2>
+        <RichText doc={home.mayorWord.body} class="bo-mayor-text" />
+        {(home.mayorWord.signature.name || home.mayorWord.signature.role) && (
+          <p class="bo-mayor-signature">
+            {home.mayorWord.signature.name && <strong>{home.mayorWord.signature.name}</strong>}{home.mayorWord.signature.name && home.mayorWord.signature.role && ', '}{home.mayorWord.signature.role}
+          </p>
+        )}
+      </div>
     </section>
   )}
 
-  {home.keyFigures && (
-    <section aria-labelledby="st-figures" data-cn-home="key_figures">
-      <h2 id="st-figures">La commune en chiffres</h2>
-      <ul>{home.keyFigures.map((figure) => <li><strong>{figure.value}</strong> {figure.label}</li>)}</ul>
-    </section>
+  {(home.canteen || home.keyFigures) && (
+    <div class="bo-grid-2 bo-home-pair">
+      {home.canteen && (
+        <section class="bo-card bo-home-card" aria-labelledby="bo-canteen" data-cn-home="canteen">
+          <div class="bo-section-head">
+            <h2 id="bo-canteen" class="bo-home-card-title">{today ? `Cantine · ${today.day.label.toLowerCase()}` : 'Cantine'}</h2>
+            <a href="/cantine">La semaine<ArrowRight size={16} aria-hidden="true" /></a>
+          </div>
+          {today ? (
+            <ul class="bo-canteen">
+              {today.courses.map((course) => (
+                <li>
+                  <span><span class="cn-sr-only">{course.label} : </span>{course.dish}</span>
+                  {course.badges.length > 0 && (
+                    <span class="bo-canteen-badges">{course.badges.map((badge) => <span class="bo-badge">{badge}</span>)}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="bo-muted">Pas de cantine cette semaine.</p>
+          )}
+        </section>
+      )}
+      {home.keyFigures && (
+        <section class="bo-card bo-card-lavender bo-home-card" aria-labelledby="bo-figures" data-cn-home="key_figures">
+          <h2 id="bo-figures" class="bo-home-card-title bo-figures-title">La commune en chiffres</h2>
+          <dl class="bo-figures">
+            {home.keyFigures.map((figure) => (
+              <div>
+                <dt>{figure.label}</dt>
+                <dd>{figure.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+    </div>
   )}
 
   {home.associations && (
-    <section aria-labelledby="st-assos" data-cn-home="associations">
-      <h2 id="st-assos">Associations</h2>
-      <ul>{home.associations.map((a) => <li><a href={a.href}>{a.name}</a> – {a.category.label}</li>)}</ul>
+    <section class="bo-home-section" aria-labelledby="bo-assos" data-cn-home="associations">
+      <div class="bo-section-head">
+        <h2 id="bo-assos" class="bo-home-title">Associations</h2>
+        <a href="/associations">L'annuaire<ArrowRight size={16} aria-hidden="true" /></a>
+      </div>
+      <ul class="bo-asso-pills">
+        {home.associations.map((association, index) => (
+          <li>
+            <a href={association.href} class="bo-asso-pill">
+              {association.logo ? (
+                <img src={association.logo.src} alt="" width="36" height="36" loading="lazy" />
+              ) : (
+                <span class={`bo-asso-initials bo-tone-${index % 6}`} aria-hidden="true">{initials(association.name)}</span>
+              )}
+              {association.name}
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )}
 
   {home.freeContent && (
-    <section aria-labelledby="st-free" data-cn-home="free_content">
-      <h2 id="st-free">{home.freeContent.title ?? site.name}</h2>
-      <RichText doc={home.freeContent.body} />
+    <section class="bo-home-section" aria-labelledby="bo-free" data-cn-home="free_content">
+      <h2 id="bo-free" class="bo-home-title">{home.freeContent.title ?? `Découvrir ${site.name}`}</h2>
+      <RichText doc={home.freeContent.body} class="bo-prose" />
     </section>
   )}
 
-  {home.newsletter && (
-    <section aria-labelledby="st-newsletter" data-cn-home="newsletter">
-      <h2 id="st-newsletter">Lettre d'information</h2>
-      <NewsletterForm form={newsletterForm}>
-        <p>Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
-      </NewsletterForm>
-    </section>
-  )}
-
-  {home.partners && (
-    <section aria-labelledby="st-partners" data-cn-home="partners">
-      <h2 id="st-partners">Partenaires</h2>
-      <ul>{home.partners.map((p) => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}</ul>
-    </section>
+  {(home.newsletter || home.partners) && (
+    <div class:list={['bo-home-pair', { 'bo-grid-2': home.newsletter && home.partners }]}>
+      {home.newsletter && (
+        <section class="bo-newsletter" aria-labelledby="bo-newsletter" data-cn-home="newsletter">
+          <h2 id="bo-newsletter" class="bo-home-card-title">Lettre d'information</h2>
+          <p>L'actualité de la commune, une fois par mois.</p>
+          <NewsletterForm form={newsletterForm} class="bo-newsletter-form" placeholder="Votre adresse e-mail">
+            <p class="bo-newsletter-note">Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+          </NewsletterForm>
+        </section>
+      )}
+      {home.partners && (
+        <section class="bo-partners" aria-labelledby="bo-partners" data-cn-home="partners">
+          <h2 id="bo-partners" class="bo-home-card-title">Partenaires</h2>
+          <ul>
+            {home.partners.map((partner) => {
+              const content = partner.logo ? <img src={partner.logo.src} alt={partner.name} loading="lazy" /> : <span>{partner.name}</span>;
+              return (
+                <li>
+                  {partner.href ? (
+                    <a href={partner.href} target="_blank" rel="noopener noreferrer">{content}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>
+                  ) : (
+                    content
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+    </div>
   )}
 </Layout>

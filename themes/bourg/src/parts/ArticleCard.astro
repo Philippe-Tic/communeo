@@ -1,13 +1,42 @@
 ---
+/**
+ * Carte d'actualité arrondie : image en haut (à la une) ou vignette à gauche (compacte), catégorie
+ * en pastille colorée, date, titre. Sans image, la carte garde sa forme sans cadre vide.
+ */
 import type { ArticleCardVM } from '@communeo/core';
 
-interface Props { article: ArticleCardVM; level?: 2 | 3 }
-const { article, level = 3 } = Astro.props;
+interface Props {
+  article: ArticleCardVM;
+  level?: 2 | 3;
+  /** Grande carte, image au-dessus */
+  featured?: boolean;
+  /** Carte compacte, vignette à gauche */
+  compact?: boolean;
+  /** Afficher le chapô */
+  summary?: boolean;
+}
+
+const { article, level = 3, featured = false, compact = false, summary = featured } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
 ---
-<article class="st-card">
-  <Heading><a href={article.href}>{article.title}</a></Heading>
-  <p class="st-meta"><span>{article.category.label}</span> · <time datetime={article.date.iso}>{article.date.label}</time></p>
-  {article.summary && <p>{article.summary}</p>}
-  {article.image && <img src={article.image.src} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} loading="lazy" />}
+<article class:list={['bo-card-news', { 'bo-card-news-featured': featured, 'bo-card-news-compact': compact, 'bo-card-news-noimage': !article.image }]}>
+  {article.image && (
+    <img
+      class="bo-card-news-image"
+      src={article.image.src}
+      alt={article.image.alt}
+      srcset={article.image.srcset ?? undefined}
+      width={article.image.width ?? undefined}
+      height={article.image.height ?? undefined}
+      loading="lazy"
+    />
+  )}
+  <div class="bo-card-news-body">
+    <p class="bo-card-news-meta">
+      <span class={`bo-pill bo-pill-${article.category.key}`}>{article.category.label}</span>
+      <time datetime={article.date.iso}>{article.date.label}</time>
+    </p>
+    <Heading class="bo-card-news-title"><a href={article.href}>{article.title}</a></Heading>
+    {summary && article.summary && <p class="bo-card-news-summary">{article.summary}</p>}
+  </div>
 </article>

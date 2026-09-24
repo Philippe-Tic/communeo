@@ -188,7 +188,7 @@ export function HomepageEditor({
       if (!valid) {
         const first = sections.find((section) => errorsOf(form.formState.errors, section.id) > 0);
         if (first) setOpen((current) => (current && errorsOf(form.formState.errors, current) > 0 ? current : first.id));
-        throw new Error('Des champs sont à compléter : l’accueil sera enregistré une fois corrigés.');
+        throw new Error('des champs sont à compléter, l’accueil sera enregistré une fois corrigés.');
       }
       await saveSiteSettings(client, site.documentId, { homepage: toHomepagePayload(snapshot) }, {});
       void client.invalidateQueries({ queryKey: homepageQuery(site.documentId).queryKey });

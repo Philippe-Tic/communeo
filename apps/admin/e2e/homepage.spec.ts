@@ -90,7 +90,7 @@ test('accroche : dépliée en place, preview sur la section, bouton incomplet si
     .getByRole('textbox', { name: /Texte du bouton/ })
     .fill('Contacter la mairie');
   await page.clock.fastForward(5500);
-  await expect(page.getByText('Accueil non enregistré')).toContainText('Des champs sont à compléter');
+  await expect(page.getByText('Accueil non enregistré')).toContainText('des champs sont à compléter');
   await expect(row(page, 'Accroche')).toContainText('1 erreur');
   expect(bodies.filter((entry) => entry.call === 'PUT site')).toHaveLength(0);
   await panel

@@ -1,27 +1,90 @@
 ---
+/**
+ * Équipe municipale : le maire en grand, les adjoints en grille, les conseillers en liste dépliable
+ * (accordéon natif), puis les services de la mairie.
+ */
 import type { TeamVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Minus from '@lucide/astro/icons/minus';
+import Plus from '@lucide/astro/icons/plus';
+import Empty from '../parts/Empty.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; team: TeamVM }
 const { ctx, team } = Astro.props;
+const groups = team.groups.filter((group) => group.members.length > 0);
 ---
 <Layout ctx={ctx}>
-  {team.groups.length ? team.groups.map((group) => (
-    <section aria-labelledby={`st-team-${group.key}`}>
-      <h2 id={`st-team-${group.key}`}>{group.label}</h2>
-      <ul class="st-team">
-        {group.members.map((member) => (
-          <li>
-            {member.photo ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} /> : <span aria-hidden="true" class="st-initials">{member.initials}</span>}
-            <h3>{member.name}</h3>
-            <p>{member.title}{member.delegation && <> – {member.delegation}</>}</p>
-            {member.bio && <p>{member.bio}</p>}
-            {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
-            {member.officeHours && <p>{member.officeHours}</p>}
-          </li>
-        ))}
-      </ul>
+  {groups.length === 0 && <Empty title="Équipe municipale">La composition de l'équipe municipale sera bientôt publiée.</Empty>}
+
+  {groups.map((group) => (
+    <section class="jo-team-group" aria-labelledby={`jo-team-${group.key}`}>
+      {group.key === 'maire' ? (
+        group.members.map((member, index) => (
+          <article class:list={['jo-mayor-card', { 'jo-mayor-card-photo': member.photo }]}>
+            {member.photo && <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} />}
+            <div>
+              <p class="jo-kicker" id={index === 0 ? `jo-team-${group.key}` : undefined}>{member.title}</p>
+              <h2 class="jo-mayor-name">{member.name}</h2>
+              {member.delegation && <p>{member.delegation}</p>}
+              {member.bio && <p class="jo-mayor-bio">{member.bio}</p>}
+              {(member.email || member.officeHours) && (
+                <p class="jo-mayor-contact">
+                  {member.email && <a href={member.email.href}>{member.email.label}</a>}
+                  {member.email && member.officeHours && ' · '}
+                  {member.officeHours}
+                </p>
+              )}
+            </div>
+          </article>
+        ))
+      ) : (
+        <>
+          <h2 id={`jo-team-${group.key}`}>{group.label}</h2>
+          {group.key === 'conseillers' ? (
+            <ul class="jo-team-list">
+              {group.members.map((member) => (
+                <li>
+                  <details>
+                    <summary>
+                      {member.photo
+                        ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} loading="lazy" class="jo-avatar jo-avatar-small" />
+                        : <span class="jo-avatar jo-avatar-small jo-initials" aria-hidden="true">{member.initials}</span>}
+                      <span class="jo-team-identity"><strong>{member.name}</strong> <span class="jo-muted">· {member.delegation ?? member.title}</span></span>
+                      <span class="jo-faq-sign" aria-hidden="true"><Plus size={20} class="jo-faq-open" /><Minus size={20} class="jo-faq-close" /></span>
+                    </summary>
+                    <div class="jo-team-details">
+                      <p>{member.title}{member.delegation && <> · {member.delegation}</>}</p>
+                      {member.bio && <p>{member.bio}</p>}
+                      {member.email && <p><a href={member.email.href}>{member.email.label}</a></p>}
+                      {member.officeHours && <p class="jo-muted">{member.officeHours}</p>}
+                    </div>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <ul class:list={['jo-grid-3', 'jo-team-cards', { 'jo-team-services': group.key === 'services' }]}>
+              {group.members.map((member) => (
+                <li>
+                  <article class="jo-team-card">
+                    {group.key !== 'services' && (member.photo
+                      ? <img src={member.photo.src} alt="" width={member.photo.width ?? undefined} height={member.photo.height ?? undefined} loading="lazy" class="jo-avatar" />
+                      : <span class="jo-avatar jo-initials" aria-hidden="true">{member.initials}</span>)}
+                    <div>
+                      <h3>{member.name}</h3>
+                      <p class="jo-team-role">{member.title}</p>
+                      {member.delegation && <p class="jo-muted">{member.delegation}</p>}
+                      {member.email && <p class="jo-team-mail"><a href={member.email.href}>{member.email.label}</a></p>}
+                      {member.officeHours && <p class="jo-muted">{member.officeHours}</p>}
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
     </section>
-  )) : <p>La composition de l'équipe municipale sera bientôt publiée.</p>}
+  ))}
 </Layout>

@@ -1,0 +1,15 @@
+---
+/** État vide : encart arrondi, titre, explication et action facultative. */
+interface Props {
+  title: string;
+  action?: { label: string; href: string } | null;
+  tone?: 'light' | 'dark';
+}
+
+const { title, action = null, tone = 'light' } = Astro.props;
+---
+<div class:list={['jo-empty', { 'jo-empty-dark jo-on-dark': tone === 'dark' }]} role="status">
+  <h2 class="jo-empty-title">{title}</h2>
+  <p><slot /></p>
+  {action && <a href={action.href} class="jo-button">{action.label}</a>}
+</div>

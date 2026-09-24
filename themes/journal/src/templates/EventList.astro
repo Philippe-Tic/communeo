@@ -1,15 +1,46 @@
 ---
-import type { EventCardVM } from '@communeo/core';
-import type { FilterOption } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+/** Agenda : titre et compteur, filtres en onglets, événements à venir groupés par mois en liste à filets. */
+import { TIME_ZONE, type EventCardVM } from '@communeo/core';
+import type { FilterOption, PageContext } from '@communeo/theme-contract';
+import Empty from '../parts/Empty.astro';
 import EventCard from '../parts/EventCard.astro';
 import Filters from '../parts/Filters.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; upcoming: EventCardVM[]; categories: FilterOption[] }
 const { ctx, upcoming, categories } = Astro.props;
+
+const monthLabel = (iso: string) => new Intl.DateTimeFormat('fr-FR', { timeZone: TIME_ZONE, month: 'long', year: 'numeric' }).format(new Date(iso));
+const months: Array<{ label: string; events: EventCardVM[] }> = [];
+for (const event of upcoming) {
+  const label = monthLabel(event.start.iso);
+  const last = months.at(-1);
+  if (last?.label === label) last.events.push(event);
+  else months.push({ label, events: [event] });
+}
+const slug = (label: string) => `jo-month-${label.normalize('NFD').replace(/[^\w]+/g, '-')}`;
+const filter = categories.find((category) => category.current) ?? null;
 ---
-<Layout ctx={ctx}>
+<Layout ctx={ctx} heading={false}>
+  <div class="jo-list-head">
+    <h1>{ctx.title}</h1>
+    <p class="jo-count" role="status">{upcoming.length} événement{upcoming.length > 1 ? 's' : ''} à venir{filter && <> · {filter.label}</>}</p>
+  </div>
   <Filters label="Filtrer par catégorie" options={categories} allHref="/agenda" />
-  {upcoming.length ? upcoming.map((event) => <EventCard event={event} level={2} />) : <p>Aucun événement à venir.</p>}
+
+  {months.map((month) => (
+    <section class="jo-month" aria-labelledby={slug(month.label)}>
+      <div class="jo-section-head">
+        <h2 id={slug(month.label)} class="jo-capitalize">{month.label}</h2>
+        <span class="jo-month-count">{month.events.length} événement{month.events.length > 1 ? 's' : ''}</span>
+      </div>
+      <div class="jo-month-events">{month.events.map((event) => <EventCard event={event} />)}</div>
+    </section>
+  ))}
+
+  {upcoming.length === 0 && (
+    <Empty title="Rien de prévu pour l'instant" action={filter ? { label: 'Voir tout l’agenda', href: '/agenda' } : null}>
+      La mairie et les associations publient régulièrement de nouveaux événements.
+    </Empty>
+  )}
 </Layout>

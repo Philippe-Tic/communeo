@@ -1,5 +1,5 @@
 /**
- * Thème Journal : navigation en barre latérale (ordinateur) et onglets + panneau de menu (mobile).
+ * Thème Journal : navigation en barre latérale (ordinateur) et onglets + panneau de menu (mobile), formulaires.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
@@ -38,4 +38,16 @@ test('mobile : « Menu » ouvre le panneau sans violation, Échap le ferme et re
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
   await expect(toggle).toBeFocused();
+});
+
+test('proposer une association : erreurs récapitulées et reliées aux champs', async ({ page }) => {
+  await page.goto('/associations/proposer');
+  await page.getByRole('button', { name: "Proposer l'association" }).click();
+  const summary = page.locator('[data-jo-form-status]');
+  await expect(summary).toBeFocused();
+  await expect(summary).toContainText('Le formulaire contient 3 erreurs');
+  await expect(page.getByLabel("Nom de l'association")).toHaveAttribute('aria-invalid', 'true');
+  expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations).toEqual([]);
+  await summary.getByRole('link', { name: /Votre e-mail/ }).click();
+  await expect(page.getByLabel('Votre e-mail')).toBeFocused();
 });

@@ -1,22 +1,43 @@
 ---
+/** Article : catégorie en kicker, titre, date, chapô, image légendée, contenu, partage, autres actualités. */
 import type { ArticleVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
 import ArticleCard from '../parts/ArticleCard.astro';
 import Content from '../parts/Content.astro';
+import Layout from '../parts/Layout.astro';
+import Share from '../parts/Share.astro';
 
 interface Props { ctx: PageContext; article: ArticleVM }
 const { ctx, article } = Astro.props;
 ---
-<Layout ctx={ctx}>
-  <p class="st-meta"><span>{article.category.label}</span> · Publié le <time datetime={article.date.iso}>{article.date.label}</time>{article.author && <> · {article.author}</>}</p>
-  {article.summary && <p class="st-lead">{article.summary}</p>}
-  {article.image && <img src={article.image.src} srcset={article.image.srcset ?? undefined} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} />}
-  <Content blocks={article.blocks} toc={article.toc} />
+<Layout ctx={ctx} heading={false}>
+  <article class="jo-post">
+    <header class="jo-page-header">
+      <p class="jo-kicker jo-card-category">{article.category.label}</p>
+      <h1>{article.title}</h1>
+      <p class="jo-post-meta">
+        <time datetime={article.date.iso}>Publié le {article.date.label}</time>{article.author && <> · {article.author}</>}
+      </p>
+      {article.summary && <p class="jo-lead">{article.summary}</p>}
+    </header>
+    {article.image && (
+      <figure class="jo-cover">
+        <img src={article.image.src} srcset={article.image.srcset ?? undefined} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} />
+        {(article.image.caption || article.image.credit) && (
+          <figcaption>{article.image.caption}{article.image.credit && <> Crédit : {article.image.credit}</>}</figcaption>
+        )}
+      </figure>
+    )}
+    <div class="jo-post-body">
+      <Content blocks={article.blocks} />
+      <Share title={article.title} url={`${ctx.site.url}${article.href}`} />
+    </div>
+  </article>
+
   {article.related.length > 0 && (
-    <section aria-labelledby="st-related">
-      <h2 id="st-related">Autres actualités</h2>
-      {article.related.slice(0, 3).map((other) => <ArticleCard article={other} />)}
+    <section class="jo-related" aria-labelledby="jo-related-title">
+      <div class="jo-section-head"><h2 id="jo-related-title">Autres actualités</h2></div>
+      <div class="jo-related-grid">{article.related.slice(0, 3).map((other) => <ArticleCard article={other} />)}</div>
     </section>
   )}
 </Layout>

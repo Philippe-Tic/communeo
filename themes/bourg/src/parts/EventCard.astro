@@ -1,12 +1,29 @@
 ---
+/** Carte d'événement : date dans un pavé lavande, titre, période, lieu et catégorie. */
 import type { EventCardVM } from '@communeo/core';
+import { dateBadge } from '../lib/date';
 
-interface Props { event: EventCardVM; level?: 2 | 3 }
+interface Props {
+  event: EventCardVM;
+  level?: 2 | 3;
+}
+
 const { event, level = 3 } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<article class="st-card">
-  <Heading><a href={event.href}>{event.title}</a></Heading>
-  <p class="st-meta"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
-  <p class="st-meta">{event.category.label}</p>
+<article class="bo-card-event">
+  <p class="bo-date" aria-hidden="true">
+    <span class="bo-date-day">{badge.day}</span>
+    <span class="bo-date-month">{badge.month}</span>
+  </p>
+  <div class="bo-card-event-body">
+    <Heading class="bo-card-event-title"><a href={event.href}>{event.title}</a></Heading>
+    <p class="bo-card-event-meta">
+      <span class="cn-sr-only">Date : </span><time datetime={event.start.iso}>{event.period}</time>
+    </p>
+    <p class="bo-card-event-meta">
+      {event.location && <>{event.location} · </>}<strong>{event.category.label}</strong>
+    </p>
+  </div>
 </article>

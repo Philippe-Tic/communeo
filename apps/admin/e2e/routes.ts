@@ -32,6 +32,7 @@ export const ROUTES = [
   '/mise-en-ligne',
   '/conformite',
   '/utilisateurs',
+  '/journal',
   '/mon-compte',
 ];
 
@@ -41,4 +42,5 @@ export const PLATFORM_ROUTES = [
   '/plateforme/communes/site-bellefontaine',
   '/plateforme/utilisateurs',
   '/plateforme/statistiques',
+  '/plateforme/journal',
 ];

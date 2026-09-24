@@ -10,6 +10,7 @@ import {
   Files,
   FileText,
   HandHeart,
+  History,
   House,
   Image,
   Landmark,
@@ -100,6 +101,7 @@ export const NAVIGATION_END: NavLink[] = [
   { label: 'Mise en ligne', to: '/mise-en-ligne', icon: CloudUpload },
   { label: 'Utilisateurs', to: '/utilisateurs', icon: Users, adminOnly: true },
   { label: 'Conformité', to: '/conformite', icon: ListChecks },
+  { label: "Journal d'activité", to: '/journal', icon: History, adminOnly: true },
 ];
 
 export const canSee = (link: NavLink, role: MunicipalityRole | undefined) => !link.adminOnly || role === 'admin' || role === 'super_admin';

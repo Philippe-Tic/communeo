@@ -942,6 +942,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     blocked: boolean;
     active: boolean;
     createdAt: string;
+    last_login_at?: string | null;
   }> = [
     {
       id: USERS.admin.id,
@@ -952,6 +953,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       blocked: false,
       active: true,
       createdAt: '2025-01-10T09:00:00.000Z',
+      last_login_at: '2026-09-22T07:40:00.000Z',
     },
     {
       id: 4,
@@ -1005,6 +1007,64 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const team = emptyTeam ? [] : (structuredClone(TEAM) as Array<Record<string, unknown>>);
   const newsletter = subscriberSet === 'none' ? [] : subscribers();
   const inbox = messageSet === 'none' ? [] : messages();
+  const saintAubin = { documentId: SITE.documentId, name: SITE.name };
+  const activityLog = [
+    {
+      id: 7,
+      at: '2026-09-24T08:12:00.000Z',
+      action: 'publish',
+      actorName: 'Sophie Leroy',
+      onBehalf: false,
+      target: { type: 'article', id: 'a-dechetterie', label: 'Nouveaux horaires de la déchetterie' },
+      site: saintAubin,
+      ip: null,
+      details: null,
+    },
+    {
+      id: 6,
+      at: '2026-09-23T16:40:00.000Z',
+      action: 'theme_change',
+      actorName: 'Léa Communeo',
+      onBehalf: true,
+      target: { type: 'site', id: SITE.documentId, label: SITE.name },
+      site: saintAubin,
+      ip: null,
+      details: { from: 'moderne', to: 'institutionnel' },
+    },
+    {
+      id: 5,
+      at: '2026-09-23T10:05:00.000Z',
+      action: 'role_change',
+      actorName: 'Sophie Leroy',
+      onBehalf: false,
+      target: { type: 'user', id: '12', label: 'claire.martin@saint-aubin.fr' },
+      site: saintAubin,
+      ip: null,
+      details: { from: 'editor', to: 'admin' },
+    },
+    {
+      id: 4,
+      at: '2026-09-22T07:40:00.000Z',
+      action: 'login',
+      actorName: 'Sophie Leroy',
+      onBehalf: false,
+      target: null,
+      site: saintAubin,
+      ip: '203.0.113.7',
+      details: null,
+    },
+    {
+      id: 3,
+      at: '2026-09-21T09:00:00.000Z',
+      action: 'commune_suspend',
+      actorName: 'Léa Communeo',
+      onBehalf: false,
+      target: { type: 'site', id: 'site-bellefontaine', label: 'Bellefontaine' },
+      site: { documentId: 'site-bellefontaine', name: 'Bellefontaine' },
+      ip: null,
+      details: null,
+    },
+  ];
   const directory = associationSet === 'none' ? [] : associations();
   const alertStore = alertSet === 'none' ? [] : alerts();
   const waste = wasteSet === 'none' ? [] : wasteSchedules();
@@ -1753,6 +1813,27 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       });
     }
     // Conformité : même calcul que l'API, sur l'état du mock (réglages, documents publiés, médias, messages)
+    // Journal d'activité : administrateur = sa commune (sans IP), équipe = tout (filtre par commune)
+    if (url.pathname === '/api/activity-log') {
+      const role = USERS[user].municipality_role;
+      if (role !== 'admin' && role !== 'super_admin')
+        return json({ error: { status: 403, message: 'Réservé aux administrateurs' } }, 403);
+      const platform = role === 'super_admin' && !route.request().headers()['x-site-document-id'];
+      const action = url.searchParams.get('action');
+      const siteFilter = url.searchParams.get('site');
+      const page = Number(url.searchParams.get('page') ?? 1);
+      const rows = activityLog
+        .filter((entry) => platform || entry.site?.documentId === SITE.documentId)
+        .filter((entry) => !action || entry.action === action)
+        .filter((entry) => !siteFilter || entry.site?.documentId === siteFilter)
+        .map((entry) => (platform ? entry : { ...entry, ip: undefined }));
+      return json({
+        data: rows.slice((page - 1) * 30, page * 30),
+        meta: {
+          pagination: { page, pageSize: 30, total: rows.length, pageCount: Math.max(1, Math.ceil(rows.length / 30)) },
+        },
+      });
+    }
     if (url.pathname === '/api/compliance')
       return json({
         data: computeCompliance({

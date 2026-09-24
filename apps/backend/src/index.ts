@@ -1,5 +1,6 @@
 import bootstrap from './bootstrap';
 import { autoDeployMiddleware } from './services/auto-deploy';
+import { activityLogMiddleware } from './services/activity-log';
 import { stopBuildQueue } from './services/build-queue';
 import { blocksValidationMiddleware } from './validation/blocks';
 import { siteValidationMiddleware } from './validation/site';
@@ -30,6 +31,8 @@ export default {
 
     // Mise en ligne automatique après une modification visible (debounce dans la file des builds)
     strapi.documents.use(autoDeployMiddleware(strapi));
+    // Journal d'activité : publications, dépublications, suppressions, changement de thème
+    strapi.documents.use(activityLogMiddleware(strapi));
   },
 
   /**

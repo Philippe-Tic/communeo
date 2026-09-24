@@ -19,7 +19,13 @@ export interface CommuneUser {
   /** `false` : compte désactivé */
   active: boolean | null;
   createdAt: string;
+  /** Dernière connexion réussie (null : jamais connecté) */
+  last_login_at?: string | null;
 }
+
+/** « Aujourd'hui, 09:12 », « 18 sept., 11:05 », « Jamais » */
+export const lastLoginText = (user: Pick<CommuneUser, 'last_login_at'>, format: (date: Date) => string) =>
+  user.last_login_at ? format(new Date(user.last_login_at)) : 'Jamais';
 
 export type UserState = 'active' | 'invited' | 'disabled';
 

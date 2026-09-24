@@ -1,3 +1,4 @@
+import { recordLogin } from '../../services/activity-log';
 import { LOGIN_LOCKED, loginAttempts } from '../../utils/login-attempts';
 
 // Champs du site jamais exposés au client (identifiants d'infrastructure)
@@ -27,7 +28,7 @@ export default (plugin) => {
         if (identifier && ctx.status >= 400) loginAttempts.failed(identifier, ctx.request.ip);
         return;
       }
-      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: { id } });
+      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: { id }, populate: ['site'] });
       if (user?.active === false) {
         loginAttempts.failed(identifier, ctx.request.ip);
         ctx.status = 400;
@@ -35,6 +36,7 @@ export default (plugin) => {
         return;
       }
       loginAttempts.succeeded(identifier);
+      await recordLogin(user, ctx.request.ip);
     };
     return controller;
   };

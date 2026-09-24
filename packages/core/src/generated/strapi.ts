@@ -81,6 +81,9 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend'] as const;
+export type ActivityLogAction = (typeof activityLogActionValues)[number];
+
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
 export type AlerteSeverity = (typeof alerteSeverityValues)[number];
 
@@ -389,6 +392,20 @@ export interface SocialSocialLink extends StrapiComponent {
 
 // --- Content-types ---
 
+/** Content-type `api::activity-log.activity-log` — Actions sensibles (connexions, publications, suppressions, rôles, thème, domaine, communes), gardées 6 mois */
+export interface ActivityLog extends StrapiDocument {
+  site?: Site | null;
+  action: ActivityLogAction;
+  actor?: User | null;
+  actor_name: string | null;
+  on_behalf: boolean | null;
+  target_type: string | null;
+  target_id: string | null;
+  target_label: string | null;
+  ip: string | null;
+  details: JsonValue | null;
+}
+
 /** Content-type `api::alerte.alerte` — Alertes et bandeaux d'urgence affichés en haut du site */
 export interface Alerte extends StrapiDocument {
   title: string;
@@ -670,10 +687,12 @@ export interface User extends StrapiDocument {
   last_name: string;
   phone: string | null;
   active: boolean | null;
+  last_login_at: string | null;
 }
 
 /** Nom pluriel de chaque content-type, utilisé dans les routes REST (`/api/<pluralName>`) */
 export const pluralNames = {
+  'api::activity-log.activity-log': 'activity-logs',
   'api::alerte.alerte': 'alertes',
   'api::article.article': 'articles',
   'api::association.association': 'associations',
@@ -694,6 +713,7 @@ export const pluralNames = {
 export type ContentTypeUid = keyof typeof pluralNames;
 
 export interface ContentTypes {
+  'api::activity-log.activity-log': ActivityLog;
   'api::alerte.alerte': Alerte;
   'api::article.article': Article;
   'api::association.association': Association;

@@ -2,6 +2,7 @@
  * Connexion à l'administration : vérifie les identifiants et pose la session dans un cookie HttpOnly
  * (voir utils/session-cookie.ts et le middleware session-cookie). Le jeton n'est pas renvoyé.
  */
+import { recordLogin } from '../../../services/activity-log';
 import { LOGIN_INVALID as INVALID, LOGIN_LOCKED, loginAttempts } from '../../../utils/login-attempts';
 import { CSRF_HEADER, issueSession, SESSION_COOKIE, sessionCookieOptions } from '../../../utils/session-cookie';
 
@@ -36,6 +37,7 @@ export default {
 
     // « Rester connecté sur cet ordinateur » : 30 jours ; sinon, fin après 8 h d'inactivité
     const duration = issueSession(ctx, user.id, remember === true);
+    await recordLogin(user, ctx.request.ip);
     ctx.body = { ok: true, expiresIn: duration };
   },
 

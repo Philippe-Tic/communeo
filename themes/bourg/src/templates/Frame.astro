@@ -1,11 +1,17 @@
 ---
+/** Cadre des pages communes (mentions légales, données personnelles, accessibilité, plan du site, recherche, démarches). */
 import type { PageContext } from '@communeo/theme-contract';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; lead?: string | null }
 const { ctx, lead } = Astro.props;
 ---
-<Layout ctx={ctx}>
-  {lead && <p class="st-lead">{lead}</p>}
-  <div class="st-prose"><slot /></div>
+<Layout ctx={ctx} heading={false}>
+  <article class="bo-frame-page">
+    <header class="bo-page-header">
+      <h1>{ctx.title}</h1>
+      {lead && <p class="bo-lead">{lead}</p>}
+    </header>
+    <div class="bo-prose bo-frame"><slot /></div>
+  </article>
 </Layout>

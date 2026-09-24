@@ -14,16 +14,18 @@ type ThemeEntry = {
   id: string;
   name: string;
   description: string;
+  /** Thème construit (package `themes/<id>` installé dans le renderer) : choisissable et prévisualisable */
+  available: boolean;
   menus: { main: true; footer: boolean };
   homeSections: readonly HomepageSectionId[];
 };
 
-// Moderne, Journal et Bourg (phase 5) préciseront leurs sections à leur construction
+// Moderne, Journal et Bourg (phase 5) : pas encore construits ; ils préciseront leurs sections à leur construction
 export const THEMES = [
-  { id: 'institutionnel', name: 'Institutionnel', description: 'Sobre et très lisible, pour tous les publics.', menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
-  { id: 'moderne', name: 'Moderne', description: 'Éditorial et visuel, grandes images.', menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
-  { id: 'journal', name: 'Journal', description: 'Le journal de la commune, rubriques en colonnes.', menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
-  { id: 'bourg', name: 'Bourg', description: 'Chaleureux et pratique, infos du quotidien en avant.', menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
+  { id: 'institutionnel', name: 'Institutionnel', description: 'Sobre et très lisible, pour tous les publics.', available: true, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
+  { id: 'moderne', name: 'Moderne', description: 'Éditorial et visuel, grandes images.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
+  { id: 'journal', name: 'Journal', description: 'Le journal de la commune, rubriques en colonnes.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
+  { id: 'bourg', name: 'Bourg', description: 'Chaleureux et pratique, infos du quotidien en avant.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
 ] as const satisfies readonly ThemeEntry[];
 
 /** Sections d'accueil affichées par un thème (toutes pour un thème inconnu) */
@@ -33,3 +35,6 @@ export const themeHomeSections = (theme: string | null | undefined): readonly Ho
 export type ThemeId = (typeof THEMES)[number]['id'];
 export const THEME_IDS = THEMES.map((theme) => theme.id) as ThemeId[];
 export const DEFAULT_THEME: ThemeId = 'institutionnel';
+
+/** Un thème peut être choisi pour un site (construit et installé) */
+export const isThemeAvailable = (theme: string | null | undefined) => THEMES.some((entry) => entry.id === theme && entry.available);

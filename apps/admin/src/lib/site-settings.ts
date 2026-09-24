@@ -129,10 +129,19 @@ export async function saveSiteSettings(
     ...cached,
     updatedAt: response.data.updatedAt,
   }));
-  // Nom de la commune : repris dans la barre latérale et l'en-tête
-  if (typeof cached.name === 'string') {
+  // Nom de la commune et thème : repris dans la barre latérale et l'en-tête
+  if (typeof cached.name === 'string' || typeof cached.theme === 'string') {
     client.setQueryData(sessionQuery.queryKey, (user) =>
-      user?.site ? { ...user, site: { ...user.site, name: cached.name! } } : user,
+      user?.site
+        ? {
+            ...user,
+            site: {
+              ...user.site,
+              ...(typeof cached.name === 'string' ? { name: cached.name } : {}),
+              ...(typeof cached.theme === 'string' ? { theme: cached.theme } : {}),
+            },
+          }
+        : user,
     );
   }
   // État de mise en ligne de l'en-tête : un réglage enregistré attend la prochaine mise en ligne

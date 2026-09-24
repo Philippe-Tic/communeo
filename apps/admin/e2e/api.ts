@@ -1324,13 +1324,13 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (url.pathname === '/api/preview/token' && method === 'POST') {
       if (previewUnavailable)
         return json({ error: { status: 503, message: "Preview indisponible : PREVIEW_SECRET n'est pas défini" } }, 503);
-      const body = route.request().postDataJSON() as { type?: string; documentId?: string };
+      const body = route.request().postDataJSON() as { type?: string; documentId?: string; theme?: string };
       const type: ContentType =
         body.type === 'article' ? 'articles' : body.type === 'evenement' ? 'evenements' : 'pages';
       const prefix = type === 'articles' ? 'actualites/' : type === 'evenements' ? 'agenda/' : '';
       const slug = (body.documentId && (stores[type][body.documentId]?.slug as string | undefined)) ?? '';
       return json({
-        url: `http://preview.test/${slug ? prefix : ''}${slug}?token=jeton-signe`,
+        url: `http://preview.test/${slug ? prefix : ''}${slug}?token=jeton-signe${body.theme ? `&theme=${body.theme}` : ''}`,
         expiresAt: new Date(Date.now() + 1_800_000).toISOString(),
       });
     }

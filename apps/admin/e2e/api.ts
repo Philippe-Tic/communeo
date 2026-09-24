@@ -2,6 +2,7 @@
  * API Strapi simulée pour les tests de l'admin : une commune, une session, l'état de mise en ligne.
  */
 import type { Page } from '@playwright/test';
+import { computeCompliance } from '@communeo/core';
 
 export const SITE = {
   documentId: 'site-saint-aubin',
@@ -1751,6 +1752,21 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    // Conformité : même calcul que l'API, sur l'état du mock (réglages, documents publiés, médias, messages)
+    if (url.pathname === '/api/compliance')
+      return json({
+        data: computeCompliance({
+          site: site as Parameters<typeof computeCompliance>[0]['site'],
+          documents: [...publishedByType['official-documents']].map(
+            (id) => stores['official-documents'][id] as { document_type: string; year: number },
+          ),
+          imagesWithoutAlt: library.filter((item) => item.file.mime.startsWith('image/') && !item.file.alternativeText)
+            .length,
+          openRgpdRequests: inbox
+            .filter((message) => message.category === 'rgpd' && ['received', 'in_progress'].includes(message.status))
+            .map((message) => message.createdAt as string),
+        }),
+      });
     if (url.pathname === '/api/media-items/folders') {
       const counts = new Map<string, number>();
       for (const item of library) if (item.folder) counts.set(item.folder, (counts.get(item.folder) ?? 0) + 1);

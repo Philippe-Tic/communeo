@@ -57,6 +57,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('comarquage', ['categories', 'fiche', 'search', 'invalidateCache', 'cacheStatus']),
     ...custom('preview', ['token']),
     ...custom('publication', ['states', 'years', 'unpublish']),
+    ...custom('compliance', ['report']),
     // Compte courant (la gestion des utilisateurs passe par /api/user-management)
     'plugin::users-permissions.user.me',
     'plugin::users-permissions.auth.changePassword',

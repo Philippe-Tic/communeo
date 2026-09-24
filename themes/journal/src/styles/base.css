@@ -249,7 +249,10 @@ textarea:focus-visible {
   border-color: var(--jo-ink);
 }
 
-[aria-invalid='true'] {
+/* Même poids que les sélecteurs de champs ci-dessus, sinon la bordure d'erreur ne s'applique pas aux input */
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
   border-width: 3px;
   border-color: var(--jo-danger);
 }

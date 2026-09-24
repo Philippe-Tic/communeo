@@ -1,4 +1,5 @@
 ---
+/** Association : catégorie, logo et nom, présentation, carte de contact. */
 import type { AssociationVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
 import Layout from '../parts/Layout.astro';
@@ -6,15 +7,33 @@ import Layout from '../parts/Layout.astro';
 interface Props { ctx: PageContext; association: AssociationVM }
 const { ctx, association } = Astro.props;
 ---
-<Layout ctx={ctx}>
-  <p class="st-meta">{association.category.label}</p>
-  {association.logo && <img src={association.logo.src} alt={association.logo.alt} width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} />}
-  {association.description && <p>{association.description}</p>}
-  <dl class="st-facts">
-    {association.contact.name && <><dt>Contact</dt><dd>{association.contact.name}</dd></>}
-    {association.contact.email && <><dt>E-mail</dt><dd><a href={association.contact.email.href}>{association.contact.email.label}</a></dd></>}
-    {association.contact.phone && <><dt>Téléphone</dt><dd><a href={association.contact.phone.href}>{association.contact.phone.label}</a></dd></>}
-    {association.address && <><dt>Adresse</dt><dd>{association.address}</dd></>}
-  </dl>
-  {association.website && <p><a href={association.website.href} target="_blank" rel="noopener noreferrer">{association.website.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></p>}
+<Layout ctx={ctx} heading={false}>
+  <article class="bo-asso">
+    <div class="bo-asso-head">
+      {association.logo && (
+        <img class="bo-asso-logo bo-asso-logo-large" src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} />
+      )}
+      <div>
+        <span class="bo-tag">{association.category.label}</span>
+        <h1>{association.name}</h1>
+      </div>
+    </div>
+    {association.description && <p class="bo-lead">{association.description}</p>}
+
+    <section class="bo-facts-card" aria-labelledby="bo-asso-contact">
+      <h2 id="bo-asso-contact" class="bo-kicker">Contact</h2>
+      <dl class="bo-facts">
+        {association.contact.name && <div><dt>Interlocuteur</dt><dd>{association.contact.name}</dd></div>}
+        {association.contact.email && <div><dt>E-mail</dt><dd><a href={association.contact.email.href}>{association.contact.email.label}</a></dd></div>}
+        {association.contact.phone && <div><dt>Téléphone</dt><dd><a href={association.contact.phone.href}>{association.contact.phone.label}</a></dd></div>}
+        {association.address && <div><dt>Adresse</dt><dd>{association.address}</dd></div>}
+        {association.website && (
+          <div>
+            <dt>Site internet</dt>
+            <dd><a href={association.website.href} target="_blank" rel="noopener noreferrer">{association.website.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></dd>
+          </div>
+        )}
+      </dl>
+    </section>
+  </article>
 </Layout>

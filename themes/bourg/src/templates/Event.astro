@@ -1,30 +1,38 @@
 ---
+/**
+ * Événement : pavé de date lavande à côté du titre, catégorie en pastille, photo, contenu. Les
+ * informations pratiques sont en tête de la colonne de droite sur ordinateur, sous le titre sur mobile.
+ */
 import type { EventVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
 import Content from '../parts/Content.astro';
+import EventFacts from '../parts/EventFacts.astro';
+import Layout from '../parts/Layout.astro';
+import { dateBadge } from '../lib/date';
 
 interface Props { ctx: PageContext; event: EventVM }
 const { ctx, event } = Astro.props;
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<Layout ctx={ctx}>
-  <p class="st-meta">{event.category.label}</p>
-  <dl class="st-facts">
-    <dt>Dates et horaires</dt><dd><time datetime={event.start.iso}>{event.period}</time></dd>
-    {(event.location || event.address) && <><dt>Lieu</dt><dd>{event.location}{event.address && <><br />{event.address}</>}</dd></>}
-    {event.price && <><dt>Tarif</dt><dd>{event.price}</dd></>}
-    {event.registration && (
-      <><dt>Inscription</dt><dd>{event.registration.required ? 'Obligatoire' : 'Conseillée'}{event.registration.deadline && <> · avant le {event.registration.deadline.label}</>}{event.registration.places && <> · {event.registration.places} places</>}</dd></>
-    )}
-    {event.organizer && <><dt>Organisateur</dt><dd>{event.organizer}</dd></>}
-    {(event.contact.email || event.contact.phone) && (
-      <><dt>Contact</dt><dd>{event.contact.email && <a href={event.contact.email.href}>{event.contact.email.label}</a>}{event.contact.phone && <> · <a href={event.contact.phone.href}>{event.contact.phone.label}</a></>}</dd></>
-    )}
-  </dl>
-  <p>
-    <a href={event.icsHref} download>Ajouter à mon agenda<span class="cn-sr-only"> (fichier .ics)</span></a>
-    {event.externalLink && <> · <a href={event.externalLink.href} target="_blank" rel="noopener noreferrer">{event.externalLink.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></>}
-  </p>
-  {event.image && <img src={event.image.src} alt={event.image.alt} width={event.image.width ?? undefined} height={event.image.height ?? undefined} />}
-  <Content blocks={event.blocks} toc={event.toc} />
+<Layout ctx={ctx} heading={false}>
+  <header class="bo-event-header">
+    <p class="bo-date bo-date-large" aria-hidden="true">
+      <span class="bo-date-day">{badge.day}</span>
+      <span class="bo-date-month">{badge.month}</span>
+    </p>
+    <div>
+      <p><span class={`bo-pill bo-pill-event`}>{event.category.label}</span></p>
+      <h1>{event.title}</h1>
+      <p class="bo-lead bo-event-when"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
+    </div>
+  </header>
+  <EventFacts event={event} id="bo-facts-inline" class="bo-facts-inline" />
+  {event.image && (
+    <figure class="bo-cover">
+      <img src={event.image.src} srcset={event.image.srcset ?? undefined} alt={event.image.alt} width={event.image.width ?? undefined} height={event.image.height ?? undefined} />
+      {event.image.caption && <figcaption>{event.image.caption}</figcaption>}
+    </figure>
+  )}
+  <Content blocks={event.blocks} />
+  <EventFacts slot="aside" event={event} id="bo-facts-side" />
 </Layout>

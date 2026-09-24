@@ -1,9 +1,5 @@
 ---
-/** Partage : liens simples ; « Copier le lien » n'apparaît qu'avec JavaScript. */
-import Copy from '@lucide/astro/icons/copy';
-import Mail from '@lucide/astro/icons/mail';
-import Share2 from '@lucide/astro/icons/share-2';
-
+/** Partage en pilules : liens simples ; « Copier le lien » n'apparaît qu'avec JavaScript. */
 interface Props {
   title: string;
   url: string;
@@ -14,23 +10,21 @@ const encoded = encodeURIComponent(url);
 const subject = encodeURIComponent(title);
 ---
 <p class="bo-share">
-  <span class="bo-share-label"><Share2 size={20} aria-hidden="true" />Partager :</span>
+  <span class="bo-share-label">Partager</span>
   <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">
     Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
   </a>
-  <a href={`mailto:?subject=${subject}&body=${encoded}`}><Mail size={18} aria-hidden="true" />Par e-mail</a>
-  <button type="button" class="bo-share-copy cn-js-only" data-in-copy={url}>
-    <Copy size={18} aria-hidden="true" />Copier le lien
-  </button>
-  <span class="cn-sr-only" role="status" data-in-copy-status></span>
+  <a href={`mailto:?subject=${subject}&body=${encoded}`}>E-mail<span class="cn-sr-only"> : partager par e-mail</span></a>
+  <button type="button" class="cn-js-only" data-bo-copy={url}>Copier le lien</button>
+  <span class="cn-sr-only" role="status" data-bo-copy-status></span>
 </p>
 
 <script>
-  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-in-copy]')) {
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-bo-copy]')) {
     button.addEventListener('click', async () => {
-      const status = document.querySelector<HTMLElement>('[data-in-copy-status]');
+      const status = document.querySelector<HTMLElement>('[data-bo-copy-status]');
       try {
-        await navigator.clipboard.writeText(button.dataset.inCopy!);
+        await navigator.clipboard.writeText(button.dataset.boCopy!);
         if (status) status.textContent = 'Lien copié dans le presse-papiers.';
       } catch {
         if (status) status.textContent = "La copie a échoué : le lien est dans la barre d'adresse.";

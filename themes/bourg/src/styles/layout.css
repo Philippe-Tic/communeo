@@ -716,6 +716,73 @@ summary.bo-nav-link::-webkit-details-marker {
   }
 }
 
+/* Colonne de droite occupée par le template (événement) : le panneau se replie dessous */
+.bo-side {
+  display: grid;
+  gap: 0.875rem;
+  align-content: start;
+}
+
+.bo-pratique-fold summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.125rem;
+  font-weight: 800;
+  color: var(--bo-primary-dark);
+  list-style: none;
+  cursor: pointer;
+  background: var(--bo-mint);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-pratique-fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.bo-pratique-fold summary svg {
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.bo-pratique-fold[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.bo-pratique-fold .bo-pratique {
+  position: static;
+  max-height: none;
+  margin-top: 0.875rem;
+  padding-top: 0;
+}
+
+.bo-pratique-fold .bo-pratique-title {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .bo-side {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding-top: var(--bo-space-2);
+  }
+}
+
+/* Mobile : le contenu de la colonne est repris dans la page par le template */
+@media (max-width: 63.99rem) {
+  .bo-side > :not(.bo-pratique-fold) {
+    display: none;
+  }
+
+  .cn-js .bo-pratique-fold {
+    display: none;
+  }
+}
+
 /* Barre « Pratique » (mobile) et tiroir ----------------------------------------------------------- */
 .bo-bar {
   display: none;

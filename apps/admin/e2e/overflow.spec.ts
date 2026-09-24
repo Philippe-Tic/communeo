@@ -4,39 +4,7 @@
  */
 import { expect, test } from '@playwright/test';
 import { mockApi } from './api';
-const ROUTES = [
-  '/',
-  '/pages',
-  '/pages/p-salle',
-  '/actualites',
-  '/actualites/a-conseil',
-  '/agenda',
-  '/agenda/e-fete',
-  '/documents',
-  '/documents/nouvelle',
-  '/equipe',
-  '/associations',
-  '/associations?onglet=propositions',
-  '/alertes',
-  '/alertes/nouvelle',
-  '/dechets',
-  '/cantine?semaine=2026-09-21',
-  '/messages',
-  '/messages?id=m-dubois',
-  '/newsletter',
-  '/mediatheque',
-  '/mon-site/menu',
-  '/mon-site/apparence',
-  '/mon-site/accueil',
-  '/mon-site/informations',
-  '/mon-site/legal',
-  '/mon-site/accessibilite',
-  '/mon-site/reseaux',
-  '/mon-site/demarches',
-  '/mon-site/open-data',
-  '/mise-en-ligne',
-  '/mon-compte',
-];
+import { ROUTES } from './routes';
 test('aucun défilement horizontal', async ({ page }) => {
   test.skip((page.viewportSize()?.width ?? 0) > 400);
   // Une route après l'autre : jusqu'à ~2 s chacune sur les machines de CI

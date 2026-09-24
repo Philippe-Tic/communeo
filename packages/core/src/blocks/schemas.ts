@@ -61,6 +61,18 @@ const mediaRef = (mode: ValidationMode) =>
       }),
   ]);
 
+/**
+ * Fichier obligatoire à la publication : absent, un message clair (sans lui, l'union de `mediaRef`
+ * n'a que le message générique de zod) ; présent, les vérifications de `mediaRef`.
+ */
+const requiredMedia = (mode: ValidationMode, message: string) =>
+  mode === 'publish'
+    ? z
+        .unknown()
+        .refine((value) => value !== null && value !== undefined && value !== '', { message })
+        .pipe(mediaRef(mode))
+    : mediaRef(mode).nullish();
+
 /** Champ obligatoire à la publication, facultatif en brouillon. */
 const required = <T extends z.ZodTypeAny>(schema: T, mode: ValidationMode) =>
   mode === 'publish' ? schema : schema.nullish();
@@ -97,7 +109,7 @@ export function blockSchemas(mode: ValidationMode) {
     'blocks.text': z.object({ ...base, body: richText(richTextDocumentSchema, mode, 'Le texte') }),
     'blocks.image': z.object({
       ...base,
-      image: required(mediaRef(mode), mode),
+      image: requiredMedia(mode, 'Choisissez une image'),
       caption: optionalText(300),
       width: z.enum(IMAGE_WIDTHS).nullish(),
     }),

@@ -184,6 +184,8 @@ export function MessageDetail({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
+        {/* Mobile : la liste (et son titre) est masquée quand un message est ouvert ; l'écran garde son h1 */}
+        <h1 className="sr-only lg:hidden">Messages</h1>
         <div className="border-b border-border bg-surface px-4 py-5 md:px-6 dark:bg-sidebar">
           <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
             <div className="min-w-0 flex-1">

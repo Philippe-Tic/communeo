@@ -134,7 +134,7 @@ export function EquipeShell({ user, children }: { user: SessionUser; children: R
           {nav(
             'flex gap-1 overflow-x-auto bg-brand-button px-2 py-1.5 md:hidden',
             cn(
-              'flex h-10 items-center gap-2 rounded-lg px-3 text-sm whitespace-nowrap text-on-brand/90 aria-[current=page]:bg-white/15 aria-[current=page]:font-semibold',
+              'flex h-10 items-center gap-2 rounded-lg px-3 text-sm whitespace-nowrap text-on-brand/90 aria-[current=page]:bg-white/15 aria-[current=page]:font-semibold aria-[current=page]:text-on-brand',
             ),
           )}
         </header>

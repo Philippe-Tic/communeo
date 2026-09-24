@@ -77,6 +77,14 @@ describe('blocs', () => {
     expect(result.issues.map((i) => i.index)).toEqual([0, 1]);
   });
 
+  it("bloc Image sans image : message clair ; image sans texte alternatif : signalée", () => {
+    const missing = validateBlocks([{ __component: 'blocks.image' }], 'publish');
+    expect(missing.issues.map((issue) => issue.message)).toEqual(['Choisissez une image']);
+    const noAlt = validateBlocks([{ __component: 'blocks.image', image: { id: 3, alternativeText: '', mime: 'image/jpeg' } }], 'publish');
+    expect(noAlt.issues.map((issue) => issue.message)).toEqual(["Texte alternatif manquant sur l'image"]);
+    expect(validateBlocks([{ __component: 'blocks.image', image: 3 }], 'publish').success).toBe(true);
+  });
+
   it('applique les limites hautes même en brouillon', () => {
     const buttons = Array.from({ length: 4 }, () => ({ label: 'x', url: '/x' }));
     expect(validateBlocks([{ __component: 'blocks.buttons', buttons }], 'draft').success).toBe(false);

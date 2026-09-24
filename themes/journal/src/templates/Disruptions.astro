@@ -1,23 +1,42 @@
 ---
+/** Perturbations : une perturbation par filet, sévérité portée par le libellé et le signe (i, !, !!). */
 import type { AlertVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Empty from '../parts/Empty.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; alerts: AlertVM[] }
 const { ctx, alerts } = Astro.props;
+const signs = { info: 'i', warning: '!', critical: '!!' } as const;
 ---
 <Layout ctx={ctx}>
   {alerts.length ? (
-    <ul>
+    <ul class="jo-ruled-list jo-disruptions-page">
       {alerts.map((alert) => (
-        <li>
-          <h2>{alert.title}</h2>
-          <p><strong>{alert.severity.label}</strong>{alert.type && <> · {alert.type.label}</>}{alert.period && <> · {alert.period}</>}</p>
-          <p>{alert.message}</p>
-          {(alert.area || alert.location) && <p>Secteur : {alert.area ?? alert.location}</p>}
-          {alert.link && <p><a href={alert.link.href}>{alert.link.label}</a></p>}
+        <li class={`jo-disruption jo-disruption-${alert.severity.key}`}>
+          <span class="jo-sign" aria-hidden="true">{signs[alert.severity.key]}</span>
+          <div>
+            <p class="jo-kicker jo-disruption-kind">{alert.severity.label}{alert.type && <> · {alert.type.label}</>}</p>
+            <h2 class="jo-disruption-heading">{alert.title}</h2>
+            <p>{alert.message}</p>
+            {(alert.period || alert.area || alert.location) && (
+              <p class="jo-disruption-meta">
+                {alert.period}
+                {(alert.area || alert.location) && <>{alert.period && ' · '}Secteur : {alert.area ?? alert.location}</>}
+              </p>
+            )}
+            {alert.link && (
+              <p>
+                <a href={alert.link.href} target={alert.link.external ? '_blank' : undefined} rel={alert.link.external ? 'noopener noreferrer' : undefined}>
+                  {alert.link.label}{alert.link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+                </a>
+              </p>
+            )}
+          </div>
         </li>
       ))}
     </ul>
-  ) : <p>Aucune perturbation en cours.</p>}
+  ) : (
+    <Empty title="Aucune perturbation en cours">Bonne nouvelle : tout est calme sur la commune.</Empty>
+  )}
 </Layout>

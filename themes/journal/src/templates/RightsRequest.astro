@@ -1,22 +1,45 @@
 ---
-import type { FormConfig } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+/** Demande d'exercice des droits RGPD : même formulaire que le contact, avec le type de demande. */
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
 import ApiForm from '../parts/ApiForm.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; form: FormConfig }
 const { ctx, form } = Astro.props;
 ---
 <Layout ctx={ctx}>
-  <p>Vous pouvez demander l'accès, la rectification ou l'effacement des données que la commune détient sur vous. La mairie répond dans un délai d'un mois.</p>
-  <ApiForm form={form} submitLabel="Envoyer ma demande" success="Votre demande a bien été envoyée. Un accusé de réception vous sera adressé par e-mail.">
-    <p><label for="rg-type">Type de demande (obligatoire)</label>
-      <select id="rg-type" name="subject" required>{(form.options ?? []).map((o) => <option value={o.label}>{o.label}</option>)}</select></p>
-    <p><label for="rg-first">Prénom (obligatoire)</label><input id="rg-first" name="first_name" required autocomplete="given-name" /></p>
-    <p><label for="rg-last">Nom (obligatoire)</label><input id="rg-last" name="last_name" required autocomplete="family-name" /></p>
-    <p><label for="rg-email">E-mail (obligatoire)</label><input id="rg-email" name="email" type="email" required autocomplete="email" /></p>
-    <p><label for="rg-message">Précisez votre demande (obligatoire)</label><textarea id="rg-message" name="message" rows="5" required></textarea></p>
-    <input type="hidden" name="category" value="rgpd" />
-    <p class="st-meta">Vos coordonnées servent uniquement à traiter cette demande. <a href="/donnees-personnelles">En savoir plus</a></p>
-  </ApiForm>
+  <div class="jo-form-page">
+    <p class="jo-lead">
+      Vous pouvez demander l'accès, la rectification ou l'effacement des données que la commune détient sur vous.
+      La mairie vous répond dans un délai d'un mois.
+    </p>
+    <ApiForm
+      form={form}
+      submitLabel="Envoyer ma demande"
+      success="Votre demande a bien été envoyée. Un accusé de réception vous sera adressé par e-mail."
+      hint="La mairie répond dans un délai d'un mois."
+    >
+      <p>
+        <label for="rg-type">Type de demande</label>
+        <select id="rg-type" name="subject" required>
+          {(form.options ?? []).map((option) => <option value={option.label}>{option.label}</option>)}
+        </select>
+      </p>
+      <div class="jo-field-row">
+        <p><label for="rg-first">Prénom</label><input id="rg-first" name="first_name" required autocomplete="given-name" /></p>
+        <p><label for="rg-last">Nom</label><input id="rg-last" name="last_name" required autocomplete="family-name" /></p>
+      </div>
+      <p><label for="rg-email">E-mail</label><input id="rg-email" name="email" type="email" required autocomplete="email" /></p>
+      <p>
+        <label for="rg-message">Précisez votre demande</label>
+        <textarea id="rg-message" name="message" rows="6" required maxlength="2000" aria-describedby="rg-message-aide"></textarea>
+        <span id="rg-message-aide" class="jo-field-help">Indiquez les données concernées, par exemple une inscription ou un formulaire envoyé.</span>
+      </p>
+      <input type="hidden" name="category" value="rgpd" />
+      <p class="jo-muted">
+        Vos coordonnées servent uniquement à traiter cette demande.
+        <a href="/donnees-personnelles">En savoir plus sur vos droits</a>
+      </p>
+    </ApiForm>
+  </div>
 </Layout>

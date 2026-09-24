@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { ComplianceScreen } from '@/components/compliance/compliance-screen';
 
-export const Route = createFileRoute('/_app/conformite')({
-  component: () => <ComingSoon title="Conformité" ticket={147} />,
-});
+export const Route = createFileRoute('/_app/conformite')({ component: ComplianceScreen });

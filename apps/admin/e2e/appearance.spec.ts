@@ -67,7 +67,7 @@ test('changer de thème : aperçu, confirmation, enregistré et mis en ligne', a
   await expect(preview).toBeHidden();
 
   expect(bodies.filter((entry) => entry.call === 'PUT site').at(-1)!.body.data).toEqual({ theme: 'institutionnel' });
-  expect(calls).toContain('POST /api/deployment/trigger');
+  await expect.poll(() => calls).toContain('POST /api/deployment/trigger');
   await expect(
     page.getByRole('status').filter({ hasText: 'Le thème Institutionnel est en cours de mise en ligne' }),
   ).toBeVisible();
@@ -84,11 +84,9 @@ test('changer de thème sans mettre en ligne : enregistré seulement', async ({ 
   await confirm.getByRole('checkbox', { name: /Mettre en ligne immédiatement/ }).uncheck();
   await confirm.getByRole('button', { name: 'Passer au thème Institutionnel' }).click();
   await expect(
-    page
-      .getByRole('status')
-      .filter({
-        hasText: 'Thème Institutionnel enregistré. Il sera visible sur le site à la prochaine mise en ligne.',
-      }),
+    page.getByRole('status').filter({
+      hasText: 'Thème Institutionnel enregistré. Il sera visible sur le site à la prochaine mise en ligne.',
+    }),
   ).toBeVisible();
   expect(bodies.filter((entry) => entry.call === 'PUT site')).toHaveLength(1);
   expect(calls).not.toContain('POST /api/deployment/trigger');

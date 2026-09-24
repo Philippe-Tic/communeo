@@ -41,7 +41,7 @@ test('en attente : ce qui sera mis en ligne, historique, mise en ligne lancée',
   await expectNoViolations(page);
 
   await page.getByRole('button', { name: 'Mettre en ligne maintenant' }).click();
-  expect(calls).toContain('POST /api/deployment/trigger');
+  await expect.poll(() => calls).toContain('POST /api/deployment/trigger');
   await expect(page.getByRole('heading', { name: /Mise en ligne (en cours|demandée)/ })).toBeVisible();
 });
 
@@ -77,7 +77,7 @@ test('échec : rien n’est modifié, référence, réessayer', async ({ page })
     .getByRole('region', { name: 'La mise en ligne a échoué' })
     .getByRole('button', { name: 'Réessayer' })
     .click();
-  expect(calls).toContain('POST /api/deployment/trigger');
+  await expect.poll(() => calls).toContain('POST /api/deployment/trigger');
 });
 
 test('à jour : dernière mise en ligne, lien vers le site', async ({ page }) => {
@@ -117,7 +117,7 @@ test('domaine : saisie, instructions DNS copiables, vérification en erreur puis
   await expectNoViolations(page);
 
   await domain.getByRole('button', { name: 'Vérifier maintenant' }).click();
-  expect(calls).toContain('POST /api/domain/verify');
+  await expect.poll(() => calls).toContain('POST /api/domain/verify');
   await expect(
     domain.getByText("L'enregistrement A ne pointe pas vers la bonne adresse.", { exact: false }),
   ).toBeVisible();

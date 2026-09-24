@@ -5,14 +5,13 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronRight, ExternalLink, LogIn } from 'lucide-react';
+import { ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
-import { formatListDate } from '@/lib/dates';
 import { communeQuery, enterCommune, refreshCommunes, updateCommune, type CommuneDetail } from '@/lib/equipe';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { themeName } from '@/lib/session';
@@ -95,8 +94,13 @@ function Detail({ commune }: { commune: CommuneDetail }) {
             {commune.suspended && <StatusBadge tone="danger">Suspendue</StatusBadge>}
           </h1>
           <p className="mt-1 text-secondary">
-            {commune.population != null && `${commune.population.toLocaleString('fr-FR')} habitants · `}créée{' '}
-            {formatListDate(new Date(commune.createdAt)).toLowerCase()}
+            {commune.population != null && `${commune.population.toLocaleString('fr-FR')} habitants · `}créée le{' '}
+            {new Intl.DateTimeFormat('fr-FR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'Europe/Paris',
+            }).format(new Date(commune.createdAt))}
           </p>
         </div>
         <Button type="button" className="max-md:h-11 max-md:w-full" onClick={() => void enter()}>
@@ -114,7 +118,7 @@ function Detail({ commune }: { commune: CommuneDetail }) {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card title="Site">
-          {commune.liveUrl ? (
+          {commune.liveUrl && commune.publication.state !== 'new' ? (
             <a
               href={commune.customDomain ? `https://${commune.customDomain}` : commune.liveUrl}
               target="_blank"
@@ -129,15 +133,17 @@ function Detail({ commune }: { commune: CommuneDetail }) {
             <p className="font-semibold">Pas encore en ligne</p>
           )}
           <p className="mt-1 text-[13px] text-secondary">
-            {commune.customDomain
-              ? commune.domainStatus === 'verified'
-                ? `Domaine vérifié · HTTPS ${commune.sslEnabled ? 'actif' : 'en cours'}`
-                : 'Domaine en attente de vérification'
-              : 'Adresse Communeo'}
+            {commune.publication.state === 'new'
+              ? `Adresse prévue : ${siteAddress(commune)}`
+              : commune.customDomain
+                ? commune.domainStatus === 'verified'
+                  ? `Domaine vérifié · HTTPS ${commune.sslEnabled ? 'actif' : 'en cours'}`
+                  : 'Domaine en attente de vérification'
+                : 'Adresse Communeo'}
           </p>
         </Card>
         <Card title="Thème">
-          <p className="font-semibold">{commune.theme ? themeName(commune.theme) : '—'}</p>
+          <p className="font-semibold">{themeName(commune.theme)}</p>
         </Card>
         <Card title="Mise en ligne">
           <PublicationBadge commune={commune} />
@@ -157,8 +163,14 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         }
       >
         <p className="font-semibold">
-          {commune.users.active} compte{commune.users.active > 1 ? 's' : ''}
-          {commune.users.invited > 0 && ` + ${commune.users.invited} invitation${commune.users.invited > 1 ? 's' : ''}`}
+          {[
+            (commune.users.active > 0 || commune.users.invited === 0) &&
+              `${commune.users.active} compte${commune.users.active > 1 ? 's' : ''} actif${commune.users.active > 1 ? 's' : ''}`,
+            commune.users.invited > 0 &&
+              `${commune.users.invited} invitation${commune.users.invited > 1 ? 's' : ''} en attente`,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
         </p>
         <ul className="mt-2 divide-y divide-border">
           {commune.members.map((user) => (
@@ -210,6 +222,7 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         open={suspending}
         onOpenChange={setSuspending}
         tone={commune.suspended ? 'warning' : 'danger'}
+        icon={commune.suspended ? PlayCircle : PauseCircle}
         title={commune.suspended ? `Lever la suspension de ${commune.name} ?` : `Suspendre ${commune.name} ?`}
         description={
           commune.suspended

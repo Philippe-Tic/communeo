@@ -40,6 +40,8 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'ssl_enabled',
   'auto_deploy_enabled',
   'auto_deploy_delay',
+  // Suspension par l'équipe Communeo : ne change rien au site public
+  'suspended',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */

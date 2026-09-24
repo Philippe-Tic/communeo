@@ -143,7 +143,10 @@ describe('gestion des communes (super admin)', () => {
   it('suspendre : utilisateurs refusés et coupés, mise en ligne refusée ; réactiver rend l’accès', async () => {
     // L'admin de la commune A est connecté ; l'équipe suspend sa commune
     expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(200);
+    const pendingBefore = await strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId: siteA } } });
     expect((await http.put(`/api/site-management/${siteA}`).set(auth(superAdmin)).send({ data: { suspended: true } })).body.data.suspended).toBe(true);
+    // Suspendre ne change rien au site public : aucune modification en attente
+    expect(await strapi.query('api::pending-change.pending-change').count({ where: { site: { documentId: siteA } } })).toBe(pendingBefore);
     expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(401);
     const login = await http.post('/api/session/login').send({ identifier: 'test@example.com', password: 'test123' });
     expect(login.status).toBe(403);

@@ -407,7 +407,7 @@ export function CommunesScreen() {
                           {commune.population != null && ` · ${commune.population.toLocaleString('fr-FR')} hab.`}
                         </p>
                       </td>
-                      <td className="px-3 py-3">{commune.theme ? themeName(commune.theme) : '—'}</td>
+                      <td className="px-3 py-3">{themeName(commune.theme)}</td>
                       <td className="px-3 py-3">
                         <PublicationBadge commune={commune} />
                       </td>
@@ -466,9 +466,11 @@ export function CommunesScreen() {
                         isInactive(commune) ? 'font-semibold text-warning' : 'text-secondary',
                       )}
                     >
-                      {commune.theme ? themeName(commune.theme) : '—'} · {commune.users.active} utilisateur
-                      {commune.users.active > 1 ? 's' : ''} ·{' '}
-                      {formatListDate(new Date(commune.lastActivity)).toLowerCase()}
+                      {themeName(commune.theme)} · {commune.users.active} utilisateur
+                      {commune.users.active > 1 ? 's' : ''}
+                      {commune.users.invited > 0 &&
+                        ` + ${commune.users.invited} invité${commune.users.invited > 1 ? 's' : ''}`}{' '}
+                      · {formatListDate(new Date(commune.lastActivity)).toLowerCase()}
                       {isInactive(commune) && ' · inactive depuis plus de 30 jours'}
                     </p>
                     <Button

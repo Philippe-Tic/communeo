@@ -1,21 +1,44 @@
 ---
+/** Document officiel : type et référence, dates, description, téléchargement en carte sombre, annexes. */
 import type { DocumentVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Download from '@lucide/astro/icons/download';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; document: DocumentVM }
 const { ctx, document: doc } = Astro.props;
+const type = (label: string) => label.split(' – ')[0];
+const size = (label: string) => label.split(' – ')[1] ?? '';
 ---
-<Layout ctx={ctx}>
-  <dl class="st-facts">
-    <dt>Type</dt><dd>{doc.type.label}</dd>
-    <dt>Date</dt><dd><time datetime={doc.date.iso}>{doc.date.label}</time></dd>
-    {doc.sessionDate && <><dt>Séance du conseil</dt><dd>{doc.sessionDate.label}</dd></>}
-    {doc.reference && <><dt>Référence</dt><dd>{doc.reference}</dd></>}
-  </dl>
-  {doc.description && <p>{doc.description}</p>}
-  {doc.file && <p><a href={doc.file.href} download>Télécharger le document ({doc.file.label})</a></p>}
-  {doc.attachments.length > 0 && (
-    <section aria-labelledby="st-annexes"><h2 id="st-annexes">Annexes</h2><ul>{doc.attachments.map((file) => <li><a href={file.href} download>{file.name} ({file.label})</a></li>)}</ul></section>
-  )}
+<Layout ctx={ctx} heading={false}>
+  <article class="mo-doc">
+    <p class="mo-eyebrow">{doc.type.label}{doc.reference && <> · {doc.reference}</>}</p>
+    <h1>{doc.title}</h1>
+    <p class="mo-doc-dates">
+      {doc.sessionDate && <>Séance du {doc.sessionDate.label} · </>}publié le <time datetime={doc.date.iso}>{doc.date.label}</time>
+    </p>
+    {doc.description && <p class="mo-doc-description">{doc.description}</p>}
+    {doc.file && (
+      <a href={doc.file.href} class="mo-doc-file mo-on-dark" download>
+        <span class="mo-doc-file-icon" aria-hidden="true"><Download size={22} /></span>
+        <span><strong>Télécharger le document</strong><span class="mo-doc-file-meta">{doc.file.label}</span></span>
+      </a>
+    )}
+    {doc.attachments.length > 0 && (
+      <section aria-labelledby="mo-annexes" class="mo-documents">
+        <h2 id="mo-annexes" class="mo-h2-small">Annexes</h2>
+        <ul class="mo-document-list">
+          {doc.attachments.map((file) => (
+            <li>
+              <a href={file.href} download>
+                <span class="mo-document-type" aria-hidden="true">{type(file.label)}</span>
+                <span class="mo-document-name">{file.name}</span>
+                <span class="mo-document-meta"><span class="cn-sr-only">{type(file.label)} – </span>{size(file.label)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </article>
 </Layout>

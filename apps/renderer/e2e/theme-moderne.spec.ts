@@ -74,3 +74,14 @@ test('page de contenu : le sommaire mène aux sections', async ({ page }, info) 
   await toc.getByRole('link', { name: 'Tarifs' }).click();
   await expect(page).toHaveURL(/#tarifs$/);
 });
+
+test('proposer une association : erreurs récapitulées et reliées aux champs', async ({ page }) => {
+  await page.goto('/associations/proposer');
+  await page.getByRole('button', { name: "Proposer l'association" }).click();
+  const summary = page.locator('[data-mo-form-status]');
+  await expect(summary).toBeFocused();
+  await expect(summary).toContainText('Le formulaire contient 3 erreurs');
+  await expect(page.getByLabel("Nom de l'association")).toHaveAttribute('aria-invalid', 'true');
+  await summary.getByRole('link', { name: /Votre e-mail/ }).click();
+  await expect(page.getByLabel('Votre e-mail')).toBeFocused();
+});

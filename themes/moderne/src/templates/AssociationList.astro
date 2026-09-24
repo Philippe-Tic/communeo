@@ -1,17 +1,55 @@
 ---
+/** Annuaire des associations : filtres en pilules, cartes (logo ou initiales), proposition d'ajout. */
 import type { AssociationCardVM } from '@communeo/core';
-import type { FilterOption } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+import type { FilterOption, PageContext } from '@communeo/theme-contract';
+import Plus from '@lucide/astro/icons/plus';
+import Empty from '../parts/Empty.astro';
 import Filters from '../parts/Filters.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; associations: AssociationCardVM[]; categories: FilterOption[]; proposeHref: string }
 const { ctx, associations, categories, proposeHref } = Astro.props;
+const initials = (name: string) =>
+  name
+    .split(/[\s-]+/)
+    .filter((word) => word.length > 2 || /^[A-Z]/.test(word))
+    .slice(0, 2)
+    .map((word) => word[0]!.toUpperCase())
+    .join('');
+const filter = categories.find((category) => category.current) ?? null;
 ---
-<Layout ctx={ctx}>
-  <p><a href={proposeHref}>Proposer une association</a></p>
-  <Filters label="Filtrer par catégorie" options={categories} allHref="/associations" />
+<Layout ctx={ctx} heading={false}>
+  <div class="mo-list-head">
+    <div>
+      <h1>{ctx.title}</h1>
+      <p class="mo-count mo-count-large" role="status">{associations.length} association{associations.length > 1 ? 's' : ''}{filter && <> · {filter.label}</>}</p>
+    </div>
+    <a href={proposeHref} class="mo-button"><Plus size={20} aria-hidden="true" />Proposer une association</a>
+  </div>
+  <div class="mo-filter-bar">
+    <Filters label="Filtrer par catégorie" options={categories} allHref="/associations" />
+  </div>
+
   {associations.length ? (
-    <ul>{associations.map((a) => <li><h2><a href={a.href}>{a.name}</a></h2><p>{a.category.label}</p>{a.summary && <p>{a.summary}</p>}</li>)}</ul>
-  ) : <p>Aucune association référencée pour le moment.</p>}
+    <ul class="mo-grid-3 mo-asso-cards">
+      {associations.map((association) => (
+        <li>
+          <article class="mo-asso-card">
+            {association.logo
+              ? <img class="mo-asso-logo" src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} loading="lazy" />
+              : <span class="mo-asso-logo mo-initials" aria-hidden="true">{initials(association.name)}</span>}
+            <div>
+              <span class="mo-chip-label mo-chip-info">{association.category.label}</span>
+              <h2 class="mo-card-title"><a href={association.href}>{association.name}</a></h2>
+              {association.summary && <p class="mo-card-summary">{association.summary}</p>}
+            </div>
+          </article>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <Empty title="Aucune association référencée" action={{ label: 'Proposer une association', href: proposeHref }}>
+      Votre association n'apparaît pas ? Proposez-la : la mairie la publiera après vérification.
+    </Empty>
+  )}
 </Layout>

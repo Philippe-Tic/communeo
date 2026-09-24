@@ -276,6 +276,7 @@
 .mo-chip {
   display: inline-flex;
   align-items: center;
+  gap: 0.3em;
   min-height: 3rem;
   padding: 0 1.25rem;
   font-weight: 600;

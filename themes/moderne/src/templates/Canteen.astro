@@ -1,30 +1,77 @@
 ---
+/**
+ * Cantine : une semaine par section, les jours en cartes (le jour même en sombre), plats avec leurs
+ * labels en toutes lettres (Bio, Local…) ; en mode fichier, l'image et le téléchargement du menu.
+ */
 import type { CanteenWeekVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Download from '@lucide/astro/icons/download';
+import Empty from '../parts/Empty.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; weeks: CanteenWeekVM[] }
 const { ctx, weeks } = Astro.props;
+const badges = [...new Set(weeks.flatMap((week) => week.days.flatMap((day) => day.courses.flatMap((course) => course.badges))))];
+const badgeClass = (badge: string) =>
+  `mo-badge-${badge.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]+/g, '-')}`;
+const dayNumber = (iso: string) => String(Number(iso.slice(8, 10)));
 ---
 <Layout ctx={ctx}>
-  {weeks.length ? weeks.map((week) => (
-    <section aria-labelledby={`st-week-${week.id}`}>
-      <h2 id={`st-week-${week.id}`}>{week.label}{week.school && <> – {week.school}</>}</h2>
+  {weeks.length === 0 && <Empty title="Menus bientôt publiés">Le menu de la cantine sera bientôt publié.</Empty>}
+
+  {badges.length > 0 && (
+    <p class="mo-legend">
+      <span class="mo-legend-label">Légende</span>
+      {badges.map((badge) => <span class={`mo-chip-label ${badgeClass(badge)}`}>{badge}</span>)}
+    </p>
+  )}
+
+  {weeks.map((week) => (
+    <section class="mo-week" aria-labelledby={`mo-week-${week.id}`}>
+      <h2 id={`mo-week-${week.id}`} class="mo-week-title">
+        {week.label}
+        {week.school && <span class="mo-week-school">{week.school}</span>}
+      </h2>
+
       {week.mode === 'detailed' ? (
-        week.days.map((day) => (
-          <div>
-            <h3>{day.day.label} <time datetime={day.date.iso}>{day.date.label}</time></h3>
-            {day.closed ? <p>Pas de cantine</p> : (
-              <dl>{day.courses.map((course) => <><dt>{course.label}</dt><dd>{course.dish}{course.badges.length > 0 && <> ({course.badges.join(', ')})</>}</dd></>)}</dl>
-            )}
-          </div>
-        ))
+        <div class="mo-menu-days">
+          {week.days.map((day) => (
+            <article class="mo-menu-day" data-cn-day={day.date.iso.slice(0, 10)}>
+              <h3 class="mo-menu-day-title">
+                <span class="mo-menu-day-number" aria-hidden="true">{dayNumber(day.date.iso)}</span>
+                <span class="mo-menu-day-name">{day.day.label}<span class="cn-sr-only"> <time datetime={day.date.iso}>{day.date.label}</time></span></span>
+              </h3>
+              {day.closed ? (
+                <p class="mo-menu-closed">Pas de cantine ce jour.</p>
+              ) : (
+                <dl class="mo-menu">
+                  {day.courses.map((course) => (
+                    <div>
+                      <dt>{course.label}</dt>
+                      <dd>{course.dish}{course.badges.map((badge) => <> <span class={`mo-chip-label mo-chip-small ${badgeClass(badge)}`}>{badge}</span></>)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </article>
+          ))}
+        </div>
       ) : (
-        <>
-          {week.image && <img src={week.image.src} alt={week.image.alt} width={week.image.width ?? undefined} height={week.image.height ?? undefined} />}
-          {week.file && <p><a href={week.file.href} download>Télécharger le menu ({week.file.label})</a></p>}
-        </>
+        <div class="mo-menu-file">
+          {week.image && (
+            <img src={week.image.src} alt={week.image.alt} width={week.image.width ?? undefined} height={week.image.height ?? undefined} loading="lazy" />
+          )}
+          {week.file && (
+            <a href={week.file.href} class="mo-button mo-button-dark" download>
+              <Download size={20} aria-hidden="true" />Télécharger le menu ({week.file.label})
+            </a>
+          )}
+        </div>
       )}
     </section>
-  )) : <p>Le menu de la cantine sera bientôt publié.</p>}
+  ))}
 </Layout>
+
+<script>
+  import '@communeo/ui-a11y/scripts/today';
+</script>

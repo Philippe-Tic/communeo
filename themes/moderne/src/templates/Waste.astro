@@ -1,23 +1,71 @@
 ---
+/** Collecte des déchets : une carte colorée par collecte (prochaine date en grand), puis le calendrier. */
 import type { WasteCollectionVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
+import Empty from '../parts/Empty.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; collections: WasteCollectionVM[]; notes: string | null }
 const { ctx, collections, notes } = Astro.props;
 ---
 <Layout ctx={ctx}>
-  {notes && <p>{notes}</p>}
+  {notes && <p class="mo-lead mo-list-intro">{notes}</p>}
   {collections.length ? (
-    <ul>
-      {collections.map((c) => (
-        <li>
-          <h2><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}</h2>
-          <p>{c.frequency.label}{c.day && <>, le {c.day.label}</>}{c.zone && <> · {c.zone}</>}</p>
-          {c.upcoming.length > 0 && <p>Prochains passages : {c.upcoming.map((d, i) => <>{i > 0 && ', '}<time datetime={d.iso}>{d.label}</time></>)}</p>}
-          {c.notes && <p>{c.notes}</p>}
-        </li>
-      ))}
-    </ul>
-  ) : <p>Le calendrier de collecte sera bientôt publié.</p>}
+    <>
+      <section class="mo-waste-section" aria-labelledby="mo-waste-next">
+        <h2 id="mo-waste-next">Prochaines collectes</h2>
+        <ul class="mo-waste-cards">
+          {collections.map((collection) => (
+            <li class={`mo-waste-card mo-waste-card-${collection.key}`}>
+              <span class={`mo-waste-badge mo-waste-badge-large mo-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
+              <h3>{collection.label}</h3>
+              {collection.upcoming.length > 0 ? (
+                <>
+                  <p class="mo-waste-kicker">Prochaine collecte</p>
+                  <p class="mo-waste-date"><NextCollections collection={collection} /></p>
+                </>
+              ) : (
+                <>
+                  <p class="mo-waste-kicker">{collection.day ? 'Hors saison' : collection.frequency.label}</p>
+                  {collection.notes && <p class="mo-waste-note">{collection.notes}</p>}
+                </>
+              )}
+              {collection.day && <p class="mo-waste-rule">{collection.frequency.label}, le {collection.day.label}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section class="mo-waste-section" aria-labelledby="mo-waste-calendar">
+        <h2 id="mo-waste-calendar">Calendrier par type</h2>
+        <div class="mo-table-wrapper">
+          <table class="mo-table">
+            <caption class="cn-sr-only">Jours, fréquences et zones de collecte</caption>
+            <thead>
+              <tr><th scope="col">Type</th><th scope="col">Jour</th><th scope="col">Fréquence</th><th scope="col">Zone</th><th scope="col">À savoir</th></tr>
+            </thead>
+            <tbody>
+              {collections.map((collection) => (
+                <tr>
+                  <th scope="row">
+                    <span class="mo-waste-row">
+                      <span class={`mo-waste-badge mo-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
+                      {collection.label}
+                    </span>
+                  </th>
+                  <td data-label="Jour">{collection.day?.label ?? '—'}</td>
+                  <td data-label="Fréquence">{collection.frequency.label}</td>
+                  <td data-label="Zone">{collection.zone ?? 'Toute la commune'}</td>
+                  <td data-label="À savoir">{collection.notes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
+  ) : (
+    <Empty title="Calendrier bientôt publié">Le calendrier de collecte sera bientôt publié.</Empty>
+  )}
 </Layout>

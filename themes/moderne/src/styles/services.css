@@ -1,0 +1,873 @@
+/* Pages de service : contact, déchets, cantine, perturbations, pages communes, 404. */
+
+/* Formulaires : lignes de deux champs, aides */
+.mo-field-row {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 48rem) {
+  .mo-field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mo-field-help {
+  display: block;
+  margin: 0.25rem 0 0 1.25rem;
+  font-size: 0.9375rem;
+  color: var(--mo-muted);
+}
+
+.mo-field-check {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  font-size: 1.0625rem;
+}
+
+.mo-form .mo-field-check label {
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Contact ------------------------------------------------------------------------------------------- */
+.mo-contact-page {
+  display: grid;
+  gap: 2.5rem;
+  padding-top: 1.5rem;
+}
+
+.mo-contact-side {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+}
+
+.mo-contact-side .mo-lead {
+  margin-top: 0;
+}
+
+.mo-mairie-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.75rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: 24px;
+}
+
+.mo-mairie-card .mo-eyebrow {
+  color: var(--mo-mint);
+}
+
+.mo-mairie-card .mo-status[data-open='true']::before {
+  background: var(--mo-mint);
+}
+
+.mo-mairie-card address {
+  display: grid;
+  justify-items: start;
+  font-style: normal;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.mo-mairie-card a {
+  color: #fff;
+}
+
+.mo-mairie-phone {
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+.mo-mairie-hours {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 1rem;
+}
+
+.mo-mairie-hours div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1rem;
+}
+
+.mo-mairie-hours dt {
+  font-weight: 600;
+}
+
+.mo-mairie-hours dd {
+  margin: 0;
+}
+
+.mo-contact-page-map {
+  aspect-ratio: 4 / 3;
+  background: var(--mo-soft);
+  border-radius: 24px;
+}
+
+.mo-contact-form .mo-form {
+  margin-top: 1rem;
+}
+
+.mo-emergency {
+  margin-top: 2.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-emergency ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-emergency a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--mo-target);
+  margin-left: 0.25rem;
+  font-weight: 700;
+}
+
+@media (min-width: 64rem) {
+  .mo-contact-page {
+    grid-template-columns: 26.25rem minmax(0, 1fr);
+    gap: 4.5rem;
+    align-items: start;
+    padding-top: 2.5rem;
+  }
+
+  .mo-contact-side {
+    position: sticky;
+    top: 1.5rem;
+  }
+
+  .mo-contact-side h1 {
+    font-size: 4rem;
+  }
+
+  .mo-contact-form {
+    max-width: 47.5rem;
+  }
+}
+
+/* Collecte des déchets --------------------------------------------------------------------------------- */
+.mo-waste-section {
+  margin-top: 3rem;
+}
+
+.mo-waste-cards {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .mo-waste-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-waste-cards {
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+}
+
+.mo-waste-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--mo-soft);
+  border-radius: 28px;
+}
+
+.mo-waste-card-tri-selectif {
+  background: var(--mo-warning-bg);
+}
+
+.mo-waste-card-verre {
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-waste-card-verre h3 {
+  color: #fff;
+}
+
+.mo-waste-card-dechets-verts {
+  background: #e9f2dd;
+}
+
+.mo-waste-card-encombrants {
+  background: var(--mo-info-bg);
+}
+
+.mo-waste-badge-large {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 0.8125rem;
+}
+
+.mo-waste-card-verre .mo-waste-badge {
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+}
+
+.mo-waste-kicker {
+  margin-top: auto;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mo-muted);
+}
+
+.mo-waste-card-verre .mo-waste-kicker {
+  color: var(--mo-mint);
+}
+
+.mo-waste-date {
+  font-family: var(--mo-font-title);
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+.mo-waste-date time::first-letter {
+  text-transform: uppercase;
+}
+
+.mo-waste-rule,
+.mo-waste-note {
+  font-size: 0.9375rem;
+  color: var(--mo-muted);
+}
+
+.mo-waste-card-verre .mo-waste-rule,
+.mo-waste-card-verre .mo-waste-note {
+  color: #fff;
+}
+
+.mo-waste-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* Tableaux arrondis ; sur mobile, une carte par ligne */
+.mo-table-wrapper {
+  margin-top: 1.25rem;
+}
+
+.mo-table {
+  width: 100%;
+  font-size: 1.0625rem;
+  border-spacing: 0;
+  border: 1px solid var(--mo-border);
+  border-radius: 24px;
+}
+
+.mo-table th,
+.mo-table td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mo-table thead th {
+  background: var(--mo-soft);
+}
+
+.mo-table thead th:first-child {
+  border-top-left-radius: 24px;
+}
+
+.mo-table thead th:last-child {
+  border-top-right-radius: 24px;
+}
+
+.mo-table tbody th,
+.mo-table tbody td {
+  border-top: 1px solid var(--mo-border);
+}
+
+@media (max-width: 47.99rem) {
+  .mo-table,
+  .mo-table tbody,
+  .mo-table tr,
+  .mo-table th,
+  .mo-table td {
+    display: block;
+  }
+
+  .mo-table {
+    border: 0;
+  }
+
+  .mo-table thead {
+    display: none;
+  }
+
+  .mo-table tr {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    border: 1px solid var(--mo-border);
+    border-radius: var(--mo-radius);
+  }
+
+  .mo-table tbody th,
+  .mo-table tbody td {
+    padding: 0.375rem 1.25rem;
+    border: 0;
+  }
+
+  .mo-table td[data-label]::before {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mo-muted);
+    content: attr(data-label);
+  }
+
+  .mo-table td:empty {
+    display: none;
+  }
+}
+
+/* Cantine ------------------------------------------------------------------------------------------------ */
+.mo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.mo-legend-label {
+  margin-right: 0.375rem;
+  font-weight: 600;
+}
+
+.mo-badge-local {
+  color: var(--mo-info);
+  background: var(--mo-info-bg);
+}
+
+.mo-badge-fait-maison {
+  color: var(--mo-warning);
+  background: var(--mo-warning-bg);
+}
+
+.mo-badge-vegetarien {
+  color: #5b2a7a;
+  background: #f0e6f5;
+}
+
+.mo-chip-small {
+  padding: 0.0625rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.mo-week {
+  margin-top: 2.5rem;
+}
+
+.mo-week-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+}
+
+.mo-week-school {
+  font-family: var(--mo-font);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mo-muted);
+}
+
+.mo-menu-days {
+  display: grid;
+  gap: 0.875rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 40rem) {
+  .mo-menu-days {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-menu-days {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.mo-menu-day {
+  padding: 1.5rem 1.375rem;
+  background: var(--mo-soft);
+  border-radius: 28px;
+}
+
+.mo-menu-day-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.mo-menu-day-number {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.mo-menu-day-name {
+  font-family: var(--mo-font);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.mo-menu {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.125rem;
+  font-size: 1rem;
+}
+
+.mo-menu dt {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mo-muted);
+}
+
+.mo-menu dd {
+  margin: 0.125rem 0 0;
+}
+
+.mo-menu-closed {
+  margin-top: 1rem;
+  color: var(--mo-muted);
+}
+
+/* Jour même (marqué dans le navigateur) : carte sombre et « aujourd'hui » en toutes lettres */
+.mo-menu-day[data-today] {
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-menu-day[data-today] .mo-menu-day-number {
+  color: var(--mo-mint);
+}
+
+.mo-menu-day[data-today] .mo-menu-day-name::after {
+  content: ' · aujourd’hui';
+}
+
+.mo-menu-day[data-today] dt,
+.mo-menu-day[data-today] .mo-menu-closed {
+  color: #fff;
+  opacity: 0.8;
+}
+
+.mo-menu-file {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.mo-menu-file img {
+  border-radius: var(--mo-radius);
+}
+
+/* Perturbations -------------------------------------------------------------------------------------------- */
+.mo-disruptions-page {
+  margin-top: 1.5rem;
+}
+
+.mo-disruptions-page .mo-disruption {
+  align-items: flex-start;
+  padding: 1.5rem;
+}
+
+.mo-disruptions-page .mo-disruption > div {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mo-disruption-heading {
+  font-size: var(--mo-h3);
+}
+
+.mo-disruption-meta {
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+.mo-disruption a {
+  font-weight: 600;
+  color: var(--mo-ink);
+}
+
+/* Pages communes (mentions légales, accessibilité, plan du site, recherche, démarches) --------------------- */
+.mo-frame-page {
+  max-width: 47.5rem;
+}
+
+.mo-frame {
+  margin-top: 2rem;
+}
+
+.mo-frame h2 {
+  margin-top: 2.5rem;
+}
+
+.mo-frame dl {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mo-frame dd {
+  margin: 0;
+}
+
+.mo-frame table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-frame th,
+.mo-frame td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.mo-frame tr + tr th,
+.mo-frame tr + tr td {
+  border-top: 1px solid var(--mo-border);
+}
+
+/* Démarches : thèmes dépliables */
+.mo-frame .cn-demarches-themes {
+  display: grid;
+  gap: 0.625rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-frame .cn-demarches-themes > li + li {
+  margin-top: 0;
+}
+
+.mo-frame .cn-demarches-themes > li > details {
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-frame .cn-demarches-themes summary {
+  display: flex;
+  align-items: center;
+  min-height: 3.75rem;
+  padding: 0.5rem 1.5rem;
+  font-family: var(--mo-font-title);
+  font-size: var(--mo-h4);
+  cursor: pointer;
+  border-radius: var(--mo-radius);
+}
+
+.mo-frame .cn-demarches-themes details[open] {
+  background: var(--mo-soft);
+  border-color: var(--mo-soft);
+}
+
+.mo-frame .cn-demarches-themes details > ul {
+  display: grid;
+  gap: 1rem;
+  padding: 0.25rem 1.5rem 1.5rem;
+  list-style: none;
+}
+
+.mo-frame .cn-demarches-themes details > ul > li > p {
+  font-weight: 700;
+}
+
+.mo-frame .cn-demarches-themes details ul ul {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+
+.mo-frame .cn-demarches-themes details ul ul a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--mo-target);
+}
+
+.mo-frame [data-cn-demarches-count] {
+  font-weight: 600;
+}
+
+/* Fiche de démarche */
+.mo-frame .cn-demarche-lead {
+  font-size: 1.25rem;
+  color: var(--mo-muted);
+}
+
+.mo-frame [data-cn-demarche] section {
+  margin-top: 2rem;
+}
+
+.mo-frame .cn-demarche-callout {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 1rem;
+  padding: 1.25rem 1.375rem;
+  background: var(--mo-info-bg);
+  border-radius: var(--mo-radius);
+}
+
+.mo-frame .cn-demarche-callout-label {
+  font-weight: 700;
+  color: var(--mo-info);
+}
+
+.mo-frame .cn-demarche-attention {
+  background: var(--mo-warning-bg);
+}
+
+.mo-frame .cn-demarche-attention .cn-demarche-callout-label {
+  color: var(--mo-warning);
+}
+
+.mo-frame .cn-demarche-case {
+  padding-left: 1rem;
+  border-left: 3px solid var(--mo-soft-line);
+}
+
+.mo-frame .cn-demarche-table {
+  overflow-x: auto;
+}
+
+.mo-frame .cn-demarche-table caption {
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.mo-frame .cn-demarche-table tr:first-child td {
+  font-weight: 600;
+  background: var(--mo-soft);
+}
+
+.mo-frame .cn-demarche-links ul {
+  display: grid;
+  gap: 0.375rem;
+  padding-left: 1.5rem;
+}
+
+.mo-frame .cn-demarche-cerfa {
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+.mo-frame .cn-demarche-source {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  font-size: 1rem;
+  color: var(--mo-muted);
+  border-top: 1px solid var(--mo-border);
+}
+
+/* Recherche : champ en pilule, résultats en titres */
+.mo-frame form[role='search'] p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.mo-frame form[role='search'] label {
+  flex: 1 0 100%;
+  margin: 0 0 0.375rem 1.25rem;
+}
+
+.mo-frame form[role='search'] input {
+  flex: 1 1 14rem;
+  width: auto;
+  min-width: 0;
+  border-right: 0;
+  border-radius: var(--mo-pill) 0 0 var(--mo-pill);
+}
+
+.mo-frame form[role='search'] button {
+  min-height: 3.5rem;
+  padding: 0 1.5rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+  border: 0;
+  border-radius: 0 var(--mo-pill) var(--mo-pill) 0;
+  cursor: pointer;
+}
+
+.mo-frame form[role='search'] button:hover {
+  background: var(--mo-accent-hover);
+}
+
+.mo-frame [data-cn-search-results] {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-frame [data-cn-search-results] > li {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-frame [data-cn-search-results] a {
+  font-family: var(--mo-font-title);
+  font-size: var(--mo-h4);
+}
+
+.mo-frame [data-cn-search-results] p:first-of-type {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--mo-muted);
+}
+
+/* 404 ---------------------------------------------------------------------------------------------------------- */
+.mo-404 {
+  display: grid;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding: 2.5rem 1.5rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: 32px;
+}
+
+.mo-404 h1 {
+  margin-top: 1rem;
+  color: #fff;
+}
+
+.mo-404-code {
+  font-family: var(--mo-font-title);
+  font-size: 6rem;
+  line-height: 0.9;
+  color: var(--mo-mint);
+}
+
+.mo-404-lead {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+}
+
+.mo-404-help {
+  display: grid;
+  gap: 1.5rem;
+  align-content: center;
+}
+
+.mo-404 .mo-mega-search input {
+  border-color: #fff;
+}
+
+.mo-404 .mo-eyebrow {
+  color: var(--mo-mint);
+}
+
+.mo-404-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: -0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-404-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  border: 2px solid #fff;
+  border-radius: var(--mo-pill);
+}
+
+.mo-404-links a:hover {
+  color: var(--mo-ink);
+  background: #fff;
+}
+
+@media (min-width: 64rem) {
+  .mo-404 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.5rem;
+    align-items: center;
+    margin-top: 2.5rem;
+    padding: 5rem 4rem;
+    border-radius: 40px;
+  }
+
+  .mo-404-code {
+    font-size: 10rem;
+  }
+
+  .mo-404 h1 {
+    font-size: 3rem;
+  }
+}
+
+/* Case à cocher en erreur : le message passe sous la case et son libellé */
+.mo-field-check {
+  flex-wrap: wrap;
+}
+
+.mo-field-check label {
+  flex: 1;
+}
+
+.mo-field-check .mo-field-error {
+  flex-basis: 100%;
+  order: 3;
+  margin-left: 2.25rem;
+}
+
+/* Dates de collecte en toutes lettres : taille contenue */
+.mo-waste-date {
+  font-size: 1.625rem;
+}
+
+/* Menu en image : largeur de lecture */
+.mo-menu-file img {
+  max-width: min(100%, 45rem);
+}

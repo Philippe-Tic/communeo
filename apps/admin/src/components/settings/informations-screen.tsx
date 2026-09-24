@@ -52,7 +52,8 @@ export function parseCoordinates(text: string): { latitude: number; longitude: n
   return { latitude, longitude };
 }
 
-const schema = z.object({
+/** Réglages « Informations de la commune » (repris par l'étape « Votre commune » de l'assistant) */
+export const informationsSchema = z.object({
   name: z
     .string()
     .trim()
@@ -92,9 +93,10 @@ const schema = z.object({
   }),
 });
 
-type Values = z.input<typeof schema>;
+export type InformationsValues = z.input<typeof informationsSchema>;
+type Values = InformationsValues;
 
-function toValues(site: SiteSettings): Values {
+export function informationsValues(site: SiteSettings): Values {
   const info = site.infos_pratiques;
   const hours: OpeningHours = info?.opening_hours ?? emptyOpeningHours();
   return {
@@ -123,7 +125,7 @@ function toValues(site: SiteSettings): Values {
 const optional = (value: string) => value.trim() || null;
 
 /** Valeurs du formulaire → données du Site (le composant « infos pratiques » est envoyé en entier) */
-function toPayload(values: Values, site: SiteSettings) {
+export function informationsPayload(values: Values, site: SiteSettings) {
   const coordinates = parseCoordinates(values.coordinates);
   const infos_pratiques = {
     opening_hours: {
@@ -155,7 +157,7 @@ function toPayload(values: Values, site: SiteSettings) {
 
 export function InformationsScreen({ site }: { site: SiteSettings }) {
   const client = useQueryClient();
-  const form = useZodForm(schema, toValues(site));
+  const form = useZodForm(informationsSchema, informationsValues(site));
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState(site.updatedAt);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -168,7 +170,7 @@ export function InformationsScreen({ site }: { site: SiteSettings }) {
   const save = async (values: Values): Promise<boolean> => {
     setSaving(true);
     try {
-      const { data, cached } = toPayload(values, site);
+      const { data, cached } = informationsPayload(values, site);
       await saveSiteSettings(client, site.documentId, data, cached);
       form.reset(values);
       setSavedAt(new Date().toISOString());

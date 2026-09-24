@@ -65,6 +65,7 @@ async function summarize(site: any) {
     customDomain: site.custom_domain ?? null,
     population: site.infos_pratiques?.population ?? null,
     suspended: !!site.suspended,
+    onboarding: site.onboarding ?? null,
     createdAt: site.createdAt,
     lastActivity: dates.length ? new Date(Math.max(...dates)).toISOString() : site.createdAt,
     publication: { state: publication, at: deployment?.completed_at ?? deployment?.triggered_at ?? null, pendingCount },
@@ -223,7 +224,8 @@ export default {
 
     // 1. La commune (contact de la mairie = l'administrateur, à préciser ensuite)
     const site = await strapi.documents('api::site.site').create({
-      data: { name, slug, theme: DEFAULT_THEME, contact_mail: email } as any,
+      // L'assistant de création attend le premier administrateur (étape 1)
+      data: { name, slug, theme: DEFAULT_THEME, contact_mail: email, onboarding: { step: 1 } } as any,
     });
 
     // 2. Le site chez l'hébergeur (sinon créé à la première mise en ligne)

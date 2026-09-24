@@ -33,6 +33,7 @@ export const ROUTES = [
   '/conformite',
   '/utilisateurs',
   '/journal',
+  '/assistant?etape=2',
   '/mon-compte',
 ];
 

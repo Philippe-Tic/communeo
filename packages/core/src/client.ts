@@ -9,3 +9,4 @@ export * from './demarches';
 // Alertes rechargées dans le navigateur (mise en ligne immédiate, sans reconstruire le site)
 export { mapAlert } from './vm/practical';
 export type { AlertVM, MapContext } from './vm';
+export type { CommuneDetails, CommuneMatch } from './site/public-data';

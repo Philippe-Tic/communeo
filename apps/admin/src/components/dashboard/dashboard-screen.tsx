@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/page-header';
 import { StatusBadge, type Tone } from '@/components/ui/status-badge';
 import { alertState, alertsQuery, type Alert } from '@/lib/alerts';
 import { complianceQuery, remainingText } from '@/lib/compliance';
+import { ONBOARDING_STEPS, onboardingPending, TOTAL_STEPS } from '@/lib/onboarding';
 import { publicationStatesQuery } from '@/lib/content-list';
 import { CONTENT_LABELS, recentContentsQuery, upcomingEventsQuery } from '@/lib/dashboard';
 import { formatDayTime, formatListDate, formatShortParisDateTime, relativeTime } from '@/lib/dates';
@@ -534,6 +535,28 @@ export function DashboardScreen() {
         documentTitle="Tableau de bord"
         description={summary}
       />
+      {onboardingPending(user) && user.site?.onboarding && (
+        <section
+          aria-labelledby="reprendre-assistant"
+          className="mb-5 flex flex-wrap items-center gap-4 rounded-xl border border-brand bg-brand-soft p-5"
+        >
+          <div className="min-w-0 flex-1 basis-64">
+            <h2 id="reprendre-assistant" className="text-[17px] font-semibold">
+              Terminez la création de votre site
+            </h2>
+            <p className="mt-1 text-secondary">
+              Vous en êtes à l'étape {user.site.onboarding.step} sur {TOTAL_STEPS} : {ONBOARDING_STEPS[user.site.onboarding.step - 1]?.label.toLowerCase()}.
+            </p>
+          </div>
+          <Link
+            to="/assistant"
+            search={{ etape: user.site.onboarding.step }}
+            className="inline-flex h-10 items-center rounded-lg bg-brand-button px-4 font-semibold text-on-brand hover:bg-brand-hover max-md:h-11 max-md:w-full max-md:justify-center"
+          >
+            Reprendre
+          </Link>
+        </section>
+      )}
       {alert && (
         <div className="mb-5 max-lg:hidden">
           <Tiles alert={alert} report={report} />

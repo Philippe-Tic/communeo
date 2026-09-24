@@ -1169,6 +1169,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     netlify_site_id: Schema.Attribute.String & Schema.Attribute.Private & Schema.Attribute.Unique;
     newsletter_subscribers: Schema.Attribute.Relation<'oneToMany', 'api::newsletter-subscriber.newsletter-subscriber'>;
     official_documents: Schema.Attribute.Relation<'oneToMany', 'api::official-document.official-document'>;
+    onboarding: Schema.Attribute.JSON;
     open_data_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     open_data_platform: Schema.Attribute.Enumeration<['data-gouv-fr', 'opendatasoft', 'custom', 'none']> &
       Schema.Attribute.DefaultTo<'none'>;

@@ -415,6 +415,10 @@ export interface MockOptions {
   failUploadFor?: string;
   /** La page « Location de la salle des fêtes » contient une image sans texte alternatif */
   pageImageWithoutAlt?: boolean;
+  /** Assistant de création en cours (commune créée par l'équipe) */
+  onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null };
+  /** Données publiques : trouvées (défaut), mairie absente de l'annuaire, ou services en panne */
+  publicData?: 'ok' | 'no-town-hall' | 'down';
 }
 
 export type MockMedia = {
@@ -876,6 +880,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     mediaSet = 'some',
     failUploadFor,
     pageImageWithoutAlt = false,
+    onboarding,
+    publicData = 'ok',
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
@@ -1176,6 +1182,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     open_data_enabled: false,
     navigation_config: structuredClone(navigation) as unknown,
     waste_notes: 'Déchetterie ouverte du mardi au samedi.' as string | null,
+    onboarding: (onboarding ?? null) as unknown,
   };
   // Réglages reçus par le serveur de preview (POST de l'admin)
   const previewPosts: Array<Record<string, unknown>> = [];
@@ -1240,7 +1247,62 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return json({ ok: true });
 
     if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
-    if (url.pathname === '/api/users/me') return json(USERS[user]);
+    if (url.pathname === '/api/users/me')
+      return json(
+        onboarding && USERS[user].site
+          ? { ...USERS[user], site: { ...USERS[user].site, onboarding: site.onboarding } }
+          : USERS[user],
+      );
+    // Assistant de création : recherche de la commune et données publiques (#150)
+    if (url.pathname === '/api/onboarding/communes') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      const q = (url.searchParams.get('q') ?? '').toLowerCase();
+      const match = {
+        name: 'Saint-Aubin-sur-Loire',
+        insee: '58236',
+        postalCodes: ['58300'],
+        population: 3240,
+        department: 'Nièvre',
+      };
+      return json({ data: q.startsWith('saint-aubin') || q === '58300' ? [match] : [] });
+    }
+    if (url.pathname === '/api/onboarding/communes/58236') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      return json({
+        data: {
+          name: 'Saint-Aubin-sur-Loire',
+          insee: '58236',
+          postalCodes: ['58300'],
+          population: 3240,
+          department: 'Nièvre',
+          latitude: 46.7412,
+          longitude: 3.7891,
+          townHall:
+            publicData === 'no-town-hall'
+              ? null
+              : {
+                  address: '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire',
+                  phone: '03 86 00 00 00',
+                  email: null,
+                  siret: '21580236500017',
+                  hours: {
+                    days: {
+                      monday: [{ open: '09:00', close: '12:00' }],
+                      tuesday: [{ open: '09:00', close: '12:00' }],
+                      wednesday: [],
+                      thursday: [{ open: '09:00', close: '12:00' }],
+                      friday: [{ open: '09:00', close: '12:00' }],
+                      saturday: [],
+                      sunday: [],
+                    },
+                    closures: [],
+                  },
+                },
+        },
+      });
+    }
     if (url.pathname === `/api/sites/${SITE.documentId}`) {
       if (method === 'PUT') {
         const body = route.request().postDataJSON() as { data: Record<string, unknown> };

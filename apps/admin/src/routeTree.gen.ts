@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as CommunesRouteImport } from './routes/communes'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as InvitationRouteImport } from './routes/invitation'
@@ -58,6 +59,11 @@ import { Route as PlateformeCommunesDocumentIdRouteImport } from './routes/plate
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunesRoute = CommunesRouteImport.update({
@@ -289,6 +295,7 @@ const PlateformeCommunesDocumentIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
   '/invitation': typeof InvitationRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByFullPath {
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
 export interface FileRoutesByTo {
+  '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
   '/invitation': typeof InvitationRoute
@@ -383,6 +391,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
   '/invitation': typeof InvitationRoute
@@ -433,6 +442,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/assistant'
     | '/communes'
     | '/connexion'
     | '/invitation'
@@ -479,6 +489,7 @@ export interface FileRouteTypes {
     | '/plateforme/communes/$documentId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/assistant'
     | '/communes'
     | '/connexion'
     | '/invitation'
@@ -526,6 +537,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/assistant'
     | '/communes'
     | '/connexion'
     | '/invitation'
@@ -575,6 +587,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  AssistantRoute: typeof AssistantRoute
   CommunesRoute: typeof CommunesRoute
   ConnexionRoute: typeof ConnexionRoute
   InvitationRoute: typeof InvitationRoute
@@ -590,6 +603,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/communes': {
@@ -1008,6 +1028,7 @@ const PlateformeRouteWithChildren = PlateformeRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  AssistantRoute: AssistantRoute,
   CommunesRoute: CommunesRoute,
   ConnexionRoute: ConnexionRoute,
   InvitationRoute: InvitationRoute,

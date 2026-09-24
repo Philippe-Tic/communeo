@@ -75,6 +75,16 @@ export interface SiteSettings {
   navigation_config: Partial<NavigationConfig> | null;
   /** Notes de la page Collecte des déchets */
   waste_notes: string | null;
+  /** Assistant de création (commune créée par l'équipe) ; absent : pas d'assistant */
+  onboarding: OnboardingProgress | null;
+}
+
+export interface OnboardingProgress {
+  /** Étape où reprendre (1 à 7) */
+  step: number;
+  /** « Enregistrer et continuer plus tard » : plus de redirection, une carte sur le tableau de bord */
+  postponedAt?: string | null;
+  completedAt?: string | null;
 }
 
 const FIELDS = [
@@ -92,6 +102,7 @@ const FIELDS = [
   'open_data_platform',
   'navigation_config',
   'waste_notes',
+  'onboarding',
 ];
 /** Composants et fichiers : chaque écran de réglages enregistre les siens en entier */
 const POPULATE = ['logo', 'favicon', 'infos_pratiques', 'mentions_legales', 'rgpd', 'accessibilite', 'social_links'];

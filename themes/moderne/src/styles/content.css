@@ -1,0 +1,779 @@
+/* Pages de contenu : en-tête, image principale, colonne de lecture, sommaire, et les 9 blocs. */
+
+/* En-tête et image principale ------------------------------------------------------------------ */
+.mo-page-header {
+  max-width: 56rem;
+  padding-top: 1.5rem;
+}
+
+.mo-page-header h1 {
+  margin-top: 0.75rem;
+}
+
+.mo-lead {
+  margin-top: 1.25rem;
+  font-size: 1.25rem;
+  color: var(--mo-muted);
+  text-wrap: pretty;
+}
+
+.mo-cover {
+  margin-top: 2rem;
+}
+
+.mo-cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 24px;
+}
+
+.mo-cover figcaption,
+.mo-image figcaption {
+  margin: 0.625rem 0.25rem 0;
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+.mo-updated {
+  margin-top: 3rem;
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+@media (min-width: 64rem) {
+  .mo-page-header {
+    padding-top: 2.5rem;
+  }
+
+  .mo-lead {
+    font-size: 1.375rem;
+  }
+
+  .mo-cover {
+    margin-top: 2.5rem;
+  }
+
+  .mo-cover img {
+    aspect-ratio: 21 / 9;
+    border-radius: 32px;
+  }
+}
+
+/* Colonne de lecture et sommaire ------------------------------------------------------------------ */
+.mo-reading {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2.5rem;
+}
+
+.mo-blocks {
+  display: grid;
+  gap: 2rem;
+  min-width: 0;
+  max-width: 47.5rem;
+}
+
+.mo-toc-side {
+  display: none;
+}
+
+.mo-toc ol {
+  padding: 0;
+  list-style: none;
+}
+
+.mo-toc a {
+  display: block;
+  padding: 0.625rem 1.125rem;
+  color: var(--mo-muted);
+  text-decoration: none;
+}
+
+.mo-toc a:hover {
+  color: var(--mo-ink);
+  text-decoration: underline;
+}
+
+.mo-toc .mo-toc-level-3 a {
+  padding-left: 2rem;
+  font-size: 1rem;
+}
+
+.mo-toc-mobile {
+  order: -1;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-toc-mobile summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.5rem;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.mo-toc-mobile summary::-webkit-details-marker {
+  display: none;
+}
+
+.mo-toc-mobile[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.mo-toc-mobile ol {
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 64rem) {
+  .mo-reading {
+    margin-top: 3.5rem;
+  }
+
+  .mo-reading-with-toc {
+    grid-template-columns: minmax(0, 47.5rem) 18.75rem;
+    justify-content: space-between;
+    gap: 4.5rem;
+    align-items: start;
+  }
+
+  .mo-toc-mobile {
+    display: none;
+  }
+
+  .mo-toc-side {
+    position: sticky;
+    top: 1.5rem;
+    display: block;
+  }
+
+  .mo-toc-side ol {
+    margin-top: 0.875rem;
+    font-size: 1.0625rem;
+    border-left: 2px solid var(--mo-border);
+  }
+
+  .mo-toc-side a {
+    margin-left: -2px;
+    border-left: 2px solid transparent;
+  }
+
+  /* Section en cours : trait vert et texte gras, pas seulement la couleur */
+  .mo-toc-side a[aria-current] {
+    font-weight: 600;
+    color: var(--mo-ink);
+    border-left-color: var(--mo-accent-text);
+  }
+}
+
+/* Texte riche ------------------------------------------------------------------------------------ */
+.mo-prose > * + * {
+  margin-top: 1rem;
+}
+
+.mo-prose h2 {
+  margin-top: 3rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.mo-prose h3 {
+  margin-top: 1.5rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.mo-prose > :first-child {
+  margin-top: 0;
+}
+
+.mo-prose ul,
+.mo-prose ol {
+  padding-left: 1.75rem;
+}
+
+.mo-prose li + li {
+  margin-top: 0.375rem;
+}
+
+.mo-prose blockquote {
+  padding-left: 1.25rem;
+  font-family: var(--mo-font-title);
+  font-size: 1.375rem;
+  font-style: italic;
+  border-left: 3px solid var(--mo-accent);
+}
+
+.mo-prose table {
+  width: 100%;
+  font-size: 1.0625rem;
+  border-spacing: 0;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-prose th,
+.mo-prose td {
+  padding: 0.875rem 1.25rem;
+  text-align: left;
+}
+
+.mo-prose thead th {
+  background: var(--mo-soft);
+}
+
+.mo-prose tbody tr td,
+.mo-prose tbody tr th {
+  border-top: 1px solid var(--mo-border);
+}
+
+/* Image ---------------------------------------------------------------------------------------------- */
+.mo-image img {
+  display: block;
+  width: 100%;
+  border-radius: var(--mo-radius);
+}
+
+@media (min-width: 40rem) {
+  .mo-image-portrait {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .mo-image-portrait img {
+    flex: none;
+    width: 16.25rem;
+  }
+
+  .mo-image-portrait figcaption {
+    margin: 0.25rem 0 0;
+  }
+}
+
+/* Boutons -------------------------------------------------------------------------------------------- */
+.mo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Encadré : disque de type + libellé ----------------------------------------------------------------- */
+.mo-callout {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem 1.375rem;
+  background: var(--mo-callout-bg);
+  border-radius: var(--mo-radius);
+}
+
+.mo-callout-info {
+  --mo-callout-bg: var(--mo-info-bg);
+  --mo-callout-ink: var(--mo-info);
+}
+
+.mo-callout-warning {
+  --mo-callout-bg: var(--mo-warning-bg);
+  --mo-callout-ink: var(--mo-warning);
+}
+
+.mo-callout-important {
+  --mo-callout-bg: var(--mo-danger-bg);
+  --mo-callout-ink: var(--mo-danger);
+}
+
+.mo-callout-tip {
+  --mo-callout-bg: var(--mo-ink);
+  --mo-callout-ink: var(--mo-mint);
+
+  color: #fff;
+}
+
+.mo-callout-tip a {
+  color: var(--mo-mint);
+}
+
+.mo-callout-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--mo-callout-ink);
+  border-radius: 50%;
+}
+
+.mo-callout-tip .mo-callout-sign {
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+}
+
+.mo-callout-label {
+  font-weight: 700;
+  color: var(--mo-callout-ink);
+}
+
+.mo-callout .mo-prose {
+  margin-top: 0.25rem;
+}
+
+/* Documents -------------------------------------------------------------------------------------------- */
+.mo-documents h2 {
+  margin-bottom: 1rem;
+}
+
+.mo-document-single {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.125rem 1.375rem;
+  color: var(--mo-ink);
+  text-decoration: none;
+  background: var(--mo-soft);
+  border-radius: var(--mo-radius);
+}
+
+.mo-document-single:hover {
+  color: var(--mo-ink);
+  background: var(--mo-border);
+}
+
+.mo-document-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: 50%;
+}
+
+.mo-document-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mo-document-single .mo-document-meta {
+  display: block;
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+.mo-document-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-document-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 3.75rem;
+  padding: 0.5rem 1.375rem;
+  color: var(--mo-ink);
+  text-decoration: none;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-pill);
+}
+
+.mo-document-list a:hover {
+  color: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-document-list .mo-document-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.mo-document-type {
+  flex: none;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: var(--mo-pill);
+}
+
+.mo-document-list .mo-document-meta {
+  flex: none;
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+/* Galerie en mosaïque ------------------------------------------------------------------------------------ */
+.mo-gallery h2 {
+  margin-bottom: 1rem;
+}
+
+.mo-gallery ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-gallery a {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--mo-radius);
+}
+
+.mo-gallery img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.mo-gallery a:hover img {
+  transform: scale(1.03);
+}
+
+@media (min-width: 40rem) {
+  .mo-gallery .mo-gallery-mosaic {
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-auto-rows: 9.5rem;
+  }
+
+  .mo-gallery-mosaic li:first-child {
+    grid-row: span 2;
+  }
+
+  .mo-gallery .mo-gallery-mosaic img {
+    aspect-ratio: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mo-gallery img {
+    transition: none;
+  }
+}
+
+/* Fenêtre d'agrandissement (partagée) */
+.cn-lightbox {
+  width: min(64rem, 100% - 2rem);
+  max-height: calc(100% - 2rem);
+  padding: 1.25rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border: 0;
+  border-radius: var(--mo-radius);
+}
+
+.cn-lightbox::backdrop {
+  background: rgb(18 33 27 / 88%);
+}
+
+.cn-lightbox img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--mo-radius-sm);
+}
+
+.cn-lightbox figcaption {
+  margin-top: 0.625rem;
+  font-size: 1rem;
+}
+
+.cn-lightbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 1rem;
+}
+
+.cn-lightbox button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  color: #fff;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cn-lightbox button:hover {
+  color: var(--mo-ink);
+  background: #fff;
+}
+
+.cn-lightbox :focus-visible {
+  outline-color: #fff;
+}
+
+.cn-lightbox-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  color: var(--mo-ink) !important;
+  background: #fff !important;
+  border-color: #fff !important;
+}
+
+/* Questions / réponses ------------------------------------------------------------------------------------ */
+.mo-faq h2 {
+  margin-bottom: 1rem;
+}
+
+.mo-faq-list {
+  display: grid;
+  gap: 0.625rem;
+}
+
+.mo-faq-list details {
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-faq-list details[open] {
+  background: var(--mo-soft);
+  border-color: var(--mo-soft);
+}
+
+.mo-faq-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--mo-radius);
+}
+
+.mo-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.mo-faq-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--mo-soft);
+  border-radius: 50%;
+}
+
+.mo-faq-list details[open] .mo-faq-sign {
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-faq-close,
+.mo-faq-list details[open] .mo-faq-open {
+  display: none;
+}
+
+.mo-faq-list details[open] .mo-faq-close {
+  display: block;
+}
+
+.mo-faq-answer {
+  padding: 0 1.5rem 1.375rem;
+}
+
+/* Contact / lieu ---------------------------------------------------------------------------------------- */
+.mo-contact {
+  overflow: hidden;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-contact-with-map {
+  display: grid;
+  background: var(--mo-soft);
+  border: 0;
+}
+
+.mo-contact-info {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.375rem 1.75rem;
+}
+
+.mo-contact-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  color: var(--mo-muted);
+  background: var(--mo-soft);
+  border-radius: 50%;
+}
+
+.mo-contact-info > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mo-contact-name {
+  font-size: var(--mo-h3);
+}
+
+.mo-contact address {
+  display: grid;
+  justify-items: start;
+  margin-top: 0.75rem;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.mo-contact-hours {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+}
+
+.mo-contact-map {
+  min-height: 16rem;
+  background: var(--mo-border);
+  border-radius: 0;
+}
+
+@media (min-width: 48rem) {
+  .mo-contact-with-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Contenus soumis au consentement (vidéo, carte) --------------------------------------------------------- */
+.cn-embed {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--mo-radius);
+}
+
+.cn-embed iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.mo-contact-map iframe {
+  height: 100%;
+  min-height: 16rem;
+  aspect-ratio: auto;
+}
+
+.cn-embed-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.875rem;
+  height: 100%;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.mo-embed {
+  aspect-ratio: 16 / 9;
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-embed .cn-embed-placeholder p:first-child {
+  font-family: var(--mo-font-title);
+  font-size: var(--mo-h3);
+}
+
+.mo-embed .cn-embed-placeholder a {
+  color: var(--mo-mint);
+}
+
+.cn-embed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.cn-embed-actions button {
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+  border: 0;
+  border-radius: var(--mo-pill);
+  cursor: pointer;
+}
+
+.cn-embed-actions button:hover {
+  background: var(--mo-mint);
+}
+
+.mo-contact-map .cn-embed-actions button {
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-contact-map .cn-embed-actions button:hover {
+  background: var(--mo-deep);
+}
+
+@media (max-width: 39.99rem) {
+  .mo-embed {
+    aspect-ratio: auto;
+    min-height: 16rem;
+  }
+}
+
+.mo-transcript {
+  margin-top: 0.75rem;
+  padding: 0.375rem 1.5rem;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-transcript summary {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mo-transcript p {
+  margin-bottom: 0.75rem;
+  font-size: 1.0625rem;
+}
+
+/* Sur le fond de la carte (#DDE5E0), le vert des liens n'atteint pas 4,5:1 : encre */
+.mo-contact-map a {
+  color: var(--mo-ink);
+}

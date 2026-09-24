@@ -1,11 +1,15 @@
 ---
+/** Image arrondie : paysage sur toute la colonne ; portrait à largeur limitée, légende à côté. */
 import type { BlockOf } from '@communeo/core';
 
 interface Props { block: BlockOf<'image'> }
 const { block } = Astro.props;
 const { image } = block;
+const portrait = !!(image.width && image.height && image.height > image.width);
 ---
-<figure class:list={['st-image', { 'st-image-full': block.width === 'full' }]}>
+<figure class:list={['mo-image', { 'mo-image-full': block.width === 'full', 'mo-image-portrait': portrait && block.width !== 'full' }]}>
   <img src={image.src} srcset={image.srcset ?? undefined} alt={image.alt} width={image.width ?? undefined} height={image.height ?? undefined} loading="lazy" decoding="async" />
-  {(image.caption || image.credit) && <figcaption>{image.caption}{image.credit && <> – {image.credit}</>}</figcaption>}
+  {(image.caption || image.credit) && (
+    <figcaption>{image.caption}{image.credit && <> Crédit : {image.credit}</>}</figcaption>
+  )}
 </figure>

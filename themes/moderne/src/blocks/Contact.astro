@@ -1,18 +1,35 @@
 ---
+/**
+ * Contact ou lieu. Avec carte : coordonnées à gauche, carte OpenStreetMap chargée après consentement
+ * à droite. Sans carte : une ligne avec pastille, coordonnées et horaires.
+ */
 import type { BlockOf } from '@communeo/core';
+import ConsentEmbed from '@communeo/ui-a11y/ConsentEmbed.astro';
+import MapPin from '@lucide/astro/icons/map-pin';
 
 interface Props { block: BlockOf<'contact'> }
 const { block } = Astro.props;
+const query = block.map ? encodeURIComponent(block.map.query) : null;
+const mapUrl = query ? `https://www.openstreetmap.org/export/embed.html?bbox=&layer=mapnik&query=${query}` : null;
+const osmUrl = query ? `https://www.openstreetmap.org/search?query=${query}` : null;
 ---
-<section class="st-contact" aria-label={block.name}>
-  <h2>{block.name}</h2>
-  <address>
-    {block.address && <p>{block.address}</p>}
-    {block.phone && <p>Téléphone : <a href={block.phone.href}>{block.phone.label}</a></p>}
-    {block.email && <p>E-mail : <a href={block.email.href}>{block.email.label}</a></p>}
-  </address>
-  {block.hours && <p>{block.hours}</p>}
-  {block.map && (
-    <p><a href={`https://www.openstreetmap.org/search?query=${encodeURIComponent(block.map.query)}`} target="_blank" rel="noopener noreferrer">Voir sur la carte<span class="cn-sr-only"> (OpenStreetMap, nouvelle fenêtre)</span></a></p>
+<section class:list={['mo-contact', { 'mo-contact-with-map': mapUrl }]} aria-label={block.name}>
+  <div class="mo-contact-info">
+    {!mapUrl && <span class="mo-contact-icon" aria-hidden="true"><MapPin size={24} /></span>}
+    <div>
+      <h2 class="mo-contact-name">{block.name}</h2>
+      <address>
+        {block.address && <span>{block.address}</span>}
+        {block.phone && <a href={block.phone.href}>{block.phone.label}</a>}
+        {block.email && <a href={block.email.href}>{block.email.label}</a>}
+      </address>
+      {block.hours && <p class="mo-contact-hours">{block.hours}</p>}
+      {osmUrl && (
+        <p><a href={osmUrl} target="_blank" rel="noopener noreferrer">Voir sur OpenStreetMap<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></p>
+      )}
+    </div>
+  </div>
+  {mapUrl && osmUrl && (
+    <ConsentEmbed title={`Carte : ${block.name}`} src={mapUrl} provider="OpenStreetMap" href={osmUrl} kind="map" class="mo-contact-map" />
   )}
 </section>

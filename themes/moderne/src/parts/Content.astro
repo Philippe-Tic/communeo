@@ -1,8 +1,9 @@
 ---
-/** Blocs d'un contenu, avec le sommaire quand la page est longue. */
+/** Blocs d'un contenu, avec le sommaire quand la page est longue (actualité, événement). */
 import type { BlockVM, TocEntryVM } from '@communeo/core';
 import Blocks from '@communeo/ui-a11y/Blocks.astro';
 import { blocks as components } from '../blocks/index';
+import Toc from './Toc.astro';
 
 interface Props {
   blocks: BlockVM[];
@@ -10,11 +11,9 @@ interface Props {
 }
 
 const { blocks, toc = [] } = Astro.props;
+const withToc = toc.length >= 3;
 ---
-{toc.length >= 3 && (
-  <nav class="st-toc" aria-labelledby="st-toc-title">
-    <h2 id="st-toc-title">Sommaire</h2>
-    <ol>{toc.map((entry) => <li class={`st-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}</ol>
-  </nav>
-)}
-<Blocks blocks={blocks} components={components} />
+<div class:list={['mo-reading', { 'mo-reading-with-toc': withToc }]}>
+  <div class="mo-blocks"><Blocks blocks={blocks} components={components} /></div>
+  {withToc && <Toc entries={toc} />}
+</div>

@@ -52,3 +52,25 @@ test('mobile : les rubriques se déplient dans le menu', async ({ page }, info) 
   await group.click();
   await expect(menu.getByRole('link', { name: 'Collecte des déchets' })).toBeVisible();
 });
+
+test('page de contenu : la galerie s’agrandit sans violation, Échap rend le focus à la vignette', async ({ page }) => {
+  await page.goto('/salle-des-fetes');
+  const first = page.locator('[data-cn-gallery] a').first();
+  await first.click();
+  const dialog = page.getByRole('dialog', { name: 'Image agrandie' });
+  await expect(dialog).toBeVisible();
+  const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+  expect(results.violations.map((v) => v.id)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(first).toBeFocused();
+});
+
+test('page de contenu : le sommaire mène aux sections', async ({ page }, info) => {
+  await page.goto('/salle-des-fetes');
+  const mobile = info.project.name.endsWith('mobile');
+  if (mobile) await page.locator('.mo-toc-mobile summary').click();
+  const toc = mobile ? page.locator('.mo-toc-mobile') : page.getByRole('navigation', { name: 'Sur cette page' });
+  await toc.getByRole('link', { name: 'Tarifs' }).click();
+  await expect(page).toHaveURL(/#tarifs$/);
+});

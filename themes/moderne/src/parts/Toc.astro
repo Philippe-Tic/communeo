@@ -1,0 +1,58 @@
+---
+/**
+ * Sommaire « Sur cette page ». Sur grand écran, il reste collé à droite du contenu et signale la
+ * section en cours de lecture ; sur mobile, il se replie dans un « Sommaire » dépliable (sans JS).
+ */
+import type { TocEntryVM } from '@communeo/core';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+
+interface Props {
+  entries: TocEntryVM[];
+}
+
+const { entries } = Astro.props;
+---
+<nav class="mo-toc mo-toc-side" aria-labelledby="mo-toc-title" data-mo-toc>
+  <h2 id="mo-toc-title" class="mo-eyebrow">Sur cette page</h2>
+  <ol>
+    {entries.map((entry) => <li class={`mo-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}
+  </ol>
+</nav>
+
+<details class="mo-toc mo-toc-mobile">
+  <summary>Sommaire<ChevronDown size={20} aria-hidden="true" /></summary>
+  <ol>
+    {entries.map((entry) => <li class={`mo-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}
+  </ol>
+</details>
+
+<script>
+  // Section en cours de lecture : le lien correspondant du sommaire est marqué (aria-current)
+  const toc = document.querySelector<HTMLElement>('[data-mo-toc]');
+  const links = toc ? [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')] : [];
+  const targets = links
+    .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+    .filter((target): target is HTMLElement => !!target);
+  if (targets.length && 'IntersectionObserver' in window) {
+    const visible = new Set<Element>();
+    const mark = () => {
+      const current = targets.find((target) => visible.has(target)) ?? null;
+      for (const link of links) {
+        const active = current !== null && link.hash === `#${current.id}`;
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      }
+    };
+    const observer = new IntersectionObserver(
+      (records) => {
+        for (const record of records) {
+          if (record.isIntersecting) visible.add(record.target);
+          else visible.delete(record.target);
+        }
+        mark();
+      },
+      { rootMargin: '0px 0px -60% 0px' },
+    );
+    targets.forEach((target) => observer.observe(target));
+  }
+</script>

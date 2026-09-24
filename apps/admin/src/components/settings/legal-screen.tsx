@@ -23,7 +23,8 @@ const phone = z
     'Indiquez un numéro de téléphone à 10 chiffres',
   );
 
-const schema = z.object({
+/** Réglages « Mentions légales et RGPD » (repris par l'étape « Obligations » de l'assistant) */
+export const legalSchema = z.object({
   siret: z
     .string()
     .trim()
@@ -38,13 +39,14 @@ const schema = z.object({
   mentions_legales_extra: z.custom<RichTextDocument>(),
 });
 
-type Values = z.infer<typeof schema>;
+export type LegalValues = z.infer<typeof legalSchema>;
+type Values = LegalValues;
 
 const doc = (value: unknown) => (value && typeof value === 'object' ? (value as RichTextDocument) : emptyDoc());
 const richOrNull = (value: RichTextDocument) => (isRichTextEmpty(value) ? null : value);
 const optional = (value: string) => value.trim() || null;
 
-function toValues(site: SiteSettings): Values {
+export function legalValues(site: SiteSettings): Values {
   const legal = site.mentions_legales;
   const rgpd = site.rgpd;
   return {
@@ -60,7 +62,7 @@ function toValues(site: SiteSettings): Values {
   };
 }
 
-function toPayload(values: Values, site: SiteSettings) {
+export function legalPayload(values: Values, site: SiteSettings) {
   const legal = site.mentions_legales;
   const mentions_legales = {
     siret: optional(values.siret),
@@ -109,9 +111,9 @@ export function LegalScreen({ site }: { site: SiteSettings }) {
   const { form, onSubmit, screen } = useSettingsForm({
     site,
     title: 'Mentions légales et RGPD',
-    schema,
-    toValues,
-    toPayload,
+    schema: legalSchema,
+    toValues: legalValues,
+    toPayload: legalPayload,
     saved: 'Mentions légales enregistrées. Elles seront en ligne à la prochaine mise en ligne du site.',
     failed: "Les mentions légales n'ont pas pu être enregistrées",
   });

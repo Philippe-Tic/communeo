@@ -15,6 +15,7 @@ import { saveProgress, TOTAL_STEPS } from '@/lib/onboarding';
 import { sessionQuery } from '@/lib/session';
 import { siteSettingsQuery, type OnboardingProgress, type SiteSettings } from '@/lib/site-settings';
 import { CommuneStep } from './steps/commune-step';
+import { LegalStep } from './steps/legal-step';
 import { LogoStep } from './steps/logo-step';
 import { ThemeStep } from './steps/theme-step';
 import { UpcomingStep } from './steps/upcoming-step';
@@ -162,5 +163,6 @@ export function OnboardingScreen({ step: requested }: { step: number | undefined
   if (step === 2) return <CommuneStep {...props} alert={alert} />;
   if (step === 3) return <LogoStep {...props} alert={alert} />;
   if (step === 4) return <ThemeStep {...props} alert={alert} />;
+  if (step === 5) return <LegalStep {...props} alert={alert} />;
   return <UpcomingStep {...props} alert={alert} />;
 }

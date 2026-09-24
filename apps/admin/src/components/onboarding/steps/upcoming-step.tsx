@@ -1,5 +1,5 @@
 /**
- * Étapes 5 à 7 (obligations, premières pages, mise en ligne) : construites par les tickets #152 à
+ * Étapes 6 et 7 (premières pages, mise en ligne) : construites par les tickets #153 et
  * #154 ; en attendant, l'étape se passe et renvoie vers l'écran de l'admin qui le fait.
  */
 import { Link } from '@tanstack/react-router';
@@ -10,7 +10,6 @@ import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
 
 const WHERE: Record<string, { to: string; label: string }> = {
-  obligations: { to: '/mon-site/legal', label: 'Mon site › Mentions légales et RGPD' },
   pages: { to: '/pages', label: 'Pages' },
   'mise-en-ligne': { to: '/mise-en-ligne', label: 'Mise en ligne' },
 };

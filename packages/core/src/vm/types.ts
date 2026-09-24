@@ -11,6 +11,7 @@ import type { RichTextHeading, RichTextList, RichTextParagraph } from '../blocks
 import type { OpeningHours } from '../site/opening-hours';
 import type { WasteRule } from '../site/practical-rules';
 import type { ThemeId } from '../site/themes';
+import type { ARTICLE_CATEGORY_LABELS } from './labels';
 
 // --- Briques communes ---------------------------------------------------------------------------
 
@@ -199,7 +200,7 @@ export interface ArticleCardVM {
   summary: string | null;
   image: ImageVM | null;
   date: DateVM;
-  category: KeyLabel<'news' | 'event' | 'information' | 'emergency'>;
+  category: KeyLabel<keyof typeof ARTICLE_CATEGORY_LABELS>;
   featured: boolean;
 }
 

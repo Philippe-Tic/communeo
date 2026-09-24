@@ -1,7 +1,6 @@
 ---
 /** Carte d'actualité : image, catégorie (jamais la couleur seule), date, titre, résumé. */
 import type { ArticleCardVM } from '@communeo/core';
-import TriangleAlert from '@lucide/astro/icons/triangle-alert';
 
 interface Props {
   article: ArticleCardVM;
@@ -14,7 +13,6 @@ interface Props {
 
 const { article, level = 3, featured = false, highlight = false } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
-const urgent = article.category.key === 'emergency';
 ---
 <article class:list={['in-card', 'in-card-article', { 'in-card-featured': featured, 'in-card-highlight': highlight }]}>
   {article.image && (
@@ -31,8 +29,8 @@ const urgent = article.category.key === 'emergency';
   <div class="in-card-body">
     <p class="in-card-meta">
       {highlight && <span class="in-tag in-tag-outline">À la une</span>}
-      <span class:list={['in-tag', { 'in-tag-urgent': urgent }]}>
-        {urgent && <TriangleAlert size={16} aria-hidden="true" />}{article.category.label}
+      <span class="in-tag">
+        {article.category.label}
       </span>
       <time datetime={article.date.iso}>{article.date.label}</time>
     </p>

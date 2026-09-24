@@ -1,10 +1,15 @@
 /** Libellés français des valeurs d'énumération, partagés par les thèmes et l'admin. */
 
+/** Thèmes des actualités (liste fixe, commune à toutes les communes) ; la clé sert d'adresse de filtre */
 export const ARTICLE_CATEGORY_LABELS = {
-  news: 'Actualité',
-  event: 'Événement',
-  information: 'Information',
-  emergency: 'Urgence',
+  'vie-municipale': 'Vie municipale',
+  travaux: 'Travaux',
+  'vie-pratique': 'Vie pratique',
+  'ecoles-jeunesse': 'Écoles et jeunesse',
+  'culture-loisirs': 'Culture et loisirs',
+  associations: 'Associations',
+  environnement: 'Environnement',
+  'sante-solidarite': 'Santé et solidarité',
 } as const;
 
 export const EVENT_CATEGORY_LABELS: Record<string, string> = {

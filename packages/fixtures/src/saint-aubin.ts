@@ -358,7 +358,7 @@ const article = (id: string, title: string, slug: string, date: string, extra: R
     slug,
     publication_date: date,
     summary: null,
-    category: 'news',
+    category: 'vie-municipale',
     author: null,
     featured: false,
     meta_description: null,
@@ -378,6 +378,7 @@ export const articles = (): Article[] =>
       '2026-09-18T08:00:00.000Z',
       {
         featured: true,
+        category: 'culture-loisirs',
         summary: 'Après huit mois de travaux, la médiathèque rouvre ses portes le 4 octobre avec des horaires élargis et un espace numérique.',
         image: media('mediatheque.svg', { alt: 'La nouvelle salle de lecture de la médiathèque', width: 1200, height: 800 }),
         author: 'Service communication',
@@ -388,23 +389,24 @@ export const articles = (): Article[] =>
       },
     ),
     article('article-coupure', 'Coupure d’eau mardi 8 octobre quartier de la Gare', 'coupure-d-eau-quartier-de-la-gare', '2026-09-20T08:00:00.000Z', {
-      category: 'emergency',
+      category: 'travaux',
       summary: 'Travaux sur le réseau : l’eau sera coupée de 9h à 12h. Pensez à faire des réserves.',
     }),
     article('article-conseil', 'Compte rendu du conseil municipal du 15 septembre', 'conseil-municipal-15-septembre', '2026-09-16T08:00:00.000Z', {
-      category: 'information',
+      category: 'vie-municipale',
       summary: 'Budget des écoles, subventions aux associations et travaux de voirie au programme.',
       image: media('marche.svg', { alt: '', width: 1200, height: 800 }),
     }),
     article('article-marche', 'Le marché du samedi s’agrandit', 'le-marche-du-samedi-s-agrandit', '2026-09-10T08:00:00.000Z', {
+      category: 'vie-pratique',
       summary: 'Six nouveaux producteurs rejoignent la place de l’Église.',
       image: media('marche.svg', { alt: 'Étals du marché sur la place de l’Église', width: 1200, height: 800 }),
     }),
     article('article-voirie', 'Travaux de voirie rue des Écoles', 'travaux-rue-des-ecoles', '2026-09-05T08:00:00.000Z', {
-      category: 'information',
+      category: 'travaux',
       image: media('travaux.svg', { alt: 'Engins de chantier rue des Écoles', width: 1200, height: 800 }),
     }),
-    article('article-fete', 'Retour en images sur la fête de la Loire', 'fete-de-la-loire-en-images', '2026-07-16T08:00:00.000Z', { category: 'event' }),
+    article('article-fete', 'Retour en images sur la fête de la Loire', 'fete-de-la-loire-en-images', '2026-07-16T08:00:00.000Z', { category: 'culture-loisirs' }),
   ] as unknown as Article[];
 
 // --- Agenda --------------------------------------------------------------------------------------

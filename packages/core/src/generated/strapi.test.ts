@@ -12,7 +12,7 @@ describe('types Strapi générés', () => {
   });
 
   it('expose les énumérations comme valeurs réutilisables', () => {
-    expect(articleCategoryValues).toContain('news');
+    expect(articleCategoryValues).toContain('vie-municipale');
   });
 
   it('associe chaque content-type à sa route REST', () => {

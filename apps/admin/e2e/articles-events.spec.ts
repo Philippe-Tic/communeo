@@ -27,8 +27,8 @@ test.describe('actualités', () => {
     await expect(page.getByText('3 actualités · 1 brouillon · 1 programmée')).toBeVisible();
     await expectNoViolations(page);
     await page.getByRole('button', { name: 'Catégorie' }).click();
-    await page.getByRole('menuitemradio', { name: 'Information' }).click();
-    await expect(page).toHaveURL(/categorie=information/);
+    await page.getByRole('menuitemradio', { name: 'Vie pratique' }).click();
+    await expect(page).toHaveURL(/categorie=vie-pratique/);
     await expect(page.getByRole('link', { name: 'Nouveaux horaires de la déchetterie' }).locator('visible=true')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Compte rendu du conseil municipal' }).locator('visible=true')).toHaveCount(0);
   });
@@ -37,16 +37,17 @@ test.describe('actualités', () => {
     test.skip(isMobile(page), 'tableau de la liste');
     const { bodies } = await open(page, '/actualites/nouvelle');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Nouvelle actualité');
-    await expect(page.getByRole('combobox', { name: /^Catégorie/ })).toHaveValue('news');
+    // Pas de thème par défaut : il se choisit
+    await expect(page.getByRole('combobox', { name: /^Catégorie/ })).toHaveValue('');
     await expect(page.getByRole('textbox', { name: /^Auteur/ })).toHaveValue('Sophie Leroy');
     await expect(page.getByText('Cette actualité est vide. Ajoutez un premier bloc.')).toBeVisible();
 
     await title(page).fill('Nouveaux horaires de la médiathèque');
-    await page.getByRole('combobox', { name: /^Catégorie/ }).selectOption({ label: 'Information' });
+    await page.getByRole('combobox', { name: /^Catégorie/ }).selectOption({ label: 'Vie pratique' });
     await page.getByRole('switch', { name: "Mettre à la une sur la page d'accueil" }).click();
     await page.clock.fastForward(5500);
     await expect(page).toHaveURL(/\/actualites\/a-nouvelle$/);
-    expect(writes(bodies, 'articles')[0]!.body.data).toMatchObject({ title: 'Nouveaux horaires de la médiathèque', category: 'information', featured: true, author: 'Sophie Leroy', publication_date: null });
+    expect(writes(bodies, 'articles')[0]!.body.data).toMatchObject({ title: 'Nouveaux horaires de la médiathèque', category: 'vie-pratique', featured: true, author: 'Sophie Leroy', publication_date: null });
 
     await page.getByRole('button', { name: 'Publier', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: '« Nouveaux horaires de la médiathèque » est publiée.' })).toBeVisible();

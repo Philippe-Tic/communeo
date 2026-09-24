@@ -42,7 +42,7 @@ export const ARTICLES_LIST: ContentListConfig<ArticleRow> = {
       slug: '',
       summary: draft.summary ?? '',
       image: draft.image ?? null,
-      category: draft.category ?? 'news',
+      category: draft.category ?? 'vie-municipale',
       featured: false,
       publication_day: '',
       publication_time: '',

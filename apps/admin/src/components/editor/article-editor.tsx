@@ -115,7 +115,7 @@ export const ARTICLE_EDITOR: EditorConfig<ArticleDocument, ArticleValues> = {
       slug: doc?.slug ?? '',
       summary: doc?.summary ?? '',
       image: doc?.image ?? null,
-      category: doc?.category ?? 'news',
+      category: doc?.category ?? '',
       featured: doc?.featured ?? false,
       publication_day: published?.day ?? '',
       publication_time: published?.time ?? '',

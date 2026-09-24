@@ -57,12 +57,16 @@
     "category": {
       "type": "enumeration",
       "enum": [
-        "news",
-        "event",
-        "information",
-        "emergency"
+        "vie-municipale",
+        "travaux",
+        "vie-pratique",
+        "ecoles-jeunesse",
+        "culture-loisirs",
+        "associations",
+        "environnement",
+        "sante-solidarite"
       ],
-      "default": "news",
+      "default": "vie-municipale",
       "required": true
     },
     "author": {

@@ -464,9 +464,20 @@ export interface ApiArticleArticle extends Struct.CollectionTypeSchema {
         'blocks.video',
       ]
     >;
-    category: Schema.Attribute.Enumeration<['news', 'event', 'information', 'emergency']> &
+    category: Schema.Attribute.Enumeration<
+      [
+        'vie-municipale',
+        'travaux',
+        'vie-pratique',
+        'ecoles-jeunesse',
+        'culture-loisirs',
+        'associations',
+        'environnement',
+        'sante-solidarite',
+      ]
+    > &
       Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'news'>;
+      Schema.Attribute.DefaultTo<'vie-municipale'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;

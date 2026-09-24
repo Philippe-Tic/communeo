@@ -66,7 +66,7 @@ describe('date de publication des articles', () => {
     const auth = { Authorization: `Bearer ${admin}` };
     const at = new Date(Date.now() + 60 * 60_000);
     // Comme l'éditeur : brouillon avec la date de publication programmée
-    const created = await http.post('/api/articles').set(auth).send({ data: { title: 'Inscriptions scolaires', category: 'news', scheduled_at: at.toISOString() } });
+    const created = await http.post('/api/articles').set(auth).send({ data: { title: 'Inscriptions scolaires', category: 'ecoles-jeunesse', scheduled_at: at.toISOString() } });
     expect(created.status).toBe(201);
     const { documentId } = created.body.data;
 

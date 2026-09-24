@@ -1,12 +1,36 @@
 ---
+/** Page 404 : grand encart lavande, « 404 » en grand, recherche et liens utiles en pastilles. */
 import type { PageContext } from '@communeo/theme-contract';
+import { SECTIONS } from '@communeo/core';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext }
 const { ctx } = Astro.props;
+const links = [
+  { href: '/', label: 'Accueil' },
+  SECTIONS.demarches,
+  SECTIONS.actualites,
+  SECTIONS.agenda,
+  SECTIONS.contact,
+  { path: '/plan-du-site', label: 'Plan du site' },
+].map((link) => ('path' in link ? { href: link.path, label: link.label } : link));
 ---
-<Layout ctx={ctx}>
-  <p>La page demandée n'existe pas ou a été déplacée.</p>
-  <form role="search" action="/recherche"><label for="nf-q">Rechercher sur le site</label> <input id="nf-q" name="q" type="search" /> <button type="submit">Rechercher</button></form>
-  <p><a href="/">Retour à l'accueil</a></p>
+<Layout ctx={ctx} heading={false}>
+  <div class="bo-404">
+    <p class="bo-404-code" aria-hidden="true">404</p>
+    <div class="bo-404-body">
+      <h1>{ctx.title}</h1>
+      <p>Cette page n'existe pas ou a été déplacée. Le lien est peut-être ancien, ou l'adresse contient une erreur.</p>
+      <form role="search" action="/recherche" class="bo-404-search">
+        <label for="bo-404-q" class="cn-sr-only">Rechercher sur le site</label>
+        <input id="bo-404-q" name="q" type="search" placeholder="Rechercher sur le site…" />
+        <button type="submit">Rechercher</button>
+      </form>
+      <nav aria-label="Liens utiles">
+        <ul class="bo-404-links">
+          {links.map((link) => <li><a href={link.href}>{link.label}</a></li>)}
+        </ul>
+      </nav>
+    </div>
+  </div>
 </Layout>

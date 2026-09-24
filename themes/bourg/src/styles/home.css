@@ -460,9 +460,3 @@
   padding: 0;
   border: 0;
 }
-
-/* Texte libre de l'accueil (styles de contenu complétés par la page de contenu, #172) */
-.bo-prose {
-  display: grid;
-  gap: 0.75rem;
-}

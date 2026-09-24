@@ -2104,6 +2104,7 @@ function listDocuments(store: Record<string, Record<string, unknown>>, params: U
   const year = params.get('filters[year][$eq]');
   const yearBefore = params.get('filters[year][$lt]');
   const upcoming = params.get('filters[$or][0][end_date][$gte]');
+  const startsAfter = params.get('filters[start_date][$gte]');
   const past = params.get('filters[$or][0][end_date][$lt]');
   const lastDay = (doc: Record<string, unknown>) => String(doc.end_date ?? doc.start_date ?? '');
   let rows = Object.values(store).filter((doc) => {
@@ -2117,6 +2118,7 @@ function listDocuments(store: Record<string, Record<string, unknown>>, params: U
     if (year && String(doc.year) !== year) return false;
     if (yearBefore && Number(doc.year) >= Number(yearBefore)) return false;
     if (upcoming && lastDay(doc) < upcoming) return false;
+    if (startsAfter && String(doc.start_date ?? '') < startsAfter) return false;
     if (past && lastDay(doc) >= past) return false;
     return true;
   });

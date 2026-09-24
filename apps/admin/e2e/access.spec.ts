@@ -25,7 +25,7 @@ test.describe('connexion', () => {
     await expect(password(page)).toHaveAttribute('type', 'text');
     await page.getByRole('checkbox', { name: /Rester connecté/ }).check();
     await page.getByRole('button', { name: 'Se connecter' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
     expect(posts['/api/session/login']).toEqual([
       { identifier: 'sophie.leroy@saint-aubin.fr', password: PASSWORD, remember: true },
     ]);
@@ -44,7 +44,7 @@ test.describe('connexion', () => {
     await page.getByRole('textbox', { name: 'E-mail' }).fill('sophie.leroy@saint-aubin.fr');
     await password(page).fill(PASSWORD);
     await page.getByRole('button', { name: 'Se connecter' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
     expect(new URL(page.url()).pathname).toBe('/');
   });
 });
@@ -88,7 +88,7 @@ test.describe('invitation et nouveau mot de passe', () => {
 
     await password(page, 'Confirmer le mot de passe').fill('loire jardin tilleul');
     await page.getByRole('button', { name: 'Créer mon compte' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
     expect(posts['/api/user-management/accept-invitation']).toEqual([
       { token: 'jeton-invitation', password: 'loire jardin tilleul', passwordConfirmation: 'loire jardin tilleul' },
     ]);
@@ -176,7 +176,7 @@ test.describe('rôles', () => {
     ).toBeVisible();
     await expectNoViolations(page);
     await page.getByRole('link', { name: 'Retour au tableau de bord' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
   });
 
   test('un administrateur y a accès', async ({ page }) => {
@@ -195,7 +195,7 @@ test.describe('rôles', () => {
 
     const banner = page.getByRole('region', { name: 'Mode équipe Communeo' });
     await expect(banner).toContainText("Vous consultez l'administration de Bellefontaine");
-    await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
     await banner.getByRole('button', { name: 'Quitter' }).click();
     await expect(page).toHaveURL(/\/plateforme\/communes\/site-bellefontaine$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Bellefontaine' })).toBeVisible();

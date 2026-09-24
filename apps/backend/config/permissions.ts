@@ -59,6 +59,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('publication', ['states', 'years', 'unpublish']),
     ...custom('compliance', ['report']),
     ...custom('activity-log', ['find']),
+    ...custom('content-version', ['list', 'findOne', 'checkpoint']),
     // Compte courant (la gestion des utilisateurs passe par /api/user-management)
     'plugin::users-permissions.user.me',
     'plugin::users-permissions.auth.changePassword',

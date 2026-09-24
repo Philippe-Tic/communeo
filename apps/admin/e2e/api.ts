@@ -1834,6 +1834,62 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
       });
     }
+    // Historique des versions : deux publications de la page « Location de la salle des fêtes »
+    const versionsMatch =
+      /^\/api\/content-versions\/(pages|articles|evenements|official-documents)\/([^/]+)(?:\/(\d+|checkpoint))?$/.exec(
+        url.pathname,
+      );
+    if (versionsMatch) {
+      const [, type, documentId, rest] = versionsMatch as unknown as [string, ContentType, string, string | undefined];
+      if (rest === 'checkpoint' && method === 'POST') {
+        bodies.push({ call: `POST checkpoint ${documentId}`, body: { data: {} } });
+        return route.fulfill({ status: 204 });
+      }
+      const current = stores[type][documentId];
+      const snapshots: Record<number, Record<string, unknown>> = {
+        2: { ...PAGES['p-salle']! },
+        1: {
+          ...PAGES['p-salle']!,
+          title: 'Salle des fêtes',
+          blocks: [{ __component: 'blocks.text', id: 1, body: doc('Réservation en mairie, le matin.') }],
+        },
+      };
+      if (rest)
+        return json({
+          data: {
+            id: Number(rest),
+            at: '2026-09-12T09:02:00.000Z',
+            kind: 'published',
+            snapshot: snapshots[Number(rest)],
+          },
+        });
+      const online = publishedByType[type].has(documentId);
+      return json({
+        data: current
+          ? [
+              {
+                id: 2,
+                at: '2026-09-21T14:30:00.000Z',
+                kind: 'published',
+                summary: 'ajout du bloc Bouton ou lien',
+                blockCount: 2,
+                authorName: 'Sophie Leroy',
+                live: online,
+              },
+              {
+                id: 1,
+                at: '2026-09-12T09:02:00.000Z',
+                kind: 'published',
+                summary: 'première publication',
+                blockCount: 1,
+                authorName: 'Claire Martin',
+                live: false,
+              },
+            ]
+          : [],
+        meta: { createdAt: '2026-09-10T08:00:00.000Z' },
+      });
+    }
     if (url.pathname === '/api/compliance')
       return json({
         data: computeCompliance({

@@ -108,6 +108,9 @@ export type ContactSubmissionCategory = (typeof contactSubmissionCategoryValues)
 export const contactSubmissionStatusValues = ['received', 'in_progress', 'resolved', 'closed'] as const;
 export type ContactSubmissionStatus = (typeof contactSubmissionStatusValues)[number];
 
+export const contentVersionKindValues = ['published', 'draft'] as const;
+export type ContentVersionKind = (typeof contentVersionKindValues)[number];
+
 export const deploymentStatusValues = ['building', 'ready', 'error'] as const;
 export type DeploymentStatus = (typeof deploymentStatusValues)[number];
 
@@ -482,6 +485,19 @@ export interface ContactSubmission extends StrapiDocument {
   history: JsonValue | null;
 }
 
+/** Content-type `api::content-version.content-version` — Instantané d'une page, actualité, événement ou document à chaque publication (historique, restauration) */
+export interface ContentVersion extends StrapiDocument {
+  site?: Site | null;
+  content_type: string;
+  content_document_id: string;
+  kind: ContentVersionKind;
+  snapshot: JsonValue;
+  summary: string | null;
+  block_count: number | null;
+  author?: User | null;
+  author_name: string | null;
+}
+
 /** Content-type `api::deployment.deployment` — Mises en ligne : un enregistrement par job de build */
 export interface Deployment extends StrapiDocument {
   site?: Site | null;
@@ -697,6 +713,7 @@ export const pluralNames = {
   'api::article.article': 'articles',
   'api::association.association': 'associations',
   'api::contact-submission.contact-submission': 'contact-submissions',
+  'api::content-version.content-version': 'content-versions',
   'api::deployment.deployment': 'deployments',
   'api::evenement.evenement': 'evenements',
   'api::media-item.media-item': 'media-items',
@@ -718,6 +735,7 @@ export interface ContentTypes {
   'api::article.article': Article;
   'api::association.association': Association;
   'api::contact-submission.contact-submission': ContactSubmission;
+  'api::content-version.content-version': ContentVersion;
   'api::deployment.deployment': Deployment;
   'api::evenement.evenement': Evenement;
   'api::media-item.media-item': MediaItem;

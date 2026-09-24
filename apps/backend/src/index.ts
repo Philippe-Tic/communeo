@@ -1,6 +1,7 @@
 import bootstrap from './bootstrap';
 import { autoDeployMiddleware } from './services/auto-deploy';
 import { activityLogMiddleware } from './services/activity-log';
+import { contentVersionsMiddleware } from './services/content-versions';
 import { stopBuildQueue } from './services/build-queue';
 import { blocksValidationMiddleware } from './validation/blocks';
 import { siteValidationMiddleware } from './validation/site';
@@ -33,6 +34,8 @@ export default {
     strapi.documents.use(autoDeployMiddleware(strapi));
     // Journal d'activité : publications, dépublications, suppressions, changement de thème
     strapi.documents.use(activityLogMiddleware(strapi));
+    // Historique : un instantané à chaque publication (pages, actualités, événements, documents)
+    strapi.documents.use(contentVersionsMiddleware());
   },
 
   /**

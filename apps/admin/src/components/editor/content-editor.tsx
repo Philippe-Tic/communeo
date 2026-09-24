@@ -9,7 +9,7 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useBlocker, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Check, Clock, ExternalLink, Eye, Maximize2, MoreHorizontal, PanelRightOpen, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Clock, ExternalLink, Eye, History, Maximize2, MoreHorizontal, PanelRightOpen, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useWatch, type FieldValues, type UseFormReturn } from 'react-hook-form';
 import type { z } from 'zod';
@@ -36,6 +36,8 @@ import { localStorageGet, localStorageSet, PreviewDrawer, PreviewFullscreen, Pre
 import { SaveStatus } from './save-status';
 import { ScheduleDialog } from './schedule-dialog';
 import { useAutosave } from './use-autosave';
+import { HistoryPanel } from './history-panel';
+import { keepDraft, refreshVersions } from '@/lib/versions';
 
 export interface EditorBodyProps<D extends BaseDocument> {
   documentId: string | null;
@@ -98,7 +100,7 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
   const [documentId, setDocumentId] = useState(initialId);
   const [doc, setDoc] = useState<Draft<D> | undefined>(initial);
   const [justPublished, setJustPublished] = useState(false);
-  const [dialog, setDialog] = useState<'schedule' | 'delete' | 'preview-drawer' | 'preview-fullscreen' | null>(null);
+  const [dialog, setDialog] = useState<'schedule' | 'delete' | 'preview-drawer' | 'preview-fullscreen' | 'history' | null>(null);
   // Preview : rechargée après chaque enregistrement, panneau masquable et redimensionnable (mémorisés)
   const [version, setVersion] = useState(0);
   const [previewShown, setPreviewShown] = useState(() => localStorageGet('communeo.preview.shown') !== 'false');
@@ -184,6 +186,17 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
     markRecent(api.type, scheduled.documentId);
     void refreshContent(client, api.type);
     toast.success(`Publication programmée le ${formatShortParisDateTime(at)}.`);
+  };
+
+  // Historique : une version reprise dans le brouillon, par le chargement habituel de l'éditeur ;
+  // le brouillon actuel est d'abord gardé dans l'historique, l'adresse de la page ne change pas
+  const restore = async (snapshot: Record<string, unknown>) => {
+    if (!(await autosave.flush())) throw new Error("Le brouillon en cours n'a pas pu être enregistré.");
+    await keepDraft(api.type, id.current!);
+    const restored = config.toValues(snapshot as unknown as D, session);
+    form.reset({ ...restored, slug: form.getValues('slug' as never) } as V, { keepDefaultValues: true });
+    void refreshVersions(client, api.type, id.current!);
+    toast.success('La version est reprise dans le brouillon. Publiez pour la mettre en ligne.');
   };
 
   const remove = async () => {
@@ -308,6 +321,10 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
                   </a>
                 </DropdownMenuItem>
               )}
+              <DropdownMenuItem disabled={!documentId} onSelect={() => setDialog('history')}>
+                <History aria-hidden="true" />
+                Historique
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem destructive disabled={!documentId} onSelect={() => setDialog('delete')}>
                 <Trash2 aria-hidden="true" />
@@ -349,6 +366,23 @@ export function ContentEditor<D extends BaseDocument, V extends FieldValues & { 
       <PreviewDrawer open={dialog === 'preview-drawer'} onOpenChange={(open) => setDialog(open ? 'preview-drawer' : null)} state={previewState} onReload={reloadPreview} onFullscreen={() => setDialog('preview-fullscreen')} />
       <PreviewFullscreen open={dialog === 'preview-fullscreen'} onOpenChange={(open) => setDialog(open ? 'preview-fullscreen' : null)} state={previewState} onReload={reloadPreview} />
       <ScheduleDialog open={dialog === 'schedule'} onOpenChange={(open) => setDialog(open ? 'schedule' : null)} onSchedule={schedule} />
+      {documentId && (
+        <HistoryPanel
+          open={dialog === 'history'}
+          onOpenChange={(open) => setDialog(open ? 'history' : null)}
+          type={api.type}
+          documentId={documentId}
+          createdLabel={`${capitalize(noun.one)} ${agree(noun, 'créé', 1)}`}
+          draft={{
+            title: values.title ?? '',
+            blocks: ((values as Record<string, unknown>).blocks as Array<{ __component: string } & Record<string, unknown>>) ?? [],
+            published: !!doc?.published,
+            modified: !!doc?.modified,
+            updatedAt: (doc?.updatedAt as string | undefined) ?? null,
+          }}
+          onRestore={restore}
+        />
+      )}
       <ConfirmDialog
         open={dialog === 'delete'}
         onOpenChange={(open) => !open && setDialog(null)}

@@ -1191,7 +1191,38 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (url.pathname === '/api/user-management/admins')
       return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
     // Utilisateurs de la commune (écran Utilisateurs)
-    if (url.pathname === '/api/user-management' && method === 'GET') return json({ data: members });
+    if (url.pathname === '/api/user-management' && method === 'GET') {
+      if (USERS[user].municipality_role !== 'super_admin') return json({ data: members });
+      // Super admin : toute la plateforme, avec la commune de chaque compte
+      const saintAubin = { documentId: SITE.documentId, name: SITE.name };
+      return json({
+        data: [
+          ...members.map((member) => ({ ...member, site: saintAubin })),
+          {
+            id: 60,
+            email: 'maire@bellefontaine.fr',
+            first_name: 'Paul',
+            last_name: 'Girard',
+            municipality_role: 'admin',
+            blocked: true,
+            active: true,
+            createdAt: '2026-09-18T09:00:00.000Z',
+            site: { documentId: 'site-bellefontaine', name: 'Bellefontaine' },
+          },
+          {
+            id: USERS.super_admin.id,
+            email: USERS.super_admin.email,
+            first_name: 'Léa',
+            last_name: 'Communeo',
+            municipality_role: 'super_admin',
+            blocked: false,
+            active: true,
+            createdAt: '2026-01-05T09:00:00.000Z',
+            site: null,
+          },
+        ],
+      });
+    }
     if (url.pathname === '/api/user-management' && method === 'POST') {
       const { data } = route.request().postDataJSON() as { data: Record<string, string> };
       bodies.push({ call: 'POST user', body: { data } });
@@ -1270,6 +1301,18 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         communes.push(created);
         return json({ data: created });
       }
+      if (url.pathname === '/api/site-management/stats')
+        return json({
+          data: {
+            communes: { total: communes.length, thisMonth: 1 },
+            activeUsers: 187,
+            deployments: { total: 1412, succeeded: 1401, medianSeconds: 26 },
+            themes: [
+              { theme: 'institutionnel', count: 2 },
+              { theme: 'moderne', count: 1 },
+            ],
+          },
+        });
       const communeMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
       const commune = communeMatch && communes.find((candidate) => candidate.documentId === communeMatch[1]);
       if (!commune) return json({ error: { status: 404, message: 'Commune introuvable' } }, 404);

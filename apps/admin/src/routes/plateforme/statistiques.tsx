@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { StatisticsScreen } from '@/components/equipe/statistics-screen';
 
-export const Route = createFileRoute('/plateforme/statistiques')({
-  component: () => <ComingSoon title="Statistiques" ticket={146} />,
-});
+export const Route = createFileRoute('/plateforme/statistiques')({ component: StatisticsScreen });

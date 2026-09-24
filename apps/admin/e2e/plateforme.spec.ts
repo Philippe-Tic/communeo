@@ -1,6 +1,7 @@
 /**
  * Espace de l'équipe Communeo (#146, handoff 6.20) : liste des communes (filtres, inactives depuis
- * 30 jours), création avec invitation du premier administrateur, fiche, suspension.
+ * 30 jours), création avec invitation du premier administrateur, fiche, suspension ; utilisateurs de
+ * toute la plateforme et statistiques.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { mockApi } from './api';
@@ -109,4 +110,40 @@ test('réservé à l’équipe Communeo', async ({ page }) => {
   await mockApi(page);
   await page.goto('/plateforme');
   await expect(page).toHaveURL(/\/$/);
+});
+
+test('utilisateurs de la plateforme : commune, rôle, état ; filtres et recherche, sans violation', async ({ page }) => {
+  await mockApi(page, { user: 'super_admin' });
+  await page.goto('/plateforme/utilisateurs');
+  await expect(page.getByRole('heading', { level: 1, name: 'Utilisateurs' })).toBeVisible();
+  const users = page.getByRole('region', { name: 'Liste des utilisateurs' });
+  if (wide(page))
+    await expect(users.getByRole('columnheader')).toHaveText(['Utilisateur', 'Commune', 'Rôle', 'État', 'Créé le']);
+  await expect(users).toContainText('Paul Girard');
+  await expect(users).toContainText('Équipe Communeo');
+  await expectNoViolations(page);
+
+  await page.getByRole('combobox', { name: 'État' }).selectOption({ label: 'Invitation en attente' });
+  await expect(users).toContainText('Paul Girard');
+  await expect(users).not.toContainText('Léa Communeo');
+  await page.getByRole('combobox', { name: 'État' }).selectOption({ label: 'Tous' });
+  await page.getByRole('searchbox', { name: 'Rechercher un utilisateur' }).fill('bellefontaine');
+  await expect(page.getByRole('status').filter({ hasText: '1 utilisateur' })).toBeAttached();
+  await users.getByRole('link', { name: 'Bellefontaine' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bellefontaine' })).toBeVisible();
+});
+
+test('statistiques : chiffres des 30 derniers jours et répartition des thèmes, sans violation', async ({ page }) => {
+  await mockApi(page, { user: 'super_admin' });
+  await page.goto('/plateforme/statistiques');
+  await expect(page.getByRole('heading', { level: 1, name: 'Statistiques' })).toBeVisible();
+  // Une seule entrée courante dans la navigation de l'espace
+  const nav = page.getByRole('navigation', { name: 'Espace équipe Communeo' }).first();
+  await expect(nav.locator('[aria-current="page"]')).toHaveText('Statistiques');
+  await expect(page.getByRole('definition')).toHaveText(['3', '187', '1 412', '26 s']);
+  await expect(page.getByText('mises en ligne · 99,2 % réussies')).toBeVisible();
+  await expect(page.getByText('communes · +1 ce mois')).toBeVisible();
+  const themes = page.getByRole('region', { name: 'Répartition des thèmes' });
+  await expect(themes.getByRole('listitem')).toHaveText([/Institutionnel.*2 · 67 %/, /Moderne.*1 · 33 %/]);
+  await expectNoViolations(page);
 });

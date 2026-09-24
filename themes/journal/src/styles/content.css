@@ -1,0 +1,664 @@
+/* Pages de contenu : en-tête, image principale, colonne de lecture, sommaire, et les 9 blocs. */
+
+/* En-tête et image principale ------------------------------------------------------------------ */
+.jo-page-header {
+  max-width: 47.5rem;
+}
+
+.jo-page-header h1 {
+  margin-top: 0.375rem;
+}
+
+.jo-lead {
+  margin-top: 0.875rem;
+  font-size: 1.1875rem;
+  color: var(--jo-muted);
+  text-wrap: pretty;
+}
+
+.jo-cover {
+  max-width: 47.5rem;
+  margin-top: 1.5rem;
+}
+
+.jo-cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  border-radius: var(--jo-radius);
+}
+
+.jo-cover figcaption,
+.jo-image figcaption {
+  margin-top: 0.5rem;
+  padding-left: 0.625rem;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+  border-left: 3px solid var(--jo-line);
+}
+
+.jo-updated {
+  margin-top: 2.5rem;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+@media (min-width: 64rem) {
+  .jo-lead {
+    font-size: 1.25rem;
+  }
+}
+
+/* Colonne de lecture et sommaire ----------------------------------------------------------------- */
+.jo-reading {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.jo-blocks {
+  display: grid;
+  gap: 1.75rem;
+  min-width: 0;
+  max-width: 47.5rem;
+}
+
+.jo-toc-side {
+  display: none;
+}
+
+.jo-toc ol {
+  padding: 0;
+  list-style: none;
+}
+
+.jo-toc a {
+  display: block;
+  padding: 0.5rem 0.625rem;
+  color: var(--jo-ink);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.jo-toc a:hover {
+  color: var(--jo-slate);
+  text-decoration: underline;
+}
+
+.jo-toc .jo-toc-level-3 a {
+  padding-left: 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.jo-toc-mobile {
+  order: -1;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-toc-mobile summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  padding: 0 1rem;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.jo-toc-mobile summary::-webkit-details-marker {
+  display: none;
+}
+
+.jo-toc-mobile[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.jo-toc-mobile ol {
+  padding: 0 0.5rem 0.5rem;
+}
+
+@media (min-width: 64rem) {
+  .jo-reading-with-toc {
+    grid-template-columns: minmax(0, 47.5rem) 18.75rem;
+    justify-content: space-between;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .jo-toc-mobile {
+    display: none;
+  }
+
+  .jo-toc-side {
+    position: sticky;
+    top: 1.5rem;
+    display: block;
+    padding: 1.125rem 1.25rem;
+    background: var(--jo-surface);
+    border: 1px solid var(--jo-line);
+    border-radius: var(--jo-radius);
+  }
+
+  .jo-toc-side ol {
+    display: grid;
+    gap: 2px;
+    margin-top: 0.625rem;
+    font-size: 1rem;
+  }
+
+  /* Section en cours : fond bleu pâle, trait bleu et gras, pas seulement la couleur */
+  .jo-toc-side a[aria-current] {
+    font-weight: 600;
+    background: var(--jo-pale);
+    border-left-color: var(--jo-slate);
+  }
+}
+
+/* Texte riche ------------------------------------------------------------------------------------- */
+.jo-prose > * + * {
+  margin-top: 0.875rem;
+}
+
+.jo-prose h2 {
+  margin-top: 2.25rem;
+  padding-bottom: 0.5rem;
+  scroll-margin-top: 1.5rem;
+  border-bottom: 3px solid var(--jo-ink);
+}
+
+.jo-prose h3 {
+  margin-top: 1.375rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.jo-prose > :first-child {
+  margin-top: 0;
+}
+
+.jo-prose ul,
+.jo-prose ol {
+  padding-left: 1.625rem;
+}
+
+.jo-prose li + li {
+  margin-top: 0.25rem;
+}
+
+.jo-prose blockquote {
+  padding-left: 1rem;
+  font-family: var(--jo-font-title);
+  font-size: 1.1875rem;
+  font-style: italic;
+  border-left: 3px solid var(--jo-slate);
+}
+
+.jo-prose table {
+  width: 100%;
+  font-size: 1rem;
+  border-collapse: collapse;
+}
+
+.jo-prose th,
+.jo-prose td {
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-prose thead th {
+  border-bottom: 2px solid var(--jo-ink);
+}
+
+/* Image ------------------------------------------------------------------------------------------ */
+.jo-image img {
+  display: block;
+  width: 100%;
+  border-radius: var(--jo-radius);
+}
+
+@media (min-width: 40rem) {
+  .jo-image-portrait {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .jo-image-portrait img {
+    flex: none;
+    width: 15rem;
+  }
+
+  .jo-image-portrait figcaption {
+    margin-top: 0;
+  }
+}
+
+/* Boutons ---------------------------------------------------------------------------------------- */
+.jo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+/* Encadré : filet épais à gauche, symbole de type + libellé ---------------------------------------- */
+.jo-callout {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem 1.125rem;
+  background: var(--jo-callout-bg);
+  border-left: 6px solid var(--jo-callout-ink);
+  border-radius: var(--jo-radius);
+}
+
+.jo-callout-info {
+  --jo-callout-bg: var(--jo-info-bg);
+  --jo-callout-ink: var(--jo-info);
+}
+
+.jo-callout-warning {
+  --jo-callout-bg: var(--jo-warning-bg);
+  --jo-callout-ink: var(--jo-warning);
+}
+
+.jo-callout-important {
+  --jo-callout-bg: var(--jo-danger-bg);
+  --jo-callout-ink: var(--jo-danger);
+}
+
+.jo-callout-tip {
+  --jo-callout-bg: var(--jo-pale);
+  --jo-callout-ink: var(--jo-slate);
+}
+
+.jo-callout-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--jo-callout-ink);
+  border: 2px solid var(--jo-callout-ink);
+  border-radius: var(--jo-radius);
+}
+
+.jo-callout-info .jo-callout-sign,
+.jo-callout-tip .jo-callout-sign {
+  border-radius: 50%;
+}
+
+.jo-callout-label {
+  font-weight: 700;
+  color: var(--jo-callout-ink);
+}
+
+.jo-callout .jo-prose {
+  margin-top: 0.125rem;
+}
+
+/* Documents ---------------------------------------------------------------------------------------- */
+.jo-documents h2 {
+  margin-bottom: 0.75rem;
+}
+
+.jo-document-single {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1.125rem;
+  color: var(--jo-ink);
+  text-decoration: none;
+  background: var(--jo-pale);
+  border-radius: var(--jo-radius);
+}
+
+.jo-document-single:hover {
+  color: var(--jo-ink);
+  background: #d6e1ee;
+}
+
+.jo-document-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: #fff;
+  background: var(--jo-slate);
+  border-radius: var(--jo-radius);
+}
+
+.jo-document-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.jo-document-single .jo-document-meta {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+/* Plusieurs fichiers : lignes séparées de filets */
+.jo-document-list {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-document-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 3.25rem;
+  padding: 0.5rem 0;
+  color: var(--jo-slate);
+  text-decoration: none;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-document-list a:hover .jo-document-name {
+  text-decoration-thickness: 2px;
+}
+
+.jo-document-list .jo-document-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.jo-document-type {
+  flex: none;
+  min-width: 3rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--jo-slate);
+  border: 1px solid var(--jo-slate);
+  border-radius: 3px;
+}
+
+.jo-document-list .jo-document-meta {
+  flex: none;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+/* Galerie : grille de trois ---------------------------------------------------------------------------- */
+.jo-gallery h2 {
+  margin-bottom: 0.75rem;
+}
+
+.jo-gallery ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .jo-gallery ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.jo-gallery a {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--jo-radius);
+}
+
+.jo-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.jo-gallery a:hover img {
+  outline: 3px solid var(--jo-slate);
+  outline-offset: -3px;
+}
+
+/* Fenêtre d'agrandissement (partagée) */
+.cn-lightbox {
+  width: min(64rem, 100% - 2rem);
+  max-height: calc(100% - 2rem);
+  padding: 1rem;
+  color: #fff;
+  background: var(--jo-ink);
+  border: 0;
+  border-radius: var(--jo-radius);
+}
+
+.cn-lightbox::backdrop {
+  background: rgb(27 36 48 / 88%);
+}
+
+.cn-lightbox img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.cn-lightbox figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.cn-lightbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.cn-lightbox button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  color: #fff;
+  background: transparent;
+  border: 2px solid #fff;
+  border-radius: var(--jo-radius);
+  cursor: pointer;
+}
+
+.cn-lightbox button:hover {
+  color: var(--jo-ink);
+  background: #fff;
+}
+
+.cn-lightbox :focus-visible {
+  outline-color: #fff;
+}
+
+.cn-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* Questions / réponses : liste à filets, réponse ouverte soulignée d'un trait bleu ----------------- */
+.jo-faq h2 {
+  margin-bottom: 0.75rem;
+}
+
+.jo-faq-list {
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-faq-list details {
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-faq-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding: 0.625rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  list-style: none;
+  cursor: pointer;
+}
+
+.jo-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.jo-faq-list details[open] summary {
+  color: var(--jo-slate);
+}
+
+.jo-faq-sign {
+  display: inline-flex;
+  flex: none;
+  color: var(--jo-slate);
+}
+
+.jo-faq-close,
+.jo-faq-list details[open] .jo-faq-open {
+  display: none;
+}
+
+.jo-faq-list details[open] .jo-faq-close {
+  display: block;
+}
+
+.jo-faq-answer {
+  margin-bottom: 1rem;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 3px solid var(--jo-slate);
+}
+
+/* Contact / lieu ------------------------------------------------------------------------------------ */
+.jo-contact {
+  overflow: hidden;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+.jo-contact-with-map {
+  display: grid;
+}
+
+.jo-contact-info {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+}
+
+.jo-contact-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--jo-slate);
+  background: var(--jo-pale);
+  border-radius: var(--jo-radius);
+}
+
+.jo-contact-info > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.jo-contact-name {
+  font-size: var(--jo-h3);
+}
+
+.jo-contact address {
+  display: grid;
+  justify-items: start;
+  margin-top: 0.625rem;
+  font-size: 1rem;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.jo-contact-hours {
+  margin-top: 0.625rem;
+  font-size: 0.9375rem;
+}
+
+.jo-contact-map {
+  min-height: 15rem;
+  border-radius: 0;
+}
+
+@media (min-width: 48rem) {
+  .jo-contact-with-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .jo-contact-map {
+    border-left: 1px dashed #8a96a6;
+  }
+}
+
+.jo-contact-map iframe {
+  height: 100%;
+  min-height: 15rem;
+  aspect-ratio: auto;
+}
+
+/* Vidéo : encart bleu pâle en pointillés tant que rien n'est chargé */
+.jo-embed {
+  border: 1px dashed #8a96a6;
+}
+
+.jo-embed .cn-embed-placeholder {
+  aspect-ratio: 16 / 9;
+}
+
+.jo-embed .cn-embed-placeholder p:first-child {
+  font-family: var(--jo-font-title);
+  font-size: var(--jo-h3);
+  font-weight: 600;
+}
+
+@media (max-width: 39.99rem) {
+  .jo-embed .cn-embed-placeholder {
+    aspect-ratio: auto;
+  }
+}
+
+.jo-transcript {
+  margin-top: 0.625rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--jo-line);
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-transcript summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--jo-target);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.jo-transcript p {
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}

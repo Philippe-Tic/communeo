@@ -1,17 +1,60 @@
 ---
+/** Actualités : titre et filtres en pilules, article à la une en grand, mosaïque de cartes, pagination. */
 import type { ArticleCardVM } from '@communeo/core';
-import type { FilterOption, PaginationLinks } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+import type { FilterOption, PageContext, PaginationLinks } from '@communeo/theme-contract';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import ArticleCard from '../parts/ArticleCard.astro';
+import Empty from '../parts/Empty.astro';
 import Filters from '../parts/Filters.astro';
+import Layout from '../parts/Layout.astro';
 import Pagination from '../parts/Pagination.astro';
 
 interface Props { ctx: PageContext; articles: ArticleCardVM[]; categories: FilterOption[]; pagination: PaginationLinks }
 const { ctx, articles, categories, pagination } = Astro.props;
+const [first, ...rest] = articles;
+const highlight = pagination.page === 1 && first?.featured ? first : null;
+const others = highlight ? rest : articles;
+const filter = categories.find((category) => category.current) ?? null;
 ---
-<Layout ctx={ctx}>
-  <Filters label="Filtrer par catégorie" options={categories} allHref="/actualites" />
-  {articles.length ? articles.map((article) => <ArticleCard article={article} level={2} />) : <p>Aucune actualité pour le moment.</p>}
+<Layout ctx={ctx} heading={false}>
+  <div class="mo-list-head">
+    <h1>{ctx.title}</h1>
+    <Filters label="Filtrer par catégorie" options={categories} allHref="/actualites" />
+  </div>
+  <p class="mo-count" role="status">{pagination.total} actualité{pagination.total > 1 ? 's' : ''}{filter && <> · {filter.label}</>}</p>
+
+  {highlight && (
+    <article class="mo-highlight">
+      {highlight.image && (
+        <img
+          class="mo-highlight-image"
+          src={highlight.image.src}
+          alt={highlight.image.alt}
+          srcset={highlight.image.srcset ?? undefined}
+          width={highlight.image.width ?? undefined}
+          height={highlight.image.height ?? undefined}
+        />
+      )}
+      <div class="mo-highlight-text">
+        <p class="mo-card-meta">
+          <span class="mo-chip-label mo-chip-dark">À la une</span>
+          <span class="mo-chip-label mo-chip-white">{highlight.category.label}</span>
+          <time datetime={highlight.date.iso}>{highlight.date.label}</time>
+        </p>
+        <h2 class="mo-highlight-title"><a href={highlight.href}>{highlight.title}</a></h2>
+        {highlight.summary && <p class="mo-card-summary">{highlight.summary}</p>}
+        <span class="mo-highlight-more" aria-hidden="true">Lire l'article <ArrowRight size={18} /></span>
+      </div>
+    </article>
+  )}
+
+  {others.length > 0 && <div class="mo-grid-3">{others.map((article, index) => <ArticleCard article={article} level={2} tone={!article.image && index % 4 === 3 ? 'dark' : 'light'} />)}</div>}
+
+  {articles.length === 0 && (
+    <Empty title={filter ? `Aucune actualité « ${filter.label} »` : 'Aucune actualité pour le moment'} action={filter ? { label: 'Voir toutes les actualités', href: '/actualites' } : null}>
+      {filter ? 'Aucune actualité publiée dans cette catégorie.' : 'Les actualités de la commune seront publiées ici.'}
+    </Empty>
+  )}
+
   <Pagination pagination={pagination} />
 </Layout>

@@ -1,28 +1,103 @@
 ---
+/**
+ * Documents officiels : recherche, type et année (filtrage dans le navigateur), puis une liste dense
+ * en lignes : date, type, titre (lien vers la fiche), référence, téléchargement avec format et poids.
+ * Sans JavaScript, tous les documents restent affichés et le formulaire est masqué.
+ */
 import type { DocumentVM, KeyLabel } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
+import Download from '@lucide/astro/icons/download';
+import Empty from '../parts/Empty.astro';
 import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; documents: DocumentVM[]; types: KeyLabel[]; years: number[] }
-const { ctx, documents } = Astro.props;
+const { ctx, documents, types, years } = Astro.props;
 ---
 <Layout ctx={ctx}>
-  <p>Procès-verbaux, délibérations, arrêtés et documents budgétaires publiés par la commune.</p>
+  <p class="mo-lead mo-list-intro">
+    Procès-verbaux, délibérations, arrêtés et documents budgétaires publiés par la commune.
+  </p>
+
+  {documents.length > 0 && (
+    <form class="mo-doc-filters cn-js-only" data-mo-doc-filters>
+      <p>
+        <label for="mo-doc-q">Rechercher</label>
+        <input id="mo-doc-q" type="search" name="q" placeholder="Mot-clé, référence…" data-mo-doc-search />
+      </p>
+      <p>
+        <label for="mo-doc-type">Type</label>
+        <select id="mo-doc-type" name="type" data-mo-doc-type>
+          <option value="">Tous les types</option>
+          {types.map((type) => <option value={type.key}>{type.label}</option>)}
+        </select>
+      </p>
+      <p>
+        <label for="mo-doc-year">Année</label>
+        <select id="mo-doc-year" name="year" data-mo-doc-year>
+          <option value="">Toutes</option>
+          {years.map((year) => <option value={year}>{year}</option>)}
+        </select>
+      </p>
+    </form>
+  )}
+
+  <p class="mo-count" role="status" data-mo-doc-count>
+    {documents.length} document{documents.length > 1 ? 's' : ''} · du plus récent au plus ancien
+  </p>
+
   {documents.length ? (
-    <table>
-      <caption>Liste des documents officiels, du plus récent au plus ancien</caption>
-      <thead><tr><th scope="col">Date</th><th scope="col">Type</th><th scope="col">Titre</th><th scope="col">Référence</th><th scope="col">Fichier</th></tr></thead>
-      <tbody>
-        {documents.map((doc) => (
-          <tr>
-            <td><time datetime={doc.date.iso}>{doc.date.label}</time></td>
-            <td>{doc.type.label}</td>
-            <th scope="row"><a href={doc.href}>{doc.title}</a></th>
-            <td>{doc.reference}</td>
-            <td>{doc.file && <a href={doc.file.href} download>Télécharger<span class="cn-sr-only"> {doc.title}</span> ({doc.file.label})</a>}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ) : <p>Aucun document publié.</p>}
+    <ul class="mo-doc-rows">
+      {documents.map((document) => (
+        <li data-mo-doc data-type={document.type.key} data-year={document.year} data-search={`${document.title} ${document.reference ?? ''} ${document.type.label}`.toLowerCase()}>
+          <span class="mo-doc-date">
+            <time datetime={document.date.iso}>{document.date.label}</time>
+          </span>
+          <span class="mo-chip-label mo-doc-type-chip">{document.type.label}</span>
+          <a href={document.href} class="mo-doc-title">{document.title}</a>
+          <span class="mo-doc-ref">{document.reference && <><span class="cn-sr-only">Référence : </span>{document.reference}</>}</span>
+          {document.file ? (
+            <a href={document.file.href} class="mo-doc-download" download>
+              <Download size={16} aria-hidden="true" />{document.file.label}
+              <span class="cn-sr-only"> – {document.title}</span>
+            </a>
+          ) : <span></span>}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <Empty title="Aucun document publié pour le moment">Les documents officiels de la commune seront publiés ici.</Empty>
+  )}
+
+  <p class="mo-empty-inline" hidden data-mo-doc-empty role="status">Aucun document ne correspond à votre recherche.</p>
 </Layout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-mo-doc-filters]');
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-mo-doc]')];
+  const count = document.querySelector<HTMLElement>('[data-mo-doc-count]');
+  const empty = document.querySelector<HTMLElement>('[data-mo-doc-empty]');
+  if (form && rows.length) {
+    const search = form.querySelector<HTMLInputElement>('[data-mo-doc-search]')!;
+    const type = form.querySelector<HTMLSelectElement>('[data-mo-doc-type]')!;
+    const year = form.querySelector<HTMLSelectElement>('[data-mo-doc-year]')!;
+
+    const apply = () => {
+      const words = search.value.trim().toLowerCase();
+      let visible = 0;
+      for (const row of rows) {
+        const match =
+          (!words || (row.dataset.search ?? '').includes(words)) &&
+          (!type.value || row.dataset.type === type.value) &&
+          (!year.value || row.dataset.year === year.value);
+        row.hidden = !match;
+        if (match) visible += 1;
+      }
+      if (count) count.textContent = `${visible} document${visible > 1 ? 's' : ''} · du plus récent au plus ancien`;
+      if (empty) empty.hidden = visible > 0;
+    };
+
+    form.addEventListener('submit', (event) => event.preventDefault());
+    form.addEventListener('input', apply);
+    form.addEventListener('change', apply);
+  }
+</script>

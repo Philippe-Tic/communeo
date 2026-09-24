@@ -12,6 +12,8 @@ interface StrapiUser {
   documentId: string;
   municipality_role?: string;
   blocked?: boolean;
+  /** `false` : compte désactivé par un administrateur */
+  active?: boolean;
   site?: {
     id: number;
     documentId: string;
@@ -141,6 +143,8 @@ export default (config: any, { strapi }: { strapi: any }) => {
     }
 
     if (!user || user.blocked) return next();
+    // Compte désactivé par un administrateur : la session en cours ne vaut plus rien
+    if (user.active === false) return ctx.unauthorized('Compte désactivé');
     ctx.state.user = user;
 
     // Routes d'authentification et profil courant : toujours accessibles

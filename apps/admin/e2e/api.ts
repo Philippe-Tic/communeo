@@ -901,6 +901,57 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const posts: Record<string, unknown[]> = {};
   let state = publication;
   let domainState = options.domain ?? 'none';
+  const members: Array<{
+    id: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    municipality_role: string;
+    blocked: boolean;
+    active: boolean;
+    createdAt: string;
+  }> = [
+    {
+      id: USERS.admin.id,
+      email: USERS.admin.email,
+      first_name: 'Sophie',
+      last_name: 'Leroy',
+      municipality_role: 'admin',
+      blocked: false,
+      active: true,
+      createdAt: '2025-01-10T09:00:00.000Z',
+    },
+    {
+      id: 4,
+      email: 'claire.martin@saint-aubin.fr',
+      first_name: 'Claire',
+      last_name: 'Martin',
+      municipality_role: 'admin',
+      blocked: false,
+      active: true,
+      createdAt: '2025-01-10T09:00:00.000Z',
+    },
+    {
+      id: USERS.editor.id,
+      email: USERS.editor.email,
+      first_name: 'Marc',
+      last_name: 'Dubois',
+      municipality_role: 'editor',
+      blocked: false,
+      active: true,
+      createdAt: '2025-03-02T09:00:00.000Z',
+    },
+    {
+      id: 7,
+      email: 'anne.rousseau@saint-aubin.fr',
+      first_name: 'Anne',
+      last_name: 'Rousseau',
+      municipality_role: 'editor',
+      blocked: true,
+      active: true,
+      createdAt: '2026-09-18T09:00:00.000Z',
+    },
+  ];
   const pages: Record<string, MockPage> =
     pageSet === 'many' ? manyPages() : pageSet === 'none' ? {} : structuredClone(PAGES);
   if (pageImageWithoutAlt && pages['p-salle']) {
@@ -1108,6 +1159,57 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     }
     if (url.pathname === '/api/user-management/admins')
       return json({ data: [{ name: 'Sophie Leroy' }, { name: 'Claire Martin' }] });
+    // Utilisateurs de la commune (écran Utilisateurs)
+    if (url.pathname === '/api/user-management' && method === 'GET') return json({ data: members });
+    if (url.pathname === '/api/user-management' && method === 'POST') {
+      const { data } = route.request().postDataJSON() as { data: Record<string, string> };
+      bodies.push({ call: 'POST user', body: { data } });
+      if (members.some((member) => member.email === data.email))
+        return json({ error: { status: 400, message: 'Un utilisateur avec cet email existe déjà' } }, 400);
+      const created = {
+        id: 90 + members.length,
+        email: data.email!,
+        first_name: data.first_name!,
+        last_name: data.last_name!,
+        municipality_role: data.municipality_role!,
+        blocked: true,
+        active: true,
+        createdAt: '2026-09-22T10:00:00.000Z',
+      };
+      members.push(created);
+      return json({ data: created });
+    }
+    const memberMatch = /^\/api\/user-management\/(\d+)(?:\/([a-z-]+))?$/.exec(url.pathname);
+    if (memberMatch) {
+      const member = members.find((entry) => entry.id === Number(memberMatch[1]));
+      if (!member) return json({ error: { status: 404, message: 'Utilisateur introuvable' } }, 404);
+      if (memberMatch[2]) {
+        calls.push(`POST ${memberMatch[2]} ${member.id}`);
+        return json({ ok: true });
+      }
+      if (method === 'PUT') {
+        const { data } = route.request().postDataJSON() as { data: Record<string, unknown> };
+        bodies.push({ call: `PUT user ${member.id}`, body: { data } });
+        const admins = members.filter(
+          (entry) => entry.municipality_role === 'admin' && entry.active !== false && !entry.blocked,
+        );
+        if (
+          member.municipality_role === 'admin' &&
+          admins.length <= 1 &&
+          (data.active === false || data.municipality_role === 'editor')
+        )
+          return json(
+            { error: { status: 400, message: 'La commune doit garder au moins un administrateur actif' } },
+            400,
+          );
+        Object.assign(member, data);
+        return json({ data: member });
+      }
+      if (method === 'DELETE') {
+        members.splice(members.indexOf(member), 1);
+        return json({ data: { id: member.id } });
+      }
+    }
     if (url.pathname === '/api/site-management' && USERS[user].municipality_role === 'super_admin')
       return json({ data: SITES });
     const siteMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);

@@ -30,7 +30,7 @@ export default {
     const userService = strapi.plugin('users-permissions').service('user');
     const valid = !!user?.password && (await userService.validatePassword(password, user.password));
     // Même réponse pour un compte inconnu, un mauvais mot de passe ou un compte non activé
-    if (!valid || user.blocked || user.confirmed === false) {
+    if (!valid || user.blocked || user.confirmed === false || user.active === false) {
       ipFailures.fail(ctx.request.ip);
       accountFailures.fail(email);
       return ctx.badRequest(INVALID);

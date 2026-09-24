@@ -689,6 +689,48 @@ export interface ApiContactSubmissionContactSubmission extends Struct.Collection
   };
 }
 
+export interface ApiContentVersionContentVersion extends Struct.CollectionTypeSchema {
+  collectionName: 'content_versions';
+  info: {
+    description: "Instantan\u00E9 d'une page, actualit\u00E9, \u00E9v\u00E9nement ou document \u00E0 chaque publication (historique, restauration)";
+    displayName: "Version d'un contenu";
+    pluralName: 'content-versions';
+    singularName: 'content-version';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    author: Schema.Attribute.Relation<'manyToOne', 'plugin::users-permissions.user'>;
+    author_name: Schema.Attribute.String;
+    block_count: Schema.Attribute.Integer;
+    content_document_id: Schema.Attribute.String & Schema.Attribute.Required;
+    content_type: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    kind: Schema.Attribute.Enumeration<['published', 'draft']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'published'>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::content-version.content-version'> &
+      Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'> & Schema.Attribute.Required;
+    snapshot: Schema.Attribute.JSON & Schema.Attribute.Required;
+    summary: Schema.Attribute.String;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiDeploymentDeployment extends Struct.CollectionTypeSchema {
   collectionName: 'deployments';
   info: {
@@ -1708,6 +1750,7 @@ declare module '@strapi/strapi' {
       'api::article.article': ApiArticleArticle;
       'api::association.association': ApiAssociationAssociation;
       'api::contact-submission.contact-submission': ApiContactSubmissionContactSubmission;
+      'api::content-version.content-version': ApiContentVersionContentVersion;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
       'api::media-item.media-item': ApiMediaItemMediaItem;

@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { ComingSoon } from '@/components/page-header';
+import { PlatformUsersScreen } from '@/components/equipe/platform-users-screen';
 
-export const Route = createFileRoute('/plateforme/utilisateurs')({
-  component: () => <ComingSoon title="Utilisateurs" ticket={146} />,
-});
+export const Route = createFileRoute('/plateforme/utilisateurs')({ component: PlatformUsersScreen });

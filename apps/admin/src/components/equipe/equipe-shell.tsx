@@ -16,9 +16,9 @@ import { displayName, logout, type SessionUser } from '@/lib/session';
 import { cn, initials } from '@/lib/utils';
 
 const LINKS = [
-  { to: '/plateforme', label: 'Communes', icon: Building2, exact: false },
-  { to: '/plateforme/utilisateurs', label: 'Utilisateurs', icon: Users, exact: true },
-  { to: '/plateforme/statistiques', label: 'Statistiques', icon: BarChart3, exact: true },
+  { to: '/plateforme', label: 'Communes', icon: Building2 },
+  { to: '/plateforme/utilisateurs', label: 'Utilisateurs', icon: Users },
+  { to: '/plateforme/statistiques', label: 'Statistiques', icon: BarChart3 },
 ] as const;
 
 function isCurrent(pathname: string, to: string) {
@@ -51,7 +51,13 @@ export function EquipeShell({ user, children }: { user: SessionUser; children: R
       <ul className="contents">
         {LINKS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
-            <Link to={to} aria-current={isCurrent(pathname, to) ? 'page' : undefined} className={itemClass}>
+            {/* Lien actif exact : le routeur marquerait sinon « Communes » sur toutes les pages de l'espace */}
+            <Link
+              to={to}
+              activeOptions={{ exact: true }}
+              aria-current={isCurrent(pathname, to) ? 'page' : undefined}
+              className={itemClass}
+            >
               <Icon aria-hidden="true" className="size-[18px] shrink-0" />
               {label}
             </Link>

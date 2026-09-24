@@ -158,8 +158,36 @@ describe('gestion des communes (super admin)', () => {
     expect((await http.get('/api/users/me').set(auth(admin))).status).toBe(200);
   });
 
+  it('statistiques : communes, utilisateurs actifs, mises en ligne des 30 jours, thèmes', async () => {
+    const now = Date.now();
+    const created = await Promise.all(
+      [
+        ['ready', 20, 1],
+        ['ready', 40, 2],
+        ['ready', 30, 3],
+        ['error', 5, 4],
+        ['ready', 999, 45], // hors des 30 derniers jours
+      ].map(([status, build_time, daysAgo]) =>
+        strapi.documents('api::deployment.deployment').create({
+          data: { site: siteA, status, build_time, triggered_at: new Date(now - (daysAgo as number) * 86_400_000).toISOString() } as any,
+        }),
+      ),
+    );
+    const { data } = (await http.get('/api/site-management/stats').set(auth(superAdmin))).body;
+    const sites = await strapi.query('api::site.site').count();
+    expect(data.communes.total).toBe(sites);
+    expect(data.deployments).toEqual({ total: 4, succeeded: 3, medianSeconds: 30 });
+    expect(data.themes.reduce((sum, { count }) => sum + count, 0)).toBe(sites);
+    // Le super admin n'est pas compté
+    expect(data.activeUsers).toBe(
+      await strapi.query('plugin::users-permissions.user').count({ where: { blocked: false, municipality_role: { $ne: 'super_admin' } } }),
+    );
+    await Promise.all(created.map(({ documentId }) => strapi.documents('api::deployment.deployment').delete({ documentId })));
+  });
+
   it("est interdite à un admin de commune", async () => {
     expect((await http.get('/api/site-management').set(auth(admin))).status).toBe(403);
+    expect((await http.get('/api/site-management/stats').set(auth(admin))).status).toBe(403);
   });
 });
 

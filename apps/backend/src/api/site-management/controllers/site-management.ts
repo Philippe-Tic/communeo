@@ -74,27 +74,58 @@ async function summarize(site: any) {
 
 export default {
   /**
-   * GET /api/site-management/stats — global stats
+   * GET /api/site-management/stats — chiffres de la plateforme : communes (dont créées ce mois-ci),
+   * utilisateurs actifs, mises en ligne des 30 derniers jours (réussite, durée médiane), thèmes.
    */
   async stats(ctx) {
     await requireSuperAdmin(ctx);
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const since = new Date(now.getTime() - 30 * 86_400_000);
 
-    const sitesCount = await strapi.query('api::site.site').count();
-    const usersCount = await strapi.query('plugin::users-permissions.user').count();
+    const [sites, activeUsers, deployments] = await Promise.all([
+      strapi.query('api::site.site').findMany({ select: ['theme', 'createdAt'] }),
+      strapi.query('plugin::users-permissions.user').count({
+        where: { blocked: false, active: { $ne: false }, municipality_role: { $ne: 'super_admin' } },
+      }),
+      strapi.query('api::deployment.deployment').findMany({
+        where: { triggered_at: { $gte: since.toISOString() }, status: { $in: ['ready', 'error'] } },
+        select: ['status', 'build_time'],
+      }),
+    ]);
 
-    // Recent deployments (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const recentDeployments = await strapi.query('api::deployment.deployment').count({
-      where: { createdAt: { $gte: thirtyDaysAgo.toISOString() } },
-    });
+    const themes: Record<string, number> = {};
+    for (const site of sites) {
+      const theme = site.theme ?? DEFAULT_THEME;
+      themes[theme] = (themes[theme] ?? 0) + 1;
+    }
+    const succeeded = deployments.filter((deployment) => deployment.status === 'ready');
+    const durations = succeeded
+      .map((deployment) => deployment.build_time)
+      .filter((value): value is number => typeof value === 'number' && value > 0)
+      .sort((a, b) => a - b);
+    const middle = Math.floor(durations.length / 2);
+    const median = !durations.length
+      ? null
+      : durations.length % 2
+        ? durations[middle]
+        : Math.round((durations[middle - 1] + durations[middle]) / 2);
 
     ctx.body = {
       data: {
-        sites: sitesCount,
-        users: usersCount,
-        recentDeployments,
+        communes: {
+          total: sites.length,
+          thisMonth: sites.filter((site) => new Date(site.createdAt) >= monthStart).length,
+        },
+        activeUsers,
+        deployments: {
+          total: deployments.length,
+          succeeded: succeeded.length,
+          medianSeconds: median,
+        },
+        themes: Object.entries(themes)
+          .map(([theme, count]) => ({ theme, count }))
+          .sort((a, b) => b.count - a.count),
       },
     };
   },

@@ -90,3 +90,26 @@ export const PUBLICATION_LABELS: Record<CommunePublication, string> = {
   pending: 'En attente',
   ok: 'À jour',
 };
+
+// --- Utilisateurs et statistiques de la plateforme ------------------------------------------------
+
+export interface PlatformUser extends CommuneUser {
+  site: { documentId: string; name: string } | null;
+}
+
+export const platformUsersQuery = queryOptions({
+  queryKey: ['equipe', 'utilisateurs'],
+  queryFn: () => api<{ data: PlatformUser[] }>('/api/user-management').then((response) => response.data),
+});
+
+export interface PlatformStats {
+  communes: { total: number; thisMonth: number };
+  activeUsers: number;
+  deployments: { total: number; succeeded: number; medianSeconds: number | null };
+  themes: Array<{ theme: string; count: number }>;
+}
+
+export const platformStatsQuery = queryOptions({
+  queryKey: ['equipe', 'statistiques'],
+  queryFn: () => api<{ data: PlatformStats }>('/api/site-management/stats').then((response) => response.data),
+});

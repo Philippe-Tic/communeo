@@ -1,0 +1,105 @@
+---
+/**
+ * Inscription à la lettre d'information, commune à tous les thèmes : champ e-mail et bouton, envoi
+ * à l'API publique, message de réussite ou d'erreur annoncé (role status / alert) sous le champ.
+ * Un champ piège, invisible et hors du parcours clavier, écarte les robots.
+ * Le thème habille les classes `cn-newsletter*` ; `data-state` vaut `success` ou `error` après un envoi.
+ * Le slot par défaut reçoit la mention sous le formulaire (désinscription, données personnelles).
+ */
+import type { FormConfig } from '@communeo/theme-contract';
+
+interface Props {
+  form: FormConfig;
+  /** Préfixe des identifiants, si la page contient plusieurs formulaires */
+  id?: string;
+  class?: string;
+  label?: string;
+  submitLabel?: string;
+  placeholder?: string;
+}
+
+const {
+  form,
+  id = 'cn-newsletter',
+  class: className,
+  label = 'Votre adresse e-mail',
+  submitLabel = "S'inscrire",
+  placeholder,
+} = Astro.props;
+---
+<form class:list={['cn-newsletter', className]} action={form.action} method="post" data-site={form.siteId} data-cn-newsletter novalidate>
+  <label for={`${id}-email`} class="cn-newsletter-label">{label}</label>
+  <div class="cn-newsletter-row">
+    <input id={`${id}-email`} name="email" type="email" autocomplete="email" required placeholder={placeholder} class="cn-newsletter-input" />
+    <button type="submit" class="cn-newsletter-submit">{submitLabel}</button>
+  </div>
+  <p class="cn-newsletter-trap" aria-hidden="true">
+    <label for={`${id}-website`}>Ne pas remplir ce champ</label>
+    <input id={`${id}-website`} name="website" type="text" tabindex="-1" autocomplete="off" />
+  </p>
+  <p id={`${id}-status`} class="cn-newsletter-status" data-cn-newsletter-status hidden></p>
+  <slot />
+</form>
+
+<script>
+  const MESSAGES: Record<number, string> = {
+    409: 'Erreur : cette adresse est déjà inscrite.',
+    429: 'Erreur : trop de tentatives. Réessayez dans une minute.',
+  };
+
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-cn-newsletter]')) {
+    const input = form.querySelector<HTMLInputElement>('input[type="email"]')!;
+    const trap = form.querySelector<HTMLInputElement>('input[name="website"]')!;
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const status = form.querySelector<HTMLElement>('[data-cn-newsletter-status]')!;
+
+    const show = (state: 'success' | 'error', text: string) => {
+      status.hidden = false;
+      status.setAttribute('role', state === 'error' ? 'alert' : 'status');
+      status.textContent = text;
+      form.dataset.state = state;
+      if (state === 'error') {
+        input.setAttribute('aria-invalid', 'true');
+        input.setAttribute('aria-describedby', status.id);
+      } else {
+        input.removeAttribute('aria-invalid');
+        input.removeAttribute('aria-describedby');
+      }
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (input.validity.valueMissing) return show('error', 'Erreur : indiquez votre adresse e-mail.');
+      if (!input.checkValidity())
+        return show('error', "Erreur : l'adresse doit contenir un « @ » et un domaine, par exemple nom@exemple.fr.");
+
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { email: input.value.trim(), website: trap.value, site: form.dataset.site } }),
+      }).catch(() => null);
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+
+      if (response?.ok) {
+        show('success', 'Inscription confirmée : vous recevrez la prochaine lettre d’information.');
+        form.reset();
+      } else {
+        show('error', MESSAGES[response?.status ?? 0] ?? "Erreur : l'inscription n'a pas abouti. Réessayez dans quelques minutes.");
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Champ piège : invisible, sans être en display:none (certains robots l'ignoreraient) */
+  .cn-newsletter-trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>

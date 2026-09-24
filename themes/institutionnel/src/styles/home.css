@@ -737,3 +737,58 @@
     padding-block: 0.5rem;
   }
 }
+
+/* Lettre d'information : champ et bouton empilés dans l'encart, message sous le champ */
+.in-newsletter {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.in-newsletter .cn-newsletter-row {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.in-newsletter .cn-newsletter-submit {
+  justify-self: start;
+  min-height: 3.25rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--in-primary);
+  border: 2px solid var(--in-primary);
+  border-radius: var(--in-radius);
+}
+
+.in-newsletter .cn-newsletter-submit:hover {
+  background: var(--in-primary-dark);
+  border-color: var(--in-primary-dark);
+}
+
+.in-newsletter .cn-newsletter-submit:disabled {
+  color: var(--in-muted);
+  background: var(--in-surface-alt);
+  border-color: var(--in-border);
+}
+
+.in-newsletter .cn-newsletter-status {
+  display: flex;
+  gap: 0.375rem;
+  font-weight: 600;
+}
+
+.in-newsletter[data-state='success'] .cn-newsletter-status {
+  color: var(--in-primary);
+}
+
+.in-newsletter[data-state='success'] .cn-newsletter-status::before {
+  content: '✓';
+}
+
+.in-newsletter[data-state='error'] .cn-newsletter-status {
+  color: var(--in-danger);
+}
+
+.in-newsletter[data-state='error'] .cn-newsletter-status::before {
+  content: '⚠';
+}

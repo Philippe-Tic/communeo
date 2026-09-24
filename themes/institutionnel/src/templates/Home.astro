@@ -4,7 +4,8 @@
  * accroche, accès rapides, actualités, agenda et informations pratiques, puis la vie de la commune.
  */
 import type { HomeVM } from '@communeo/core';
-import type { PageContext } from '@communeo/theme-contract';
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import NewsletterForm from '@communeo/ui-a11y/NewsletterForm.astro';
 import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
 import RichText from '@communeo/ui-a11y/RichText.astro';
@@ -21,9 +22,10 @@ import Layout from '../parts/Layout.astro';
 interface Props {
   ctx: PageContext;
   home: HomeVM;
+  newsletterForm: FormConfig;
 }
 
-const { ctx, home } = Astro.props;
+const { ctx, home, newsletterForm } = Astro.props;
 const { site } = ctx;
 const hero = home.hero;
 const aside = home.practicalInfo || home.weather || home.wasteCollection;
@@ -295,9 +297,10 @@ const today = home.canteen?.days.find((day) => !day.closed) ?? null;
             {home.newsletter && (
               <section class="in-box" aria-labelledby="in-newsletter" data-cn-home="newsletter">
                 <h2 id="in-newsletter" class="in-box-title">Lettre d'information</h2>
-                <p>Recevez l'actualité de la commune une fois par mois, par e-mail.</p>
-                <p><a href="/contact" class="in-button">S'inscrire à la lettre d'information</a></p>
-                <p class="in-meta">Désinscription possible à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+                <p>Recevez l'actualité de la commune par e-mail.</p>
+                <NewsletterForm form={newsletterForm} class="in-newsletter">
+                  <p class="in-meta">Désinscription possible à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+                </NewsletterForm>
               </section>
             )}
 

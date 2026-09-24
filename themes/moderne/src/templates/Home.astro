@@ -1,134 +1,357 @@
 ---
+/**
+ * Accueil « magazine » : grande accroche typographique avec la photo et l'événement du moment,
+ * accès rapides en tuiles, actualités en mosaïque, agenda sur fond sombre, infos pratiques en
+ * cartes (mairie, météo, collectes), puis le mot du maire, les chiffres clés, les perturbations et
+ * la cantine, les associations, la commune, la lettre d'information et les partenaires.
+ * Chaque section est facultative : l'accueil reste propre avec le minimum (accroche seule).
+ */
 import type { HomeVM } from '@communeo/core';
-import type { PageContext } from '@communeo/theme-contract';
-import RichText from '@communeo/ui-a11y/RichText.astro';
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import NewsletterForm from '@communeo/ui-a11y/NewsletterForm.astro';
 import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import RichText from '@communeo/ui-a11y/RichText.astro';
 import Weather from '@communeo/ui-a11y/Weather.astro';
-import Layout from '../parts/Layout.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
 import ArticleCard from '../parts/ArticleCard.astro';
 import EventCard from '../parts/EventCard.astro';
+import Icon from '../parts/Icon.astro';
+import Layout from '../parts/Layout.astro';
+import { dateBadge } from '../lib/date';
 
-interface Props { ctx: PageContext; home: HomeVM }
-const { ctx, home } = Astro.props;
+interface Props {
+  ctx: PageContext;
+  home: HomeVM;
+  newsletterForm: FormConfig;
+}
+
+const { ctx, home, newsletterForm } = Astro.props;
 const { site } = ctx;
+const hero = home.hero;
+const next = home.agenda?.[0] ?? null;
+const nextBadge = next ? dateBadge(next.start.iso, next.multiDay ? next.end?.iso : null) : null;
+
+// Mosaïque d'actualités : la première en grand, puis une colonne de tuiles, puis la suite
+const [lead, ...others] = home.featuredNews ?? [];
+const middle = others.length >= 3 ? others.slice(0, 2) : others.slice(0, 1);
+const right = others.length >= 3 ? others.slice(2) : others.slice(1);
+
+const practical = home.practicalInfo || home.weather || home.wasteCollection;
+const today = home.canteen?.days.find((day) => !day.closed) ?? null;
+const initials = (name: string) =>
+  name
+    .split(/[\s-]+/)
+    .filter((word) => word.length > 2 || /^[A-Z]/.test(word))
+    .slice(0, 2)
+    .map((word) => word[0]!.toUpperCase())
+    .join('');
+const severitySign = { info: 'i', warning: '!', critical: '!!' } as const;
 ---
-<Layout ctx={ctx} heading={false}>
-  <section class="st-hero" aria-labelledby="st-hero-title" data-cn-home="hero">
-    <h1 id="st-hero-title">{home.hero?.title ?? site.name}</h1>
-    {home.hero?.subtitle && <p>{home.hero.subtitle}</p>}
-    {home.hero?.image && <img src={home.hero.image.src} alt={home.hero.image.alt} width={home.hero.image.width ?? undefined} height={home.hero.image.height ?? undefined} />}
-    {(home.hero?.primary || home.hero?.secondary) && (
-      <p>
-        {home.hero.primary && <a class="st-button st-button-primary" href={home.hero.primary.href}>{home.hero.primary.label}</a>}
-        {home.hero.secondary && <a class="st-button st-button-secondary" href={home.hero.secondary.href}>{home.hero.secondary.label}</a>}
-      </p>
+<Layout ctx={ctx} heading={false} full>
+  <section class:list={['mo-container', 'mo-hero', { 'mo-hero-split': hero?.image || next }]} aria-labelledby="mo-hero-title" data-cn-home="hero">
+    <div class="mo-hero-text">
+      {site.population && <p class="mo-eyebrow mo-eyebrow-accent">Commune de {site.population.toLocaleString('fr-FR')} habitants</p>}
+      <h1 id="mo-hero-title">{hero?.title ?? site.name}</h1>
+      {hero?.subtitle && <p class="mo-hero-subtitle">{hero.subtitle}</p>}
+      {(hero?.primary || hero?.secondary) && (
+        <p class="mo-hero-actions">
+          {hero?.primary && <a class="mo-button mo-button-primary mo-button-large" href={hero.primary.href}>{hero.primary.label}</a>}
+          {hero?.secondary && <a class="mo-button mo-button-large" href={hero.secondary.href}>{hero.secondary.label}</a>}
+        </p>
+      )}
+    </div>
+    {(hero?.image || next) && (
+      <div class="mo-hero-side">
+        {hero?.image && (
+          <img
+            class="mo-hero-image"
+            src={hero.image.src}
+            alt={hero.image.alt}
+            srcset={hero.image.srcset ?? undefined}
+            width={hero.image.width ?? undefined}
+            height={hero.image.height ?? undefined}
+            fetchpriority="high"
+          />
+        )}
+        {next && nextBadge && (
+          <a href={next.href} class="mo-hero-event mo-on-dark">
+            <span class="mo-hero-event-date" aria-hidden="true">{nextBadge.day} {nextBadge.month}</span>
+            <span class="mo-hero-event-text">
+              <span class="cn-sr-only">Prochain événement : </span>
+              <strong>{next.title}</strong>
+              <span>{next.period}{next.location && <> · {next.location}</>}</span>
+            </span>
+            <span class="mo-hero-event-arrow" aria-hidden="true"><ArrowRight size={20} /></span>
+          </a>
+        )}
+      </div>
     )}
   </section>
 
   {home.quickLinks && (
-    <section aria-labelledby="st-quick" data-cn-home="quick_links">
-      <h2 id="st-quick">Accès rapides</h2>
-      <ul>{home.quickLinks.map((link) => <li><a href={link.href}>{link.label}</a>{link.description && <span> – {link.description}</span>}</li>)}</ul>
+    <section class="mo-container mo-home-section" aria-labelledby="mo-quick" data-cn-home="quick_links">
+      <div class="mo-section-head">
+        <h2 id="mo-quick">Accès rapides</h2>
+        <a href="/demarches" class="mo-more">Toutes les démarches<ArrowRight size={18} aria-hidden="true" /></a>
+      </div>
+      <ul class="mo-tiles">
+        {home.quickLinks.map((link) => (
+          <li>
+            <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+              <span class="mo-tile-icon"><Icon name={link.icon} size={24} /></span>
+              <span>
+                <strong class="mo-tile-label">{link.label}</strong>
+                {link.description && <span class="mo-tile-description">{link.description}</span>}
+                {link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )}
 
-  {home.featuredNews && (
-    <section aria-labelledby="st-news" data-cn-home="featured_news">
-      <h2 id="st-news">Actualités</h2>
-      {home.featuredNews.map((article) => <ArticleCard article={article} />)}
-      <p><a href="/actualites">Toutes les actualités</a></p>
+  {lead && (
+    <section class="mo-container mo-home-section" aria-labelledby="mo-news" data-cn-home="featured_news">
+      <div class="mo-section-head">
+        <h2 id="mo-news">Actualités</h2>
+        <a href="/actualites" class="mo-more">Toutes les actualités<ArrowRight size={18} aria-hidden="true" /></a>
+      </div>
+      <div class:list={['mo-news', `mo-news-${1 + (middle.length ? 1 : 0) + (right.length ? 1 : 0)}`]}>
+        <ArticleCard article={lead} featured />
+        {middle.length > 0 && (
+          <div class="mo-news-stack">
+            {middle.map((article, index) => <ArticleCard article={article} tone={index === 1 ? 'dark' : 'light'} />)}
+          </div>
+        )}
+        {right.length > 0 && <div class="mo-news-stack">{right.map((article) => <ArticleCard article={article} />)}</div>}
+      </div>
     </section>
   )}
 
   {home.agenda && (
-    <section aria-labelledby="st-agenda" data-cn-home="agenda">
-      <h2 id="st-agenda">Agenda</h2>
-      {home.agenda.map((event) => <EventCard event={event} />)}
-      <p><a href="/agenda">Tout l'agenda</a></p>
-    </section>
+    <div class="mo-container">
+      <section class="mo-agenda mo-on-dark" aria-labelledby="mo-agenda" data-cn-home="agenda">
+        <div class="mo-section-head">
+          <h2 id="mo-agenda">Agenda</h2>
+          <a href="/agenda" class="mo-more">Tout l'agenda<ArrowRight size={18} aria-hidden="true" /></a>
+        </div>
+        <div class="mo-agenda-grid">{home.agenda.map((event) => <EventCard event={event} />)}</div>
+      </section>
+    </div>
   )}
 
-  {home.practicalInfo && (
-    <section aria-labelledby="st-info" data-cn-home="practical_info">
-      <h2 id="st-info">Mairie</h2>
-      <OpeningStatus hours={site.contact.hours} />
-      {site.contact.address && <p>{site.contact.address}</p>}
-      {site.contact.phone && <p><a href={site.contact.phone.href}>{site.contact.phone.label}</a></p>}
-      {site.contact.hoursSummary.length > 0 && <dl>{site.contact.hoursSummary.map((line) => <><dt>{line.days}</dt><dd>{line.hours}</dd></>)}</dl>}
-    </section>
-  )}
+  {practical && (
+    <section class="mo-container mo-home-section mo-practical" aria-label="Informations pratiques">
+      {home.practicalInfo && (
+        <section class="mo-info-card" aria-labelledby="mo-mairie" data-cn-home="practical_info">
+          <h2 id="mo-mairie" class="mo-eyebrow">Mairie</h2>
+          <OpeningStatus hours={site.contact.hours} class="mo-status mo-status-large" />
+          <address>
+            {site.contact.address && <span>{site.contact.address}</span>}
+            {site.contact.phone && <a href={site.contact.phone.href} class="mo-info-phone">{site.contact.phone.label}</a>}
+          </address>
+          {site.contact.hoursSummary.length > 0 && (
+            <p class="mo-info-hours">{site.contact.hoursSummary.map((line) => `${line.days} ${line.hours}`).join(' · ')}</p>
+          )}
+          <a href="/contact" class="mo-more">Contacter la mairie<ArrowRight size={18} aria-hidden="true" /></a>
+        </section>
+      )}
 
-  {home.disruptions && (
-    <section aria-labelledby="st-disruptions" data-cn-home="disruptions">
-      <h2 id="st-disruptions">Perturbations en cours</h2>
-      <ul>{home.disruptions.map((alert) => <li><strong>{alert.title}</strong> – {alert.message}</li>)}</ul>
-    </section>
-  )}
+      {home.weather && (
+        <Weather position={home.weather} class="mo-info-card mo-weather" data-cn-home="weather">
+          <h2 slot="titre" class="mo-eyebrow">Météo</h2>
+        </Weather>
+      )}
 
-  {home.weather && (
-    <Weather position={home.weather} data-cn-home="weather">
-      <h2 slot="titre">Météo</h2>
-    </Weather>
-  )}
-
-  {home.wasteCollection && (
-    <section aria-labelledby="st-waste" data-cn-home="waste_collection">
-      <h2 id="st-waste">Prochaines collectes</h2>
-      <ul>{home.wasteCollection.map((c) => <li><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}{c.upcoming.length > 0 && <> : <NextCollections collection={c} /></>}</li>)}</ul>
-      <p><a href="/collecte-des-dechets">Tout le calendrier</a></p>
-    </section>
-  )}
-
-  {home.canteen && (
-    <section aria-labelledby="st-canteen" data-cn-home="canteen">
-      <h2 id="st-canteen">Cantine</h2>
-      <p>{home.canteen.label}</p>
-      <p><a href="/cantine">Voir le menu</a></p>
+      {home.wasteCollection && (
+        <section class="mo-info-card" aria-labelledby="mo-waste" data-cn-home="waste_collection">
+          <h2 id="mo-waste" class="mo-eyebrow">Prochaines collectes</h2>
+          <ul class="mo-waste-list">
+            {home.wasteCollection.map((collection) => (
+              <li>
+                <span class={`mo-waste-badge mo-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
+                <span>
+                  <strong>{collection.label}</strong>
+                  {collection.upcoming.length > 0 && <> · <NextCollections collection={collection} /></>}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <a href="/collecte-des-dechets" class="mo-more">Tout le calendrier<ArrowRight size={18} aria-hidden="true" /></a>
+        </section>
+      )}
     </section>
   )}
 
   {home.mayorWord && (
-    <section aria-labelledby="st-mayor" data-cn-home="mayor_word">
-      <h2 id="st-mayor">{home.mayorWord.title}</h2>
-      {home.mayorWord.photo && <img src={home.mayorWord.photo.src} alt={home.mayorWord.photo.alt} width={home.mayorWord.photo.width ?? undefined} height={home.mayorWord.photo.height ?? undefined} />}
-      <RichText doc={home.mayorWord.body} />
-      {home.mayorWord.signature.name && <p>{home.mayorWord.signature.name}{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}</p>}
+    <section class:list={['mo-container', 'mo-home-section', 'mo-mayor', { 'mo-mayor-with-photo': home.mayorWord.photo }]} aria-labelledby="mo-mayor" data-cn-home="mayor_word">
+      {home.mayorWord.photo && (
+        <img
+          class="mo-mayor-photo"
+          src={home.mayorWord.photo.src}
+          alt={home.mayorWord.photo.alt}
+          width={home.mayorWord.photo.width ?? undefined}
+          height={home.mayorWord.photo.height ?? undefined}
+          loading="lazy"
+        />
+      )}
+      <div>
+        {!/^le mot du maire$/i.test(home.mayorWord.title.trim()) && <p class="mo-eyebrow mo-eyebrow-accent">Le mot du maire</p>}
+        <h2 id="mo-mayor" class="mo-mayor-title">{home.mayorWord.title}</h2>
+        <RichText doc={home.mayorWord.body} class="mo-prose mo-mayor-body" />
+        {home.mayorWord.signature.name && (
+          <p class="mo-mayor-signature">
+            <strong>{home.mayorWord.signature.name}</strong>{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}
+          </p>
+        )}
+      </div>
     </section>
   )}
 
   {home.keyFigures && (
-    <section aria-labelledby="st-figures" data-cn-home="key_figures">
-      <h2 id="st-figures">La commune en chiffres</h2>
-      <ul>{home.keyFigures.map((figure) => <li><strong>{figure.value}</strong> {figure.label}</li>)}</ul>
+    <div class="mo-container">
+      <section class="mo-figures" aria-labelledby="mo-figures" data-cn-home="key_figures">
+        <h2 id="mo-figures" class="cn-sr-only">La commune en chiffres</h2>
+        <ul>
+          {home.keyFigures.map((figure) => (
+            <li>
+              <p class="mo-figure-value">{figure.value}</p>
+              <p class="mo-figure-label">{figure.label}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )}
+
+  {(home.disruptions || home.canteen) && (
+    <section class:list={['mo-container', 'mo-home-section', 'mo-split', { 'mo-split-half': home.disruptions && home.canteen }]} aria-label="Perturbations et cantine">
+      {home.disruptions && (
+        <div data-cn-home="disruptions">
+          <div class="mo-section-head">
+            <h2 id="mo-disruptions" class="mo-h2-small">Perturbations en cours</h2>
+            <a href="/perturbations" class="mo-more">Toutes<span class="cn-sr-only"> les perturbations</span><ArrowRight size={18} aria-hidden="true" /></a>
+          </div>
+          <ul class="mo-disruptions">
+            {home.disruptions.map((alert) => (
+              <li class={`mo-disruption mo-disruption-${alert.severity.key}`}>
+                <span class="mo-disruption-sign" aria-hidden="true">{severitySign[alert.severity.key]}</span>
+                <span>
+                  <span class="mo-disruption-kind">{alert.severity.label}{alert.type && <> · {alert.type.label}</>}</span>
+                  <span class="mo-disruption-title">
+                    {alert.link ? <a href={alert.link.href}>{alert.title}</a> : <strong>{alert.title}</strong>}
+                    {(alert.period ?? alert.location) && <> · {[alert.location, alert.period].filter(Boolean).join(' · ')}</>}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {home.canteen && (
+        <div data-cn-home="canteen">
+          <div class="mo-section-head">
+            <h2 id="mo-canteen" class="mo-h2-small">{today ? "À la cantine aujourd'hui" : 'Cantine'}</h2>
+            <a href="/cantine" class="mo-more">Toute la semaine<ArrowRight size={18} aria-hidden="true" /></a>
+          </div>
+          <div class="mo-canteen">
+            {today ? (
+              <>
+                <p class="mo-eyebrow" data-cn-day={today.date.iso.slice(0, 10)}>
+                  {today.day.label} {today.date.label}{home.canteen.school && <> · {home.canteen.school}</>}
+                </p>
+                <ul class="mo-canteen-menu">
+                  {today.courses.map((course) => (
+                    <li>
+                      <span>{course.dish}</span>
+                      {course.badges.length > 0 && <span class="mo-canteen-badges">{course.badges.map((badge) => <span class="mo-chip-label">{badge}</span>)}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p>{home.canteen.label}{home.canteen.school && <> · {home.canteen.school}</>}</p>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )}
 
   {home.associations && (
-    <section aria-labelledby="st-assos" data-cn-home="associations">
-      <h2 id="st-assos">Associations</h2>
-      <ul>{home.associations.map((a) => <li><a href={a.href}>{a.name}</a> – {a.category.label}</li>)}</ul>
+    <section class="mo-container mo-home-section" aria-labelledby="mo-assos" data-cn-home="associations">
+      <div class="mo-section-head">
+        <h2 id="mo-assos">Associations</h2>
+        <a href="/associations" class="mo-more">Annuaire des associations<ArrowRight size={18} aria-hidden="true" /></a>
+      </div>
+      <ul class="mo-assos">
+        {home.associations.map((association) => (
+          <li>
+            <a href={association.href}>
+              {association.logo ? (
+                <img src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} loading="lazy" />
+              ) : (
+                <span class="mo-initials" aria-hidden="true">{initials(association.name)}</span>
+              )}
+              <span><strong>{association.name}</strong> <span class="mo-assos-category">· {association.category.label}</span></span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )}
 
-  {home.freeContent && (
-    <section aria-labelledby="st-free" data-cn-home="free_content">
-      <h2 id="st-free">{home.freeContent.title ?? site.name}</h2>
-      <RichText doc={home.freeContent.body} />
-    </section>
-  )}
+  {(home.freeContent || home.newsletter || home.partners) && (
+    <section class:list={['mo-container', 'mo-home-section', 'mo-split', { 'mo-split-half': home.freeContent && (home.newsletter || home.partners) }]} aria-label="La commune">
+      {home.freeContent && (
+        <div data-cn-home="free_content">
+          <h2 id="mo-free">{home.freeContent.title ?? `Découvrir ${site.name}`}</h2>
+          <RichText doc={home.freeContent.body} class="mo-prose mo-free" />
+        </div>
+      )}
 
-  {home.newsletter && (
-    <section aria-labelledby="st-newsletter" data-cn-home="newsletter">
-      <h2 id="st-newsletter">Lettre d'information</h2>
-      <p><a href="/contact">S'inscrire à la lettre d'information</a></p>
-    </section>
-  )}
+      {(home.newsletter || home.partners) && (
+        <div class="mo-stack">
+          {home.newsletter && (
+            <section class="mo-newsletter mo-on-dark" aria-labelledby="mo-newsletter" data-cn-home="newsletter">
+              <h2 id="mo-newsletter" class="mo-h2-small">Lettre d'information</h2>
+              <p>L'actualité de la commune, par e-mail.</p>
+              <NewsletterForm form={newsletterForm} class="mo-newsletter-form" placeholder="Votre adresse e-mail">
+                <p class="mo-newsletter-note">Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+              </NewsletterForm>
+            </section>
+          )}
 
-  {home.partners && (
-    <section aria-labelledby="st-partners" data-cn-home="partners">
-      <h2 id="st-partners">Partenaires</h2>
-      <ul>{home.partners.map((p) => <li>{p.href ? <a href={p.href}>{p.name}</a> : p.name}</li>)}</ul>
+          {home.partners && (
+            <section aria-labelledby="mo-partners" data-cn-home="partners">
+              <h2 id="mo-partners" class="mo-eyebrow">Partenaires</h2>
+              <ul class="mo-partners">
+                {home.partners.map((partner) => (
+                  <li>
+                    {partner.href ? (
+                      <a href={partner.href} target="_blank" rel="noopener noreferrer">
+                        {partner.logo
+                          ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
+                          : partner.name}
+                        <span class="cn-sr-only"> (nouvelle fenêtre)</span>
+                      </a>
+                    ) : (
+                      <span>
+                        {partner.logo
+                          ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
+                          : partner.name}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
     </section>
   )}
 </Layout>

@@ -1,6 +1,7 @@
 ---
 import type { HomeVM } from '@communeo/core';
-import type { PageContext } from '@communeo/theme-contract';
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import NewsletterForm from '@communeo/ui-a11y/NewsletterForm.astro';
 import RichText from '@communeo/ui-a11y/RichText.astro';
 import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
 import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
@@ -9,8 +10,8 @@ import Layout from '../parts/Layout.astro';
 import ArticleCard from '../parts/ArticleCard.astro';
 import EventCard from '../parts/EventCard.astro';
 
-interface Props { ctx: PageContext; home: HomeVM }
-const { ctx, home } = Astro.props;
+interface Props { ctx: PageContext; home: HomeVM; newsletterForm: FormConfig }
+const { ctx, home, newsletterForm } = Astro.props;
 const { site } = ctx;
 ---
 <Layout ctx={ctx} heading={false}>
@@ -121,7 +122,9 @@ const { site } = ctx;
   {home.newsletter && (
     <section aria-labelledby="st-newsletter" data-cn-home="newsletter">
       <h2 id="st-newsletter">Lettre d'information</h2>
-      <p><a href="/contact">S'inscrire à la lettre d'information</a></p>
+      <NewsletterForm form={newsletterForm}>
+        <p>Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+      </NewsletterForm>
     </section>
   )}
 

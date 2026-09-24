@@ -1,13 +1,52 @@
 ---
+/**
+ * Carte d'actualité. Avec image : photo arrondie puis catégorie, date, titre, résumé. Sans image :
+ * une tuile (claire, ou sombre avec `tone="dark"`) avec « Lire la suite ».
+ */
 import type { ArticleCardVM } from '@communeo/core';
 
-interface Props { article: ArticleCardVM; level?: 2 | 3 }
-const { article, level = 3 } = Astro.props;
+interface Props {
+  article: ArticleCardVM;
+  level?: 2 | 3;
+  /** Carte mise en avant : image plus haute, titre plus grand */
+  featured?: boolean;
+  tone?: 'light' | 'dark';
+}
+
+const { article, level = 3, featured = false, tone = 'light' } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
 ---
-<article class="st-card">
-  <Heading><a href={article.href}>{article.title}</a></Heading>
-  <p class="st-meta"><span>{article.category.label}</span> · <time datetime={article.date.iso}>{article.date.label}</time></p>
-  {article.summary && <p>{article.summary}</p>}
-  {article.image && <img src={article.image.src} alt={article.image.alt} width={article.image.width ?? undefined} height={article.image.height ?? undefined} loading="lazy" />}
+<article class:list={['mo-card-article', { 'mo-card-featured': featured }]}>
+  {article.image ? (
+    <>
+      <div class="mo-card-media">
+        <img
+          src={article.image.src}
+          alt={article.image.alt}
+          srcset={article.image.srcset ?? undefined}
+          width={article.image.width ?? undefined}
+          height={article.image.height ?? undefined}
+          loading="lazy"
+        />
+      </div>
+      <div class="mo-card-text">
+        <p class="mo-card-meta">
+          <span class="mo-chip-label">{article.category.label}</span>
+          <time datetime={article.date.iso}>{article.date.label}</time>
+        </p>
+        <Heading class="mo-card-title"><a href={article.href}>{article.title}</a></Heading>
+        {article.summary && <p class="mo-card-summary">{article.summary}</p>}
+      </div>
+    </>
+  ) : (
+    <div class:list={['mo-card-tile', { 'mo-card-tile-dark mo-on-dark': tone === 'dark' }]}>
+      <p class="mo-card-meta">
+        <span class="mo-chip-label">{article.category.label}</span>
+        <time datetime={article.date.iso}>{article.date.label}</time>
+      </p>
+      <Heading class="mo-card-title"><a href={article.href}>{article.title}</a></Heading>
+      {article.summary && <p class="mo-card-summary">{article.summary}</p>}
+      <span class="mo-card-more" aria-hidden="true">Lire la suite <span>→</span></span>
+    </div>
+  )}
 </article>

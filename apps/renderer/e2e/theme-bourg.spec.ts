@@ -1,6 +1,6 @@
 /**
  * Thème Bourg : menu en pastilles (ordinateur) ou déplié sous l'en-tête (mobile), panneau « Pratique »
- * en colonne (ordinateur) ou dans un tiroir ouvert depuis la barre du bas (mobile).
+ * en colonne (ordinateur) ou dans un tiroir ouvert depuis la barre du bas (mobile), page de contenu.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
@@ -68,4 +68,23 @@ test('mobile : la barre du bas ouvre le tiroir « Pratique » sans violation, É
   await drawer.getByRole('button', { name: 'Fermer' }).click();
   await expect(drawer).toBeHidden();
   await expect(opener).toBeFocused();
+});
+
+test('page de contenu : la galerie s’agrandit sans violation, Échap rend le focus à la vignette', async ({ page }) => {
+  await page.goto('/salle-des-fetes');
+  const first = page.locator('[data-cn-gallery] a').first();
+  await first.click();
+  const dialog = page.getByRole('dialog', { name: 'Image agrandie' });
+  await expect(dialog).toBeVisible();
+  expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations.map((v) => v.id)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(first).toBeFocused();
+});
+
+test('page de contenu : le sommaire en pastilles mène aux sections', async ({ page }) => {
+  await page.goto('/salle-des-fetes');
+  await page.getByRole('navigation', { name: 'Sommaire' }).getByRole('link', { name: 'Tarifs' }).click();
+  await expect(page).toHaveURL(/#tarifs$/);
+  await expect(page.getByRole('heading', { name: 'Tarifs', level: 2 })).toBeInViewport();
 });

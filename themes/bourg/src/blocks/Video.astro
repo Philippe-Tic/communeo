@@ -1,15 +1,16 @@
 ---
+/** Vidéo : rien n'est chargé avant le consentement ; la transcription reste accessible. */
 import type { BlockOf } from '@communeo/core';
 import ConsentEmbed from '@communeo/ui-a11y/ConsentEmbed.astro';
 
 interface Props { block: BlockOf<'video'> }
 const { block } = Astro.props;
 ---
-<section class="st-video" aria-label={block.title}>
-  <ConsentEmbed title={block.title} src={block.embedUrl} provider={block.providerLabel} href={block.watchUrl} />
+<section class="bo-video" aria-label={block.title}>
+  <ConsentEmbed title={block.title} src={block.embedUrl} provider={block.providerLabel} href={block.watchUrl} class="bo-embed" />
   {block.transcript && (
-    <details>
-      <summary>Transcription</summary>
+    <details class="bo-transcript">
+      <summary>Lire la transcription de la vidéo</summary>
       <p>{block.transcript}</p>
     </details>
   )}

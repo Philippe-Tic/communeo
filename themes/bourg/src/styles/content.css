@@ -1,0 +1,628 @@
+/* Pages de contenu : en-tête, sommaire en pastilles, image principale, et les 9 blocs. */
+
+/* En-tête et image principale ------------------------------------------------------------------ */
+.bo-page-header {
+  max-width: 47.5rem;
+}
+
+.bo-lead {
+  margin-top: 0.625rem;
+  font-size: 1.125rem;
+  color: var(--bo-muted);
+  text-wrap: pretty;
+}
+
+.bo-cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+  border-radius: var(--bo-radius-large);
+}
+
+.bo-cover figcaption,
+.bo-image figcaption {
+  margin-top: 0.5rem;
+  padding-inline: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+.bo-updated {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+/* Sommaire en pastilles (défile à l'horizontale sur mobile) ------------------------------------------ */
+.bo-toc {
+  width: calc(100% + 2 * var(--bo-gutter));
+  margin-inline: calc(-1 * var(--bo-gutter));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bo-toc ol {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  padding: 0.25rem var(--bo-gutter);
+  list-style: none;
+}
+
+.bo-toc a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  padding: 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--bo-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--bo-sand);
+  border-radius: var(--bo-pill);
+}
+
+.bo-toc a:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+}
+
+.bo-toc a[aria-current] {
+  color: #fff;
+  background: var(--bo-ink);
+}
+
+@media (min-width: 48rem) {
+  .bo-toc {
+    width: auto;
+    margin-inline: 0;
+    overflow: visible;
+  }
+
+  .bo-toc ol {
+    flex-wrap: wrap;
+    width: auto;
+    padding-inline: 0;
+  }
+}
+
+/* Blocs : une colonne de lecture ------------------------------------------------------------------ */
+.bo-blocks {
+  display: grid;
+  gap: 1.75rem;
+  max-width: 47.5rem;
+}
+
+.bo-blocks > * {
+  min-width: 0;
+}
+
+/* Texte riche ------------------------------------------------------------------------------------- */
+.bo-prose > * + * {
+  margin-top: 0.875rem;
+}
+
+.bo-prose h2 {
+  margin-top: 2rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.bo-prose h3 {
+  margin-top: 1.25rem;
+  scroll-margin-top: 1.5rem;
+}
+
+.bo-prose > :first-child {
+  margin-top: 0;
+}
+
+.bo-prose ul,
+.bo-prose ol {
+  padding-left: 1.5rem;
+}
+
+.bo-prose li + li {
+  margin-top: 0.25rem;
+}
+
+.bo-prose blockquote {
+  padding: 0.875rem 1.125rem;
+  font-size: 1.0625rem;
+  font-style: italic;
+  background: var(--bo-sand);
+  border-radius: var(--bo-radius-card);
+}
+
+/* Tableau : carte blanche arrondie, en-tête sable */
+.bo-prose table {
+  width: 100%;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-prose th,
+.bo-prose td {
+  padding: 0.75rem 0.875rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.bo-prose tr + tr > * {
+  border-top: 1px solid var(--bo-line);
+}
+
+.bo-prose thead th,
+.bo-prose tr:first-child > th {
+  font-weight: 800;
+  background: var(--bo-sand);
+}
+
+.bo-prose caption {
+  padding-bottom: 0.5rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+/* Image ------------------------------------------------------------------------------------------ */
+.bo-image img {
+  display: block;
+  width: 100%;
+  border-radius: var(--bo-radius-large);
+}
+
+@media (min-width: 40rem) {
+  .bo-image-portrait {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .bo-image-portrait img {
+    flex: none;
+    width: 15rem;
+  }
+
+  .bo-image-portrait figcaption {
+    margin-top: 0;
+  }
+}
+
+/* Boutons ---------------------------------------------------------------------------------------- */
+.bo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.bo-button-secondary {
+  color: var(--bo-primary);
+  background: var(--bo-surface);
+  border-color: var(--bo-primary);
+}
+
+.bo-button-secondary:hover {
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-color: var(--bo-primary-dark);
+}
+
+@media (max-width: 47.99rem) {
+  .bo-buttons .bo-button {
+    width: 100%;
+  }
+}
+
+/* Encadré : fond teinté arrondi, signe dans un disque plein ---------------------------------------- */
+.bo-callout {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem 1.125rem;
+  color: var(--bo-ink);
+  background: var(--bo-callout-bg);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-callout-info {
+  --bo-callout: var(--bo-info);
+  --bo-callout-bg: var(--bo-info-bg);
+}
+
+.bo-callout-warning {
+  --bo-callout: var(--bo-warning);
+  --bo-callout-bg: var(--bo-warning-bg);
+}
+
+.bo-callout-important {
+  --bo-callout: var(--bo-danger);
+  --bo-callout-bg: var(--bo-danger-bg);
+}
+
+.bo-callout-tip {
+  --bo-callout: var(--bo-primary-dark);
+  --bo-callout-bg: var(--bo-mint);
+}
+
+.bo-callout-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-callout);
+  border-radius: 50%;
+}
+
+.bo-callout-label {
+  font-weight: 800;
+  color: var(--bo-callout);
+}
+
+.bo-callout .bo-prose {
+  margin-top: 0.25rem;
+}
+
+/* Documents : une carte par fichier, format en pastille --------------------------------------------- */
+.bo-documents h2,
+.bo-gallery h2,
+.bo-faq h2 {
+  margin-bottom: 0.75rem;
+}
+
+.bo-document-single {
+  display: flex;
+  gap: 0.875rem;
+  align-items: center;
+  padding: 1rem 1.125rem;
+  color: var(--bo-ink);
+  text-decoration: none;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-document-single:hover {
+  color: var(--bo-ink);
+  border-color: var(--bo-primary);
+}
+
+.bo-document-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-radius: var(--bo-radius);
+}
+
+.bo-document-name {
+  font-weight: 700;
+}
+
+.bo-document-single .bo-document-name {
+  display: block;
+  text-decoration: underline;
+}
+
+.bo-document-single .bo-document-meta {
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+.bo-document-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-document-list a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+  min-height: 3.5rem;
+  padding: 0.625rem 1rem;
+  color: var(--bo-ink);
+  text-decoration: none;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-document-list a:hover {
+  color: var(--bo-ink);
+  border-color: var(--bo-primary);
+}
+
+.bo-document-list .bo-document-name {
+  flex: 1;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.bo-document-type {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--bo-primary-dark);
+  text-transform: uppercase;
+  background: var(--bo-mint);
+  border-radius: var(--bo-pill);
+}
+
+.bo-document-list .bo-document-meta {
+  font-size: 0.875rem;
+  color: var(--bo-muted);
+}
+
+/* Galerie ------------------------------------------------------------------------------------------ */
+.bo-gallery ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .bo-gallery ul {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.bo-gallery a {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-gallery img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.bo-gallery a:hover img {
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bo-gallery img {
+    transition: none;
+  }
+}
+
+/* Fenêtre d'agrandissement (partagée) */
+.cn-lightbox {
+  width: min(64rem, 100% - 2rem);
+  max-height: calc(100% - 2rem);
+  padding: 1rem;
+  color: #fff;
+  background: var(--bo-ink);
+  border: 0;
+  border-radius: var(--bo-radius-large);
+}
+
+.cn-lightbox::backdrop {
+  background: rgb(46 42 38 / 88%);
+}
+
+.cn-lightbox img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--bo-radius);
+}
+
+.cn-lightbox figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+.cn-lightbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.cn-lightbox button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  color: var(--bo-ink);
+  background: #fff;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cn-lightbox button:hover {
+  background: var(--bo-sand);
+}
+
+.cn-lightbox :focus-visible {
+  outline-color: #fff;
+}
+
+.cn-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* Questions / réponses : cartes, la question ouverte sur fond menthe ------------------------------- */
+.bo-faq-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.bo-faq-list details {
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-faq-list details[open] {
+  background: var(--bo-mint);
+  border-color: var(--bo-mint);
+}
+
+.bo-faq-list summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3.5rem;
+  padding: 0.625rem 1rem;
+  font-weight: 800;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-faq-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.bo-faq-list details[open] summary {
+  color: var(--bo-primary-dark);
+}
+
+.bo-faq-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+  border-radius: 50%;
+}
+
+.bo-faq-list details[open] .bo-faq-sign {
+  color: #fff;
+  background: var(--bo-primary);
+}
+
+.bo-faq-close,
+.bo-faq-list details[open] .bo-faq-open {
+  display: none;
+}
+
+.bo-faq-list details[open] .bo-faq-close {
+  display: block;
+}
+
+.bo-faq-answer {
+  padding: 0 1rem 1rem;
+}
+
+/* Contact / lieu : carte blanche, la carte OpenStreetMap à droite ---------------------------------- */
+.bo-contact {
+  display: grid;
+  overflow: hidden;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-contact-info {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1.125rem 1.25rem;
+}
+
+.bo-contact-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-radius: var(--bo-radius);
+}
+
+.bo-contact-info > div {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.bo-contact-name {
+  font-size: 1.1875rem;
+}
+
+.bo-contact address {
+  display: grid;
+  justify-items: start;
+  font-style: normal;
+}
+
+.bo-contact-hours {
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-contact-map {
+  min-height: 14rem;
+  border-radius: 0;
+}
+
+.bo-contact-map iframe {
+  height: 100%;
+  min-height: 14rem;
+  aspect-ratio: auto;
+}
+
+@media (min-width: 48rem) {
+  .bo-contact-with-map {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* Vidéo */
+.bo-transcript {
+  margin-top: 0.625rem;
+}
+
+.bo-transcript summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  font-weight: 700;
+  color: var(--bo-primary);
+  cursor: pointer;
+}
+
+.bo-transcript p {
+  margin-top: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: var(--bo-sand);
+  border-radius: var(--bo-radius);
+}

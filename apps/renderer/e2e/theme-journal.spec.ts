@@ -51,3 +51,23 @@ test('proposer une association : erreurs récapitulées et reliées aux champs',
   await summary.getByRole('link', { name: /Votre e-mail/ }).click();
   await expect(page.getByLabel('Votre e-mail')).toBeFocused();
 });
+
+test('contact : récapitulatif des erreurs, message sous chaque champ, envoi réussi', async ({ page }) => {
+  await page.route('**/api/contact-submissions/public', (route) => route.fulfill({ status: 201, contentType: 'application/json', body: '{}' }));
+  await page.goto('/contact');
+  await page.getByRole('button', { name: 'Envoyer la demande' }).click();
+  const summary = page.locator('[data-jo-form-status]');
+  await expect(summary).toBeFocused();
+  await expect(summary).toContainText('Le formulaire contient 6 erreurs');
+  await expect(page.locator('#ct-consent-erreur')).toBeVisible();
+  expect((await new AxeBuilder({ page }).withTags(WCAG).analyze()).violations).toEqual([]);
+
+  await page.getByLabel('Prénom').fill('Claire');
+  await page.getByLabel('Nom', { exact: true }).fill('Martin');
+  await page.getByLabel('E-mail').fill('claire.martin@exemple.fr');
+  await page.getByLabel('Objet').fill('Acte de naissance');
+  await page.getByLabel('Message').fill('Bonjour, je souhaite une copie de mon acte de naissance.');
+  await page.getByLabel(/J'accepte que mes données/).check();
+  await page.getByRole('button', { name: 'Envoyer la demande' }).click();
+  await expect(summary).toContainText('Votre message a bien été envoyé');
+});

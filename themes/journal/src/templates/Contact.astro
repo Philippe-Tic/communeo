@@ -1,29 +1,101 @@
 ---
-import type { FormConfig } from '@communeo/theme-contract';
-import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
+/**
+ * Contact : le formulaire dans une carte blanche (erreurs récapitulées et répétées sous les champs),
+ * à droite la mairie (statut, coordonnées, horaires) et la carte OpenStreetMap après consentement.
+ */
+import type { FormConfig, PageContext } from '@communeo/theme-contract';
+import ConsentEmbed from '@communeo/ui-a11y/ConsentEmbed.astro';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
 import ApiForm from '../parts/ApiForm.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; form: FormConfig }
 const { ctx, form } = Astro.props;
 const { contact } = ctx.site;
+const where = contact.coordinates;
+const mapUrl = where
+  ? `https://www.openstreetmap.org/export/embed.html?bbox=${where.lng - 0.01},${where.lat - 0.006},${where.lng + 0.01},${where.lat + 0.006}&layer=mapnik&marker=${where.lat},${where.lng}`
+  : null;
+const osmUrl = where ? `https://www.openstreetmap.org/?mlat=${where.lat}&mlon=${where.lng}#map=16/${where.lat}/${where.lng}` : null;
 ---
-<Layout ctx={ctx}>
-  <address>
-    {contact.address && <p>{contact.address}</p>}
-    {contact.phone && <p>Téléphone : <a href={contact.phone.href}>{contact.phone.label}</a></p>}
-    <p>E-mail : <a href={contact.email.href}>{contact.email.label}</a></p>
-  </address>
-  {contact.formIntro && <p>{contact.formIntro}</p>}
-  <ApiForm form={form} submitLabel="Envoyer" success="Votre message a bien été envoyé. Un accusé de réception vous sera adressé par e-mail.">
-    <p><label for="ct-first">Prénom (obligatoire)</label><input id="ct-first" name="first_name" required autocomplete="given-name" /></p>
-    <p><label for="ct-last">Nom (obligatoire)</label><input id="ct-last" name="last_name" required autocomplete="family-name" /></p>
-    <p><label for="ct-email">E-mail (obligatoire)</label><input id="ct-email" name="email" type="email" required autocomplete="email" /></p>
-    <p><label for="ct-phone">Téléphone</label><input id="ct-phone" name="phone" type="tel" autocomplete="tel" /></p>
-    <p><label for="ct-category">Catégorie (obligatoire)</label>
-      <select id="ct-category" name="category" required>{(form.options ?? []).map((o) => <option value={o.key}>{o.label}</option>)}</select></p>
-    <p><label for="ct-subject">Objet (obligatoire)</label><input id="ct-subject" name="subject" required /></p>
-    <p><label for="ct-message">Message (obligatoire)</label><textarea id="ct-message" name="message" rows="6" required></textarea></p>
-    <p class="st-meta">Vos données servent uniquement à traiter votre demande. <a href="/donnees-personnelles">En savoir plus</a></p>
-  </ApiForm>
+<Layout ctx={ctx} heading={false}>
+  <header class="jo-page-header">
+    <h1>{ctx.title}</h1>
+    <p class="jo-lead">{contact.formIntro ?? 'Une question, une démarche ? Écrivez à la mairie : un accusé de réception vous est envoyé par e-mail.'}</p>
+  </header>
+
+  <div class="jo-contact-layout">
+    <section class="jo-form-card" aria-labelledby="jo-contact-form">
+      <div class="jo-section-head"><h2 id="jo-contact-form">Votre demande</h2></div>
+      <ApiForm
+        form={form}
+        submitLabel="Envoyer la demande"
+        success="Votre message a bien été envoyé. Un accusé de réception vous sera adressé par e-mail."
+        hint="Accusé de réception par e-mail."
+      >
+        <div class="jo-field-row">
+          <p><label for="ct-first">Prénom</label><input id="ct-first" name="first_name" required autocomplete="given-name" /></p>
+          <p><label for="ct-last">Nom</label><input id="ct-last" name="last_name" required autocomplete="family-name" /></p>
+        </div>
+        <div class="jo-field-row">
+          <p><label for="ct-email">E-mail</label><input id="ct-email" name="email" type="email" required autocomplete="email" /></p>
+          <p>
+            <label for="ct-phone">Téléphone <span class="jo-optional">(facultatif)</span></label>
+            <input id="ct-phone" name="phone" type="tel" autocomplete="tel" aria-describedby="ct-phone-aide" />
+            <span id="ct-phone-aide" class="jo-field-help">Format : 02 41 00 00 00</span>
+          </p>
+        </div>
+        <div class="jo-field-row">
+          <p>
+            <label for="ct-category">Catégorie</label>
+            <select id="ct-category" name="category" required>
+              {(form.options ?? []).map((option) => <option value={option.key}>{option.label}</option>)}
+            </select>
+          </p>
+          <p><label for="ct-subject">Objet</label><input id="ct-subject" name="subject" required /></p>
+        </div>
+        <p>
+          <label for="ct-message">Message</label>
+          <textarea id="ct-message" name="message" rows="6" required maxlength="2000" aria-describedby="ct-message-aide"></textarea>
+          <span id="ct-message-aide" class="jo-field-help">2 000 caractères maximum.</span>
+        </p>
+        <p>
+          <input id="ct-consent" name="consent" type="checkbox" required data-jo-label="Utilisation de mes données" />
+          <label for="ct-consent">
+            J'accepte que mes données soient utilisées pour traiter ma demande. Elles sont conservées 12 mois.
+            <a href="/donnees-personnelles">Politique de données personnelles</a>
+          </label>
+        </p>
+      </ApiForm>
+    </section>
+
+    <aside class="jo-contact-aside" aria-label="Coordonnées de la mairie">
+      <section class="jo-box" aria-labelledby="jo-contact-mairie">
+        <h2 id="jo-contact-mairie" class="jo-kicker">Mairie de {ctx.site.name}</h2>
+        <OpeningStatus hours={contact.hours} class="jo-status jo-status-light" />
+        <address>
+          {contact.address && <span>{contact.address}</span>}
+          {contact.phone && <a href={contact.phone.href} class="jo-box-phone">{contact.phone.label}</a>}
+          <a href={contact.email.href}>{contact.email.label}</a>
+        </address>
+        {contact.hoursSummary.length > 0 && (
+          <dl class="jo-contact-hours">
+            {contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
+          </dl>
+        )}
+      </section>
+      {mapUrl && osmUrl && (
+        <ConsentEmbed title={`Carte : mairie de ${ctx.site.name}`} src={mapUrl} provider="OpenStreetMap" href={osmUrl} kind="map" class="jo-contact-map" />
+      )}
+      <section class="jo-box" aria-labelledby="jo-contact-urgences">
+        <h2 id="jo-contact-urgences" class="jo-kicker">Urgences</h2>
+        <ul class="jo-emergency">
+          <li>Samu <a href="tel:15">15</a></li>
+          <li>Police secours <a href="tel:17">17</a></li>
+          <li>Pompiers <a href="tel:18">18</a></li>
+          <li>Urgence européen <a href="tel:112">112</a></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
 </Layout>

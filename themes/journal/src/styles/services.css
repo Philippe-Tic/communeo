@@ -1,0 +1,683 @@
+/* Pages pratiques : contact, cantine, déchets, perturbations, pages communes, 404. */
+
+/* Contact ------------------------------------------------------------------------------------------------- */
+.jo-contact-layout {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 64rem) {
+  .jo-contact-layout {
+    grid-template-columns: minmax(0, 1fr) 21.25rem;
+    align-items: start;
+    gap: 3rem;
+  }
+}
+
+.jo-form-card {
+  padding: 1.5rem 1.25rem;
+  background: var(--jo-surface);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+@media (min-width: 48rem) {
+  .jo-form-card {
+    padding: 1.75rem;
+  }
+}
+
+.jo-form-card .jo-form {
+  margin-top: 1.25rem;
+}
+
+.jo-field-row {
+  display: grid;
+  gap: 1.125rem;
+}
+
+@media (min-width: 48rem) {
+  .jo-field-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.jo-field-help {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+.jo-contact-aside {
+  display: grid;
+  gap: 1rem;
+}
+
+.jo-contact-hours {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  font-size: 0.9375rem;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-contact-hours div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1rem;
+}
+
+.jo-contact-hours dt {
+  font-weight: 600;
+}
+
+.jo-contact-hours dd {
+  margin: 0;
+}
+
+.jo-contact-map {
+  min-height: 16rem;
+  border: 1px dashed var(--jo-muted);
+  border-radius: var(--jo-radius);
+}
+
+.jo-emergency {
+  padding: 0;
+  font-size: 0.9375rem;
+  list-style: none;
+}
+
+.jo-emergency li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.jo-emergency li + li {
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-emergency a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: var(--jo-target);
+  min-height: var(--jo-target);
+  font-weight: 700;
+}
+
+/* Cantine ------------------------------------------------------------------------------------------------- */
+.jo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  font-size: 0.9375rem;
+}
+
+.jo-legend-label {
+  font-weight: 700;
+}
+
+.jo-badge {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.jo-badge-local {
+  color: var(--jo-info);
+}
+
+.jo-badge-fait-maison {
+  color: var(--jo-warning);
+}
+
+.jo-badge-vegetarien {
+  color: #5b2a7a;
+}
+
+.jo-week {
+  margin-top: 2rem;
+}
+
+.jo-week-school {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--jo-muted);
+}
+
+.jo-menu-table {
+  display: none;
+}
+
+.jo-menu-table .jo-table {
+  table-layout: fixed;
+}
+
+.jo-menu-table thead th {
+  vertical-align: bottom;
+}
+
+.jo-menu-table thead td {
+  width: 10rem;
+  border-bottom: 2px solid var(--jo-ink);
+}
+
+.jo-menu-table tbody th {
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+.jo-menu-table td .jo-badge {
+  display: block;
+  margin-top: 0.125rem;
+}
+
+.jo-menu-table [data-today] {
+  background: var(--jo-pale);
+}
+
+.jo-menu-table thead [data-today] {
+  color: var(--jo-slate);
+}
+
+.jo-today-label {
+  display: none;
+}
+
+[data-today] > .jo-today-label {
+  display: inline;
+}
+
+.jo-menu-main {
+  font-weight: 600;
+}
+
+.jo-menu-days {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.jo-menu-day h3 {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-menu-day[data-today] h3 {
+  color: var(--jo-slate);
+  border-bottom: 3px solid var(--jo-slate);
+}
+
+.jo-menu {
+  display: grid;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.jo-menu div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-menu dt {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--jo-muted);
+}
+
+.jo-menu dd {
+  margin: 0;
+}
+
+@media (min-width: 64rem) {
+  .jo-menu-table {
+    display: block;
+  }
+
+  .jo-menu-days {
+    display: none;
+  }
+}
+
+.jo-menu-file {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.jo-menu-file img {
+  width: 100%;
+  max-width: 40rem;
+  height: auto;
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-radius);
+}
+
+/* Déchets ------------------------------------------------------------------------------------------------- */
+.jo-waste-section {
+  margin-top: 2rem;
+}
+
+.jo-waste-cards {
+  display: grid;
+  gap: 0 1.5rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .jo-waste-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .jo-waste-cards {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  }
+}
+
+.jo-waste-card {
+  padding: 1rem 0 1.25rem;
+  border-top: 5px solid var(--jo-waste);
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-waste-card h3 {
+  font-size: 1.1875rem;
+}
+
+.jo-waste-date {
+  margin-top: 0.375rem;
+  font-family: var(--jo-font-title);
+  font-size: 1.625rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.jo-waste-date :is(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+.jo-waste-rule {
+  margin-top: 0.375rem;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+/* Couleur de chaque collecte (les mêmes que la pastille de l'accueil) */
+.jo-bin-ordures-menageres {
+  --jo-waste: var(--jo-muted);
+}
+
+.jo-bin-tri-selectif {
+  --jo-waste: #7a5a00;
+}
+
+.jo-bin-verre {
+  --jo-waste: var(--jo-slate);
+}
+
+.jo-bin-dechets-verts {
+  --jo-waste: #3f5f1f;
+}
+
+.jo-bin-encombrants {
+  --jo-waste: var(--jo-info);
+}
+
+.jo-waste-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.jo-waste-swatch {
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--jo-waste, var(--jo-muted));
+  border-radius: 2px;
+}
+
+/* Perturbations ------------------------------------------------------------------------------------------ */
+.jo-disruptions-page {
+  max-width: 50rem;
+}
+
+.jo-disruptions-page .jo-disruption {
+  padding: 1.25rem 0;
+}
+
+.jo-disruptions-page .jo-sign {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+}
+
+.jo-disruption-heading {
+  margin: 0.25rem 0 0.375rem;
+  font-size: var(--jo-h3);
+}
+
+.jo-disruption-meta {
+  margin-top: 0.375rem;
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+/* Pages communes (mentions légales, accessibilité, plan du site, recherche, démarches) --------------------- */
+.jo-frame-page {
+  max-width: 47.5rem;
+}
+
+.jo-frame {
+  margin-top: 2rem;
+}
+
+.jo-frame h2 {
+  margin-top: 2.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid var(--jo-ink);
+}
+
+.jo-frame dl {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.jo-frame dd {
+  margin: 0;
+}
+
+.jo-frame table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--jo-surface);
+}
+
+.jo-frame th,
+.jo-frame td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+/* Démarches : thèmes dépliables sur filets */
+.jo-frame .cn-demarches-themes {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-frame .cn-demarches-themes > li {
+  margin-top: 0;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-frame .cn-demarches-themes summary {
+  display: flex;
+  align-items: center;
+  min-height: 3.5rem;
+  font-family: var(--jo-font-title);
+  font-size: var(--jo-h4);
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.jo-frame .cn-demarches-themes summary::-webkit-details-marker {
+  display: none;
+}
+
+.jo-frame .cn-demarches-themes summary::after {
+  margin-left: auto;
+  padding-left: 1rem;
+  font-family: var(--jo-font);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--jo-slate);
+  content: '+';
+}
+
+.jo-frame .cn-demarches-themes details[open] > summary::after {
+  content: '−';
+}
+
+.jo-frame .cn-demarches-themes details > ul {
+  display: grid;
+  gap: 1rem;
+  padding: 0 0 1.25rem 1rem;
+  list-style: none;
+  border-left: 3px solid var(--jo-slate);
+}
+
+.jo-frame .cn-demarches-themes details > ul > li > p {
+  font-weight: 700;
+}
+
+.jo-frame .cn-demarches-themes details ul ul {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.375rem;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+
+.jo-frame .cn-demarches-themes details ul ul a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--jo-target);
+}
+
+.jo-frame [data-cn-demarches-count] {
+  font-weight: 600;
+}
+
+/* Fiche de démarche */
+.jo-frame .cn-demarche-lead {
+  font-size: 1.1875rem;
+  color: var(--jo-muted);
+}
+
+.jo-frame [data-cn-demarche] section {
+  margin-top: 2rem;
+}
+
+.jo-frame .cn-demarche-callout {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--jo-info-bg);
+  border-left: 6px solid var(--jo-info);
+  border-radius: var(--jo-radius);
+}
+
+.jo-frame .cn-demarche-callout-label {
+  font-weight: 700;
+  color: var(--jo-info);
+}
+
+.jo-frame .cn-demarche-attention {
+  background: var(--jo-warning-bg);
+  border-left-color: var(--jo-warning);
+}
+
+.jo-frame .cn-demarche-attention .cn-demarche-callout-label {
+  color: var(--jo-warning);
+}
+
+.jo-frame .cn-demarche-case {
+  padding-left: 1rem;
+  border-left: 3px solid var(--jo-line);
+}
+
+.jo-frame .cn-demarche-table {
+  overflow-x: auto;
+}
+
+.jo-frame .cn-demarche-table caption {
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.jo-frame .cn-demarche-table tr:first-child td {
+  font-weight: 600;
+  background: var(--jo-pale);
+}
+
+.jo-frame .cn-demarche-links ul {
+  display: grid;
+  gap: 0.375rem;
+  padding-left: 1.5rem;
+}
+
+.jo-frame .cn-demarche-cerfa {
+  font-size: 1rem;
+  color: var(--jo-muted);
+}
+
+.jo-frame .cn-demarche-source {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  font-size: 1rem;
+  color: var(--jo-muted);
+  border-top: 1px solid var(--jo-line);
+}
+
+/* Recherche : champ et bouton accolés, résultats sur filets */
+.jo-frame form[role='search'] p,
+.jo-404-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.jo-frame form[role='search'] label {
+  flex: 1 0 100%;
+  margin-bottom: 0.375rem;
+}
+
+.jo-frame form[role='search'] input,
+.jo-404-search input {
+  flex: 1 1 8rem;
+  width: auto;
+  min-width: 0;
+  border-radius: var(--jo-radius) 0 0 var(--jo-radius);
+}
+
+.jo-frame form[role='search'] button {
+  min-height: 3rem;
+  padding: 0 1.375rem;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: var(--jo-slate);
+  border: 0;
+  border-radius: 0 var(--jo-radius) var(--jo-radius) 0;
+  cursor: pointer;
+}
+
+.jo-404-search .jo-button {
+  border-radius: 0 var(--jo-radius) var(--jo-radius) 0;
+}
+
+.jo-frame form[role='search'] button:hover {
+  background: var(--jo-slate-dark);
+}
+
+.jo-frame [data-cn-search-results] {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-frame [data-cn-search-results] > li {
+  margin: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-frame [data-cn-search-results] a {
+  font-family: var(--jo-font-title);
+  font-size: var(--jo-h4);
+  font-weight: 600;
+}
+
+.jo-frame [data-cn-search-results] p:first-of-type {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--jo-muted);
+}
+
+/* 404 ----------------------------------------------------------------------------------------------------- */
+.jo-404 {
+  max-width: 45rem;
+  padding-top: 1rem;
+}
+
+.jo-404-code {
+  font-family: var(--jo-font-title);
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--jo-slate);
+}
+
+.jo-404 h1 {
+  margin-top: 0.5rem;
+}
+
+.jo-404 .jo-lead {
+  margin-top: 0.75rem;
+}
+
+.jo-404-search {
+  max-width: 35rem;
+  margin: 1.75rem 0 2.5rem;
+}
+
+.jo-404-links {
+  display: grid;
+  gap: 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .jo-404-links {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.jo-404-links a {
+  display: flex;
+  align-items: center;
+  min-height: 4rem;
+  font-weight: 600;
+  color: var(--jo-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--jo-line);
+}
+
+.jo-404-links a:hover {
+  color: var(--jo-slate);
+  text-decoration: underline;
+}

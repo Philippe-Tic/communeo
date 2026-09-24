@@ -1,0 +1,887 @@
+/* Listes et pages de détail : actualités, agenda, documents, équipe, associations, formulaires. */
+
+.bo-capitalize::first-letter {
+  text-transform: uppercase;
+}
+
+.bo-optional {
+  font-weight: 400;
+  color: var(--bo-muted);
+}
+
+/* En-tête de liste : titre, compteur dessous, action à droite */
+.bo-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+
+.bo-list-head .bo-count {
+  flex-basis: 100%;
+  order: 2;
+  margin-top: -0.25rem;
+}
+
+.bo-list-head .bo-button {
+  flex: none;
+}
+
+.bo-count {
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-list-intro {
+  max-width: 50rem;
+}
+
+.bo-grid-3 {
+  display: grid;
+  gap: 0.875rem;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 40rem) {
+  .bo-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Trois colonnes seulement sur très grand écran : la colonne « Pratique » prend déjà de la place */
+@media (min-width: 90rem) {
+  .bo-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Sur mobile, les filtres défilent à l'horizontale */
+@media (max-width: 47.99rem) {
+  .bo-filters {
+    width: calc(100% + 2 * var(--bo-gutter));
+    margin-inline: calc(-1 * var(--bo-gutter));
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .bo-filters ul {
+    flex-wrap: nowrap;
+    width: max-content;
+    padding-inline: var(--bo-gutter);
+  }
+}
+
+/* État vide */
+.bo-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.625rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-large);
+}
+
+.bo-empty p {
+  max-width: 34rem;
+  color: var(--bo-muted);
+}
+
+.bo-empty-title {
+  font-size: 1.375rem;
+}
+
+.bo-empty .bo-button {
+  margin-top: 0.375rem;
+}
+
+.bo-empty-inline {
+  padding: 1rem 1.25rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+/* Actualités : grille de cartes, l'article à la une sur deux colonnes */
+.bo-news-grid {
+  display: grid;
+  gap: 0.875rem;
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .bo-news-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bo-news-grid .bo-card-news-featured {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 80rem) {
+  .bo-news-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .bo-news-grid .bo-card-news-featured {
+    grid-column: span 2;
+  }
+}
+
+/* Article */
+.bo-post {
+  display: grid;
+  gap: 1.5rem;
+  max-width: 47.5rem;
+}
+
+.bo-post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.75rem;
+  margin-bottom: 0.625rem;
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-post-body {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.bo-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--bo-line);
+}
+
+.bo-share-label {
+  margin-right: 0.25rem;
+  font-weight: 800;
+}
+
+.bo-share a,
+.bo-share button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  padding: 0 1rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  color: var(--bo-ink);
+  text-decoration: none;
+  background: var(--bo-sand);
+  border: 0;
+  border-radius: var(--bo-pill);
+  cursor: pointer;
+}
+
+.bo-share a:hover,
+.bo-share button:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+}
+
+.bo-related {
+  display: grid;
+  gap: 0.875rem;
+  margin-top: 1.5rem;
+}
+
+.bo-related-grid {
+  display: grid;
+  gap: 0.875rem;
+  align-items: start;
+}
+
+@media (min-width: 48rem) {
+  .bo-related-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Agenda : un mois par section */
+.bo-month {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Événement */
+.bo-event-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.bo-event-header h1 {
+  margin-top: 0.375rem;
+}
+
+.bo-pill-event {
+  color: var(--bo-violet);
+  background: var(--bo-lavender);
+}
+
+.bo-date-large {
+  min-width: 5rem;
+  min-height: 5rem;
+}
+
+.bo-date-large .bo-date-day {
+  font-size: 2rem;
+}
+
+.bo-event-when {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 47.99rem) {
+  .bo-event-when {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 64rem) {
+  .bo-date-large {
+    min-width: 6.25rem;
+    min-height: 5.5rem;
+  }
+
+  .bo-date-large .bo-date-day {
+    font-size: 2.5rem;
+  }
+
+  .bo-facts-card.bo-facts-inline {
+    display: none;
+  }
+}
+
+/* Carte d'informations (événement, association) */
+.bo-facts-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.375rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-large);
+}
+
+.bo-facts {
+  display: grid;
+  gap: 0.875rem;
+  font-size: 1rem;
+}
+
+.bo-facts dt {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--bo-muted);
+}
+
+.bo-facts dd {
+  margin: 0.125rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.bo-facts-price {
+  font-family: var(--bo-font-title);
+  font-size: 1.375rem;
+  font-weight: 800;
+}
+
+.bo-button-sand {
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+  border-color: var(--bo-sand);
+}
+
+.bo-button-sand:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+  border-color: var(--bo-line);
+}
+
+/* Type de document : pastille qui passe à la ligne proprement quand le libellé est long */
+.bo-table .bo-pill {
+  padding-block: 0.1875rem;
+  border-radius: 10px;
+}
+
+/* Autres documents : pastille sable */
+.bo-pill-doc-autre {
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+}
+
+/* Documents officiels : lignes en cartes, filtrables ----------------------------------------------- */
+.bo-filter-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.125rem 1.25rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-large);
+}
+
+.bo-filter-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 48rem) {
+  .bo-filter-form {
+    grid-template-columns: minmax(0, 1fr) 14rem 9rem;
+    align-items: end;
+  }
+}
+
+.bo-table-wrapper {
+  margin-top: -0.5rem;
+}
+
+.bo-table {
+  width: 100%;
+  font-size: 0.9375rem;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+/* Les en-têtes restent lus par les lecteurs d'écran ; chaque ligne est une carte */
+.bo-table thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.bo-table th,
+.bo-table td {
+  padding: 1rem 0.75rem;
+  text-align: left;
+  vertical-align: middle;
+  background: var(--bo-surface);
+  border-block: 1px solid var(--bo-line);
+}
+
+.bo-table tr > :first-child {
+  padding-left: 1.25rem;
+  white-space: nowrap;
+  border-left: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card) 0 0 var(--bo-radius-card);
+}
+
+.bo-table tr > :last-child {
+  padding-right: 1.25rem;
+  text-align: right;
+  border-right: 1px solid var(--bo-line);
+  border-radius: 0 var(--bo-radius-card) var(--bo-radius-card) 0;
+}
+
+.bo-table tbody th {
+  font-weight: 800;
+}
+
+.bo-table tbody th a {
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-table tbody th a:hover {
+  text-decoration: underline;
+}
+
+.bo-table tr[hidden] {
+  display: none;
+}
+
+.bo-doc-reference {
+  white-space: nowrap;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8125rem;
+  color: var(--bo-muted);
+}
+
+.bo-doc-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--bo-target);
+  padding: 0 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--bo-ink);
+  text-decoration: none;
+  white-space: nowrap;
+  background: var(--bo-sand);
+  border-radius: var(--bo-radius);
+}
+
+.bo-doc-download:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+}
+
+.bo-pill-doc-deliberation {
+  color: var(--bo-violet);
+  background: var(--bo-lavender);
+}
+
+.bo-pill-doc-arrete,
+.bo-pill-doc-plu,
+.bo-pill-doc-scot,
+.bo-pill-doc-carte-communale {
+  color: var(--bo-warning);
+  background: var(--bo-peach);
+}
+
+.bo-pill-doc-budget-primitif,
+.bo-pill-doc-compte-administratif,
+.bo-pill-doc-rapport-orientations-budgetaires {
+  color: var(--bo-info);
+  background: var(--bo-sky);
+}
+
+@media (max-width: 63.99rem) {
+  .bo-table,
+  .bo-table tbody,
+  .bo-table tr,
+  .bo-table th,
+  .bo-table td {
+    display: block;
+  }
+
+  .bo-table tr {
+    margin-bottom: 0.625rem;
+    padding: 0.875rem 1rem;
+    background: var(--bo-surface);
+    border: 1px solid var(--bo-line);
+    border-radius: var(--bo-radius-card);
+  }
+
+  .bo-table tbody th,
+  .bo-table tbody td,
+  .bo-table tr > :first-child,
+  .bo-table tr > :last-child {
+    padding: 0.125rem 0;
+    text-align: left;
+    white-space: normal;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .bo-table tbody th {
+    padding-block: 0.375rem;
+  }
+
+  .bo-table td:empty {
+    display: none;
+  }
+
+  .bo-table td:last-child {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Document */
+.bo-doc {
+  display: grid;
+  gap: 1rem;
+  max-width: 45rem;
+}
+
+.bo-doc h1 {
+  margin-top: 0.375rem;
+}
+
+.bo-doc-dates {
+  margin-top: 0.5rem;
+  color: var(--bo-muted);
+}
+
+.bo-annexes-title {
+  margin-top: 1rem;
+  font-size: var(--bo-h3);
+}
+
+/* Équipe municipale ------------------------------------------------------------------------------------ */
+.bo-team-group {
+  display: grid;
+  gap: 0.875rem;
+}
+
+.bo-team-group > h2 {
+  font-size: 1.375rem;
+}
+
+.bo-mayor-card {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.5rem;
+  background: var(--bo-mint);
+  border-radius: var(--bo-radius-large);
+}
+
+.bo-mayor-card .bo-kicker {
+  color: var(--bo-primary-dark);
+}
+
+.bo-mayor-card img {
+  display: block;
+  width: 100%;
+  max-width: 12.5rem;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-mayor-name {
+  margin-top: 0.25rem;
+  font-size: 1.875rem;
+}
+
+.bo-mayor-bio {
+  margin-top: 0.75rem;
+}
+
+.bo-mayor-contact {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 48rem) {
+  .bo-mayor-card-photo {
+    grid-template-columns: 12.5rem minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+.bo-team-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  padding: 1rem 1.125rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-team-card > div {
+  min-width: 0;
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.bo-team-card h3 {
+  font-size: 1.0625rem;
+}
+
+.bo-team-role {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--bo-primary);
+}
+
+.bo-avatar {
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.bo-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--bo-font-title);
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--bo-violet);
+  background: var(--bo-lavender);
+}
+
+.bo-avatar-small {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.bo-avatar-small.bo-initials {
+  font-size: 1rem;
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+}
+
+/* Conseillers : cartes dépliables, comme les questions fréquentes */
+.bo-team-list {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-team-list details {
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-team-list details[open] {
+  background: var(--bo-mint);
+  border-color: var(--bo-mint);
+}
+
+.bo-team-list summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0.5rem 1rem;
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-team-list summary::-webkit-details-marker {
+  display: none;
+}
+
+.bo-team-identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.bo-team-list details[open] .bo-faq-sign {
+  color: #fff;
+  background: var(--bo-primary);
+}
+
+.bo-team-list details[open] .bo-avatar-small.bo-initials {
+  background: var(--bo-surface);
+}
+
+.bo-team-list details[open] .bo-faq-open {
+  display: none;
+}
+
+.bo-team-list details[open] .bo-faq-close {
+  display: block;
+}
+
+.bo-team-details {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0 1rem 1rem 4.75rem;
+}
+
+/* Associations --------------------------------------------------------------------------------------- */
+.bo-asso-card {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  height: 100%;
+  padding: 1rem 1.125rem;
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-asso-card .bo-card-title {
+  margin-top: 0.375rem;
+  font-size: 1.0625rem;
+}
+
+.bo-asso-card .bo-card-title a {
+  color: var(--bo-ink);
+  text-decoration: none;
+}
+
+.bo-asso-card .bo-card-title a::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.bo-asso-card:hover .bo-card-title a {
+  text-decoration: underline;
+}
+
+.bo-asso-card:has(a:focus-visible) {
+  outline: 3px solid var(--bo-ink);
+  outline-offset: 3px;
+}
+
+.bo-asso-card a:focus-visible {
+  outline: none;
+}
+
+.bo-card-summary {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+.bo-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+  border-radius: var(--bo-pill);
+}
+
+.bo-asso-logo {
+  flex: none;
+  width: 3.5rem;
+  height: 3.5rem;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.bo-asso-logo.bo-initials {
+  font-size: 1.125rem;
+}
+
+.bo-asso {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 47.5rem;
+}
+
+.bo-asso-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bo-asso-head h1 {
+  margin-top: 0.375rem;
+}
+
+.bo-asso-logo-large {
+  width: 5rem;
+  height: 5rem;
+}
+
+/* Formulaires ------------------------------------------------------------------------------------------ */
+.bo-form-page {
+  display: grid;
+  gap: 1rem;
+  max-width: 45rem;
+}
+
+.bo-form {
+  display: grid;
+  gap: 1.125rem;
+}
+
+.bo-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.bo-form p:has(> input[type='checkbox']) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.bo-form p:has(> input[type='checkbox']) label {
+  flex: 1;
+  margin: 0;
+  font-weight: 400;
+}
+
+.bo-field-error {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--bo-danger);
+}
+
+.bo-field-error::before {
+  content: '⚠';
+}
+
+.bo-form p:has(> input[type='checkbox']) .bo-field-error {
+  flex-basis: 100%;
+  order: 3;
+}
+
+.bo-form-submit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.bo-form-submit button {
+  min-height: 3rem;
+  padding: 0 1.375rem;
+  font: inherit;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-primary);
+  border: 0;
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.bo-form-submit button:hover {
+  background: var(--bo-primary-dark);
+}
+
+.bo-form-status:empty {
+  display: none;
+}
+
+.bo-form-status {
+  padding: 1rem 1.125rem;
+  border-radius: var(--bo-radius-card);
+}
+
+.bo-form-status:focus {
+  outline: 3px solid var(--bo-ink);
+  outline-offset: 3px;
+}
+
+.bo-form-status ul {
+  margin-top: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.bo-form-status-error {
+  color: var(--bo-danger);
+  background: var(--bo-danger-bg);
+}
+
+.bo-form-status-error a {
+  color: var(--bo-danger);
+}
+
+.bo-form-status-success {
+  color: var(--bo-primary-dark);
+  background: var(--bo-mint);
+}

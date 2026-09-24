@@ -1,0 +1,50 @@
+---
+/** Informations pratiques d'un événement : dates, lieu, tarif, inscription, organisateur, .ics. */
+import type { EventVM } from '@communeo/core';
+import CalendarPlus from '@lucide/astro/icons/calendar-plus';
+
+interface Props {
+  event: EventVM;
+  /** Identifiant du titre (la carte est rendue deux fois : dans la page sur mobile, à droite sur ordinateur) */
+  id: string;
+  class?: string;
+}
+
+const { event, id, class: className } = Astro.props;
+---
+<section class:list={['bo-facts-card', className]} aria-labelledby={id}>
+  <h2 id={id} class="cn-sr-only">Informations pratiques</h2>
+  <dl class="bo-facts">
+    <div><dt>Dates et horaires</dt><dd><time datetime={event.start.iso}>{event.period}</time></dd></div>
+    {(event.location || event.address) && (
+      <div><dt>Lieu</dt><dd>{event.location}{event.address && <><br />{event.address}</>}</dd></div>
+    )}
+    {event.price && <div><dt>Tarif</dt><dd class="bo-facts-price">{event.price}</dd></div>}
+    {event.registration && (
+      <div>
+        <dt>Inscription</dt>
+        <dd>
+          {event.registration.required ? 'Obligatoire' : 'Conseillée'}
+          {event.registration.deadline && <> · avant le {event.registration.deadline.label}</>}
+          {event.registration.places && <><br /><span class="bo-muted">{event.registration.places} places</span></>}
+        </dd>
+      </div>
+    )}
+    {(event.organizer || event.contact.email || event.contact.phone || event.externalLink) && (
+      <div>
+        <dt>Organisateur</dt>
+        <dd>
+          {event.organizer}
+          {event.contact.email && <><br /><a href={event.contact.email.href}>{event.contact.email.label}</a></>}
+          {event.contact.phone && <><br /><a href={event.contact.phone.href}>{event.contact.phone.label}</a></>}
+          {event.externalLink && (
+            <><br /><a href={event.externalLink.href} target="_blank" rel="noopener noreferrer">{event.externalLink.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></>
+          )}
+        </dd>
+      </div>
+    )}
+  </dl>
+  <a href={event.icsHref} class="bo-button bo-button-sand" download>
+    <CalendarPlus size={20} aria-hidden="true" />Ajouter à mon agenda<span class="cn-sr-only"> (fichier .ics)</span>
+  </a>
+</section>

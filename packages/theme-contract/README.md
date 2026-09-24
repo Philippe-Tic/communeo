@@ -74,6 +74,7 @@ Open Graph, JSON-LD), les liens d'évitement et le bandeau cookies. Le thème re
 | `Alerts` | Bandeau d'alertes : rendu au build, puis rechargé par le navigateur (mise en ligne immédiate) et retrait à la date de fin |
 | `ConsentEmbed` | Vidéos et cartes chargées seulement après consentement |
 | `OpeningStatus` | Statut « ouverte · ferme à 12h », calculé dans le navigateur |
+| `NewsletterForm` | Inscription à la lettre d'information (accueil, prop `newsletterForm` de `Home`) : validation, envoi, messages annoncés, champ piège anti-robots |
 | `Lightbox` + `scripts/lightbox` | Agrandissement d'une galerie : Échap, flèches, focus rendu à la vignette |
 | `scripts/menu` | Menu repliable sur petit écran et sous-menus : `aria-expanded`, Échap, clic à l'extérieur |
 | `styles.css` | Utilitaires d'accessibilité (`cn-sr-only`, `cn-js-only`, `prefers-reduced-motion`) |

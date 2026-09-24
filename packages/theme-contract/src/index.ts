@@ -95,7 +95,8 @@ export interface FormConfig {
 type WithContext<P = object> = { ctx: PageContext } & P;
 
 export interface ThemeTemplates {
-  Home: ThemeComponent<WithContext<{ home: HomeVM }>>;
+  /** `newsletterForm` : inscription à la lettre d'information (composant NewsletterForm de ui-a11y) */
+  Home: ThemeComponent<WithContext<{ home: HomeVM; newsletterForm: FormConfig }>>;
   Page: ThemeComponent<WithContext<{ page: PageVM }>>;
   ArticleList: ThemeComponent<WithContext<{ articles: ArticleCardVM[]; categories: FilterOption[]; pagination: PaginationLinks }>>;
   Article: ThemeComponent<WithContext<{ article: ArticleVM }>>;

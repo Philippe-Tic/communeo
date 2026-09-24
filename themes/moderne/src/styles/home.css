@@ -1,0 +1,823 @@
+/* Accueil « magazine ». */
+
+.mo-home-section {
+  padding-block: 3rem 0;
+}
+
+.mo-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mo-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: var(--mo-target);
+  font-weight: 600;
+}
+
+.mo-on-dark .mo-more {
+  color: var(--mo-mint);
+}
+
+.mo-eyebrow-accent {
+  color: var(--mo-accent-text);
+}
+
+.mo-h2-small {
+  font-size: 1.75rem;
+}
+
+.mo-button-large {
+  min-height: 3.5rem;
+  padding: 0 1.75rem;
+  font-size: 1.125rem;
+}
+
+.mo-prose {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Accroche ------------------------------------------------------------------------------------- */
+.mo-hero {
+  display: grid;
+  gap: 2rem;
+  padding-block: 2.5rem 0.5rem;
+}
+
+.mo-hero h1 {
+  margin-top: 0.75rem;
+  font-size: 2.625rem;
+  line-height: 1.02;
+}
+
+.mo-hero-subtitle {
+  max-width: 35rem;
+  margin-top: 1.25rem;
+  font-size: 1.25rem;
+  color: var(--mo-muted);
+}
+
+.mo-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.mo-hero-side {
+  display: grid;
+  gap: 1rem;
+}
+
+.mo-hero-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 28px;
+}
+
+.mo-hero-event {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1rem 1rem 1.5rem;
+  color: #fff;
+  text-decoration: none;
+  background: var(--mo-ink);
+  border-radius: 28px;
+}
+
+.mo-hero-event:hover {
+  color: #fff;
+  background: var(--mo-deep);
+}
+
+.mo-hero-event-date {
+  flex: none;
+  font-family: var(--mo-font-title);
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--mo-mint);
+}
+
+.mo-hero-event-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.mo-hero-event-text > span:last-child {
+  font-size: 0.9375rem;
+  opacity: 0.9;
+}
+
+.mo-hero-event-arrow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--mo-target);
+  height: var(--mo-target);
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+  border-radius: 50%;
+}
+
+@media (min-width: 64rem) {
+  .mo-hero {
+    padding-block: 4rem 0;
+  }
+
+  .mo-hero-split {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 3.5rem;
+    align-items: end;
+  }
+
+  .mo-hero h1 {
+    margin-top: 1rem;
+    font-size: 4.75rem;
+  }
+
+  .mo-hero-subtitle {
+    margin-top: 1.5rem;
+    font-size: 1.375rem;
+  }
+
+  .mo-hero-actions {
+    margin-top: 2rem;
+  }
+
+  .mo-hero-event {
+    padding: 1.125rem 1.25rem 1.125rem 1.5rem;
+    border-radius: var(--mo-pill);
+  }
+
+  .mo-hero-event-date {
+    font-size: 2.125rem;
+  }
+
+  .mo-home-section {
+    padding-top: 4.5rem;
+  }
+}
+
+/* Accès rapides : tuiles vert clair, icône dans un disque blanc --------------------------------- */
+.mo-tiles {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-tiles a {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 100%;
+  min-height: 5rem;
+  padding: 1rem 1.25rem;
+  color: var(--mo-ink);
+  text-decoration: none;
+  background: var(--mo-soft);
+  border-radius: var(--mo-radius);
+}
+
+.mo-tiles a:hover {
+  color: var(--mo-ink);
+  background: var(--mo-border);
+}
+
+.mo-tile-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--mo-surface);
+  border-radius: 50%;
+}
+
+.mo-tile-label {
+  display: block;
+  font-size: 1.1875rem;
+}
+
+.mo-tile-description {
+  display: block;
+  font-size: 0.9375rem;
+  color: var(--mo-muted);
+}
+
+@media (min-width: 40rem) {
+  .mo-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.875rem;
+  }
+
+  .mo-tiles a {
+    min-height: 5.5rem;
+    padding: 1.125rem 1.375rem;
+  }
+}
+
+/* Actualités en mosaïque ------------------------------------------------------------------------- */
+.mo-news {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.mo-news-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 48rem) {
+  .mo-news-2,
+  .mo-news-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-news-2 {
+    grid-template-columns: 1.4fr 1fr;
+  }
+
+  .mo-news-3 {
+    grid-template-columns: 1.4fr 1fr 1fr;
+  }
+}
+
+/* Agenda : bloc sombre arrondi -------------------------------------------------------------------- */
+.mo-agenda {
+  margin-top: 3rem;
+  padding: 2rem 1.25rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: 28px;
+}
+
+.mo-agenda h2 {
+  color: #fff;
+}
+
+.mo-agenda-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 40rem) {
+  .mo-agenda-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-agenda {
+    margin-top: 4.5rem;
+    padding: 3.5rem;
+    border-radius: 32px;
+  }
+
+  .mo-agenda-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Infos pratiques : cartes vert clair --------------------------------------------------------------- */
+.mo-practical {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.mo-info-card {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 0.625rem;
+  padding: 1.5rem;
+  font-size: 1.0625rem;
+  background: var(--mo-soft);
+  border-radius: 24px;
+}
+
+.mo-info-card address {
+  display: grid;
+  font-style: normal;
+  line-height: 1.6;
+}
+
+.mo-info-phone {
+  font-weight: 600;
+}
+
+.mo-info-hours {
+  font-size: 0.9375rem;
+  color: var(--mo-muted);
+}
+
+.mo-status-large {
+  font-family: var(--mo-font-title);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.mo-status-large[data-open='true']::before {
+  background: var(--mo-accent);
+}
+
+/* Météo : widget partagé, rempli dans le navigateur */
+.mo-weather .cn-weather-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+}
+
+.mo-weather .cn-weather-temp {
+  font-family: var(--mo-font-title);
+  font-size: 3.25rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.mo-weather .cn-weather-days {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.875rem 0 0;
+  font-size: 0.9375rem;
+  list-style: none;
+  border-top: 1px solid var(--mo-soft-line);
+}
+
+.mo-waste-list {
+  display: grid;
+  gap: 0.625rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-waste-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Pastille textuelle (OM, TRI, VER) : la couleur n'est qu'un repère en plus */
+.mo-waste-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--mo-muted);
+  border-radius: 50%;
+}
+
+.mo-waste-tri-selectif {
+  background: #7a5a00;
+}
+
+.mo-waste-verre {
+  background: var(--mo-accent-text);
+}
+
+.mo-waste-dechets-verts {
+  background: #3f5f1f;
+}
+
+.mo-waste-encombrants {
+  background: var(--mo-info);
+}
+
+@media (min-width: 48rem) {
+  .mo-practical {
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .mo-info-card {
+    padding: 1.75rem;
+  }
+}
+
+/* Mot du maire ---------------------------------------------------------------------------------- */
+.mo-mayor {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.mo-mayor-photo {
+  display: block;
+  width: 100%;
+  max-width: 20rem;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 28px;
+}
+
+.mo-mayor-title {
+  margin-top: 0.75rem;
+  font-size: 2rem;
+  font-style: italic;
+}
+
+.mo-mayor-body {
+  max-width: 42rem;
+  margin-top: 1.25rem;
+  font-size: 1.1875rem;
+}
+
+.mo-mayor-signature {
+  margin-top: 1.25rem;
+  font-size: 1.1875rem;
+}
+
+@media (min-width: 64rem) {
+  .mo-mayor-with-photo {
+    grid-template-columns: 20rem minmax(0, 1fr);
+    gap: 3rem;
+  }
+
+  .mo-mayor-title {
+    font-size: 2.75rem;
+  }
+}
+
+/* Chiffres clés ------------------------------------------------------------------------------------ */
+.mo-figures {
+  margin-top: 3rem;
+  padding: 2rem 1.5rem;
+  background: var(--mo-soft);
+  border-radius: 28px;
+}
+
+.mo-figures ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-figure-value {
+  font-family: var(--mo-font-title);
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.mo-figure-label {
+  margin-top: 0.375rem;
+  font-size: 1.0625rem;
+  color: var(--mo-muted);
+}
+
+@media (min-width: 64rem) {
+  .mo-figures {
+    margin-top: 4.5rem;
+    padding: 3rem 3.5rem;
+    border-radius: 32px;
+  }
+
+  .mo-figures ul {
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  }
+
+  .mo-figure-value {
+    font-size: 4.5rem;
+  }
+}
+
+/* Perturbations et cantine ---------------------------------------------------------------------------- */
+.mo-split {
+  display: grid;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (min-width: 64rem) {
+  .mo-split-half {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.mo-disruptions {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-disruption {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.125rem 1.375rem;
+  border-radius: var(--mo-radius);
+}
+
+.mo-disruption-info {
+  --mo-sign: var(--mo-info);
+
+  background: var(--mo-info-bg);
+}
+
+.mo-disruption-warning {
+  --mo-sign: var(--mo-warning);
+
+  background: var(--mo-warning-bg);
+}
+
+.mo-disruption-critical {
+  --mo-sign: var(--mo-danger);
+
+  background: var(--mo-danger-bg);
+}
+
+.mo-disruption-sign {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--mo-sign);
+  border-radius: 50%;
+}
+
+.mo-disruption-kind {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mo-sign);
+}
+
+.mo-disruption-title a {
+  font-weight: 700;
+  color: var(--mo-ink);
+}
+
+.mo-canteen {
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+}
+
+.mo-canteen-menu {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-canteen-menu li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 0.75rem;
+}
+
+.mo-canteen-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+/* Associations : pilules avec logo ou initiales ---------------------------------------------------------- */
+.mo-assos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-assos a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.75rem;
+  padding: 0.5rem 1.25rem 0.5rem 0.5rem;
+  color: var(--mo-ink);
+  text-decoration: none;
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-pill);
+}
+
+.mo-assos a:hover {
+  color: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-assos img,
+.mo-initials {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+}
+
+.mo-assos img {
+  object-fit: cover;
+}
+
+.mo-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mo-font-title);
+  font-size: 1.125rem;
+  color: var(--mo-mint);
+  background: var(--mo-ink);
+}
+
+.mo-assos-category {
+  font-size: 0.9375rem;
+  color: var(--mo-muted);
+}
+
+/* La commune, lettre d'information, partenaires ----------------------------------------------------------- */
+.mo-free {
+  margin-top: 1rem;
+  font-size: 1.1875rem;
+}
+
+.mo-stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.mo-newsletter {
+  padding: 1.75rem;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: 24px;
+}
+
+.mo-newsletter h2 {
+  color: #fff;
+}
+
+.mo-newsletter > p {
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
+}
+
+.mo-newsletter-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.125rem;
+}
+
+.mo-newsletter-form .cn-newsletter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.mo-newsletter-form .cn-newsletter-row {
+  display: flex;
+}
+
+.mo-newsletter-form .cn-newsletter-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: var(--mo-pill) 0 0 var(--mo-pill);
+}
+
+.mo-newsletter-form .cn-newsletter-input[aria-invalid='true'] {
+  border: 3px solid var(--mo-danger);
+  border-right: 0;
+}
+
+.mo-newsletter-form .cn-newsletter-submit {
+  flex: none;
+  min-height: 3.5rem;
+  padding: 0 1.5rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+  border: 0;
+  border-radius: 0 var(--mo-pill) var(--mo-pill) 0;
+  cursor: pointer;
+}
+
+.mo-newsletter-form .cn-newsletter-submit:hover {
+  background: var(--mo-mint);
+}
+
+.mo-newsletter-form .cn-newsletter-submit:disabled {
+  color: #fff;
+  background: var(--mo-field);
+}
+
+.mo-newsletter-form .cn-newsletter-status {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--mo-radius);
+}
+
+.mo-newsletter-form[data-state='success'] .cn-newsletter-status {
+  color: var(--mo-mint);
+  background: var(--mo-deep);
+}
+
+.mo-newsletter-form[data-state='success'] .cn-newsletter-status::before {
+  content: '✓';
+}
+
+.mo-newsletter-form[data-state='error'] .cn-newsletter-status {
+  color: var(--mo-danger);
+  background: var(--mo-danger-bg);
+}
+
+.mo-newsletter-form[data-state='error'] .cn-newsletter-status::before {
+  content: '⚠';
+}
+
+.mo-newsletter-note {
+  font-size: 0.9375rem;
+}
+
+.mo-newsletter a {
+  color: var(--mo-mint);
+}
+
+.mo-partners {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-partners a,
+.mo-partners li > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 8.75rem;
+  min-height: 4rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: var(--mo-ink);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--mo-border);
+  border-radius: 16px;
+}
+
+.mo-partners a:hover {
+  color: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-partners img {
+  max-height: 3rem;
+  width: auto;
+}
+
+.mo-main-full {
+  padding-bottom: 5rem;
+}

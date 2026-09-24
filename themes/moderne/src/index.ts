@@ -1,6 +1,6 @@
 /** Thème Moderne. */
 import { defineTheme } from '@communeo/theme-contract';
-import { HOMEPAGE_SECTION_IDS } from '@communeo/core';
+import { themeHomeSections } from '@communeo/core';
 import { blocks } from './blocks/index';
 import Article from './templates/Article.astro';
 import ArticleList from './templates/ArticleList.astro';
@@ -28,7 +28,7 @@ export default defineTheme({
     name: 'Moderne',
     description:
       'Éditorial et visuel : un site « magazine » qui met l’agenda et les actualités en avant. Grandes images, titres Newsreader, formes arrondies, vert émeraude pour les actions.',
-    homeSections: HOMEPAGE_SECTION_IDS,
+    homeSections: [...themeHomeSections('moderne')],
     menus: { main: true, footer: true },
     thumbnail: '',
   },

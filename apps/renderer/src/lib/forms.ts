@@ -42,3 +42,9 @@ export const associationForm = (siteId: string): FormConfig => ({
   siteId,
   options: options(ASSOCIATION_CATEGORY_LABELS),
 });
+
+/** Inscription à la lettre d'information (accueil) */
+export const newsletterForm = (siteId: string): FormConfig => ({
+  action: `${apiUrl()}/api/newsletter-subscribers/public`,
+  siteId,
+});

@@ -1,12 +1,43 @@
 ---
+/** Carte d'événement : grande date, catégorie, image facultative, titre, période et lieu. */
 import type { EventCardVM } from '@communeo/core';
+import { dateBadge } from '../lib/date';
 
-interface Props { event: EventCardVM; level?: 2 | 3 }
-const { event, level = 3 } = Astro.props;
+interface Props {
+  event: EventCardVM;
+  level?: 2 | 3;
+  /** Afficher l'image de l'événement (listes) ; l'accueil s'en passe */
+  image?: boolean;
+}
+
+const { event, level = 3, image = false } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<article class="st-card">
-  <Heading><a href={event.href}>{event.title}</a></Heading>
-  <p class="st-meta"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
-  <p class="st-meta">{event.category.label}</p>
+<article class="mo-card-event">
+  <div class="mo-card-event-top">
+    <p class="mo-card-date" aria-hidden="true">
+      <span class="mo-card-day">{badge.day}</span>
+      <span class="mo-card-month">{badge.month}</span>
+    </p>
+    <span class="mo-chip-label mo-chip-info">{event.category.label}</span>
+  </div>
+  {image && event.image && (
+    <img
+      class="mo-card-event-image"
+      src={event.image.src}
+      alt={event.image.alt}
+      srcset={event.image.srcset ?? undefined}
+      width={event.image.width ?? undefined}
+      height={event.image.height ?? undefined}
+      loading="lazy"
+    />
+  )}
+  <div class="mo-card-event-body">
+    <Heading class="mo-card-title"><a href={event.href}>{event.title}</a></Heading>
+    <p class="mo-card-period">
+      <span class="cn-sr-only">Date : </span><time datetime={event.start.iso}>{event.period}</time>
+      {event.location && <><br />{event.location}</>}
+    </p>
+  </div>
 </article>

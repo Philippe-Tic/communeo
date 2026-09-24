@@ -83,20 +83,19 @@ test('enregistrer et continuer plus tard : tableau de bord avec « Reprendre »,
   await expect(page.getByRole('heading', { level: 1, name: 'Votre commune' })).toBeVisible();
 });
 
-test('votre thème : la commune dans chaque vignette, thèmes à venir non sélectionnables, aperçu, choix', async ({
+test('votre thème : la commune dans chaque vignette, tous les thèmes proposés, aperçu, choix', async ({
   page,
 }) => {
-  // Commune créée avec un thème pas encore construit : Institutionnel proposé, enregistré en continuant
-  const { bodies } = await mockApi(page, { onboarding: { step: 4 }, theme: 'bourg' });
+  // Commune créée en Journal : elle passe en Institutionnel depuis l'aperçu, enregistré en continuant
+  const { bodies } = await mockApi(page, { onboarding: { step: 4 }, theme: 'journal' });
   await page.goto('/assistant?etape=4');
   await expect(page.getByRole('heading', { level: 1, name: 'Votre thème' })).toBeVisible();
   const themes = page.getByRole('group', { name: 'Thème du site' });
   await expect(themes.getByRole('listitem')).toHaveCount(4);
   await expect(themes.getByRole('listitem').first()).toContainText('Saint-Aubin-sur-Loire');
-  await expect(themes.getByRole('radio', { name: 'Institutionnel' })).toBeChecked();
-  await expect(themes.getByRole('radio', { name: /^Moderne/ })).toBeEnabled();
-  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeEnabled();
-  await expect(themes.getByRole('radio', { name: /^Bourg/ })).toBeDisabled();
+  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeChecked();
+  for (const name of ['Institutionnel', 'Moderne', 'Bourg'])
+    await expect(themes.getByRole('radio', { name: new RegExp(`^${name}`) })).toBeEnabled();
   await expectNoViolations(page);
 
   await themes.getByRole('button', { name: 'Aperçu de votre site dans le thème Institutionnel' }).click();

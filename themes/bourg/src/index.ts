@@ -31,7 +31,7 @@ export default defineTheme({
       'Chaleureux et pratique : le panneau « Pratique » (mairie, alertes, collectes, météo) sur toutes les pages. Titres Nunito, sarcelle, encarts teintés.',
     homeSections: [...themeHomeSections('bourg')],
     menus: { main: true, footer: true },
-    thumbnail: '',
+    thumbnail: 'thumbnail.png',
   },
   stylesheet,
   templates: {

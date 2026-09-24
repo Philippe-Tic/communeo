@@ -1,0 +1,302 @@
+/* Composants transverses : liens d'évitement, consentement, pagination, filtres. */
+
+/* Liens d'évitement : pilules blanches sur une barre encre, au premier Tab */
+.cn-skip-links ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mo-space-1);
+}
+
+.cn-skip-links a {
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--mo-target);
+  padding: 0 1.125rem;
+  font-weight: 600;
+  color: var(--mo-ink);
+  background: #fff;
+  border-radius: var(--mo-pill);
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 0.75rem var(--mo-ink);
+}
+
+.cn-skip-links a:focus {
+  top: 0.75rem;
+  left: 0.75rem;
+}
+
+/* Bandeau cookies : carte sombre ; « Tout accepter » et « Tout refuser » ont le même poids */
+.cn-cookie-banner {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  display: grid;
+  gap: 0.875rem;
+  max-height: 80vh;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  color: #fff;
+  background: var(--mo-ink);
+  border-radius: var(--mo-radius);
+  box-shadow: var(--mo-shadow);
+}
+
+.cn-cookie-banner h2,
+.cn-cookie-dialog h2 {
+  font-size: 1.625rem;
+}
+
+.cn-cookie-banner p {
+  font-size: 1.0625rem;
+}
+
+.cn-cookie-banner a {
+  color: #fff;
+}
+
+.cn-cookie-banner :focus-visible {
+  outline-color: #fff;
+}
+
+.cn-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.cn-cookie-actions button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0 1.375rem;
+  font: inherit;
+  font-weight: 700;
+  color: var(--mo-ink);
+  background: var(--mo-accent);
+  border: 2px solid var(--mo-accent);
+  border-radius: var(--mo-pill);
+  cursor: pointer;
+}
+
+.cn-cookie-actions button:hover {
+  background: var(--mo-mint);
+  border-color: var(--mo-mint);
+}
+
+.cn-cookie-banner button[data-cn-consent='customize'] {
+  font-weight: 600;
+  color: #fff;
+  background: transparent;
+  border-color: #fff;
+}
+
+.cn-cookie-banner button[data-cn-consent='customize']:hover {
+  color: var(--mo-ink);
+  background: #fff;
+}
+
+@media (min-width: 48rem) {
+  .cn-cookie-banner {
+    right: var(--mo-space-3);
+    bottom: var(--mo-space-3);
+    left: auto;
+    max-width: 38rem;
+    padding: 1.5rem 1.75rem;
+  }
+
+  .cn-cookie-actions button {
+    flex: 0 1 auto;
+  }
+}
+
+/* Panneau de préférences : carte blanche, interrupteurs à libellé visible */
+.cn-cookie-dialog {
+  width: min(38rem, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  padding: 1.5rem 1.75rem;
+  color: var(--mo-ink);
+  background: var(--mo-surface);
+  border: 1px solid var(--mo-border);
+  border-radius: var(--mo-radius);
+  box-shadow: var(--mo-shadow);
+}
+
+.cn-cookie-dialog::backdrop {
+  background: rgb(18 33 27 / 70%);
+}
+
+.cn-cookie-dialog form {
+  display: grid;
+  gap: var(--mo-space-2);
+}
+
+.cn-cookie-dialog fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.cn-cookie-dialog legend {
+  margin-bottom: 0.25rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+.cn-cookie-dialog fieldset p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mo-space-2);
+  padding-block: 0.875rem;
+  border-top: 1px solid var(--mo-border);
+}
+
+.cn-cookie-dialog fieldset label {
+  order: -1;
+}
+
+/* Interrupteur : case à cocher habillée, l'état se lit aussi à la position du rond */
+.cn-cookie-dialog input[role='switch'],
+.cn-cookie-dialog input[type='checkbox']:disabled {
+  position: relative;
+  flex: none;
+  width: 3.5rem;
+  height: 2rem;
+  margin: 0;
+  appearance: none;
+  background: var(--mo-field);
+  border-radius: 1rem;
+  cursor: pointer;
+}
+
+.cn-cookie-dialog input[role='switch']::before,
+.cn-cookie-dialog input[type='checkbox']:disabled::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1.625rem;
+  height: 1.625rem;
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.cn-cookie-dialog input:checked,
+.cn-cookie-dialog input[type='checkbox']:checked:disabled {
+  background: var(--mo-accent-text);
+}
+
+.cn-cookie-dialog input:checked::before {
+  transform: translateX(1.5rem);
+}
+
+.cn-cookie-dialog input:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.cn-cookie-dialog .cn-cookie-actions button[value='cancel'] {
+  font-weight: 600;
+  background: var(--mo-surface);
+  border-color: var(--mo-ink);
+}
+
+.cn-cookie-dialog .cn-cookie-actions button[value='cancel']:hover {
+  background: var(--mo-soft);
+}
+
+/* Pagination : pilules « Précédent / Suivant », pastilles de page ------------------------------ */
+.mo-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: var(--mo-space-4);
+}
+
+.mo-pagination ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  min-height: 3rem;
+  font-weight: 600;
+  color: var(--mo-ink);
+  text-decoration: none;
+  border-radius: var(--mo-pill);
+}
+
+.mo-pagination-step {
+  gap: 0.375rem;
+  padding: 0 1.125rem;
+  border: 2px solid var(--mo-ink);
+}
+
+.mo-pagination a:hover {
+  color: var(--mo-ink);
+  background: var(--mo-soft);
+}
+
+.mo-pagination a[aria-current='page'] {
+  color: #fff;
+  background: var(--mo-ink);
+}
+
+.mo-pagination-status {
+  font-size: 1rem;
+  color: var(--mo-muted);
+}
+
+/* Filtres en pilules --------------------------------------------------------------------------- */
+.mo-filters ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.mo-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  color: var(--mo-ink);
+  text-decoration: none;
+  background: var(--mo-surface);
+  border: 2px solid var(--mo-border);
+  border-radius: var(--mo-pill);
+}
+
+.mo-chip:hover {
+  color: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-chip[aria-current='page'] {
+  color: #fff;
+  background: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-chip-count {
+  font-weight: 400;
+}

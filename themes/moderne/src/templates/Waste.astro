@@ -1,0 +1,23 @@
+---
+import type { WasteCollectionVM } from '@communeo/core';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+
+interface Props { ctx: PageContext; collections: WasteCollectionVM[]; notes: string | null }
+const { ctx, collections, notes } = Astro.props;
+---
+<Layout ctx={ctx}>
+  {notes && <p>{notes}</p>}
+  {collections.length ? (
+    <ul>
+      {collections.map((c) => (
+        <li>
+          <h2><abbr title={c.label}>{c.abbreviation}</abbr> {c.label}</h2>
+          <p>{c.frequency.label}{c.day && <>, le {c.day.label}</>}{c.zone && <> · {c.zone}</>}</p>
+          {c.upcoming.length > 0 && <p>Prochains passages : {c.upcoming.map((d, i) => <>{i > 0 && ', '}<time datetime={d.iso}>{d.label}</time></>)}</p>}
+          {c.notes && <p>{c.notes}</p>}
+        </li>
+      ))}
+    </ul>
+  ) : <p>Le calendrier de collecte sera bientôt publié.</p>}
+</Layout>

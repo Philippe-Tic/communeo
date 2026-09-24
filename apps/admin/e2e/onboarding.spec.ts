@@ -200,19 +200,91 @@ test('liste des pages : « Depuis un modèle » crée la page et l’ouvre dans 
   });
 });
 
-test('logo passé, étapes suivantes, terminer : assistant fini, tableau de bord', async ({ page }) => {
-  const { bodies } = await mockApi(page, { onboarding: { step: 3 } });
+test('logo passé, thème, obligations : l’assistant avance étape par étape', async ({ page }) => {
+  await mockApi(page, { onboarding: { step: 3 } });
   await page.goto('/assistant?etape=3');
   await expect(page.getByRole('figure').first()).toContainText('Saint-Aubin-sur-Loire');
   await page.getByRole('button', { name: 'Passer cette étape' }).filter({ visible: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Votre thème' })).toBeVisible();
   await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
+});
+
+test('mise en ligne : récapitulatif, suivi, succès ; l’assistant est terminé, la checklist prend le relais', async ({
+  page,
+}) => {
+  const { bodies, calls } = await mockApi(page, {
+    onboarding: { step: 7 },
+    legalMissing: true,
+    deployOutcome: 'ok',
+    publication: 'idle',
+  });
   await page.goto('/assistant?etape=7');
-  await page.getByRole('button', { name: 'Terminer' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mise en ligne' })).toBeVisible();
+  const recap = page.locator('dl');
+  await expect(recap).toContainText('Institutionnel');
+  await expect(recap).toContainText('2 informations à compléter');
+  await expect(recap).toContainText('saint-aubin-sur-loire.fr');
+  await expectNoViolations(page);
+  await page.getByRole('button', { name: 'Mettre le site en ligne' }).click();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Le site de Saint-Aubin-sur-Loire est en ligne' }),
+  ).toBeFocused();
+  await expect(page.getByText('Mise en ligne réussie en 27 secondes.')).toBeVisible();
+  expect(calls).toContain('POST /api/deployment/trigger');
   expect(lastSitePut(bodies)?.onboarding).toMatchObject({ completedAt: expect.any(String) });
+  const finish = page.getByRole('region', { name: /Pour finir votre site/ });
+  await expect(finish.getByRole('listitem').first()).toHaveText(
+    'Compléter les mentions légales (SIRET, directeur de publication)',
+  );
+  await expectNoViolations(page);
+
+  await page.getByRole('link', { name: 'Aller au tableau de bord' }).click();
+  const checklist = page.getByRole('region', { name: /Pour terminer votre site/ });
+  await expect(checklist).toBeVisible();
+  await expect(checklist.getByRole('link', { name: /Mentions légales/ })).toHaveAttribute('href', '/mon-site/legal');
   await expect(page.getByRole('region', { name: 'Terminez la création de votre site' })).toHaveCount(0);
+});
+
+test('mise en ligne en échec : message avec la référence, « Réessayer »', async ({ page }) => {
+  await mockApi(page, { onboarding: { step: 7 }, deployOutcome: 'failed', publication: 'idle' });
+  await page.goto('/assistant?etape=7');
+  await page.getByRole('button', { name: 'Mettre le site en ligne' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'La mise en ligne a échoué' })).toContainText(
+    'La mise en ligne a échoué (référence MEL-2026-0924-1802)',
+  );
+  await expect(page.getByRole('button', { name: 'Réessayer' })).toBeEnabled();
+});
+
+test('checklist du tableau de bord : un rédacteur voit ce qui reste, « Masquer » la retire pour la commune', async ({
+  page,
+}) => {
+  const { calls } = await mockApi(page, {
+    user: 'editor',
+    onboarding: { step: 7, completedAt: '2026-09-24T10:00:00.000Z' },
+    legalMissing: true,
+  });
+  await page.goto('/');
+  const checklist = page.getByRole('region', { name: /Pour terminer votre site/ }).filter({ visible: true });
+  await expect(checklist).toContainText(
+    'Compléter les mentions légales (SIRET, directeur de publication) · par un administrateur',
+  );
+  await expect(checklist.getByRole('link', { name: /Mentions légales/ })).toHaveCount(0);
+  await expectNoViolations(page);
+  await checklist.getByRole('button', { name: 'Masquer la checklist' }).click();
+  await expect(page.getByRole('region', { name: /Pour terminer votre site/ })).toHaveCount(0);
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
+  expect(calls).toContain('POST checklist/hide');
+});
+
+test('aide contextuelle : une phrase sous le titre de l’écran', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/alertes');
+  await expect(
+    page.getByText("Une alerte publiée s'affiche en bandeau sur le site en moins d'une minute"),
+  ).toBeVisible();
+  await page.goto('/mon-site/legal');
+  await expect(page.getByText('Les pages Mentions légales et Données personnelles du site')).toBeVisible();
 });
 
 test('éditeur : pas d’assistant', async ({ page }) => {

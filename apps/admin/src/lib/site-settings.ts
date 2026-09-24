@@ -85,6 +85,8 @@ export interface OnboardingProgress {
   /** « Enregistrer et continuer plus tard » : plus de redirection, une carte sur le tableau de bord */
   postponedAt?: string | null;
   completedAt?: string | null;
+  /** Checklist du tableau de bord masquée par la commune */
+  checklistHiddenAt?: string | null;
 }
 
 const FIELDS = [

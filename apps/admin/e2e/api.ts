@@ -2,7 +2,7 @@
  * API Strapi simulée pour les tests de l'admin : une commune, une session, l'état de mise en ligne.
  */
 import type { Page } from '@playwright/test';
-import { computeCompliance } from '@communeo/core';
+import { computeCompliance, onboardingChecklist } from '@communeo/core';
 
 export const SITE = {
   documentId: 'site-saint-aubin',
@@ -371,7 +371,7 @@ const isDraftOnly = (documentId: string) => /^p-(\d+)$/.test(documentId) && Numb
 
 export interface MockOptions {
   user?: keyof typeof USERS;
-  publication?: 'pending' | 'ok' | 'running' | 'failed';
+  publication?: 'idle' | 'pending' | 'ok' | 'running' | 'failed';
   /** Domaine personnalisé : aucun, en attente de DNS, vérifié ; `unavailable` : hébergeur non configuré (503) */
   domain?: 'none' | 'pending' | 'verified' | 'unavailable';
   /** Vérification du domaine : le DNS renvoie une autre adresse */
@@ -418,7 +418,9 @@ export interface MockOptions {
   /** SIRET et directeur de publication pas encore renseignés */
   legalMissing?: boolean;
   /** Assistant de création en cours (commune créée par l'équipe) */
-  onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null };
+  onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null; checklistHiddenAt?: string | null };
+  /** Mise en ligne demandée : reste en cours (défaut), réussit ou échoue à la lecture suivante de l'état */
+  deployOutcome?: 'running' | 'ok' | 'failed';
   /** Données publiques : trouvées (défaut), mairie absente de l'annuaire, ou services en panne */
   publicData?: 'ok' | 'no-town-hall' | 'down';
 }
@@ -913,6 +915,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     onboarding,
     publicData = 'ok',
     legalMissing = false,
+    deployOutcome = 'running',
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
@@ -938,6 +941,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const bodies: Array<{ call: string; type?: ContentType; body: { data: Record<string, unknown> } }> = [];
   const posts: Record<string, unknown[]> = {};
   let state = publication;
+  // Mise en ligne demandée : l'état la montre en cours une fois, puis selon `deployOutcome`
+  let deploy: { readsLeft: number; triggeredAt: string } | null = null;
   let domainState = options.domain ?? 'none';
   const communeSummary = (documentId: string, name: string, slug: string, theme: string | null) => ({
     documentId,
@@ -1505,6 +1510,29 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     }
     if (url.pathname === '/api/deployment/state') {
       const sophie = { firstName: 'Sophie', lastName: 'Leroy' };
+      if (deploy && deployOutcome !== 'running') {
+        if (deploy.readsLeft > 0) deploy.readsLeft -= 1;
+        else state = deployOutcome;
+      }
+      if (deploy && state !== 'running')
+        return json({
+          state,
+          pendingCount: 0,
+          step: null,
+          reference: state === 'failed' ? 'MEL-2026-0924-1802' : null,
+          scheduledAt: null,
+          lastDeployment: {
+            status: state === 'failed' ? 'error' : 'ready',
+            reason: 'manual',
+            reference: 'MEL-2026-0924-1802',
+            step: null,
+            triggeredAt: deploy.triggeredAt,
+            completedAt: new Date().toISOString(),
+            buildTime: state === 'failed' ? null : 27,
+            triggeredBy: sophie,
+          },
+          pending: [],
+        });
       return json({
         state,
         pendingCount: state === 'pending' ? 3 : 0,
@@ -1666,6 +1694,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
       state = 'running';
+      deploy = { readsLeft: 1, triggeredAt: new Date().toISOString() };
       return json({ status: 'queued', queued: true }, 202);
     }
     if (url.pathname === '/api/publication/official-documents/years') {
@@ -2009,6 +2038,26 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       }
       return json({
         data: PAGE_TEMPLATE_LIST.map((template) => ({ ...template, page: templatePages[template.id] ?? null })),
+      });
+    }
+    // Checklist « Pour terminer votre site » (#154)
+    if (url.pathname === '/api/onboarding/checklist/hide' && method === 'POST') {
+      site.onboarding = { ...(site.onboarding as object), checklistHiddenAt: new Date().toISOString() };
+      calls.push('POST checklist/hide');
+      return json({ data: { hidden: true } });
+    }
+    if (url.pathname === '/api/onboarding/checklist') {
+      const drafts = Object.values(templatePages).filter((page) => !publishedByType.pages.has(page.documentId)).length;
+      const checklist = onboardingChecklist({
+        site: { ...(site as Omit<Parameters<typeof onboardingChecklist>[0]['site'], 'hasLogo'>), hasLogo: !!site.logo },
+        pages: { published: publishedByType.pages.size, templateDrafts: drafts },
+      });
+      const progress = site.onboarding as { completedAt?: string | null; checklistHiddenAt?: string | null } | null;
+      return json({
+        data: {
+          ...checklist,
+          visible: !!progress?.completedAt && !progress.checklistHiddenAt && checklist.done < checklist.total,
+        },
       });
     }
     if (url.pathname === '/api/compliance')

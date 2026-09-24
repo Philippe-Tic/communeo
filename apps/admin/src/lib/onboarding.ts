@@ -3,7 +3,8 @@
  * (`onboarding`) à chaque étape quittée ; données publiques pour pré-remplir (API Communeo, qui
  * interroge geo.api.gouv.fr et l'Annuaire de l'administration).
  */
-import type { QueryClient } from '@tanstack/react-query';
+import { queryOptions, type QueryClient } from '@tanstack/react-query';
+import type { OnboardingChecklist } from '@communeo/core';
 import type { CommuneDetails, CommuneMatch } from '@communeo/core/client';
 import { api } from './api';
 import { sessionQuery, type SessionUser } from './session';
@@ -58,4 +59,21 @@ export async function saveProgress(
   client.setQueryData(sessionQuery.queryKey, (user) =>
     user?.site ? { ...user, site: { ...user.site, onboarding: progress } } : user,
   );
+}
+
+/** Checklist « Pour terminer votre site » (#154) : tableau de bord et écran de succès */
+export const checklistQuery = queryOptions({
+  queryKey: ['checklist'],
+  queryFn: () =>
+    api<{ data: OnboardingChecklist & { visible: boolean } }>('/api/onboarding/checklist').then(
+      (response) => response.data,
+    ),
+  // Recalculée à chaque visite : on revient souvent de l'écran où l'on vient de compléter un point
+  staleTime: 0,
+});
+
+/** « Masquer » : pour toute la commune */
+export async function hideChecklist(client: QueryClient) {
+  await api('/api/onboarding/checklist/hide', { method: 'POST' });
+  client.setQueryData(checklistQuery.queryKey, (current) => (current ? { ...current, visible: false } : current));
 }

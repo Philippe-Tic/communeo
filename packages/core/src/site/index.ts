@@ -9,3 +9,4 @@ export * from './compliance';
 export * from './public-data';
 export * from './legal-templates';
 export * from './page-templates';
+export * from './onboarding-checklist';

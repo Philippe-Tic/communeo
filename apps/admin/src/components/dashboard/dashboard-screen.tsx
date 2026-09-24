@@ -2,6 +2,8 @@
  * Tableau de bord (handoff 6.6, variante 1f « une action à la fois ») : la prochaine action de
  * conformité en tête, trois raccourcis, les messages non lus ; à droite la mise en ligne, les
  * prochains événements, les derniers contenus modifiés et le score de conformité.
+ * Après l'assistant de création, la checklist « Pour terminer votre site » (variante 1g) prend la
+ * place de la prochaine action tant qu'elle n'est ni faite ni masquée.
  * Quand une alerte est en cours, le bandeau de tuiles de la variante 1g (alerte, mise en ligne,
  * conformité) passe en tête. Mobile : raccourcis d'abord (« Publier une alerte » en premier), puis
  * messages, puis action recommandée et mise en ligne en cartes courtes.
@@ -25,7 +27,7 @@ import { PageHeader } from '@/components/page-header';
 import { StatusBadge, type Tone } from '@/components/ui/status-badge';
 import { alertState, alertsQuery, type Alert } from '@/lib/alerts';
 import { complianceQuery, remainingText } from '@/lib/compliance';
-import { ONBOARDING_STEPS, onboardingPending, TOTAL_STEPS } from '@/lib/onboarding';
+import { checklistQuery, ONBOARDING_STEPS, onboardingPending, TOTAL_STEPS } from '@/lib/onboarding';
 import { publicationStatesQuery } from '@/lib/content-list';
 import { CONTENT_LABELS, recentContentsQuery, upcomingEventsQuery } from '@/lib/dashboard';
 import { formatDayTime, formatListDate, formatShortParisDateTime, relativeTime } from '@/lib/dates';
@@ -34,6 +36,7 @@ import { inboxQuery, MESSAGE_CATEGORIES, type MessageSummary } from '@/lib/messa
 import { publicationQuery, type PublicationStatus } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
 import { cn } from '@/lib/utils';
+import { Checklist } from './checklist';
 
 const ZONE = 'Europe/Paris';
 const today = () =>
@@ -512,6 +515,7 @@ function Tiles({ alert, report }: { alert: Alert; report: ComplianceReport | und
 export function DashboardScreen() {
   const { data: user } = useSuspenseQuery(sessionQuery);
   const compliance = useQuery(complianceQuery);
+  const checklist = useQuery(checklistQuery);
   const alerts = useQuery(alertsQuery);
   const inbox = useQuery(inboxQuery({ q: '', nonLus: true, page: 1 }));
   const canAdmin = user.municipality_role === 'admin' || user.municipality_role === 'super_admin';
@@ -519,6 +523,7 @@ export function DashboardScreen() {
   const alert = activeAlerts[0];
   const report = compliance.data;
   const unread = inbox.data?.total;
+  const steps = checklist.data?.visible ? checklist.data : null;
 
   const summary = [
     capitalize(today()),
@@ -545,7 +550,8 @@ export function DashboardScreen() {
               Terminez la création de votre site
             </h2>
             <p className="mt-1 text-secondary">
-              Vous en êtes à l'étape {user.site.onboarding.step} sur {TOTAL_STEPS} : {ONBOARDING_STEPS[user.site.onboarding.step - 1]?.label.toLowerCase()}.
+              Vous en êtes à l'étape {user.site.onboarding.step} sur {TOTAL_STEPS} :{' '}
+              {ONBOARDING_STEPS[user.site.onboarding.step - 1]?.label.toLowerCase()}.
             </p>
           </div>
           <Link
@@ -565,10 +571,16 @@ export function DashboardScreen() {
       <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6">
         {/* Mobile : les deux colonnes se suivent (raccourcis, messages, action, mise en ligne…), dans l'ordre du DOM */}
         <div className="flex flex-col gap-4">
-          {report && (
+          {steps ? (
             <div className="max-lg:hidden">
-              <NextAction report={report} canAdmin={canAdmin} />
+              <Checklist checklist={steps} canAdmin={canAdmin} />
             </div>
+          ) : (
+            report && (
+              <div className="max-lg:hidden">
+                <NextAction report={report} canAdmin={canAdmin} />
+              </div>
+            )
           )}
           <nav aria-label="Raccourcis">
             <ul className="grid grid-cols-2 gap-3 lg:grid-cols-3">
@@ -598,10 +610,16 @@ export function DashboardScreen() {
             </ul>
           </nav>
           <Messages />
-          {report && (
+          {steps ? (
             <div className="lg:hidden">
-              <NextAction report={report} canAdmin={canAdmin} compact />
+              <Checklist checklist={steps} canAdmin={canAdmin} />
             </div>
+          ) : (
+            report && (
+              <div className="lg:hidden">
+                <NextAction report={report} canAdmin={canAdmin} compact />
+              </div>
+            )
           )}
         </div>
         <div className="flex flex-col gap-4">

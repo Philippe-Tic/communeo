@@ -18,6 +18,7 @@ import { useAutosave } from '@/components/editor/use-autosave';
 import { flattenErrors, Form, TextareaField, useZodForm } from '@/components/form';
 import { Button } from '@/components/ui/button';
 import { UnsavedChangesDialog } from '@/components/ui/confirm-dialog';
+import { ScreenHelp } from '@/components/screen-help';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import {
   homepageQuery,
@@ -242,6 +243,7 @@ export function HomepageEditor({
                   {shownCount} section{shownCount > 1 ? 's' : ''} affichée{shownCount > 1 ? 's' : ''} sur{' '}
                   {sections.length} disponibles
                 </p>
+                <ScreenHelp />
               </div>
               <div className="flex items-center gap-2">
                 <SaveStatus

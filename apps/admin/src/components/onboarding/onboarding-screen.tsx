@@ -5,7 +5,7 @@
  */
 import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, type LucideIcon } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
@@ -19,7 +19,7 @@ import { LegalStep } from './steps/legal-step';
 import { LogoStep } from './steps/logo-step';
 import { PagesStep } from './steps/pages-step';
 import { ThemeStep } from './steps/theme-step';
-import { UpcomingStep } from './steps/upcoming-step';
+import { PublishStep } from './steps/publish-step';
 import { WelcomeStep } from './steps/welcome-step';
 import { WizardFrame } from './wizard-frame';
 
@@ -31,6 +31,8 @@ export interface StepProps {
   back: () => void;
   /** Enregistre et revient au tableau de bord */
   later: (data?: Record<string, unknown>, cached?: Record<string, unknown>) => Promise<void>;
+  /** Termine l'assistant sur place (dernière étape, écran de succès) */
+  complete: () => Promise<boolean>;
 }
 
 const failure = (error: unknown) => (error instanceof ApiError ? error.message : 'le serveur ne répond pas');
@@ -43,8 +45,9 @@ export function WizardActions({
 }: {
   onBack?: () => void;
   tertiary?: { label: string; onClick: () => void };
-  primary: { label: string; busy?: boolean; form?: string; onClick?: () => void };
+  primary: { label: string; icon?: LucideIcon; busy?: boolean; form?: string; onClick?: () => void };
 }) {
+  const Icon = primary.icon;
   return (
     <>
       {onBack && (
@@ -66,7 +69,7 @@ export function WizardActions({
           disabled={primary.busy}
           className="max-md:h-11"
         >
-          {primary.busy && <Loader2 aria-hidden="true" className="animate-spin" />}
+          {primary.busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : Icon && <Icon aria-hidden="true" />}
           {primary.label}
         </Button>
       </div>
@@ -146,6 +149,7 @@ export function OnboardingScreen({ step: requested }: { step: number | undefined
         await navigate({ to: '/' });
       } else go(step + 1);
     },
+    complete: () => persist({ step: TOTAL_STEPS, completedAt: new Date().toISOString(), postponedAt: null }),
     later: async (data, cached) => {
       const saved = await persist({ step, postponedAt: new Date().toISOString(), completedAt: null }, data, cached);
       if (!saved) return;
@@ -166,5 +170,5 @@ export function OnboardingScreen({ step: requested }: { step: number | undefined
   if (step === 4) return <ThemeStep {...props} alert={alert} />;
   if (step === 5) return <LegalStep {...props} alert={alert} />;
   if (step === 6) return <PagesStep {...props} alert={alert} />;
-  return <UpcomingStep {...props} alert={alert} />;
+  return <PublishStep {...props} alert={alert} />;
 }

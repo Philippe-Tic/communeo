@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { SECTIONS, THEMES } from '@communeo/core';
 import { PreviewDrawer, PreviewFullscreen, PreviewView, type PreviewState } from '@/components/editor/preview-panel';
 import { UnsavedChangesGuard } from '@/components/form';
+import { ScreenHelp } from '@/components/screen-help';
 import { SettingsBar } from '@/components/settings/settings-bar';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
@@ -211,6 +212,7 @@ export function MenuEditor({ site, pages, unpublished }: { site: SiteSettings; p
             <div role="status" className="sr-only">
               {message}
             </div>
+            <ScreenHelp className="mt-0 mb-5" />
 
             <section aria-labelledby="menu-principal">
               <div className="flex flex-wrap items-start justify-between gap-3">

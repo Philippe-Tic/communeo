@@ -145,3 +145,30 @@ describe('pré-remplissage', () => {
     expect((await api.get('/api/onboarding/communes/abc').set(auth(admin))).status).toBe(404);
   });
 });
+
+describe('checklist « Pour terminer votre site » (#154)', () => {
+  it('visible après l’assistant pour tous les utilisateurs ; pages de modèles en brouillon comptées', async () => {
+    const siteId = (await api.get('/api/users/me').set(auth(admin))).body.site.documentId;
+    // Pas d'assistant terminé : checklist calculée mais pas proposée
+    expect((await api.get('/api/onboarding/checklist').set(auth(editor))).body.data.visible).toBe(false);
+
+    await strapi.documents('api::site.site').update({
+      documentId: siteId,
+      data: { onboarding: { step: 7, completedAt: new Date().toISOString() } } as any,
+    });
+    await api.post('/api/page-templates').set(auth(admin)).send({ templates: ['etat-civil', 'urbanisme'] });
+    const { data } = (await api.get('/api/onboarding/checklist').set(auth(editor))).body;
+    expect(data.visible).toBe(true);
+    expect(data.total).toBe(7);
+    expect(data.todo.map((item: any) => item.todo)).toContain('Relire et publier les 2 pages en brouillon');
+  });
+
+  it('« Masquer » : masquée pour toute la commune ; sans session : refusé', async () => {
+    expect((await api.post('/api/onboarding/checklist/hide').set(auth(editor))).status).toBe(200);
+    expect((await api.get('/api/onboarding/checklist').set(auth(admin))).body.data.visible).toBe(false);
+    const siteId = (await api.get('/api/users/me').set(auth(admin))).body.site.documentId;
+    const site: any = await strapi.documents('api::site.site').findOne({ documentId: siteId });
+    expect(site.onboarding).toMatchObject({ step: 7, checklistHiddenAt: expect.any(String) });
+    expect((await api.get('/api/onboarding/checklist')).status).toBeGreaterThanOrEqual(401);
+  });
+});

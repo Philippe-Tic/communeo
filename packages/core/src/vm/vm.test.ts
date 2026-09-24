@@ -212,7 +212,7 @@ describe('source de contenus', () => {
       calls.push(name);
       return items;
     };
-    const article = { ...base, documentId: 'a1', publishedAt: base.createdAt, title: 'Réouverture', slug: 'reouverture', category: 'news', summary: null, publication_date: '2026-09-15T08:00:00.000Z' } as unknown as Article;
+    const article = { ...base, documentId: 'a1', publishedAt: base.createdAt, title: 'Réouverture', slug: 'reouverture', category: 'vie-municipale', summary: null, publication_date: '2026-09-15T08:00:00.000Z' } as unknown as Article;
     const page = { ...base, documentId: 'p1', publishedAt: base.createdAt, title: 'Salle', slug: 'salle', lead: null, blocks: [] } as unknown as Page;
     const loader: RawLoader = {
       site: async () => {

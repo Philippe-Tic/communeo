@@ -31,7 +31,8 @@ describe('commune complète', () => {
     ]);
     expect(articles.some((a) => a.title.length > 85)).toBe(true);
     expect(articles.some((a) => a.image === null)).toBe(true);
-    expect(articles.some((a) => a.category.key === 'emergency')).toBe(true);
+    // Plusieurs thèmes, dont un partagé par deux actualités (filtre du site non trivial)
+    expect(articles.filter((a) => a.category.key === 'travaux')).toHaveLength(2);
     expect(events.some((e) => e.multiDay)).toBe(true);
     expect(team.groups.flatMap((g) => g.members).some((m) => m.photo === null)).toBe(true);
     expect(associations.some((a) => a.logo === null)).toBe(true);

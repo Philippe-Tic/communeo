@@ -338,13 +338,6 @@
   border-radius: 3px;
 }
 
-.in-tag-urgent {
-  color: #fff;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  background: var(--in-danger);
-}
-
 .in-tag-outline {
   color: var(--in-ink);
   background: transparent;

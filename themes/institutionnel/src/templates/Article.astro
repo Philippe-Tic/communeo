@@ -3,7 +3,6 @@
 import type { ArticleVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
 import Blocks from '@communeo/ui-a11y/Blocks.astro';
-import TriangleAlert from '@lucide/astro/icons/triangle-alert';
 import { blocks as components } from '../blocks/index';
 import ArticleCard from '../parts/ArticleCard.astro';
 import Layout from '../parts/Layout.astro';
@@ -11,12 +10,11 @@ import Share from '../parts/Share.astro';
 
 interface Props { ctx: PageContext; article: ArticleVM }
 const { ctx, article } = Astro.props;
-const urgent = article.category.key === 'emergency';
 ---
 <Layout ctx={ctx} heading={false}>
   <article class="in-article">
     <p class="in-card-meta">
-      <span class:list={['in-tag', { 'in-tag-urgent': urgent }]}>{urgent && <TriangleAlert size={16} aria-hidden="true" />}{article.category.label}</span>
+      <span class="in-tag">{article.category.label}</span>
       <time datetime={article.date.iso}>Publié le {article.date.label}</time>
       {article.author && <span>· {article.author}</span>}
     </p>

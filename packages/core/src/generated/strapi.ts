@@ -87,7 +87,7 @@ export type AlerteSeverity = (typeof alerteSeverityValues)[number];
 export const alerteAlertTypeValues = ['travaux', 'coupure-eau', 'coupure-electricite', 'deviation', 'intemperie', 'autre'] as const;
 export type AlerteAlertType = (typeof alerteAlertTypeValues)[number];
 
-export const articleCategoryValues = ['news', 'event', 'information', 'emergency'] as const;
+export const articleCategoryValues = ['vie-municipale', 'travaux', 'vie-pratique', 'ecoles-jeunesse', 'culture-loisirs', 'associations', 'environnement', 'sante-solidarite'] as const;
 export type ArticleCategory = (typeof articleCategoryValues)[number];
 
 export const associationCategoryValues = ['sport', 'culture', 'social', 'environnement', 'education', 'autre'] as const;

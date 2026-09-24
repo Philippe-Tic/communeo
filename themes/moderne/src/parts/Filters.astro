@@ -1,0 +1,22 @@
+---
+/** Filtres en pilules ; le filtre courant est plein, marqué d'une coche et de aria-current. */
+import type { FilterOption } from '@communeo/theme-contract';
+
+interface Props { label: string; options: FilterOption[]; allHref: string }
+const { label, options, allHref } = Astro.props;
+const anyCurrent = options.some((option) => option.current);
+---
+{options.length > 1 && (
+  <nav class="mo-filters" aria-label={label}>
+    <ul>
+      <li><a href={allHref} class="mo-chip" aria-current={anyCurrent ? undefined : 'page'}>{!anyCurrent && <span aria-hidden="true">{'✓\u00a0'}</span>}Tout</a></li>
+      {options.map((option) => (
+        <li>
+          <a href={option.href} class="mo-chip" aria-current={option.current ? 'page' : undefined}>
+            {option.current && <span aria-hidden="true">{'✓\u00a0'}</span>}{option.label}{' '}<span class="mo-chip-count">({option.count})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

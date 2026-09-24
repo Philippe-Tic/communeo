@@ -1,0 +1,65 @@
+---
+/** Pied de page vert clair : commune et coordonnées, réseaux sociaux, horaires, liens utiles, liens légaux. */
+import type { PageContext } from '@communeo/theme-contract';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav } = Astro.props.ctx;
+---
+<footer class="mo-footer">
+  <div class="mo-container mo-footer-grid">
+    <section aria-labelledby="mo-footer-mairie" class="mo-footer-identity">
+      <h2 id="mo-footer-mairie" class="mo-footer-name">{site.name}</h2>
+      <address>
+        {site.contact.address && <span>{site.contact.address}</span>}
+        {site.contact.phone && <a href={site.contact.phone.href} class="mo-footer-phone">{site.contact.phone.label}</a>}
+        <a href={site.contact.email.href} class="mo-footer-email">{site.contact.email.label}</a>
+      </address>
+      {site.social.length > 0 && (
+        <ul class="mo-footer-social" aria-label="Réseaux sociaux">
+          {site.social.map((link) => (
+            <li>
+              <a href={link.href} target="_blank" rel="noopener noreferrer">
+                {link.label}<span class="cn-sr-only"> (nouvelle fenêtre)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+
+    {site.contact.hoursSummary.length > 0 && (
+      <section aria-labelledby="mo-footer-hours">
+        <h2 id="mo-footer-hours" class="mo-eyebrow">Horaires</h2>
+        <dl class="mo-footer-hours">
+          {site.contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
+        </dl>
+      </section>
+    )}
+
+    {nav.footer.length > 0 && (
+      <nav aria-labelledby="mo-footer-links">
+        <h2 id="mo-footer-links" class="mo-eyebrow">Liens utiles</h2>
+        <ul class="mo-footer-list">
+          {nav.footer.map((link) => (
+            <li>
+              <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+                {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </div>
+
+  <div class="mo-container">
+    <ul class="mo-footer-legal" aria-label="Informations légales">
+      {nav.legal.map((link) => (
+        <li><a href={link.href} data-cn-cookie-preferences={link.href === '/gestion-des-cookies' ? '' : undefined}>{link.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</footer>

@@ -1,0 +1,12 @@
+/*
+ * Thème Moderne : éditorial et visuel. Titres en Newsreader, texte en Figtree à 18 px, formes
+ * arrondies (cartes 20 px, boutons en pilule), vert émeraude vif réservé aux actions, vert profond
+ * pour les surfaces sombres. Cibles d'au moins 44 px, focus 3 px toujours visible.
+ */
+@import '@communeo/ui-a11y/styles.css';
+@import '@fontsource-variable/figtree/wght.css';
+@import '@fontsource-variable/figtree/wght-italic.css';
+@import '@fontsource-variable/newsreader/wght.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';

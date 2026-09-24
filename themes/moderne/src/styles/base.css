@@ -1,0 +1,286 @@
+/* Jetons et styles de base. Contrastes vérifiés (maquette « Fondations ») sur blanc et sur l'encre. */
+:root {
+  color-scheme: light;
+
+  /* Couleurs */
+  --mo-accent: #00a86b; /* actions : texte encre dessus 7,6:1, jamais de blanc */
+  --mo-accent-hover: #00925d;
+  --mo-accent-text: #00755a; /* liens, libellés : 5,2:1 sur blanc */
+  --mo-ink: #12211b; /* texte et surfaces sombres : blanc dessus 16,6:1 */
+  --mo-deep: #1b3a2e; /* encarts dans le sombre : blanc dessus 11,4:1 */
+  --mo-deep-line: #2a4a3c;
+  --mo-mint: #7fe0b4; /* sur l'encre : 11,1:1 */
+  --mo-surface: #fff;
+  --mo-soft: #eaf0ec; /* tuiles, pied de page, pilules : encre dessus 14,5:1 */
+  --mo-soft-alt: #f5f8f6;
+  --mo-soft-line: #c8d4cc;
+  --mo-muted: #4b5750; /* 7,3:1 sur blanc */
+  --mo-border: #dde5e0;
+  --mo-field: #6e7b74;
+  --mo-info: #0b4f8a;
+  --mo-info-bg: #e3f0fa;
+  --mo-warning: #7a4a00;
+  --mo-warning-bg: #fff1d6;
+  --mo-danger: #b3261e; /* blanc dessus 6,3:1 */
+  --mo-danger-bg: #fbe9e7;
+
+  /* Typographie */
+  --mo-font: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
+  --mo-font-title: 'Newsreader Variable', 'Newsreader', Georgia, serif;
+  --mo-h1: 2.375rem;
+  --mo-h2: 1.875rem;
+  --mo-h3: 1.4375rem;
+  --mo-h4: 1.25rem;
+
+  /* Espacements, formes */
+  --mo-space-1: 0.5rem;
+  --mo-space-2: 1rem;
+  --mo-space-3: 1.5rem;
+  --mo-space-4: 2rem;
+  --mo-space-5: 3rem;
+  --mo-space-6: 5rem;
+  --mo-radius-sm: 12px;
+  --mo-radius: 20px;
+  --mo-pill: 999px;
+  --mo-max: 83rem;
+  --mo-gutter: 1rem;
+  --mo-target: 2.75rem;
+  --mo-shadow: 0 12px 32px rgb(18 33 27 / 14%);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --mo-gutter: 2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --mo-h1: 3.75rem;
+    --mo-h2: 2.5rem;
+    --mo-h3: 1.625rem;
+    --mo-h4: 1.375rem;
+    --mo-gutter: 3.5rem;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Le bandeau cookies, fixé en bas, ne doit pas masquer l'élément qui reçoit le focus */
+html:has([data-cn-cookie-banner]:not([hidden])) {
+  scroll-padding-bottom: 18rem;
+}
+
+/* Méga-menu ouvert : la page ne défile plus derrière */
+html.mo-mega-open {
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--mo-font);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--mo-ink);
+  background: var(--mo-surface);
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: var(--mo-font-title);
+  font-weight: 500;
+  line-height: 1.08;
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: var(--mo-h1);
+}
+
+h2 {
+  font-size: var(--mo-h2);
+}
+
+h3 {
+  font-size: var(--mo-h3);
+}
+
+h4 {
+  font-size: var(--mo-h4);
+}
+
+p,
+ul,
+ol,
+dl,
+figure,
+blockquote {
+  margin: 0;
+}
+
+a {
+  color: var(--mo-accent-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--mo-ink);
+  text-decoration-thickness: 2px;
+}
+
+strong,
+b {
+  font-weight: 700;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+:focus-visible {
+  outline: 3px solid var(--mo-ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Sur fond sombre, le focus passe en blanc */
+.mo-on-dark :focus-visible {
+  outline-color: #fff;
+}
+
+/* Étiquette en capitales espacées : 14 px minimum, toujours en gras */
+.mo-eyebrow {
+  margin: 0;
+  font-family: var(--mo-font);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mo-muted);
+}
+
+.mo-container {
+  width: 100%;
+  max-width: var(--mo-max);
+  margin-inline: auto;
+  padding-inline: var(--mo-gutter);
+}
+
+/* Boutons : pilules de 48 px ; le primaire est émeraude avec texte encre */
+.mo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  color: var(--mo-ink);
+  background: transparent;
+  border: 2px solid var(--mo-ink);
+  border-radius: var(--mo-pill);
+  cursor: pointer;
+}
+
+.mo-button:hover {
+  color: var(--mo-ink);
+  background: var(--mo-soft);
+}
+
+.mo-button-primary {
+  font-weight: 700;
+  background: var(--mo-accent);
+  border-color: var(--mo-accent);
+}
+
+.mo-button-primary:hover {
+  background: var(--mo-accent-hover);
+  border-color: var(--mo-accent-hover);
+}
+
+.mo-button-dark {
+  color: #fff;
+  background: var(--mo-ink);
+  border-color: var(--mo-ink);
+}
+
+.mo-button-dark:hover {
+  color: #fff;
+  background: var(--mo-deep);
+}
+
+/* Formulaires : champs en pilule, bordure 2 px ; erreur en bordure 3 px, message avec icône */
+input:not([type='checkbox'], [type='radio'], [type='file']),
+select,
+textarea {
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0 1.25rem;
+  font: inherit;
+  color: var(--mo-ink);
+  background: var(--mo-surface);
+  border: 2px solid var(--mo-field);
+  border-radius: var(--mo-pill);
+}
+
+textarea {
+  min-height: 9rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: var(--mo-radius);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: var(--mo-ink);
+}
+
+[aria-invalid='true'] {
+  border-width: 3px;
+  border-color: var(--mo-danger);
+}
+
+input:not([type='checkbox'], [type='radio'], [type='file']):disabled,
+select:disabled,
+textarea:disabled {
+  color: var(--mo-muted);
+  background: var(--mo-soft-alt);
+  border-style: dashed;
+  border-color: var(--mo-border);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.5rem;
+  height: 1.5rem;
+  accent-color: var(--mo-accent-text);
+}
+
+label {
+  font-weight: 600;
+}

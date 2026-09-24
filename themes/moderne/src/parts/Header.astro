@@ -1,0 +1,133 @@
+---
+/**
+ * En-tête léger sur une ligne : identité, quatre entrées du menu, recherche et bouton « Menu », qui
+ * ouvre un méga-menu plein écran (recherche, toutes les rubriques, infos pratiques de la mairie).
+ * Sur mobile : identité, recherche et « Menu » seulement.
+ *
+ * Le méga-menu est un <dialog> modal : focus contenu dans le menu, Échap pour fermer, focus rendu
+ * au bouton. Sans JavaScript, « Menu » mène au plan du site et « Rechercher » à la page de recherche.
+ * `#menu` (lien d'évitement « Aller au menu ») est la barre de navigation de l'en-tête.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+import Search from '@lucide/astro/icons/search';
+import X from '@lucide/astro/icons/x';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, nav, path } = Astro.props.ctx;
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+// Dans la barre : les quatre premières entrées simples du menu ; tout le menu est dans le méga-menu
+const links = nav.main.filter((item) => item.kind === 'link');
+const groups = nav.main.filter((item) => item.kind === 'group');
+const visible = links.slice(0, 4);
+---
+<header class="mo-header">
+  <div class="mo-header-bar">
+    <a href="/" class="mo-brand">
+      {site.logo && (
+        <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="mo-brand-logo" />
+      )}
+      <span class="mo-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
+    </a>
+
+    <nav id="menu" class="mo-nav" aria-label="Menu principal" tabindex="-1">
+      <ul class="mo-nav-links">
+        {visible.map((item) => (
+          <li><a href={item.href} class="mo-nav-link" aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+        ))}
+      </ul>
+      <a href="/recherche" class="mo-icon-button" data-mo-search>
+        <Search size={22} aria-hidden="true" /><span class="cn-sr-only">Rechercher</span>
+      </a>
+      <button type="button" class="mo-menu-button cn-js-only" aria-haspopup="dialog" aria-expanded="false" aria-controls="mo-mega" data-mo-menu-open>
+        <span class="mo-burger" aria-hidden="true"><span></span><span></span></span>Menu
+      </button>
+      <a href="/plan-du-site" class="mo-menu-button cn-no-js-only">
+        <span class="mo-burger" aria-hidden="true"><span></span><span></span></span>Menu
+      </a>
+    </nav>
+  </div>
+
+  <dialog id="mo-mega" class="mo-mega mo-on-dark" aria-labelledby="mo-mega-title" data-mo-mega>
+    <div class="mo-mega-inner">
+      <div class="mo-mega-top">
+        <p id="mo-mega-title" class="mo-mega-name">{site.name}<span class="cn-sr-only"> : menu complet</span></p>
+        <button type="button" class="mo-mega-close" data-mo-menu-close>
+          <X size={20} aria-hidden="true" />Fermer<span class="mo-mega-close-hint"> (Échap)</span>
+        </button>
+      </div>
+
+      <form role="search" action="/recherche" class="mo-mega-search">
+        <label for="mo-mega-q" class="cn-sr-only">Rechercher sur le site</label>
+        <input id="mo-mega-q" name="q" type="search" placeholder="Rechercher une démarche, une actualité…" data-mo-search-input />
+        <button type="submit">Rechercher</button>
+      </form>
+
+      <!-- Ordinateur : une colonne par rubrique -->
+      <nav class="mo-mega-columns" aria-label="Toutes les rubriques">
+        {links.length > 0 && (
+          <section aria-labelledby="mo-mega-direct">
+            <h2 id="mo-mega-direct" class="mo-mega-heading">Accès directs</h2>
+            <ul>
+              <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
+              {links.map((item) => <li><a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>)}
+            </ul>
+          </section>
+        )}
+        {groups.map((group, index) => (
+          <section aria-labelledby={`mo-mega-group-${index}`}>
+            <h2 id={`mo-mega-group-${index}`} class="mo-mega-heading">{group.label}</h2>
+            <ul>
+              {group.children.map((child) => <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>)}
+            </ul>
+          </section>
+        ))}
+      </nav>
+
+      <!-- Mobile : la liste du menu, sous-menus dépliables -->
+      <nav class="mo-mega-list" aria-label="Toutes les rubriques">
+        <ul>
+          <li><a href="/" class="mo-mega-entry" aria-current={path === '/' ? 'page' : undefined}>Accueil</a></li>
+          {nav.main.map((item) =>
+            item.kind === 'link' ? (
+              <li><a href={item.href} class="mo-mega-entry" aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+            ) : (
+              <li>
+                <details class="mo-mega-group" open={item.children.some((child) => isCurrent(child.href))}>
+                  <summary class="mo-mega-entry">{item.label}<ChevronDown size={20} aria-hidden="true" class="mo-mega-chevron" /></summary>
+                  <ul>
+                    {item.children.map((child) => <li><a href={child.href} aria-current={isCurrent(child.href) ? 'page' : undefined}>{child.label}</a></li>)}
+                  </ul>
+                </details>
+              </li>
+            ),
+          )}
+        </ul>
+      </nav>
+
+      <section class="mo-mega-card" aria-labelledby="mo-mega-mairie">
+        <h2 id="mo-mega-mairie" class="mo-eyebrow">Mairie</h2>
+        <OpeningStatus hours={site.contact.hours} class="mo-status" />
+        <address>
+          {site.contact.address && <span class="mo-mega-address">{site.contact.address}</span>}
+          {site.contact.phone && <a href={site.contact.phone.href} class="mo-mega-phone">{site.contact.phone.label}</a>}
+        </address>
+        <a href="/contact" class="mo-button mo-button-primary">Nous écrire</a>
+      </section>
+
+      <ul class="mo-mega-legal" aria-label="Informations légales">
+        {nav.legal.map((link) => (
+          <li><a href={link.href} data-cn-cookie-preferences={link.href === '/gestion-des-cookies' ? '' : undefined}>{link.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  import '../scripts/mega-menu';
+</script>

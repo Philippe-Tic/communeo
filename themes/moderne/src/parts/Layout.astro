@@ -1,0 +1,44 @@
+---
+/**
+ * Mise en page du thème : en-tête, alertes, fil d'Ariane, contenu, pied de page.
+ * Le document (<html>, <head>, liens d'évitement, bandeau cookies) est fourni par le renderer.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import Alerts from '@communeo/ui-a11y/Alerts.astro';
+import Breadcrumb from '@communeo/ui-a11y/Breadcrumb.astro';
+import { searchAttributes } from '@communeo/ui-a11y/search';
+import Footer from './Footer.astro';
+import Header from './Header.astro';
+import '../styles.css';
+
+interface Props {
+  ctx: PageContext;
+  /** Titre affiché en H1 (par défaut : titre de la page) ; `false` si le template le rend lui-même */
+  heading?: string | false;
+  /** Pleine largeur : le template gère lui-même ses conteneurs (accueil) */
+  full?: boolean;
+}
+
+const { ctx, heading = ctx.title, full = false } = Astro.props;
+---
+<Header ctx={ctx} />
+<Alerts alerts={ctx.alerts} class="mo-alerts" />
+
+<div class="mo-page">
+  {full ? (
+    <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="mo-main mo-main-full">
+      {heading && <h1 class="mo-title mo-container">{heading}</h1>}
+      <slot />
+    </main>
+  ) : (
+    <div class="mo-container">
+      <Breadcrumb items={ctx.breadcrumb} class="mo-breadcrumb" />
+      <main {...searchAttributes(ctx)} id="contenu" tabindex="-1" class="mo-main">
+        {heading && <h1 class="mo-title">{heading}</h1>}
+        <slot />
+      </main>
+    </div>
+  )}
+</div>
+
+<Footer ctx={ctx} />

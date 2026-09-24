@@ -1,15 +1,32 @@
 ---
+/**
+ * Page de contenu : rubrique, titre et chapô, image principale en bandeau, puis les blocs en colonne
+ * de lecture avec le sommaire collé à droite (dépliable sur mobile).
+ */
 import type { PageVM } from '@communeo/core';
 import type { PageContext } from '@communeo/theme-contract';
-import Layout from '../parts/Layout.astro';
 import Content from '../parts/Content.astro';
+import Layout from '../parts/Layout.astro';
 
 interface Props { ctx: PageContext; page: PageVM }
 const { ctx, page } = Astro.props;
+// Rubrique : le parent dans le fil d'Ariane (« Vivre ici »), quand il y en a un
+const section = ctx.breadcrumb.length > 2 ? ctx.breadcrumb[ctx.breadcrumb.length - 2]!.label : null;
 ---
-<Layout ctx={ctx}>
-  {page.lead && <p class="st-lead">{page.lead}</p>}
-  {page.image && <img src={page.image.src} srcset={page.image.srcset ?? undefined} alt={page.image.alt} width={page.image.width ?? undefined} height={page.image.height ?? undefined} />}
+<Layout ctx={ctx} heading={false}>
+  <header class="jo-page-header">
+    {section && <p class="jo-kicker">{section}</p>}
+    <h1>{page.title}</h1>
+    {page.lead && <p class="jo-lead">{page.lead}</p>}
+  </header>
+  {page.image && (
+    <figure class="jo-cover">
+      <img src={page.image.src} srcset={page.image.srcset ?? undefined} alt={page.image.alt} width={page.image.width ?? undefined} height={page.image.height ?? undefined} />
+      {(page.image.caption || page.image.credit) && (
+        <figcaption>{page.image.caption}{page.image.credit && <> Crédit : {page.image.credit}</>}</figcaption>
+      )}
+    </figure>
+  )}
   <Content blocks={page.blocks} toc={page.toc} />
-  <p class="st-meta">Mis à jour le <time datetime={page.updatedAt.iso}>{page.updatedAt.label}</time></p>
+  <p class="jo-updated">Page mise à jour le <time datetime={page.updatedAt.iso}>{page.updatedAt.label}</time></p>
 </Layout>

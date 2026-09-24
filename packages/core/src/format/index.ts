@@ -9,22 +9,29 @@ const fmt = (options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat('fr
 
 const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
+/** Formate une date en écrivant « 1er » pour le premier jour du mois (« 1er octobre », pas « 1 octobre »). */
+const withOrdinal = (options: Intl.DateTimeFormatOptions) => (date: Date) =>
+  fmt(options)
+    .formatToParts(date)
+    .map((part) => (part.type === 'day' && part.value === '1' ? '1er' : part.value))
+    .join('');
+
 type DateInput = string | Date;
 const toDate = (value: DateInput) => (value instanceof Date ? value : new Date(value));
 
-/** « 24 juin 2026 » */
-export const formatDate = (value: DateInput) => fmt({ day: 'numeric', month: 'long', year: 'numeric' }).format(toDate(value));
+/** « 24 juin 2026 », « 1er octobre 2026 » */
+export const formatDate = (value: DateInput) => withOrdinal({ day: 'numeric', month: 'long', year: 'numeric' })(toDate(value));
 
 /** « 24 juin » */
-export const formatDayMonth = (value: DateInput) => fmt({ day: 'numeric', month: 'long' }).format(toDate(value));
+export const formatDayMonth = (value: DateInput) => withOrdinal({ day: 'numeric', month: 'long' })(toDate(value));
 
 /** « Samedi 5 octobre 2026 » */
 export const formatLongDate = (value: DateInput) =>
-  capitalize(fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(toDate(value)));
+  capitalize(withOrdinal({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })(toDate(value)));
 
 /** « jeu. 25 sept. » */
 export const formatShortDate = (value: DateInput) =>
-  fmt({ weekday: 'short', day: 'numeric', month: 'short' }).format(toDate(value));
+  withOrdinal({ weekday: 'short', day: 'numeric', month: 'short' })(toDate(value));
 
 /** Heure française : « 14h », « 14h30 » */
 export function formatHour(value: DateInput): string {
@@ -65,7 +72,7 @@ export function formatEventPeriod(start: DateInput, end?: DateInput | null): str
   const sameYear = fmt({ year: 'numeric' }).format(startDate) === fmt({ year: 'numeric' }).format(endDate);
   const sameMonth = sameYear && fmt({ month: 'numeric' }).format(startDate) === fmt({ month: 'numeric' }).format(endDate);
   const from = sameMonth
-    ? fmt({ day: 'numeric' }).format(startDate)
+    ? withOrdinal({ day: 'numeric' })(startDate)
     : sameYear
       ? formatDayMonth(startDate)
       : formatDate(startDate);

@@ -5,6 +5,7 @@
 import { defineTheme } from '@communeo/theme-contract';
 import { HOMEPAGE_SECTION_IDS } from '@communeo/core';
 import { blocks } from './blocks/index';
+import stylesheet from './styles.css?url';
 import Article from './templates/Article.astro';
 import ArticleList from './templates/ArticleList.astro';
 import Association from './templates/Association.astro';
@@ -34,6 +35,7 @@ export default defineTheme({
     menus: { main: true, footer: true },
     thumbnail: '',
   },
+  stylesheet,
   templates: {
     Home,
     Page,

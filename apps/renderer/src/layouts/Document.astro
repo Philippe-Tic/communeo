@@ -1,12 +1,14 @@
 ---
 /**
  * Document HTML commun à tous les thèmes : métadonnées, SEO, données structurées, lien d'évitement
- * et bandeau de consentement. Le thème rend le contenu du <body>.
+ * et bandeau de consentement. Le thème rend le contenu du <body> ; sa feuille de styles est liée ici,
+ * seule (en preview, tous les thèmes sont chargés mais chaque page ne reçoit que celle de son thème).
  */
 import type { PageContext } from '@communeo/theme-contract';
 import { toSchemaOrgOpeningHours } from '@communeo/core';
 import CookieBanner from '@communeo/ui-a11y/CookieBanner.astro';
 import SkipLinks from '@communeo/ui-a11y/SkipLinks.astro';
+import theme from 'virtual:communeo/theme';
 
 interface Props {
   ctx: PageContext;
@@ -56,6 +58,7 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
+    <link rel="stylesheet" href={theme.stylesheet} />
     {seo.description && <meta name="description" content={seo.description} />}
     <link rel="canonical" href={seo.canonical} />
     {seo.noindex && <meta name="robots" content="noindex" />}

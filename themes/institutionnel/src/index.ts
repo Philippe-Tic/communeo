@@ -2,6 +2,7 @@
 import { defineTheme } from '@communeo/theme-contract';
 import { themeHomeSections } from '@communeo/core';
 import { blocks } from './blocks/index';
+import stylesheet from './styles.css?url';
 import Article from './templates/Article.astro';
 import ArticleList from './templates/ArticleList.astro';
 import Association from './templates/Association.astro';
@@ -32,6 +33,7 @@ export default defineTheme({
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
   },
+  stylesheet,
   templates: {
     Home,
     Page,

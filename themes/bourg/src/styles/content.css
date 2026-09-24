@@ -159,7 +159,7 @@
 }
 
 .bo-prose thead th,
-.bo-prose tr:first-child > th {
+.bo-prose table:not(:has(thead)) tr:first-child > th {
   font-weight: 800;
   background: var(--bo-sand);
 }

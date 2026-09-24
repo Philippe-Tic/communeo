@@ -1,12 +1,28 @@
 ---
+/** Carte d'événement « journal » : date en colonne soulignée d'un filet bleu, titre, période, lieu, catégorie. */
 import type { EventCardVM } from '@communeo/core';
+import { dateBadge } from '../lib/date';
 
-interface Props { event: EventCardVM; level?: 2 | 3 }
+interface Props {
+  event: EventCardVM;
+  level?: 2 | 3;
+}
+
 const { event, level = 3 } = Astro.props;
 const Heading = level === 2 ? 'h2' : 'h3';
+const badge = dateBadge(event.start.iso, event.multiDay ? event.end?.iso : null);
 ---
-<article class="st-card">
-  <Heading><a href={event.href}>{event.title}</a></Heading>
-  <p class="st-meta"><time datetime={event.start.iso}>{event.period}</time>{event.location && <> · {event.location}</>}</p>
-  <p class="st-meta">{event.category.label}</p>
+<article class="jo-event">
+  <p class="jo-event-date" aria-hidden="true">
+    <span class="jo-event-day">{badge.day}</span>
+    <span class="jo-event-month">{badge.month}</span>
+  </p>
+  <div class="jo-event-body">
+    <Heading class="jo-card-title jo-event-title"><a href={event.href}>{event.title}</a></Heading>
+    <p class="jo-event-meta">
+      <span class="cn-sr-only">Date : </span><time datetime={event.start.iso}>{event.period}</time>
+      {event.location && <> · {event.location}</>}
+    </p>
+    <span class="jo-tag">{event.category.label}</span>
+  </div>
 </article>

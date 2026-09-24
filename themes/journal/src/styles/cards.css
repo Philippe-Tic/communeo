@@ -1,0 +1,162 @@
+/* Cartes « journal » : pas de cadre, un filet au-dessus ; titres Lora. */
+
+.jo-card {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-card-featured {
+  flex-direction: column;
+  border-top: 0;
+}
+
+.jo-card-image {
+  display: block;
+  flex: none;
+  object-fit: cover;
+  border-radius: var(--jo-radius);
+}
+
+.jo-card-thumb .jo-card-image {
+  width: 7.5rem;
+  aspect-ratio: 4 / 3;
+}
+
+.jo-card-featured .jo-card-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.jo-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.jo-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.625rem;
+  font-size: 0.875rem;
+  color: var(--jo-muted);
+}
+
+.jo-card-category {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--jo-slate);
+}
+
+.jo-card-title {
+  font-size: 1.125rem;
+  line-height: 1.25;
+}
+
+.jo-card-featured .jo-card-title {
+  font-size: 1.625rem;
+}
+
+.jo-card-title a {
+  color: var(--jo-ink);
+  text-decoration: none;
+}
+
+.jo-card-title a:hover {
+  color: var(--jo-slate);
+  text-decoration: underline;
+}
+
+/* Toute la carte est cliquable ; le lien reste le titre */
+.jo-card-title a::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.jo-card-summary {
+  font-size: 1rem;
+  color: var(--jo-muted);
+}
+
+@media (min-width: 64rem) {
+  .jo-card-featured .jo-card-title {
+    font-size: 2rem;
+  }
+
+  .jo-card-featured .jo-card-summary {
+    font-size: 1.0625rem;
+  }
+}
+
+/* Événement : date en colonne, filet bleu à droite */
+.jo-event {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: 0.875rem;
+  align-items: start;
+  padding: 0.875rem 0;
+  border-top: 1px solid var(--jo-line);
+}
+
+.jo-section-head + .jo-event {
+  border-top: 0;
+}
+
+.jo-event-date {
+  padding-right: 0.75rem;
+  line-height: 1;
+  text-align: center;
+  border-right: 2px solid var(--jo-slate);
+}
+
+.jo-event-day {
+  display: block;
+  font-family: var(--jo-font-title);
+  font-size: 1.625rem;
+  font-weight: 600;
+  color: var(--jo-slate);
+}
+
+.jo-event-month {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--jo-muted);
+}
+
+.jo-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.jo-event-title {
+  font-size: 1.1875rem;
+}
+
+.jo-event-meta {
+  font-size: 0.9375rem;
+  color: var(--jo-muted);
+}
+
+.jo-tag {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.0625rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--jo-ink);
+  border: 1px solid var(--jo-line);
+  border-radius: 3px;
+}

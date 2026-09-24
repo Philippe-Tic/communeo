@@ -83,12 +83,51 @@ test('enregistrer et continuer plus tard : tableau de bord avec « Reprendre »,
   await expect(page.getByRole('heading', { level: 1, name: 'Votre commune' })).toBeVisible();
 });
 
+test('votre thème : la commune dans chaque vignette, thèmes à venir non sélectionnables, aperçu, choix', async ({
+  page,
+}) => {
+  // Commune créée avec un thème pas encore construit : Institutionnel proposé, enregistré en continuant
+  const { bodies } = await mockApi(page, { onboarding: { step: 4 }, theme: 'moderne' });
+  await page.goto('/assistant?etape=4');
+  await expect(page.getByRole('heading', { level: 1, name: 'Votre thème' })).toBeVisible();
+  const themes = page.getByRole('group', { name: 'Thème du site' });
+  await expect(themes.getByRole('listitem')).toHaveCount(4);
+  await expect(themes.getByRole('listitem').first()).toContainText('Saint-Aubin-sur-Loire');
+  await expect(themes.getByRole('radio', { name: 'Institutionnel' })).toBeChecked();
+  for (const name of ['Moderne', 'Journal', 'Bourg'])
+    await expect(themes.getByRole('radio', { name: new RegExp(`^${name}`) })).toBeDisabled();
+  await expectNoViolations(page);
+
+  await themes.getByRole('button', { name: 'Aperçu de votre site dans le thème Institutionnel' }).click();
+  const preview = page.getByRole('dialog', { name: /Aperçu de votre site dans le thème Institutionnel/ });
+  await expect(preview.getByTitle(/Votre site dans le thème Institutionnel/)).toHaveAttribute(
+    'src',
+    /theme=institutionnel/,
+  );
+  await preview.getByRole('button', { name: 'Choisir le thème Institutionnel' }).click();
+  await expect(preview).toBeHidden();
+
+  await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ theme: 'institutionnel', onboarding: { step: 5 } });
+});
+
+test('votre thème déjà choisi : rien à changer, on continue', async ({ page }) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
+  await page.goto('/assistant?etape=4');
+  await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
+  expect(lastSitePut(bodies)).not.toHaveProperty('theme');
+});
+
 test('logo passé, étapes suivantes, terminer : assistant fini, tableau de bord', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 3 } });
   await page.goto('/assistant?etape=3');
   await expect(page.getByRole('figure').first()).toContainText('Saint-Aubin-sur-Loire');
   await page.getByRole('button', { name: 'Passer cette étape' }).filter({ visible: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Votre thème' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
   await page.goto('/assistant?etape=7');
   await page.getByRole('button', { name: 'Terminer' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();

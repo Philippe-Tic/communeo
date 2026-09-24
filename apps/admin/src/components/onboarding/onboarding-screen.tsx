@@ -16,6 +16,7 @@ import { sessionQuery } from '@/lib/session';
 import { siteSettingsQuery, type OnboardingProgress, type SiteSettings } from '@/lib/site-settings';
 import { CommuneStep } from './steps/commune-step';
 import { LogoStep } from './steps/logo-step';
+import { ThemeStep } from './steps/theme-step';
 import { UpcomingStep } from './steps/upcoming-step';
 import { WelcomeStep } from './steps/welcome-step';
 import { WizardFrame } from './wizard-frame';
@@ -160,5 +161,6 @@ export function OnboardingScreen({ step: requested }: { step: number | undefined
   if (step === 1) return <WelcomeStep {...props} alert={alert} />;
   if (step === 2) return <CommuneStep {...props} alert={alert} />;
   if (step === 3) return <LogoStep {...props} alert={alert} />;
+  if (step === 4) return <ThemeStep {...props} alert={alert} />;
   return <UpcomingStep {...props} alert={alert} />;
 }

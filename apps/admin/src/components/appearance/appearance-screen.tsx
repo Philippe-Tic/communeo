@@ -22,7 +22,7 @@ import { sessionQuery, themeName } from '@/lib/session';
 import { saveSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import { cn } from '@/lib/utils';
 
-type Theme = (typeof THEMES)[number];
+export type Theme = (typeof THEMES)[number];
 
 /** Vignettes 1200 × 800 générées par `pnpm theme:thumbnail <id>` (themes/<id>/thumbnail.png) */
 const THUMBNAILS = Object.fromEntries(
@@ -125,7 +125,7 @@ function ThemeCard({
 }
 
 /** Aperçu plein écran : le vrai site de la commune, dans le thème choisi dans la barre du haut */
-function ThemePreview({
+export function ThemePreview({
   open,
   onOpenChange,
   theme,

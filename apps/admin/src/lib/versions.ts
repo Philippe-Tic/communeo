@@ -23,7 +23,7 @@ export const versionsQuery = (type: ContentApi, documentId: string) =>
   queryOptions({
     queryKey: ['versions', type, documentId],
     queryFn: () =>
-      api<{ data: VersionSummary[]; meta: { createdAt: string } }>(`/api/content-versions/${type}/${documentId}`),
+      api<{ data: VersionSummary[]; meta: { createdAt: string; template?: string | null } }>(`/api/content-versions/${type}/${documentId}`),
     staleTime: 0,
   });
 

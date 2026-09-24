@@ -857,6 +857,34 @@ export const NAVIGATION = {
   footer: [{ type: 'external', url: 'https://www.service-public.fr', label: 'Service-Public' }],
 };
 
+const PAGE_TEMPLATE_LIST = [
+  {
+    id: 'salle-des-fetes',
+    title: 'Location de la salle des fêtes',
+    summary: 'Description, tarifs, règlement, formulaire de demande',
+    suggested: true,
+  },
+  {
+    id: 'etat-civil',
+    title: 'État civil',
+    summary: 'Actes, mariage, PACS, recensement, avec les démarches en ligne',
+    suggested: true,
+  },
+  { id: 'urbanisme', title: 'Urbanisme', summary: 'PLU, permis, déclarations préalables', suggested: true },
+  {
+    id: 'inscriptions-scolaires',
+    title: 'Inscriptions scolaires',
+    summary: 'Calendrier, pièces à fournir, cantine et périscolaire',
+    suggested: true,
+  },
+  {
+    id: 'contact-services',
+    title: 'Contacter les services',
+    summary: 'Coordonnées, horaires, formulaire de contact',
+    suggested: false,
+  },
+];
+
 export async function mockApi(page: Page, options: MockOptions = {}) {
   const {
     user = 'admin',
@@ -1016,6 +1044,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const team = emptyTeam ? [] : (structuredClone(TEAM) as Array<Record<string, unknown>>);
   const newsletter = subscriberSet === 'none' ? [] : subscribers();
   const inbox = messageSet === 'none' ? [] : messages();
+  const templatePages: Record<string, { documentId: string; title: string }> = {};
   const saintAubin = { documentId: SITE.documentId, name: SITE.name };
   const activityLog = [
     {
@@ -1953,6 +1982,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
             ]
           : [],
         meta: { createdAt: '2026-09-10T08:00:00.000Z' },
+      });
+    }
+    // Modèles de pages (#153)
+    if (url.pathname === '/api/page-templates') {
+      if (method === 'POST') {
+        const body = route.request().postDataJSON() as { templates: string[]; menu?: boolean };
+        bodies.push({ call: 'POST page-templates', body: { data: body as unknown as Record<string, unknown> } });
+        const pagesCreated = body.templates
+          .filter((id) => !templatePages[id])
+          .map((id) => {
+            const template = PAGE_TEMPLATE_LIST.find((entry) => entry.id === id)!;
+            const documentId = `p-modele-${id}`;
+            templatePages[id] = { documentId, title: template.title };
+            pages[documentId] = {
+              ...PAGES['p-salle']!,
+              documentId,
+              title: template.title,
+              slug: id,
+              blocks: [],
+              updatedAt: new Date().toISOString(),
+            };
+            return { documentId, title: template.title, template: id };
+          });
+        return json({ data: pagesCreated, meta: { notInMenu: [] } });
+      }
+      return json({
+        data: PAGE_TEMPLATE_LIST.map((template) => ({ ...template, page: templatePages[template.id] ?? null })),
       });
     }
     if (url.pathname === '/api/compliance')

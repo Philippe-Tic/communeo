@@ -6,6 +6,7 @@
  * La restauration elle-même se fait dans l'éditeur (nouveau brouillon) : la version en ligne n'est
  * jamais touchée par l'historique.
  */
+import { pageTemplate } from '@communeo/core';
 import { recordVersion, VERSIONED_TYPES } from '../../../services/content-versions';
 import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 
@@ -29,7 +30,7 @@ async function resolve(ctx) {
   }
   const entries = await strapi.db.query(uid).findMany({
     where: { documentId: ctx.params.documentId, site: { documentId: site.documentId } },
-    select: ['id', 'createdAt', 'publishedAt'],
+    select: ['id', 'createdAt', 'publishedAt', ...(uid === 'api::page.page' ? ['template'] : [])],
   });
   if (!entries.length) {
     ctx.notFound('Contenu introuvable');
@@ -37,7 +38,10 @@ async function resolve(ctx) {
   }
   const published = entries.find((entry: any) => entry.publishedAt) ?? null;
   const created = entries.map((entry: any) => entry.createdAt).sort()[0];
-  return { uid, type: ctx.params.type as string, documentId: ctx.params.documentId as string, published, created };
+  // Page créée depuis un modèle (#153) : l'historique le dit
+  const templateId = entries.find((entry: any) => entry.template)?.template;
+  const template = templateId ? (pageTemplate(templateId)?.title ?? null) : null;
+  return { uid, type: ctx.params.type as string, documentId: ctx.params.documentId as string, published, created, template };
 }
 
 export default {
@@ -72,7 +76,7 @@ export default {
         authorName: row.author_name,
         live: row.id === live,
       })),
-      meta: { createdAt: target.created },
+      meta: { createdAt: target.created, template: target.template },
     };
   },
 

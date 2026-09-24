@@ -1,6 +1,5 @@
 /**
- * Étapes 6 et 7 (premières pages, mise en ligne) : construites par les tickets #153 et
- * #154 ; en attendant, l'étape se passe et renvoie vers l'écran de l'admin qui le fait.
+ * Étape 7 (mise en ligne) : construite par le ticket #154 ; en attendant, l'étape se passe et renvoie vers l'écran de l'admin qui le fait.
  */
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
@@ -10,7 +9,6 @@ import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
 
 const WHERE: Record<string, { to: string; label: string }> = {
-  pages: { to: '/pages', label: 'Pages' },
   'mise-en-ligne': { to: '/mise-en-ligne', label: 'Mise en ligne' },
 };
 

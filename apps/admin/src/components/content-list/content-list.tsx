@@ -221,7 +221,7 @@ export function ContentList<T extends ListRow>({
 
   return (
     <div className="pb-24 md:pb-0">
-      <PageHeader title={config.title} description={counters} actions={!empty && newButton('hidden md:inline-flex')} />
+      <PageHeader title={config.title} description={counters} actions={(!empty || config.extraActions) && <>{config.extraActions}{!empty && newButton('hidden md:inline-flex')}</>} />
 
       {config.tabs && tabOptions && !empty && (
         <nav aria-label={config.tabs.label} className="-mx-4 -mt-2 mb-4 flex items-center gap-x-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:flex-wrap md:px-0">

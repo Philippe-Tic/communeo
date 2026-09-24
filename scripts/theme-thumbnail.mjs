@@ -5,7 +5,8 @@
  *
  *   pnpm theme:thumbnail institutionnel
  *
- * Les couleurs et les arguments du panneau viennent du thème (--color, --tagline, --points).
+ * Les couleurs et les arguments du panneau viennent du thème (--color, --tagline, --points) ;
+ * --sans et --serif désignent ses polices dans le build (début du nom du fichier .woff2).
  */
 import { spawn } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -21,6 +22,8 @@ const { positionals, values } = parseArgs({
     tagline: { type: 'string', default: '' },
     points: { type: 'string', multiple: true, default: [] },
     port: { type: 'string', default: '4599' },
+    sans: { type: 'string', default: 'source-sans-3-latin-wght-normal' },
+    serif: { type: 'string', default: 'source-serif-4-latin-wght-normal' },
   },
 });
 
@@ -63,8 +66,8 @@ try {
   // Les polices du thème sont dans le build : la vignette les réutilise pour rester fidèle
   const assets = join(out, '_astro');
   const font = (needle) => readdirSync(assets).find((file) => file.includes(needle) && file.endsWith('.woff2'));
-  const serif = font('source-serif-4-latin-wght-normal') ?? font('source-serif');
-  const sans = font('source-sans-3-latin-wght-normal') ?? font('source-sans');
+  const serif = font(values.serif);
+  const sans = font(values.sans);
   const faces = [
     sans && `@font-face { font-family: 'Vignette Sans'; src: url('_astro/${sans}') format('woff2'); font-weight: 200 900; }`,
     serif && `@font-face { font-family: 'Vignette Serif'; src: url('_astro/${serif}') format('woff2'); font-weight: 200 900; }`,

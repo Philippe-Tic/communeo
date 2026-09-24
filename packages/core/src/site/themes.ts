@@ -23,7 +23,7 @@ type ThemeEntry = {
 // Moderne, Journal et Bourg (phase 5) : pas encore construits ; ils préciseront leurs sections à leur construction
 export const THEMES = [
   { id: 'institutionnel', name: 'Institutionnel', description: 'Sobre et très lisible, pour tous les publics.', available: true, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
-  { id: 'moderne', name: 'Moderne', description: 'Éditorial et visuel, grandes images.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
+  { id: 'moderne', name: 'Moderne', description: 'Dynamique et typographique : photos en grand, agenda et actualités dès le premier écran.', available: true, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
   { id: 'journal', name: 'Journal', description: 'Le journal de la commune, rubriques en colonnes.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
   { id: 'bourg', name: 'Bourg', description: 'Chaleureux et pratique, infos du quotidien en avant.', available: false, menus: { main: true, footer: true }, homeSections: HOMEPAGE_SECTION_IDS },
 ] as const satisfies readonly ThemeEntry[];

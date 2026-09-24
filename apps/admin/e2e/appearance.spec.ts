@@ -18,7 +18,11 @@ test('galerie : thème actif marqué, thèmes à venir sans action, rappel sur l
   await expect(active.getByRole('img', { name: "Page d'accueil dans le thème Institutionnel" })).toBeVisible();
   // Déjà actif : on peut le prévisualiser, pas le choisir
   await expect(active.getByRole('button', { name: 'Choisir le thème Institutionnel' })).toHaveCount(0);
-  for (const name of ['Moderne', 'Journal', 'Bourg']) {
+  // Thème construit : prévisualisable et proposé
+  const moderne = cards.filter({ hasText: 'Moderne' });
+  await expect(moderne.getByRole('img', { name: "Page d'accueil dans le thème Moderne" })).toBeVisible();
+  await expect(moderne.getByRole('button', { name: 'Choisir le thème Moderne' })).toBeVisible();
+  for (const name of ['Journal', 'Bourg']) {
     const card = cards.filter({ hasText: name });
     await expect(card).toContainText('Bientôt disponible');
     await expect(card.getByRole('button')).toHaveCount(0);
@@ -37,7 +41,8 @@ test('aperçu plein écran : le vrai site dans le thème, thèmes à venir non s
     /theme=institutionnel/,
   );
   await expect(preview.getByRole('radio', { name: /Institutionnel/ })).toBeChecked();
-  await expect(preview.getByRole('radio', { name: /Moderne/ })).toBeDisabled();
+  await expect(preview.getByRole('radio', { name: /Moderne/ })).toBeEnabled();
+  await expect(preview.getByRole('radio', { name: /Journal/ })).toBeDisabled();
   await expect(preview.getByRole('button', { name: /Choisir le thème/ })).toHaveCount(0);
   await expectNoViolations(page);
   await preview.getByRole('button', { name: "Fermer l'aperçu" }).click();
@@ -47,10 +52,10 @@ test('aperçu plein écran : le vrai site dans le thème, thèmes à venir non s
 
 test('changer de thème : aperçu, confirmation, enregistré et mis en ligne', async ({ page }) => {
   // Commune restée sur un thème pas encore construit : l'Institutionnel est proposé
-  const { bodies, calls } = await mockApi(page, { theme: 'moderne' });
+  const { bodies, calls } = await mockApi(page, { theme: 'journal' });
   await page.goto('/mon-site/apparence');
   await expect(
-    page.getByRole('list', { name: 'Thèmes' }).getByRole('listitem').filter({ hasText: 'Moderne' }),
+    page.getByRole('list', { name: 'Thèmes' }).getByRole('listitem').filter({ hasText: 'Journal' }),
   ).toContainText('Thème actif');
   await page.getByRole('button', { name: 'Prévisualiser le thème Institutionnel' }).click();
   const preview = page.getByRole('dialog', { name: 'Aperçu de votre site dans le thème Institutionnel' });
@@ -77,7 +82,7 @@ test('changer de thème : aperçu, confirmation, enregistré et mis en ligne', a
 });
 
 test('changer de thème sans mettre en ligne : enregistré seulement', async ({ page }) => {
-  const { bodies, calls } = await mockApi(page, { theme: 'moderne' });
+  const { bodies, calls } = await mockApi(page, { theme: 'journal' });
   await page.goto('/mon-site/apparence');
   await page.getByRole('button', { name: 'Choisir le thème Institutionnel' }).click();
   const confirm = page.getByRole('alertdialog', { name: 'Passer au thème Institutionnel ?' });

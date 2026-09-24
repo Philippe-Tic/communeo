@@ -3,8 +3,8 @@
  * 390 px, en clair et en sombre :
  * - A : créer et publier une actualité depuis le tableau de bord (erreur de publication corrigée
  *   depuis le récapitulatif, image décrite, publication, retour à la liste, mise en ligne) ;
- * - B : changer de thème avec aperçu (voir aussi appearance.spec.ts ; seul Institutionnel est
- *   construit, le parcours part donc d'une commune en Moderne).
+ * - B : changer de thème avec aperçu (voir aussi appearance.spec.ts ; seuls Institutionnel et Moderne sont
+ *   construits, le parcours part donc d'une commune en Journal).
  */
 import { expect, test, type Page } from '@playwright/test';
 import { mockApi } from './api';
@@ -89,7 +89,7 @@ for (const scheme of ['light', 'dark'] as const) {
     });
 
     test('parcours B : changer de thème avec aperçu, puis mise en ligne', async ({ page }) => {
-      const { bodies, calls } = await mockApi(page, { theme: 'moderne' });
+      const { bodies, calls } = await mockApi(page, { theme: 'journal' });
       await page.goto('/');
       // Mon site → Apparence
       if (narrow(page)) await page.getByRole('button', { name: 'Menu' }).click();

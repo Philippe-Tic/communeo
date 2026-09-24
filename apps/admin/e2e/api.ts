@@ -415,6 +415,8 @@ export interface MockOptions {
   failUploadFor?: string;
   /** La page « Location de la salle des fêtes » contient une image sans texte alternatif */
   pageImageWithoutAlt?: boolean;
+  /** SIRET et directeur de publication pas encore renseignés */
+  legalMissing?: boolean;
   /** Assistant de création en cours (commune créée par l'équipe) */
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null };
   /** Données publiques : trouvées (défaut), mairie absente de l'annuaire, ou services en panne */
@@ -882,6 +884,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     pageImageWithoutAlt = false,
     onboarding,
     publicData = 'ok',
+    legalMissing = false,
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
@@ -1124,8 +1127,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       longitude: 3.7891,
     } as unknown,
     mentions_legales: {
-      siret: '215 803 205 00017',
-      publication_director: 'Claire Martin',
+      siret: legalMissing ? null : '215 803 205 00017',
+      publication_director: legalMissing ? null : 'Claire Martin',
       publication_director_title: 'Maire',
       hebergeur_name: 'Netlify, Inc.',
       hebergeur_address: 'San Francisco, États-Unis',

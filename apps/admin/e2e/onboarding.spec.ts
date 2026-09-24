@@ -108,7 +108,7 @@ test('votre thème : la commune dans chaque vignette, thèmes à venir non séle
   await expect(preview).toBeHidden();
 
   await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
   expect(lastSitePut(bodies)).toMatchObject({ theme: 'institutionnel', onboarding: { step: 5 } });
 });
 
@@ -116,8 +116,50 @@ test('votre thème déjà choisi : rien à changer, on continue', async ({ page 
   const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
   await page.goto('/assistant?etape=4');
   await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
   expect(lastSitePut(bodies)).not.toHaveProperty('theme');
+});
+
+test('obligations : textes pré-remplis à relire, informations manquantes demandées', async ({ page }) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 5 }, legalMissing: true });
+  await page.goto('/assistant?etape=5');
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Mentions légales' })).toContainText('2 informations manquantes');
+  await expect(page.getByRole('region', { name: 'Accessibilité' })).toContainText('niveau « partiellement conforme »');
+  await expectNoViolations(page);
+
+  // Relire la politique : pré-remplie au nom de la commune, modifiable
+  await page.getByRole('button', { name: 'Relire : Politique de données personnelles' }).click();
+  const review = page.getByRole('dialog', { name: 'Politique de données personnelles' });
+  await expect(review).toContainText('La mairie de Saint-Aubin-sur-Loire collecte des données personnelles');
+  await review.getByRole('button', { name: 'Terminer la relecture' }).click();
+
+  // Continuer sans SIRET ni directeur : demandés ; « Compléter plus tard » passe
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: /^SIRET de la mairie/ })).toBeFocused();
+  await page.getByRole('textbox', { name: /^SIRET de la mairie/ }).fill('21580236500017');
+  await page.getByRole('textbox', { name: /^Directeur de publication/ }).fill('Claire Martin');
+  await expect(page.getByRole('region', { name: 'Mentions légales' })).toContainText('Complètes');
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Premières pages' })).toBeVisible();
+  const saved = lastSitePut(bodies)!;
+  expect(saved).toMatchObject({
+    mentions_legales: { siret: '21580236500017', publication_director: 'Claire Martin' },
+    accessibilite: { accessibility_level: 'partiellement-conforme' },
+    onboarding: { step: 6 },
+  });
+  expect(JSON.stringify((saved.rgpd as { rgpd_policy: unknown }).rgpd_policy)).toContain('Base légale');
+  expect(
+    JSON.stringify((saved.accessibilite as { accessibility_declaration: unknown }).accessibility_declaration),
+  ).toContain('Établissement de cette déclaration');
+});
+
+test('obligations : compléter plus tard enregistre ce qui est là et passe à la suite', async ({ page }) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 5 }, legalMissing: true });
+  await page.goto('/assistant?etape=5');
+  await page.getByRole('button', { name: 'Compléter plus tard' }).filter({ visible: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Premières pages' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ mentions_legales: { siret: null }, onboarding: { step: 6 } });
 });
 
 test('logo passé, étapes suivantes, terminer : assistant fini, tableau de bord', async ({ page }) => {
@@ -127,7 +169,7 @@ test('logo passé, étapes suivantes, terminer : assistant fini, tableau de bord
   await page.getByRole('button', { name: 'Passer cette étape' }).filter({ visible: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Votre thème' })).toBeVisible();
   await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Obligations' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
   await page.goto('/assistant?etape=7');
   await page.getByRole('button', { name: 'Terminer' }).click();
   await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();

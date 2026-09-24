@@ -7,3 +7,4 @@ export * from './settings';
 export * from './practical-rules';
 export * from './compliance';
 export * from './public-data';
+export * from './legal-templates';

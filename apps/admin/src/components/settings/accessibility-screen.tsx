@@ -56,8 +56,9 @@ const schema = z
   });
 
 type Values = z.infer<typeof schema>;
+export type AccessibilityValues = Values;
 
-function toValues(site: SiteSettings): Values {
+export function accessibilityValues(site: SiteSettings): Values {
   const a11y = site.accessibilite;
   const declaration = a11y?.accessibility_declaration;
   return {
@@ -68,7 +69,7 @@ function toValues(site: SiteSettings): Values {
   };
 }
 
-function toPayload(values: Values) {
+export function accessibilityPayload(values: Values) {
   const accessibilite = {
     accessibility_level: values.level || null,
     accessibility_declaration: isRichTextEmpty(values.declaration) ? null : values.declaration,
@@ -102,8 +103,8 @@ export function AccessibilityScreen({ site }: { site: SiteSettings }) {
     site,
     title: 'Accessibilité',
     schema,
-    toValues,
-    toPayload,
+    toValues: accessibilityValues,
+    toPayload: accessibilityPayload,
     saved: 'Déclaration d’accessibilité enregistrée. Elle sera en ligne à la prochaine mise en ligne du site.',
     failed: 'La déclaration d’accessibilité n’a pas pu être enregistrée',
   });

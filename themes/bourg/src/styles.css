@@ -1,0 +1,8 @@
+/* Thème Bourg : chaleureux et pratique. Titres Nunito, texte Nunito Sans, sarcelle, encarts teintés. */
+@import '@communeo/ui-a11y/styles.css';
+@import '@fontsource-variable/nunito/wght.css';
+@import '@fontsource-variable/nunito-sans/wght.css';
+@import '@fontsource-variable/nunito-sans/wght-italic.css';
+@import './styles/base.css';
+@import './styles/layout.css';
+@import './styles/components.css';

@@ -1,0 +1,105 @@
+---
+/**
+ * Panneau « Pratique », sur toutes les pages : la mairie (statut, coordonnées, horaires), les alertes
+ * en cours, les prochaines collectes, la météo et les accès rapides (ces trois-là selon les sections
+ * d'accueil activées par la commune). Colonne de droite sur ordinateur ; sur mobile, le tiroir
+ * ouvert depuis la barre du bas l'affiche (voir PratiqueBar), et sans JavaScript il suit le contenu.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import { SECTIONS } from '@communeo/core';
+import NextCollections from '@communeo/ui-a11y/NextCollections.astro';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import Weather from '@communeo/ui-a11y/Weather.astro';
+import ArrowRight from '@lucide/astro/icons/arrow-right';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, alerts, practical } = Astro.props.ctx;
+const { contact } = site;
+const signs = { info: 'i', warning: '!', critical: '!!' } as const;
+---
+<aside id="pratique" class="bo-pratique" aria-labelledby="bo-pratique-title" tabindex="-1">
+  <h2 id="bo-pratique-title" class="bo-kicker bo-pratique-title">Pratique</h2>
+
+  <section class="bo-card bo-card-mint" aria-labelledby="bo-pratique-mairie">
+    <h3 id="bo-pratique-mairie">Mairie</h3>
+    <OpeningStatus hours={contact.hours} class="bo-status" />
+    <address>
+      {contact.address && <span>{contact.address}</span>}
+      {contact.phone && <a href={contact.phone.href} class="bo-pratique-phone">{contact.phone.label}</a>}
+    </address>
+    {contact.hoursSummary.length > 0 && (
+      <p class="bo-pratique-hours">{contact.hoursSummary.map((line) => `${line.days} ${line.hours}`).join(' · ')}</p>
+    )}
+    <a href={SECTIONS.contact.path} class="bo-button bo-button-block">Nous écrire</a>
+  </section>
+
+  {alerts.length > 0 && (
+    <section class="bo-card bo-card-peach" aria-labelledby="bo-pratique-now">
+      <h3 id="bo-pratique-now">En ce moment</h3>
+      <ul class="bo-pratique-alerts">
+        {alerts.map((alert) => (
+          <li class={`bo-pratique-alert bo-pratique-alert-${alert.severity.key}`}>
+            <span class="bo-sign" aria-hidden="true">{signs[alert.severity.key]}</span>
+            <p>
+              <span class="cn-sr-only">{alert.severity.label} : </span>
+              <strong>{alert.title}</strong>
+              {alert.period && <> · {alert.period}</>}
+              {alert.link && (
+                <>
+                  {' · '}
+                  <a href={alert.link.href} target={alert.link.external ? '_blank' : undefined} rel={alert.link.external ? 'noopener noreferrer' : undefined}>
+                    {alert.link.label}<span class="cn-sr-only"> : {alert.title}{alert.link.external && ' (nouvelle fenêtre)'}</span>
+                  </a>
+                </>
+              )}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {practical.wasteCollection && (
+    <section class="bo-card bo-card-lavender" aria-labelledby="bo-pratique-waste">
+      <h3 id="bo-pratique-waste">Prochaines collectes</h3>
+      <ul class="bo-pratique-waste">
+        {practical.wasteCollection.map((collection) => (
+          <li>
+            <span class={`bo-dot bo-bin-${collection.key}`} aria-hidden="true"></span>
+            <span class="bo-pratique-waste-label">{collection.label}</span>
+            {collection.upcoming.length > 0 ? (
+              <NextCollections collection={collection} class="bo-pratique-waste-date" />
+            ) : (
+              <span class="bo-pratique-waste-date">{collection.day ? 'Hors saison' : collection.frequency.label}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      <a href="/collecte-des-dechets" class="bo-more">Tout le calendrier<ArrowRight size={16} aria-hidden="true" /></a>
+    </section>
+  )}
+
+  {practical.weather && (
+    <Weather position={practical.weather} class="bo-card bo-card-sky bo-weather">
+      <h3 slot="titre">Météo</h3>
+    </Weather>
+  )}
+
+  {practical.quickLinks && (
+    <nav class="bo-card bo-pratique-links" aria-labelledby="bo-pratique-quick">
+      <h3 id="bo-pratique-quick">Accès rapides</h3>
+      <ul>
+        {practical.quickLinks.map((link) => (
+          <li>
+            <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+              {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+</aside>

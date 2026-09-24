@@ -1,0 +1,342 @@
+/* Composants transverses : liens d'évitement, consentement, pagination, filtres, contenus tiers. */
+
+/* Liens d'évitement : boutons blancs sur une barre encre, au premier Tab */
+.cn-skip-links ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bo-space-1);
+}
+
+.cn-skip-links a {
+  top: 0;
+  left: 0;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bo-target);
+  padding: 0 1rem;
+  font-weight: 600;
+  color: var(--bo-ink);
+  background: #fff;
+  border-radius: var(--bo-radius);
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 0.75rem var(--bo-ink);
+}
+
+.cn-skip-links a:focus {
+  top: 0.75rem;
+  left: 0.75rem;
+}
+
+/* Bandeau cookies : carte blanche arrondie au-dessus de la barre « Pratique » ; accepter et refuser ont le même poids */
+.cn-cookie-banner {
+  position: fixed;
+  right: 0.5rem;
+  bottom: calc(var(--bo-bar) + 0.5rem);
+  left: 0.5rem;
+  z-index: 50;
+  display: grid;
+  gap: 0.75rem;
+  max-height: 70vh;
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  color: var(--bo-ink);
+  background: var(--bo-surface);
+  border: 1px solid var(--bo-line);
+  border-radius: var(--bo-radius-large);
+  box-shadow: var(--bo-shadow);
+}
+
+.cn-cookie-banner h2,
+.cn-cookie-dialog h2 {
+  font-size: 1.25rem;
+}
+
+.cn-cookie-banner p {
+  font-size: 1rem;
+}
+
+.cn-cookie-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.cn-cookie-actions button {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font: inherit;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-primary);
+  border: 2px solid var(--bo-primary);
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.cn-cookie-actions button:hover {
+  background: var(--bo-primary-dark);
+  border-color: var(--bo-primary-dark);
+}
+
+.cn-cookie-actions button[data-cn-consent='customize'],
+.cn-cookie-actions button[value='cancel'] {
+  color: var(--bo-ink);
+  background: var(--bo-sand);
+  border-color: var(--bo-sand);
+}
+
+.cn-cookie-actions button[data-cn-consent='customize']:hover,
+.cn-cookie-actions button[value='cancel']:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+  border-color: var(--bo-line);
+}
+
+@media (min-width: 48rem) {
+  .cn-cookie-banner {
+    right: auto;
+    left: 1.5rem;
+    max-width: 34rem;
+  }
+
+  .cn-cookie-actions button {
+    flex: 0 1 auto;
+  }
+}
+
+@media (min-width: 64rem) {
+  .cn-cookie-banner {
+    bottom: 1.5rem;
+  }
+}
+
+/* Panneau de préférences */
+.cn-cookie-dialog {
+  width: min(36rem, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  padding: 1.25rem 1.5rem;
+  color: var(--bo-ink);
+  background: var(--bo-surface);
+  border: 0;
+  border-radius: var(--bo-radius-large);
+  box-shadow: var(--bo-shadow);
+}
+
+.cn-cookie-dialog::backdrop {
+  background: rgb(46 42 38 / 60%);
+}
+
+.cn-cookie-dialog form {
+  display: grid;
+  gap: var(--bo-space-2);
+}
+
+.cn-cookie-dialog fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.cn-cookie-dialog legend {
+  margin-bottom: 0.25rem;
+  padding: 0;
+  font-weight: 700;
+}
+
+.cn-cookie-dialog fieldset p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bo-space-2);
+  padding-block: 0.75rem;
+  border-top: 1px solid var(--bo-line);
+}
+
+.cn-cookie-dialog fieldset label {
+  order: -1;
+}
+
+/* Interrupteur : case à cocher habillée, l'état se lit aussi à la position du rond */
+.cn-cookie-dialog input[role='switch'],
+.cn-cookie-dialog input[type='checkbox']:disabled {
+  position: relative;
+  flex: none;
+  width: 3rem;
+  height: 1.75rem;
+  margin: 0;
+  appearance: none;
+  background: var(--bo-field);
+  border-radius: 0.875rem;
+  cursor: pointer;
+}
+
+.cn-cookie-dialog input[role='switch']::before,
+.cn-cookie-dialog input[type='checkbox']:disabled::before {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 1.375rem;
+  height: 1.375rem;
+  content: '';
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+
+.cn-cookie-dialog input:checked,
+.cn-cookie-dialog input[type='checkbox']:checked:disabled {
+  background: var(--bo-primary);
+}
+
+.cn-cookie-dialog input:checked::before {
+  transform: translateX(1.25rem);
+}
+
+.cn-cookie-dialog input:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* Pagination ------------------------------------------------------------------------------------- */
+.bo-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: var(--bo-space-4);
+}
+
+.bo-pagination ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-pagination a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--bo-target);
+  min-height: var(--bo-target);
+  font-weight: 700;
+  color: var(--bo-ink);
+  text-decoration: none;
+  border-radius: var(--bo-radius);
+}
+
+.bo-pagination-step {
+  gap: 0.375rem;
+  padding: 0 1rem;
+  background: var(--bo-sand);
+}
+
+.bo-pagination a:hover {
+  color: var(--bo-ink);
+  background: var(--bo-mint);
+}
+
+.bo-pagination a[aria-current='page'] {
+  color: #fff;
+  background: var(--bo-primary);
+}
+
+.bo-pagination-status {
+  font-size: 0.9375rem;
+  color: var(--bo-muted);
+}
+
+/* Filtres en pastilles : la catégorie courante en encre */
+.bo-filters ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.bo-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  min-height: var(--bo-target);
+  padding: 0 1.125rem;
+  font-weight: 800;
+  font-size: 0.9375rem;
+  color: var(--bo-ink);
+  text-decoration: none;
+  background: var(--bo-sand);
+  border-radius: var(--bo-pill);
+}
+
+.bo-filter:hover {
+  color: var(--bo-ink);
+  background: var(--bo-line);
+}
+
+.bo-filter[aria-current='page'] {
+  color: #fff;
+  background: var(--bo-ink);
+}
+
+.bo-filter-count {
+  font-weight: 600;
+}
+
+/* Contenus soumis au consentement (vidéo, carte) */
+.cn-embed {
+  position: relative;
+  overflow: hidden;
+  background: var(--bo-sand);
+  border-radius: var(--bo-radius-card);
+}
+
+.cn-embed iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
+.cn-embed-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 14rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.cn-embed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.cn-embed-actions button {
+  min-height: 3rem;
+  padding: 0 1.25rem;
+  font: inherit;
+  font-weight: 800;
+  color: #fff;
+  background: var(--bo-primary);
+  border: 0;
+  border-radius: var(--bo-radius);
+  cursor: pointer;
+}
+
+.cn-embed-actions button:hover {
+  background: var(--bo-primary-dark);
+}

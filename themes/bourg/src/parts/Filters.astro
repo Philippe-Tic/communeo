@@ -1,0 +1,22 @@
+---
+/** Filtres en pastilles ; le filtre courant est en encre et marqué aria-current. */
+import type { FilterOption } from '@communeo/theme-contract';
+
+interface Props { label: string; options: FilterOption[]; allHref: string }
+const { label, options, allHref } = Astro.props;
+const anyCurrent = options.some((option) => option.current);
+---
+{options.length > 1 && (
+  <nav class="bo-filters" aria-label={label}>
+    <ul>
+      <li><a href={allHref} class="bo-filter" aria-current={anyCurrent ? undefined : 'page'}>Toutes</a></li>
+      {options.map((option) => (
+        <li>
+          <a href={option.href} class="bo-filter" aria-current={option.current ? 'page' : undefined}>
+            {option.label}<span class="bo-filter-count">({option.count})</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

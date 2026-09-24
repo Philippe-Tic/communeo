@@ -1,0 +1,26 @@
+---
+/** Galerie : vignettes liées à l'image ; avec JavaScript, elles s'agrandissent dans la fenêtre partagée. */
+import type { BlockOf } from '@communeo/core';
+import Lightbox from '@communeo/ui-a11y/Lightbox.astro';
+
+interface Props { block: BlockOf<'gallery'> }
+const { block } = Astro.props;
+---
+<section class="st-gallery" aria-label={block.title ?? 'Galerie'} data-cn-gallery>
+  {block.title && <h2>{block.title}</h2>}
+  <ul>
+    {block.images.map((image) => (
+      <li>
+        <figure>
+          <a href={image.src} data-cn-lightbox-item data-cn-lightbox-caption={image.caption ?? undefined}>
+            <img src={image.src} alt={image.alt} width={image.width ?? undefined} height={image.height ?? undefined} loading="lazy" />
+            <span class="cn-sr-only">Agrandir{image.alt && <> : {image.alt}</>}</span>
+          </a>
+          {image.caption && <figcaption>{image.caption}</figcaption>}
+        </figure>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<Lightbox />

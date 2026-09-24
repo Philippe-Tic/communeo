@@ -1,0 +1,82 @@
+---
+/**
+ * Mobile : barre fixée en bas (statut de la mairie, nombre d'alertes) qui ouvre le panneau
+ * « Pratique » dans un tiroir (<dialog> modal). Le panneau n'existe qu'une fois dans la page : le
+ * tiroir l'accueille le temps de son ouverture puis le rend à sa place. Sans JavaScript, la barre
+ * mène au panneau, affiché après le contenu.
+ */
+import type { PageContext } from '@communeo/theme-contract';
+import OpeningStatus from '@communeo/ui-a11y/OpeningStatus.astro';
+import ChevronUp from '@lucide/astro/icons/chevron-up';
+import X from '@lucide/astro/icons/x';
+
+interface Props {
+  ctx: PageContext;
+}
+
+const { site, alerts } = Astro.props.ctx;
+const count = alerts.length;
+---
+<div class="bo-bar">
+  <div class="bo-bar-status">
+    <OpeningStatus hours={site.contact.hours} class="bo-status" />
+    {count > 0 && <p class="bo-bar-alerts">{count} alerte{count > 1 ? 's' : ''} en cours</p>}
+  </div>
+  <a href="#pratique" class="bo-bar-button" data-bo-drawer-open>Pratique<ChevronUp size={18} aria-hidden="true" /></a>
+</div>
+
+<dialog class="bo-drawer" aria-labelledby="bo-drawer-title" data-bo-drawer>
+  <div class="bo-drawer-head">
+    <h2 id="bo-drawer-title">Pratique</h2>
+    <button type="button" class="bo-drawer-close" data-bo-drawer-close><X size={18} aria-hidden="true" />Fermer</button>
+  </div>
+  <div class="bo-drawer-body" data-bo-drawer-body></div>
+</dialog>
+
+<script>
+  export {};
+
+  const dialog = document.querySelector<HTMLDialogElement>('[data-bo-drawer]');
+  const body = dialog?.querySelector<HTMLElement>('[data-bo-drawer-body]');
+  const panel = document.getElementById('pratique');
+  const opener = document.querySelector<HTMLAnchorElement>('[data-bo-drawer-open]');
+
+  if (dialog && body && panel && opener) {
+    const home = panel.parentElement!;
+    const next = panel.nextSibling;
+    // Le lien devient un bouton qui ouvre le tiroir
+    opener.setAttribute('role', 'button');
+    opener.setAttribute('aria-haspopup', 'dialog');
+
+    const restore = () => {
+      if (!body.contains(panel)) return;
+      home.insertBefore(panel, next);
+      opener.focus();
+    };
+
+    opener.addEventListener('click', (event) => {
+      event.preventDefault();
+      body.append(panel);
+      dialog.showModal();
+      dialog.querySelector<HTMLElement>('[data-bo-drawer-close]')?.focus();
+    });
+    opener.addEventListener('keydown', (event) => {
+      if (event.key === ' ') {
+        event.preventDefault();
+        opener.click();
+      }
+    });
+    dialog.querySelector('[data-bo-drawer-close]')?.addEventListener('click', () => dialog.close());
+    // Clic sur le fond : ferme le tiroir
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', restore);
+    // Onglet en arrière-plan : `close` peut ne pas arriver, Échap passe par `cancel`
+    dialog.addEventListener('cancel', () => queueMicrotask(restore));
+    // Passage en grand écran tiroir ouvert : le panneau retrouve sa colonne
+    matchMedia('(min-width: 64rem)').addEventListener('change', (event) => {
+      if (event.matches && dialog.open) dialog.close();
+    });
+  }
+</script>

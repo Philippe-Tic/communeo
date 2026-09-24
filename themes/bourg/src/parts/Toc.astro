@@ -1,0 +1,27 @@
+---
+/**
+ * Sommaire des titres de la page. Sur grand écran, il reste visible à côté du contenu ;
+ * sur mobile, il se replie dans un « Sommaire » dépliable (sans JavaScript).
+ */
+import type { TocEntryVM } from '@communeo/core';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
+
+interface Props {
+  entries: TocEntryVM[];
+}
+
+const { entries } = Astro.props;
+---
+<nav class="bo-toc bo-toc-side" aria-labelledby="bo-toc-title">
+  <h2 id="bo-toc-title" class="bo-toc-title">Sommaire</h2>
+  <ol>
+    {entries.map((entry) => <li class={`bo-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}
+  </ol>
+</nav>
+
+<details class="bo-toc bo-toc-mobile">
+  <summary>Sommaire<ChevronDown size={20} aria-hidden="true" /></summary>
+  <ol>
+    {entries.map((entry) => <li class={`bo-toc-level-${entry.level}`}><a href={`#${entry.id}`}>{entry.label}</a></li>)}
+  </ol>
+</details>

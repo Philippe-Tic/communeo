@@ -1,0 +1,11 @@
+---
+import type { BlockOf } from '@communeo/core';
+
+interface Props { block: BlockOf<'image'> }
+const { block } = Astro.props;
+const { image } = block;
+---
+<figure class:list={['st-image', { 'st-image-full': block.width === 'full' }]}>
+  <img src={image.src} srcset={image.srcset ?? undefined} alt={image.alt} width={image.width ?? undefined} height={image.height ?? undefined} loading="lazy" decoding="async" />
+  {(image.caption || image.credit) && <figcaption>{image.caption}{image.credit && <> – {image.credit}</>}</figcaption>}
+</figure>

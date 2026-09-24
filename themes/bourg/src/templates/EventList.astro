@@ -1,0 +1,15 @@
+---
+import type { EventCardVM } from '@communeo/core';
+import type { FilterOption } from '@communeo/theme-contract';
+import type { PageContext } from '@communeo/theme-contract';
+import Layout from '../parts/Layout.astro';
+import EventCard from '../parts/EventCard.astro';
+import Filters from '../parts/Filters.astro';
+
+interface Props { ctx: PageContext; upcoming: EventCardVM[]; categories: FilterOption[] }
+const { ctx, upcoming, categories } = Astro.props;
+---
+<Layout ctx={ctx}>
+  <Filters label="Filtrer par catégorie" options={categories} allHref="/agenda" />
+  {upcoming.length ? upcoming.map((event) => <EventCard event={event} level={2} />) : <p>Aucun événement à venir.</p>}
+</Layout>

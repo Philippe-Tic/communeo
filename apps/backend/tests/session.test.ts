@@ -30,8 +30,8 @@ describe('POST /api/session/login', () => {
     expect(cookie).toMatch(/SameSite=Strict/i);
     expect(cookie).toMatch(/path=\/api/i);
     const hours = (new Date(/expires=([^;]+)/i.exec(cookie)![1]!).getTime() - Date.now()) / 3_600_000;
-    expect(hours).toBeGreaterThan(11);
-    expect(hours).toBeLessThanOrEqual(12);
+    expect(hours).toBeGreaterThan(7.9);
+    expect(hours).toBeLessThanOrEqual(8);
   });
 
   it('même réponse pour un mauvais mot de passe et un compte inconnu', async () => {
@@ -96,15 +96,103 @@ describe('authentification par le cookie', () => {
   });
 });
 
+/** Jeton de session émis `ageSeconds` plus tôt (comme après une période d'utilisation) */
+async function sessionCookie(ageSeconds: number, payload: Record<string, unknown> = {}, expiresIn = '8h') {
+  const user = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { email: 'test@example.com' } });
+  const iat = Math.floor(Date.now() / 1000) - ageSeconds;
+  const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id, iat, ...payload }, { expiresIn });
+  return `communeo_session=${jwt}`;
+}
+const renewed = (res: request.Response) =>
+  ((res.headers['set-cookie'] as unknown as string[] | undefined) ?? []).find((value) => value.startsWith('communeo_session='));
+
+describe('fin après 8 h d’inactivité', () => {
+  it('une session utilisée est renouvelée pour 8 h (au plus toutes les 5 minutes)', async () => {
+    const http = request(strapi.server.httpServer);
+    const old = await http.get('/api/users/me').set('Cookie', await sessionCookie(10 * 60));
+    expect(old.status).toBe(200);
+    const cookie = renewed(old);
+    expect(cookie).toMatch(/HttpOnly/i);
+    const hours = (new Date(/expires=([^;]+)/i.exec(cookie!)![1]!).getTime() - Date.now()) / 3_600_000;
+    expect(hours).toBeGreaterThan(7.9);
+    // Émise il y a moins de 5 minutes : pas de renouvellement à chaque requête
+    expect(renewed(await http.get('/api/users/me').set('Cookie', await sessionCookie(60)))).toBeUndefined();
+  });
+
+  it('une session sans activité depuis 8 h est refusée', async () => {
+    const res = await request(strapi.server.httpServer).get('/api/users/me').set('Cookie', await sessionCookie(8 * 3600 + 60));
+    expect(res.status).toBe(401);
+    expect(renewed(res)).toBeUndefined();
+  });
+
+  it('« Rester connecté » : 30 jours, sans renouvellement', async () => {
+    const res = await request(strapi.server.httpServer)
+      .get('/api/users/me')
+      .set('Cookie', await sessionCookie(10 * 60, { remember: true }, '30d'));
+    expect(res.status).toBe(200);
+    expect(renewed(res)).toBeUndefined();
+  });
+
+  it('une requête refusée ne renouvelle pas la session', async () => {
+    const res = await request(strapi.server.httpServer).get('/api/site-management').set('Cookie', await sessionCookie(10 * 60));
+    expect(res.status).toBe(403);
+    expect(renewed(res)).toBeUndefined();
+  });
+});
+
+async function member(email: string, password: string) {
+  const role = await strapi.db.query('plugin::users-permissions.role').findOne({ where: { type: 'authenticated' } });
+  const site = await strapi.db.query('api::site.site').findOne({ where: { slug: 'test-site' } });
+  const hashed = (await strapi.plugin('users-permissions').service('user').ensureHashedPasswords({ password })).password;
+  await strapi.db.query('plugin::users-permissions.user').create({
+    data: { username: email, email, password: hashed, municipality_role: 'editor', blocked: false, active: true, confirmed: true, provider: 'local', role: role.id, site: site.id },
+  });
+}
+
 describe('limitation des tentatives', () => {
-  it('bloque après 5 tentatives pour un même compte', async () => {
-    const identifier = 'cible@example.com';
-    let last = 0;
-    for (let i = 0; i < 6; i += 1) last = (await agent().post('/api/session/login').send({ identifier, password: 'x' })).status;
-    expect(last).toBe(429);
+  // Une adresse par test : les échecs se comptent aussi par adresse IP
+  const login = (ip: string, identifier: string, password: string) =>
+    agent().post('/api/session/login').set('X-Forwarded-For', ip).send({ identifier, password });
+  const local = (ip: string, identifier: string, password: string) =>
+    request(strapi.server.httpServer).post('/api/auth/local').set('X-Forwarded-For', ip).send({ identifier, password });
+
+  it('6e essai en moins de 15 minutes : refusé même avec le bon mot de passe', async () => {
+    await member('bloque@example.test', 'jardin-loire-2026');
+    for (let i = 0; i < 5; i += 1) expect((await login('10.0.0.1', 'bloque@example.test', 'faux')).status).toBe(400);
+    const sixth = await login('10.0.0.1', 'bloque@example.test', 'jardin-loire-2026');
+    expect(sixth.status).toBe(429);
+    expect(sixth.body.error.message).toMatch(/bloqué 15 minutes/);
+    expect(sixth.headers['set-cookie']).toBeUndefined();
+    // Le compte est bloqué, d'où qu'on vienne
+    expect((await login('10.0.0.99', 'bloque@example.test', 'jardin-loire-2026')).status).toBe(429);
+  });
+
+  it('/api/auth/local compte avec la session : pas de contournement du blocage', async () => {
+    await member('contourne@example.test', 'jardin-loire-2026');
+    for (let i = 0; i < 3; i += 1) expect((await local('10.0.0.2', 'contourne@example.test', 'faux')).status).toBe(400);
+    for (let i = 0; i < 2; i += 1) expect((await login('10.0.0.2', 'contourne@example.test', 'faux')).status).toBe(400);
+    const direct = await local('10.0.0.2', 'contourne@example.test', 'jardin-loire-2026');
+    expect(direct.status).toBe(429);
+    expect(direct.body.jwt).toBeUndefined();
+    expect((await login('10.0.0.2', 'Contourne@Example.test', 'jardin-loire-2026')).status).toBe(429);
+  });
+
+  it('une connexion réussie remet le compteur du compte à zéro', async () => {
+    await member('reprise@example.test', 'jardin-loire-2026');
+    for (let i = 0; i < 4; i += 1) await local('10.0.0.3', 'reprise@example.test', 'faux');
+    expect((await local('10.0.0.3', 'reprise@example.test', 'jardin-loire-2026')).status).toBe(200);
+    for (let i = 0; i < 4; i += 1) await login('10.0.0.3', 'reprise@example.test', 'faux');
+    expect((await login('10.0.0.3', 'reprise@example.test', 'jardin-loire-2026')).status).toBe(200);
+  });
+
+  it('par adresse IP : 20 échecs sur des comptes différents bloquent l’adresse, pas les autres', async () => {
+    for (let i = 0; i < 20; i += 1) expect((await login('10.0.0.4', `inconnu${i}@example.test`, 'faux')).status).toBe(400);
+    expect((await login('10.0.0.4', 'test@example.com', 'test123')).status).toBe(429);
+    expect((await local('10.0.0.4', 'test@example.com', 'test123')).status).toBe(429);
+    expect((await login('10.0.0.5', 'test@example.com', 'test123')).status).toBe(200);
   });
 
   it('les connexions réussies ne comptent pas (plusieurs agents derrière une même adresse)', async () => {
-    for (let i = 0; i < 8; i += 1) expect((await agent().post('/api/session/login').send(credentials)).status).toBe(200);
+    for (let i = 0; i < 25; i += 1) expect((await login('10.0.0.6', 'test@example.com', 'test123')).status).toBe(200);
   });
 });

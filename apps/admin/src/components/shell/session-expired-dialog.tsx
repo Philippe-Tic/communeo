@@ -60,7 +60,7 @@ export function SessionExpiredDialog({ email }: { email: string }) {
             <div className="min-w-0 flex-1">
               <Dialog.Title className="text-[17px] font-semibold">Votre session a expiré</Dialog.Title>
               <Dialog.Description className="mt-1.5 text-secondary">
-                Par sécurité, la connexion a une durée limitée. Reconnectez-vous pour continuer : la page reste telle quelle, vos modifications en cours ne sont pas perdues.
+                Par sécurité, la session se ferme après 8 heures d'inactivité. Reconnectez-vous pour continuer : la page reste telle quelle, vos modifications en cours ne sont pas perdues.
               </Dialog.Description>
               <Form form={form} onSubmit={submit} requiredNote={false} className="mt-4 space-y-4" summaryTitle={() => 'Mot de passe manquant'}>
                 <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />

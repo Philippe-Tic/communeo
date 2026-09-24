@@ -3,8 +3,10 @@
  * l'en-tête Authorization habituel, avant l'isolation par commune et les permissions (inchangées).
  * Une écriture authentifiée par le cookie exige l'en-tête X-Communeo-Csrf (en plus de SameSite=Strict).
  * Les appels qui fournissent déjà un en-tête Authorization (jetons d'API, build, preview) ne sont pas concernés.
+ * Session ordinaire : renouvelée après une requête réussie (au plus toutes les 5 minutes), elle
+ * n'expire qu'après 8 h sans activité.
  */
-import { CSRF_HEADER, SESSION_COOKIE } from '../utils/session-cookie';
+import { CSRF_HEADER, issueSession, SESSION_COOKIE, SESSION_RENEW_AFTER_SECONDS } from '../utils/session-cookie';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -21,6 +23,17 @@ export default () => {
     }
     ctx.request.header.authorization = `Bearer ${token}`;
     ctx.state.cookieSession = true;
-    return next();
+    await next();
+
+    // Requête authentifiée et réussie : la session ordinaire repart pour 8 h
+    const userId = ctx.state.user?.id;
+    if (!userId || ctx.status >= 400 || ctx.path === '/api/session/logout') return;
+    const payload = await strapi
+      .plugin('users-permissions')
+      .service('jwt')
+      .verify(token)
+      .catch(() => null);
+    if (!payload || payload.remember || payload.id !== userId) return;
+    if (Date.now() / 1000 - (payload.iat ?? 0) >= SESSION_RENEW_AFTER_SECONDS) issueSession(ctx, userId, false);
   };
 };

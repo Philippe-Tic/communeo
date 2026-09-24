@@ -44,7 +44,7 @@ export const sessionQuery = queryOptions({
   retry: false,
 });
 
-/** `remember` : session de 30 jours au lieu de 12 heures */
+/** `remember` : session de 30 jours ; sinon, elle se ferme après 8 heures d'inactivité */
 export const login = (identifier: string, password: string, remember = false) =>
   api<{ ok: true; expiresIn: number }>('/api/session/login', { method: 'POST', json: { identifier, password, remember } });
 

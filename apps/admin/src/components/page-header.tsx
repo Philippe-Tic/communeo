@@ -3,15 +3,28 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { sessionQuery } from '@/lib/session';
 
-/** Titre de page (h1) et titre du document : « Actualités — Saint-Aubin-sur-Loire · Communeo » */
-export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
+/**
+ * Titre de page (h1) et titre du document : « Actualités — Saint-Aubin-sur-Loire · Communeo ».
+ * `documentTitle` : titre du document quand le h1 n'est pas le nom de l'écran (« Bonjour Sophie »).
+ */
+export function PageHeader({
+  title,
+  documentTitle = title,
+  description,
+  actions,
+}: {
+  title: string;
+  documentTitle?: string;
+  description?: ReactNode;
+  actions?: ReactNode;
+}) {
   const { data: user } = useQuery(sessionQuery);
   const siteName = user?.site?.name;
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => focusHeadingIfRequested(heading.current), []);
   useEffect(() => {
-    document.title = [title, siteName].filter(Boolean).join(' — ') + ' · Communeo';
-  }, [title, siteName]);
+    document.title = [documentTitle, siteName].filter(Boolean).join(' — ') + ' · Communeo';
+  }, [documentTitle, siteName]);
 
   return (
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4">

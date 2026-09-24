@@ -30,17 +30,26 @@ test('sans violation, au repos, en erreur et en sombre', async ({ page }) => {
 
 test('chaque champ a un libellé relié', async ({ page }) => {
   await open(page);
-  await page.getByRole('group', { name: /^Tarif/ }).getByRole('radio', { name: 'Montant' }).check();
-  const unnamed = await page.locator('main').locator('input, select, textarea, [role="switch"]').evaluateAll((controls) =>
-    controls
-      // Champ natif caché que Radix ajoute à l'interrupteur (aria-hidden, hors tabulation)
-      .filter((control) => control.getAttribute('aria-hidden') !== 'true')
-      .filter((control) => {
-        const labelled = (control as HTMLInputElement).labels?.length || control.getAttribute('aria-label') || control.getAttribute('aria-labelledby');
-        return !labelled;
-      })
-      .map((control) => control.outerHTML.slice(0, 120)),
-  );
+  await page
+    .getByRole('group', { name: /^Tarif/ })
+    .getByRole('radio', { name: 'Montant' })
+    .check();
+  const unnamed = await page
+    .locator('main')
+    .locator('input, select, textarea, [role="switch"]')
+    .evaluateAll((controls) =>
+      controls
+        // Champ natif caché que Radix ajoute à l'interrupteur (aria-hidden, hors tabulation)
+        .filter((control) => control.getAttribute('aria-hidden') !== 'true')
+        .filter((control) => {
+          const labelled =
+            (control as HTMLInputElement).labels?.length ||
+            control.getAttribute('aria-label') ||
+            control.getAttribute('aria-labelledby');
+          return !labelled;
+        })
+        .map((control) => control.outerHTML.slice(0, 120)),
+    );
   expect(unnamed).toEqual([]);
   // Libellés utilisables pour atteindre les contrôles
   await expect(page.getByRole('textbox', { name: 'Titre', exact: true })).toBeVisible();
@@ -102,17 +111,32 @@ test('cohérence des dates, montant conditionnel et e-mail', async ({ page }) =>
   await page.getByRole('textbox', { name: 'Titre', exact: true }).fill('Fête de la musique');
   await page.getByRole('combobox', { name: 'Catégorie', exact: true }).selectOption('fête');
   await field(page, 'startDate').fill('2026-06-21');
-  await page.getByRole('group', { name: /Heure de début/ }).getByLabel('Heures').selectOption('19');
-  await expect(page.getByRole('group', { name: /Heure de début/ }).getByLabel('Minutes').locator('option')).toHaveText(['--', '00', '15', '30', '45']);
+  await page
+    .getByRole('group', { name: /Heure de début/ })
+    .getByLabel('Heures')
+    .selectOption('19');
+  await expect(
+    page
+      .getByRole('group', { name: /Heure de début/ })
+      .getByLabel('Minutes')
+      .locator('option'),
+  ).toHaveText(['--', '00', '15', '30', '45']);
   await field(page, 'endDate').fill('2026-06-20');
-  await page.getByRole('group', { name: /^Tarif/ }).getByRole('radio', { name: 'Montant' }).check();
+  await page
+    .getByRole('group', { name: /^Tarif/ })
+    .getByRole('radio', { name: 'Montant' })
+    .check();
   await page.getByRole('textbox', { name: 'E-mail de contact (facultatif)' }).fill('pas-un-email');
   await page.getByRole('checkbox', { name: "Je confirme l'exactitude des informations" }).check();
   await page.getByRole('button', { name: 'Publier', exact: true }).click();
 
   await expect(field(page, 'endDate')).toHaveAccessibleDescription(/La date de fin doit être après la date de début/);
-  await expect(page.getByRole('textbox', { name: 'Montant (€)', exact: true })).toHaveAccessibleDescription('Indiquez le montant en euros (par exemple 5 ou 7,50)');
-  await expect(page.getByRole('textbox', { name: 'E-mail de contact (facultatif)' })).toHaveAccessibleDescription("L'e-mail de contact n'est pas valide");
+  await expect(page.getByRole('textbox', { name: 'Montant (€)', exact: true })).toHaveAccessibleDescription(
+    'Indiquez le montant en euros (par exemple 5 ou 7,50)',
+  );
+  await expect(page.getByRole('textbox', { name: 'E-mail de contact (facultatif)' })).toHaveAccessibleDescription(
+    "L'e-mail de contact n'est pas valide",
+  );
   // L'aide reste lue avec l'erreur
   await expect(field(page, 'endDate')).toHaveAccessibleDescription(/Un événement peut durer plusieurs jours/);
 });
@@ -170,5 +194,5 @@ test('modifications non enregistrées : Rester, puis Quitter sans enregistrer', 
 
   await page.getByRole('link', { name: 'quittez la page' }).click();
   await dialog.getByRole('button', { name: 'Quitter sans enregistrer' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: /^Bonjour/ })).toBeVisible();
 });

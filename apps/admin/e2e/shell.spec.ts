@@ -178,7 +178,7 @@ test.describe('mise en ligne', () => {
     test.skip(isMobile(page), 'une largeur suffit');
     await mockApi(page, { publication: 'ok' });
     await page.goto('/');
-    await expect(page.getByText('Site à jour')).toBeVisible();
+    await expect(page.getByRole('banner').getByText('Site à jour')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Mettre en ligne' })).toHaveCount(0);
   });
 });

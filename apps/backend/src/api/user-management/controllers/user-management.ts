@@ -225,12 +225,12 @@ export default {
     });
 
     if (!user) {
-      ctx.throw(404, 'User not found');
+      ctx.throw(404, 'Utilisateur introuvable');
     }
 
     // Super admin can see any user; regular admin only their site's users
     if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
-      ctx.throw(403, 'User does not belong to your site');
+      ctx.throw(403, "Cet utilisateur n'appartient pas à votre commune");
     }
 
     const { password, resetPasswordToken, confirmationToken, ...sanitized } = user;
@@ -242,7 +242,7 @@ export default {
     const data = ctx.request.body?.data || ctx.request.body;
 
     if (!data.username || !data.email || !data.first_name || !data.last_name) {
-      ctx.throw(400, 'Missing required fields: username, email, first_name, last_name');
+      ctx.throw(400, 'Prénom, nom et e-mail sont obligatoires');
     }
 
     assertAssignableRole(ctx, currentUser, data.municipality_role);
@@ -344,14 +344,29 @@ export default {
     });
 
     if (!existingUser) {
-      ctx.throw(404, 'User not found');
+      ctx.throw(404, 'Utilisateur introuvable');
     }
 
     if (currentUser.municipality_role !== 'super_admin' && existingUser.site?.documentId !== currentUser.site.documentId) {
-      ctx.throw(403, 'User does not belong to your site');
+      ctx.throw(403, "Cet utilisateur n'appartient pas à votre commune");
     }
 
     assertAssignableRole(ctx, currentUser, data.municipality_role);
+
+    // Garde-fous : on ne se désactive pas soi-même, et une commune garde toujours un administrateur actif
+    const deactivating = data.active === false && existingUser.active !== false;
+    const demoting = data.municipality_role !== undefined && data.municipality_role !== 'admin' && existingUser.municipality_role === 'admin';
+    if (deactivating && existingUser.id === currentUser.id) {
+      ctx.throw(400, 'Vous ne pouvez pas désactiver votre propre compte');
+    }
+    if ((deactivating || demoting) && existingUser.municipality_role === 'admin' && existingUser.site) {
+      const activeAdmins = await strapi.query('plugin::users-permissions.user').count({
+        where: { site: { documentId: existingUser.site.documentId }, municipality_role: 'admin', active: { $ne: false }, blocked: false },
+      });
+      if (activeAdmins <= 1 && existingUser.active !== false && !existingUser.blocked) {
+        ctx.throw(400, 'La commune doit garder au moins un administrateur actif');
+      }
+    }
 
     const updateData: Record<string, any> = {};
     if (data.username !== undefined) updateData.username = data.username;
@@ -385,16 +400,16 @@ export default {
     });
 
     if (!userToDelete) {
-      ctx.throw(404, 'User not found');
+      ctx.throw(404, 'Utilisateur introuvable');
     }
 
     // Super admin can delete any user; regular admin only their site's users
     if (currentUser.municipality_role !== 'super_admin' && userToDelete.site?.documentId !== currentUser.site.documentId) {
-      ctx.throw(403, 'User does not belong to your site');
+      ctx.throw(403, "Cet utilisateur n'appartient pas à votre commune");
     }
 
     if (userToDelete.id === currentUser.id) {
-      ctx.throw(400, 'Cannot delete yourself');
+      ctx.throw(400, 'Vous ne pouvez pas supprimer votre propre compte');
     }
 
     // Prevent deleting the last admin of a site
@@ -406,7 +421,7 @@ export default {
         },
       });
       if (admins.length <= 1) {
-        ctx.throw(400, 'Cannot delete the last admin of the site');
+        ctx.throw(400, 'La commune doit garder au moins un administrateur');
       }
     }
 
@@ -527,13 +542,16 @@ export default {
     });
 
     if (!user) {
-      ctx.throw(404, 'User not found');
+      ctx.throw(404, 'Utilisateur introuvable');
     }
 
     if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
-      ctx.throw(403, 'User does not belong to your site');
+      ctx.throw(403, "Cet utilisateur n'appartient pas à votre commune");
     }
 
+    if (user.active === false) {
+      ctx.throw(400, "Ce compte est désactivé : réactivez-le avant de renvoyer l'invitation");
+    }
     if (!user.blocked) {
       ctx.throw(400, "Cet utilisateur a déjà activé son compte");
     }
@@ -570,11 +588,11 @@ export default {
     });
 
     if (!user) {
-      ctx.throw(404, 'User not found');
+      ctx.throw(404, 'Utilisateur introuvable');
     }
 
     if (currentUser.municipality_role !== 'super_admin' && user.site?.documentId !== currentUser.site.documentId) {
-      ctx.throw(403, 'User does not belong to your site');
+      ctx.throw(403, "Cet utilisateur n'appartient pas à votre commune");
     }
 
     if (user.blocked) {

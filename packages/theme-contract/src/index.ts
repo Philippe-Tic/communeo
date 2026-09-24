@@ -27,6 +27,7 @@ import type {
   NavVM,
   PageVM,
   PaginationVM,
+  PracticalVM,
   SeoVM,
   SiteVM,
   TeamVM,
@@ -61,6 +62,8 @@ export interface PageContext {
   nav: NavVM;
   /** Alertes visibles (bandeau en haut de page) */
   alerts: AlertVM[];
+  /** Accès rapides, météo, prochaines collectes (sections d'accueil activées), pour un panneau présent partout */
+  practical: PracticalVM;
   /** Chemin de la page courante, pour aria-current */
   path: string;
   /** Fil d'Ariane (vide sur l'accueil) */

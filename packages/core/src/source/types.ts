@@ -9,6 +9,7 @@ import type {
   HomeVM,
   NavVM,
   PageVM,
+  PracticalVM,
   SiteVM,
   TeamVM,
   WasteCollectionVM,
@@ -33,6 +34,8 @@ export interface ContentSource {
   site(): Promise<SiteVM>;
   navigation(): Promise<NavVM>;
   home(): Promise<HomeVM>;
+  /** Accès rapides, météo, prochaines collectes : pour chaque page (voir PracticalVM) */
+  practical(): Promise<PracticalVM>;
   pages(): Promise<PageVM[]>;
   articles(): Promise<ArticleVM[]>;
   events(): Promise<EventVM[]>;

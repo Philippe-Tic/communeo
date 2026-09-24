@@ -32,9 +32,13 @@ auquel il manque un template ou un bloc, ou dont les props ne correspondent pas 
 | `templates` | 19 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `RightsRequest`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
 | `blocks` | 9 composants de blocs : `text`, `image`, `buttons`, `callout`, `documents`, `gallery`, `faq`, `contact`, `video` |
 
-Chaque template reçoit `ctx` (site, menus, alertes, chemin courant, fil d'Ariane, titre, SEO) et ses données
+Chaque template reçoit `ctx` (site, menus, alertes, infos pratiques, chemin courant, fil d'Ariane, titre, SEO) et ses données
 propres, sous forme de **view-models** de `@communeo/core` : libellés en français, dates formatées,
 liens prêts, champs absents à `null`. Un thème ne fait jamais d'appel à Strapi.
+
+`ctx.practical` donne à chaque page les accès rapides, la météo et les prochaines collectes, tels que
+les sections d'accueil du même nom (`null` si la commune les a désactivées) : de quoi afficher un
+panneau d'infos pratiques ailleurs que sur l'accueil.
 
 Le `<main>` du thème porte les attributs de `searchAttributes(ctx)` : l'index de recherche du site
 (Pagefind, construit après le build) ne retient alors que le contenu propre à chaque page.

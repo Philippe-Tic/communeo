@@ -4,6 +4,7 @@
  * Un échec laisse la liste intacte : le site précédent reste en ligne.
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { formatDate, WASTE_TYPES } from '@communeo/core';
 
 const PENDING = 'api::pending-change.pending-change';
 
@@ -22,6 +23,13 @@ export const isScheduledPublication = (): boolean => scheduled.getStore() === tr
 /** Libellé lisible d'un contenu, quel que soit son type */
 export function changeTitle(uid: string, entry: any): string {
   if (uid === 'api::site.site') return 'Informations du site';
+  // Contenus sans titre : décrits par ce qui les distingue
+  if (uid === 'api::school-menu.school-menu' && entry?.week_start) {
+    return `Semaine du ${formatDate(entry.week_start)}${entry.school_name ? ` — ${entry.school_name}` : ''}`;
+  }
+  if (uid === 'api::waste-schedule.waste-schedule' && entry?.waste_type) {
+    return `${WASTE_TYPES[entry.waste_type]?.label ?? entry.waste_type}${entry.zone ? ` — ${entry.zone}` : ''}`;
+  }
   const person = [entry?.first_name, entry?.last_name].filter(Boolean).join(' ');
   return entry?.title || entry?.name || person || entry?.slug || 'Sans titre';
 }

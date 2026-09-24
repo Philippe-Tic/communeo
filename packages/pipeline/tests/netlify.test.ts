@@ -192,6 +192,8 @@ describe('domaines', () => {
     expect(await p.verifyDomain(hosted, 'mairie-lyon.fr')).toEqual({
       ok: false,
       errors: ['Enregistrement A non configuré ou ne pointe pas vers 75.2.60.5'],
+      // Ce qui est attendu et ce que le DNS renvoie, côte à côte dans l'admin
+      mismatch: { type: 'A', name: 'mairie-lyon.fr', expected: '75.2.60.5', found: ['1.2.3.4'] },
     });
     // Seule la vérification HTTP a eu lieu : aucun appel à l'API Netlify
     expect(api.calls.map((c) => [c.method, c.path])).toEqual([['HEAD', 'http://mairie-lyon.fr/']]);
@@ -216,7 +218,21 @@ describe('domaines', () => {
   it("traite un nom absent du DNS comme non pointé", async () => {
     const notFound = Object.assign(new Error('queryCname ENOTFOUND'), { code: 'ENOTFOUND' });
     const { p } = publisher(() => undefined, { resolveCname: async () => { throw notFound; } });
-    expect((await p.verifyDomain(hosted, 'www.mairie-lyon.fr')).ok).toBe(false);
+    const check = await p.verifyDomain(hosted, 'www.mairie-lyon.fr');
+    expect(check.ok).toBe(false);
+    expect(check.mismatch).toMatchObject({ type: 'CNAME', found: [] });
+  });
+
+  it('CNAME vers une autre cible : attendu et trouvé', async () => {
+    const { p } = publisher(({ path }) => (path === '/sites/site-lyon' ? { body: { id: 'site-lyon', name: 'lyon-mairie' } } : path.startsWith('http://') ? { status: 200, body: '' } : undefined), {
+      resolveCname: async () => ['ancien-hebergeur.example.net.'],
+    });
+    expect((await p.verifyDomain(hosted, 'www.mairie-lyon.fr')).mismatch).toEqual({
+      type: 'CNAME',
+      name: 'www.mairie-lyon.fr',
+      expected: 'lyon-mairie.netlify.app',
+      found: ['ancien-hebergeur.example.net'],
+    });
   });
 
   it("détache le domaine et l'alias www, et renvoie l'adresse par défaut", async () => {

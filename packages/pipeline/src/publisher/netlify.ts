@@ -181,22 +181,19 @@ export class NetlifyPublisher implements SitePublisher {
   async verifyDomain(site: PublisherSite, domain: string): Promise<DomainCheck> {
     const hostId = requireHostId(site);
     const apex = isApexDomain(domain);
+    const found = (await lookup(() => (apex ? this.resolve4(domain) : this.resolveCname(domain)))).map((record) => record.replace(/\.$/, ''));
     const pointed =
-      (apex
-        ? (await lookup(() => this.resolve4(domain))).includes(NETLIFY_LOAD_BALANCER_IP)
-        : (await lookup(() => this.resolveCname(domain))).some((record) => record.replace(/\.$/, '').endsWith(DNS_SUFFIX))) ||
+      (apex ? found.includes(NETLIFY_LOAD_BALANCER_IP) : found.some((record) => record.endsWith(DNS_SUFFIX))) ||
       // DNS Netlify, ALIAS ou CNAME « aplati » : pas d'enregistrement reconnaissable, mais le domaine répond
       // par Netlify. Netlify ne rattachant un domaine qu'à un seul site, c'est le nôtre.
       (await this.servedByNetlify(domain));
 
     if (!pointed) {
+      const expected = apex ? NETLIFY_LOAD_BALANCER_IP : `${await this.getSite(hostId).then((host) => host.name, () => this.siteName(site))}${DNS_SUFFIX}`;
       return {
         ok: false,
-        errors: [
-          apex
-            ? `Enregistrement A non configuré ou ne pointe pas vers ${NETLIFY_LOAD_BALANCER_IP}`
-            : 'Enregistrement CNAME non configuré ou incorrect',
-        ],
+        errors: [apex ? `Enregistrement A non configuré ou ne pointe pas vers ${NETLIFY_LOAD_BALANCER_IP}` : 'Enregistrement CNAME non configuré ou incorrect'],
+        mismatch: { type: apex ? 'A' : 'CNAME', name: domain, expected, found },
       };
     }
 

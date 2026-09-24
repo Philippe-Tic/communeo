@@ -58,6 +58,8 @@ export interface DomainCheck {
   /** Le domaine pointe vers l'hébergeur (et le certificat HTTPS est demandé) */
   ok: boolean;
   errors: string[];
+  /** Domaine non pointé : l'enregistrement attendu et ce que le DNS renvoie (vide : aucun) */
+  mismatch?: { type: DnsRecord['type']; name: string; expected: string; found: string[] };
 }
 
 export interface SitePublisher {

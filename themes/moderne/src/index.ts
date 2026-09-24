@@ -27,10 +27,10 @@ export default defineTheme({
     id: 'moderne',
     name: 'Moderne',
     description:
-      'Éditorial et visuel : un site « magazine » qui met l’agenda et les actualités en avant. Grandes images, titres Newsreader, formes arrondies, vert émeraude pour les actions.',
+      'Dynamique et typographique : photos en grand, agenda et actualités dès le premier écran. Menu plein écran, accent émeraude, titres Newsreader.',
     homeSections: [...themeHomeSections('moderne')],
     menus: { main: true, footer: true },
-    thumbnail: '',
+    thumbnail: 'thumbnail.png',
   },
   templates: {
     Home,

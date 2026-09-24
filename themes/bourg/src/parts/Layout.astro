@@ -3,6 +3,9 @@
  * Mise en page du thème : en-tête, alertes, puis deux colonnes sur ordinateur (le contenu, et le
  * panneau « Pratique » collant à droite), pied de page. Sur mobile, le panneau s'ouvre depuis la
  * barre du bas. Le document (<html>, <head>, liens d'évitement, bandeau cookies) vient du renderer.
+ *
+ * Emplacement `aside` : ce que le template met en tête de la colonne de droite (les informations
+ * pratiques d'un événement). Le panneau « Pratique » se replie alors dessous.
  */
 import type { PageContext } from '@communeo/theme-contract';
 import Alerts from '@communeo/ui-a11y/Alerts.astro';
@@ -12,6 +15,7 @@ import Footer from './Footer.astro';
 import Header from './Header.astro';
 import Pratique from './Pratique.astro';
 import PratiqueBar from './PratiqueBar.astro';
+import ChevronDown from '@lucide/astro/icons/chevron-down';
 
 interface Props {
   ctx: PageContext;
@@ -22,6 +26,7 @@ interface Props {
 }
 
 const { ctx, heading = ctx.title, full = false } = Astro.props;
+const aside = Astro.slots.has('aside');
 ---
 <Header ctx={ctx} />
 
@@ -35,7 +40,17 @@ const { ctx, heading = ctx.title, full = false } = Astro.props;
         <slot />
       </main>
     </div>
-    <Pratique ctx={ctx} />
+    {aside ? (
+      <div class="bo-side">
+        <slot name="aside" />
+        <details class="bo-pratique-fold">
+          <summary>Pratique : mairie, collectes, météo<ChevronDown size={18} aria-hidden="true" /></summary>
+          <Pratique ctx={ctx} />
+        </details>
+      </div>
+    ) : (
+      <Pratique ctx={ctx} />
+    )}
   </div>
 </div>
 

@@ -39,6 +39,11 @@ const initials = (name: string) =>
     .map((word) => word[0]!.toUpperCase())
     .join('');
 const aside = home.quickLinks || home.agenda || home.wasteCollection || home.weather || home.practicalInfo;
+const main =
+  home.mayorWord || home.disruptions || home.canteen || home.associations ||
+  home.freeContent || home.keyFigures || home.newsletter || home.partners;
+// Commune qui n'a encore rien rempli : la une s'arrête au titre, sans colonnes vides
+const front = lead || aside || main;
 ---
 <Layout ctx={ctx} heading={false} full>
   <header class="jo-masthead" data-cn-home="hero">
@@ -59,10 +64,10 @@ const aside = home.quickLinks || home.agenda || home.wasteCollection || home.wea
     )}
   </header>
 
-  <div class:list={['jo-front', { 'jo-front-aside': aside }]}>
-    <div class="jo-front-news">
+  {front && (
+    <div class:list={['jo-front', { 'jo-front-aside': aside }]}>
       {lead && (
-        <section aria-labelledby="jo-news" data-cn-home="featured_news">
+        <section class="jo-front-news" aria-labelledby="jo-news" data-cn-home="featured_news">
           <h2 id="jo-news" class="cn-sr-only">À la une</h2>
           <ArticleCard article={lead} featured />
           {newsColumns.length > 0 && (
@@ -73,240 +78,242 @@ const aside = home.quickLinks || home.agenda || home.wasteCollection || home.wea
           <p class="jo-more-line"><a href="/actualites">Toutes les actualités →</a></p>
         </section>
       )}
-    </div>
 
-    {aside && (
-      <aside class="jo-front-aside-column" aria-label="En bref">
-        {home.quickLinks && (
-          <section aria-labelledby="jo-quick" data-cn-home="quick_links">
-            <div class="jo-section-head"><h2 id="jo-quick">Accès rapides</h2></div>
-            <ul class="jo-quick">
-              {home.quickLinks.map((link) => (
-                <li>
-                  <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
-                    <span class="jo-quick-icon"><Icon name={link.icon} size={20} /></span>
-                    {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {home.agenda && (
-          <section aria-labelledby="jo-agenda" data-cn-home="agenda">
-            <div class="jo-section-head">
-              <h2 id="jo-agenda">Agenda</h2>
-              <a href="/agenda">Tout<span class="cn-sr-only"> l'agenda</span> →</a>
-            </div>
-            {home.agenda.map((event) => <EventCard event={event} />)}
-          </section>
-        )}
-
-        {home.practicalInfo && (
-          <section class="jo-box" aria-labelledby="jo-mairie" data-cn-home="practical_info">
-            <h2 id="jo-mairie" class="jo-kicker">Mairie</h2>
-            <OpeningStatus hours={site.contact.hours} class="jo-status jo-status-light" />
-            <address>
-              {site.contact.address && <span>{site.contact.address}</span>}
-              {site.contact.phone && <a href={site.contact.phone.href} class="jo-box-phone">{site.contact.phone.label}</a>}
-            </address>
-            {site.contact.hoursSummary.length > 0 && (
-              <p class="jo-box-hours">{site.contact.hoursSummary.map((line) => `${line.days} ${line.hours}`).join(' · ')}</p>
-            )}
-          </section>
-        )}
-
-        {home.wasteCollection && (
-          <section class="jo-box" aria-labelledby="jo-waste" data-cn-home="waste_collection">
-            <h2 id="jo-waste" class="jo-kicker">Prochaines collectes</h2>
-            <ul class="jo-waste-list">
-              {home.wasteCollection.map((collection) => (
-                <li>
-                  <span class={`jo-waste-badge jo-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
-                  <span>
-                    <strong>{collection.label}</strong>
-                    {collection.upcoming.length > 0 && <> · <NextCollections collection={collection} /></>}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <a href="/collecte-des-dechets" class="jo-box-more">Tout le calendrier →</a>
-          </section>
-        )}
-
-        {home.weather && (
-          <Weather position={home.weather} class="jo-box jo-weather" data-cn-home="weather">
-            <h2 slot="titre" class="jo-kicker">Météo</h2>
-          </Weather>
-        )}
-      </aside>
-    )}
-
-    <div class="jo-front-main">
-      {home.mayorWord && (
-        <section class:list={['jo-mayor', { 'jo-mayor-photo': home.mayorWord.photo }]} aria-labelledby="jo-mayor" data-cn-home="mayor_word">
-          {home.mayorWord.photo && (
-            <img
-              src={home.mayorWord.photo.src}
-              alt={home.mayorWord.photo.alt}
-              width={home.mayorWord.photo.width ?? undefined}
-              height={home.mayorWord.photo.height ?? undefined}
-              loading="lazy"
-            />
-          )}
-          <div>
-            {!/^le mot du maire$/i.test(home.mayorWord.title.trim()) && <p class="jo-kicker">Le mot du maire</p>}
-            <h2 id="jo-mayor" class="jo-mayor-title">{home.mayorWord.title}</h2>
-            <RichText doc={home.mayorWord.body} class="jo-prose jo-mayor-body" />
-            {home.mayorWord.signature.name && (
-              <p class="jo-mayor-signature">
-                <strong>{home.mayorWord.signature.name}</strong>{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}
-              </p>
-            )}
-          </div>
-        </section>
-      )}
-
-      {(home.disruptions || home.canteen) && (
-        <div class="jo-pair">
-          {home.disruptions && (
-            <section aria-labelledby="jo-disruptions" data-cn-home="disruptions">
-              <div class="jo-section-head">
-                <h2 id="jo-disruptions">Perturbations en cours</h2>
-                <a href="/perturbations">Toutes<span class="cn-sr-only"> les perturbations</span> →</a>
-              </div>
-              <ul class="jo-ruled-list">
-                {home.disruptions.map((alert) => (
-                  <li class={`jo-disruption jo-disruption-${alert.severity.key}`}>
-                    <span class="jo-sign" aria-hidden="true">{signs[alert.severity.key]}</span>
-                    <div>
-                      <p class="jo-kicker jo-disruption-kind">{alert.severity.label}{alert.type && <> · {alert.type.label}</>}</p>
-                      {alert.link ? <a href={alert.link.href} class="jo-strong-link">{alert.title}</a> : <strong>{alert.title}</strong>}
-                      {(alert.period ?? alert.location) && <> · {[alert.location, alert.period].filter(Boolean).join(' · ')}</>}
-                    </div>
+      {aside && (
+        <aside class="jo-front-aside-column" aria-label="En bref">
+          {home.quickLinks && (
+            <section aria-labelledby="jo-quick" data-cn-home="quick_links">
+              <div class="jo-section-head"><h2 id="jo-quick">Accès rapides</h2></div>
+              <ul class="jo-quick">
+                {home.quickLinks.map((link) => (
+                  <li>
+                    <a href={link.href} target={link.external ? '_blank' : undefined} rel={link.external ? 'noopener noreferrer' : undefined}>
+                      <span class="jo-quick-icon"><Icon name={link.icon} size={20} /></span>
+                      {link.label}{link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+                    </a>
                   </li>
                 ))}
               </ul>
             </section>
           )}
 
-          {home.canteen && (
-            <section aria-labelledby="jo-canteen" data-cn-home="canteen">
+          {home.agenda && (
+            <section aria-labelledby="jo-agenda" data-cn-home="agenda">
               <div class="jo-section-head">
-                <h2 id="jo-canteen">{today ? "Cantine · aujourd'hui" : 'Cantine'}</h2>
-                <a href="/cantine">La semaine →</a>
+                <h2 id="jo-agenda">Agenda</h2>
+                <a href="/agenda">Tout<span class="cn-sr-only"> l'agenda</span> →</a>
               </div>
-              {today ? (
-                <>
-                  <p class="jo-kicker jo-canteen-day" data-cn-day={today.date.iso.slice(0, 10)}>
-                    {today.day.label} {today.date.label}{home.canteen.school && <> · {home.canteen.school}</>}
-                  </p>
-                  <ul class="jo-ruled-list jo-canteen-menu">
-                    {today.courses.map((course) => (
-                      <li>
-                        <span>{course.dish}</span>
-                        {course.badges.length > 0 && <span class="jo-canteen-badges">{course.badges.map((badge) => <span class="jo-kicker jo-badge">{badge}</span>)}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p class="jo-canteen-day">{home.canteen.label}{home.canteen.school && <> · {home.canteen.school}</>}</p>
+              {home.agenda.map((event) => <EventCard event={event} />)}
+            </section>
+          )}
+
+          {home.practicalInfo && (
+            <section class="jo-box" aria-labelledby="jo-mairie" data-cn-home="practical_info">
+              <h2 id="jo-mairie" class="jo-kicker">Mairie</h2>
+              <OpeningStatus hours={site.contact.hours} class="jo-status jo-status-light" />
+              <address>
+                {site.contact.address && <span>{site.contact.address}</span>}
+                {site.contact.phone && <a href={site.contact.phone.href} class="jo-box-phone">{site.contact.phone.label}</a>}
+              </address>
+              {site.contact.hoursSummary.length > 0 && (
+                <p class="jo-box-hours">{site.contact.hoursSummary.map((line) => `${line.days} ${line.hours}`).join(' · ')}</p>
               )}
             </section>
           )}
-        </div>
+
+          {home.wasteCollection && (
+            <section class="jo-box" aria-labelledby="jo-waste" data-cn-home="waste_collection">
+              <h2 id="jo-waste" class="jo-kicker">Prochaines collectes</h2>
+              <ul class="jo-waste-list">
+                {home.wasteCollection.map((collection) => (
+                  <li>
+                    <span class={`jo-waste-badge jo-waste-${collection.key}`} aria-hidden="true">{collection.abbreviation}</span>
+                    <span>
+                      <strong>{collection.label}</strong>
+                      {collection.upcoming.length > 0 && <> · <NextCollections collection={collection} /></>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <a href="/collecte-des-dechets" class="jo-box-more">Tout le calendrier →</a>
+            </section>
+          )}
+
+          {home.weather && (
+            <Weather position={home.weather} class="jo-box jo-weather" data-cn-home="weather">
+              <h2 slot="titre" class="jo-kicker">Météo</h2>
+            </Weather>
+          )}
+        </aside>
       )}
 
-      {home.associations && (
-        <section aria-labelledby="jo-assos" data-cn-home="associations">
-          <div class="jo-section-head">
-            <h2 id="jo-assos">Associations</h2>
-            <a href="/associations">Annuaire →</a>
-          </div>
-          <ul class="jo-assos">
-            {home.associations.map((association) => (
-              <li>
-                <a href={association.href}>
-                  {association.logo ? (
-                    <img src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} loading="lazy" />
-                  ) : (
-                    <span class="jo-initials" aria-hidden="true">{initials(association.name)}</span>
-                  )}
-                  <span><strong>{association.name}</strong><span class="jo-assos-category">{association.category.label}</span></span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {(home.freeContent || home.keyFigures || home.newsletter || home.partners) && (
-        <div class="jo-pair">
-          {(home.freeContent || home.keyFigures) && (
-            <div>
-              {home.freeContent && (
-                <section aria-labelledby="jo-free" data-cn-home="free_content">
-                  <div class="jo-section-head"><h2 id="jo-free">{home.freeContent.title ?? `Découvrir ${site.name}`}</h2></div>
-                  <RichText doc={home.freeContent.body} class="jo-prose jo-free" />
-                </section>
+      {main && (
+        <div class="jo-front-main">
+          {home.mayorWord && (
+            <section class:list={['jo-mayor', { 'jo-mayor-photo': home.mayorWord.photo }]} aria-labelledby="jo-mayor" data-cn-home="mayor_word">
+              {home.mayorWord.photo && (
+                <img
+                  src={home.mayorWord.photo.src}
+                  alt={home.mayorWord.photo.alt}
+                  width={home.mayorWord.photo.width ?? undefined}
+                  height={home.mayorWord.photo.height ?? undefined}
+                  loading="lazy"
+                />
               )}
-              {home.keyFigures && (
-                <section class="jo-figures" aria-labelledby="jo-figures" data-cn-home="key_figures">
-                  <h2 id="jo-figures" class="cn-sr-only">La commune en chiffres</h2>
-                  <ul>
-                    {home.keyFigures.map((figure) => (
-                      <li><span class="jo-figure-value">{figure.value}</span><span class="jo-figure-label">{figure.label}</span></li>
+              <div>
+                {!/^le mot du maire$/i.test(home.mayorWord.title.trim()) && <p class="jo-kicker">Le mot du maire</p>}
+                <h2 id="jo-mayor" class="jo-mayor-title">{home.mayorWord.title}</h2>
+                <RichText doc={home.mayorWord.body} class="jo-prose jo-mayor-body" />
+                {home.mayorWord.signature.name && (
+                  <p class="jo-mayor-signature">
+                    <strong>{home.mayorWord.signature.name}</strong>{home.mayorWord.signature.role && <>, {home.mayorWord.signature.role}</>}
+                  </p>
+                )}
+              </div>
+            </section>
+          )}
+
+          {(home.disruptions || home.canteen) && (
+            <div class="jo-pair">
+              {home.disruptions && (
+                <section aria-labelledby="jo-disruptions" data-cn-home="disruptions">
+                  <div class="jo-section-head">
+                    <h2 id="jo-disruptions">Perturbations en cours</h2>
+                    <a href="/perturbations">Toutes<span class="cn-sr-only"> les perturbations</span> →</a>
+                  </div>
+                  <ul class="jo-ruled-list">
+                    {home.disruptions.map((alert) => (
+                      <li class={`jo-disruption jo-disruption-${alert.severity.key}`}>
+                        <span class="jo-sign" aria-hidden="true">{signs[alert.severity.key]}</span>
+                        <div>
+                          <p class="jo-kicker jo-disruption-kind">{alert.severity.label}{alert.type && <> · {alert.type.label}</>}</p>
+                          {alert.link ? <a href={alert.link.href} class="jo-strong-link">{alert.title}</a> : <strong>{alert.title}</strong>}
+                          {(alert.period ?? alert.location) && <> · {[alert.location, alert.period].filter(Boolean).join(' · ')}</>}
+                        </div>
+                      </li>
                     ))}
                   </ul>
+                </section>
+              )}
+
+              {home.canteen && (
+                <section aria-labelledby="jo-canteen" data-cn-home="canteen">
+                  <div class="jo-section-head">
+                    <h2 id="jo-canteen">{today ? "Cantine · aujourd'hui" : 'Cantine'}</h2>
+                    <a href="/cantine">La semaine →</a>
+                  </div>
+                  {today ? (
+                    <>
+                      <p class="jo-kicker jo-canteen-day" data-cn-day={today.date.iso.slice(0, 10)}>
+                        {today.day.label} {today.date.label}{home.canteen.school && <> · {home.canteen.school}</>}
+                      </p>
+                      <ul class="jo-ruled-list jo-canteen-menu">
+                        {today.courses.map((course) => (
+                          <li>
+                            <span>{course.dish}</span>
+                            {course.badges.length > 0 && <span class="jo-canteen-badges">{course.badges.map((badge) => <span class="jo-kicker jo-badge">{badge}</span>)}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p class="jo-canteen-day">{home.canteen.label}{home.canteen.school && <> · {home.canteen.school}</>}</p>
+                  )}
                 </section>
               )}
             </div>
           )}
 
-          {(home.newsletter || home.partners) && (
-            <div class="jo-stack">
-              {home.newsletter && (
-                <section class="jo-newsletter jo-on-dark" aria-labelledby="jo-newsletter" data-cn-home="newsletter">
-                  <h2 id="jo-newsletter">Lettre d'information</h2>
-                  <p>L'actualité de la commune, par e-mail.</p>
-                  <NewsletterForm form={newsletterForm} class="jo-newsletter-form" placeholder="Votre adresse e-mail">
-                    <p class="jo-newsletter-note">Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
-                  </NewsletterForm>
-                </section>
+          {home.associations && (
+            <section aria-labelledby="jo-assos" data-cn-home="associations">
+              <div class="jo-section-head">
+                <h2 id="jo-assos">Associations</h2>
+                <a href="/associations">Annuaire →</a>
+              </div>
+              <ul class="jo-assos">
+                {home.associations.map((association) => (
+                  <li>
+                    <a href={association.href}>
+                      {association.logo ? (
+                        <img src={association.logo.src} alt="" width={association.logo.width ?? undefined} height={association.logo.height ?? undefined} loading="lazy" />
+                      ) : (
+                        <span class="jo-initials" aria-hidden="true">{initials(association.name)}</span>
+                      )}
+                      <span><strong>{association.name}</strong><span class="jo-assos-category">{association.category.label}</span></span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {(home.freeContent || home.keyFigures || home.newsletter || home.partners) && (
+            <div class="jo-pair">
+              {(home.freeContent || home.keyFigures) && (
+                <div>
+                  {home.freeContent && (
+                    <section aria-labelledby="jo-free" data-cn-home="free_content">
+                      <div class="jo-section-head"><h2 id="jo-free">{home.freeContent.title ?? `Découvrir ${site.name}`}</h2></div>
+                      <RichText doc={home.freeContent.body} class="jo-prose jo-free" />
+                    </section>
+                  )}
+                  {home.keyFigures && (
+                    <section class="jo-figures" aria-labelledby="jo-figures" data-cn-home="key_figures">
+                      <h2 id="jo-figures" class="cn-sr-only">La commune en chiffres</h2>
+                      <ul>
+                        {home.keyFigures.map((figure) => (
+                          <li><span class="jo-figure-value">{figure.value}</span><span class="jo-figure-label">{figure.label}</span></li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+                </div>
               )}
-              {home.partners && (
-                <section aria-labelledby="jo-partners" data-cn-home="partners">
-                  <h2 id="jo-partners" class="jo-kicker">Partenaires</h2>
-                  <ul class="jo-partners">
-                    {home.partners.map((partner) => (
-                      <li>
-                        {partner.href ? (
-                          <a href={partner.href} target="_blank" rel="noopener noreferrer">
-                            {partner.logo
-                              ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
-                              : partner.name}
-                            <span class="cn-sr-only"> (nouvelle fenêtre)</span>
-                          </a>
-                        ) : (
-                          <span>
-                            {partner.logo
-                              ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
-                              : partner.name}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
+
+              {(home.newsletter || home.partners) && (
+                <div class="jo-stack">
+                  {home.newsletter && (
+                    <section class="jo-newsletter jo-on-dark" aria-labelledby="jo-newsletter" data-cn-home="newsletter">
+                      <h2 id="jo-newsletter">Lettre d'information</h2>
+                      <p>L'actualité de la commune, par e-mail.</p>
+                      <NewsletterForm form={newsletterForm} class="jo-newsletter-form" placeholder="Votre adresse e-mail">
+                        <p class="jo-newsletter-note">Désinscription à tout moment. <a href="/donnees-personnelles">Données personnelles</a></p>
+                      </NewsletterForm>
+                    </section>
+                  )}
+                  {home.partners && (
+                    <section aria-labelledby="jo-partners" data-cn-home="partners">
+                      <h2 id="jo-partners" class="jo-kicker">Partenaires</h2>
+                      <ul class="jo-partners">
+                        {home.partners.map((partner) => (
+                          <li>
+                            {partner.href ? (
+                              <a href={partner.href} target="_blank" rel="noopener noreferrer">
+                                {partner.logo
+                                  ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
+                                  : partner.name}
+                                <span class="cn-sr-only"> (nouvelle fenêtre)</span>
+                              </a>
+                            ) : (
+                              <span>
+                                {partner.logo
+                                  ? <img src={partner.logo.src} alt={partner.name} width={partner.logo.width ?? undefined} height={partner.logo.height ?? undefined} loading="lazy" />
+                                  : partner.name}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+                </div>
               )}
             </div>
           )}
         </div>
       )}
     </div>
-  </div>
+  )}
 </Layout>
 
 <script>

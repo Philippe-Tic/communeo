@@ -59,7 +59,7 @@ describe('hébergeur des mentions légales', () => {
 
 describe('thème', () => {
   it('seul un thème construit peut être choisi', async () => {
-    const unbuilt = await http.put(`/api/sites/${site}`).set(auth()).send({ data: { theme: 'journal' } });
+    const unbuilt = await http.put(`/api/sites/${site}`).set(auth()).send({ data: { theme: 'bourg' } });
     expect(unbuilt.status).toBe(400);
     expect(unbuilt.body.error.details.errors[0]).toMatchObject({ path: ['theme'], message: "Ce thème n'est pas encore disponible" });
     expect((await http.put(`/api/sites/${site}`).set(auth()).send({ data: { theme: 'institutionnel' } })).status).toBe(200);

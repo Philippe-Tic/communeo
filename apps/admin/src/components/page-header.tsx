@@ -2,10 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { sessionQuery } from '@/lib/session';
+import { ScreenHelp } from './screen-help';
 
 /**
  * Titre de page (h1) et titre du document : « Actualités — Saint-Aubin-sur-Loire · Communeo ».
  * `documentTitle` : titre du document quand le h1 n'est pas le nom de l'écran (« Bonjour Sophie »).
+ * L'aide contextuelle de l'écran (une phrase, `lib/help.ts`) suit le titre.
  */
 export function PageHeader({
   title,
@@ -33,6 +35,7 @@ export function PageHeader({
           {title}
         </h1>
         {description && <p className="mt-1 text-secondary">{description}</p>}
+        <ScreenHelp />
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>

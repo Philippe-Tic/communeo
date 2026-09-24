@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/components/ui/toast';
+import { ScreenHelp } from '@/components/screen-help';
 import { ApiError } from '@/lib/api';
 import { formatListDate } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
@@ -334,6 +335,7 @@ export function UsersScreen() {
               {invited > 0 && ` · ${invited} invitation${invited > 1 ? 's' : ''} en attente`}
             </p>
           )}
+          <ScreenHelp />
         </div>
         <Button type="button" className="max-md:h-11" onClick={() => setInviting(true)}>
           <UserPlus aria-hidden="true" />

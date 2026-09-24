@@ -12,5 +12,17 @@ export default {
       handler: 'onboarding.details',
       config: { policies: [], middlewares: [] },
     },
+    {
+      method: 'GET',
+      path: '/onboarding/checklist',
+      handler: 'onboarding.checklist',
+      config: { policies: [], middlewares: [] },
+    },
+    {
+      method: 'POST',
+      path: '/onboarding/checklist/hide',
+      handler: 'onboarding.hideChecklist',
+      config: { policies: [], middlewares: [] },
+    },
   ],
 };

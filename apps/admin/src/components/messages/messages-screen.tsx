@@ -13,6 +13,7 @@ import { Pagination } from '@/components/content-list/pagination';
 import { Toolbar } from '@/components/content-list/toolbar';
 import type { Noun } from '@/components/content-list/types';
 import { Button } from '@/components/ui/button';
+import { ScreenHelp } from '@/components/screen-help';
 import { formatInboxDate } from '@/lib/dates';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import {
@@ -115,6 +116,7 @@ export function MessagesScreen({ search, onSearchChange }: { search: MessagesSea
               </p>
             )}
           </div>
+          <ScreenHelp className="pb-3" />
         </div>
         <Toolbar
           noun={NOUN}

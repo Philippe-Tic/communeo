@@ -41,7 +41,7 @@ import { sessionQuery } from '@/lib/session';
 import { cn } from '@/lib/utils';
 import { DomainSection } from './domain-section';
 
-const STEPS = [
+export const PUBLICATION_STEPS = [
   { id: 'checking', label: 'Vérification des contenus' },
   { id: 'rendering', label: 'Préparation des pages' },
   { id: 'publishing', label: 'Publication sur le site' },
@@ -131,7 +131,7 @@ function StatusCard({
   const liveUrl = user.site?.live_url;
 
   if (status.state === 'running') {
-    const current = STEPS.findIndex((step) => step.id === status.step);
+    const current = PUBLICATION_STEPS.findIndex((step) => step.id === status.step);
     return (
       <section aria-labelledby="etat-titre" className="rounded-xl border border-border bg-surface p-5 dark:bg-sidebar">
         <div className="flex gap-3">
@@ -148,7 +148,7 @@ function StatusCard({
           </div>
         </div>
         <ol className="mt-4 space-y-1.5" aria-label="Étapes">
-          {STEPS.map((step, index) => {
+          {PUBLICATION_STEPS.map((step, index) => {
             const done = index < current;
             const active = index === current;
             return (
@@ -305,7 +305,7 @@ function StatusCard({
 
 function announce(status: PublicationStatus): string {
   if (status.state === 'running')
-    return `Mise en ligne en cours${STEPS.find((step) => step.id === status.step) ? ` : ${lower(STEPS.find((step) => step.id === status.step)!.label)}` : ''}.`;
+    return `Mise en ligne en cours${PUBLICATION_STEPS.find((step) => step.id === status.step) ? ` : ${lower(PUBLICATION_STEPS.find((step) => step.id === status.step)!.label)}` : ''}.`;
   if (status.state === 'failed') return 'La mise en ligne a échoué.';
   if (status.state === 'ok') return 'Votre site est à jour.';
   return '';

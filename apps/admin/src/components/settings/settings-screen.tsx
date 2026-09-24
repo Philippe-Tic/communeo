@@ -9,6 +9,7 @@ import { Link } from '@tanstack/react-router';
 import { type ReactNode, type Ref } from 'react';
 import { UnsavedChangesGuard } from '@/components/form';
 import { Button } from '@/components/ui/button';
+import { ScreenHelp } from '@/components/screen-help';
 import { screensToComplete, type SettingsScreenId } from '@/lib/compliance';
 import { sessionQuery } from '@/lib/session';
 import { siteSettingsQuery, type SiteSettings } from '@/lib/site-settings';
@@ -107,7 +108,10 @@ export function SettingsScreen({
         form={form}
       />
       <div className="flex justify-center gap-10 px-4 pt-6 pb-28 md:px-8 md:py-7">
-        <div className="w-full max-w-[760px] min-w-0">{children}</div>
+        <div className="w-full max-w-[760px] min-w-0">
+          <ScreenHelp className="mt-0 mb-5" />
+          {children}
+        </div>
         <SettingsNav current={id} site={site} />
       </div>
       <UnsavedChangesGuard when={dirty} onSave={onSave} />

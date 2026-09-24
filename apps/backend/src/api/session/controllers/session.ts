@@ -2,13 +2,8 @@
  * Connexion à l'administration : vérifie les identifiants et pose la session dans un cookie HttpOnly
  * (voir utils/session-cookie.ts et le middleware session-cookie). Le jeton n'est pas renvoyé.
  */
-import { createFailureLimiter } from '../../../utils/security';
-import { CSRF_HEADER, REMEMBERED_SESSION_SECONDS, SESSION_COOKIE, SESSION_DURATION_SECONDS, sessionCookieOptions } from '../../../utils/session-cookie';
-
-// 5 échecs par compte (message de la maquette 6.19), 20 par adresse IP, sur 15 minutes
-const accountFailures = createFailureLimiter({ windowMs: 15 * 60 * 1000, max: 5 });
-const ipFailures = createFailureLimiter({ windowMs: 15 * 60 * 1000, max: 20 });
-const INVALID = 'E-mail ou mot de passe incorrect. Vérifiez votre saisie ; après 5 essais, le compte est bloqué 15 minutes.';
+import { LOGIN_INVALID as INVALID, LOGIN_LOCKED, loginAttempts } from '../../../utils/login-attempts';
+import { CSRF_HEADER, issueSession, SESSION_COOKIE, sessionCookieOptions } from '../../../utils/session-cookie';
 
 export default {
   /**
@@ -20,9 +15,7 @@ export default {
       return ctx.badRequest(INVALID);
     }
     const email = identifier.trim().toLowerCase();
-    if (ipFailures.isLimited(ctx.request.ip) || accountFailures.isLimited(email)) {
-      return ctx.tooManyRequests('Trop de tentatives : le compte est bloqué 15 minutes. Réessayez plus tard ou utilisez « Mot de passe oublié ».');
-    }
+    if (loginAttempts.isLocked(email, ctx.request.ip)) return ctx.tooManyRequests(LOGIN_LOCKED);
 
     const user = await strapi.db.query('plugin::users-permissions.user').findOne({
       where: { $or: [{ email }, { username: identifier.trim() }] },
@@ -32,20 +25,17 @@ export default {
     const valid = !!user?.password && (await userService.validatePassword(password, user.password));
     // Même réponse pour un compte inconnu, un mauvais mot de passe ou un compte non activé
     if (!valid || user.blocked || user.confirmed === false || user.active === false) {
-      ipFailures.fail(ctx.request.ip);
-      accountFailures.fail(email);
+      loginAttempts.failed(email, ctx.request.ip);
       return ctx.badRequest(INVALID);
     }
-    accountFailures.reset(email);
+    loginAttempts.succeeded(email);
     // Commune suspendue par l'équipe Communeo : le mot de passe est bon, on peut le dire
     if (user.municipality_role !== 'super_admin' && user.site?.suspended) {
       return ctx.forbidden("Cette commune est suspendue : contactez l'équipe Communeo.");
     }
 
-    // « Rester connecté sur cet ordinateur » : 30 jours, sinon 12 h
-    const duration = remember === true ? REMEMBERED_SESSION_SECONDS : SESSION_DURATION_SECONDS;
-    const jwt = strapi.plugin('users-permissions').service('jwt').issue({ id: user.id }, { expiresIn: `${duration}s` });
-    ctx.cookies.set(SESSION_COOKIE, jwt, sessionCookieOptions(ctx, duration));
+    // « Rester connecté sur cet ordinateur » : 30 jours ; sinon, fin après 8 h d'inactivité
+    const duration = issueSession(ctx, user.id, remember === true);
     ctx.body = { ok: true, expiresIn: duration };
   },
 

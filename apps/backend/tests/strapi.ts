@@ -44,6 +44,8 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     PREVIEW_SECRET: 'test-preview-secret',
     PREVIEW_URL: 'https://preview.test',
     CRON_ENABLED: 'false',
+    // Comme en production (derrière le proxy) : l'adresse du client vient de X-Forwarded-For
+    IS_PROXIED: 'true',
     STRAPI_TELEMETRY_DISABLED: 'true',
     STRAPI_DISABLE_UPDATE_NOTIFICATION: 'true',
   });

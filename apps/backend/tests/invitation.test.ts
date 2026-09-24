@@ -53,6 +53,16 @@ describe('GET /api/user-management/invitation', () => {
   });
 });
 
+describe('lien de mot de passe oublié de plus d’une heure', () => {
+  it('annoncé expiré, et refusé à la validation du nouveau mot de passe', async () => {
+    const token = await invitedUser('reset-expire@example.test', -1000, false);
+    expect((await http.get('/api/user-management/invitation').query({ jeton: token })).body).toMatchObject({ status: 'expired', purpose: 'reset' });
+    const accept = await http.post('/api/user-management/accept-invitation').send({ token, password: 'nouveau-mot-2026', passwordConfirmation: 'nouveau-mot-2026' });
+    expect(accept.status).toBe(400);
+    expect((await http.post('/api/session/login').send({ identifier: 'reset-expire@example.test', password: 'nouveau-mot-2026' })).status).toBe(400);
+  });
+});
+
 describe('acceptation et nouvelle invitation', () => {
   it('le mot de passe choisi active le compte, qui peut ensuite se connecter', async () => {
     const token = await invitedUser('active@example.test');
@@ -81,7 +91,7 @@ describe('acceptation et nouvelle invitation', () => {
 });
 
 describe('rester connecté', () => {
-  it('session de 30 jours sur demande, 12 h sinon', async () => {
+  it('session de 30 jours sur demande, 8 h (renouvelées à l’usage) sinon', async () => {
     const hours = (cookie: unknown) => {
       const expires = /expires=([^;]+)/i.exec(String(cookie))?.[1];
       return expires ? (new Date(expires).getTime() - Date.now()) / 3_600_000 : 0;
@@ -89,8 +99,8 @@ describe('rester connecté', () => {
     const remembered = await http.post('/api/session/login').send({ identifier: 'test@example.com', password: 'test123', remember: true });
     expect(hours(remembered.headers['set-cookie'])).toBeGreaterThan(24 * 29);
     const normal = await http.post('/api/session/login').send({ identifier: 'test@example.com', password: 'test123' });
-    expect(hours(normal.headers['set-cookie'])).toBeGreaterThan(11);
-    expect(hours(normal.headers['set-cookie'])).toBeLessThanOrEqual(12);
+    expect(hours(normal.headers['set-cookie'])).toBeGreaterThan(7.9);
+    expect(hours(normal.headers['set-cookie'])).toBeLessThanOrEqual(8);
   });
 });
 

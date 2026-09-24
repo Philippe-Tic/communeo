@@ -7,9 +7,10 @@
 import type { RichTextDocument } from '../blocks/rich-text';
 
 const text = (value: string) => ({ type: 'text' as const, text: value });
-const paragraph = (value: string) => ({ type: 'paragraph' as const, content: [text(value)] });
-const heading = (value: string) => ({ type: 'heading' as const, attrs: { level: 2 as const }, content: [text(value)] });
-const list = (items: string[]) => ({
+/** Constructeurs de texte riche restreint (modèles de textes et de pages) */
+export const paragraph = (value: string) => ({ type: 'paragraph' as const, content: [text(value)] });
+export const heading = (value: string) => ({ type: 'heading' as const, attrs: { level: 2 as const }, content: [text(value)] });
+export const list = (items: string[]) => ({
   type: 'bulletList' as const,
   content: items.map((item) => ({ type: 'listItem' as const, content: [paragraph(item)] })),
 });

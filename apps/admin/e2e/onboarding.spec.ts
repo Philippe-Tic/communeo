@@ -162,6 +162,44 @@ test('obligations : compléter plus tard enregistre ce qui est là et passe à l
   expect(lastSitePut(bodies)).toMatchObject({ mentions_legales: { siret: null }, onboarding: { step: 6 } });
 });
 
+test('premières pages : quatre modèles proposés, créés en brouillon et ajoutés au menu', async ({ page }) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 6 } });
+  await page.goto('/assistant?etape=6');
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos premières pages' })).toBeVisible();
+  const templates = page.getByRole('group', { name: 'Modèles de pages' });
+  await expect(templates.getByRole('checkbox')).toHaveCount(5);
+  await expect(templates.getByRole('checkbox', { name: /Contacter les services/ })).not.toBeChecked();
+  await expectNoViolations(page);
+  await templates.getByRole('checkbox', { name: /Urbanisme/ }).uncheck();
+  await page.getByRole('button', { name: 'Créer 3 pages et continuer' }).click();
+  await expect(page.getByRole('status').filter({ hasText: '3 pages créées en brouillon' })).toBeVisible();
+  await expect(page.getByText('Étape 7 sur 7')).toBeVisible();
+  expect(bodies.find((entry) => entry.call === 'POST page-templates')?.body.data).toEqual({
+    templates: ['salle-des-fetes', 'etat-civil', 'inscriptions-scolaires'],
+    menu: true,
+  });
+  // Retour sur l'étape : les pages créées sont signalées, pas recréées
+  await page.goto('/assistant?etape=6');
+  await expect(templates.getByRole('checkbox', { name: /Location de la salle des fêtes/ })).toBeDisabled();
+  await expect(templates).toContainText('Déjà créée');
+  await expect(page.getByRole('button', { name: 'Créer 1 page et continuer' })).toBeVisible();
+});
+
+test('liste des pages : « Depuis un modèle » crée la page et l’ouvre dans l’éditeur', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/pages');
+  await page.getByRole('button', { name: 'Depuis un modèle' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Créer une page depuis un modèle' });
+  await expect(dialog.getByRole('listitem')).toHaveCount(5);
+  await expectNoViolations(page);
+  await dialog.getByRole('button', { name: 'Créer la page « État civil »' }).click();
+  await expect(page).toHaveURL(/\/pages\/p-modele-etat-civil$/);
+  expect(bodies.find((entry) => entry.call === 'POST page-templates')?.body.data).toEqual({
+    templates: ['etat-civil'],
+    menu: false,
+  });
+});
+
 test('logo passé, étapes suivantes, terminer : assistant fini, tableau de bord', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 3 } });
   await page.goto('/assistant?etape=3');

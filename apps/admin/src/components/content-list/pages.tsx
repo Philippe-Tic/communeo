@@ -2,6 +2,7 @@
  * Liste des pages : premier type branché sur le gabarit (#134). « Dans le menu » vient du menu du
  * site (Site.navigation_config), pas d'un champ de la page.
  */
+import { FromTemplateButton } from '@/components/pages/from-template';
 import { useQuery } from '@tanstack/react-query';
 import { pageIdsInMenu } from '@/components/menu/model';
 import { pageQuery, pageToValues, savePageDraft } from '@/lib/content-api';
@@ -32,6 +33,7 @@ export const PAGES_LIST: ContentListConfig<PageRow> = {
   title: 'Pages',
   noun: { one: 'page', many: 'pages', feminine: true, definite: 'la page' },
   newLabel: 'Nouvelle page',
+  extraActions: <FromTemplateButton />,
   editTo: '/pages/$documentId',
   thumbnail: (row) => row.featured_image,
   columns: [

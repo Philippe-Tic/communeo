@@ -55,6 +55,10 @@
     "scheduled_at": {
       "type": "datetime"
     },
+    "template": {
+      "type": "string",
+      "private": true
+    },
     "seo_keywords": {
       "type": "string",
       "maxLength": 255

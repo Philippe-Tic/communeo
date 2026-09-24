@@ -296,7 +296,11 @@ export function HistoryPanel({
                       )}
                     </Row>
                   ))}
-                  <Row title={createdLabel} at={versions.data.meta.createdAt} />
+                  <Row
+                    title={createdLabel}
+                    at={versions.data.meta.createdAt}
+                    detail={versions.data.meta.template ? `Depuis le modèle « ${versions.data.meta.template} »` : null}
+                  />
                 </ul>
               )}
             </div>

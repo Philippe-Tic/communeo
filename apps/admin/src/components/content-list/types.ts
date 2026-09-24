@@ -79,6 +79,8 @@ export interface ContentListConfig<T extends ListRow> {
   title: string;
   noun: Noun;
   newLabel: string;
+  /** Actions à côté de « Nouveau » (pages : « Depuis un modèle ») */
+  extraActions?: ReactNode;
   /** Route de l'éditeur, avec $documentId (« nouvelle » pour créer) */
   editTo: string;
   /** Colonnes propres au type, entre le statut et la date de modification */

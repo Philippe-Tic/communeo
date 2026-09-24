@@ -47,3 +47,34 @@ export const navigationConfigSchema = z.object({
 export type NavigationLinkItem = z.infer<typeof linkItem>;
 export type NavigationGroupItem = z.infer<typeof groupItem>;
 export type NavigationConfig = z.infer<typeof navigationConfigSchema>;
+
+/**
+ * Ajoute des pages au menu principal, dans le sous-menu `groupLabel` (créé s'il reste une place ;
+ * dans la limite de 10 liens). Renvoie le nouveau menu et les pages qui n'ont pas trouvé de place.
+ * Une page en brouillon n'apparaît sur le site qu'une fois publiée.
+ */
+export function addPagesToMenu(
+  config: Partial<NavigationConfig> | null | undefined,
+  pageDocumentIds: string[],
+  groupLabel = 'Vie pratique',
+): { config: NavigationConfig; left: string[] } {
+  const main = [...(config?.main ?? [])];
+  const footer = [...(config?.footer ?? [])];
+  const already = new Set(
+    main.flatMap((item) => (item.type === 'group' ? item.children : [item])).flatMap((item) => (item.type === 'page' ? [item.pageDocumentId] : [])),
+  );
+  const toAdd = pageDocumentIds.filter((id) => !already.has(id));
+  let index = main.findIndex((item) => item.type === 'group' && item.label === groupLabel);
+  if (index === -1 && toAdd.length && main.length < NAVIGATION_LIMITS.main) {
+    main.push({ type: 'group', label: groupLabel, children: [] });
+    index = main.length - 1;
+  }
+  if (index === -1) return { config: { main, footer }, left: toAdd };
+  const group = main[index] as NavigationGroupItem;
+  const room = NAVIGATION_LIMITS.children - group.children.length;
+  main[index] = {
+    ...group,
+    children: [...group.children, ...toAdd.slice(0, room).map((id) => ({ type: 'page' as const, pageDocumentId: id }))],
+  };
+  return { config: { main, footer }, left: toAdd.slice(room) };
+}

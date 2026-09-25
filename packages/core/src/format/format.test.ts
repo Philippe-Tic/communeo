@@ -1,10 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatEventPeriod, formatFileLabel, formatHour, formatLongDate } from './index';
+import { formatDate, formatDayMonth, formatEventPeriod, formatFileLabel, formatHour, formatLongDate, formatShortDate } from './index';
 
 describe('dates en français (fuseau Europe/Paris)', () => {
   it('formate une date', () => {
     expect(formatDate('2026-06-24T10:00:00.000Z')).toBe('24 juin 2026');
     expect(formatLongDate('2026-10-05T12:00:00.000Z')).toBe('Lundi 5 octobre 2026');
+  });
+
+  it('écrit « 1er » pour le premier jour du mois', () => {
+    expect(formatDate('2026-10-01T10:00:00.000Z')).toBe('1er octobre 2026');
+    expect(formatDayMonth('2026-10-01T10:00:00.000Z')).toBe('1er octobre');
+    expect(formatLongDate('2026-10-01T10:00:00.000Z')).toBe('Jeudi 1er octobre 2026');
+    expect(formatShortDate('2026-10-01T10:00:00.000Z')).toBe('jeu. 1er oct.');
+    expect(formatEventPeriod('2026-07-01T08:00:00.000Z', '2026-07-03T20:00:00.000Z')).toBe('Du 1er au 3 juillet 2026');
+    // Les autres jours restent en chiffres, 11, 21 et 31 compris
+    expect(formatDate('2026-10-11T10:00:00.000Z')).toBe('11 octobre 2026');
+    expect(formatDate('2026-10-31T10:00:00.000Z')).toBe('31 octobre 2026');
   });
 
   it('formate les heures à la française', () => {

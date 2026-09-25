@@ -66,7 +66,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations', 'quote'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [
@@ -107,7 +107,7 @@ const PROTECTED_SITE_FIELDS = [
 // personne, l'aperçu et la demande de passage en live
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const writableWhenExpired = (apiId: string | null, id: string | null) =>
-  ['session', 'auth', 'preview', 'trial'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
+  ['session', 'auth', 'preview', 'quote'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
 
 const parsePath = (rawUrl: string) => {
   const pathname = rawUrl.split('?')[0];

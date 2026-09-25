@@ -4,11 +4,11 @@
  * GET  /api/validations → { signups, liveRequests }
  *   - inscriptions à vérifier : commune sans adresse officielle dans l'Annuaire (la confirmation n'a
  *     pas pu partir à la mairie) ;
- *   - passages en live demandés depuis l'administration d'une commune.
+ *   - passages en live demandés : devis validé en ligne par la commune (#312), joint à la demande.
  * POST /api/validations/signups/:id/approve → crée la commune en essai et invite le demandeur
  * POST /api/validations/signups/:id/reject  → { reason } envoyé au demandeur
- * POST /api/validations/live/:documentId/approve → passage en live (services/trial.ts)
- * POST /api/validations/live/:documentId/reject  → { reason } envoyé aux administrateurs de la commune
+ * POST /api/validations/live/:documentId/approve → passage en live (services/trial.ts), devis accepté
+ * POST /api/validations/live/:documentId/reject  → { reason } envoyé aux administrateurs, devis refusé
  *
  * Aucune commune ne passe en live sans l'équipe : ici, ou depuis sa fiche (PUT /api/site-management).
  */
@@ -29,6 +29,21 @@ async function requireSuperAdmin(ctx) {
   const full = await strapi.query('plugin::users-permissions.user').findOne({ where: { id: user.id } });
   if (full?.municipality_role !== 'super_admin') ctx.throw(403, 'Super admin access required');
   return full;
+}
+
+/** Devis validé qui accompagne la demande (#312) */
+async function signedQuote(siteDocumentId: string) {
+  const quote: any = await strapi.db.query('api::quote.quote').findOne({ where: { site: { documentId: siteDocumentId }, status: 'signed' }, orderBy: { signed_at: 'desc' } });
+  return quote
+    ? {
+        documentId: quote.documentId,
+        number: quote.number,
+        amountHT: Number(quote.amount_ht),
+        tierLabel: quote.tier_label,
+        signatory: `${quote.signatory_name}, ${quote.signatory_role}`,
+        signedAt: quote.signed_at,
+      }
+    : null;
 }
 
 const nameOf = (user: any) => [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email;
@@ -80,7 +95,8 @@ export default {
           email: request.email,
           requestedAt: request.createdAt,
         })),
-        liveRequests: sites.map((site: any) => ({
+        liveRequests: await Promise.all(sites.map(async (site: any) => ({
+          quote: await signedQuote(site.documentId),
           documentId: site.documentId,
           name: site.name,
           insee: site.code_insee ?? null,
@@ -89,7 +105,7 @@ export default {
           trialExpiredAt: site.trial_expired_at ?? null,
           requestedAt: site.live_requested_at,
           requestedBy: site.live_requested_by ?? null,
-        })),
+        }))),
       },
     };
   },

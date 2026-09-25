@@ -62,7 +62,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('content-version', ['list', 'findOne', 'checkpoint']),
     ...custom('onboarding', ['search', 'details', 'checklist', 'hideChecklist']),
     ...custom('page-template', ['list', 'create']),
-    ...custom('trial', ['liveRequest']),
+    ...custom('quote', ['offer', 'draft', 'sign', 'pdf']),
     ...custom('validation', ['list', 'approveSignup', 'rejectSignup', 'approveLive', 'rejectLive']),
     // Compte courant (la gestion des utilisateurs passe par /api/user-management)
     'plugin::users-permissions.user.me',

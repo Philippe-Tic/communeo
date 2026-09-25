@@ -26,6 +26,7 @@
     "better-sqlite3": "12.6.2",
     "fast-xml-parser": "^5.4.2",
     "isomorphic-dompurify": "^4.3.0",
+    "pdfkit": "^0.17.2",
     "pg": "^8.18.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/supertest": "^6.0.3",

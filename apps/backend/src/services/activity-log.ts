@@ -36,7 +36,8 @@ export type ActivityAction =
   | 'live_request'
   | 'commune_go_live'
   | 'live_reject'
-  | 'signup_reject';
+  | 'signup_reject'
+  | 'quote_sign';
 
 export interface ActivityInput {
   action: ActivityAction;

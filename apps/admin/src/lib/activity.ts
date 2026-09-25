@@ -26,7 +26,8 @@ export type ActivityAction =
   | 'live_request'
   | 'commune_go_live'
   | 'live_reject'
-  | 'signup_reject';
+  | 'signup_reject'
+  | 'quote_sign';
 
 export interface ActivityEntry {
   id: number;
@@ -84,6 +85,7 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   commune_go_live: 'Passage en live',
   live_reject: 'Passage en live refusé',
   signup_reject: 'Inscription refusée',
+  quote_sign: 'Devis validé',
 };
 
 /** Actions qu'une commune voit (les autres concernent la plateforme) */
@@ -104,6 +106,7 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'live_request',
   'commune_go_live',
   'live_reject',
+  'quote_sign',
 ];
 
 const TYPE_LABELS: Record<string, string> = {
@@ -121,6 +124,7 @@ const TYPE_LABELS: Record<string, string> = {
   'waste-schedule': 'Collecte des déchets',
   site: 'Site',
   'signup-request': "Demande d'inscription",
+  quote: 'Devis',
   user: 'Compte',
   domain: 'Domaine',
 };

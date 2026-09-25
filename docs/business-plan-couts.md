@@ -1,156 +1,110 @@
-# Communeo — Analyse des coûts et rentabilité
+# Communeo — Coûts, marché et grille tarifaire
 
-> Dernière mise à jour : 28 février 2026
+> Mise à jour : 25 septembre 2026 (V2 : inscription en libre-service, essai de 30 jours, devis en ligne).
+> Tarifs **d'exemple**, à confirmer (#315). La grille vit dans `packages/core/src/site/pricing.ts`.
 
-## 1. Architecture technique
+## 1. Architecture et coûts d'infrastructure (V2)
 
-Communeo repose sur 3 briques :
+| Brique | Rôle | Hébergement |
+|--------|------|-------------|
+| Strapi 5 + PostgreSQL | API, contenus, file des builds (pg-boss) | VPS (Scaleway ou OVH) |
+| Worker de build | Construit chaque site (Astro + Pagefind) et le publie | Même VPS |
+| Serveur d'aperçu | Aperçu des brouillons | Même VPS |
+| Admin React | Interface des communes et de l'équipe | Même VPS (statique) |
+| Sites publics | HTML statique, `<commune>.communeo.fr` ou domaine de la commune | Netlify (DNS communeo.fr compris) |
+| E-mails | Invitations, rappels d'essai, devis | Resend |
 
-| Brique | Techno | Hébergement |
-|--------|--------|-------------|
-| Backend API | Strapi v5 + PostgreSQL | VPS (Docker Compose) |
-| Dashboard admin | React 19 (SPA statique) | Même VPS (Nginx) |
-| Sites publics mairies | Astro (HTML statique) | Netlify (1 site par mairie) |
+| Poste | Hypothèse | Coût mensuel |
+|-------|-----------|--------------|
+| VPS | 4 à 8 vCPU / 8 à 16 Go (builds Astro, Postgres, Strapi) | 20 à 40 € |
+| Stockage des sauvegardes | Object storage S3 (à mettre en place) | ~5 € |
+| Netlify | Gratuit jusqu'à 100 Go de bande passante, puis Pro (~19 $/membre) | 0 à 20 € |
+| Resend | Gratuit jusqu'à 3 000 e-mails/mois, puis ~20 $ | 0 à 20 € |
+| Domaine communeo.fr | | ~1 € |
+| **Infrastructure** | | **~25 € (début) à ~85 € (100 communes)** |
 
-Les déploiements des sites municipaux sont des uploads ZIP vers Netlify (pas de CI Netlify consommé). Les builds se font sur le VPS.
+Coût marginal d'une commune : **1 à 2 € par mois** d'infrastructure. Le vrai coût est ailleurs :
+**l'accompagnement** (prise en main, questions, Chorus Pro), estimé à 2 h la première année et 1 h
+les suivantes.
 
----
+## 2. Charges (micro-entreprise, prestations de services)
 
-## 2. Coûts d'infrastructure mensuels
+| Poste | Coût |
+|-------|------|
+| Cotisations sociales + versement libératoire | ~23 % du chiffre d'affaires |
+| CFE (exonérée la 1ʳᵉ année) | ~20 €/mois |
+| Assurance RC Pro | ~20 €/mois |
+| Stripe Invoicing (#314) | ~0,4 % par facture, virement quasi gratuit |
 
-| Service | Détail | Coût/mois |
-|---------|--------|-----------|
-| VPS | Hetzner CX21 (2 vCPU, 4 GB RAM) ou équivalent | €8 |
-| PostgreSQL | Auto-hébergé sur le VPS | €0 |
-| Stockage médias | Volume Docker local | €0 |
-| SSL backend | Let's Encrypt (Certbot) | €0 |
-| Email transactionnel | Brevo gratuit (300 emails/jour) | €0 |
-| Nom de domaine | ~€12/an | €1 |
-| Netlify (sites publics) | Starter gratuit (100 GB bande passante) | €0 |
+TVA : en franchise en base (« TVA non applicable, art. 293 B du CGI ») tant que le chiffre d'affaires
+reste sous le seuil ; `COMMUNEO_VAT_RATE=0.2` au-delà. Pour une commune, la franchise est un avantage :
+elle ne récupère pas la TVA sur ce type de dépense (hors FCTVA), le prix HT est donc son coût réel.
 
-**Total infrastructure : ~€9/mois**
+**Charges fixes : ~65 € par mois** (infrastructure de départ, CFE, assurance).
 
-### Montée en charge (infra uniquement)
+## 3. Le marché (prix publics relevés en septembre 2026)
 
-| Nombre de clients | VPS recommandé | Netlify | Total infra |
-|-------------------|---------------|---------|-------------|
-| 1-5 | 2 vCPU / 4 GB (~€8) | Free | ~€9 |
-| 5-20 | 4 vCPU / 8 GB (~€20) | Free | ~€21 |
-| 20-50 | 8 vCPU / 16 GB (~€35) | Pro ($19) | ~€55 |
-| 50-100+ | Dédié ou multi-VPS (~€60) | Pro ($19) + S3 (~€5) | ~€85 |
+| Offre | Modèle | Prix |
+|-------|--------|------|
+| [Campagnol](https://campagnol.fr/offres/tarifs-formules/) (AMRF, associatif) | Abonnement | 120 € TTC/an (5 pages) · 220 € TTC/an (complet) |
+| [LaPageLocale](https://lapagelocale.com/index2/pricing.php) | Abonnement | 199 € HT/an + 0,10 € HT par habitant (+ domaine 32 € HT/an) |
+| [MaCommune « Prestige »](https://www.macommune.com/les-tarifs-formule-prestige.php) | Abonnement par population | 410 € HT (< 1 000 hab.) à 1 250 € HT/an (> 10 000), + 150 € de mise en service |
+| [Ma Petite Mairie](https://www.mapetitemairie.fr/) | Abonnement 36 mois | 9,90 à 69,90 € TTC/mois |
+| [Websee Mairie](https://www.websee-mairie.fr/tarifs-site-internet-administrable) | Création + abonnement | 1 290 à 3 990 € HT + 39 € HT/mois |
+| [Web Mairie](https://www.web-mairie.fr/tarifs/) (WordPress) | Création + maintenance | 1 790 à 2 290 € HT + ~500 € HT/an |
+| 123mairie | Sur devis | Non publié |
+| MairieConnect | Abonnement | 399 €/mois (très au-dessus du marché) |
 
----
+Lecture : les communes rurales ont une référence associative très basse (Campagnol) ; les offres SaaS
+spécialisées se situent entre **250 et 1 250 € HT par an** selon la population, souvent avec des frais
+de mise en service ; les agences facturent la création (1 300 à 4 000 € HT) puis ~500 € HT/an.
 
-## 3. Coûts administratifs fixes (micro-entreprise)
+## 4. Grille proposée (exemple)
 
-| Poste | Coût/mois |
-|-------|-----------|
-| Cotisations URSSAF (BIC services) | 21.1% du CA |
-| Versement libératoire IR | 1.7% du CA |
-| **Total charges sur CA** | **22.8% du CA** |
-| CFE (cotisation foncière entreprise) | ~€20 |
-| Assurance RC Pro | ~€20 |
+Abonnement annuel HT, **sans frais de mise en service**, selon la population municipale INSEE (lue
+par le serveur au moment du devis : la commune ne peut pas la modifier).
 
-> Chaque euro facturé ne rapporte que **€0.77 net** après charges sociales et fiscales.
+| Population | Prix HT / an | Soit / mois | Repère |
+|------------|--------------|-------------|--------|
+| moins de 500 hab. | **290 €** | 24 € | au-dessus de Campagnol (associatif), sous MaCommune (560 € la 1ʳᵉ année) |
+| 500 à 1 999 | **390 €** | 33 € | LaPageLocale ~250 à 400 € · MaCommune 450 à 510 € |
+| 2 000 à 4 999 | **590 €** | 49 € | LaPageLocale ~400 à 700 € · MaCommune 550 à 810 € |
+| 5 000 à 9 999 | **890 €** | 74 € | LaPageLocale ~700 à 1 200 € · MaCommune 1 050 € |
+| 10 000 et plus | **1 290 €** | 108 € | MaCommune 1 250 € · LaPageLocale 1 200 € et plus |
 
----
+Pourquoi ce niveau :
 
-## 4. Prix minimum par palier de clients
+- **Compétitif sans casser le marché** : dans la fourchette des SaaS spécialisés, sans frais de mise en
+  service, et nettement sous le coût d'une agence. Pas de guerre des prix avec Campagnol, soutenu par
+  l'AMRF : Communeo ne vise pas le même besoin (thèmes, conformité RGAA, démarches, newsletter, alertes
+  en direct).
+- **Par tranches de population** : c'est la façon dont les communes raisonnent leur budget ; une petite
+  commune ne paie pas pour une grande.
+- **Couvre l'accompagnement** : même à 290 €, il reste ~220 € après charges pour ~2 h de support et
+  une part d'infrastructure.
+- **Sous les seuils** : quelques centaines d'euros par an, marché de faible montant sans mise en
+  concurrence, validé en ligne par le maire ou une personne ayant délégation.
 
-Formule :
+## 5. Rentabilité (prix moyen ~450 € HT/an, soit ~37 €/mois)
 
-```
-Prix minimum/client = (Coûts infra + Coûts admin fixes) ÷ (Nombre clients × 0.77)
-```
+| Communes | CA annuel | Net après charges sociales | Charges fixes (an) | Résultat annuel |
+|----------|-----------|----------------------------|--------------------|-----------------|
+| 3 | 1 350 € | 1 040 € | ~780 € | ~260 € |
+| 10 | 4 500 € | 3 465 € | ~900 € | ~2 565 € |
+| 50 | 22 500 € | 17 325 € | ~1 400 € | ~15 900 € |
+| 100 | 45 000 € | 34 650 € | ~1 850 € | ~32 800 € (TVA et régime à revoir) |
 
-| Clients | Infra | Admin fixes | Total coûts | CA nécessaire (÷0.77) | Prix min/client |
-|---------|-------|-------------|-------------|----------------------|-----------------|
-| **1** | €9 | €40 | **€49** | €64 | **€64/mois** |
-| 3 | €9 | €40 | €49 | €64 | €21/mois |
-| 5 | €9 | €40 | €49 | €64 | €13/mois |
-| 10 | €15 | €40 | €55 | €71 | €7/mois |
-| 20 | €21 | €40 | €61 | €79 | €4/mois |
-| 50 | €55 | €40 | €95 | €123 | €2.5/mois |
+**Seuil de rentabilité : 2 à 3 communes.** Le temps d'accompagnement n'est pas compté dans ces
+chiffres : c'est lui qu'il faut surveiller au-delà de quelques dizaines de communes.
 
-**Avec 1 seul client, il faut facturer au minimum €64/mois pour couvrir tous les frais.**
+## 6. Points d'attention
 
----
+- **Sauvegardes** : à mettre en place avant la première commune cliente ; elles ne figurent pas dans
+  l'offre tant qu'elles n'existent pas.
+- **Hébergement** : les sites publics sont chez Netlify ; « hébergé en France » ne peut pas être promis
+  tant que ce n'est pas le cas.
+- **Bande passante Netlify** : surveiller au-delà de 100 Go/mois (communes avec beaucoup de PDF).
+- **Seuil de franchise de TVA** : vérifier le seuil en vigueur ; au-delà, la TVA s'ajoute au prix HT.
+- **Seuils de la commande publique** : à vérifier au moment de publier les CGV (#315).
 
-## 5. Grille tarifaire et projections de CA annuel
-
-### Hypothèse : prix unique à €19/mois
-
-| Clients | CA mensuel | CA annuel | Coûts mensuels | Résultat net mensuel | Résultat net annuel |
-|---------|-----------|-----------|---------------|---------------------|-------------------|
-| 1 | €19 | €228 | €49 + €4 charges | -**€34** | -€408 |
-| 3 | €57 | €684 | €49 + €13 charges | -€5 | -€60 |
-| **4** | **€76** | **€912** | **€49 + €17 charges** | **+€10** | **+€120** |
-| 5 | €95 | €1 140 | €49 + €22 charges | +€24 | €288 |
-| 10 | €190 | €2 280 | €55 + €43 charges | +€92 | €1 104 |
-| 20 | €380 | €4 560 | €61 + €87 charges | +€232 | €2 784 |
-| 50 | €950 | €11 400 | €95 + €217 charges | +€638 | €7 656 |
-
-> Seuil de rentabilité à €19/mois : **4 clients**
-
-### Hypothèse : prix unique à €29/mois
-
-| Clients | CA mensuel | CA annuel | Coûts mensuels | Résultat net mensuel | Résultat net annuel |
-|---------|-----------|-----------|---------------|---------------------|-------------------|
-| 1 | €29 | €348 | €49 + €7 charges | -€27 | -€324 |
-| **3** | **€87** | **€1 044** | **€49 + €20 charges** | **+€18** | **+€216** |
-| 5 | €145 | €1 740 | €49 + €33 charges | +€63 | €756 |
-| 10 | €290 | €3 480 | €55 + €66 charges | +€169 | €2 028 |
-| 20 | €580 | €6 960 | €61 + €132 charges | +€387 | €4 644 |
-| 50 | €1 450 | €17 400 | €95 + €331 charges | +€1 024 | €12 288 |
-
-> Seuil de rentabilité à €29/mois : **3 clients**
-
-### Hypothèse : prix unique à €49/mois
-
-| Clients | CA mensuel | CA annuel | Coûts mensuels | Résultat net mensuel | Résultat net annuel |
-|---------|-----------|-----------|---------------|---------------------|-------------------|
-| 1 | €49 | €588 | €49 + €11 charges | -€11 | -€132 |
-| **2** | **€98** | **€1 176** | **€49 + €22 charges** | **+€27** | **+€324** |
-| 5 | €245 | €2 940 | €49 + €56 charges | +€140 | €1 680 |
-| 10 | €490 | €5 880 | €55 + €112 charges | +€323 | €3 876 |
-| 20 | €980 | €11 760 | €61 + €223 charges | +€696 | €8 352 |
-| 50 | €2 450 | €29 400 | €95 + €559 charges | +€1 796 | €21 552 |
-
-> Seuil de rentabilité à €49/mois : **2 clients**
-
-### Hypothèse : prix unique à €79/mois
-
-| Clients | CA mensuel | CA annuel | Coûts mensuels | Résultat net mensuel | Résultat net annuel |
-|---------|-----------|-----------|---------------|---------------------|-------------------|
-| **1** | **€79** | **€948** | **€49 + €18 charges** | **+€12** | **+€144** |
-| 5 | €395 | €4 740 | €49 + €90 charges | +€256 | €3 072 |
-| 10 | €790 | €9 480 | €55 + €180 charges | +€555 | €6 660 |
-| 20 | €1 580 | €18 960 | €61 + €360 charges | +€1 159 | €13 908 |
-| 50 | €3 950 | €47 400 | €95 + €901 charges | +€2 954 | €35 448 |
-
-> Seuil de rentabilité à €79/mois : **1 client** (rentable dès le premier)
-
----
-
-## 6. Synthèse : seuils de rentabilité
-
-| Prix/mois | Clients pour être rentable | CA annuel à ce seuil |
-|-----------|---------------------------|---------------------|
-| €19 | 4 clients | €912 |
-| €29 | 3 clients | €1 044 |
-| €49 | 2 clients | €1 176 |
-| €79 | 1 client | €948 |
-
----
-
-## 7. Risques et points d'attention
-
-- **Builds concurrents** : chaque déploiement consomme CPU/RAM sur le VPS. Au-delà de ~20 mairies, prévoir un upgrade serveur.
-- **Stockage uploads** : les médias sont sur le disque du VPS. Prévoir migration Cloudinary ou S3 si volume important.
-- **Bande passante Netlify** : 100 GB gratuits. Surveiller si sites avec beaucoup de photos/PDFs.
-- **Brevo** : 300 emails/jour gratuits. Suffisant pour un bon moment.
-- **CFE** : exonérée la 1ère année de création d'entreprise. Les chiffres ci-dessus incluent la CFE.
-
----
-
-*Ce document ne constitue pas un conseil fiscal. Vérifier les taux URSSAF en vigueur au moment de la création.*
+*Ce document ne constitue pas un conseil fiscal ou juridique. Vérifier les taux et seuils en vigueur.*

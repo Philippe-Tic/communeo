@@ -41,7 +41,9 @@ test('passage en live : refuser exige un motif, envoyé aux administrateurs', as
   const { bodies } = await mockApi(page, { user: 'super_admin', validations: 'some' });
   await page.goto('/plateforme/a-valider');
   const live = page.getByRole('region', { name: 'Passages en live demandés · 1' });
-  await expect(live).toContainText('Demandé le 25 septembre 2026 par Sophie Leroy (sophie.leroy@saint-aubin.fr)');
+  await expect(live).toContainText('Devis DEV-2026-0001 : 390,00 € HT par an, tranche : de 500 à 1 999 habitants');
+  await expect(live.getByRole('link', { name: 'PDF du devis DEV-2026-0001 (nouvel onglet)' })).toHaveAttribute('href', '/api/quote/q-1/pdf');
+  await expect(live).toContainText('Validé le 25 septembre 2026 par Sophie Leroy, Maire (sophie.leroy@saint-aubin.fr)');
   await expect(live.getByRole('link', { name: 'Saint-Aubin-sur-Loire' })).toHaveAttribute('href', '/plateforme/communes/site-saint-aubin');
 
   await live.getByRole('button', { name: 'Refuser…' }).click();

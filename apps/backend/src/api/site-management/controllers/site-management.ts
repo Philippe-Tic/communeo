@@ -3,9 +3,8 @@
  * CRUD for managing all municipality sites across the platform.
  */
 
-import crypto from 'crypto';
+import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { publisher as getPublisher, toPublisherSite } from '../../../utils/publisher';
-import { createInvitationToken } from '../../../utils/security';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';
@@ -218,49 +217,10 @@ export default {
       ctx.throw(400, "Nom, adresse du site, prénom, nom et e-mail de l'administrateur sont obligatoires");
     }
     if (await strapi.query('api::site.site').count({ where: { slug } })) ctx.throw(400, 'Adresse déjà utilisée par une autre commune');
-    if (await strapi.query('plugin::users-permissions.user').count({ where: { $or: [{ email }, { username: email }] } })) {
-      ctx.throw(400, 'Un compte existe déjà avec cet e-mail');
-    }
+    if (await emailTaken(email)) ctx.throw(400, 'Un compte existe déjà avec cet e-mail');
 
-    // 1. La commune (contact de la mairie = l'administrateur, à préciser ensuite)
-    const site = await strapi.documents('api::site.site').create({
-      // L'assistant de création attend le premier administrateur (étape 1)
-      data: { name, slug, theme: DEFAULT_THEME, contact_mail: email, onboarding: { step: 1 } } as any,
-    });
-
-    // 2. Le site chez l'hébergeur (sinon créé à la première mise en ligne)
-    const publisher = getPublisher();
-    if (publisher.configured) {
-      try {
-        const host = await publisher.ensureSite(toPublisherSite(site));
-        await strapi.documents('api::site.site').update({ documentId: site.documentId, data: { netlify_site_id: host.hostId, live_url: host.defaultUrl } as any });
-      } catch (error) {
-        log.error('Failed to create host site:', error);
-      }
-    }
-
-    // 3. Le premier administrateur, invité (compte bloqué jusqu'au choix du mot de passe)
-    const userService = strapi.plugin('users-permissions').service('user');
-    const hashed = (await userService.ensureHashedPasswords({ password: crypto.randomBytes(32).toString('hex') })).password;
-    const { token, stored } = createInvitationToken();
-    const authenticated = await strapi.query('plugin::users-permissions.role').findOne({ where: { type: 'authenticated' } });
-    await strapi.query('plugin::users-permissions.user').create({
-      data: {
-        username: email,
-        email,
-        password: hashed,
-        first_name: firstName,
-        last_name: lastName,
-        municipality_role: 'admin',
-        active: true,
-        confirmed: true,
-        blocked: true,
-        provider: 'local',
-        role: authenticated.id,
-        site: site.id,
-        resetPasswordToken: stored,
-      },
-    });
+    // La commune, son site chez l'hébergeur et son premier administrateur, invité
+    const { site, invitationToken: token } = await createCommune({ name, slug, contactMail: email, admin: { email, firstName, lastName } });
     try {
       await sendInvitationEmail(email, firstName, token, name);
     } catch (error) {

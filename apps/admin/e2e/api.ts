@@ -65,6 +65,15 @@ export const LINKS: Record<string, object> = {
     role: 'admin',
     email: 'sophie.leroy@saint-aubin.fr',
   },
+  // Inscription en libre-service confirmée par la mairie : le demandeur choisit son mot de passe
+  'jeton-inscription-invitation': {
+    status: 'valid',
+    purpose: 'invitation',
+    firstName: 'Julie',
+    siteName: 'Bourg-Neuf',
+    role: 'admin',
+    email: 'julie@gmail.test',
+  },
   'jeton-expire': {
     status: 'expired',
     purpose: 'invitation',
@@ -1276,6 +1285,31 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         return json({ error: { status: 400, message: 'Le mot de passe doit contenir au moins 10 caractères' } }, 400);
       passwords.add(body.password);
       return json({ ok: true });
+    }
+    // Inscription en libre-service (#309), sans session
+    if (url.pathname === '/api/signup/communes') {
+      const q = (url.searchParams.get('q') ?? '').toLowerCase();
+      const communes = [
+        { name: 'Bourg-Neuf', insee: '58999', postalCodes: ['58100'], population: 812, department: 'Nièvre', taken: false },
+        { name: 'Bourg-sur-Annuaire', insee: '58998', postalCodes: ['58110'], population: 240, department: 'Nièvre', taken: false },
+        { name: 'Saint-Aubin-sur-Loire', insee: '58236', postalCodes: ['58300'], population: 3240, department: 'Nièvre', taken: true },
+      ];
+      return json({ data: communes.filter((commune) => commune.name.toLowerCase().includes(q) || commune.postalCodes[0]!.startsWith(q)) });
+    }
+    if (url.pathname === '/api/signup') {
+      const body = route.request().postDataJSON() as { insee: string; email: string };
+      if (body.email === 'existe@saint-aubin.fr')
+        return json({ error: { status: 409, message: 'Un compte existe déjà avec cet e-mail : connectez-vous.' } }, 409);
+      return json({ data: body.insee === '58998' ? { status: 'review' } : { status: 'sent', to: 'm***@bourg-neuf.fr' } }, 202);
+    }
+    if (url.pathname === '/api/signup/confirm') {
+      const jeton = method === 'GET' ? url.searchParams.get('jeton') : (route.request().postDataJSON() as { jeton: string }).jeton;
+      if (jeton === 'jeton-inscription-expire')
+        return json({ error: { status: 410, message: 'Ce lien a expiré : refaites la demande depuis la page d’inscription.' } }, 410);
+      if (jeton !== 'jeton-inscription') return json({ error: { status: 400, message: 'Ce lien n’est pas valable ou a déjà été utilisé.' } }, 400);
+      return method === 'GET'
+        ? json({ data: { commune: 'Bourg-Neuf', firstName: 'Julie', lastName: 'Martin', email: 'julie@gmail.test' } })
+        : json({ data: { invitation: 'jeton-inscription-invitation' } });
     }
     if (
       url.pathname === '/api/user-management/request-invitation' ||

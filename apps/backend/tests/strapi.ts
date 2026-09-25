@@ -59,6 +59,10 @@ export async function setupStrapi(): Promise<Core.Strapi> {
     sentEmails.push(message);
   };
   instance.server.mount();
+  // Écoute une fois, sur 127.0.0.1 : supertest réutilise ce serveur. Laissé à supertest, chaque requête
+  // ouvrait un port éphémère sur toutes les interfaces, parfois déjà pris sur 127.0.0.1 par un autre
+  // serveur local (Vite, Astro…) : la requête partait chez lui (401, 426, ou pas de réponse du tout).
+  await new Promise<void>((resolve) => instance!.server.httpServer.listen(0, '127.0.0.1', resolve));
   return instance;
 }
 

@@ -51,6 +51,7 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'trial_expired_at',
   'trial_notice',
   'live_requested_at',
+  'live_requested_by',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */

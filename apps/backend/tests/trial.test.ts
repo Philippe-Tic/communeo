@@ -161,7 +161,7 @@ describe('fin de l’essai', () => {
     }
     const [mail] = emailsTo('equipe@communeo.test');
     expect(mail!.subject).toBe(`Passage en live demandé : ${(await site()).name}`);
-    expect(mail!.text).toContain(`/plateforme/communes/${siteA}`);
+    expect(mail!.text).toContain('/plateforme/a-valider');
     expect((await site()).live_requested_at).toBeTruthy();
   });
 

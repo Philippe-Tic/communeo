@@ -19,6 +19,7 @@ import deploymentService from './deployment';
 import { log } from '../utils/logger';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { escapeHtml } from '../utils/security';
+import { adminUrl, notifyTeam } from './team-notifications';
 
 const SITE = 'api::site.site';
 
@@ -33,7 +34,6 @@ export const isExpired = (site: { plan?: string | null } | null | undefined) => 
 /** Champs d'une commune qui démarre son essai (inscription en libre-service) */
 export const trialStart = (now: Date = new Date()) => ({ plan: 'trial', trial_ends_at: addDays(now, TRIAL_DAYS) });
 
-const adminUrl = () => process.env.ADMIN_URL || 'http://localhost:5173';
 
 async function adminEmails(siteDocumentId: string): Promise<string[]> {
   const admins = await strapi.db.query('plugin::users-permissions.user').findMany({
@@ -191,10 +191,19 @@ async function republish(site: any, { ifPublished = false } = {}) {
 export async function goLive(site: any) {
   const updated = await strapi.documents(SITE).update({
     documentId: site.documentId,
-    data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null } as any,
+    data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null, live_requested_by: null } as any,
   });
   await recordActivity({ action: 'commune_go_live', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
   await republish(site, { ifPublished: true });
+  await notifyAdmins(
+    site,
+    `Le site de ${site.name} est en live — Communeo`,
+    [
+      `Le site de ${site.name} est passé en live : il reste en ligne sans limite de durée, sans le bandeau « Site en préparation ».`,
+      "Vous pouvez maintenant le relier à l'adresse de la commune depuis l'écran Mise en ligne de l'administration.",
+    ],
+    { label: 'Ouvrir la mise en ligne', path: '/mise-en-ligne' },
+  );
   return updated;
 }
 
@@ -219,23 +228,37 @@ export async function extendTrial(site: any, days: number, now: Date = new Date(
 /** « Passer en live » demandé depuis l'administration de la commune : l'équipe est prévenue */
 export async function requestGoLive(site: any, requester: { email: string; name: string }) {
   const now = new Date();
-  const updated = await strapi.documents(SITE).update({ documentId: site.documentId, data: { live_requested_at: now } as any });
+  const updated = await strapi.documents(SITE).update({
+    documentId: site.documentId,
+    data: { live_requested_at: now, live_requested_by: `${requester.name} (${requester.email})` } as any,
+  });
   await recordActivity({ action: 'live_request', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
-  const to = process.env.SIGNUP_NOTIFY_EMAIL;
-  if (to) {
-    try {
-      await strapi.plugin('email').service('email').send({
-        to,
-        subject: `Passage en live demandé : ${site.name}`,
-        text: `${requester.name} (${requester.email}) demande le passage en live de ${site.name} (INSEE ${site.code_insee ?? 'inconnu'}). ${
-          site.plan === 'expired' ? "L'essai est terminé depuis le " + formatDate(site.trial_expired_at) : "L'essai se termine le " + formatDate(site.trial_ends_at)
-        }. Passez la commune en live depuis sa fiche dans l'espace équipe : ${adminUrl()}/plateforme/communes/${site.documentId}`,
-      });
-    } catch (error) {
-      log.error('[ESSAI] Notification de l’équipe impossible :', error);
-    }
-  } else {
-    log.warn(`[ESSAI] SIGNUP_NOTIFY_EMAIL non défini : la demande de passage en live de ${site.slug} n'est pas envoyée à l'équipe`);
-  }
+  await notifyTeam(
+    `Passage en live demandé : ${site.name}`,
+    `${requester.name} (${requester.email}) demande le passage en live de ${site.name} (INSEE ${site.code_insee ?? 'inconnu'}). ${
+      site.plan === 'expired' ? "L'essai est terminé depuis le " + formatDate(site.trial_expired_at) : "L'essai se termine le " + formatDate(site.trial_ends_at)
+    }. À valider dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
+  );
   return updated;
+}
+
+/** Demande de passage en live refusée par l'équipe : la demande est retirée, le motif envoyé à la commune */
+export async function rejectGoLive(site: any, reason: string) {
+  await strapi.documents(SITE).update({ documentId: site.documentId, data: { live_requested_at: null, live_requested_by: null } as any });
+  await recordActivity({
+    action: 'live_reject',
+    siteDocumentId: site.documentId,
+    target: { type: 'site', id: site.documentId, label: site.name },
+    details: { reason },
+  });
+  await notifyAdmins(
+    site,
+    `Votre demande de passage en live — ${site.name}`,
+    [
+      `L'équipe Communeo n'a pas validé le passage en live du site de ${site.name} :`,
+      reason,
+      "Vous pouvez refaire la demande depuis l'administration, une fois le point réglé.",
+    ],
+    GO_LIVE,
+  );
 }

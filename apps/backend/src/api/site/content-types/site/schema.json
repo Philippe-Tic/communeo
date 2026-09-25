@@ -133,6 +133,10 @@
     "live_requested_at": {
       "type": "datetime"
     },
+    "live_requested_by": {
+      "type": "string",
+      "private": true
+    },
     "onboarding": {
       "type": "json"
     },

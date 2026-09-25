@@ -1,11 +1,11 @@
 /**
  * Espace de l'équipe Communeo (handoff 6.20) : même structure que l'administration d'une commune,
- * navigation réduite (Communes, Utilisateurs, Statistiques) et barre latérale de couleur de marque,
+ * navigation réduite (Communes, À valider, Utilisateurs, Statistiques, Journal) et barre latérale de couleur de marque,
  * pour ne jamais confondre cet espace avec l'admin d'une commune.
  */
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
-import { BarChart3, Building2, History, LogOut, Users } from 'lucide-react';
+import { BarChart3, Building2, ClipboardCheck, History, LogOut, Users } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { ColorSchemeToggle } from '@/components/shell/color-scheme-toggle';
 import { SessionExpiredDialog } from '@/components/shell/session-expired-dialog';
@@ -14,9 +14,11 @@ import { auth } from '@/lib/api';
 import { requestHeadingFocus } from '@/lib/focus';
 import { displayName, logout, type SessionUser } from '@/lib/session';
 import { cn, initials } from '@/lib/utils';
+import { pendingCount, validationsQuery } from '@/lib/validations';
 
 const LINKS = [
   { to: '/plateforme', label: 'Communes', icon: Building2 },
+  { to: '/plateforme/a-valider', label: 'À valider', icon: ClipboardCheck },
   { to: '/plateforme/utilisateurs', label: 'Utilisateurs', icon: Users },
   { to: '/plateforme/statistiques', label: 'Statistiques', icon: BarChart3 },
   { to: '/plateforme/journal', label: 'Journal', icon: History },
@@ -31,6 +33,7 @@ export function EquipeShell({ user, children }: { user: SessionUser; children: R
   const client = useQueryClient();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const pending = pendingCount(useQuery(validationsQuery).data);
   const first = useRef(true);
   useEffect(() => {
     if (first.current) {
@@ -61,6 +64,12 @@ export function EquipeShell({ user, children }: { user: SessionUser; children: R
             >
               <Icon aria-hidden="true" className="size-[18px] shrink-0" />
               {label}
+              {to === '/plateforme/a-valider' && pending > 0 && (
+                <span className="ml-auto rounded-full bg-white/20 px-1.5 text-xs font-semibold tabular-nums">
+                  {pending}
+                  <span className="sr-only"> en attente</span>
+                </span>
+              )}
             </Link>
           </li>
         ))}

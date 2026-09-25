@@ -132,8 +132,16 @@ describe('confirmation', () => {
     const info = await api.get(`/api/signup/confirm?jeton=${jeton}`);
     expect(info.body.data).toEqual({ commune: 'Saint-Pierre-le-Moûtier', firstName: 'Julie', lastName: 'Secrétaire', email: 'julie@gmail.test' });
 
-    const confirmed = await api.post('/api/signup/confirm').send({ jeton });
+    process.env.SIGNUP_NOTIFY_EMAIL = 'equipe@communeo.test';
+    let confirmed;
+    try {
+      confirmed = await api.post('/api/signup/confirm').send({ jeton });
+    } finally {
+      delete process.env.SIGNUP_NOTIFY_EMAIL;
+    }
     expect(confirmed.status).toBe(200);
+    // L'équipe est prévenue de chaque nouvelle commune en essai
+    expect(sentEmails.find((mail) => mail.to === 'equipe@communeo.test')?.subject).toBe('Nouvelle commune en essai : Saint-Pierre-le-Moûtier');
     const site: any = await strapi.query('api::site.site').findOne({ where: { code_insee: '58264' } });
     expect(site).toMatchObject({ name: 'Saint-Pierre-le-Moûtier', slug: 'saint-pierre-le-moutier', contact_mail: 'mairie@saintpierrelemoutier.fr', onboarding: { step: 1 }, plan: 'trial' });
     // 30 jours d'essai à partir de la confirmation

@@ -1,7 +1,7 @@
 # Admin V2
 
 Nouvelle administration (React 19 + Vite + TanStack Router/Query + Tailwind 4 + Radix), phase 3 (epic #130).
-Maquettes : `v2/Design Admin Handoff/`. L'admin V1 gelée est dans `admin/` à la racine.
+Maquettes : `v2/Design Admin Handoff/`.
 
 ```bash
 pnpm --filter @communeo/admin dev        # http://localhost:5173, API Strapi via le proxy Vite (VITE_API_URL, défaut localhost:1337)

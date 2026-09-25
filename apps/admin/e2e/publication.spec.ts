@@ -105,7 +105,7 @@ test('domaine : saisie, instructions DNS copiables, vérification en erreur puis
   await expect(domain.getByRole('alert')).toHaveText('Ce domaine est déjà utilisé par un autre site');
   await domain.getByRole('textbox', { name: 'Adresse de votre site' }).fill('https://Saint-Aubin-sur-Loire.fr/');
   await domain.getByRole('button', { name: 'Enregistrer le domaine' }).click();
-  expect(posts['domain']).toEqual(['saint-aubin-sur-loire.fr']);
+  await expect.poll(() => posts['domain']).toEqual(['saint-aubin-sur-loire.fr']);
 
   const table = domain.getByRole('table', { name: 'Enregistrements DNS à créer' });
   await expect(table.getByRole('row')).toHaveCount(3);

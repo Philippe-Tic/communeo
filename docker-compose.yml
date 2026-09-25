@@ -135,7 +135,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/templates:/etc/nginx/templates:ro
-      - ./admin/dist:/usr/share/nginx/html:ro
+      - ./apps/admin/dist:/usr/share/nginx/html:ro
       - certbot-webroot:/var/www/certbot:ro
       - certbot-certs:/etc/letsencrypt:ro
     logging:

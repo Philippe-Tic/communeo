@@ -36,7 +36,12 @@
         "user_delete",
         "commune_create",
         "commune_suspend",
-        "commune_unsuspend"
+        "commune_unsuspend",
+        "commune_delete",
+        "trial_extend",
+        "trial_expire",
+        "live_request",
+        "commune_go_live"
       ],
       "required": true
     },

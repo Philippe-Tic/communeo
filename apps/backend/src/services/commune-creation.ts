@@ -8,6 +8,7 @@ import { DEFAULT_THEME, slugify } from '@communeo/core';
 import { log } from '../utils/logger';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { createInvitationToken } from '../utils/security';
+import { trialStart } from './trial';
 
 export interface NewCommune {
   name: string;
@@ -17,6 +18,8 @@ export interface NewCommune {
   /** E-mail de contact de la mairie */
   contactMail: string;
   admin: { email: string; firstName: string; lastName: string };
+  /** Inscription en libre-service : 30 jours d'essai (sinon, commune créée par l'équipe : en live) */
+  trial?: boolean;
 }
 
 /** Adresse de site libre, depuis le nom de la commune (« saint-aubin », puis « saint-aubin-2 »…) */
@@ -46,6 +49,7 @@ export async function createCommune(input: NewCommune): Promise<{ site: any; inv
       contact_mail: input.contactMail,
       ...(input.codeInsee ? { code_insee: input.codeInsee } : {}),
       onboarding: { step: 1 },
+      ...(input.trial ? trialStart() : { plan: 'live' }),
     } as any,
   });
 

@@ -432,6 +432,8 @@ export interface MockOptions {
   deployOutcome?: 'running' | 'ok' | 'failed';
   /** Données publiques : trouvées (défaut), mairie absente de l'annuaire, ou services en panne */
   publicData?: 'ok' | 'no-town-hall' | 'down';
+  /** Période d'essai de Saint-Aubin (#310) : jours restants, ou essai terminé depuis N jours */
+  trial?: { endsInDays: number; requested?: boolean } | { expiredDaysAgo: number; requested?: boolean };
 }
 
 export type MockMedia = {
@@ -953,6 +955,26 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   // Mise en ligne demandée : l'état la montre en cours une fois, puis selon `deployOutcome`
   let deploy: { readsLeft: number; triggeredAt: string } | null = null;
   let domainState = options.domain ?? 'none';
+  const DAY = 86_400_000;
+  // Offre de Saint-Aubin, dans la session et dans l'espace équipe
+  const plan = {
+    plan: (!options.trial ? 'live' : 'endsInDays' in options.trial ? 'trial' : 'expired') as 'trial' | 'live' | 'expired',
+    trialEndsAt:
+      options.trial && 'endsInDays' in options.trial
+        ? new Date(Date.now() + options.trial.endsInDays * DAY - 60_000).toISOString()
+        : options.trial
+          ? new Date(Date.now() - options.trial.expiredDaysAgo * DAY).toISOString()
+          : null,
+    trialExpiredAt:
+      options.trial && 'expiredDaysAgo' in options.trial ? new Date(Date.now() - options.trial.expiredDaysAgo * DAY).toISOString() : null,
+    liveRequestedAt: options.trial?.requested ? new Date(Date.now() - 2 * DAY).toISOString() : null,
+  };
+  const sessionPlan = () => ({
+    plan: plan.plan,
+    trial_ends_at: plan.trialEndsAt,
+    trial_expired_at: plan.trialExpiredAt,
+    live_requested_at: plan.liveRequestedAt,
+  });
   const communeSummary = (documentId: string, name: string, slug: string, theme: string | null) => ({
     documentId,
     name,
@@ -962,6 +984,10 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     customDomain: null as string | null,
     population: null as number | null,
     suspended: false,
+    plan: 'live' as 'trial' | 'live' | 'expired',
+    trialEndsAt: null as string | null,
+    trialExpiredAt: null as string | null,
+    liveRequestedAt: null as string | null,
     createdAt: '2025-03-04T09:00:00.000Z',
     lastActivity: '2026-09-22T07:12:00.000Z',
     publication: { state: 'ok', at: '2026-09-22T05:45:00.000Z', pendingCount: 0 },
@@ -972,6 +998,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       ...communeSummary(SITE.documentId, SITE.name, SITE.slug, 'institutionnel'),
       customDomain: 'saint-aubin-sur-loire.fr',
       population: 3240,
+      ...plan,
     },
     {
       ...communeSummary('site-bellefontaine', 'Bellefontaine', 'bellefontaine', 'moderne'),
@@ -1320,10 +1347,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (!session) return json({ error: { status: 403, message: 'Forbidden' } }, 403);
     if (url.pathname === '/api/users/me')
       return json(
-        onboarding && USERS[user].site
-          ? { ...USERS[user], site: { ...USERS[user].site, onboarding: site.onboarding } }
+        USERS[user].site
+          ? { ...USERS[user], site: { ...USERS[user].site, ...(onboarding ? { onboarding: site.onboarding } : {}), ...sessionPlan() } }
           : USERS[user],
       );
+    // Essai terminé : l'administration de la commune est en lecture seule (sauf pour l'équipe)
+    if (
+      plan.plan === 'expired' &&
+      USERS[user].municipality_role !== 'super_admin' &&
+      !['GET', 'HEAD'].includes(method) &&
+      !['/api/session/', '/api/trial/', '/api/preview/'].some((prefix) => url.pathname.startsWith(prefix))
+    )
+      return json(
+        {
+          error: {
+            status: 403,
+            message:
+              "Votre période d'essai est terminée : l'administration est en lecture seule. Passez en live pour modifier et remettre le site en ligne.",
+            details: { code: 'trial_expired' },
+          },
+        },
+        403,
+      );
+    if (url.pathname === '/api/trial/live-request' && method === 'POST') {
+      plan.liveRequestedAt = new Date().toISOString();
+      Object.assign(communes[0]!, plan);
+      return json({ data: { liveRequestedAt: plan.liveRequestedAt } });
+    }
     // Assistant de création : recherche de la commune et données publiques (#150)
     if (url.pathname === '/api/onboarding/communes') {
       if (publicData === 'down')
@@ -1513,7 +1563,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       if (method === 'PUT') {
         const { data } = route.request().postDataJSON() as { data: Record<string, unknown> };
         bodies.push({ call: `PUT commune ${commune.documentId}`, body: { data } });
-        Object.assign(commune, data);
+        const { extendTrialDays, ...rest } = data as { extendTrialDays?: number; plan?: string };
+        Object.assign(commune, rest);
+        if (rest.plan === 'live') Object.assign(commune, { trialExpiredAt: null, liveRequestedAt: null });
+        if (typeof extendTrialDays === 'number') {
+          const running = commune.plan === 'trial' && commune.trialEndsAt && new Date(commune.trialEndsAt).getTime() > Date.now();
+          const from = running ? new Date(commune.trialEndsAt!).getTime() : Date.now();
+          Object.assign(commune, { plan: 'trial', trialEndsAt: new Date(from + extendTrialDays * DAY).toISOString(), trialExpiredAt: null });
+        }
+        if (commune.documentId === SITE.documentId) Object.assign(plan, { plan: commune.plan, trialEndsAt: commune.trialEndsAt, trialExpiredAt: commune.trialExpiredAt, liveRequestedAt: commune.liveRequestedAt });
         return json({ data: commune });
       }
       return json({

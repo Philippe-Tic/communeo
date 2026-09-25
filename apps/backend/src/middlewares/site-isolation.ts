@@ -1,3 +1,4 @@
+import { isExpired, TRIAL_EXPIRED_MESSAGE } from '../services/trial';
 import { log } from '../utils/logger';
 /**
  * Isolation multi-tenant : chaque utilisateur ne voit et ne modifie que les données de son site.
@@ -18,6 +19,7 @@ interface StrapiUser {
     id: number;
     documentId: string;
     suspended?: boolean;
+    plan?: string | null;
   };
 }
 
@@ -64,7 +66,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [
@@ -76,8 +78,13 @@ const PROTECTED_SITE_FIELDS = [
   'domain_type',
   'domain_configured_at',
   'ssl_enabled',
-  // suspension : décidée par l'équipe Communeo (site-management)
+  // suspension et période d'essai : décidées par l'équipe Communeo (site-management) et le serveur
   'suspended',
+  'plan',
+  'trial_ends_at',
+  'trial_expired_at',
+  'trial_notice',
+  'live_requested_at',
   // relations : empêchent de rattacher les contenus d'une autre commune
   'pages',
   'articles',
@@ -94,6 +101,12 @@ const PROTECTED_SITE_FIELDS = [
   'school_menus',
   'users',
 ];
+
+// Essai terminé (#310) : l'administration est en lecture seule, sauf la session, le compte de la
+// personne, l'aperçu et la demande de passage en live
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const writableWhenExpired = (apiId: string | null, id: string | null) =>
+  ['session', 'auth', 'preview', 'trial'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
 
 const parsePath = (rawUrl: string) => {
   const pathname = rawUrl.split('?')[0];
@@ -154,6 +167,11 @@ export default (config: any, { strapi }: { strapi: any }) => {
     // Routes d'authentification et profil courant : toujours accessibles
     if (apiId === 'auth' || (apiId === 'users' && id === 'me' && extra.length === 0)) {
       return next();
+    }
+
+    // L'équipe Communeo garde la main sur une commune dont l'essai est terminé
+    if (user.municipality_role !== 'super_admin' && isExpired(user.site) && !READ_METHODS.has(method) && !writableWhenExpired(apiId, id)) {
+      return ctx.forbidden(TRIAL_EXPIRED_MESSAGE, { code: 'trial_expired' });
     }
 
     if (user.municipality_role === 'super_admin') {

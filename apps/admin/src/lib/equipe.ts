@@ -17,6 +17,11 @@ export interface CommuneSummary {
   customDomain: string | null;
   population: number | null;
   suspended: boolean;
+  plan: 'trial' | 'live' | 'expired';
+  trialEndsAt: string | null;
+  trialExpiredAt: string | null;
+  liveRequestedAt: string | null;
+  onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null } | null;
   createdAt: string;
   lastActivity: string;
   publication: { state: CommunePublication; at: string | null; pendingCount: number };
@@ -74,7 +79,10 @@ export const createCommune = (values: {
   admin_last_name: string;
 }) => api<{ data: CommuneSummary }>('/api/site-management', { method: 'POST', json: { data: values } });
 
-export const updateCommune = (documentId: string, data: { name?: string; suspended?: boolean }) =>
+export const updateCommune = (
+  documentId: string,
+  data: { name?: string; suspended?: boolean; plan?: 'live'; extendTrialDays?: number },
+) =>
   api<{ data: CommuneSummary }>(`/api/site-management/${documentId}`, { method: 'PUT', json: { data } });
 
 /** Ouvre l'administration de la commune : tout le cache est vidé (autre commune, autres données) */

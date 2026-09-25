@@ -135,7 +135,10 @@ describe('confirmation', () => {
     const confirmed = await api.post('/api/signup/confirm').send({ jeton });
     expect(confirmed.status).toBe(200);
     const site: any = await strapi.query('api::site.site').findOne({ where: { code_insee: '58264' } });
-    expect(site).toMatchObject({ name: 'Saint-Pierre-le-Moûtier', slug: 'saint-pierre-le-moutier', contact_mail: 'mairie@saintpierrelemoutier.fr', onboarding: { step: 1 } });
+    expect(site).toMatchObject({ name: 'Saint-Pierre-le-Moûtier', slug: 'saint-pierre-le-moutier', contact_mail: 'mairie@saintpierrelemoutier.fr', onboarding: { step: 1 }, plan: 'trial' });
+    // 30 jours d'essai à partir de la confirmation
+    expect(new Date(site.trial_ends_at).getTime() - Date.now()).toBeGreaterThan(29.9 * 86_400_000);
+    expect(new Date(site.trial_ends_at).getTime() - Date.now()).toBeLessThanOrEqual(30 * 86_400_000);
     const user: any = await strapi.query('plugin::users-permissions.user').findOne({ where: { email: 'julie@gmail.test' }, populate: ['site'] });
     expect(user).toMatchObject({ municipality_role: 'admin', blocked: true, first_name: 'Julie' });
     expect(user.site.id).toBe(site.id);

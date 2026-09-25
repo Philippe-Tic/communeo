@@ -37,6 +37,7 @@ import { Route as AppMiseEnLigneRouteImport } from './routes/_app/mise-en-ligne'
 import { Route as AppMonCompteRouteImport } from './routes/_app/mon-compte'
 import { Route as AppNewsletterRouteImport } from './routes/_app/newsletter'
 import { Route as AppPagesRouteImport } from './routes/_app/pages'
+import { Route as AppPasserEnLiveRouteImport } from './routes/_app/passer-en-live'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as InscriptionConfirmerRouteImport } from './routes/inscription_.confirmer'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
@@ -198,6 +199,11 @@ const AppPagesRoute = AppPagesRouteImport.update({
   path: '/pages',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPasserEnLiveRoute = AppPasserEnLiveRouteImport.update({
+  id: '/passer-en-live',
+  path: '/passer-en-live',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
   id: '/utilisateurs',
   path: '/utilisateurs',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/mon-compte': typeof AppMonCompteRoute
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
+  '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
@@ -381,6 +388,7 @@ export interface FileRoutesByTo {
   '/mon-compte': typeof AppMonCompteRoute
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
+  '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
@@ -433,6 +441,7 @@ export interface FileRoutesById {
   '/_app/mon-compte': typeof AppMonCompteRoute
   '/_app/newsletter': typeof AppNewsletterRoute
   '/_app/pages': typeof AppPagesRoute
+  '/_app/passer-en-live': typeof AppPasserEnLiveRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/inscription_/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
@@ -486,6 +495,7 @@ export interface FileRouteTypes {
     | '/mon-compte'
     | '/newsletter'
     | '/pages'
+    | '/passer-en-live'
     | '/utilisateurs'
     | '/inscription/confirmer'
     | '/plateforme/journal'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/mon-compte'
     | '/newsletter'
     | '/pages'
+    | '/passer-en-live'
     | '/utilisateurs'
     | '/inscription/confirmer'
     | '/plateforme/journal'
@@ -585,6 +596,7 @@ export interface FileRouteTypes {
     | '/_app/mon-compte'
     | '/_app/newsletter'
     | '/_app/pages'
+    | '/_app/passer-en-live'
     | '/_app/utilisateurs'
     | '/inscription_/confirmer'
     | '/plateforme/journal'
@@ -820,6 +832,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPagesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/passer-en-live': {
+      id: '/_app/passer-en-live'
+      path: '/passer-en-live'
+      fullPath: '/passer-en-live'
+      preLoaderRoute: typeof AppPasserEnLiveRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/utilisateurs': {
       id: '/_app/utilisateurs'
       path: '/utilisateurs'
@@ -989,6 +1008,7 @@ interface AppRouteChildren {
   AppMonCompteRoute: typeof AppMonCompteRoute
   AppNewsletterRoute: typeof AppNewsletterRoute
   AppPagesRoute: typeof AppPagesRoute
+  AppPasserEnLiveRoute: typeof AppPasserEnLiveRoute
   AppUtilisateursRoute: typeof AppUtilisateursRoute
   AppIndexRoute: typeof AppIndexRoute
   AppActualitesDocumentIdRoute: typeof AppActualitesDocumentIdRoute
@@ -1026,6 +1046,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonCompteRoute: AppMonCompteRoute,
   AppNewsletterRoute: AppNewsletterRoute,
   AppPagesRoute: AppPagesRoute,
+  AppPasserEnLiveRoute: AppPasserEnLiveRoute,
   AppUtilisateursRoute: AppUtilisateursRoute,
   AppIndexRoute: AppIndexRoute,
   AppActualitesDocumentIdRoute: AppActualitesDocumentIdRoute,

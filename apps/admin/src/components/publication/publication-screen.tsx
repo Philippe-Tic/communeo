@@ -38,6 +38,7 @@ import {
   type PublicationStatus,
 } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
+import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 import { DomainSection } from './domain-section';
 
@@ -518,7 +519,19 @@ export function PublicationScreen() {
         </p>
       </div>
 
-      {status.isError ? (
+      {isReadOnly(user.site) ? (
+        <section aria-labelledby="etat-titre" className="rounded-xl border border-danger/40 bg-danger-alert-bg p-5">
+          <h2 id="etat-titre" className="text-base font-semibold">
+            Site retiré : votre essai est terminé
+          </h2>
+          <p className="mt-1">
+            Plus rien n'est mis en ligne. Le site est remis en ligne dès le passage en live.{' '}
+            <Link to="/passer-en-live" className="font-medium text-brand underline">
+              Passer en live
+            </Link>
+          </p>
+        </section>
+      ) : status.isError ? (
         <div role="alert" className="rounded-xl border border-danger bg-danger-alert-bg p-5">
           L'état de la mise en ligne n'a pas pu être chargé.{' '}
           <Button type="button" variant="secondary" size="sm" onClick={() => void status.refetch()}>
@@ -542,7 +555,7 @@ export function PublicationScreen() {
 
       <History />
 
-      {admin && <DomainSection />}
+      {admin && !isReadOnly(user.site) && <DomainSection />}
     </div>
   );
 }

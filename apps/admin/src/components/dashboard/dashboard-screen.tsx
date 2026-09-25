@@ -35,6 +35,7 @@ import { isOpenRgpd } from '@/components/messages/messages-screen';
 import { inboxQuery, MESSAGE_CATEGORIES, type MessageSummary } from '@/lib/messages';
 import { publicationQuery, type PublicationStatus } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
+import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 import { Checklist } from './checklist';
 
@@ -272,6 +273,13 @@ const PUBLICATION_BADGE: Record<PublicationStatus['state'], { tone: Tone; label:
   failed: { tone: 'danger', label: 'Échec' },
 };
 
+/** Essai terminé : le site est retiré, quel que soit l'état de la dernière mise en ligne */
+function usePublicationBadge(state: PublicationStatus['state'] | undefined) {
+  const { data: user } = useQuery(sessionQuery);
+  if (isReadOnly(user?.site)) return { tone: 'danger' as Tone, label: 'Site retiré : essai terminé' };
+  return state ? PUBLICATION_BADGE[state] : null;
+}
+
 function lastPublicationText(status: PublicationStatus) {
   const last = status.lastDeployment;
   if (!last) return "Le site n'a pas encore été mis en ligne.";
@@ -284,8 +292,8 @@ function lastPublicationText(status: PublicationStatus) {
 
 function Publication({ siteUrl, compact }: { siteUrl: string | null; compact?: boolean }) {
   const { data } = useQuery(publicationQuery);
-  if (!data) return null;
-  const badge = PUBLICATION_BADGE[data.state];
+  const badge = usePublicationBadge(data?.state);
+  if (!data || !badge) return null;
   const link = siteUrl && (
     <a href={siteUrl} target="_blank" rel="noreferrer" className={cn(cardLink, 'inline-flex items-center gap-1')}>
       {compact ? 'Voir le site' : siteUrl.replace(/^https?:\/\//, '')}
@@ -462,6 +470,7 @@ function Tile({
 
 function Tiles({ alert, report }: { alert: Alert; report: ComplianceReport | undefined }) {
   const { data: publication } = useQuery(publicationQuery);
+  const badge = usePublicationBadge(publication?.state);
   const last = publication?.lastDeployment;
   const who = last?.triggeredBy && [last.triggeredBy.firstName, last.triggeredBy.lastName].filter(Boolean).join(' ');
   return (
@@ -483,7 +492,7 @@ function Tiles({ alert, report }: { alert: Alert; report: ComplianceReport | und
         eyebrow="Mise en ligne"
         icon={<CloudUpload aria-hidden="true" className="size-5 shrink-0 text-secondary" />}
       >
-        <p className="text-[15px] font-semibold">{publication ? PUBLICATION_BADGE[publication.state].label : '…'}</p>
+        <p className="text-[15px] font-semibold">{badge?.label ?? '…'}</p>
         {last && (
           <p className="text-secondary">
             {capitalize(since(new Date(last.triggeredAt)))}

@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -146,6 +146,12 @@ export type SiteDomainStatus = (typeof siteDomainStatusValues)[number];
 
 export const siteDomainTypeValues = ['apex', 'subdomain'] as const;
 export type SiteDomainType = (typeof siteDomainTypeValues)[number];
+
+export const sitePlanValues = ['trial', 'live', 'expired'] as const;
+export type SitePlan = (typeof sitePlanValues)[number];
+
+export const siteTrialNoticeValues = ['reminder_7', 'reminder_1', 'expired', 'deletion'] as const;
+export type SiteTrialNotice = (typeof siteTrialNoticeValues)[number];
 
 export const siteOpenDataPlatformValues = ['data-gouv-fr', 'opendatasoft', 'custom', 'none'] as const;
 export type SiteOpenDataPlatform = (typeof siteOpenDataPlatformValues)[number];
@@ -643,6 +649,11 @@ export interface Site extends StrapiDocument {
   domain_configured_at: string | null;
   ssl_enabled: boolean | null;
   suspended: boolean | null;
+  plan: SitePlan | null;
+  trial_ends_at: string | null;
+  trial_expired_at: string | null;
+  trial_notice: SiteTrialNotice | null;
+  live_requested_at: string | null;
   onboarding: JsonValue | null;
   pages?: Page[];
   articles?: Article[];

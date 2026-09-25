@@ -138,6 +138,16 @@ describe('processBuild', () => {
     await expect(processBuild(job(), d)).rejects.toThrow('Strapi 503');
     expect(buildDirs()).toEqual([]);
   });
+
+  it('s’arrête sans rien construire quand Strapi annule le build (essai terminé, commune suspendue)', async () => {
+    const d = deps();
+    d.strapi.start = vi.fn(async () => ({ cancelled: 'essai terminé' }));
+    await processBuild(job(), d);
+    expect(rendered).toEqual([]);
+    expect(d.publisher.publish).not.toHaveBeenCalled();
+    expect(finished).toEqual([]);
+    expect(buildDirs()).toEqual([]);
+  });
 });
 
 describe('cleanText', () => {

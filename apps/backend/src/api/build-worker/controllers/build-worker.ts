@@ -52,6 +52,12 @@ export default {
       filters: { documentId: body.siteDocumentId } as any,
     });
     if (!site) return ctx.notFound('Site non trouvé');
+    // Demande déposée avant la suspension ou la fin de l'essai : plus rien n'est mis en ligne
+    if (site.suspended || site.plan === 'expired') {
+      log.info(`🚫 [BUILD] Job ${jobId} annulé pour ${site.slug} (${site.suspended ? 'commune suspendue' : 'essai terminé'})`);
+      ctx.body = { cancelled: site.suspended ? 'commune suspendue' : 'essai terminé' };
+      return;
+    }
 
     const now = new Date();
     let deployment: any = await findDeployment(jobId);

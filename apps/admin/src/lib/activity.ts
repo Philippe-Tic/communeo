@@ -19,7 +19,12 @@ export type ActivityAction =
   | 'user_delete'
   | 'commune_create'
   | 'commune_suspend'
-  | 'commune_unsuspend';
+  | 'commune_unsuspend'
+  | 'commune_delete'
+  | 'trial_extend'
+  | 'trial_expire'
+  | 'live_request'
+  | 'commune_go_live';
 
 export interface ActivityEntry {
   id: number;
@@ -70,6 +75,11 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   commune_create: 'Commune créée',
   commune_suspend: 'Commune suspendue',
   commune_unsuspend: 'Suspension levée',
+  commune_delete: 'Commune supprimée',
+  trial_extend: 'Essai prolongé',
+  trial_expire: 'Essai terminé',
+  live_request: 'Passage en live demandé',
+  commune_go_live: 'Passage en live',
 };
 
 /** Actions qu'une commune voit (les autres concernent la plateforme) */
@@ -85,6 +95,10 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'user_deactivate',
   'user_reactivate',
   'user_delete',
+  'trial_extend',
+  'trial_expire',
+  'live_request',
+  'commune_go_live',
 ];
 
 const TYPE_LABELS: Record<string, string> = {

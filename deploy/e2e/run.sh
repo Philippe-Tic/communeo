@@ -64,6 +64,14 @@ site=$(api POST /api/site-management '{"data":{"name":"Commune E2E","slug":"comm
 [ -n "$site" ] && [ "$site" != null ] || fail "commune non créée"
 echo "  $site"
 
+step "Fichier dans la médiathèque de la commune"
+printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' | base64 --decode > /tmp/communeo-e2e.png
+file_url=$(curl -sS -X POST "$base/api/media-items/upload" -H "Authorization: Bearer $token" -H "X-Site-Document-Id: $site" \
+  -F 'files=@/tmp/communeo-e2e.png;type=image/png;filename=salle.png' -F 'alt_text=Salle des fêtes' | jq -r .data.file.url)
+[ -n "$file_url" ] && [ "$file_url" != null ] || fail "fichier non envoyé"
+curl -fsS -o /dev/null "$base$file_url" || fail "fichier non servi"
+echo "  $file_url"
+
 step "Mise en ligne par le worker"
 status=$(api POST /api/deployment/trigger '' -H "X-Site-Document-Id: $site" -o /dev/null -w '%{http_code}')
 [ "$status" = 202 ] || fail "mise en ligne refusée ($status)"
@@ -81,28 +89,31 @@ echo "  site publié : commune-e2e/index.html"
 step "Preview fermée sans jeton"
 compose exec -T preview sh -c "wget -S --spider http://127.0.0.1:4321/ 2>&1 | grep -q ' 401 '" || fail "la preview répond sans jeton"
 
-step "Sauvegarde, suppression, restauration"
+step "Sauvegarde (copie S3 chiffrée)"
 compose exec -T backup backup.sh
-# Copie hors du serveur : chiffrée, et relisible avec la phrase de passe (PRODUCTION.md, serveur perdu)
 compose exec -T backup sh -c '
   set -e
-  stamp=$(ls /backups | sed -n "s/^db-\(.*\)\.dump$/\1/p" | sort | tail -n 1)
-  rclone lsf "remote:$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX" | grep -q "db-$stamp.dump.enc"
-  ! rclone lsf "remote:$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX" | grep -q "db-$stamp.dump$"
-  rm -rf /tmp/s3 && rclone copy "remote:$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX" /tmp/s3 --include "*$stamp*"
-  openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in "/tmp/s3/db-$stamp.dump.enc" -out /tmp/s3/db.dump
-  cmp /tmp/s3/db.dump "/backups/db-$stamp.dump"
-' || fail "copie S3 chiffrée absente ou illisible"
-echo "  copie S3 chiffrée, relue et déchiffrée"
+  . /usr/local/bin/remote.sh
+  # Rien de lisible dans le stockage objet : noms et contenus chiffrés
+  ! rclone lsf -R "remote:$BACKUP_S3_BUCKET" | grep -q -e "db-" -e "salle"
+  rclone lsf -R "${target}" | grep -q "^db/db-.*\.dump$"
+  rclone lsf -R "${target}uploads" | grep -q "salle"
+' || fail "copie S3 absente, lisible ou incomplète"
+echo "  copie S3 chiffrée (noms et contenus)"
+
+step "Serveur perdu : suppression, sauvegardes locales effacées, restauration depuis S3"
 api DELETE "/api/site-management/$site" '' -o /dev/null
 [ "$(api GET "/api/site-management/$site" '' -o /dev/null -w '%{http_code}')" = 404 ] || fail "commune non supprimée"
+[ "$(curl -sS -o /dev/null -w '%{http_code}' "$base$file_url")" = 404 ] || fail "fichier non supprimé avec la commune"
 compose stop strapi worker
-compose run --rm -T backup restore.sh latest
+compose exec -T backup sh -c 'rm -rf /backups/*'
+compose run --rm -T backup restore.sh --from-s3 latest
 compose up -d strapi worker
 wait_healthy "strapi" 300
 token=$(curl -sS -X POST "$base/api/auth/local" -H 'Content-Type: application/json' \
   --data "{\"identifier\":\"equipe@communeo.test\",\"password\":\"$E2E_SUPER_PASSWORD\"}" | jq -r .jwt)
 [ "$(api GET "/api/site-management/$site" '' | jq -r .data.name)" = "Commune E2E" ] || fail "commune absente après restauration"
-echo "  commune restaurée"
+curl -fsS -o /dev/null "$base$file_url" || fail "fichier absent après restauration"
+echo "  commune et fichier restaurés depuis S3"
 
-printf '\n✓ Stack de production : démarrage, admin, commune, mise en ligne, preview, sauvegarde et restauration\n'
+printf '\n✓ Stack de production : démarrage, admin, commune, fichier, mise en ligne, preview, sauvegarde S3 chiffrée, restauration après perte du serveur\n'

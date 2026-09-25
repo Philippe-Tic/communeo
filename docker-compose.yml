@@ -175,7 +175,8 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Sauvegardes chaque nuit (deploy/backup) : base et fichiers, sur le serveur et vers un stockage S3
+  # Sauvegardes chaque nuit (deploy/backup) : base (3 jours) et copie miroir des fichiers sur le serveur,
+  # historique de 90 jours dans un stockage S3 (chiffré)
   backup:
     image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-backup:${IMAGE_TAG:-latest}
     build:
@@ -190,7 +191,7 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD}
       PGDATABASE: strapi
       BACKUP_TIME: ${BACKUP_TIME:-03:15}
-      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-3}
       BACKUP_REMOTE_RETENTION_DAYS: ${BACKUP_REMOTE_RETENTION_DAYS:-90}
       # Copie hors du serveur (facultative mais recommandée) : stockage objet S3 (Scaleway, OVH…)
       BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}

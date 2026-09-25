@@ -24,8 +24,13 @@ une version par commit (`IMAGE_TAG`). Le serveur n'a pas le code source : seulem
 
 ## 1. Le serveur
 
-- **Taille** : 4 vCPU et 8 Go de RAM au minimum (le worker construit les sites avec Astro), 80 Go de disque.
-  Ubuntu 24.04. Hébergeur en France : Scaleway ou OVH.
+- **Taille** : 4 vCPU, 8 Go de RAM, 75 Go de disque (OVH VPS-2 ou équivalent Scaleway), Ubuntu 24.04 LTS,
+  datacenter en France. Mesuré : ~600 Mo de RAM au repos, ~0,5 Go de plus pendant un build.
+- **Capacité** : le disque limite en premier (photos et PDF des communes, 0,2 à 1 Go chacune, plus leur copie
+  miroir) : environ **30 à 100 communes** sur 75 Go. Au-delà : disque supplémentaire, ou fichiers envoyés
+  directement dans le stockage objet (provider d'upload S3 de Strapi), ou serveur plus grand.
+- **OVH** : l'utilisateur par défaut est `ubuntu` (sudo) et non `root` ; il peut servir d'utilisateur de
+  déploiement (`DEPLOY_USER=ubuntu`, `DEPLOY_PATH=/home/ubuntu/communeo`).
 - **Sécuriser** : utilisateur `deploy` (sudo, clé SSH), pare-feu, accès root coupé.
 
 ```bash
@@ -127,8 +132,10 @@ chmod 600 .env
 
 - **Netlify** : jeton personnel du compte qui gère la zone communeo.fr (`NETLIFY_TOKEN`).
 - **Resend** : domaine communeo.fr vérifié (enregistrements SPF/DKIM dans la zone Netlify), clé `RESEND_API_KEY`.
-- **Sauvegardes** : bucket de stockage objet (Scaleway Object Storage ou OVH), clé d'accès limitée à ce bucket.
-  OVH : `BACKUP_S3_PROVIDER=Other`, `BACKUP_S3_ENDPOINT=s3.gra.io.cloud.ovh.net`, `BACKUP_S3_REGION=gra`.
+- **Sauvegardes** : bucket de stockage objet dans **une autre région que le serveur**, clé d'accès limitée à ce bucket.
+  Scaleway : Object Storage, valeurs ci-dessus. OVH : Public Cloud → Object Storage (utilisateur S3 + conteneur
+  « Standard »), `BACKUP_S3_PROVIDER=Other`, `BACKUP_S3_ENDPOINT=https://s3.sbg.io.cloud.ovh.net`, `BACKUP_S3_REGION=sbg`
+  (région du conteneur : `sbg`, `gra`, `rbx`…).
 
 ## 4. Certificats
 

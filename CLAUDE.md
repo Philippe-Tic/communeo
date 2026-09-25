@@ -25,7 +25,7 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 
 ### Production (#179)
 
-`docker-compose.yml` runs postgres, strapi, worker, preview, `nginx` (image « web » = admin build + nginx, `apps/admin/Dockerfile`), `backup` (`deploy/backup`: nightly pg_dump + uploads, local retention, encrypted copy to S3 via rclone, `restore.sh`) and certbot. Images are published to GHCR per commit by `.github/workflows/deploy.yml` (then `deploy/e2e/run.sh` on the runner, then `deploy/server/deploy.sh <sha>` over SSH when `DEPLOY_HOST` is set, with automatic rollback). PRs touching the stack run `deploy-e2e.yml`. `STRAPI_API_TOKEN` / `PREVIEW_API_TOKEN` can be generated up front: Strapi creates the tokens with those values. Setup: DEPLOYMENT.md; runbook: PRODUCTION.md.
+`docker-compose.yml` runs postgres, strapi, worker, preview, `nginx` (image « web » = admin build + nginx, `apps/admin/Dockerfile`), `backup` (`deploy/backup`: nightly pg_dump kept 3 days + incremental uploads mirror with dated history of deleted/replaced files, same to S3 through an rclone crypt remote (names and contents encrypted, 90 days), `restore.sh [--from-s3] <stamp|latest>`) and certbot. Images are published to GHCR per commit by `.github/workflows/deploy.yml` (then `deploy/e2e/run.sh` on the runner, then `deploy/server/deploy.sh <sha>` over SSH when `DEPLOY_HOST` is set, with automatic rollback). PRs touching the stack run `deploy-e2e.yml`. `STRAPI_API_TOKEN` / `PREVIEW_API_TOKEN` can be generated up front: Strapi creates the tokens with those values. Setup: DEPLOYMENT.md; runbook: PRODUCTION.md.
 
 ### Data Flow
 
@@ -54,7 +54,7 @@ pnpm --filter @communeo/renderer test:parity  # static build HTML == server (pre
 pnpm --filter @communeo/renderer test:preview # preview server access: 401 without token, token → HttpOnly cookie
 pnpm --filter @communeo/worker dev   # build worker (apps/worker/.env: QUEUE_DATABASE_URL, STRAPI_URL, STRAPI_API_TOKEN, WORKER_SECRET, NETLIFY_TOKEN or PUBLISH_DIR)
 docker run -d -p 55432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_DB=queue postgres:16-alpine   # queue for local tests: TEST_QUEUE_DATABASE_URL=postgres://postgres:test@localhost:55432/queue pnpm test
-deploy/e2e/run.sh        # production stack end to end (images, health, commune published by the worker, preview, backup to S3 + restore); E2E_KEEP=1 keeps it on :8088
+deploy/e2e/run.sh        # production stack end to end (images, health, commune + uploaded file, published by the worker, preview, encrypted S3 backup, restore from S3 only); E2E_KEEP=1 keeps it on :8088
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 

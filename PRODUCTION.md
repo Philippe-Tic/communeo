@@ -34,42 +34,47 @@ df -h && docker system df               # disque
 
 ## Sauvegardes
 
-Chaque nuit à `BACKUP_TIME` (03:15, heure de Paris), le service `backup` sauvegarde la base (contenus,
-comptes, file des builds) et les fichiers envoyés dans le volume `backups` (14 jours), et une copie
-chiffrée dans le stockage objet (`BACKUP_S3_*`, 90 jours). Il est `unhealthy` si la dernière sauvegarde
-réussie date de plus de 26 heures.
+Chaque nuit à `BACKUP_TIME` (03:15, heure de Paris), le service `backup` :
+
+- sauvegarde la base (contenus, comptes, devis, file des builds) : un dump par nuit, **3 jours** sur le serveur
+  (`BACKUP_RETENTION_DAYS`) ;
+- met à jour une **copie miroir** des fichiers envoyés (photos, PDF) : seuls les fichiers nouveaux ou modifiés
+  sont copiés ; un fichier supprimé ou remplacé part dans un historique daté, ce qui permet de retrouver l'état
+  des fichiers d'une nuit donnée ;
+- envoie la même chose vers le stockage objet (`BACKUP_S3_*`), **chiffrée, noms compris** (`BACKUP_PASSPHRASE`),
+  avec **90 jours** d'historique (`BACKUP_REMOTE_RETENTION_DAYS`).
+
+Il est `unhealthy` si la dernière sauvegarde réussie date de plus de 26 heures. Place prise sur le serveur :
+environ une fois les fichiers envoyés, plus quelques dumps de base.
 
 ```bash
-docker compose exec backup backup.sh    # sauvegarde immédiate (avant une opération risquée)
-docker compose exec backup ls -lh /backups
+docker compose exec backup backup.sh                # sauvegarde immédiate (avant une opération risquée)
+docker compose exec backup ls /backups/db           # dumps disponibles
 docker compose exec backup cat /backups/last-success
 ```
 
 ### Restaurer
 
 ```bash
-docker compose exec backup ls /backups                    # choisir l'horodatage (ou « latest »)
 docker compose stop strapi worker
-docker compose run --rm backup restore.sh 20261002T011500Z
+docker compose run --rm backup restore.sh latest              # ou un horodatage : 20261002T011500Z
 docker compose up -d strapi worker
 ```
 
-Depuis le stockage objet (serveur perdu) : sur le nouveau serveur installé (DEPLOYMENT.md, **même `.env`**),
+Serveur perdu : nouveau serveur installé (DEPLOYMENT.md) avec **le même `.env`** (la phrase de passe
+`BACKUP_PASSPHRASE` déchiffre les sauvegardes), puis :
 
 ```bash
-docker compose run --rm backup sh -c '
-  rclone copy "remote:$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX" /backups --include "*20261002T011500Z*"
-  cd /backups && for f in *.enc; do
-    openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in "$f" -out "${f%.enc}" && rm "$f"
-  done'
-docker compose stop strapi worker && docker compose run --rm backup restore.sh 20261002T011500Z && docker compose up -d
+./deploy.sh latest && docker compose stop strapi worker
+docker compose run --rm backup restore.sh --from-s3 latest    # récupère, déchiffre et restaure
+docker compose up -d
 ```
 
-Les sites des communes sont chez Netlify : ils restent en ligne pendant l'incident, et une mise en ligne
-les reconstruit à partir de la base restaurée.
+La base est recréée à neuf ; les fichiers sont remis dans l'état de la sauvegarde choisie. Les sites des
+communes sont chez Netlify : ils restent en ligne pendant l'incident, une mise en ligne les reconstruit.
 
-**Tester une restauration** une fois par trimestre : `deploy/e2e/run.sh` le fait sur une stack jetable
-(en local ou en CI à chaque déploiement).
+**Tester une restauration** une fois par trimestre : `deploy/e2e/run.sh` le fait sur une stack jetable, y
+compris la restauration depuis le stockage objet seul (en local, et en CI à chaque déploiement).
 
 ## Supervision
 
@@ -88,7 +93,7 @@ les reconstruit à partir de la base restaurée.
 | Les mises en ligne restent « en attente » | worker arrêté ou file bloquée : `docker compose logs worker`, `docker compose restart worker` (les builds reprennent) |
 | Aperçu : 401 dans l'éditeur | `PREVIEW_SECRET` différent entre strapi et preview, ou domaine de preview hors du domaine de l'admin |
 | Certificat expiré | `docker compose logs certbot` ; `docker compose run --rm certbot renew` puis `docker compose exec nginx nginx -s reload` |
-| Disque plein | `docker image prune -a` (anciennes versions), taille du volume `backups`, `BACKUP_RETENTION_DAYS` |
+| Disque plein | `docker image prune -a` (anciennes versions), `du -sh` des volumes `strapi-uploads` et `backups` ; au-delà de ~60 Go de fichiers : voir « Capacité » dans DEPLOYMENT.md |
 | `backup` unhealthy | `docker compose logs backup` (base, place disque, identifiants S3), puis `docker compose exec backup backup.sh` |
 
 ## Base de données

@@ -1,7 +1,7 @@
 ---
 /**
- * Document HTML commun à tous les thèmes : métadonnées, SEO, données structurées, lien d'évitement
- * et bandeau de consentement. Le thème rend le contenu du <body> ; sa feuille de styles est liée ici,
+ * Document HTML commun à tous les thèmes : métadonnées, SEO, données structurées, lien d'évitement,
+ * bandeau « Site en préparation » (commune en période d'essai, #311) et bandeau de consentement. Le thème rend le contenu du <body> ; sa feuille de styles est liée ici,
  * seule (en preview, tous les thèmes sont chargés mais chaque page ne reçoit que celle de son thème).
  */
 import type { PageContext } from '@communeo/theme-contract';
@@ -61,7 +61,7 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     <link rel="stylesheet" href={theme.stylesheet} />
     {seo.description && <meta name="description" content={seo.description} />}
     <link rel="canonical" href={seo.canonical} />
-    {seo.noindex && <meta name="robots" content="noindex" />}
+    {site.inPreparation ? <meta name="robots" content="noindex, nofollow" /> : seo.noindex && <meta name="robots" content="noindex" />}
     {site.favicon ? <link rel="icon" href={site.favicon.src} /> : site.logo && <link rel="icon" href={site.logo.src} />}
     {(site.favicon ?? site.logo) && <link rel="apple-touch-icon" href={(site.favicon ?? site.logo)!.src} />}
     <link rel="manifest" href="/site.webmanifest" />
@@ -79,7 +79,33 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
   <body data-cn-alerts-endpoint={alertsEndpoint}>
     <script is:inline>document.documentElement.classList.add('cn-js');</script>
     <SkipLinks />
+    {
+      site.inPreparation && (
+        <aside class="cn-preparation" aria-label="Site en préparation">
+          <p>
+            <strong>Site en préparation.</strong> Le site de {site.name} est en cours de construction : ses informations
+            peuvent être incomplètes.
+          </p>
+        </aside>
+      )
+    }
     <slot />
     <CookieBanner />
   </body>
 </html>
+
+<style>
+  /* Indépendant du thème : mêmes couleurs partout, contraste AA */
+  .cn-preparation {
+    background: #fff4d6;
+    color: #3d2e00;
+    border-bottom: 1px solid #d9b95c;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .cn-preparation p {
+    margin: 0 auto;
+    max-width: 75rem;
+    padding: 0.625rem 1rem;
+  }
+</style>

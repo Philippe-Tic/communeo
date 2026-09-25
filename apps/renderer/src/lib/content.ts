@@ -38,7 +38,7 @@ function createSource(): ContentSource {
     );
   }
   return createContentSource(
-    withSettings(createFixtureLoader({ variant: (env.FIXTURE_VARIANT as FixtureVariant) || 'complete', logo: env.FIXTURE_LOGO === 'blason' ? 'blason' : 'horizontal', criticalAlert: env.FIXTURE_ALERT === 'critical' })),
+    withSettings(createFixtureLoader({ variant: (env.FIXTURE_VARIANT as FixtureVariant) || 'complete', logo: env.FIXTURE_LOGO === 'blason' ? 'blason' : 'horizontal', criticalAlert: env.FIXTURE_ALERT === 'critical', trial: env.FIXTURE_PLAN === 'trial' })),
     FIXTURE_CONTEXT,
     { now: FIXTURE_NOW },
   );

@@ -7,7 +7,7 @@ import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { deleteCommune } from '../../../services/commune-deletion';
 import { extendTrial, goLive } from '../../../services/trial';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
-import { DEFAULT_THEME } from '@communeo/core';
+import { DEFAULT_THEME, isReservedSiteSlug } from '@communeo/core';
 import { log } from '../../../utils/logger';
 import { recordActivity } from '../../../services/activity-log';
 
@@ -158,6 +158,10 @@ export default {
       ctx.body = { available: false, reason: 'Lettres minuscules, chiffres et tirets seulement' };
       return;
     }
+    if (isReservedSiteSlug(slug)) {
+      ctx.body = { available: false, reason: 'Adresse réservée à Communeo' };
+      return;
+    }
     const taken = await strapi.query('api::site.site').count({ where: { slug } });
     ctx.body = taken ? { available: false, reason: 'Adresse déjà utilisée' } : { available: true };
   },
@@ -221,6 +225,7 @@ export default {
     if (!name || !SLUG.test(slug) || !EMAIL.test(email) || !firstName || !lastName) {
       ctx.throw(400, "Nom, adresse du site, prénom, nom et e-mail de l'administrateur sont obligatoires");
     }
+    if (isReservedSiteSlug(slug)) ctx.throw(400, 'Adresse réservée à Communeo');
     if (await strapi.query('api::site.site').count({ where: { slug } })) ctx.throw(400, 'Adresse déjà utilisée par une autre commune');
     if (await emailTaken(email)) ctx.throw(400, 'Un compte existe déjà avec cet e-mail');
 

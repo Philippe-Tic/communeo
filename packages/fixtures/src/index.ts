@@ -31,6 +31,8 @@ export interface FixtureOptions {
   logo?: 'horizontal' | 'blason';
   /** Ajoute une alerte urgente (troisième niveau de sévérité) */
   criticalAlert?: boolean;
+  /** Commune en période d'essai : site « en préparation », non indexé */
+  trial?: boolean;
 }
 
 const stripImages = <T>(value: T): T =>
@@ -68,7 +70,7 @@ export function createFixtureLoader(options: FixtureOptions = {}): RawLoader {
 
   return {
     site: async () => {
-      const site = saintAubin.site(options.logo);
+      const site = { ...saintAubin.site(options.logo), ...(options.trial ? { plan: 'trial' as const } : {}) };
       return variant === 'minimal' ? minimalSite(transform(site)) : site;
     },
     pages: list(saintAubin.pages),

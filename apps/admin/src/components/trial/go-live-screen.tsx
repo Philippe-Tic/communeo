@@ -70,6 +70,8 @@ export function GoLiveScreen() {
       <Card id="ce-qui-change" title="Ce qui change">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>Le site reste en ligne après l'essai, sans limite de durée.</li>
+          <li>Il n'affiche plus le bandeau « Site en préparation » et les moteurs de recherche peuvent l'indexer.</li>
+          <li>Vous pouvez le relier à l'adresse de la commune (domaine personnalisé).</li>
           <li>Vous continuez à le modifier : vos contenus et vos réglages sont gardés tels quels.</li>
           {trial.kind === 'expired' && <li>Le site est remis en ligne dès le passage en live.</li>}
         </ul>

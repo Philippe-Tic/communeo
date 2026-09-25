@@ -142,6 +142,95 @@ describe('publish', () => {
   });
 });
 
+describe('adresse Communeo (SITES_DOMAIN)', () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'publisher-'));
+    fs.writeFileSync(path.join(dir, 'index.html'), '<h1>Lyon</h1>');
+  });
+  afterEach(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+  /** Site Netlify qui évolue au fil des PATCH, avec la règle de Netlify : pas d'alias sans domaine principal */
+  const api = (initial: { custom_domain?: string | null; domain_aliases?: string[] } = {}, refuse = false): Handler => {
+    const netlifySite = { id: 'site-lyon', name: 'lyon-mairie', custom_domain: initial.custom_domain ?? null, domain_aliases: initial.domain_aliases ?? [] };
+    return ({ method, path, body }) => {
+      if (path === '/sites/site-lyon' && method === 'GET') return { body: netlifySite };
+      if (path === '/sites/site-lyon' && method === 'PATCH') {
+        if (refuse) return { status: 422, body: 'domain already taken' };
+        if ('domain_aliases' in body && !netlifySite.custom_domain)
+          return { status: 422, body: 'You cannot update domain aliases while primary custom domain is not set' };
+        Object.assign(netlifySite, body);
+        return { body: netlifySite };
+      }
+      if (method === 'POST' && path === '/sites/site-lyon/ssl') return { body: {} };
+      if (method === 'POST' && path === '/sites/site-lyon/deploys') return { body: { id: 'dep-1', state: 'uploaded' } };
+      if (path === '/deploys/dep-1') return { body: { id: 'dep-1', state: 'ready' } };
+      if (method === 'POST' && path.endsWith('/restore')) return { body: {} };
+      return undefined;
+    };
+  };
+
+  it('<slug>.<domaine> devient le domaine principal, avec son certificat, et l’adresse du site', async () => {
+    const { api: netlify, p } = publisher(api(), { sitesDomain: 'communeo.fr' });
+    expect(await p.ensureSite({ ...site, hostId: 'site-lyon' })).toEqual({ hostId: 'site-lyon', defaultUrl: 'https://lyon.communeo.fr' });
+    expect(netlify.calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path, c.body])).toEqual([
+      ['PATCH', '/sites/site-lyon', { custom_domain: 'lyon.communeo.fr' }],
+      ['POST', '/sites/site-lyon/ssl', undefined],
+    ]);
+    // Déjà rattachée : rien à refaire
+    const again = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });
+    await again.p.ensureSite({ ...site, hostId: 'site-lyon' });
+    expect(again.api.calls.filter((c) => c.method !== 'GET')).toEqual([]);
+  });
+
+  it('préfixe dev- hors production, comme le nom du site', async () => {
+    const netlifySite = { id: 'dev', name: 'dev-lyon-mairie', custom_domain: 'dev-lyon.communeo.fr' };
+    const { p } = publisher(({ path }) => (path === '/sites/dev' ? { body: netlifySite } : undefined), { sitesDomain: 'communeo.fr', namePrefix: 'dev-' });
+    expect((await p.ensureSite({ ...site, hostId: 'dev' })).defaultUrl).toBe('https://dev-lyon.communeo.fr');
+  });
+
+  it('refus de Netlify : la mise en ligne continue sur l’adresse netlify.app', async () => {
+    const { p } = publisher(api({}, true), { sitesDomain: 'communeo.fr' });
+    const result = await p.publish({ ...site, hostId: 'site-lyon' }, dir);
+    expect(result.defaultUrl).toBe('https://lyon-mairie.netlify.app');
+    expect(fs.existsSync(path.join(dir, '_redirects'))).toBe(false);
+  });
+
+  it('netlify.app redirige vers l’adresse Communeo ; avec un domaine personnalisé, les deux y redirigent', async () => {
+    const { p } = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });
+    await p.publish({ ...site, hostId: 'site-lyon' }, dir);
+    expect(fs.readFileSync(path.join(dir, '_redirects'), 'utf8')).toBe('https://lyon-mairie.netlify.app/* https://lyon.communeo.fr/:splat 301!\n');
+
+    fs.rmSync(path.join(dir, '_redirects'));
+    const withDomain = publisher(api({ custom_domain: 'mairie-lyon.fr', domain_aliases: ['www.mairie-lyon.fr', 'lyon.communeo.fr'] }), { sitesDomain: 'communeo.fr' });
+    await withDomain.p.publish({ ...site, hostId: 'site-lyon', customDomain: 'mairie-lyon.fr' }, dir);
+    expect(fs.readFileSync(path.join(dir, '_redirects'), 'utf8')).toBe(
+      'https://lyon-mairie.netlify.app/* https://mairie-lyon.fr/:splat 301!\nhttps://lyon.communeo.fr/* https://mairie-lyon.fr/:splat 301!\n',
+    );
+  });
+
+  it('site en préparation : en-tête X-Robots-Tag sur toutes les pages, en plus des en-têtes du site', async () => {
+    fs.writeFileSync(path.join(dir, '_headers'), '/fixtures/*\n  Cache-Control: max-age=60\n');
+    const { p } = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });
+    await p.publish({ ...site, hostId: 'site-lyon', noindex: true }, dir);
+    expect(fs.readFileSync(path.join(dir, '_headers'), 'utf8')).toBe(
+      '/*\n  X-Robots-Tag: noindex, nofollow\n\n/fixtures/*\n  Cache-Control: max-age=60\n',
+    );
+  });
+
+  it('domaine de la commune : il devient principal, l’adresse Communeo passe en alias ; retiré, elle redevient principale', async () => {
+    const { api: netlify, p } = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });
+    await p.configureDomain({ ...site, hostId: 'site-lyon' }, 'mairie-lyon.fr');
+    expect(netlify.calls.filter((c) => c.method === 'PATCH').map((c) => c.body)).toEqual([
+      { custom_domain: 'mairie-lyon.fr' },
+      { domain_aliases: ['www.mairie-lyon.fr', 'lyon.communeo.fr'] },
+    ]);
+    netlify.calls.length = 0;
+    expect(await p.removeDomain({ ...site, hostId: 'site-lyon' }, 'mairie-lyon.fr')).toEqual({ defaultUrl: 'https://lyon.communeo.fr' });
+    expect(netlify.calls.filter((c) => c.method === 'PATCH').map((c) => c.body)).toEqual([{ domain_aliases: [] }, { custom_domain: 'lyon.communeo.fr' }]);
+  });
+});
+
 describe('status', () => {
   it('ramène les états Netlify à building / ready / error', async () => {
     const states: Record<string, string> = { a: 'enqueued', b: 'ready', c: 'rejected' };
@@ -237,10 +326,10 @@ describe('domaines', () => {
 
   it("détache le domaine et l'alias www, et renvoie l'adresse par défaut", async () => {
     const { api, p } = publisher(({ body }) => ({
-      body: { id: 'site-lyon', name: 'lyon-mairie', custom_domain: null, domain_aliases: body.domain_aliases ?? ['www.mairie-lyon.fr', 'autre.fr'] },
+      body: { id: 'site-lyon', name: 'lyon-mairie', custom_domain: body?.custom_domain ?? 'mairie-lyon.fr', domain_aliases: body?.domain_aliases ?? ['www.mairie-lyon.fr', 'autre.fr'] },
     }));
     expect(await p.removeDomain(hosted, 'mairie-lyon.fr')).toEqual({ defaultUrl: 'https://lyon-mairie.netlify.app' });
-    expect(api.calls.map((c) => c.body)).toEqual([{ custom_domain: null }, { domain_aliases: ['autre.fr'] }]);
+    expect(api.calls.map((c) => c.body)).toEqual([undefined, { domain_aliases: ['autre.fr'] }, { custom_domain: null }]);
   });
 });
 

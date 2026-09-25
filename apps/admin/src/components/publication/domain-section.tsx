@@ -5,6 +5,7 @@
  * manuelle avec la date du dernier essai ; en échec, ce qui est attendu et ce qui est trouvé.
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { Check, CircleAlert, Copy, ExternalLink, Loader2, Lock, Mail } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
 import { localStorageGet, localStorageSet } from '@/components/editor/preview-panel';
@@ -391,7 +392,31 @@ function DomainCard({ status, onChanged }: { status: DomainStatus; onChanged: ()
   );
 }
 
+/** Période d'essai (#311) : le domaine personnalisé vient avec le passage en live */
+function TrialDomain() {
+  return (
+    <section aria-labelledby="domaine-titre" className="space-y-2 rounded-xl border border-border bg-surface p-5 dark:bg-sidebar">
+      <h2 id="domaine-titre" className="text-xl">
+        Domaine personnalisé
+      </h2>
+      <p>
+        Pendant l'essai, le site garde son adresse Communeo. Une fois le site passé en live, vous pourrez le relier à
+        l'adresse de la commune.
+      </p>
+      <Link to="/passer-en-live" className="inline-block font-medium text-brand underline">
+        Passer en live
+      </Link>
+    </section>
+  );
+}
+
 export function DomainSection() {
+  const { data: user } = useQuery(sessionQuery);
+  if (user?.site?.plan === 'trial') return <TrialDomain />;
+  return <CustomDomain />;
+}
+
+function CustomDomain() {
   const status = useQuery({ ...domainQuery, retry: false });
   const refresh = () => void status.refetch();
   const unavailable = status.error instanceof ApiError && status.error.status === 503;

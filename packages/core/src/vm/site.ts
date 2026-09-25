@@ -36,6 +36,7 @@ export function mapSite(ctx: MapContext, site: Site): SiteVM {
     slug: site.slug,
     theme: (THEME_IDS as string[]).includes(site.theme) ? (site.theme as ThemeId) : DEFAULT_THEME,
     url: ctx.siteUrl,
+    inPreparation: site.plan === 'trial',
     logo: mapImage(ctx, site.logo),
     favicon: mapImage(ctx, site.favicon),
     population: info?.population ?? null,

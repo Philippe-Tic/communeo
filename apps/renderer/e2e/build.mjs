@@ -6,7 +6,7 @@
 import { execSync } from 'node:child_process';
 import { readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { outDir, themes } from './themes.mjs';
+import { outDir, themes, variants } from './themes.mjs';
 
 /** Pages du site : `actualites.html` → `/actualites` (index.html seulement à la racine). */
 function pages(dir, prefix = '') {
@@ -23,13 +23,14 @@ function pages(dir, prefix = '') {
   });
 }
 
-for (const theme of themes) {
-  const dir = fileURLToPath(outDir(theme));
+const builds = [...themes.map((theme) => ({ id: theme, theme, env: {} })), ...variants];
+for (const { id, theme, env } of builds) {
+  const dir = fileURLToPath(outDir(id));
   rmSync(dir, { recursive: true, force: true });
-  console.log(`▸ Build du thème ${theme}`);
+  console.log(`▸ Build ${id === theme ? `du thème ${theme}` : `${id} (thème ${theme})`}`);
   execSync('pnpm astro build', {
     stdio: ['ignore', 'ignore', 'inherit'],
-    env: { ...process.env, THEME: theme, DATA_SOURCE: 'fixtures', OUT_DIR: dir, RENDER_MODE: 'static' },
+    env: { ...process.env, ...env, THEME: theme, DATA_SOURCE: 'fixtures', OUT_DIR: dir, RENDER_MODE: 'static' },
   });
   // Index de recherche : les tests parcourent le site comme un visiteur
   execSync(`node scripts/pagefind.mjs ${dir}`, { stdio: ['ignore', 'ignore', 'inherit'] });

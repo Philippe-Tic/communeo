@@ -144,6 +144,11 @@ export interface SiteVM {
   theme: ThemeId;
   /** URL publique du site, sans slash final */
   url: string;
+  /**
+   * Commune en période d'essai (#311) : le renderer affiche le bandeau « Site en préparation » et
+   * demande aux moteurs de ne pas indexer le site. Les thèmes n'ont rien à faire.
+   */
+  inPreparation: boolean;
   logo: ImageVM | null;
   favicon: ImageVM | null;
   population: number | null;

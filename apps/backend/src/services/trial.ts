@@ -173,9 +173,13 @@ export async function processTrials(now: Date = new Date()) {
   }
 }
 
-/** Site retiré à l'expiration : remis en ligne dès que la commune reprend la main */
-async function republishIfExpired(site: any) {
-  if (!isExpired(site) || !isBuildQueueConfigured()) return;
+/**
+ * Remise en ligne : un site retiré à l'expiration revient dès que la commune reprend la main ; au
+ * passage en live, un site déjà publié perd tout de suite son bandeau « Site en préparation » (#311).
+ */
+async function republish(site: any, { ifPublished = false } = {}) {
+  const published = !!(site.netlify_site_id || site.live_url);
+  if (!(isExpired(site) || (ifPublished && published)) || !isBuildQueueConfigured()) return;
   try {
     await deploymentService.requestBuild(site.documentId, { triggeredBy: null, reason: 'manual' });
   } catch (error) {
@@ -183,14 +187,14 @@ async function republishIfExpired(site: any) {
   }
 }
 
-/** Passage en live (équipe Communeo) : fin de l'essai, le site est remis en ligne s'il avait été retiré */
+/** Passage en live (équipe Communeo) : fin de l'essai ; le site est remis en ligne, sans bandeau d'essai */
 export async function goLive(site: any) {
   const updated = await strapi.documents(SITE).update({
     documentId: site.documentId,
     data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null } as any,
   });
   await recordActivity({ action: 'commune_go_live', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
-  await republishIfExpired(site);
+  await republish(site, { ifPublished: true });
   return updated;
 }
 
@@ -208,7 +212,7 @@ export async function extendTrial(site: any, days: number, now: Date = new Date(
     target: { type: 'site', id: site.documentId, label: site.name },
     details: { days, until: endsAt.toISOString() },
   });
-  await republishIfExpired(site);
+  await republish(site);
   return updated;
 }
 

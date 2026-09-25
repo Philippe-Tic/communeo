@@ -54,6 +54,7 @@ describe('routes internes du worker', () => {
       theme: expect.any(String),
       hostId: null,
       customDomain: null,
+      noindex: false,
     });
 
     const retry = await start(1);

@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quotes",
+  "info": {
+    "singularName": "quote",
+    "pluralName": "quotes",
+    "displayName": "Devis",
+    "description": "Devis et bon de commande de l'abonnement Communeo, validés en ligne par la commune (#312)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "site": { "type": "relation", "relation": "manyToOne", "target": "api::site.site" },
+    "number": { "type": "string", "required": true, "unique": true },
+    "status": { "type": "enumeration", "enum": ["signed", "accepted", "rejected"], "required": true, "default": "signed" },
+    "commune_name": { "type": "string", "required": true },
+    "code_insee": { "type": "string" },
+    "siret": { "type": "string", "required": true },
+    "address": { "type": "text", "required": true },
+    "billing_email": { "type": "email", "required": true },
+    "population": { "type": "integer", "required": true },
+    "tier_label": { "type": "string", "required": true },
+    "amount_ht": { "type": "decimal", "required": true },
+    "vat_rate": { "type": "decimal", "required": true },
+    "amount_ttc": { "type": "decimal", "required": true },
+    "signatory_name": { "type": "string", "required": true },
+    "signatory_role": { "type": "string", "required": true },
+    "signed_by_email": { "type": "email", "private": true },
+    "signed_at": { "type": "datetime", "required": true },
+    "signed_ip": { "type": "string", "private": true },
+    "pdf": { "type": "text", "private": true },
+    "pdf_sha256": { "type": "string" }
+  }
+}

@@ -994,11 +994,22 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
               trialEndsAt: '2026-10-12T08:00:00.000Z',
               trialExpiredAt: null as string | null,
               requestedAt: '2026-09-25T09:10:00.000Z',
-              requestedBy: 'Sophie Leroy (sophie.leroy@saint-aubin.fr)',
+              requestedBy: 'Sophie Leroy, Maire (sophie.leroy@saint-aubin.fr)',
+              quote: { documentId: 'q-1', number: 'DEV-2026-0001', amountHT: 390, tierLabel: 'de 500 à 1 999 habitants', signatory: 'Sophie Leroy, Maire', signedAt: '2026-09-25T09:10:00.000Z' },
             },
           ],
         }
       : { signups: [] as Array<{ id: number; communeName: string; insee: string; firstName: string; lastName: string; email: string; requestedAt: string }>, liveRequests: [] as Array<{ documentId: string }> };
+  let signedQuote: {
+    documentId: string;
+    number: string;
+    status: 'signed' | 'accepted' | 'rejected';
+    signedAt: string;
+    signatoryName: string;
+    signatoryRole: string;
+    amountHT: number;
+    amountTTC: number;
+  } | null = null;
   const sessionPlan = () => ({
     plan: plan.plan,
     trial_ends_at: plan.trialEndsAt,
@@ -1399,11 +1410,34 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         },
         403,
       );
-    if (url.pathname === '/api/trial/live-request' && method === 'POST') {
-      plan.liveRequestedAt = new Date().toISOString();
+    // Devis en ligne (#312) : offre de la tranche 500 – 1 999 habitants
+    if (url.pathname === '/api/quote' && method === 'GET')
+      return json({
+        data: {
+          commune: { name: SITE.name, insee: '58236', siret: null, address: '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire', billingEmail: 'mairie@saint-aubin-sur-loire.fr' },
+          offer: { population: 1234, tierLabel: 'de 500 à 1 999 habitants', amounts: { ht: 390, vatRate: 0, vat: 0, ttc: 390 } },
+          quote: signedQuote,
+        },
+      });
+    if (url.pathname === '/api/quote/sign' && method === 'POST') {
+      const body = route.request().postDataJSON() as Record<string, unknown>;
+      bodies.push({ call: 'sign quote', body: { data: body } });
+      signedQuote = {
+        documentId: 'q-1',
+        number: 'DEV-2026-0001',
+        status: 'signed',
+        signedAt: new Date().toISOString(),
+        signatoryName: String(body.signatoryName),
+        signatoryRole: String(body.signatoryRole),
+        amountHT: 390,
+        amountTTC: 390,
+      };
+      plan.liveRequestedAt = signedQuote.signedAt;
       Object.assign(communes[0]!, plan);
-      return json({ data: { liveRequestedAt: plan.liveRequestedAt } });
+      return json({ data: signedQuote });
     }
+    if (url.pathname.startsWith('/api/quote/') && method === 'GET')
+      return route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n%%EOF\n' });
     // Assistant de création : recherche de la commune et données publiques (#150)
     if (url.pathname === '/api/onboarding/communes') {
       if (publicData === 'down')

@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject', 'quote_sign'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -131,6 +131,9 @@ export type PendingChangeAction = (typeof pendingChangeActionValues)[number];
 
 export const pendingChangeSourceValues = ['person', 'scheduled'] as const;
 export type PendingChangeSource = (typeof pendingChangeSourceValues)[number];
+
+export const quoteStatusValues = ['signed', 'accepted', 'rejected'] as const;
+export type QuoteStatus = (typeof quoteStatusValues)[number];
 
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
@@ -609,6 +612,27 @@ export interface PendingChange extends StrapiDocument {
   occurred_at: string;
 }
 
+/** Content-type `api::quote.quote` — Devis et bon de commande de l'abonnement Communeo, validés en ligne par la commune (#312) */
+export interface Quote extends StrapiDocument {
+  site?: Site | null;
+  number: string;
+  status: QuoteStatus;
+  commune_name: string;
+  code_insee: string | null;
+  siret: string;
+  address: string;
+  billing_email: string;
+  population: number;
+  tier_label: string;
+  amount_ht: string;
+  vat_rate: string;
+  amount_ttc: string;
+  signatory_name: string;
+  signatory_role: string;
+  signed_at: string;
+  pdf_sha256: string | null;
+}
+
 /** Content-type `api::school-menu.school-menu` — Menus de cantine scolaire par semaine */
 export interface SchoolMenu extends StrapiDocument {
   week_start: string;
@@ -750,6 +774,7 @@ export const pluralNames = {
   'api::official-document.official-document': 'official-documents',
   'api::page.page': 'pages',
   'api::pending-change.pending-change': 'pending-changes',
+  'api::quote.quote': 'quotes',
   'api::school-menu.school-menu': 'school-menus',
   'api::signup-request.signup-request': 'signup-requests',
   'api::site.site': 'sites',
@@ -773,6 +798,7 @@ export interface ContentTypes {
   'api::official-document.official-document': OfficialDocument;
   'api::page.page': Page;
   'api::pending-change.pending-change': PendingChange;
+  'api::quote.quote': Quote;
   'api::school-menu.school-menu': SchoolMenu;
   'api::signup-request.signup-request': SignupRequest;
   'api::site.site': Site;

@@ -7,11 +7,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Building2, Rocket } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { formatEuros } from '@communeo/core';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import { focusHeadingIfRequested } from '@/lib/focus';
+import { quotePdfUrl } from '@/lib/quote';
 import { formatDay } from '@/lib/trial';
 import {
   approveLive,
@@ -160,7 +162,17 @@ export function ValidationsScreen() {
                   </>
                 }
                 lines={[
-                  `Demandé le ${formatDay(new Date(live.requestedAt))}${live.requestedBy ? ` par ${live.requestedBy}` : ''}`,
+                  live.quote ? (
+                    <>
+                      Devis {live.quote.number} : {formatEuros(live.quote.amountHT)} HT par an, tranche : {live.quote.tierLabel} ·{' '}
+                      <a href={quotePdfUrl(live.quote.documentId)} target="_blank" rel="noreferrer" className="font-medium text-brand underline">
+                        PDF<span className="sr-only"> du devis {live.quote.number} (nouvel onglet)</span>
+                      </a>
+                    </>
+                  ) : (
+                    'Sans devis'
+                  ),
+                  `Validé le ${formatDay(new Date(live.requestedAt))}${live.requestedBy ? ` par ${live.requestedBy}` : ''}`,
                   live.plan === 'expired'
                     ? `Essai terminé${live.trialExpiredAt ? ` le ${formatDay(new Date(live.trialExpiredAt))}` : ''} : site retiré, administration en lecture seule`
                     : `Essai jusqu'au ${live.trialEndsAt ? formatDay(new Date(live.trialEndsAt)) : '—'}`,

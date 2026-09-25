@@ -67,3 +67,13 @@ export async function communeDetails(insee: string): Promise<CommuneDetails | nu
   }
   return { ...fromGeo(record), townHall };
 }
+
+/** Population municipale INSEE d'une commune (devis #312) ; `null` : commune inconnue */
+export async function communePopulation(insee: string): Promise<number | null> {
+  if (!/^\d[\dAB]\d{3}$/.test(insee)) return null;
+  const record = await getJson(`${GEO()}/communes/${insee}?fields=population`).catch((error) => {
+    if (error instanceof PublicDataUnavailable && error.message === 'Réponse 404') return null;
+    throw error;
+  });
+  return typeof record?.population === 'number' ? record.population : null;
+}

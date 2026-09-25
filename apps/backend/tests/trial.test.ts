@@ -148,21 +148,12 @@ describe('fin de l’essai', () => {
     expect(await strapi.db.query('api::deployment.deployment').count({ where: { job_id: 'job-apres-essai' } })).toBe(0);
   });
 
-  it('son compte et la demande de passage en live restent possibles ; l’équipe est prévenue', async () => {
+  it('son compte et la validation du devis restent possibles', async () => {
     expect((await http.put('/api/user-management/me').set(auth(admin)).send({ first_name: 'Test' })).status).toBe(200);
-
-    process.env.SIGNUP_NOTIFY_EMAIL = 'equipe@communeo.test';
-    try {
-      const res = await http.post('/api/trial/live-request').set(auth(admin));
-      expect(res.status).toBe(200);
-      expect(res.body.data.liveRequestedAt).toBeTruthy();
-    } finally {
-      delete process.env.SIGNUP_NOTIFY_EMAIL;
-    }
-    const [mail] = emailsTo('equipe@communeo.test');
-    expect(mail!.subject).toBe(`Passage en live demandé : ${(await site()).name}`);
-    expect(mail!.text).toContain('/plateforme/a-valider');
-    expect((await site()).live_requested_at).toBeTruthy();
+    // Refusé pour les champs manquants, pas pour la lecture seule (tests/quote.test.ts)
+    const quote = await http.post('/api/quote/sign').set(auth(admin)).send({});
+    expect(quote.status).toBe(400);
+    expect(quote.body.error.details?.code).toBeUndefined();
   });
 
   it('l’équipe garde la main sur l’administration de la commune', async () => {
@@ -212,7 +203,7 @@ describe('espace équipe', () => {
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({ plan: 'live', liveRequestedAt: null });
     expect(await strapi.db.query('api::activity-log.activity-log').count({ where: { action: 'commune_go_live' } })).toBe(1);
-    expect((await http.post('/api/trial/live-request').set(auth(admin))).status).toBe(409);
+    expect((await http.post('/api/quote/sign').set(auth(admin)).send({})).status).toBe(409);
     expect((await http.put(`/api/site-management/${siteA}`).set(auth(superAdmin)).send({ data: { extendTrialDays: 7 } })).status).toBe(400);
     expect((await http.put(`/api/site-management/${siteA}`).set(auth(superAdmin)).send({ data: { plan: 'trial' } })).status).toBe(400);
   });

@@ -418,6 +418,7 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'commune_go_live',
         'live_reject',
         'signup_reject',
+        'quote_sign',
       ]
     > &
       Schema.Attribute.Required;
@@ -1076,6 +1077,58 @@ export interface ApiPendingChangePendingChange extends Struct.CollectionTypeSche
     title: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
+export interface ApiQuoteQuote extends Struct.CollectionTypeSchema {
+  collectionName: 'quotes';
+  info: {
+    description: "Devis et bon de commande de l'abonnement Communeo, valid\u00E9s en ligne par la commune (#312)";
+    displayName: 'Devis';
+    pluralName: 'quotes';
+    singularName: 'quote';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    address: Schema.Attribute.Text & Schema.Attribute.Required;
+    amount_ht: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    amount_ttc: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    billing_email: Schema.Attribute.Email & Schema.Attribute.Required;
+    code_insee: Schema.Attribute.String;
+    commune_name: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::quote.quote'> & Schema.Attribute.Private;
+    number: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique;
+    pdf: Schema.Attribute.Text & Schema.Attribute.Private;
+    pdf_sha256: Schema.Attribute.String;
+    population: Schema.Attribute.Integer & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    signatory_name: Schema.Attribute.String & Schema.Attribute.Required;
+    signatory_role: Schema.Attribute.String & Schema.Attribute.Required;
+    signed_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    signed_by_email: Schema.Attribute.Email & Schema.Attribute.Private;
+    signed_ip: Schema.Attribute.String & Schema.Attribute.Private;
+    siret: Schema.Attribute.String & Schema.Attribute.Required;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'>;
+    status: Schema.Attribute.Enumeration<['signed', 'accepted', 'rejected']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'signed'>;
+    tier_label: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    vat_rate: Schema.Attribute.Decimal & Schema.Attribute.Required;
   };
 }
 
@@ -1820,6 +1873,7 @@ declare module '@strapi/strapi' {
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;
       'api::page.page': ApiPagePage;
       'api::pending-change.pending-change': ApiPendingChangePendingChange;
+      'api::quote.quote': ApiQuoteQuote;
       'api::school-menu.school-menu': ApiSchoolMenuSchoolMenu;
       'api::signup-request.signup-request': ApiSignupRequestSignupRequest;
       'api::site.site': ApiSiteSite;

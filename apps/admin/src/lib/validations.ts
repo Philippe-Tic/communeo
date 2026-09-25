@@ -23,8 +23,10 @@ export interface LiveRequest {
   trialEndsAt: string | null;
   trialExpiredAt: string | null;
   requestedAt: string;
-  /** « Prénom Nom (e-mail) » de la personne qui a fait la demande */
+  /** « Prénom Nom, qualité (e-mail) » de la personne qui a validé le devis */
   requestedBy: string | null;
+  /** Devis validé qui accompagne la demande (#312) */
+  quote: { documentId: string; number: string; amountHT: number; tierLabel: string; signatory: string; signedAt: string } | null;
 }
 
 export const validationsQuery = queryOptions({

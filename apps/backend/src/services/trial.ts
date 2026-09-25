@@ -19,7 +19,7 @@ import deploymentService from './deployment';
 import { log } from '../utils/logger';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { escapeHtml } from '../utils/security';
-import { adminUrl, notifyTeam } from './team-notifications';
+import { adminUrl } from './team-notifications';
 
 const SITE = 'api::site.site';
 
@@ -173,6 +173,13 @@ export async function processTrials(now: Date = new Date()) {
   }
 }
 
+/** Le devis validé qui attendait l'équipe : accepté au passage en live, refusé sinon (#312) */
+async function settleQuote(site: any, status: 'accepted' | 'rejected') {
+  const quotes = await strapi.db.query('api::quote.quote').findMany({ where: { site: { documentId: site.documentId }, status: 'signed' }, select: ['id'] });
+  // updateMany ne filtre pas sur une relation : par identifiants
+  if (quotes.length) await strapi.db.query('api::quote.quote').updateMany({ where: { id: { $in: quotes.map((quote: any) => quote.id) } }, data: { status } });
+}
+
 /**
  * Remise en ligne : un site retiré à l'expiration revient dès que la commune reprend la main ; au
  * passage en live, un site déjà publié perd tout de suite son bandeau « Site en préparation » (#311).
@@ -194,6 +201,7 @@ export async function goLive(site: any) {
     data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null, live_requested_by: null } as any,
   });
   await recordActivity({ action: 'commune_go_live', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
+  await settleQuote(site, 'accepted');
   await republish(site, { ifPublished: true });
   await notifyAdmins(
     site,
@@ -225,26 +233,10 @@ export async function extendTrial(site: any, days: number, now: Date = new Date(
   return updated;
 }
 
-/** « Passer en live » demandé depuis l'administration de la commune : l'équipe est prévenue */
-export async function requestGoLive(site: any, requester: { email: string; name: string }) {
-  const now = new Date();
-  const updated = await strapi.documents(SITE).update({
-    documentId: site.documentId,
-    data: { live_requested_at: now, live_requested_by: `${requester.name} (${requester.email})` } as any,
-  });
-  await recordActivity({ action: 'live_request', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
-  await notifyTeam(
-    `Passage en live demandé : ${site.name}`,
-    `${requester.name} (${requester.email}) demande le passage en live de ${site.name} (INSEE ${site.code_insee ?? 'inconnu'}). ${
-      site.plan === 'expired' ? "L'essai est terminé depuis le " + formatDate(site.trial_expired_at) : "L'essai se termine le " + formatDate(site.trial_ends_at)
-    }. À valider dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
-  );
-  return updated;
-}
-
 /** Demande de passage en live refusée par l'équipe : la demande est retirée, le motif envoyé à la commune */
 export async function rejectGoLive(site: any, reason: string) {
   await strapi.documents(SITE).update({ documentId: site.documentId, data: { live_requested_at: null, live_requested_by: null } as any });
+  await settleQuote(site, 'rejected');
   await recordActivity({
     action: 'live_reject',
     siteDocumentId: site.documentId,
@@ -257,7 +249,7 @@ export async function rejectGoLive(site: any, reason: string) {
     [
       `L'équipe Communeo n'a pas validé le passage en live du site de ${site.name} :`,
       reason,
-      "Vous pouvez refaire la demande depuis l'administration, une fois le point réglé.",
+      "Vous pouvez valider un nouveau devis depuis l'administration, une fois le point réglé.",
     ],
     GO_LIVE,
   );

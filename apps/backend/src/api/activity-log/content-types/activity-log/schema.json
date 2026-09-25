@@ -43,7 +43,8 @@
         "live_request",
         "commune_go_live",
         "live_reject",
-        "signup_reject"
+        "signup_reject",
+        "quote_sign"
       ],
       "required": true
     },

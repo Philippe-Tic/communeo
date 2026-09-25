@@ -18,6 +18,9 @@ const auth = (token: string) => ({ Authorization: `Bearer ${token}` });
 const REQUEST = 'api::signup-request.signup-request';
 const SITE = 'api::site.site';
 const team = () => http.get('/api/validations').set(auth(superAdmin));
+/** Demande de passage en live, telle que la laisse un devis validé (tests/quote.test.ts) */
+const requestLive = () =>
+  strapi.db.query(SITE).update({ where: { documentId: siteA }, data: { live_requested_at: new Date(), live_requested_by: 'Marie Durand, Maire (test@example.com)' } });
 
 const awaitingReview = (insee: string, commune: string, email: string) =>
   strapi.db.query(REQUEST).create({
@@ -92,16 +95,10 @@ describe('passages en live demandés', () => {
     await strapi.db.query(SITE).update({ where: { documentId: siteA }, data: { plan: 'trial', trial_ends_at: addDays(new Date(), 10) } });
   });
 
-  it('la demande arrive dans la file, avec son auteur ; l’équipe est prévenue', async () => {
-    process.env.SIGNUP_NOTIFY_EMAIL = 'equipe@communeo.test';
-    try {
-      expect((await http.post('/api/trial/live-request').set(auth(admin))).status).toBe(200);
-    } finally {
-      delete process.env.SIGNUP_NOTIFY_EMAIL;
-    }
-    expect(sentEmails.find((mail) => mail.to === 'equipe@communeo.test')?.text).toContain('/plateforme/a-valider');
+  it('la demande arrive dans la file, avec son auteur', async () => {
+    await requestLive();
     const [live] = (await team()).body.data.liveRequests;
-    expect(live).toMatchObject({ documentId: siteA, plan: 'trial', requestedBy: expect.stringContaining('test@example.com') });
+    expect(live).toMatchObject({ documentId: siteA, plan: 'trial', requestedBy: 'Marie Durand, Maire (test@example.com)' });
   });
 
   it('refuser : la demande est retirée, le motif envoyé aux administrateurs', async () => {
@@ -116,7 +113,7 @@ describe('passages en live demandés', () => {
   });
 
   it('valider : la commune passe en live et en est prévenue', async () => {
-    await http.post('/api/trial/live-request').set(auth(admin));
+    await requestLive();
     sentEmails.length = 0;
     expect((await http.post(`/api/validations/live/${siteA}/approve`).set(auth(superAdmin))).status).toBe(200);
     expect(await strapi.db.query(SITE).findOne({ where: { documentId: siteA } })).toMatchObject({ plan: 'live', live_requested_at: null });

@@ -63,6 +63,8 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 - `STRAPI_API_TOKEN` — read-only build token (created at first boot when unset, see logs)
 - `PREVIEW_API_TOKEN` — read-only token of the preview server (drafts), created the same way
 - `PREVIEW_SECRET` — HMAC secret of the signed preview tokens (same value on the preview server); `PREVIEW_URL` — preview server base URL
+- `ADMIN_URL` — admin base URL, used in e-mailed links (invitation, sign-up confirmation)
+- `SIGNUP_NOTIFY_EMAIL` — Communeo team address notified of self-service sign-ups that need a manual check (no official town-hall e-mail in the Annuaire)
 - `HOSTING_NAME`, `HOSTING_ADDRESS`, `HOSTING_PHONE` — host shown in every commune's legal notice (`config/platform.ts`); enforced on each Site write and synced at boot, never editable by communes. Unset: values already stored are kept
 
 ### Worker (`apps/worker/.env.example`)
@@ -72,6 +74,7 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 
 ### Admin
 - `VITE_API_URL` — Strapi backend URL (e.g., `http://localhost:1337`)
+- `VITE_TERMS_URL` — Communeo terms of use, linked from the sign-up page (#315)
 
 ### Renderer
 - `THEME` — theme of the static build (default `institutionnel`); `DATA_SOURCE` — `strapi` or the demo fixtures (default)

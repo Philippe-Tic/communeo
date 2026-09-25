@@ -16,6 +16,7 @@ export default defineConfig({
           label: "Premiers pas",
           items: [
             { label: "Présentation", slug: "premiers-pas/presentation" },
+            { label: "Créer le site de sa commune", slug: "premiers-pas/inscription" },
             { label: "Se connecter", slug: "premiers-pas/connexion" },
             { label: "L'assistant de démarrage", slug: "premiers-pas/assistant" },
             { label: "Le tableau de bord", slug: "premiers-pas/tableau-de-bord" },

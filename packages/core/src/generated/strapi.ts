@@ -135,6 +135,9 @@ export type PendingChangeSource = (typeof pendingChangeSourceValues)[number];
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
 
+export const signupRequestStatusValues = ['pending_confirmation', 'awaiting_review', 'confirmed', 'rejected'] as const;
+export type SignupRequestStatus = (typeof signupRequestStatusValues)[number];
+
 export const siteThemeValues = ['institutionnel', 'moderne', 'journal', 'bourg'] as const;
 export type SiteTheme = (typeof siteThemeValues)[number];
 
@@ -611,6 +614,18 @@ export interface SchoolMenu extends StrapiDocument {
   site?: Site | null;
 }
 
+/** Content-type `api::signup-request.signup-request` — Inscription d'une mairie en libre-service, en attente de la confirmation envoyée à l'adresse officielle de la mairie ou de la vérification par l'équipe */
+export interface SignupRequest extends StrapiDocument {
+  code_insee: string;
+  commune_name: string;
+  first_name: string;
+  last_name: string;
+  status: SignupRequestStatus;
+  terms_accepted_at: string;
+  confirmed_at: string | null;
+  site?: Site | null;
+}
+
 /** Content-type `api::site.site` */
 export interface Site extends StrapiDocument {
   name: string;
@@ -723,6 +738,7 @@ export const pluralNames = {
   'api::page.page': 'pages',
   'api::pending-change.pending-change': 'pending-changes',
   'api::school-menu.school-menu': 'school-menus',
+  'api::signup-request.signup-request': 'signup-requests',
   'api::site.site': 'sites',
   'api::team-member.team-member': 'team-members',
   'api::waste-schedule.waste-schedule': 'waste-schedules',
@@ -745,6 +761,7 @@ export interface ContentTypes {
   'api::page.page': Page;
   'api::pending-change.pending-change': PendingChange;
   'api::school-menu.school-menu': SchoolMenu;
+  'api::signup-request.signup-request': SignupRequest;
   'api::site.site': Site;
   'api::team-member.team-member': TeamMember;
   'api::waste-schedule.waste-schedule': WasteSchedule;

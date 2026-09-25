@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as CommunesRouteImport } from './routes/communes'
 import { Route as ConnexionRouteImport } from './routes/connexion'
+import { Route as InscriptionRouteImport } from './routes/inscription'
 import { Route as InvitationRouteImport } from './routes/invitation'
 import { Route as MotDePasseOublieRouteImport } from './routes/mot-de-passe-oublie'
 import { Route as NouveauMotDePasseRouteImport } from './routes/nouveau-mot-de-passe'
@@ -37,6 +38,7 @@ import { Route as AppMonCompteRouteImport } from './routes/_app/mon-compte'
 import { Route as AppNewsletterRouteImport } from './routes/_app/newsletter'
 import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
+import { Route as InscriptionConfirmerRouteImport } from './routes/inscription_.confirmer'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
 import { Route as PlateformeJournalRouteImport } from './routes/plateforme/journal'
 import { Route as PlateformeStatistiquesRouteImport } from './routes/plateforme/statistiques'
@@ -74,6 +76,11 @@ const CommunesRoute = CommunesRouteImport.update({
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InscriptionRoute = InscriptionRouteImport.update({
+  id: '/inscription',
+  path: '/inscription',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InvitationRoute = InvitationRouteImport.update({
@@ -196,6 +203,11 @@ const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
   path: '/utilisateurs',
   getParentRoute: () => AppRoute,
 } as any)
+const InscriptionConfirmerRoute = InscriptionConfirmerRouteImport.update({
+  id: '/inscription_/confirmer',
+  path: '/inscription/confirmer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlateformeIndexRoute = PlateformeIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -298,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/inscription': typeof InscriptionRoute
   '/invitation': typeof InvitationRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
@@ -321,6 +334,7 @@ export interface FileRoutesByFullPath {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -345,6 +359,7 @@ export interface FileRoutesByTo {
   '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/inscription': typeof InscriptionRoute
   '/invitation': typeof InvitationRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
@@ -367,6 +382,7 @@ export interface FileRoutesByTo {
   '/newsletter': typeof AppNewsletterRoute
   '/pages': typeof AppPagesRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -394,6 +410,7 @@ export interface FileRoutesById {
   '/assistant': typeof AssistantRoute
   '/communes': typeof CommunesRoute
   '/connexion': typeof ConnexionRoute
+  '/inscription': typeof InscriptionRoute
   '/invitation': typeof InvitationRoute
   '/mot-de-passe-oublie': typeof MotDePasseOublieRoute
   '/nouveau-mot-de-passe': typeof NouveauMotDePasseRoute
@@ -417,6 +434,7 @@ export interface FileRoutesById {
   '/_app/newsletter': typeof AppNewsletterRoute
   '/_app/pages': typeof AppPagesRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription_/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -445,6 +463,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/communes'
     | '/connexion'
+    | '/inscription'
     | '/invitation'
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
@@ -468,6 +487,7 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/inscription/confirmer'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -492,6 +512,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/communes'
     | '/connexion'
+    | '/inscription'
     | '/invitation'
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
@@ -514,6 +535,7 @@ export interface FileRouteTypes {
     | '/newsletter'
     | '/pages'
     | '/utilisateurs'
+    | '/inscription/confirmer'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -540,6 +562,7 @@ export interface FileRouteTypes {
     | '/assistant'
     | '/communes'
     | '/connexion'
+    | '/inscription'
     | '/invitation'
     | '/mot-de-passe-oublie'
     | '/nouveau-mot-de-passe'
@@ -563,6 +586,7 @@ export interface FileRouteTypes {
     | '/_app/newsletter'
     | '/_app/pages'
     | '/_app/utilisateurs'
+    | '/inscription_/confirmer'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -590,10 +614,12 @@ export interface RootRouteChildren {
   AssistantRoute: typeof AssistantRoute
   CommunesRoute: typeof CommunesRoute
   ConnexionRoute: typeof ConnexionRoute
+  InscriptionRoute: typeof InscriptionRoute
   InvitationRoute: typeof InvitationRoute
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   NouveauMotDePasseRoute: typeof NouveauMotDePasseRoute
   PlateformeRoute: typeof PlateformeRouteWithChildren
+  InscriptionConfirmerRoute: typeof InscriptionConfirmerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -624,6 +650,13 @@ declare module '@tanstack/react-router' {
       path: '/connexion'
       fullPath: '/connexion'
       preLoaderRoute: typeof ConnexionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inscription': {
+      id: '/inscription'
+      path: '/inscription'
+      fullPath: '/inscription'
+      preLoaderRoute: typeof InscriptionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invitation': {
@@ -793,6 +826,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/utilisateurs'
       preLoaderRoute: typeof AppUtilisateursRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/inscription_/confirmer': {
+      id: '/inscription_/confirmer'
+      path: '/inscription/confirmer'
+      fullPath: '/inscription/confirmer'
+      preLoaderRoute: typeof InscriptionConfirmerRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/plateforme/': {
       id: '/plateforme/'
@@ -1031,10 +1071,12 @@ const rootRouteChildren: RootRouteChildren = {
   AssistantRoute: AssistantRoute,
   CommunesRoute: CommunesRoute,
   ConnexionRoute: ConnexionRoute,
+  InscriptionRoute: InscriptionRoute,
   InvitationRoute: InvitationRoute,
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   NouveauMotDePasseRoute: NouveauMotDePasseRoute,
   PlateformeRoute: PlateformeRouteWithChildren,
+  InscriptionConfirmerRoute: InscriptionConfirmerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

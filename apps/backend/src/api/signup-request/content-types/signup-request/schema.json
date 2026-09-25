@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "signup_requests",
+  "info": {
+    "singularName": "signup-request",
+    "pluralName": "signup-requests",
+    "displayName": "Demande d'inscription",
+    "description": "Inscription d'une mairie en libre-service, en attente de la confirmation envoyée à l'adresse officielle de la mairie ou de la vérification par l'équipe"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "code_insee": { "type": "string", "required": true, "regex": "^[0-9][0-9AB][0-9]{3}$" },
+    "commune_name": { "type": "string", "required": true },
+    "first_name": { "type": "string", "required": true },
+    "last_name": { "type": "string", "required": true },
+    "email": { "type": "email", "required": true, "private": true },
+    "official_email": { "type": "email", "private": true },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending_confirmation", "awaiting_review", "confirmed", "rejected"],
+      "required": true,
+      "default": "pending_confirmation"
+    },
+    "token": { "type": "string", "private": true },
+    "terms_accepted_at": { "type": "datetime", "required": true },
+    "confirmed_at": { "type": "datetime" },
+    "site": { "type": "relation", "relation": "oneToOne", "target": "api::site.site" }
+  }
+}

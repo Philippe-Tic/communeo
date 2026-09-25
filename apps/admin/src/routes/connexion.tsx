@@ -80,6 +80,12 @@ function LoginPage() {
           {form.formState.isSubmitting ? 'Connexion…' : 'Se connecter'}
         </Button>
       </Form>
+      <p className="mt-5 text-[13px] text-secondary">
+        Votre commune n’a pas encore de site ?{' '}
+        <Link to="/inscription" className="font-semibold text-brand underline underline-offset-2">
+          Créer le site de la commune
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

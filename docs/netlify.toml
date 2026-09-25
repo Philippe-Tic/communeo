@@ -1,0 +1,9 @@
+# Site Netlify de la documentation (doc-communeo), « Base directory » = docs.
+# Netlify lit ce fichier dans le dossier de base et n'y voit pas le .nvmrc de la racine :
+# la version de Node est fixée ici, alignée sur le monorepo.
+[build]
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"

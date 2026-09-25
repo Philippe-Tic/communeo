@@ -17,7 +17,8 @@
     "gen:types": "pnpm --filter @communeo/core gen:types",
     "create-theme": "node scripts/create-theme.mjs",
     "theme:dev": "node scripts/theme-dev.mjs",
-    "theme:thumbnail": "node scripts/theme-thumbnail.mjs"
+    "theme:thumbnail": "node scripts/theme-thumbnail.mjs",
+    "docs:captures": "E2E_THEMES=institutionnel pnpm --filter @communeo/renderer exec node e2e/build.mjs && pnpm --filter @communeo/admin exec vite build && DOCS_CAPTURES=1 pnpm --filter @communeo/admin exec playwright test docs-captures --project laptop-1366"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

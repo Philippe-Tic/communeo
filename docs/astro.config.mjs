@@ -10,87 +10,76 @@ export default defineConfig({
       locales: {
         root: { label: "Français", lang: "fr" },
       },
+      // Même arborescence que le menu de l'administration
       sidebar: [
         {
-          label: "Guide de démarrage",
+          label: "Premiers pas",
           items: [
-            { label: "Présentation", slug: "guide/presentation" },
-            { label: "Connexion et navigation", slug: "guide/connexion" },
+            { label: "Présentation", slug: "premiers-pas/presentation" },
+            { label: "Se connecter", slug: "premiers-pas/connexion" },
+            { label: "L'assistant de démarrage", slug: "premiers-pas/assistant" },
+            { label: "Le tableau de bord", slug: "premiers-pas/tableau-de-bord" },
           ],
         },
         {
-          label: "Gestion de contenu",
+          label: "Écrire et publier",
           items: [
-            { label: "Tableau de bord", slug: "contenu/tableau-de-bord" },
-            { label: "Actualités", slug: "contenu/actualites" },
-            { label: "Pages", slug: "contenu/pages" },
-            { label: "Événements", slug: "contenu/evenements" },
-            {
-              label: "Documents officiels",
-              slug: "contenu/documents-officiels",
-            },
-            { label: "Alertes", slug: "contenu/alertes" },
-            {
-              label: "Collecte des déchets",
-              slug: "contenu/collecte-dechets",
-            },
-            { label: "Cantine", slug: "contenu/cantine" },
-            { label: "Médiathèque", slug: "contenu/mediatheque" },
+            { label: "L'éditeur de contenu", slug: "publier/editeur" },
+            { label: "Les blocs", slug: "publier/blocs" },
+            { label: "Publier, programmer, historique", slug: "publier/publication" },
+            { label: "Mettre en ligne", slug: "publier/mise-en-ligne" },
           ],
         },
         {
-          label: "Communauté",
+          label: "Contenus",
           items: [
-            { label: "Messages", slug: "communaute/messages" },
-            { label: "Équipe municipale", slug: "communaute/equipe" },
-            { label: "Associations", slug: "communaute/associations" },
-            { label: "Newsletter", slug: "communaute/newsletter" },
+            { label: "Pages", slug: "contenus/pages" },
+            { label: "Actualités", slug: "contenus/actualites" },
+            { label: "Agenda", slug: "contenus/agenda" },
+            { label: "Documents officiels", slug: "contenus/documents" },
+            { label: "Équipe municipale", slug: "contenus/equipe" },
+            { label: "Associations", slug: "contenus/associations" },
           ],
         },
         {
-          label: "Configuration du site",
+          label: "Vie pratique",
           items: [
-            {
-              label: "Informations générales",
-              slug: "configuration/informations-generales",
-            },
-            {
-              label: "Mentions légales & RGPD",
-              slug: "configuration/mentions-legales-rgpd",
-            },
-            {
-              label: "Accueil & Navigation",
-              slug: "configuration/accueil-navigation",
-            },
-            {
-              label: "Réseaux sociaux",
-              slug: "configuration/reseaux-sociaux",
-            },
+            { label: "Alertes", slug: "vie-pratique/alertes" },
+            { label: "Collecte des déchets", slug: "vie-pratique/dechets" },
+            { label: "Cantine", slug: "vie-pratique/cantine" },
+          ],
+        },
+        {
+          label: "Habitants",
+          items: [
+            { label: "Messages", slug: "habitants/messages" },
+            { label: "Lettre d'information", slug: "habitants/newsletter" },
+          ],
+        },
+        { label: "Médiathèque", slug: "mediatheque" },
+        {
+          label: "Mon site",
+          items: [
+            { label: "Apparence", slug: "mon-site/apparence" },
+            { label: "Page d'accueil", slug: "mon-site/accueil" },
+            { label: "Menu du site", slug: "mon-site/menu" },
+            { label: "Informations de la commune", slug: "mon-site/informations" },
+            { label: "Mentions légales et données personnelles", slug: "mon-site/legal" },
+            { label: "Accessibilité", slug: "mon-site/accessibilite" },
+            { label: "Réseaux sociaux, démarches, open data", slug: "mon-site/autres-reglages" },
           ],
         },
         {
           label: "Administration",
           items: [
-            {
-              label: "Conformité légale",
-              slug: "administration/conformite-legale",
-            },
-            { label: "Déploiement", slug: "administration/deploiement" },
-            {
-              label: "Domaine personnalisé",
-              slug: "administration/domaine-personnalise",
-            },
+            { label: "Conformité", slug: "administration/conformite" },
             { label: "Utilisateurs", slug: "administration/utilisateurs" },
-            { label: "Profil", slug: "administration/profil" },
+            { label: "Journal d'activité", slug: "administration/journal" },
+            { label: "Mon compte", slug: "administration/mon-compte" },
           ],
         },
-        {
-          label: "Référence",
-          items: [
-            { label: "Éditeur de texte", slug: "reference/editeur-texte" },
-            { label: "Astuces", slug: "reference/astuces" },
-          ],
-        },
+        { label: "Équipe Communeo", slug: "equipe-communeo" },
+        { label: "Créer un thème (développeurs)", slug: "developpeurs/creer-un-theme" },
       ],
     }),
   ],

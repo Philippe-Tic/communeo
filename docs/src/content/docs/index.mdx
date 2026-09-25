@@ -1,12 +1,12 @@
 ---
-title: Communeo
-description: Documentation du CMS multi-tenant pour les sites municipaux.
+title: "Communeo"
+description: "Documentation de l'administration des sites de communes Communeo."
 template: splash
 hero:
-  tagline: Créez et gérez facilement le site internet de votre commune avec Communeo.
+  tagline: "Le site internet de votre commune, tenu à jour par la mairie, simplement et dans les règles."
   actions:
     - text: Commencer
-      link: /guide/presentation/
+      link: /premiers-pas/presentation/
       icon: right-arrow
 ---
 
@@ -15,31 +15,25 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 ## Premiers pas
 
 <CardGrid>
-  <LinkCard title="Présentation" href="/guide/presentation/" description="Découvrez Communeo et ses fonctionnalités principales." />
-  <LinkCard title="Connexion et navigation" href="/guide/connexion/" description="Connectez-vous et prenez en main l'interface d'administration." />
+  <LinkCard title="Présentation" href="/premiers-pas/presentation/" description="Ce que fait Communeo, et comment le site se met à jour." />
+  <LinkCard title="L'assistant de démarrage" href="/premiers-pas/assistant/" description="Sept étapes pour un site prêt à publier." />
+  <LinkCard title="Le tableau de bord" href="/premiers-pas/tableau-de-bord/" description="Ce qui demande votre attention, en un coup d'œil." />
+  <LinkCard title="Écrire et publier" href="/publier/editeur/" description="L'éditeur, les blocs, la publication et la mise en ligne." />
 </CardGrid>
 
-## Gérer votre contenu
+## Tout le site, écran par écran
 
 <CardGrid>
-  <Card title="Contenu" icon="pencil">
-    Actualités, pages, événements, documents officiels, alertes, cantine et collecte des déchets.
+  <Card title="Contenus" icon="pencil">
+    Pages, actualités, agenda, documents officiels, équipe municipale, associations.
   </Card>
-  <Card title="Médiathèque" icon="open-book">
-    Gérez les images et fichiers utilisés sur votre site.
+  <Card title="Vie pratique" icon="warning">
+    Alertes en bandeau, collecte des déchets, menus de la cantine.
   </Card>
-  <Card title="Communauté" icon="comment">
-    Messages reçus, équipe municipale, associations et newsletter.
+  <Card title="Habitants" icon="comment">
+    Messages du formulaire de contact (dont les demandes RGPD), lettre d'information.
   </Card>
-  <Card title="Configuration" icon="setting">
-    Informations générales, mentions légales, réseaux sociaux et navigation.
+  <Card title="Mon site" icon="setting">
+    Thème, page d'accueil, menu, informations, textes légaux, accessibilité.
   </Card>
-</CardGrid>
-
-## Aller plus loin
-
-<CardGrid>
-  <LinkCard title="Déploiement" href="/administration/deploiement/" description="Publiez votre site en ligne en un clic." />
-  <LinkCard title="Éditeur de texte" href="/reference/editeur-texte/" description="Maîtrisez l'éditeur de texte enrichi." />
-  <LinkCard title="Astuces" href="/reference/astuces/" description="Conseils et bonnes pratiques pour tirer le meilleur de Communeo." />
 </CardGrid>

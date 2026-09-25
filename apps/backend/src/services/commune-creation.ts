@@ -4,7 +4,7 @@
  * l'inscription en libre-service (#309).
  */
 import crypto from 'crypto';
-import { DEFAULT_THEME, slugify } from '@communeo/core';
+import { DEFAULT_THEME, isReservedSiteSlug, slugify } from '@communeo/core';
 import { log } from '../utils/logger';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { createInvitationToken } from '../utils/security';
@@ -27,6 +27,7 @@ export async function uniqueSiteSlug(name: string): Promise<string> {
   const base = slugify(name) || 'commune';
   for (let index = 1; ; index += 1) {
     const candidate = index === 1 ? base : `${base}-${index}`;
+    if (isReservedSiteSlug(candidate)) continue;
     if (!(await strapi.query('api::site.site').count({ where: { slug: candidate } }))) return candidate;
   }
 }

@@ -1,6 +1,10 @@
 /**
  * Adaptateur Netlify : le seul endroit du backend qui appelle l'API Netlify.
  * Un site Netlify par commune (`<slug>-mairie`, préfixé `dev-` hors production), publié par dépôt ZIP.
+ * Avec `sitesDomain` (SITES_DOMAIN, zone DNS gérée par Netlify), chaque site répond aussi sur
+ * `<slug>.<sitesDomain>` (alias, enregistrement DNS et certificat créés par Netlify) : c'est l'adresse
+ * du site tant qu'il n'a pas de domaine personnalisé. Les autres adresses redirigent vers l'adresse
+ * canonique.
  */
 import dns from 'node:dns/promises';
 import fs from 'node:fs/promises';
@@ -55,6 +59,8 @@ export interface NetlifyPublisherOptions {
   token: string;
   /** Préfixe des noms de sites Netlify (`dev-` hors production) */
   namePrefix?: string;
+  /** Domaine des adresses Communeo (`<slug>.<sitesDomain>`), dont la zone DNS est chez Netlify */
+  sitesDomain?: string;
   fetch?: typeof fetch;
   resolveCname?: (domain: string) => Promise<string[]>;
   resolve4?: (domain: string) => Promise<string[]>;
@@ -71,6 +77,7 @@ export class NetlifyPublisher implements SitePublisher {
 
   private readonly token: string;
   private readonly namePrefix: string;
+  private readonly sitesDomain: string | null;
   private readonly fetch: typeof fetch;
   private readonly resolveCname: (domain: string) => Promise<string[]>;
   private readonly resolve4: (domain: string) => Promise<string[]>;
@@ -82,6 +89,7 @@ export class NetlifyPublisher implements SitePublisher {
   constructor(options: NetlifyPublisherOptions) {
     this.token = options.token;
     this.namePrefix = options.namePrefix ?? '';
+    this.sitesDomain = options.sitesDomain?.trim().replace(/^\.+|\.+$/g, '').toLowerCase() || null;
     this.fetch = options.fetch ?? globalThis.fetch;
     this.resolveCname = options.resolveCname ?? ((domain) => dns.resolveCname(domain));
     this.resolve4 = options.resolve4 ?? ((domain) => dns.resolve4(domain));
@@ -94,9 +102,40 @@ export class NetlifyPublisher implements SitePublisher {
   // Sites
 
   async ensureSite(site: PublisherSite): Promise<HostSite> {
+    return this.toHostSite(await this.ensureNetlifySite(site));
+  }
+
+  private async ensureNetlifySite(site: PublisherSite): Promise<NetlifySite> {
+    return this.withCommuneoDomain(await this.findOrCreateSite(site));
+  }
+
+  /**
+   * L'adresse Communeo est un alias du site ; le certificat HTTPS est demandé à l'ajout. Un refus de
+   * Netlify ne bloque pas la mise en ligne : le site reste sur son adresse *.netlify.app.
+   */
+  private async withCommuneoDomain(netlifySite: NetlifySite): Promise<NetlifySite> {
+    const domain = this.communeoDomain(netlifySite);
+    if (!domain || this.communeoAddress(netlifySite)) return netlifySite;
+    const aliases = [...(netlifySite.domain_aliases ?? []), domain];
+    try {
+      await this.setAliases(netlifySite, aliases);
+      this.log.info(`[NETLIFY] Adresse ${domain} ajoutée à ${netlifySite.name}`);
+    } catch (error) {
+      this.log.error(`[NETLIFY] Adresse ${domain} non ajoutée à ${netlifySite.name}:`, error);
+      return netlifySite;
+    }
+    try {
+      await this.request(`/sites/${netlifySite.id}/ssl`, { method: 'POST' });
+    } catch (error) {
+      this.log.warn(`[NETLIFY] Certificat HTTPS non demandé pour ${domain}:`, error);
+    }
+    return { ...netlifySite, domain_aliases: aliases };
+  }
+
+  private async findOrCreateSite(site: PublisherSite): Promise<NetlifySite> {
     if (site.hostId) {
       try {
-        return this.toHostSite(await this.getSite(site.hostId));
+        return await this.getSite(site.hostId);
       } catch (error) {
         // Site supprimé côté Netlify : on le retrouve par son nom ou on le recrée
         if (!(error instanceof NetlifyApiError && error.status === 404)) throw error;
@@ -106,14 +145,13 @@ export class NetlifyPublisher implements SitePublisher {
 
     const name = this.siteName(site);
     const existing = await this.findSiteByName(name);
-    if (existing) return this.toHostSite(existing);
+    if (existing) return existing;
 
     this.log.info(`[NETLIFY] Création du site ${name}`);
-    const created: NetlifySite = await this.request('/sites', {
+    return this.request('/sites', {
       method: 'POST',
       body: JSON.stringify({ name }),
     });
-    return this.toHostSite(created);
   }
 
   async deleteSite(site: PublisherSite): Promise<void> {
@@ -125,8 +163,10 @@ export class NetlifyPublisher implements SitePublisher {
   // Publication
 
   async publish(site: PublisherSite, dir: string, options: { onUploaded?: () => Promise<void> | void } = {}): Promise<PublishResult> {
-    const host = await this.ensureSite(site);
-    if (site.customDomain) await this.redirectDefaultDomain(dir, host, site.customDomain);
+    const netlifySite = await this.ensureNetlifySite(site);
+    const host = this.toHostSite(netlifySite);
+    await this.redirectToCanonical(dir, netlifySite, site.customDomain ?? null);
+    if (site.noindex) await this.noindexHeaders(dir);
     const zip = await zipDirectory(dir);
     this.log.info(`[NETLIFY] Dépôt de ${(zip.length / 1024 / 1024).toFixed(2)} Mo sur ${host.hostId}`);
 
@@ -245,20 +285,48 @@ export class NetlifyPublisher implements SitePublisher {
     }
   }
 
-  /** L'adresse *.netlify.app redirige vers le domaine personnalisé (règle en tête de `_redirects`). */
-  private async redirectDefaultDomain(dir: string, host: HostSite, domain: string): Promise<void> {
+  /**
+   * Une seule adresse par site : le domaine personnalisé vérifié, sinon l'adresse Communeo. L'adresse
+   * *.netlify.app (et l'adresse Communeo quand il y a un domaine personnalisé) y redirige (règles en
+   * tête de `_redirects`).
+   */
+  private async redirectToCanonical(dir: string, netlifySite: NetlifySite, customDomain: string | null): Promise<void> {
+    const communeo = this.communeoAddress(netlifySite);
+    const canonical = customDomain ?? communeo;
+    if (!canonical) return;
+    const others = [`${netlifySite.name}${DNS_SUFFIX}`, ...(communeo && communeo !== canonical ? [communeo] : [])];
     const file = path.join(dir, '_redirects');
     const existing = await fs.readFile(file, 'utf8').catch(() => '');
-    const rule = `${host.defaultUrl}/* https://${domain}/:splat 301!\n`;
-    await fs.writeFile(file, rule + existing, 'utf8');
+    const rules = others.map((host) => `https://${host}/* https://${canonical}/:splat 301!\n`).join('');
+    await fs.writeFile(file, rules + existing, 'utf8');
+  }
+
+  /** Site en préparation : aucune page indexée, quel que soit le robot (règle en tête de `_headers`) */
+  private async noindexHeaders(dir: string): Promise<void> {
+    const file = path.join(dir, '_headers');
+    const existing = await fs.readFile(file, 'utf8').catch(() => '');
+    await fs.writeFile(file, `/*\n  X-Robots-Tag: noindex, nofollow\n${existing ? `\n${existing}` : ''}`, 'utf8');
   }
 
   private siteName(site: PublisherSite): string {
     return `${this.namePrefix}${site.slug}-mairie`;
   }
 
+  /** `lyon.communeo.fr` (préfixé `dev-` hors production), du nom du site Netlify `lyon-mairie` */
+  private communeoDomain(site: NetlifySite): string | null {
+    if (!this.sitesDomain || !site.name.endsWith('-mairie')) return null;
+    return `${site.name.slice(0, -'-mairie'.length)}.${this.sitesDomain}`;
+  }
+
+  /** L'adresse Communeo, si elle est bien rattachée au site */
+  private communeoAddress(site: NetlifySite): string | null {
+    const domain = this.communeoDomain(site);
+    return domain && (site.custom_domain === domain || (site.domain_aliases ?? []).includes(domain)) ? domain : null;
+  }
+
   private toHostSite(site: NetlifySite): HostSite {
-    return { hostId: site.id, defaultUrl: `https://${site.name}${DNS_SUFFIX}` };
+    const communeo = this.communeoAddress(site);
+    return { hostId: site.id, defaultUrl: `https://${communeo ?? `${site.name}${DNS_SUFFIX}`}` };
   }
 
   private getSite(hostId: string): Promise<NetlifySite> {

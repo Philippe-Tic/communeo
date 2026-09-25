@@ -41,7 +41,7 @@ pnpm install              # at the root, installs every workspace package
 pnpm check                # lint + typecheck + tests (Turborepo)
 pnpm build                # build everything
 pnpm --filter @communeo/backend dev   # Strapi dev server (http://localhost:1337)
-pnpm theme:dev <id> [--variant complete|minimal|empty] [--logo blason]   # demo commune in a theme, no Strapi
+pnpm theme:dev <id> [--variant complete|minimal|empty] [--logo blason] [--trial]   # demo commune in a theme, no Strapi (--trial: « Site en préparation »)
 pnpm create-theme <id> --name "Nom"   # new theme from themes/starter (guide: packages/theme-contract/README.md)
 pnpm theme:thumbnail <id>            # regenerate themes/<id>/thumbnail.png (1200 x 800)
 THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/renderer/dist
@@ -57,6 +57,7 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 
 ### Backend
 - `NETLIFY_TOKEN` — Netlify API token (custom domains); without it Strapi boots and those actions answer 503
+- `SITES_DOMAIN` — Communeo address of every site, `<slug>.<SITES_DOMAIN>` (Netlify alias; the DNS zone is on Netlify, which creates the record and certificate); the `*.netlify.app` address redirects to it, and both redirect to a verified custom domain. Unset: `*.netlify.app`. Same value on the worker. Some slugs are reserved (`RESERVED_SITE_SLUGS` in `@communeo/core`)
 - `QUEUE_DATABASE_URL` — Postgres of the build queue (pg-boss schema `pgboss`); without it « Mettre en ligne » answers 503
 - `WORKER_SECRET` — shared secret of the internal `/api/build-worker/*` routes
 - `STRAPI_PUBLIC_URL` — Public URL of Strapi
@@ -69,7 +70,7 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 
 ### Worker (`apps/worker/.env.example`)
 - `QUEUE_DATABASE_URL`, `WORKER_SECRET`, `STRAPI_URL`, `STRAPI_PUBLIC_URL`, `STRAPI_API_TOKEN` (passed to the renderer)
-- `NETLIFY_TOKEN` — publish to Netlify; or `PUBLISH_DIR` (+ `PUBLISH_BASE_URL`) to publish into a local folder in dev
+- `NETLIFY_TOKEN` (+ `SITES_DOMAIN`) — publish to Netlify; or `PUBLISH_DIR` (+ `PUBLISH_BASE_URL`) to publish into a local folder in dev
 - `BUILD_TIMEOUT_SECONDS` (600), `WORK_DIR`, `RENDERER_DIR`
 
 ### Admin
@@ -96,7 +97,7 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 - `src/api/build-worker/` — internal routes of the build worker (shared secret): start (Deployment with `reason`, `reference` `MEL-…`), progress (`step`: checking → rendering → publishing → cache), finish
 - `src/services/pending-changes.ts` — changes waiting to go live (`api::pending-change`, no REST access): one entry per content item, recorded by the auto-deploy middleware with its author (or `scheduled` for the cron); a successful publication clears what changed before it started, a failure keeps the list. `GET /api/deployment/state` → `idle | pending | running(step) | failed(reference) | ok` + the list, for the admin header and « Mise en ligne » screen
 - `src/services/auto-deploy.ts` — automatic publication: a document middleware (`changesPublicSite`) schedules a build `auto_deploy_delay` s after the **last** visible change (persistent debounce in the queue, `BuildQueue.schedule`). Drafts, technical Site fields (host, domain, auto-deploy settings), public submissions and non-published associations never trigger; a manual « Mettre en ligne » starts a waiting delayed build now.
-- `src/services/trial.ts` — trial period (#310): a self-service sign-up starts a 30-day trial (`plan` `trial | live | expired`, `trial_ends_at`, protected fields); hourly cron sends reminders (D-7, D-1), expires the trial (host site removed, admin read-only in `site-isolation` with `details.code = 'trial_expired'`, no build, queued builds cancelled at worker start), warns a month before deletion and deletes the commune 6 months after. `POST /api/trial/live-request` notifies the team (`SIGNUP_NOTIFY_EMAIL`); the team extends the trial or switches to live through `PUT /api/site-management/:id` (`extendTrialDays`, `plan: 'live'`). Team-created communes are live
+- `src/services/trial.ts` — trial period (#310): a self-service sign-up starts a 30-day trial (`plan` `trial | live | expired`, `trial_ends_at`, protected fields); hourly cron sends reminders (D-7, D-1), expires the trial (host site removed, admin read-only in `site-isolation` with `details.code = 'trial_expired'`, no build, queued builds cancelled at worker start), warns a month before deletion and deletes the commune 6 months after. `POST /api/trial/live-request` notifies the team (`SIGNUP_NOTIFY_EMAIL`); the team extends the trial or switches to live through `PUT /api/site-management/:id` (`extendTrialDays`, `plan: 'live'`). Team-created communes are live. A trial site (#311) shows the renderer's « Site en préparation » banner (`SiteVM.inPreparation`), `noindex` meta, closed `robots.txt` without sitemap and `X-Robots-Tag` (`_headers` written by the Netlify adapter from `BuildSite.noindex`); custom domains are for live communes only (`POST /api/domain/configure` → 403 `live_only`); going live republishes at once
 - `src/services/commune-deletion.ts` — deletes a commune: host site, accounts, every site-scoped document (all versions, media files), then the site; no pending change, build or per-item log line during it
 - `src/api/*/content-types/*/schema.json` — content type schemas
 

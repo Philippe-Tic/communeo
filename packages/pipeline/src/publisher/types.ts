@@ -14,13 +14,19 @@ export interface PublisherSite {
   hostId?: string | null;
   /** Domaine personnalisé vérifié : l'adresse par défaut de l'hébergeur y redirige */
   customDomain?: string | null;
+  /** Site à ne pas indexer (commune en période d'essai) : l'hébergeur ajoute `X-Robots-Tag` */
+  noindex?: boolean;
 }
 
 export type DeployState = 'building' | 'ready' | 'error';
 
 export interface HostSite {
   hostId: string;
-  /** Adresse par défaut chez l'hébergeur, en https (ex. https://lyon-mairie.netlify.app) */
+  /**
+   * Adresse du site sans domaine personnalisé, en https : l'adresse Communeo (ex.
+   * https://lyon.communeo.fr) quand SITES_DOMAIN est défini, sinon celle de l'hébergeur
+   * (ex. https://lyon-mairie.netlify.app)
+   */
   defaultUrl: string;
 }
 

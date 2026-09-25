@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isValidSlug, slugify } from './slug';
+import { isReservedSiteSlug, isValidSlug, slugify } from './slug';
 
 describe('slugify', () => {
   it('retire les accents et la ponctuation', () => {
@@ -18,5 +18,13 @@ describe('slugify', () => {
     for (const slug of ['Fete', 'fête', 'a--b', '-a', 'a-', 'a b', '']) {
       expect(isValidSlug(slug), slug).toBe(false);
     }
+  });
+});
+
+describe('adresses de commune réservées', () => {
+  it('réserve les sous-domaines de la plateforme, pas les noms de commune', () => {
+    expect(isReservedSiteSlug('doc')).toBe(true);
+    expect(isReservedSiteSlug('demo')).toBe(true);
+    expect(isReservedSiteSlug('saint-aubin-sur-loire')).toBe(false);
   });
 });

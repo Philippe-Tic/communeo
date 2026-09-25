@@ -43,6 +43,8 @@ export interface ChecklistInput {
     accessibilite?: { accessibility_declaration?: unknown } | null;
     custom_domain?: string | null;
     domain_status?: string | null;
+    /** Période d'essai : le domaine personnalisé vient avec le passage en live (#311) */
+    plan?: string | null;
   };
   /** Pages de la commune : publiées, et créées depuis un modèle mais jamais publiées */
   pages: { published: number; templateDrafts: number };
@@ -67,6 +69,7 @@ export function onboardingChecklist({ site, pages }: ChecklistInput): Onboarding
     !filled(site.mentions_legales?.publication_director) && 'directeur de publication',
   ].filter((entry): entry is string => !!entry);
   const domainPending = filled(site.custom_domain) && site.domain_status !== 'verified';
+  const trial = site.plan === 'trial' || site.plan === 'expired';
 
   const items: ChecklistItem[] = [
     {
@@ -118,10 +121,12 @@ export function onboardingChecklist({ site, pages }: ChecklistInput): Onboarding
       id: 'domaine',
       label: 'Domaine personnalisé',
       done: filled(site.custom_domain) && site.domain_status === 'verified',
-      todo: domainPending
-        ? `Terminer la configuration de ${site.custom_domain!.trim()}`
-        : 'Ajouter votre nom de domaine',
-      target: { to: '/mise-en-ligne', adminOnly: true },
+      todo: trial
+        ? "Passer en live pour relier le site à l'adresse de la commune"
+        : domainPending
+          ? `Terminer la configuration de ${site.custom_domain!.trim()}`
+          : 'Ajouter votre nom de domaine',
+      target: trial ? { to: '/passer-en-live', adminOnly: true } : { to: '/mise-en-ligne', adminOnly: true },
     },
   ];
 

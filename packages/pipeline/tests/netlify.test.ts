@@ -142,6 +142,80 @@ describe('publish', () => {
   });
 });
 
+describe('adresse Communeo (SITES_DOMAIN)', () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'publisher-'));
+    fs.writeFileSync(path.join(dir, 'index.html'), '<h1>Lyon</h1>');
+  });
+  afterEach(() => fs.rmSync(dir, { recursive: true, force: true }));
+
+  /** Site Netlify dont les alias évoluent au fil des PATCH */
+  const api = (initial: string[] = [], refuse = false): Handler => {
+    const netlifySite = { id: 'site-lyon', name: 'lyon-mairie', custom_domain: null as string | null, domain_aliases: initial };
+    return ({ method, path, body }) => {
+      if (path === '/sites/site-lyon' && method === 'GET') return { body: netlifySite };
+      if (path === '/sites/site-lyon' && method === 'PATCH') {
+        if (refuse) return { status: 422, body: 'domain already taken' };
+        netlifySite.domain_aliases = body.domain_aliases;
+        return { body: netlifySite };
+      }
+      if (method === 'POST' && path === '/sites/site-lyon/ssl') return { body: {} };
+      if (method === 'POST' && path === '/sites/site-lyon/deploys') return { body: { id: 'dep-1', state: 'uploaded' } };
+      if (path === '/deploys/dep-1') return { body: { id: 'dep-1', state: 'ready' } };
+      if (method === 'POST' && path.endsWith('/restore')) return { body: {} };
+      return undefined;
+    };
+  };
+
+  it('rattache <slug>.<domaine>, demande le certificat, et en fait l’adresse du site', async () => {
+    const { api: netlify, p } = publisher(api(), { sitesDomain: 'communeo.fr' });
+    expect(await p.ensureSite({ ...site, hostId: 'site-lyon' })).toEqual({ hostId: 'site-lyon', defaultUrl: 'https://lyon.communeo.fr' });
+    expect(netlify.calls.filter((c) => c.method !== 'GET').map((c) => [c.method, c.path, c.body])).toEqual([
+      ['PATCH', '/sites/site-lyon', { domain_aliases: ['lyon.communeo.fr'] }],
+      ['POST', '/sites/site-lyon/ssl', undefined],
+    ]);
+    // Déjà rattachée : rien à refaire
+    const again = publisher(api(['lyon.communeo.fr']), { sitesDomain: 'communeo.fr' });
+    await again.p.ensureSite({ ...site, hostId: 'site-lyon' });
+    expect(again.api.calls.filter((c) => c.method !== 'GET')).toEqual([]);
+  });
+
+  it('préfixe dev- hors production, comme le nom du site', async () => {
+    const netlifySite = { id: 'dev', name: 'dev-lyon-mairie', domain_aliases: ['dev-lyon.communeo.fr'] };
+    const { p } = publisher(({ path }) => (path === '/sites/dev' ? { body: netlifySite } : undefined), { sitesDomain: 'communeo.fr', namePrefix: 'dev-' });
+    expect((await p.ensureSite({ ...site, hostId: 'dev' })).defaultUrl).toBe('https://dev-lyon.communeo.fr');
+  });
+
+  it('refus de Netlify : la mise en ligne continue sur l’adresse netlify.app', async () => {
+    const { p } = publisher(api([], true), { sitesDomain: 'communeo.fr' });
+    const result = await p.publish({ ...site, hostId: 'site-lyon' }, dir);
+    expect(result.defaultUrl).toBe('https://lyon-mairie.netlify.app');
+    expect(fs.existsSync(path.join(dir, '_redirects'))).toBe(false);
+  });
+
+  it('netlify.app redirige vers l’adresse Communeo ; avec un domaine personnalisé, les deux y redirigent', async () => {
+    const { p } = publisher(api(['lyon.communeo.fr']), { sitesDomain: 'communeo.fr' });
+    await p.publish({ ...site, hostId: 'site-lyon' }, dir);
+    expect(fs.readFileSync(path.join(dir, '_redirects'), 'utf8')).toBe('https://lyon-mairie.netlify.app/* https://lyon.communeo.fr/:splat 301!\n');
+
+    fs.rmSync(path.join(dir, '_redirects'));
+    await p.publish({ ...site, hostId: 'site-lyon', customDomain: 'mairie-lyon.fr' }, dir);
+    expect(fs.readFileSync(path.join(dir, '_redirects'), 'utf8')).toBe(
+      'https://lyon-mairie.netlify.app/* https://mairie-lyon.fr/:splat 301!\nhttps://lyon.communeo.fr/* https://mairie-lyon.fr/:splat 301!\n',
+    );
+  });
+
+  it('site en préparation : en-tête X-Robots-Tag sur toutes les pages, en plus des en-têtes du site', async () => {
+    fs.writeFileSync(path.join(dir, '_headers'), '/fixtures/*\n  Cache-Control: max-age=60\n');
+    const { p } = publisher(api(['lyon.communeo.fr']), { sitesDomain: 'communeo.fr' });
+    await p.publish({ ...site, hostId: 'site-lyon', noindex: true }, dir);
+    expect(fs.readFileSync(path.join(dir, '_headers'), 'utf8')).toBe(
+      '/*\n  X-Robots-Tag: noindex, nofollow\n\n/fixtures/*\n  Cache-Control: max-age=60\n',
+    );
+  });
+});
+
 describe('status', () => {
   it('ramène les états Netlify à building / ready / error', async () => {
     const states: Record<string, string> = { a: 'enqueued', b: 'ready', c: 'rejected' };

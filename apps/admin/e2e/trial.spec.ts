@@ -51,6 +51,17 @@ test('passer en live : ce qui change, demande envoyée à l’équipe', async ({
   await expectNoViolations(page);
 });
 
+test('pendant l’essai, le domaine personnalisé vient avec le passage en live', async ({ page }) => {
+  await mockApi(page, { trial: { endsInDays: 12 } });
+  await page.goto('/mise-en-ligne');
+  const domain = page.getByRole('region', { name: 'Domaine personnalisé' });
+  await expect(domain).toContainText("Pendant l'essai, le site garde son adresse Communeo.");
+  await expect(domain.getByRole('textbox')).toHaveCount(0);
+  await domain.getByRole('link', { name: 'Passer en live' }).click();
+  await expect(page.getByRole('region', { name: 'Ce qui change' })).toContainText("Vous pouvez le relier à l'adresse de la commune");
+  await expectNoViolations(page);
+});
+
 test('rédacteur : la demande est réservée aux administrateurs', async ({ page }) => {
   await mockApi(page, { user: 'editor', trial: { endsInDays: 12 } });
   await page.goto('/passer-en-live');

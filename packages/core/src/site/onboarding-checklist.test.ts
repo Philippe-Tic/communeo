@@ -62,4 +62,11 @@ describe('checklist « Pour terminer votre site »', () => {
     const checklist = onboardingChecklist({ ...complete, pages: { published: 0, templateDrafts: 0 } });
     expect(checklist.todo.map((item) => item.todo)).toEqual(['Publier une première page']);
   });
+
+  it('pendant l’essai, le domaine vient avec le passage en live', () => {
+    const checklist = onboardingChecklist({ ...complete, site: { ...complete.site, custom_domain: null, plan: 'trial' } });
+    expect(checklist.todo.map((item) => [item.todo, item.target])).toEqual([
+      ["Passer en live pour relier le site à l'adresse de la commune", { to: '/passer-en-live', adminOnly: true }],
+    ]);
+  });
 });

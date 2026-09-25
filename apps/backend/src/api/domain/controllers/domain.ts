@@ -9,6 +9,9 @@ import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
 import { recordActivity } from '../../../services/activity-log';
 
+const DOMAIN_LIVE_ONLY =
+  "Le domaine personnalisé est disponible une fois le site passé en live : pendant l'essai, le site garde son adresse Communeo.";
+
 /** Hébergeur non configuré : 503 plutôt qu'une erreur générique */
 function unavailable(ctx, error: unknown): boolean {
   if (!isPublisherUnavailable(error)) return false;
@@ -43,6 +46,12 @@ export default {
 
       if (!customDomain) {
         return ctx.badRequest('Le domaine personnalisé est requis');
+      }
+
+      // Domaine personnalisé réservé aux communes en live (#311), y compris pour l'équipe
+      const { plan } = (await strapi.db.query('api::site.site').findOne({ where: { documentId: site.documentId }, select: ['plan'] })) ?? {};
+      if (plan && plan !== 'live') {
+        return ctx.forbidden(DOMAIN_LIVE_ONLY, { code: 'live_only' });
       }
 
       const siteId = site.documentId || site.id;

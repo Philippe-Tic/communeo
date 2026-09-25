@@ -14,6 +14,8 @@ export interface BuildSite {
   hostId: string | null;
   /** Domaine personnalisé vérifié : adresse canonique du site */
   customDomain: string | null;
+  /** Commune en période d'essai : le site ne doit pas être indexé */
+  noindex?: boolean;
 }
 
 export interface StartBuildRequest {

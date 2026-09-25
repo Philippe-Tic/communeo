@@ -23,3 +23,11 @@ export function slugify(text: string): string {
 export function isValidSlug(slug: string): boolean {
   return slug.length <= SLUG_MAX_LENGTH && SLUG_PATTERN.test(slug);
 }
+
+/**
+ * Adresses de commune réservées : le site d'une commune répond sur `<slug>.communeo.fr` (#311), ces
+ * sous-domaines servent déjà ou serviront à la plateforme.
+ */
+export const RESERVED_SITE_SLUGS = ['www', 'admin', 'api', 'app', 'doc', 'docs', 'demo', 'preview', 'apercu', 'essai', 'mail', 'static', 'cdn', 'status', 'aide'] as const;
+
+export const isReservedSiteSlug = (slug: string) => (RESERVED_SITE_SLUGS as readonly string[]).includes(slug);

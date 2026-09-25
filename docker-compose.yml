@@ -44,6 +44,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
+      SITES_DOMAIN: ${SITES_DOMAIN:-}
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
       # File des builds (schéma pgboss de la même base), traitée par le service worker
       QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
@@ -88,6 +89,7 @@ services:
       STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
       WORKER_SECRET: ${WORKER_SECRET}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
+      SITES_DOMAIN: ${SITES_DOMAIN:-}
     logging:
       driver: json-file
       options:

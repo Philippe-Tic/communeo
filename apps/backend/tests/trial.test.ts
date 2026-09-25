@@ -76,6 +76,34 @@ describe('essai en cours', () => {
   });
 });
 
+describe('site d’essai (#311)', () => {
+  it('le build d’une commune en essai n’est pas indexé ; en live, si', async () => {
+    const start = (jobId: string) =>
+      http.post(`/api/build-worker/jobs/${jobId}/start`).set(auth('test-worker-secret')).send({ siteDocumentId: siteA, triggeredBy: null, reason: 'manual', attempt: 0 });
+    expect((await start('job-essai')).body.site).toMatchObject({ noindex: true });
+    await setSite({ plan: 'live' });
+    expect((await start('job-live')).body.site).toMatchObject({ noindex: false });
+    await setSite({ plan: 'trial' });
+  });
+
+  it('domaine personnalisé réservé aux communes en live, y compris pour l’équipe', async () => {
+    const res = await http.post('/api/domain/configure').set(auth(admin)).send({ customDomain: 'mairie-essai.fr' });
+    expect(res.status).toBe(403);
+    expect(res.body.error.message).toMatch(/une fois le site passé en live/);
+    expect(res.body.error.details).toEqual({ code: 'live_only' });
+    const team = await http.post('/api/domain/configure').set({ ...auth(superAdmin), 'X-Site-Document-Id': siteA }).send({ customDomain: 'mairie-essai.fr' });
+    expect(team.status).toBe(403);
+  });
+
+  it('adresses réservées à Communeo refusées pour une nouvelle commune', async () => {
+    expect((await http.get('/api/site-management/slug-available?slug=doc').set(auth(superAdmin))).body).toEqual({ available: false, reason: 'Adresse réservée à Communeo' });
+    const created = await http.post('/api/site-management').set(auth(superAdmin)).send({
+      data: { name: 'Démo', slug: 'demo', admin_email: 'maire@demo.test', admin_first_name: 'A', admin_last_name: 'B' },
+    });
+    expect(created.status).toBe(400);
+  });
+});
+
 describe('fin de l’essai', () => {
   const now = new Date('2026-10-01T08:00:00Z');
 

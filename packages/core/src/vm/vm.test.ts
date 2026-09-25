@@ -96,6 +96,12 @@ describe('site et navigation', () => {
     expect(vm.legal.accessibility.levelLabel).toBe('Partiellement conforme');
   });
 
+  it('site en préparation pendant l’essai seulement', () => {
+    expect(mapSite(ctx, site({ plan: 'trial' })).inPreparation).toBe(true);
+    expect(mapSite(ctx, site({ plan: 'live' })).inPreparation).toBe(false);
+    expect(mapSite(ctx, site({ plan: null })).inPreparation).toBe(false);
+  });
+
   it('construit les menus et ignore les pages non publiées', () => {
     const pages = [{ documentId: 'p1', title: 'Salle des fêtes', slug: 'salle-des-fetes' }];
     const nav = mapNavigation(

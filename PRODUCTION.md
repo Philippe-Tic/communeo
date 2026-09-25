@@ -3,8 +3,7 @@
 Guide rapide pour déployer des mises à jour de code sur le VPS.
 Pour le setup initial complet, voir [DEPLOYMENT.md](./DEPLOYMENT.md).
 
-> **Refonte V2 en cours** : le workflow GitHub `Deploy` ne part plus automatiquement à chaque push sur `main`.
-> Il se lance à la main (Actions → Deploy → Run workflow). Le déploiement V2 sera redéfini en phase 2 (epic #123).
+> Le déploiement V2 complet (worker, serveur de preview, file de publication, sauvegardes, CI) est en préparation dans le ticket #179 ; ce guide couvre le backend et l'admin.
 
 ---
 
@@ -46,12 +45,11 @@ Le build se fait **en local** (pas de Node.js sur le VPS).
 
 ```bash
 # En local
-cd admin
-npm run build
+VITE_API_URL=https://app.communeo.fr pnpm --filter @communeo/admin build
 
 # IMPORTANT : vider l'ancien build puis copier le CONTENU (dist/*)
-ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/admin/dist/*"
-scp -r dist/* deploy@IP_DU_VPS:/opt/communeo/admin/dist/
+ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/apps/admin/dist/*"
+scp -r apps/admin/dist/* deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist/
 ```
 
 Puis sur le VPS :
@@ -65,14 +63,12 @@ docker compose restart nginx
 **Vérifier** que `index.html` pointe sur le bon hash :
 
 ```bash
-ssh deploy@IP_DU_VPS "grep 'index-' /opt/communeo/admin/dist/index.html"
+ssh deploy@IP_DU_VPS "grep 'index-' /opt/communeo/apps/admin/dist/index.html"
 ```
 
-Le hash (ex: `index-C9TciKGh.js`) doit correspondre au build local dans `admin/dist/assets/`.
+Le hash (ex: `index-C9TciKGh.js`) doit correspondre au build local dans `apps/admin/dist/assets/`.
 
 > **Piège scp** : `scp -r dist/ dest/` copie le dossier `dist` **dans** `dest`, donnant `dest/dist/`. Toujours utiliser `dist/*` pour copier le contenu.
-
-> **Note** : Le fichier `admin/.env.production` contient `VITE_API_URL=https://app.communeo.fr`. Vite le charge automatiquement lors de `npm run build`, donc pas besoin de préfixer la commande.
 
 ---
 
@@ -80,13 +76,11 @@ Le hash (ex: `index-C9TciKGh.js`) doit correspondre au build local dans `admin/d
 
 ```bash
 # En local — build admin
-cd admin
-npm run build
-cd ..
+VITE_API_URL=https://app.communeo.fr pnpm --filter @communeo/admin build
 
 # Upload admin + pull code sur le VPS
-ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/admin/dist/*"
-scp -r admin/dist/* deploy@IP_DU_VPS:/opt/communeo/admin/dist/
+ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/apps/admin/dist/*"
+scp -r apps/admin/dist/* deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist/
 ssh deploy@IP_DU_VPS "cd /opt/communeo && git pull && docker compose build strapi && docker compose up -d"
 ```
 

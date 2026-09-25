@@ -132,11 +132,11 @@ dig cms.tondomaine.fr +short
 ### 2.1 Builder l'admin SPA
 
 ```bash
-cd admin
-VITE_API_URL=https://cms.tondomaine.fr npm run build
+pnpm install
+VITE_API_URL=https://cms.tondomaine.fr pnpm --filter @communeo/admin build
 ```
 
-Cela génère `admin/dist/` qui sera servi par Nginx en production.
+Cela génère `apps/admin/dist/` qui sera servi par Nginx en production.
 
 ### 2.2 Commit et push
 
@@ -200,15 +200,7 @@ Remplir le `.env` avec :
 
 ```bash
 # Depuis ta machine locale (après avoir fait le build en Phase 2.1)
-scp -r admin/dist deploy@IP_DU_VPS:/opt/communeo/admin/dist
-```
-
-Alternative — builder directement sur le VPS (nécessite Node.js installé) :
-
-```bash
-cd /opt/communeo/admin
-npm ci
-VITE_API_URL=https://cms.tondomaine.fr npm run build
+scp -r apps/admin/dist deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist
 ```
 
 ### 3.4 Obtenir le certificat SSL
@@ -439,7 +431,7 @@ cd /opt/communeo
 git pull
 
 # Rebuilder l'admin SPA si le frontend a changé
-cd admin && VITE_API_URL=https://cms.tondomaine.fr npm run build && cd ..
+pnpm install && VITE_API_URL=https://cms.tondomaine.fr pnpm --filter @communeo/admin build
 
 # Rebuilder et redémarrer Strapi
 docker compose build strapi

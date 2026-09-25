@@ -17,13 +17,13 @@ interface Props {
 const { site, alerts } = Astro.props.ctx;
 const count = alerts.length;
 ---
-<div class="bo-bar">
+<aside class="bo-bar" aria-label="Accès au panneau Pratique">
   <div class="bo-bar-status">
     <OpeningStatus hours={site.contact.hours} class="bo-status" />
     {count > 0 && <p class="bo-bar-alerts">{count} alerte{count > 1 ? 's' : ''} en cours</p>}
   </div>
   <a href="#pratique" class="bo-bar-button" data-bo-drawer-open>Pratique<ChevronUp size={18} aria-hidden="true" /></a>
-</div>
+</aside>
 
 <dialog class="bo-drawer" aria-labelledby="bo-drawer-title" data-bo-drawer>
   <div class="bo-drawer-head">

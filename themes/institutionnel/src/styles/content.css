@@ -4,6 +4,11 @@
   gap: var(--in-space-3);
 }
 
+.in-article-layout > *,
+.in-blocks > * {
+  min-width: 0;
+}
+
 .in-article {
   max-width: 47.5rem;
 }
@@ -509,6 +514,8 @@ figcaption {
 }
 
 .in-video .cn-embed-placeholder {
+  /* Largeur explicite : sinon la hauteur minimale, par le ratio, élargit l'encart au-delà de l'écran */
+  width: 100%;
   aspect-ratio: 16 / 9;
 }
 

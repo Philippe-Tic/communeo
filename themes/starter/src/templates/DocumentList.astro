@@ -9,8 +9,9 @@ const { ctx, documents } = Astro.props;
 <Layout ctx={ctx}>
   <p>Procès-verbaux, délibérations, arrêtés et documents budgétaires publiés par la commune.</p>
   {documents.length ? (
+    <div class="st-table" role="region" tabindex="0" aria-labelledby="st-documents-caption">
     <table>
-      <caption>Liste des documents officiels, du plus récent au plus ancien</caption>
+      <caption id="st-documents-caption">Liste des documents officiels, du plus récent au plus ancien</caption>
       <thead><tr><th scope="col">Date</th><th scope="col">Type</th><th scope="col">Titre</th><th scope="col">Référence</th><th scope="col">Fichier</th></tr></thead>
       <tbody>
         {documents.map((doc) => (
@@ -24,5 +25,6 @@ const { ctx, documents } = Astro.props;
         ))}
       </tbody>
     </table>
+    </div>
   ) : <p>Aucun document publié.</p>}
 </Layout>

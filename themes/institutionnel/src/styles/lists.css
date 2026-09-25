@@ -221,6 +221,7 @@
 }
 
 .in-team-card {
+  overflow-wrap: anywhere;
   display: flex;
   gap: 1.25rem;
   align-items: flex-start;

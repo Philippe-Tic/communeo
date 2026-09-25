@@ -29,6 +29,11 @@
   outline: none;
 }
 
+/* Grille : un contenu très large (filtres défilants, tableau) ne doit pas élargir la colonne */
+.bo-main > * {
+  min-width: 0;
+}
+
 @media (min-width: 64rem) {
   .bo-page {
     padding-top: var(--bo-space-3);

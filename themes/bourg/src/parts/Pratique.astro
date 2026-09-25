@@ -66,7 +66,7 @@ const signs = { info: 'i', warning: '!', critical: '!!' } as const;
     </section>
   )}
 
-  {practical.wasteCollection && (
+  {practical.wasteCollection && path !== '/collecte-des-dechets' && (
     <section class="bo-card bo-card-lavender" aria-labelledby="bo-pratique-waste" {...section('waste_collection')}>
       <h3 id="bo-pratique-waste">Prochaines collectes</h3>
       <ul class="bo-pratique-waste">

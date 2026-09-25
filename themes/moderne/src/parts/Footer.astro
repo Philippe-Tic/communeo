@@ -10,7 +10,7 @@ const { site, nav } = Astro.props.ctx;
 ---
 <footer class="mo-footer">
   <div class="mo-container mo-footer-grid">
-    <section aria-labelledby="mo-footer-mairie" class="mo-footer-identity">
+    <section class="mo-footer-identity">
       <h2 id="mo-footer-mairie" class="mo-footer-name">{site.name}</h2>
       <address>
         {site.contact.address && <span>{site.contact.address}</span>}
@@ -31,7 +31,7 @@ const { site, nav } = Astro.props.ctx;
     </section>
 
     {site.contact.hoursSummary.length > 0 && (
-      <section aria-labelledby="mo-footer-hours">
+      <section>
         <h2 id="mo-footer-hours" class="mo-eyebrow">Horaires</h2>
         <dl class="mo-footer-hours">
           {site.contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}

@@ -22,7 +22,7 @@ test('ordinateur : rubrique courante marquée, sous-menu déroulant, panneau « 
   await page.keyboard.press('Escape');
   await expect(menu.getByRole('link', { name: 'Collecte des déchets' })).toBeHidden();
 
-  const pratique = page.getByRole('complementary', { name: 'Pratique' });
+  const pratique = page.getByRole('complementary', { name: 'Pratique', exact: true });
   await expect(pratique).toBeVisible();
   await expect(pratique.getByRole('heading', { name: 'Prochaines collectes' })).toBeVisible();
   await expect(pratique.getByRole('link', { name: 'Nous écrire' })).toHaveAttribute('href', '/contact');
@@ -49,7 +49,7 @@ test('mobile : la barre du bas ouvre le tiroir « Pratique » sans violation, É
   test.skip(!info.project.name.endsWith('mobile'), 'Barre et tiroir sur mobile');
   await page.goto('/salle-des-fetes');
   // Le panneau n'est pas dans la page tant que le tiroir est fermé
-  await expect(page.getByRole('complementary', { name: 'Pratique' })).toBeHidden();
+  await expect(page.getByRole('complementary', { name: 'Pratique', exact: true })).toBeHidden();
   const opener = page.getByRole('button', { name: /Pratique/ });
   await opener.click();
   const drawer = page.getByRole('dialog', { name: 'Pratique' });

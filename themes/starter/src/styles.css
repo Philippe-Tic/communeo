@@ -59,3 +59,10 @@ img {
 .st-meta {
   color: #4a4942;
 }
+
+/* Tableau plus large que l'écran : il défile dans sa zone (atteignable au clavier), pas la page.
+   `relative` : les textes pour lecteurs d'écran (position absolue) restent dans la zone. */
+.st-table {
+  position: relative;
+  overflow-x: auto;
+}

@@ -10,7 +10,7 @@ const { site, nav } = Astro.props.ctx;
 ---
 <footer class="bo-footer">
   <div class="bo-container bo-footer-grid">
-    <section aria-labelledby="bo-footer-mairie">
+    <section>
       <h2 id="bo-footer-mairie" class="bo-footer-title">Mairie de {site.name}</h2>
       <address>
         {site.contact.address && <span class="bo-footer-address">{site.contact.address}</span>}
@@ -20,7 +20,7 @@ const { site, nav } = Astro.props.ctx;
     </section>
 
     {site.contact.hoursSummary.length > 0 && (
-      <section aria-labelledby="bo-footer-hours">
+      <section>
         <h2 id="bo-footer-hours" class="bo-footer-heading">Horaires</h2>
         <dl class="bo-footer-hours">
           {site.contact.hoursSummary.map((line) => <div><dt>{line.days}</dt><dd>{line.hours}</dd></div>)}
@@ -44,7 +44,7 @@ const { site, nav } = Astro.props.ctx;
     )}
 
     {site.social.length > 0 && (
-      <section aria-labelledby="bo-footer-social">
+      <section>
         <h2 id="bo-footer-social" class="bo-footer-heading">Suivre la commune</h2>
         <ul class="bo-footer-list">
           {site.social.map((link) => (

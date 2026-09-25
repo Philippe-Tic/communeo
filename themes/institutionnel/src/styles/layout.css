@@ -17,6 +17,11 @@
   padding-top: var(--in-space-4);
 }
 
+/* Grille : un contenu large ou un mot insécable ne doit pas élargir la page (320 px sans défilement) */
+.in-main > * {
+  min-width: 0;
+}
+
 .in-main:focus {
   outline: none;
 }

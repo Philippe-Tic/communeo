@@ -139,7 +139,13 @@ export function TeamScreen() {
                     <MemberList group={group} members={list} onMove={(from, to, focus) => void reorder(group, from, to, focus)} onEdit={(member) => setSheet({ member, role: member.role })} />
                   )}
                   <div className="border-t border-border-row px-4 py-2.5">
-                    <Button type="button" variant="tertiary" size="sm" onClick={() => setSheet({ member: null, role: GROUP_ROLE[group.key] })}>
+                    <Button
+                      type="button"
+                      variant="tertiary"
+                      size="sm"
+                      className="h-auto min-h-8 py-1 text-left whitespace-normal"
+                      onClick={() => setSheet({ member: null, role: GROUP_ROLE[group.key] })}
+                    >
                       <Plus aria-hidden="true" />
                       Ajouter dans « {group.label} »
                     </Button>

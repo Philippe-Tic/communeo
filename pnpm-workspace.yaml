@@ -1,4 +1,3 @@
-# admin/ et sites/ (V1) sont gelés : hors workspace, supprimés au lancement de la V2.
 # docs/ reste à la racine tant que le site Netlify de la documentation pointe dessus.
 packages:
   - "apps/*"

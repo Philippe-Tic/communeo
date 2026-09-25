@@ -21,7 +21,7 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **themes/** — one package per public-site theme (`@communeo/theme-<id>`). `themes/starter` implements the whole contract in plain accessible HTML (template for new themes, reference for renderer tests); `themes/institutionnel` is the reference theme and the renderer's default. Moderne, Journal, Bourg mockups are in `v2/`.
 - **packages/fixtures** — demo commune Saint-Aubin-sur-Loire in Strapi format (`createFixtureLoader({ variant: complete | minimal | empty })`, `FIXTURE_NOW`), goes through the same mappers as production; assets served under `/fixtures`.
 
-Frozen V1 apps (outside the workspace, no compatibility work, deleted at V2 launch): **admin/** (React admin V1) and **sites/** (Astro site V1). **docs/** (Starlight) stays at the root while the Netlify docs site points to it.
+**docs/** (Starlight) is the user documentation, one page per admin screen, deployed on Netlify; its screenshots are generated with `pnpm docs:captures`.
 
 ### Data Flow
 
@@ -53,8 +53,6 @@ docker run -d -p 55432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_DB=queue postg
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 
-Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites && npm run dev`.
-
 ## Environment Variables
 
 ### Backend
@@ -75,10 +73,10 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 ### Admin
 - `VITE_API_URL` — Strapi backend URL (e.g., `http://localhost:1337`)
 
-### Sites
-- `SITE_DOCUMENT_ID` — UUID of the municipality in Strapi
-- `SITE_SLUG` — URL slug (e.g., "lyon")
-- `STRAPI_URL` — Strapi API endpoint
+### Renderer
+- `THEME` — theme of the static build (default `institutionnel`); `DATA_SOURCE` — `strapi` or the demo fixtures (default)
+- `RENDER_MODE=server` — draft preview server (see Architecture)
+- With `DATA_SOURCE=strapi`: `STRAPI_URL`, `STRAPI_TOKEN`, `STRAPI_PUBLIC_URL`, `SITE_DOCUMENT_ID` (static build of one commune; set by the worker)
 
 ## Key Backend Files (apps/backend)
 
@@ -119,8 +117,8 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 | Layer | Stack |
 |-------|-------|
 | Backend | Strapi 5, TypeScript 5, SQLite/MySQL/PostgreSQL, Knex |
-| Admin | React 19, Vite 7, Tailwind CSS 4, shadcn/ui, TanStack Query 5, React Router 7, Axios |
-| Sites | Astro 4, Tailwind CSS 3, TypeScript 5 |
+| Admin | React 19, Vite 8, Tailwind CSS 4, shadcn/ui, TanStack Router and Query |
+| Renderer and themes | Astro 7, TypeScript 5, Pagefind |
 | Docs | Astro 6, Starlight |
 | Hosting | Netlify (static sites) |
 

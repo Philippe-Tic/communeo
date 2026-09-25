@@ -1,220 +1,105 @@
-# Mises à jour en production
+# Exploitation — Communeo V2
 
-Guide rapide pour déployer des mises à jour de code sur le VPS.
-Pour le setup initial complet, voir [DEPLOYMENT.md](./DEPLOYMENT.md).
+Guide du quotidien sur le serveur. Installation initiale : [DEPLOYMENT.md](DEPLOYMENT.md).
+Tout se passe dans `~/communeo` (docker-compose.yml, deploy.sh, .env), en utilisateur `deploy`.
 
-> Le déploiement V2 complet (worker, serveur de preview, file de publication, sauvegardes, CI) est en préparation dans le ticket #179 ; ce guide couvre le backend et l'admin.
+## Déployer
 
----
+Automatique : chaque commit sur `main` passe par `.github/workflows/deploy.yml` (images, test de bout en
+bout, déploiement). À la main depuis GitHub : **Actions → Déploiement → Run workflow**, avec une version
+(commit) déjà publiée pour redéployer ou revenir en arrière sans reconstruire.
 
-## Prérequis
-
-```bash
-# Connexion au VPS
-ssh deploy@IP_DU_VPS
-cd /opt/communeo
-```
-
-Variables requises dans `/opt/communeo/.env` (déjà configurées lors du setup initial).
-
----
-
-## Déployer le backend (Strapi)
+Sur le serveur :
 
 ```bash
-ssh deploy@IP_DU_VPS
-cd /opt/communeo
-
-git pull
-docker compose build strapi
-docker compose up -d strapi
+./deploy.sh <commit>     # une version précise
+./deploy.sh rollback     # la version précédente
+cat .deployed-tag .previous-tag
 ```
 
-Vérifier que Strapi redémarre correctement :
+`deploy.sh` récupère les images, redémarre et attend que Strapi et nginx soient sains ; sinon il remet la
+version précédente et s'arrête en erreur. Les migrations de données (`apps/backend/database/migrations`)
+s'appliquent au démarrage de Strapi : **un retour arrière ne défait pas une migration** ; en cas de doute,
+restaurer la sauvegarde d'avant le déploiement.
+
+## État et journaux
 
 ```bash
-docker compose logs -f strapi
-# Attendre "Server started" puis Ctrl+C
+docker compose ps                       # tous les services doivent être « healthy » (worker et certbot : « running »)
+docker compose logs -f --tail 100 strapi
+docker compose logs --tail 100 worker   # mises en ligne des communes
+docker compose logs backup              # sauvegardes
+df -h && docker system df               # disque
 ```
 
----
+## Sauvegardes
 
-## Deployer le frontend (Admin SPA)
-
-Le build se fait **en local** (pas de Node.js sur le VPS).
+Chaque nuit à `BACKUP_TIME` (03:15, heure de Paris), le service `backup` sauvegarde la base (contenus,
+comptes, file des builds) et les fichiers envoyés dans le volume `backups` (14 jours), et une copie
+chiffrée dans le stockage objet (`BACKUP_S3_*`, 90 jours). Il est `unhealthy` si la dernière sauvegarde
+réussie date de plus de 26 heures.
 
 ```bash
-# En local
-VITE_API_URL=https://app.communeo.fr pnpm --filter @communeo/admin build
-
-# IMPORTANT : vider l'ancien build puis copier le CONTENU (dist/*)
-ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/apps/admin/dist/*"
-scp -r apps/admin/dist/* deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist/
+docker compose exec backup backup.sh    # sauvegarde immédiate (avant une opération risquée)
+docker compose exec backup ls -lh /backups
+docker compose exec backup cat /backups/last-success
 ```
 
-Puis sur le VPS :
+### Restaurer
 
 ```bash
-ssh deploy@IP_DU_VPS
-cd /opt/communeo
-docker compose restart nginx
+docker compose exec backup ls /backups                    # choisir l'horodatage (ou « latest »)
+docker compose stop strapi worker
+docker compose run --rm backup restore.sh 20261002T011500Z
+docker compose up -d strapi worker
 ```
 
-**Vérifier** que `index.html` pointe sur le bon hash :
+Depuis le stockage objet (serveur perdu) : sur le nouveau serveur installé (DEPLOYMENT.md, **même `.env`**),
 
 ```bash
-ssh deploy@IP_DU_VPS "grep 'index-' /opt/communeo/apps/admin/dist/index.html"
+docker compose run --rm backup sh -c '
+  rclone copy "remote:$BACKUP_S3_BUCKET/$BACKUP_S3_PREFIX" /backups --include "*20261002T011500Z*"
+  cd /backups && for f in *.enc; do
+    openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:BACKUP_PASSPHRASE -in "$f" -out "${f%.enc}" && rm "$f"
+  done'
+docker compose stop strapi worker && docker compose run --rm backup restore.sh 20261002T011500Z && docker compose up -d
 ```
 
-Le hash (ex: `index-C9TciKGh.js`) doit correspondre au build local dans `apps/admin/dist/assets/`.
+Les sites des communes sont chez Netlify : ils restent en ligne pendant l'incident, et une mise en ligne
+les reconstruit à partir de la base restaurée.
 
-> **Piège scp** : `scp -r dist/ dest/` copie le dossier `dist` **dans** `dest`, donnant `dest/dist/`. Toujours utiliser `dist/*` pour copier le contenu.
+**Tester une restauration** une fois par trimestre : `deploy/e2e/run.sh` le fait sur une stack jetable
+(en local ou en CI à chaque déploiement).
 
----
+## Supervision
 
-## Déployer les deux
+- Moniteur externe (UptimeRobot, Better Stack…) : `https://app.communeo.fr/healthz`,
+  `https://app.communeo.fr/api/health` et un site de commune, alerte par e-mail.
+- `docker compose ps` : un service `unhealthy` est redémarré par Docker s'il s'arrête (`restart: unless-stopped`),
+  mais pas s'il reste bloqué : regarder ses journaux.
+- Mises en ligne en échec : espace équipe → fiche de la commune, ou `docker compose logs worker`
+  (référence `MEL-…` donnée à la commune).
 
-```bash
-# En local — build admin
-VITE_API_URL=https://app.communeo.fr pnpm --filter @communeo/admin build
+## Incidents
 
-# Upload admin + pull code sur le VPS
-ssh deploy@IP_DU_VPS "rm -rf /opt/communeo/apps/admin/dist/*"
-scp -r apps/admin/dist/* deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist/
-ssh deploy@IP_DU_VPS "cd /opt/communeo && git pull && docker compose build strapi && docker compose up -d"
-```
+| Symptôme | Piste |
+|----------|-------|
+| 502 sur l'admin | `docker compose ps strapi`, `docker compose logs strapi` ; base joignable ? `docker compose exec postgres pg_isready` |
+| Les mises en ligne restent « en attente » | worker arrêté ou file bloquée : `docker compose logs worker`, `docker compose restart worker` (les builds reprennent) |
+| Aperçu : 401 dans l'éditeur | `PREVIEW_SECRET` différent entre strapi et preview, ou domaine de preview hors du domaine de l'admin |
+| Certificat expiré | `docker compose logs certbot` ; `docker compose run --rm certbot renew` puis `docker compose exec nginx nginx -s reload` |
+| Disque plein | `docker image prune -a` (anciennes versions), taille du volume `backups`, `BACKUP_RETENTION_DAYS` |
+| `backup` unhealthy | `docker compose logs backup` (base, place disque, identifiants S3), puis `docker compose exec backup backup.sh` |
 
----
-
-## Commandes utiles
-
-### Logs
-
-```bash
-docker compose logs -f strapi     # Logs Strapi
-docker compose logs -f nginx      # Logs Nginx
-docker compose logs -f postgres   # Logs PostgreSQL
-docker compose logs -f            # Tous les services
-```
-
-### Status
-
-```bash
-docker compose ps                 # État des containers
-docker compose top                # Processus dans chaque container
-df -h                             # Espace disque
-free -h                           # Mémoire
-```
-
-### Restart
-
-```bash
-docker compose restart strapi     # Restart Strapi seul
-docker compose restart nginx      # Restart Nginx seul
-docker compose restart            # Restart tous les services
-docker compose down && docker compose up -d  # Arrêt complet + relance
-```
-
-### Backup manuel
-
-```bash
-/opt/communeo/scripts/backup.sh
-ls -la /opt/communeo/backups/
-```
-
-### Nettoyage Docker
-
-```bash
-docker system prune -f            # Supprimer images/containers inutilisés
-docker image prune -a -f          # Supprimer toutes les images non utilisées
-```
-
----
-
-## Dépannage
-
-### Strapi ne démarre pas
-
-```bash
-docker compose logs strapi --tail=50
-docker compose exec strapi sh -c "env | grep DATABASE"   # Vérifier les variables
-docker compose restart strapi
-```
-
-### Nginx erreur 502 (Bad Gateway)
-
-Strapi n'est pas encore prêt ou a crashé :
-
-```bash
-docker compose ps                 # Vérifier que strapi est "Up"
-docker compose logs strapi --tail=20
-docker compose restart strapi
-```
-
-### Espace disque plein
-
-```bash
-df -h
-docker system prune -f
-sudo journalctl --vacuum-size=100M
-```
-
-### Certificat SSL expiré
-
-```bash
-docker compose run --rm certbot renew
-docker compose restart nginx
-```
-
-### Base de données — accès direct
+## Base de données
 
 ```bash
 docker compose exec postgres psql -U strapi strapi
 ```
 
-### Super admin non visible
+Ne jamais modifier les données à la main sans sauvegarde immédiate avant (`docker compose exec backup backup.sh`).
 
-Si le super admin ne voit pas l'interface `/super-admin` après connexion :
+## Mises à jour du système
 
-```bash
-# Vérifier le rôle en base
-docker compose exec postgres psql -U strapi strapi -c \
-  "SELECT id, email, municipality_role FROM up_users;"
-
-# Corriger le rôle si nécessaire
-docker compose exec postgres psql -U strapi strapi -c \
-  "UPDATE up_users SET municipality_role = 'super_admin' WHERE email = 'VOTRE_EMAIL';"
-```
-
-Puis se déconnecter et reconnecter dans le dashboard.
-
-### Rollback rapide
-
-```bash
-cd /opt/communeo
-git log --oneline -5              # Trouver le commit précédent
-git checkout <commit-hash>        # Revenir au commit
-docker compose build strapi
-docker compose up -d
-```
-
----
-
-## Incidents résolus
-
-### Super admin redirigé vers /dashboard en prod (2026-03-04)
-
-**Symptôme** : Le super admin fonctionnait en local mais pas en prod. `curl /api/users/me` retournait bien `municipality_role: "super_admin"`, mais le frontend redirigeait vers `/dashboard`.
-
-**Deux causes** :
-
-1. **Cache TanStack Query après login** : `useLogin.onSuccess` appelait `queryClient.setQueryData()` avec la réponse de `/api/auth/local`, qui ne contenait pas `municipality_role`. `SuperAdminRoute` lisait ces données incomplètes et redirigeait immédiatement, avant que le refetch de `/api/users/me` (qui lui contient `municipality_role`) ait le temps de répondre.
-
-2. **Commande `scp` incorrecte** : `scp -r dist/ dest/` crée `dest/dist/` au lieu d'écraser le contenu. Résultat : `index.html` sur le serveur pointait encore sur l'ancien bundle JS, donc les corrections de code n'étaient même pas chargées.
-
-**Fix** :
-- Supprimé `setQueryData` dans `useLogin`, `useRegister`, `useResetPassword` — seul `invalidateQueries` est appelé, forçant un fetch frais de `/api/users/me?populate=site` qui contient toutes les données
-- Ajouté headers `Cache-Control: no-store` sur les réponses API dans nginx (`nginx/templates/default.conf.template`)
-- Corrigé la procédure de déploiement : `rm -rf dist/*` + `scp -r dist/*` (voir section "Déployer le frontend")
-
-**Leçon** : Toujours vérifier le hash dans `index.html` sur le serveur après un déploiement (`grep 'index-' .../index.html`).
+Mensuel : `sudo apt update && sudo apt upgrade -y`, redémarrage si le noyau change (`docker compose up -d`
+relance tout). Les images de base (Node, Postgres, nginx) sont mises à jour à chaque déploiement.

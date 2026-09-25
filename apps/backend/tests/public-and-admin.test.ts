@@ -33,6 +33,14 @@ afterAll(async () => {
   await teardownStrapi();
 });
 
+describe('supervision', () => {
+  it('GET /api/health : public, vérifie la base', async () => {
+    const res = await http.get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ status: 'ok' });
+  });
+});
+
 describe('formulaire de contact (public)', () => {
   it('enregistre la demande avec un numéro de référence, visible par la commune', async () => {
     const res = await http.post('/api/contact-submissions/public').send({

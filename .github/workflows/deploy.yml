@@ -1,0 +1,99 @@
+# Déploiement de production (#179) : à chaque commit sur main, les images sont construites et publiées
+# sur GHCR (version = commit), la stack est testée de bout en bout (deploy/e2e/run.sh), puis déployée
+# sur le serveur si DEPLOY_HOST est configuré (variables et secrets de l'environnement « production »).
+# Relancer à la main avec une version existante : redéploiement ou retour arrière, sans reconstruire.
+name: Déploiement
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version à déployer (commit déjà publié) ; vide : ce commit"
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io/philippe-tic
+  VERSION: ${{ inputs.version || github.sha }}
+
+jobs:
+  images:
+    name: Image ${{ matrix.image }}
+    if: ${{ !inputs.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { image: backend, context: ., file: apps/backend/Dockerfile }
+          - { image: worker, context: ., file: apps/worker/Dockerfile }
+          - { image: preview, context: ., file: apps/renderer/Dockerfile }
+          - { image: web, context: ., file: apps/admin/Dockerfile }
+          - { image: backup, context: deploy/backup, file: deploy/backup/Dockerfile }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          tags: ${{ env.REGISTRY }}/communeo-${{ matrix.image }}:${{ github.sha }}
+          build-args: |
+            VITE_TERMS_URL=${{ vars.VITE_TERMS_URL }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  e2e:
+    name: Stack de production (bout en bout)
+    needs: images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Démarrage, commune, mise en ligne, sauvegarde et restauration
+        run: E2E_BUILD=0 E2E_REGISTRY=${{ env.REGISTRY }} E2E_TAG=${{ github.sha }} deploy/e2e/run.sh
+      - name: Versions testées marquées « latest »
+        run: |
+          for image in backend worker preview web backup; do
+            docker buildx imagetools create -t "$REGISTRY/communeo-$image:latest" "$REGISTRY/communeo-$image:${{ github.sha }}"
+          done
+
+  deploy:
+    name: Serveur de production
+    needs: [images, e2e]
+    # Déploiement d'un commit : après les tests ; redéploiement d'une version (images déjà testées) : directement
+    if: ${{ always() && vars.DEPLOY_HOST != '' && (inputs.version != '' || (needs.images.result == 'success' && needs.e2e.result == 'success')) }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      # Le docker-compose.yml de la version déployée (retour arrière compris)
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.VERSION }}
+      - name: Clé SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: Fichiers de la stack
+        run: scp docker-compose.yml deploy/server/deploy.sh "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}:${{ vars.DEPLOY_PATH }}/"
+      - name: Mise à jour du serveur (retour arrière automatique en cas d'échec)
+        run: ssh "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}" "cd ${{ vars.DEPLOY_PATH }} && ./deploy.sh $VERSION"

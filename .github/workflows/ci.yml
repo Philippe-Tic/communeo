@@ -147,14 +147,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [backend, worker, renderer]
+        include:
+          - { app: backend, context: ., file: apps/backend/Dockerfile, scope: backend }
+          - { app: worker, context: ., file: apps/worker/Dockerfile, scope: worker }
+          - { app: renderer, context: ., file: apps/renderer/Dockerfile, scope: preview }
+          - { app: web, context: ., file: apps/admin/Dockerfile, scope: web }
+          - { app: backup, context: deploy/backup, file: deploy/backup/Dockerfile, scope: backup }
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@v6
         with:
-          context: .
-          file: apps/${{ matrix.app }}/Dockerfile
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           push: false
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+          # Même cache que .github/workflows/deploy.yml
+          cache-from: type=gha,scope=${{ matrix.scope }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.scope }}

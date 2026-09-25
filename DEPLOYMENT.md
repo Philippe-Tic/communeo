@@ -1,493 +1,195 @@
-# Guide de mise en production — Communeo
+# Mise en production — Communeo V2
 
-## Architecture cible
+Installation initiale du serveur. L'exploitation courante (déployer, revenir en arrière, sauvegardes,
+restauration, supervision, incidents) est dans [PRODUCTION.md](PRODUCTION.md).
+
+## Architecture
 
 ```
-Internet → DNS (A record) → [VPS Scaleway START-2-S — 6,99€ HT/mois]
-                                    │
-                                 [Nginx :443]
-                                    ├── /             → Admin SPA (React, fichiers statiques)
-                                    ├── /api/*        → Reverse proxy → Strapi :1337
-                                    ├── /uploads/*    → Reverse proxy → Strapi :1337
-                                    └── /admin/*      → Reverse proxy → Strapi admin panel
-
-                              [Docker Compose]
-                                ├── postgres:16-alpine (port 5432, interne uniquement)
-                                ├── strapi (port 1337, interne uniquement)
-                                ├── nginx (ports 80/443, exposé)
-                                └── certbot (renouvellement SSL automatique)
+                         ┌──────────────── VPS (Scaleway ou OVH, France) ─────────────────┐
+app.communeo.fr ────────►│ nginx « web » :443 ─┬─ /            admin (fichiers statiques)  │
+                         │  (admin compilée,   ├─ /api, /uploads, /admin  → strapi :1337   │
+preview.communeo.fr ────►│   TLS Let's Encrypt)└─ preview.*   → preview :4321 (SSR)       │
+                         │                                                                 │
+                         │ strapi ── postgres (contenus + file des builds pg-boss)         │
+                         │ worker ── construit chaque site (Astro) et le publie ───────────┼──► Netlify
+                         │ backup ── chaque nuit : base + fichiers, sur place et vers S3 ──┼──► stockage objet
+                         │ certbot ── renouvelle les certificats                           │
+                         └─────────────────────────────────────────────────────────────────┘
+<commune>.communeo.fr et domaines des communes ─────────────────────────────────────► Netlify
 ```
 
----
+Images : publiées sur GHCR par `.github/workflows/deploy.yml` (`ghcr.io/philippe-tic/communeo-{backend,worker,preview,web,backup}`),
+une version par commit (`IMAGE_TAG`). Le serveur n'a pas le code source : seulement `docker-compose.yml`, `deploy.sh` et `.env`.
 
-## Phase 1 — Provisionner le VPS
+## 1. Le serveur
 
-### 1.1 Créer le serveur
-
-1. Se connecter sur la [console Scaleway](https://console.scaleway.com/)
-2. Créer une instance **START-2-S** (2 vCPU, 2 Go RAM, 30 Go NVMe) — datacenter : **Barcelona** (latence ~10-15 ms depuis la France, UE)
-3. OS : **Ubuntu 24.04**
-4. Ajouter ta clé SSH publique lors de la création
-
-### 1.2 Sécuriser le serveur
+- **Taille** : 4 vCPU, 8 Go de RAM, 75 Go de disque (OVH VPS-2 ou équivalent Scaleway), Ubuntu 24.04 LTS,
+  datacenter en France. Mesuré : ~600 Mo de RAM au repos, ~0,5 Go de plus pendant un build.
+- **Capacité** : le disque limite en premier (photos et PDF des communes, 0,2 à 1 Go chacune, plus leur copie
+  miroir) : environ **30 à 100 communes** sur 75 Go. Au-delà : disque supplémentaire, ou fichiers envoyés
+  directement dans le stockage objet (provider d'upload S3 de Strapi), ou serveur plus grand.
+- **OVH** : l'utilisateur par défaut est `ubuntu` (sudo) et non `root` ; il peut servir d'utilisateur de
+  déploiement (`DEPLOY_USER=ubuntu`, `DEPLOY_PATH=/home/ubuntu/communeo`).
+- **Sécuriser** : utilisateur `deploy` (sudo, clé SSH), pare-feu, accès root coupé.
 
 ```bash
-# Se connecter en root
 ssh root@IP_DU_VPS
-
-# Mettre à jour le système
 apt update && apt upgrade -y
+adduser deploy && usermod -aG sudo deploy
+mkdir -p /home/deploy/.ssh && cp ~/.ssh/authorized_keys /home/deploy/.ssh/
+chown -R deploy:deploy /home/deploy/.ssh && chmod 700 /home/deploy/.ssh && chmod 600 /home/deploy/.ssh/authorized_keys
 
-# Créer un utilisateur non-root
-adduser deploy
-usermod -aG sudo deploy
+apt install -y ufw && ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
+curl -fsSL https://get.docker.com | sh && usermod -aG docker deploy
 
-# Copier la clé SSH vers le nouvel utilisateur
-mkdir -p /home/deploy/.ssh
-cp ~/.ssh/authorized_keys /home/deploy/.ssh/
-chown -R deploy:deploy /home/deploy/.ssh
-chmod 700 /home/deploy/.ssh
-chmod 600 /home/deploy/.ssh/authorized_keys
+# Swap : les builds de sites consomment de la mémoire par pics
+fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
 ```
 
-> **Note** : On désactivera l'accès root SSH **après** avoir installé Docker et configuré le firewall (étape 1.6), pour éviter de se retrouver bloqué en cas de problème.
+Tester `ssh deploy@IP_DU_VPS` depuis un autre terminal, **puis seulement** couper root :
+`sed -i 's/^PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config && systemctl restart ssh`.
 
-### 1.3 Configurer le firewall
+## 2. DNS
 
-```bash
-# ufw n'est pas préinstallé sur Scaleway Ubuntu 24.04
-sudo apt install ufw -y
+La zone communeo.fr est gérée par Netlify (les adresses des sites y sont créées automatiquement). Y ajouter :
 
-# En tant que deploy (ou root avant de couper l'accès)
-sudo ufw allow OpenSSH
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-```
+| Nom | Type | Valeur |
+|-----|------|--------|
+| `app.communeo.fr` | A | IP du VPS |
+| `preview.communeo.fr` | A | IP du VPS |
 
-### 1.4 Installer Docker
+L'admin et la preview partagent le même domaine parent : le cookie de la preview est envoyé dans le
+panneau d'aperçu de l'éditeur.
 
-```bash
-# Installer Docker (script officiel)
-curl -fsSL https://get.docker.com | sudo sh
-
-# Ajouter deploy au groupe docker (évite sudo pour docker)
-sudo usermod -aG docker deploy
-
-# Se reconnecter pour appliquer le groupe
-exit
-ssh deploy@IP_DU_VPS
-
-# Vérifier
-docker --version
-docker compose version
-```
-
-### 1.5 Configurer le swap
-
-Avec 2 Go de RAM, ajouter du swap évite les OOM kills lors des builds Strapi :
-
-```bash
-sudo fallocate -l 2G /swapfile
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
-```
-
-### 1.6 Désactiver l'accès root SSH
-
-Maintenant que Docker, le firewall et le swap sont en place, on peut sécuriser l'accès SSH.
-
-```bash
-# D'abord, tester la connexion avec l'utilisateur deploy depuis un AUTRE terminal
-ssh deploy@IP_DU_VPS
-# Si ça fonctionne, continuer ci-dessous. Sinon, NE PAS désactiver root !
-
-# Désactiver l'accès root SSH (gère les deux cas : "yes" et "prohibit-password")
-sudo sed -i 's/^PermitRootLogin .*/PermitRootLogin no/' /etc/ssh/sshd_config
-sudo systemctl restart ssh
-```
-
-### 1.7 Configurer le DNS
-
-Chez ton registrar DNS, créer un **enregistrement A** :
-
-```
-cms.tondomaine.fr  →  IP_DU_VPS
-```
-
-Attendre la propagation DNS (quelques minutes à quelques heures).
-
-```bash
-# Vérifier la propagation
-dig cms.tondomaine.fr +short
-# Doit retourner l'IP du VPS
-```
-
----
-
-## Phase 2 — Préparer le code (en local)
-
-### 2.1 Builder l'admin SPA
-
-```bash
-pnpm install
-VITE_API_URL=https://cms.tondomaine.fr pnpm --filter @communeo/admin build
-```
-
-Cela génère `apps/admin/dist/` qui sera servi par Nginx en production.
-
-### 2.2 Commit et push
-
-```bash
-git add -A
-git commit -m "feat: production deployment setup"
-git push
-```
-
----
-
-## Phase 3 — Déployer sur le VPS
-
-### 3.1 Cloner le projet
+## 3. Fichiers et secrets
 
 ```bash
 ssh deploy@IP_DU_VPS
-
-# Créer le répertoire cible (appartient à deploy, pas à root)
-sudo mkdir -p /opt/communeo
-sudo chown deploy:deploy /opt/communeo
-
-git clone https://github.com/TON_USER/cms-mairies.git /opt/communeo
-cd /opt/communeo
+mkdir -p ~/communeo && cd ~/communeo
+# docker-compose.yml et deploy.sh : copiés par le workflow à chaque déploiement ; la première fois, à la main
+curl -fsSLO https://raw.githubusercontent.com/Philippe-Tic/communeo/main/docker-compose.yml
+curl -fsSLO https://raw.githubusercontent.com/Philippe-Tic/communeo/main/deploy/server/deploy.sh && chmod +x deploy.sh
+# Accès aux images (dépôt privé) : jeton GitHub avec le droit read:packages
+echo "$GHCR_TOKEN" | docker login ghcr.io -u philippe-tic --password-stdin
 ```
 
-### 3.2 Générer les secrets et créer le .env
+Créer `~/communeo/.env` (droits 600). Les secrets se génèrent tous d'avance, **tokens d'API compris** :
+Strapi crée au premier démarrage le « Build Token » et le « Preview Token » avec ces valeurs.
 
 ```bash
-cd /opt/communeo
+secret() { openssl rand -hex 32; }
+cat > .env <<ENV
+DOMAIN=app.communeo.fr
+PREVIEW_DOMAIN=preview.communeo.fr
+SITES_DOMAIN=communeo.fr
 
-# Générer tous les secrets d'un coup
-echo "# --- Secrets générés ---"
-echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)"
-echo "APP_KEYS=$(openssl rand -base64 16),$(openssl rand -base64 16),$(openssl rand -base64 16),$(openssl rand -base64 16)"
-echo "API_TOKEN_SALT=$(openssl rand -base64 16)"
-echo "ADMIN_JWT_SECRET=$(openssl rand -base64 16)"
-echo "TRANSFER_TOKEN_SALT=$(openssl rand -base64 16)"
-echo "JWT_SECRET=$(openssl rand -base64 16)"
+POSTGRES_PASSWORD=$(secret)
+APP_KEYS=$(secret),$(secret)
+API_TOKEN_SALT=$(secret)
+ADMIN_JWT_SECRET=$(secret)
+TRANSFER_TOKEN_SALT=$(secret)
+JWT_SECRET=$(secret)
+ENCRYPTION_KEY=$(secret)
+STRAPI_API_TOKEN=$(openssl rand -hex 64)
+PREVIEW_API_TOKEN=$(openssl rand -hex 64)
+WORKER_SECRET=$(secret)
+PREVIEW_SECRET=$(secret)
+
+NETLIFY_TOKEN=
+RESEND_API_KEY=
+EMAIL_DEFAULT_FROM=noreply@communeo.fr
+SIGNUP_NOTIFY_EMAIL=
+
+HOSTING_NAME=
+HOSTING_ADDRESS=
+HOSTING_PHONE=
+COMMUNEO_LEGAL_NAME=
+COMMUNEO_LEGAL_ADDRESS=
+COMMUNEO_SIRET=
+COMMUNEO_BILLING_EMAIL=
+COMMUNEO_VAT_RATE=0
+
+# Premier démarrage : compte de l'équipe Communeo
+SEED_SUPER_ADMIN_EMAIL=
+SEED_SUPER_ADMIN_PASSWORD=
+
+# Sauvegardes hors du serveur (stockage objet S3), chiffrées
+BACKUP_S3_BUCKET=
+BACKUP_S3_PROVIDER=Scaleway
+BACKUP_S3_ENDPOINT=s3.fr-par.scw.cloud
+BACKUP_S3_REGION=fr-par
+BACKUP_S3_ACCESS_KEY_ID=
+BACKUP_S3_SECRET_ACCESS_KEY=
+BACKUP_PASSPHRASE=$(openssl rand -base64 48)
+ENV
+chmod 600 .env
 ```
 
-Copier le template et remplacer les valeurs :
+> Garder une copie de `.env` hors du serveur (gestionnaire de mots de passe) : **`BACKUP_PASSPHRASE`
+> est indispensable pour relire les sauvegardes**, `ENCRYPTION_KEY` pour les tokens d'API.
+
+- **Netlify** : jeton personnel du compte qui gère la zone communeo.fr (`NETLIFY_TOKEN`).
+- **Resend** : domaine communeo.fr vérifié (enregistrements SPF/DKIM dans la zone Netlify), clé `RESEND_API_KEY`.
+- **Sauvegardes** : bucket de stockage objet dans **une autre région que le serveur**, clé d'accès limitée à ce bucket.
+  Scaleway : Object Storage, valeurs ci-dessus. OVH : Public Cloud → Object Storage (utilisateur S3 + conteneur
+  « Standard »), `BACKUP_S3_PROVIDER=Other`, `BACKUP_S3_ENDPOINT=https://s3.sbg.io.cloud.ovh.net`, `BACKUP_S3_REGION=sbg`
+  (région du conteneur : `sbg`, `gra`, `rbx`…).
+
+## 4. Certificats
+
+nginx a besoin des certificats pour démarrer : les obtenir une fois, avant le premier lancement.
 
 ```bash
-cp .env.production .env
-nano .env
+docker volume create communeo_certbot-certs && docker volume create communeo_certbot-webroot
+docker run --rm -p 80:80 -v communeo_certbot-certs:/etc/letsencrypt certbot/certbot certonly --standalone \
+  --non-interactive --agree-tos -m equipe@communeo.fr -d app.communeo.fr -d preview.communeo.fr --cert-name app.communeo.fr
+docker run --rm -v communeo_certbot-certs:/etc/letsencrypt alpine sh -c \
+  'ln -sfn app.communeo.fr /etc/letsencrypt/live/preview.communeo.fr'
 ```
 
-Remplir le `.env` avec :
-- Les secrets générés ci-dessus
-- Ton domaine (`DOMAIN=cms.tondomaine.fr`)
-- Ton token Netlify (`NETLIFY_TOKEN=...`)
-- L'émetteur des devis (`COMMUNEO_LEGAL_NAME`, `COMMUNEO_LEGAL_ADDRESS`, `COMMUNEO_SIRET`, `COMMUNEO_BILLING_EMAIL`, `COMMUNEO_VAT_RATE=0` en franchise de TVA) : sans ces valeurs, le PDF du devis affiche « [à compléter] »
-- Le domaine des adresses Communeo (`SITES_DOMAIN=communeo.fr`) : chaque site répond sur `<commune>.communeo.fr`. La zone DNS de ce domaine doit être gérée par Netlify (enregistrements et certificats créés automatiquement) ; sans cette variable, les sites gardent leur adresse `*.netlify.app`
-- Le domaine de la preview des brouillons (`PREVIEW_DOMAIN=preview.tondomaine.fr`, certificat : `certbot certonly --webroot -w /var/www/certbot -d preview.tondomaine.fr`) `PREVIEW_API_TOKEN` (comme `STRAPI_API_TOKEN`, affiché dans les logs au premier démarrage de Strapi) et le secret des jetons de preview (`PREVIEW_SECRET=$(openssl rand -hex 32)`). L'administration et la preview doivent partager le même domaine (`app.tondomaine.fr` et `preview.tondomaine.fr`) : le cookie de la preview est ainsi envoyé dans le panneau d'aperçu de l'éditeur
-- Un secret partagé Strapi ⇄ worker de build (`WORKER_SECRET=$(openssl rand -hex 32)`) : le service `worker` du docker-compose construit et publie les sites
-- Les identifiants SMTP Resend (voir Phase 4)
-- Laisser `STRAPI_API_TOKEN=` vide pour l'instant (sera rempli à l'étape 3.7)
+Le service `certbot` les renouvelle ensuite ; nginx se recharge toutes les 12 heures pour les prendre en compte.
 
-### 3.3 Copier l'admin SPA sur le VPS
-
-**Méthode recommandée** — copier le build local (pas besoin de Node.js sur le VPS) :
+## 5. Premier lancement
 
 ```bash
-# Depuis ta machine locale (après avoir fait le build en Phase 2.1)
-scp -r apps/admin/dist deploy@IP_DU_VPS:/opt/communeo/apps/admin/dist
+cd ~/communeo && ./deploy.sh latest
 ```
 
-### 3.4 Obtenir le certificat SSL
+Vérifier : `https://app.communeo.fr` (connexion avec le compte `SEED_SUPER_ADMIN_*`), `docker compose ps`
+(tous les services `healthy`), `docker compose logs backup` (première sauvegarde faite), puis retirer
+`SEED_SUPER_ADMIN_PASSWORD` du `.env`.
 
-Avant de lancer tout docker-compose, il faut obtenir le certificat SSL. On lance Nginx temporairement en HTTP uniquement.
+## 6. Déploiement continu
+
+Dans GitHub, **Settings → Secrets and variables → Actions** (au niveau du dépôt : la condition du job de
+déploiement lit `DEPLOY_HOST`, qu'une variable d'environnement ne fournirait pas). L'environnement `production`
+(créé au premier déploiement) peut en plus exiger une approbation manuelle :
+
+| Type | Nom | Valeur |
+|------|-----|--------|
+| Variable | `DEPLOY_HOST` | IP ou nom du VPS |
+| Variable | `DEPLOY_USER` | `deploy` |
+| Variable | `DEPLOY_PATH` | `/home/deploy/communeo` |
+| Variable | `VITE_TERMS_URL` | adresse des conditions d'utilisation (#315) |
+| Secret | `DEPLOY_SSH_KEY` | clé privée dédiée au déploiement (sa clé publique dans `~deploy/.ssh/authorized_keys`) |
+| Secret | `DEPLOY_KNOWN_HOSTS` | sortie de `ssh-keyscan IP_DU_VPS` |
+
+Ensuite, chaque commit sur `main` : images construites et publiées, stack testée de bout en bout sur la CI
+(`deploy/e2e/run.sh`), puis déployée par `deploy.sh` (retour automatique à la version précédente si Strapi
+ou nginx ne démarrent pas sains). Sans `DEPLOY_HOST`, le workflow s'arrête après les tests.
+
+## 7. Supervision
+
+- Contrôles de santé Docker sur strapi, preview, nginx et backup (`docker compose ps`).
+- Moniteur externe gratuit (UptimeRobot, Better Stack…), alerte par e-mail : `https://app.communeo.fr/healthz`
+  (nginx), `https://app.communeo.fr/api/health` (Strapi et sa base) et un site de commune (Netlify).
+- Sauvegardes : le service `backup` devient `unhealthy` si la dernière réussie date de plus de 26 heures.
+
+## Essayer la stack en local
 
 ```bash
-cd /opt/communeo
-
-# Créer une config Nginx temporaire (HTTP uniquement pour le challenge ACME)
-mkdir -p nginx/conf.d-init
-cat > nginx/conf.d-init/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name _;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 200 'OK';
-        add_header Content-Type text/plain;
-    }
-}
-EOF
-
-# Lancer Nginx temporairement avec la config HTTP
-docker run -d --name nginx-init \
-  -p 80:80 \
-  -v $(pwd)/nginx/conf.d-init:/etc/nginx/conf.d:ro \
-  -v cms-certbot-webroot:/var/www/certbot \
-  nginx:alpine
-
-# Obtenir le certificat
-docker run --rm \
-  -v cms-certbot-webroot:/var/www/certbot \
-  -v cms-certbot-certs:/etc/letsencrypt \
-  certbot/certbot certonly \
-    --webroot \
-    --webroot-path=/var/www/certbot \
-    -d app.communeo.fr \
-    --email contact@communeo.fr \
-    --agree-tos \
-    --no-eff-email
-
-# Arrêter et supprimer le Nginx temporaire
-docker stop nginx-init && docker rm nginx-init
-rm -rf nginx/conf.d-init
+deploy/e2e/run.sh              # construit les images, démarre, publie une commune, sauvegarde, restaure
+E2E_KEEP=1 deploy/e2e/run.sh   # garde la stack ouverte sur http://localhost:8088 (equipe@communeo.test)
 ```
-
-> **Important** : Les volumes `cms-certbot-webroot` et `cms-certbot-certs` créés ici seront les memes que ceux utilisés par docker-compose (Docker les retrouve par nom). Si docker-compose utilise un préfixe de projet différent, il faudra adapter. Pour s'assurer de la cohérence, on peut renommer les volumes dans docker-compose ou utiliser des volumes nommés explicites.
-
-Pour forcer la cohérence, copier les certificats vers les volumes de docker-compose :
-
-```bash
-# Lancer docker-compose qui va créer ses propres volumes
-docker compose up -d postgres
-docker compose down
-
-# Copier les certificats dans le volume de docker-compose
-docker run --rm \
-  -v cms-certbot-certs:/source:ro \
-  -v communeo_certbot-certs:/dest \
-  alpine sh -c "cp -a /source/. /dest/"
-
-# Nettoyer les volumes temporaires
-docker volume rm cms-certbot-webroot cms-certbot-certs
-```
-
-### 3.5 Lancer l'application
-
-```bash
-cd /opt/communeo
-docker compose up -d
-```
-
-Vérifier que tout démarre correctement :
-
-```bash
-# Voir les logs en temps réel
-docker compose logs -f
-
-# Vérifier le statut des containers
-docker compose ps
-```
-
-Attendre que Strapi soit prêt (peut prendre 30-60 secondes au premier démarrage, le temps de créer les tables dans PostgreSQL).
-
-### 3.6 Créer le premier admin du dashboard
-
-Au premier démarrage, si aucun utilisateur n'existe, Strapi crée automatiquement un site + admin via le seed bootstrap.
-
-**Configurer le `.env` avant le premier `docker compose up`** (optionnel — des valeurs par défaut sont utilisées sinon) :
-
-```bash
-# Seed initial admin (first boot uniquement)
-SEED_SITE_NAME=Ma Commune
-SEED_SITE_SLUG=ma-commune
-SEED_ADMIN_EMAIL=admin@communeo.fr
-SEED_ADMIN_PASSWORD=ChangeMe123!
-
-# Super admin (optionnel — accès gestion multi-sites)
-SEED_SUPER_ADMIN_EMAIL=superadmin@communeo.fr
-SEED_SUPER_ADMIN_PASSWORD=ChangeMe456!
-```
-
-Après le démarrage, vérifier dans les logs :
-```bash
-docker compose logs strapi | grep "seed"
-# Doit afficher : "Created seed site" et "Created seed admin"
-```
-
-Se connecter sur `https://app.communeo.fr/login` avec les identifiants configurés, puis **changer le mot de passe immédiatement**.
-
-### 3.7 Créer un API Token
-
-Dans le panel admin Strapi :
-
-1. Aller dans **Settings** > **API Tokens**
-2. Cliquer **Create new API Token**
-3. Nom : `Site Builder`
-4. Type : **Full access**
-5. Copier le token généré
-
-Mettre à jour le `.env` sur le serveur :
-
-```bash
-nano /opt/communeo/.env
-# Remplir STRAPI_API_TOKEN=le_token_copié
-```
-
-Redémarrer Strapi pour prendre en compte le token :
-
-```bash
-docker compose restart strapi
-```
-
----
-
-## Phase 4 — Email (Resend)
-
-### 4.1 Configurer Resend
-
-1. Se connecter sur [resend.com](https://resend.com/) (tier gratuit = 100 emails/jour, 3 000/mois)
-2. Aller dans **Settings** > **API Keys**
-3. Créer une **API Key**
-4. Aller dans **SMTP** et noter :
-   - **SMTP_HOST** : `smtp.resend.com`
-   - **SMTP_PORT** : `587`
-   - **SMTP_USERNAME** : `resend`
-   - **SMTP_PASSWORD** : ton API Key (commence par `re_`)
-
-### 4.2 Configurer le DNS pour les emails
-
-Chez ton registrar DNS, ajouter les enregistrements DKIM/SPF/DMARC fournis par Resend (dans **Domains** > **Add Domain**) pour améliorer la délivrabilité. Si tu utilises déjà Resend pour ta landing page, ces enregistrements sont probablement déjà en place.
-
-### 4.3 Mettre à jour le .env
-
-```bash
-nano /opt/communeo/.env
-# Remplir les variables SMTP_*
-```
-
-```bash
-docker compose restart strapi
-```
-
----
-
-## Phase 5 — Vérification
-
-### Checklist
-
-| Test | Commande / Action | Attendu |
-|------|-------------------|---------|
-| Admin SPA charge | Naviguer vers `https://cms.tondomaine.fr/` | Page de login visible |
-| API Strapi répond | `curl https://cms.tondomaine.fr/api/` | Réponse JSON |
-| SSL valide | Vérifier le cadenas dans le navigateur | Certificat Let's Encrypt valide |
-| Login admin | Se connecter avec les identifiants | Dashboard affiché |
-| Créer du contenu | Créer un article dans l'admin | Article sauvegardé |
-| Déployer un site | Déclencher un déploiement | Site Netlify mis à jour |
-| Email | Inviter un utilisateur | Email reçu |
-| HTTPS redirect | `curl -I http://cms.tondomaine.fr/` | 301 → https |
-
----
-
-## Phase 6 — Post-déploiement
-
-### 6.1 Configurer les backups automatiques
-
-```bash
-# Créer le dossier de backups
-sudo mkdir -p /opt/communeo/backups
-sudo chown deploy:deploy /opt/communeo/backups
-
-# Tester le backup manuellement
-/opt/communeo/scripts/backup.sh
-
-# Ajouter au cron (tous les jours à 3h)
-crontab -e
-# Ajouter cette ligne :
-0 3 * * * /opt/communeo/scripts/backup.sh >> /var/log/cms-backup.log 2>&1
-```
-
-### 6.2 Monitoring
-
-Configurer [UptimeRobot](https://uptimerobot.com/) (gratuit, 5 min d'intervalle) :
-
-- Monitor 1 : `https://cms.tondomaine.fr/api/` (API health)
-- Monitor 2 : `https://cms.tondomaine.fr/` (Admin SPA)
-- Notification par email en cas de downtime
-
-### 6.3 Créer la première municipalité
-
-1. Se connecter au panel Strapi (`/admin`)
-2. Créer un **Site** (Content Manager > Sites > Create)
-3. Revenir dans l'admin SPA (`/`) et créer le contenu
-
----
-
-## Maintenance courante
-
-### Mettre à jour le code
-
-```bash
-cd /opt/communeo
-git pull
-
-# Rebuilder l'admin SPA si le frontend a changé
-pnpm install && VITE_API_URL=https://cms.tondomaine.fr pnpm --filter @communeo/admin build
-
-# Rebuilder et redémarrer Strapi
-docker compose build strapi
-docker compose up -d
-```
-
-### Consulter les logs
-
-```bash
-docker compose logs -f strapi    # Logs Strapi
-docker compose logs -f nginx     # Logs Nginx
-docker compose logs -f postgres  # Logs PostgreSQL
-```
-
-### Renouvellement SSL
-
-Le container `certbot` renouvelle automatiquement les certificats toutes les 12h (si nécessaire). Pour forcer un renouvellement :
-
-```bash
-docker compose run --rm certbot renew
-docker compose restart nginx
-```
-
-### Restaurer un backup
-
-```bash
-# Restaurer la base de données
-gunzip -c /opt/communeo/backups/db_YYYYMMDD_HHMMSS.sql.gz | \
-  docker compose exec -T postgres psql -U strapi strapi
-
-# Restaurer les uploads
-docker compose cp /opt/communeo/backups/uploads_YYYYMMDD_HHMMSS.tar.gz strapi:/tmp/
-docker compose exec strapi sh -c "cd /app/public && tar xzf /tmp/uploads_*.tar.gz"
-```
-
-### Mises à jour système
-
-```bash
-# Mensuel
-sudo apt update && sudo apt upgrade -y
-
-# Docker
-docker system prune -f   # Nettoyer les images/containers inutilisés
-```
-
----
-
-## Coûts estimés
-
-| Service | Coût |
-|---------|------|
-| Scaleway START-2-S | 6,99 € HT/mois (~8,39 € TTC) |
-| Resend (email) | Gratuit (100 emails/jour) |
-| Let's Encrypt (SSL) | Gratuit |
-| UptimeRobot (monitoring) | Gratuit |
-| Netlify (sites municipaux) | Gratuit (tier starter) |
-| **Total** | **~9 €/mois TTC** |

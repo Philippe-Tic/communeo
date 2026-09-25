@@ -290,7 +290,7 @@ function RichTextInput({
         ...(describedBy ? { 'aria-describedby': describedBy } : {}),
         ...(invalid ? { 'aria-invalid': 'true' } : {}),
         class: cn(
-          'prose-admin min-h-28 rounded-b-lg border border-border-input bg-surface px-4 py-3.5 text-[15px] leading-relaxed outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent dark:bg-sidebar',
+          'prose-admin min-h-28 rounded-b-lg border border-border-input bg-surface px-4 py-3.5 text-[15px] leading-relaxed outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-accent dark:bg-sidebar',
           invalid && 'border-2 border-danger',
         ),
       },
@@ -310,7 +310,7 @@ function RichTextInput({
           ...(describedBy ? { 'aria-describedby': describedBy } : { 'aria-describedby': '' }),
           'aria-invalid': invalid ? 'true' : 'false',
           class: cn(
-            'prose-admin min-h-28 rounded-b-lg border border-border-input bg-surface px-4 py-3.5 text-[15px] leading-relaxed outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent dark:bg-sidebar',
+            'prose-admin min-h-28 rounded-b-lg border border-border-input bg-surface px-4 py-3.5 text-[15px] leading-relaxed outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-accent dark:bg-sidebar',
             invalid && 'border-2 border-danger',
           ),
         },

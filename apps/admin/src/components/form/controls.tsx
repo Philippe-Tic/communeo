@@ -86,7 +86,21 @@ export function DateField<T extends FieldValues>({ name, ...field }: Base<T>) {
     <Field name={name} error={error} {...field}>
       {(props) => (
         <div className="relative">
-          <input type="date" {...props} {...register(name)} className={cn(controlClass, 'h-11 pr-9 md:h-10 [&::-webkit-calendar-picker-indicator]:opacity-0')} />
+          {/* Le bouton calendrier natif, invisible, recevait le focus clavier sans rien montrer : il est
+              retiré, un clic dans le champ ouvre le calendrier ; au clavier, la date se saisit */}
+          <input
+            type="date"
+            {...props}
+            {...register(name)}
+            onClick={(event) => {
+              try {
+                event.currentTarget.showPicker();
+              } catch {
+                // Navigateur sans showPicker ou champ désactivé : saisie au clavier
+              }
+            }}
+            className={cn(controlClass, 'h-11 pr-9 md:h-10 [&::-webkit-calendar-picker-indicator]:hidden')}
+          />
           <CalendarDays aria-hidden="true" className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-secondary" />
         </div>
       )}

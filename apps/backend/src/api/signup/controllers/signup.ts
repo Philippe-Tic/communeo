@@ -216,6 +216,7 @@ export default {
       codeInsee: request.code_insee,
       contactMail: request.official_email,
       admin: { email: request.email, firstName: request.first_name, lastName: request.last_name },
+      trial: true,
     });
     await strapi.db.query(REQUEST).update({
       where: { id: request.id },

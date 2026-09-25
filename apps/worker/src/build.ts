@@ -38,7 +38,12 @@ export async function processBuild(job: BuildJob, deps: BuildDeps): Promise<void
   };
 
   // Strapi ouvre l'enregistrement à l'étape « vérification des contenus »
-  const { site } = await deps.strapi.start(job.id, { siteDocumentId, triggeredBy, reason, attempt: job.retryCount });
+  const opened = await deps.strapi.start(job.id, { siteDocumentId, triggeredBy, reason, attempt: job.retryCount });
+  if ('cancelled' in opened) {
+    log.info(`[BUILD] Job ${job.id} annulé : ${opened.cancelled}`);
+    return;
+  }
+  const { site } = opened;
   log.info(`[BUILD] ${site.slug} : début (job ${job.id}, essai ${job.retryCount + 1}/${job.retryLimit + 1})`);
 
   await fs.mkdir(deps.workDir, { recursive: true });

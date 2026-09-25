@@ -9,6 +9,7 @@
  * L'enregistrement n'empêche jamais l'action : une erreur est seulement consignée.
  */
 import { log } from '../utils/logger';
+import { isCommuneDeletion } from './commune-deletion';
 import { changeTitle, isScheduledPublication } from './pending-changes';
 
 const LOG = 'api::activity-log.activity-log';
@@ -28,7 +29,12 @@ export type ActivityAction =
   | 'user_delete'
   | 'commune_create'
   | 'commune_suspend'
-  | 'commune_unsuspend';
+  | 'commune_unsuspend'
+  | 'commune_delete'
+  | 'trial_extend'
+  | 'trial_expire'
+  | 'live_request'
+  | 'commune_go_live';
 
 export interface ActivityInput {
   action: ActivityAction;
@@ -110,6 +116,8 @@ export function activityLogMiddleware(strapi: any) {
     const uid: string = ctx.uid ?? '';
     const contentType = strapi.contentTypes[uid];
     if (!uid.startsWith('api::') || IGNORED.has(uid) || (!contentType?.attributes?.site && uid !== 'api::site.site')) return next();
+    // Suppression d'une commune : une seule ligne pour la commune, pas une par contenu
+    if (isCommuneDeletion()) return next();
 
     const documentId: string | undefined = ctx.params?.documentId;
     const publishing =

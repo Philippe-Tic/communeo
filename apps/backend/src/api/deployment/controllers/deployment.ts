@@ -2,6 +2,7 @@
  * deployment controller
  */
 
+import { isExpired, TRIAL_EXPIRED_MESSAGE } from '../../../services/trial';
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
 import { isBuildQueueConfigured, waitingBuild } from '../../../services/build-queue';
@@ -56,6 +57,7 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
       if ((siteData as any).suspended) {
         return ctx.forbidden("Cette commune est suspendue : la mise en ligne n'est pas possible");
       }
+      if (isExpired(siteData as any)) return ctx.forbidden(TRIAL_EXPIRED_MESSAGE, { code: 'trial_expired' });
 
       if (!isBuildQueueConfigured()) {
         ctx.status = 503;

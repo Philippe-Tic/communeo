@@ -1,6 +1,7 @@
 /**
  * État de la mise en ligne dans l'en-tête : « Site à jour » ou « Modifications en attente de mise en ligne »
- * suivi de « Mettre en ligne » (seulement quand il y a quelque chose à mettre en ligne).
+ * suivi de « Mettre en ligne » (seulement quand il y a quelque chose à mettre en ligne). Essai terminé :
+ * le site est retiré, plus rien n'est mis en ligne.
  */
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Loader2 } from 'lucide-react';
@@ -9,13 +10,25 @@ import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { publicationQuery, usePublish } from '@/lib/publication';
+import { sessionQuery } from '@/lib/session';
+import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 
 const formatTime = (date: Date) => new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', hour: 'numeric', minute: '2-digit' }).format(date).replace(':', ' h ');
 
 export function PublicationStatus({ className, stacked }: { className?: string; stacked?: boolean }) {
   const { data } = useQuery(publicationQuery);
+  const { data: user } = useQuery(sessionQuery);
   const publish = usePublish();
+  if (isReadOnly(user?.site)) {
+    return (
+      <div role="status" className={className}>
+        <StatusBadge size="md" tone="danger">
+          Site retiré : essai terminé
+        </StatusBadge>
+      </div>
+    );
+  }
   if (!data) return null;
 
   const running = data.state === 'running' || publish.isPending;

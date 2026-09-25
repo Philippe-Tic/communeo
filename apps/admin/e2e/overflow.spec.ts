@@ -20,3 +20,15 @@ test('aucun défilement horizontal', async ({ page }) => {
   }
   expect(wide).toEqual([]);
 });
+
+test('bandeau d’essai et écran « Passer en live » : aucun défilement horizontal', async ({ page }) => {
+  test.skip((page.viewportSize()?.width ?? 0) > 400);
+  for (const trial of [{ endsInDays: 12 }, { expiredDaysAgo: 3, requested: true }]) {
+    await mockApi(page, { trial });
+    for (const route of ['/', '/passer-en-live', '/mise-en-ligne']) {
+      await page.goto(route);
+      await page.waitForLoadState('networkidle');
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), route).toBeLessThanOrEqual(390);
+    }
+  }
+});

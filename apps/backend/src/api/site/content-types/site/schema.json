@@ -106,6 +106,33 @@
       "type": "boolean",
       "default": false
     },
+    "plan": {
+      "type": "enumeration",
+      "enum": [
+        "trial",
+        "live",
+        "expired"
+      ],
+      "default": "live"
+    },
+    "trial_ends_at": {
+      "type": "datetime"
+    },
+    "trial_expired_at": {
+      "type": "datetime"
+    },
+    "trial_notice": {
+      "type": "enumeration",
+      "enum": [
+        "reminder_7",
+        "reminder_1",
+        "expired",
+        "deletion"
+      ]
+    },
+    "live_requested_at": {
+      "type": "datetime"
+    },
     "onboarding": {
       "type": "json"
     },

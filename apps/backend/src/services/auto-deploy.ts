@@ -10,6 +10,7 @@
  */
 import deploymentService from './deployment';
 import { isBuildQueueConfigured } from './build-queue';
+import { isCommuneDeletion } from './commune-deletion';
 import { isScheduledPublication, recordPendingChange, type PendingAction } from './pending-changes';
 import { log } from '../utils/logger';
 
@@ -44,6 +45,12 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'auto_deploy_delay',
   // Suspension par l'équipe Communeo : ne change rien au site public
   'suspended',
+  // Période d'essai : le retrait et le retour du site sont gérés par services/trial.ts
+  'plan',
+  'trial_ends_at',
+  'trial_expired_at',
+  'trial_notice',
+  'live_requested_at',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */
@@ -105,8 +112,8 @@ class AutoDeployService {
       const scheduledPublication = isScheduledPublication();
       // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
       if (!site?.auto_deploy_enabled && !scheduledPublication) return;
-      // Commune suspendue : plus aucune mise en ligne
-      if (site.suspended) return;
+      // Commune suspendue ou essai terminé : plus aucune mise en ligne
+      if (site.suspended || site.plan === 'expired') return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;
@@ -136,7 +143,7 @@ async function siteOf(strapi: any, uid: string, documentId: string): Promise<{ s
  */
 export function autoDeployMiddleware(strapi: any) {
   return async (ctx: any, next: () => Promise<any>) => {
-    if (!DOCUMENT_ACTIONS.has(ctx.action) || !ctx.uid?.startsWith('api::')) return next();
+    if (!DOCUMENT_ACTIONS.has(ctx.action) || !ctx.uid?.startsWith('api::') || isCommuneDeletion()) return next();
 
     const contentType = strapi.contentTypes[ctx.uid];
     const siteScoped = ctx.uid === SITE || !!contentType?.attributes?.site;

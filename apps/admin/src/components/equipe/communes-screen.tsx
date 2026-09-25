@@ -28,6 +28,7 @@ import {
   type CommuneSummary,
 } from '@/lib/equipe';
 import { focusHeadingIfRequested } from '@/lib/focus';
+import { PlanBadge } from './plan-badge';
 import { themeName } from '@/lib/session';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
@@ -402,6 +403,7 @@ export function CommunesScreen() {
                             Suspendue
                           </StatusBadge>
                         )}
+                        <PlanBadge commune={commune} className="ml-2" />
                         <p className="text-secondary">
                           {siteAddress(commune)}
                           {commune.population != null && ` · ${commune.population.toLocaleString('fr-FR')} hab.`}
@@ -457,6 +459,7 @@ export function CommunesScreen() {
                           Suspendue
                         </StatusBadge>
                       )}
+                      <PlanBadge commune={commune} className="ml-2" />
                       <p className="text-[13px] text-secondary">{siteAddress(commune)}</p>
                     </div>
                     <PublicationBadge commune={commune} />

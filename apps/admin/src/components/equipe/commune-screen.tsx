@@ -5,7 +5,8 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle } from 'lucide-react';
+import { CalendarPlus, ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle, Rocket } from 'lucide-react';
+import { deletionDate, trialDaysLeft } from '@communeo/core';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -16,7 +17,30 @@ import { communeQuery, enterCommune, refreshCommunes, updateCommune, type Commun
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { themeName } from '@/lib/session';
 import { fullName, resendInvitation, roleLabel, stateOf } from '@/lib/users';
+import { formatDay } from '@/lib/trial';
 import { PublicationBadge, siteAddress } from './communes-screen';
+import { PlanBadge } from './plan-badge';
+
+const EXTENSIONS = [7, 15, 30] as const;
+
+/** Offre de la commune : en live, essai en cours, essai terminé (#310) */
+function planSummary(commune: CommuneDetail): { title: string; detail: string | null } {
+  if (commune.plan === 'live') return { title: 'Live', detail: null };
+  const requested = commune.liveRequestedAt ? `Passage en live demandé le ${formatDay(new Date(commune.liveRequestedAt))}` : null;
+  if (commune.plan === 'expired') {
+    const deletion = commune.trialExpiredAt ? `Données supprimées le ${formatDay(deletionDate(commune.trialExpiredAt))}` : null;
+    return {
+      title: commune.trialExpiredAt ? `Essai terminé le ${formatDay(new Date(commune.trialExpiredAt))}` : 'Essai terminé',
+      detail: [requested, deletion].filter(Boolean).join(' · ') || null,
+    };
+  }
+  if (!commune.trialEndsAt) return { title: 'Essai', detail: requested };
+  const days = trialDaysLeft(commune.trialEndsAt);
+  return {
+    title: `Essai jusqu'au ${formatDay(new Date(commune.trialEndsAt))}`,
+    detail: [`${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`, requested].filter(Boolean).join(' · '),
+  };
+}
 
 const failure = (error: unknown) => (error instanceof ApiError ? error.message : 'erreur inattendue');
 
@@ -36,6 +60,9 @@ function Detail({ commune }: { commune: CommuneDetail }) {
   const client = useQueryClient();
   const navigate = useNavigate();
   const [suspending, setSuspending] = useState(false);
+  const [goingLive, setGoingLive] = useState(false);
+  const [extending, setExtending] = useState(false);
+  const [extension, setExtension] = useState<number>(15);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => focusHeadingIfRequested(heading.current), []);
   useEffect(() => {
@@ -69,6 +96,28 @@ function Detail({ commune }: { commune: CommuneDetail }) {
     toast.success(commune.suspended ? `${commune.name} est de nouveau active.` : `${commune.name} est suspendue.`);
   };
 
+  const goLive = async () => {
+    try {
+      await updateCommune(commune.documentId, { plan: 'live' });
+    } catch (error) {
+      throw new Error(`La commune n'est pas passée en live : ${failure(error)}`);
+    }
+    void refreshCommunes(client);
+    toast.success(`${commune.name} est en live.`);
+  };
+
+  const extendTrial = async () => {
+    try {
+      await updateCommune(commune.documentId, { extendTrialDays: extension });
+    } catch (error) {
+      throw new Error(`L'essai n'a pas été prolongé : ${failure(error)}`);
+    }
+    void refreshCommunes(client);
+    toast.success(`Essai de ${commune.name} prolongé de ${extension} jours.`);
+  };
+
+  const plan = planSummary(commune);
+
   return (
     <div className="mx-auto max-w-[960px] space-y-5">
       <nav aria-label="Fil d'Ariane" className="text-[13px]">
@@ -92,6 +141,7 @@ function Detail({ commune }: { commune: CommuneDetail }) {
           <h1 ref={heading} className="flex flex-wrap items-center gap-3 outline-none">
             {commune.name}
             {commune.suspended && <StatusBadge tone="danger">Suspendue</StatusBadge>}
+            <PlanBadge commune={commune} />
           </h1>
           <p className="mt-1 text-secondary">
             {commune.population != null && `${commune.population.toLocaleString('fr-FR')} habitants · `}créée le{' '}
@@ -116,7 +166,7 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         </p>
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card title="Site">
           {commune.liveUrl && commune.publication.state !== 'new' ? (
             <a
@@ -144,6 +194,10 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         </Card>
         <Card title="Thème">
           <p className="font-semibold">{themeName(commune.theme)}</p>
+        </Card>
+        <Card title="Offre">
+          <p className="font-semibold">{plan.title}</p>
+          {plan.detail && <p className="mt-1 text-[13px] text-secondary">{plan.detail}</p>}
         </Card>
         <Card title="Mise en ligne">
           <PublicationBadge commune={commune} />
@@ -208,6 +262,16 @@ function Detail({ commune }: { commune: CommuneDetail }) {
             Renvoyer une invitation admin
           </Button>
         )}
+        {commune.plan !== 'live' && (
+          <>
+            <Button type="button" className="max-md:h-11" onClick={() => setGoingLive(true)}>
+              Passer en live…
+            </Button>
+            <Button type="button" variant="secondary" className="max-md:h-11" onClick={() => setExtending(true)}>
+              Prolonger l'essai…
+            </Button>
+          </>
+        )}
         <Button
           type="button"
           variant={commune.suspended ? 'secondary' : 'destructive-outline'}
@@ -232,6 +296,55 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         confirmLabel={commune.suspended ? 'Lever la suspension' : 'Suspendre la commune'}
         onConfirm={toggleSuspension}
       />
+
+      <ConfirmDialog
+        open={goingLive}
+        onOpenChange={setGoingLive}
+        tone="info"
+        icon={Rocket}
+        title={`Passer ${commune.name} en live ?`}
+        description={
+          commune.plan === 'expired'
+            ? "L'essai prend fin : l'administration de la commune n'est plus en lecture seule et le site est remis en ligne aussitôt."
+            : "L'essai prend fin : le site reste en ligne sans limite de durée."
+        }
+        confirmLabel="Passer en live"
+        onConfirm={goLive}
+      />
+
+      <ConfirmDialog
+        open={extending}
+        onOpenChange={setExtending}
+        tone="info"
+        icon={CalendarPlus}
+        title={`Prolonger l'essai de ${commune.name} ?`}
+        description={
+          commune.plan === 'expired'
+            ? "L'essai reprend à partir d'aujourd'hui : l'administration n'est plus en lecture seule et le site est remis en ligne."
+            : "La prolongation s'ajoute à la fin d'essai prévue."
+        }
+        confirmLabel="Prolonger l'essai"
+        onConfirm={extendTrial}
+      >
+        <fieldset>
+          <legend className="text-sm font-semibold">Durée de la prolongation</legend>
+          <div className="mt-2 flex flex-wrap gap-4">
+            {EXTENSIONS.map((days) => (
+              <label key={days} className="flex min-h-11 items-center gap-2 md:min-h-0">
+                <input
+                  type="radio"
+                  name="prolongation"
+                  value={days}
+                  checked={extension === days}
+                  onChange={() => setExtension(days)}
+                  className="size-4 accent-brand"
+                />
+                {days} jours
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </ConfirmDialog>
     </div>
   );
 }

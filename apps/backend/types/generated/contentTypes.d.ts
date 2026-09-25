@@ -411,6 +411,11 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'commune_create',
         'commune_suspend',
         'commune_unsuspend',
+        'commune_delete',
+        'trial_extend',
+        'trial_expire',
+        'live_request',
+        'commune_go_live',
       ]
     > &
       Schema.Attribute.Required;
@@ -1106,6 +1111,50 @@ export interface ApiSchoolMenuSchoolMenu extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiSignupRequestSignupRequest extends Struct.CollectionTypeSchema {
+  collectionName: 'signup_requests';
+  info: {
+    description: "Inscription d'une mairie en libre-service, en attente de la confirmation envoy\u00E9e \u00E0 l'adresse officielle de la mairie ou de la v\u00E9rification par l'\u00E9quipe";
+    displayName: "Demande d'inscription";
+    pluralName: 'signup-requests';
+    singularName: 'signup-request';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    code_insee: Schema.Attribute.String & Schema.Attribute.Required;
+    commune_name: Schema.Attribute.String & Schema.Attribute.Required;
+    confirmed_at: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required & Schema.Attribute.Private;
+    first_name: Schema.Attribute.String & Schema.Attribute.Required;
+    last_name: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::signup-request.signup-request'> &
+      Schema.Attribute.Private;
+    official_email: Schema.Attribute.Email & Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'oneToOne', 'api::site.site'>;
+    status: Schema.Attribute.Enumeration<['pending_confirmation', 'awaiting_review', 'confirmed', 'rejected']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending_confirmation'>;
+    terms_accepted_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
+    token: Schema.Attribute.String & Schema.Attribute.Private;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSiteSite extends Struct.CollectionTypeSchema {
   collectionName: 'sites';
   info: {
@@ -1154,6 +1203,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     favicon: Schema.Attribute.Media<'images'>;
     homepage: Schema.Attribute.Component<'homepage.homepage', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
+    live_requested_at: Schema.Attribute.DateTime;
     live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> & Schema.Attribute.Private;
@@ -1176,6 +1226,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       Schema.Attribute.DefaultTo<'none'>;
     open_data_url: Schema.Attribute.String;
     pages: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
+    plan: Schema.Attribute.Enumeration<['trial', 'live', 'expired']> & Schema.Attribute.DefaultTo<'live'>;
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     school_menus: Schema.Attribute.Relation<'oneToMany', 'api::school-menu.school-menu'>;
@@ -1187,6 +1238,9 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     theme: Schema.Attribute.Enumeration<['institutionnel', 'moderne', 'journal', 'bourg']> &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'institutionnel'>;
+    trial_ends_at: Schema.Attribute.DateTime;
+    trial_expired_at: Schema.Attribute.DateTime;
+    trial_notice: Schema.Attribute.Enumeration<['reminder_7', 'reminder_1', 'expired', 'deletion']>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     waste_notes: Schema.Attribute.Text &
@@ -1761,6 +1815,7 @@ declare module '@strapi/strapi' {
       'api::page.page': ApiPagePage;
       'api::pending-change.pending-change': ApiPendingChangePendingChange;
       'api::school-menu.school-menu': ApiSchoolMenuSchoolMenu;
+      'api::signup-request.signup-request': ApiSignupRequestSignupRequest;
       'api::site.site': ApiSiteSite;
       'api::team-member.team-member': ApiTeamMemberTeamMember;
       'api::waste-schedule.waste-schedule': ApiWasteScheduleWasteSchedule;

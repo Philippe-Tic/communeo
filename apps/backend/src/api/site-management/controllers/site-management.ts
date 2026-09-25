@@ -4,7 +4,8 @@
  */
 
 import { createCommune, emailTaken } from '../../../services/commune-creation';
-import { publisher as getPublisher, toPublisherSite } from '../../../utils/publisher';
+import { deleteCommune } from '../../../services/commune-deletion';
+import { extendTrial, goLive } from '../../../services/trial';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME } from '@communeo/core';
 import { log } from '../../../utils/logger';
@@ -64,6 +65,10 @@ async function summarize(site: any) {
     customDomain: site.custom_domain ?? null,
     population: site.infos_pratiques?.population ?? null,
     suspended: !!site.suspended,
+    plan: site.plan ?? 'live',
+    trialEndsAt: site.trial_ends_at ?? null,
+    trialExpiredAt: site.trial_expired_at ?? null,
+    liveRequestedAt: site.live_requested_at ?? null,
     onboarding: site.onboarding ?? null,
     createdAt: site.createdAt,
     lastActivity: dates.length ? new Date(Math.max(...dates)).toISOString() : site.createdAt,
@@ -238,69 +243,53 @@ export default {
   },
 
   /**
-   * PUT /api/site-management/:documentId — { name?, suspended? }
+   * PUT /api/site-management/:documentId — { name?, suspended?, plan?: 'live', extendTrialDays? }
    * Suspendre : les utilisateurs de la commune ne peuvent plus se connecter (session coupée) et
    * rien n'est plus mis en ligne ; le site public reste en ligne tel quel.
+   * Passer en live ou prolonger l'essai (1 à 90 jours) : voir services/trial.ts.
    */
   async update(ctx) {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
     const data = ctx.request.body?.data || ctx.request.body || {};
-    const site = await strapi.documents('api::site.site').findFirst({ filters: { documentId: { $eq: documentId } } as any });
+    const site: any = await strapi.documents('api::site.site').findFirst({ filters: { documentId: { $eq: documentId } } as any });
     if (!site) ctx.throw(404, 'Commune introuvable');
+
+    const extend = data.extendTrialDays;
+    if (extend !== undefined && (!Number.isInteger(extend) || extend < 1 || extend > 90)) {
+      return ctx.badRequest("La prolongation de l'essai va de 1 à 90 jours.");
+    }
+    if (data.plan !== undefined && data.plan !== 'live') return ctx.badRequest('Seul le passage en live est possible.');
+    if (extend !== undefined && site.plan === 'live') return ctx.badRequest("Cette commune est en live : il n'y a pas d'essai à prolonger.");
 
     const update: Record<string, unknown> = {};
     if (typeof data.name === 'string' && data.name.trim()) update.name = data.name.trim();
     if (typeof data.suspended === 'boolean') update.suspended = data.suspended;
-    const updated = await strapi.documents('api::site.site').update({ documentId, data: update as any, populate: ['infos_pratiques'] as any });
+    if (Object.keys(update).length) await strapi.documents('api::site.site').update({ documentId, data: update as any });
     if (typeof data.suspended === 'boolean' && data.suspended !== !!site.suspended)
       await recordActivity({
         action: data.suspended ? 'commune_suspend' : 'commune_unsuspend',
         siteDocumentId: documentId,
-        target: { type: 'site', id: documentId, label: updated.name },
+        target: { type: 'site', id: documentId, label: (update.name as string) ?? site.name },
       });
+    if (data.plan === 'live' && site.plan !== 'live') await goLive(site);
+    else if (extend !== undefined) await extendTrial(site, extend);
+
+    const updated = await strapi.documents('api::site.site').findOne({ documentId, populate: ['infos_pratiques'] as any });
     ctx.body = { data: await summarize(updated) };
   },
 
   /**
-   * DELETE /api/site-management/:documentId — delete site and its host site
+   * DELETE /api/site-management/:documentId — la commune, son site chez l'hébergeur, ses comptes et
+   * tous ses contenus (services/commune-deletion.ts)
    */
   async delete(ctx) {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
-
-    const sites = await strapi.documents('api::site.site').findMany({
-      filters: { documentId: { $eq: documentId } } as any,
-    });
-
-    if (!sites || sites.length === 0) {
-      ctx.throw(404, 'Site not found');
-    }
-
-    const site = sites[0] as any;
-
-    // Delete the host site if exists
-    if (site.netlify_site_id) {
-      try {
-        await getPublisher().deleteSite(toPublisherSite(site));
-      } catch (error) {
-        log.error('Failed to delete host site:', error);
-        // Continue with deletion even if the host fails
-      }
-    }
-
-    // Delete all users belonging to this site
-    const siteUsers = await strapi.query('plugin::users-permissions.user').findMany({
-      where: { site: { documentId } },
-    });
-
-    for (const user of siteUsers) {
-      await strapi.query('plugin::users-permissions.user').delete({ where: { id: user.id } });
-    }
-
-    // Delete the site
-    await strapi.documents('api::site.site').delete({ documentId: site.documentId });
-
+    const site: any = await strapi.db.query('api::site.site').findOne({ where: { documentId }, select: ['name'] });
+    if (!site) ctx.throw(404, 'Site not found');
+    await recordActivity({ action: 'commune_delete', siteDocumentId: null, target: { type: 'site', id: documentId, label: site.name } });
+    await deleteCommune(documentId);
     ctx.body = { data: { documentId } };
   },
 };

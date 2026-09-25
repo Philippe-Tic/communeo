@@ -98,13 +98,15 @@ Frozen V1 apps keep their own npm setup: `cd admin && npm run dev`, `cd sites &&
 - `src/api/build-worker/` — internal routes of the build worker (shared secret): start (Deployment with `reason`, `reference` `MEL-…`), progress (`step`: checking → rendering → publishing → cache), finish
 - `src/services/pending-changes.ts` — changes waiting to go live (`api::pending-change`, no REST access): one entry per content item, recorded by the auto-deploy middleware with its author (or `scheduled` for the cron); a successful publication clears what changed before it started, a failure keeps the list. `GET /api/deployment/state` → `idle | pending | running(step) | failed(reference) | ok` + the list, for the admin header and « Mise en ligne » screen
 - `src/services/auto-deploy.ts` — automatic publication: a document middleware (`changesPublicSite`) schedules a build `auto_deploy_delay` s after the **last** visible change (persistent debounce in the queue, `BuildQueue.schedule`). Drafts, technical Site fields (host, domain, auto-deploy settings), public submissions and non-published associations never trigger; a manual « Mettre en ligne » starts a waiting delayed build now.
+- `src/services/trial.ts` — trial period (#310): a self-service sign-up starts a 30-day trial (`plan` `trial | live | expired`, `trial_ends_at`, protected fields); hourly cron sends reminders (D-7, D-1), expires the trial (host site removed, admin read-only in `site-isolation` with `details.code = 'trial_expired'`, no build, queued builds cancelled at worker start), warns a month before deletion and deletes the commune 6 months after. `POST /api/trial/live-request` notifies the team (`SIGNUP_NOTIFY_EMAIL`); the team extends the trial or switches to live through `PUT /api/site-management/:id` (`extendTrialDays`, `plan: 'live'`). Team-created communes are live
+- `src/services/commune-deletion.ts` — deletes a commune: host site, accounts, every site-scoped document (all versions, media files), then the site; no pending change, build or per-item log line during it
 - `src/api/*/content-types/*/schema.json` — content type schemas
 
 ## Content Types
 
 | Type | API ID | Key fields |
 |------|--------|------------|
-| Site | `api::site.site` | name, slug, **theme**, logo, contact, legal components, **homepage**, navigation_config |
+| Site | `api::site.site` | name, slug, **theme**, logo, contact, legal components, **homepage**, navigation_config, **plan** (trial / live / expired) |
 | Page | `api::page.page` | title, slug, **blocks**, featured_image, show_in_menu, scheduled_at |
 | Article | `api::article.article` | title, slug, summary, **blocks**, image, category, featured, scheduled_at |
 | Event | `api::evenement.evenement` | title, **blocks**, start_date, end_date, location, registration, scheduled_at |

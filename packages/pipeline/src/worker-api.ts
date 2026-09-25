@@ -24,11 +24,16 @@ export interface StartBuildRequest {
   attempt: number;
 }
 
-export interface StartBuildResponse {
-  /** documentId de l'enregistrement Deployment (réutilisé par les nouvelles tentatives du même job) */
-  deploymentId: string;
-  site: BuildSite;
-}
+export type StartBuildResponse =
+  | {
+      /** documentId de l'enregistrement Deployment (réutilisé par les nouvelles tentatives du même job) */
+      deploymentId: string;
+      site: BuildSite;
+    }
+  | {
+      /** La commune ne peut plus être mise en ligne (suspendue, essai terminé) : le job s'arrête là */
+      cancelled: string;
+    };
 
 /**
  * Étapes d'une mise en ligne, dans l'ordre : vérification des contenus, préparation des pages,

@@ -1,0 +1,24 @@
+---
+title: "Créer un thème"
+description: "Pour les développeurs : ajouter un thème aux sites Communeo."
+---
+
+Un thème décide de la présentation des sites ; les données lui arrivent prêtes à afficher. Il se crée dans le dépôt Communeo :
+
+```bash
+pnpm create-theme mon-theme --name "Mon thème"   # copie du thème de départ (themes/starter)
+pnpm theme:dev mon-theme                          # la commune de démonstration dans le thème
+```
+
+Le thème fournit 19 gabarits de page et 9 blocs, déclarés avec `defineTheme` : TypeScript refuse un thème incomplet. Le renderer fournit le document HTML (métadonnées, SEO, lien d'évitement, bandeau cookies), les pages communes et les données ; le thème ne fait jamais d'appel au CMS.
+
+Avant de proposer le thème :
+
+```bash
+THEME=mon-theme pnpm --filter @communeo/renderer build
+pnpm --filter @communeo/renderer test:e2e     # axe (WCAG 2.2 AA), 320 px, clavier, sur chaque page
+pnpm --filter @communeo/renderer test:parity  # le site statique et l'aperçu donnent le même HTML
+pnpm theme:thumbnail mon-theme                # vignette 1200 × 800 du sélecteur de thème
+```
+
+Le guide complet (contrat, règles d'accessibilité, composants partagés) est dans le dépôt : [`packages/theme-contract/README.md`](https://github.com/Philippe-Tic/communeo/blob/main/packages/theme-contract/README.md).

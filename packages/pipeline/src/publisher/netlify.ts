@@ -110,15 +110,19 @@ export class NetlifyPublisher implements SitePublisher {
   }
 
   /**
-   * L'adresse Communeo est un alias du site ; le certificat HTTPS est demandé à l'ajout. Un refus de
-   * Netlify ne bloque pas la mise en ligne : le site reste sur son adresse *.netlify.app.
+   * L'adresse Communeo est le domaine principal du site tant qu'il n'a pas de domaine personnalisé,
+   * puis un alias (Netlify n'accepte d'alias qu'une fois le domaine principal défini). Le certificat
+   * HTTPS est demandé à l'ajout. Un refus de Netlify ne bloque pas la mise en ligne : le site reste sur
+   * son adresse *.netlify.app.
    */
   private async withCommuneoDomain(netlifySite: NetlifySite): Promise<NetlifySite> {
     const domain = this.communeoDomain(netlifySite);
     if (!domain || this.communeoAddress(netlifySite)) return netlifySite;
-    const aliases = [...(netlifySite.domain_aliases ?? []), domain];
+    let updated: NetlifySite;
     try {
-      await this.setAliases(netlifySite, aliases);
+      updated = netlifySite.custom_domain
+        ? await this.patchSite(netlifySite.id, { domain_aliases: [...(netlifySite.domain_aliases ?? []), domain] })
+        : await this.patchSite(netlifySite.id, { custom_domain: domain });
       this.log.info(`[NETLIFY] Adresse ${domain} ajoutée à ${netlifySite.name}`);
     } catch (error) {
       this.log.error(`[NETLIFY] Adresse ${domain} non ajoutée à ${netlifySite.name}:`, error);
@@ -129,7 +133,11 @@ export class NetlifyPublisher implements SitePublisher {
     } catch (error) {
       this.log.warn(`[NETLIFY] Certificat HTTPS non demandé pour ${domain}:`, error);
     }
-    return { ...netlifySite, domain_aliases: aliases };
+    return updated;
+  }
+
+  private patchSite(hostId: string, body: Partial<NetlifySite>): Promise<NetlifySite> {
+    return this.request(`/sites/${hostId}`, { method: 'PATCH', body: JSON.stringify(body) });
   }
 
   private async findOrCreateSite(site: PublisherSite): Promise<NetlifySite> {
@@ -202,12 +210,13 @@ export class NetlifyPublisher implements SitePublisher {
       );
     }
 
-    if (isApexDomain(domain)) {
-      try {
-        await this.setAliases(updated, [...(updated.domain_aliases ?? []), `www.${domain}`]);
-      } catch (error) {
-        this.log.warn(`[NETLIFY] Alias www.${domain} non ajouté:`, error);
-      }
+    // www pour un apex ; l'adresse Communeo reste servie (elle redirige vers le domaine) en alias
+    const communeo = this.communeoDomain(updated);
+    const aliases = [...(updated.domain_aliases ?? []), ...(isApexDomain(domain) ? [`www.${domain}`] : []), ...(communeo ? [communeo] : [])];
+    try {
+      await this.setAliases(updated, aliases);
+    } catch (error) {
+      this.log.warn(`[NETLIFY] Alias de ${domain} non ajoutés:`, error);
     }
 
     return this.instructionsFor(updated.name, domain);
@@ -249,17 +258,17 @@ export class NetlifyPublisher implements SitePublisher {
 
   async removeDomain(site: PublisherSite, domain: string): Promise<{ defaultUrl: string | null }> {
     if (!site.hostId) return { defaultUrl: null };
-    const updated: NetlifySite = await this.request(`/sites/${site.hostId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ custom_domain: null }),
-    });
-    if (isApexDomain(domain)) {
-      try {
-        await this.setAliases(updated, (updated.domain_aliases ?? []).filter((alias) => alias !== `www.${domain}`));
-      } catch (error) {
-        this.log.warn(`[NETLIFY] Alias www.${domain} non retiré:`, error);
-      }
+    // L'adresse Communeo redevient le domaine principal (et quitte les alias)
+    const current = await this.getSite(site.hostId);
+    const communeo = this.communeoDomain(current);
+    const aliases = (current.domain_aliases ?? []).filter((alias) => alias !== `www.${domain}` && alias !== communeo);
+    let updated: NetlifySite = current;
+    try {
+      if (aliases.length !== (current.domain_aliases ?? []).length) updated = await this.patchSite(site.hostId, { domain_aliases: aliases });
+    } catch (error) {
+      this.log.warn(`[NETLIFY] Alias de ${domain} non retirés:`, error);
     }
+    updated = await this.patchSite(site.hostId, { custom_domain: communeo });
     return { defaultUrl: this.toHostSite(updated).defaultUrl };
   }
 

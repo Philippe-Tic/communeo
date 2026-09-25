@@ -11,6 +11,7 @@
  *   l'invitation qui mène au choix du mot de passe puis à l'assistant de démarrage.
  */
 import { recordActivity } from '../../../services/activity-log';
+import { adminUrl, notifyTeam } from '../../../services/team-notifications';
 import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { communeDetails, PublicDataUnavailable, searchCommunes } from '../../../services/public-data';
 import { log } from '../../../utils/logger';
@@ -46,8 +47,7 @@ async function communeTaken(insee: string) {
 }
 
 async function sendConfirmationEmail(to: string, request: any, token: string) {
-  const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
-  const link = `${adminUrl}/inscription/confirmer?jeton=${token}`;
+  const link = `${adminUrl()}/inscription/confirmer?jeton=${token}`;
   const commune = escapeHtml(request.commune_name);
   const person = escapeHtml(`${request.first_name} ${request.last_name}`);
   const email = escapeHtml(request.email);
@@ -67,19 +67,11 @@ async function sendConfirmationEmail(to: string, request: any, token: string) {
   });
 }
 
-async function notifyTeam(request: any) {
-  const to = process.env.SIGNUP_NOTIFY_EMAIL;
-  if (!to) return;
-  try {
-    await strapi.plugin('email').service('email').send({
-      to,
-      subject: `Inscription à vérifier : ${request.commune_name}`,
-      text: `${request.first_name} ${request.last_name} (${request.email}) demande un site pour ${request.commune_name} (INSEE ${request.code_insee}). Aucune adresse officielle de mairie n'est connue : la demande attend votre vérification dans l'espace équipe.`,
-    });
-  } catch (error) {
-    log.error('[INSCRIPTION] Notification de l’équipe impossible :', error);
-  }
-}
+const teamReview = (request: any) =>
+  notifyTeam(
+    `Inscription à vérifier : ${request.commune_name}`,
+    `${request.first_name} ${request.last_name} (${request.email}) demande un site pour ${request.commune_name} (INSEE ${request.code_insee}). Aucune adresse officielle de mairie n'est connue : vérifiez la demande dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
+  );
 
 /** Demande en attente de confirmation d'après le jeton du lien ; répond et renvoie null sinon */
 async function pendingRequest(ctx, token: unknown) {
@@ -170,7 +162,7 @@ export default {
 
     if (!official) {
       const request = await strapi.db.query(REQUEST).create({ data: { ...base, status: 'awaiting_review' } });
-      await notifyTeam(request);
+      await teamReview(request);
       ctx.status = 202;
       ctx.body = { data: { status: 'review' } };
       return;
@@ -228,6 +220,10 @@ export default {
       target: { type: 'site', id: site.documentId, label: request.commune_name },
       details: { admin: request.email, signup: true },
     });
+    await notifyTeam(
+      `Nouvelle commune en essai : ${request.commune_name}`,
+      `${request.commune_name} (INSEE ${request.code_insee}) a confirmé son inscription depuis l'adresse officielle de la mairie. Administrateur : ${request.first_name} ${request.last_name} (${request.email}). Fiche : ${adminUrl()}/plateforme/communes/${site.documentId}`,
+    );
     ctx.body = { data: { invitation: invitationToken } };
   },
 };

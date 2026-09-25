@@ -432,6 +432,8 @@ export interface MockOptions {
   deployOutcome?: 'running' | 'ok' | 'failed';
   /** Données publiques : trouvées (défaut), mairie absente de l'annuaire, ou services en panne */
   publicData?: 'ok' | 'no-town-hall' | 'down';
+  /** File « À valider » de l'équipe (#313) : vide par défaut */
+  validations?: 'some' | 'none';
   /** Période d'essai de Saint-Aubin (#310) : jours restants, ou essai terminé depuis N jours */
   trial?: { endsInDays: number; requested?: boolean } | { expiredDaysAgo: number; requested?: boolean };
 }
@@ -969,6 +971,34 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       options.trial && 'expiredDaysAgo' in options.trial ? new Date(Date.now() - options.trial.expiredDaysAgo * DAY).toISOString() : null,
     liveRequestedAt: options.trial?.requested ? new Date(Date.now() - 2 * DAY).toISOString() : null,
   };
+  const validationQueue =
+    options.validations === 'some'
+      ? {
+          signups: [
+            {
+              id: 41,
+              communeName: 'Bourg-Neuf',
+              insee: '58041',
+              firstName: 'Julie',
+              lastName: 'Martin',
+              email: 'julie@gmail.test',
+              requestedAt: '2026-09-24T08:30:00.000Z',
+            },
+          ],
+          liveRequests: [
+            {
+              documentId: SITE.documentId,
+              name: SITE.name,
+              insee: '58236',
+              plan: 'trial' as 'trial' | 'expired',
+              trialEndsAt: '2026-10-12T08:00:00.000Z',
+              trialExpiredAt: null as string | null,
+              requestedAt: '2026-09-25T09:10:00.000Z',
+              requestedBy: 'Sophie Leroy (sophie.leroy@saint-aubin.fr)',
+            },
+          ],
+        }
+      : { signups: [] as Array<{ id: number; communeName: string; insee: string; firstName: string; lastName: string; email: string; requestedAt: string }>, liveRequests: [] as Array<{ documentId: string }> };
   const sessionPlan = () => ({
     plan: plan.plan,
     trial_ends_at: plan.trialEndsAt,
@@ -1522,6 +1552,17 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       }
     }
     // Espace équipe Communeo (super admin)
+    // File « À valider » de l'équipe (#313)
+    if (url.pathname.startsWith('/api/validations') && USERS[user].municipality_role === 'super_admin') {
+      if (url.pathname === '/api/validations') return json({ data: validationQueue });
+      const decision = /^\/api\/validations\/(signups|live)\/([^/]+)\/(approve|reject)$/.exec(url.pathname);
+      if (!decision) return json({ error: { status: 404, message: 'Not Found' } }, 404);
+      const [, kind, id, action] = decision;
+      bodies.push({ call: `${action} ${kind} ${id}`, body: { data: (route.request().postDataJSON() as Record<string, unknown>) ?? {} } });
+      if (kind === 'signups') validationQueue.signups = validationQueue.signups.filter((signup) => String(signup.id) !== id);
+      else validationQueue.liveRequests = validationQueue.liveRequests.filter((live) => live.documentId !== id);
+      return json({ data: action === 'reject' && kind === 'signups' ? { emailed: true } : { documentId: id } });
+    }
     if (url.pathname.startsWith('/api/site-management') && USERS[user].municipality_role === 'super_admin') {
       if (url.pathname === '/api/site-management/slug-available') {
         const slug = url.searchParams.get('slug') ?? '';

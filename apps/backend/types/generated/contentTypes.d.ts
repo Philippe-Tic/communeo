@@ -416,6 +416,8 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'trial_expire',
         'live_request',
         'commune_go_live',
+        'live_reject',
+        'signup_reject',
       ]
     > &
       Schema.Attribute.Required;
@@ -1144,6 +1146,9 @@ export interface ApiSignupRequestSignupRequest extends Struct.CollectionTypeSche
       Schema.Attribute.Private;
     official_email: Schema.Attribute.Email & Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    rejection_reason: Schema.Attribute.Text & Schema.Attribute.Private;
+    reviewed_at: Schema.Attribute.DateTime;
+    reviewed_by: Schema.Attribute.String;
     site: Schema.Attribute.Relation<'oneToOne', 'api::site.site'>;
     status: Schema.Attribute.Enumeration<['pending_confirmation', 'awaiting_review', 'confirmed', 'rejected']> &
       Schema.Attribute.Required &
@@ -1204,6 +1209,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     homepage: Schema.Attribute.Component<'homepage.homepage', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_requested_at: Schema.Attribute.DateTime;
+    live_requested_by: Schema.Attribute.String & Schema.Attribute.Private;
     live_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::site.site'> & Schema.Attribute.Private;

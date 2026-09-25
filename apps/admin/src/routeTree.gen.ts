@@ -41,6 +41,7 @@ import { Route as AppPasserEnLiveRouteImport } from './routes/_app/passer-en-liv
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as InscriptionConfirmerRouteImport } from './routes/inscription_.confirmer'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
+import { Route as PlateformeAValiderRouteImport } from './routes/plateforme/a-valider'
 import { Route as PlateformeJournalRouteImport } from './routes/plateforme/journal'
 import { Route as PlateformeStatistiquesRouteImport } from './routes/plateforme/statistiques'
 import { Route as PlateformeUtilisateursRouteImport } from './routes/plateforme/utilisateurs'
@@ -219,6 +220,11 @@ const PlateformeIndexRoute = PlateformeIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PlateformeRoute,
 } as any)
+const PlateformeAValiderRoute = PlateformeAValiderRouteImport.update({
+  id: '/a-valider',
+  path: '/a-valider',
+  getParentRoute: () => PlateformeRoute,
+} as any)
 const PlateformeJournalRoute = PlateformeJournalRouteImport.update({
   id: '/journal',
   path: '/journal',
@@ -342,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
+  '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -391,6 +398,7 @@ export interface FileRoutesByTo {
   '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
+  '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -444,6 +452,7 @@ export interface FileRoutesById {
   '/_app/passer-en-live': typeof AppPasserEnLiveRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/inscription_/confirmer': typeof InscriptionConfirmerRoute
+  '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -498,6 +507,7 @@ export interface FileRouteTypes {
     | '/passer-en-live'
     | '/utilisateurs'
     | '/inscription/confirmer'
+    | '/plateforme/a-valider'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/passer-en-live'
     | '/utilisateurs'
     | '/inscription/confirmer'
+    | '/plateforme/a-valider'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -599,6 +610,7 @@ export interface FileRouteTypes {
     | '/_app/passer-en-live'
     | '/_app/utilisateurs'
     | '/inscription_/confirmer'
+    | '/plateforme/a-valider'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -860,6 +872,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlateformeIndexRouteImport
       parentRoute: typeof PlateformeRoute
     }
+    '/plateforme/a-valider': {
+      id: '/plateforme/a-valider'
+      path: '/a-valider'
+      fullPath: '/plateforme/a-valider'
+      preLoaderRoute: typeof PlateformeAValiderRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
     '/plateforme/journal': {
       id: '/plateforme/journal'
       path: '/journal'
@@ -1068,6 +1087,7 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PlateformeRouteChildren {
+  PlateformeAValiderRoute: typeof PlateformeAValiderRoute
   PlateformeJournalRoute: typeof PlateformeJournalRoute
   PlateformeStatistiquesRoute: typeof PlateformeStatistiquesRoute
   PlateformeUtilisateursRoute: typeof PlateformeUtilisateursRoute
@@ -1076,6 +1096,7 @@ interface PlateformeRouteChildren {
 }
 
 const PlateformeRouteChildren: PlateformeRouteChildren = {
+  PlateformeAValiderRoute: PlateformeAValiderRoute,
   PlateformeJournalRoute: PlateformeJournalRoute,
   PlateformeStatistiquesRoute: PlateformeStatistiquesRoute,
   PlateformeUtilisateursRoute: PlateformeUtilisateursRoute,

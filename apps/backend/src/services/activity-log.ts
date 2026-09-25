@@ -34,7 +34,9 @@ export type ActivityAction =
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'
-  | 'commune_go_live';
+  | 'commune_go_live'
+  | 'live_reject'
+  | 'signup_reject';
 
 export interface ActivityInput {
   action: ActivityAction;

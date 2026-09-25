@@ -24,7 +24,9 @@ export type ActivityAction =
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'
-  | 'commune_go_live';
+  | 'commune_go_live'
+  | 'live_reject'
+  | 'signup_reject';
 
 export interface ActivityEntry {
   id: number;
@@ -80,6 +82,8 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   trial_expire: 'Essai terminé',
   live_request: 'Passage en live demandé',
   commune_go_live: 'Passage en live',
+  live_reject: 'Passage en live refusé',
+  signup_reject: 'Inscription refusée',
 };
 
 /** Actions qu'une commune voit (les autres concernent la plateforme) */
@@ -99,6 +103,7 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'trial_expire',
   'live_request',
   'commune_go_live',
+  'live_reject',
 ];
 
 const TYPE_LABELS: Record<string, string> = {
@@ -115,6 +120,7 @@ const TYPE_LABELS: Record<string, string> = {
   'school-menu': 'Menu de la cantine',
   'waste-schedule': 'Collecte des déchets',
   site: 'Site',
+  'signup-request': "Demande d'inscription",
   user: 'Compte',
   domain: 'Domaine',
 };

@@ -30,6 +30,9 @@
     "token": { "type": "string", "private": true },
     "terms_accepted_at": { "type": "datetime", "required": true },
     "confirmed_at": { "type": "datetime" },
+    "reviewed_at": { "type": "datetime" },
+    "reviewed_by": { "type": "string" },
+    "rejection_reason": { "type": "text", "private": true },
     "site": { "type": "relation", "relation": "oneToOne", "target": "api::site.site" }
   }
 }

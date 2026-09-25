@@ -41,6 +41,7 @@ export const ROUTES = [
 /** Espace de l'équipe Communeo (super admin) */
 export const PLATFORM_ROUTES = [
   '/plateforme',
+  '/plateforme/a-valider',
   '/plateforme/communes/site-bellefontaine',
   '/plateforme/utilisateurs',
   '/plateforme/statistiques',

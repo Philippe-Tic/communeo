@@ -66,7 +66,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [
@@ -85,6 +85,7 @@ const PROTECTED_SITE_FIELDS = [
   'trial_expired_at',
   'trial_notice',
   'live_requested_at',
+  'live_requested_by',
   // relations : empêchent de rattacher les contenus d'une autre commune
   'pages',
   'articles',

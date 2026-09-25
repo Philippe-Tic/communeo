@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -629,6 +629,8 @@ export interface SignupRequest extends StrapiDocument {
   status: SignupRequestStatus;
   terms_accepted_at: string;
   confirmed_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   site?: Site | null;
 }
 

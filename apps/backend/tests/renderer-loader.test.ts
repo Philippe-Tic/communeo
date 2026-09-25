@@ -21,7 +21,7 @@ const p = (text: string) => ({ type: 'paragraph', content: [{ type: 'text', text
 
 beforeAll(async () => {
   strapi = await setupStrapi();
-  await new Promise<void>((resolve) => strapi.server.httpServer.listen(0, '127.0.0.1', resolve));
+  // Déjà à l'écoute sur 127.0.0.1 (tests/strapi.ts)
   apiUrl = `http://127.0.0.1:${(strapi.server.httpServer.address() as AddressInfo).port}`;
 
   const created = await strapi.service('admin::api-token').create({

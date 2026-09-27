@@ -1,3 +1,6 @@
+# Stack de production Communeo V2 (#179). Images publiées par .github/workflows/deploy.yml sur GHCR ;
+# `IMAGE_TAG` choisit la version (commit), `latest` par défaut. `build:` sert aux essais en local.
+# Déploiement, sauvegardes, supervision, retour arrière : DEPLOYMENT.md et PRODUCTION.md.
 services:
   postgres:
     image: postgres:16-alpine
@@ -20,7 +23,7 @@ services:
         max-file: "3"
 
   strapi:
-    image: communeo-strapi:latest
+    image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-backend:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
@@ -42,6 +45,10 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
       JWT_SECRET: ${JWT_SECRET}
+      # Chiffrement des tokens d'API dans la base (admin Strapi)
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
+      PREVIEW_API_TOKEN: ${PREVIEW_API_TOKEN}
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       SITES_DOMAIN: ${SITES_DOMAIN:-}
@@ -51,7 +58,6 @@ services:
       COMMUNEO_SIRET: ${COMMUNEO_SIRET:-}
       COMMUNEO_BILLING_EMAIL: ${COMMUNEO_BILLING_EMAIL:-}
       COMMUNEO_VAT_RATE: ${COMMUNEO_VAT_RATE:-0}
-      STRAPI_API_TOKEN: ${STRAPI_API_TOKEN}
       # File des builds (schéma pgboss de la même base), traitée par le service worker
       QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
       WORKER_SECRET: ${WORKER_SECRET}
@@ -71,6 +77,12 @@ services:
       SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:1337/_health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
     logging:
       driver: json-file
       options:
@@ -78,7 +90,7 @@ services:
         max-file: "3"
 
   worker:
-    image: communeo-worker:latest
+    image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-worker:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
@@ -87,7 +99,7 @@ services:
       postgres:
         condition: service_healthy
       strapi:
-        condition: service_started
+        condition: service_healthy
     environment:
       QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
       STRAPI_URL: http://strapi:1337
@@ -103,7 +115,7 @@ services:
         max-file: "3"
 
   preview:
-    image: communeo-preview:latest
+    image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-preview:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: apps/renderer/Dockerfile
@@ -120,18 +132,32 @@ services:
       PREVIEW_SECRET: ${PREVIEW_SECRET}
       # Affichée dans le panneau de preview de l'administration seulement
       PREVIEW_FRAME_ANCESTORS: https://${DOMAIN}
+    healthcheck:
+      # Sans jeton, la preview répond 401 : toute réponse HTTP prouve que le serveur tourne
+      test: ["CMD-SHELL", "wget -S --spider http://127.0.0.1:4321/ 2>&1 | grep -q 'HTTP/'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
 
+  # Image « web » (apps/admin/Dockerfile) : admin compilée + nginx (configuration dans nginx/)
   nginx:
-    image: nginx:alpine
+    image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        VITE_TERMS_URL: ${VITE_TERMS_URL:-}
     restart: unless-stopped
     depends_on:
-      - strapi
-      - preview
+      strapi:
+        condition: service_healthy
+      preview:
+        condition: service_started
     ports:
       - "80:80"
       - "443:443"
@@ -141,11 +167,45 @@ services:
       # Seuls DOMAIN et PREVIEW_DOMAIN sont substitués dans les templates, les variables nginx ($host etc.) sont préservées
       NGINX_ENVSUBST_FILTER: "DOMAIN"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/templates:/etc/nginx/templates:ro
-      - ./apps/admin/dist:/usr/share/nginx/html:ro
       - certbot-webroot:/var/www/certbot:ro
       - certbot-certs:/etc/letsencrypt:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Sauvegardes chaque nuit (deploy/backup) : base (3 jours) et copie miroir des fichiers sur le serveur,
+  # historique de 90 jours dans un stockage S3 (chiffré)
+  backup:
+    image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-backup:${IMAGE_TAG:-latest}
+    build:
+      context: deploy/backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: strapi
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: strapi
+      BACKUP_TIME: ${BACKUP_TIME:-03:15}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-3}
+      BACKUP_REMOTE_RETENTION_DAYS: ${BACKUP_REMOTE_RETENTION_DAYS:-90}
+      # Copie hors du serveur (facultative mais recommandée) : stockage objet S3 (Scaleway, OVH…)
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_S3_PREFIX: ${BACKUP_S3_PREFIX:-communeo}
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:-}
+      RCLONE_CONFIG_REMOTE_TYPE: s3
+      RCLONE_CONFIG_REMOTE_PROVIDER: ${BACKUP_S3_PROVIDER:-Other}
+      RCLONE_CONFIG_REMOTE_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      RCLONE_CONFIG_REMOTE_REGION: ${BACKUP_S3_REGION:-}
+      RCLONE_CONFIG_REMOTE_ACCESS_KEY_ID: ${BACKUP_S3_ACCESS_KEY_ID:-}
+      RCLONE_CONFIG_REMOTE_SECRET_ACCESS_KEY: ${BACKUP_S3_SECRET_ACCESS_KEY:-}
+    volumes:
+      - backups:/backups
+      - strapi-uploads:/uploads
     logging:
       driver: json-file
       options:
@@ -162,5 +222,6 @@ services:
 volumes:
   postgres-data:
   strapi-uploads:
+  backups:
   certbot-webroot:
   certbot-certs:

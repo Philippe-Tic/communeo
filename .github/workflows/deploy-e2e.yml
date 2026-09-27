@@ -1,0 +1,26 @@
+# Pull request qui touche la stack de production (compose, Dockerfiles, nginx, sauvegardes, déploiement) :
+# les images sont construites et la stack testée de bout en bout avant le merge (deploy/e2e/run.sh).
+name: Stack de production
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - docker-compose.yml
+      - deploy/**
+      - nginx/**
+      - apps/*/Dockerfile
+      - .github/workflows/deploy*.yml
+
+concurrency:
+  group: deploy-e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Stack de production (bout en bout)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construction, démarrage, commune, mise en ligne, sauvegarde et restauration
+        run: deploy/e2e/run.sh

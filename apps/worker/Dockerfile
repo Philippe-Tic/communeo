@@ -36,6 +36,9 @@ ENV NODE_ENV=production \
 WORKDIR /app
 # Le renderer écrit ses caches (.astro, Vite) dans son dossier : il appartient à l'utilisateur node
 COPY --from=builder --chown=node:node /out /app
+# Publication dans un dossier (PUBLISH_DIR, tests de la stack sans Netlify) : un volume monté ici hérite
+# de ce propriétaire
+RUN mkdir -p /app/published && chown node:node /app/published
 USER node
 
 CMD ["node", "worker/dist/main.js"]

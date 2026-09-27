@@ -70,6 +70,15 @@ afterAll(async () => {
 });
 
 describe('loader Strapi du renderer', () => {
+  it('les jetons fournis par l’environnement (STRAPI_API_TOKEN, PREVIEW_API_TOKEN) sont créés avec leur valeur, en lecture seule', async () => {
+    for (const token of ['test-build-token', 'test-preview-token']) {
+      const read = await fetch(`${apiUrl}/api/pages`, { headers: { Authorization: `Bearer ${token}` } });
+      expect(read.status).toBe(200);
+      const write = await fetch(`${apiUrl}/api/pages`, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: '{"data":{"title":"x"}}' });
+      expect(write.status).toBe(403);
+    }
+  });
+
   it('charge le site avec ses réglages', async () => {
     const site = await source.site();
     expect(site.name).toBe('Test Site');

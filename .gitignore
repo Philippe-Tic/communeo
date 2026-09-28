@@ -2,10 +2,10 @@
 .DS_Store
 .claude/
 
-# Production secrets
+# Secrets : aucun .env n'est suivi, sauf les modèles .env.example (le .env de production vit sur le serveur)
 .env
-.env.local
-!.env.production
+.env.*
+!.env.example
 
 # Backups
 backups/

@@ -71,9 +71,15 @@ export async function initAlerts() {
   region.addEventListener('click', (event) => {
     const alert = (event.target as HTMLElement).closest<HTMLElement>('[data-cn-alert]');
     if (!(event.target as HTMLElement).closest('[data-cn-alert-close]') || !alert) return;
+    const alerts = [...region.querySelectorAll<HTMLElement>('[data-cn-alert]')];
     remember(alert.dataset.cnAlert!);
     refreshVisibility(region);
-    document.getElementById('contenu')?.focus();
+    // Le focus ne doit pas se perdre avec l'alerte masquée : croix de l'alerte suivante (ou précédente)
+    // encore affichée, sinon le contenu principal. Sans défilement : la page ne doit pas sauter.
+    const index = alerts.indexOf(alert);
+    const next = [...alerts.slice(index + 1), ...alerts.slice(0, index).reverse()].find((other) => !other.hidden);
+    const target = next?.querySelector<HTMLElement>('[data-cn-alert-close]') ?? document.getElementById('contenu');
+    target?.focus({ preventScroll: true });
   });
 
   const endpoint = document.body.dataset.cnAlertsEndpoint;

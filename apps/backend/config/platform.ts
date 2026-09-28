@@ -4,6 +4,7 @@
  * les communes. Vide : les valeurs déjà enregistrées sur chaque site sont conservées.
  * Émetteur des devis (#312) : identité de Communeo sur le devis et le bon de commande. TVA :
  * `COMMUNEO_VAT_RATE=0` en franchise en base (micro-entreprise, art. 293 B du CGI), 0.2 sinon.
+ * Coordonnées bancaires des factures (#314) : `COMMUNEO_IBAN`, `COMMUNEO_BIC` (jamais dans le dépôt).
  */
 export default ({ env }: { env: (key: string, fallback?: string) => string }) => ({
   host: {
@@ -17,5 +18,7 @@ export default ({ env }: { env: (key: string, fallback?: string) => string }) =>
     siret: env('COMMUNEO_SIRET', ''),
     email: env('COMMUNEO_BILLING_EMAIL', ''),
     vatRate: Number(env('COMMUNEO_VAT_RATE', '0')) || 0,
+    iban: env('COMMUNEO_IBAN', ''),
+    bic: env('COMMUNEO_BIC', ''),
   },
 });

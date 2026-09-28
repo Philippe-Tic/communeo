@@ -971,6 +971,40 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       options.trial && 'expiredDaysAgo' in options.trial ? new Date(Date.now() - options.trial.expiredDaysAgo * DAY).toISOString() : null,
     liveRequestedAt: options.trial?.requested ? new Date(Date.now() - 2 * DAY).toISOString() : null,
   };
+  // Facturation (#314) : factures de Saint-Aubin (payée, à encaisser) et de Bellefontaine (en retard, avoir)
+  const billingDay = (offset: number) => new Date(Date.now() + offset * DAY).toISOString().slice(0, 10);
+  type MockInvoice = { documentId: string; number: string; site: { documentId: string; name: string }; status: string; remindersSent: number; [field: string]: unknown };
+  const billedInvoice = (fields: Pick<MockInvoice, 'documentId' | 'number' | 'site'> & Record<string, unknown>): MockInvoice => ({
+    kind: 'invoice',
+    reason: 'go_live',
+    status: 'issued',
+    creditFor: null,
+    cancelReason: null,
+    label: 'Abonnement annuel Communeo : site internet de la commune',
+    vatRate: 0,
+    paidAt: null,
+    paidAmount: null,
+    chorusDepositedAt: null,
+    chorusReference: null,
+    paymentNote: null,
+    remindersSent: 0,
+    lastReminderAt: null,
+    ...fields,
+  });
+  const billedSaintAubin = { documentId: SITE.documentId, name: SITE.name };
+  const billedBellefontaine = { documentId: 'site-bellefontaine', name: 'Bellefontaine' };
+  const invoices: MockInvoice[] = [
+    billedInvoice({ documentId: 'inv-4', number: 'FAC-2026-0004', site: billedSaintAubin, reason: 'renewal', issuedAt: billingDay(-5), dueAt: billingDay(25), periodStart: billingDay(-5), periodEnd: billingDay(359), customerName: `Commune de ${SITE.name}`, customerEmail: 'compta@saint-aubin.test', customerSiret: '21750001600019', amountHT: 390, amountTTC: 390 }),
+    billedInvoice({ documentId: 'inv-3', number: 'AV-2026-0001', kind: 'credit_note', reason: 'cancellation', site: billedBellefontaine, creditFor: 'FAC-2026-0002', cancelReason: 'Erreur d’adresse', issuedAt: billingDay(-40), dueAt: billingDay(-40), periodStart: billingDay(-60), periodEnd: billingDay(304), customerName: 'Commune de Bellefontaine', customerEmail: 'mairie@billedBellefontaine.test', customerSiret: '21760216000010', amountHT: 290, amountTTC: 290, chorusDepositedAt: billingDay(-39) }),
+    billedInvoice({ documentId: 'inv-2b', number: 'FAC-2026-0003', site: billedBellefontaine, issuedAt: billingDay(-40), dueAt: billingDay(-10), periodStart: billingDay(-60), periodEnd: billingDay(304), customerName: 'Commune de Bellefontaine', customerEmail: 'mairie@billedBellefontaine.test', customerSiret: '21760216000010', amountHT: 290, amountTTC: 290, chorusDepositedAt: billingDay(-39), chorusReference: 'CPP-2026-118', remindersSent: 1 }),
+    billedInvoice({ documentId: 'inv-2', number: 'FAC-2026-0002', site: billedBellefontaine, status: 'cancelled', cancelReason: 'Erreur d’adresse', issuedAt: billingDay(-60), dueAt: billingDay(-30), periodStart: billingDay(-60), periodEnd: billingDay(304), customerName: 'Commune de Bellefontaine', customerEmail: 'mairie@billedBellefontaine.test', customerSiret: '21760216000010', amountHT: 290, amountTTC: 290 }),
+    billedInvoice({ documentId: 'inv-1', number: 'FAC-2025-0001', site: billedSaintAubin, issuedAt: billingDay(-370), dueAt: billingDay(-340), periodStart: billingDay(-370), periodEnd: billingDay(-6), customerName: `Commune de ${SITE.name}`, customerEmail: 'compta@saint-aubin.test', customerSiret: '21750001600019', amountHT: 390, amountTTC: 390, status: 'paid', paidAt: billingDay(-350), paidAmount: 390, chorusDepositedAt: billingDay(-369) }),
+  ];
+  const renewals = [
+    { ...billedSaintAubin, enabled: true, periodEnd: billingDay(359) },
+    { ...billedBellefontaine, enabled: true, periodEnd: billingDay(304) },
+  ];
+  const publicInvoice = ({ site: _site, chorusReference: _c, paymentNote: _p, remindersSent: _r, lastReminderAt: _l, customerEmail: _e, customerSiret: _s, ...rest }: MockInvoice) => rest;
   const validationQueue =
     options.validations === 'some'
       ? {
@@ -1583,6 +1617,45 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       if (method === 'DELETE') {
         members.splice(members.indexOf(member), 1);
         return json({ data: { id: member.id } });
+      }
+    }
+    // Facturation (#314)
+    if (url.pathname === '/api/billing/invoices' && method === 'GET')
+      return json({
+        data: {
+          invoices: invoices.filter((item) => item.site.documentId === SITE.documentId).map(publicInvoice),
+          renewal: plan.plan === 'live' ? { enabled: true, periodEnd: billingDay(359) } : null,
+        },
+      });
+    if (/^\/api\/billing\/invoices\/[^/]+\/pdf$/.test(url.pathname))
+      return route.fulfill({ status: 200, contentType: 'application/pdf', body: '%PDF-1.4\n%%EOF\n' });
+    if (url.pathname.startsWith('/api/billing/team') && USERS[user].municipality_role === 'super_admin') {
+      if (url.pathname === '/api/billing/team')
+        return json({ data: { today: billingDay(0), invoices, uninvoiced: [], renewals, missingSettings: [] } });
+      const act = /^\/api\/billing\/team\/invoices\/([^/]+)\/(paid|chorus|remind|cancel)$/.exec(url.pathname);
+      if (act) {
+        const [, id, action] = act;
+        const body = (route.request().postDataJSON() as Record<string, unknown>) ?? {};
+        bodies.push({ call: `invoice ${action} ${id}`, body: { data: body } });
+        const target = invoices.find((item) => item.documentId === id)!;
+        if (action === 'paid') Object.assign(target, { status: 'paid', paidAt: body.paidAt, paidAmount: body.amount, paymentNote: body.note || null });
+        if (action === 'chorus') Object.assign(target, { chorusDepositedAt: body.depositedAt, chorusReference: body.reference || null });
+        if (action === 'remind') target.remindersSent += 1;
+        if (action === 'cancel') {
+          target.status = 'cancelled';
+          const credit = billedInvoice({ ...target, documentId: `${id}-av`, number: 'AV-2026-0002', kind: 'credit_note', reason: 'cancellation', status: 'issued', creditFor: target.number, cancelReason: body.reason, issuedAt: billingDay(0), dueAt: billingDay(0), chorusDepositedAt: null, chorusReference: null });
+          invoices.unshift(credit);
+          return json({ data: credit });
+        }
+        return json({ data: target });
+      }
+      const renewal = /^\/api\/billing\/team\/sites\/([^/]+)\/renewal$/.exec(url.pathname);
+      if (renewal && method === 'PUT') {
+        const body = route.request().postDataJSON() as { enabled: boolean };
+        bodies.push({ call: `renewal ${renewal[1]}`, body: { data: body } });
+        const site = renewals.find((item) => item.documentId === renewal[1])!;
+        site.enabled = body.enabled;
+        return json({ data: site });
       }
     }
     // Espace équipe Communeo (super admin)

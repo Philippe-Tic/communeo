@@ -419,6 +419,12 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'live_reject',
         'signup_reject',
         'quote_sign',
+        'invoice_issue',
+        'invoice_paid',
+        'invoice_cancel',
+        'invoice_chorus',
+        'invoice_remind',
+        'billing_renewal',
       ]
     > &
       Schema.Attribute.Required;
@@ -847,6 +853,69 @@ export interface ApiEvenementEvenement extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiInvoiceInvoice extends Struct.CollectionTypeSchema {
+  collectionName: 'invoices';
+  info: {
+    description: "Factures et avoirs de l'abonnement Communeo (#314) : fig\u00E9s \u00E0 l'\u00E9mission, jamais modifi\u00E9s ni supprim\u00E9s";
+    displayName: 'Facture';
+    pluralName: 'invoices';
+    singularName: 'invoice';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    amount_ht: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    amount_ttc: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    cancel_reason: Schema.Attribute.Text;
+    chorus_deposited_at: Schema.Attribute.Date;
+    chorus_reference: Schema.Attribute.String;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    credit_for: Schema.Attribute.String;
+    customer_address: Schema.Attribute.Text & Schema.Attribute.Required;
+    customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
+    customer_name: Schema.Attribute.String & Schema.Attribute.Required;
+    customer_siret: Schema.Attribute.String & Schema.Attribute.Required;
+    due_at: Schema.Attribute.Date & Schema.Attribute.Required;
+    issued_at: Schema.Attribute.Date & Schema.Attribute.Required;
+    kind: Schema.Attribute.Enumeration<['invoice', 'credit_note']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'invoice'>;
+    label: Schema.Attribute.String & Schema.Attribute.Required;
+    last_reminder_at: Schema.Attribute.DateTime;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::invoice.invoice'> & Schema.Attribute.Private;
+    number: Schema.Attribute.String & Schema.Attribute.Required & Schema.Attribute.Unique;
+    paid_amount: Schema.Attribute.Decimal;
+    paid_at: Schema.Attribute.Date;
+    payment_note: Schema.Attribute.Text & Schema.Attribute.Private;
+    pdf: Schema.Attribute.Text & Schema.Attribute.Private;
+    pdf_sha256: Schema.Attribute.String & Schema.Attribute.Required;
+    period_end: Schema.Attribute.Date;
+    period_start: Schema.Attribute.Date;
+    publishedAt: Schema.Attribute.DateTime;
+    quote: Schema.Attribute.Relation<'manyToOne', 'api::quote.quote'>;
+    reason: Schema.Attribute.Enumeration<['go_live', 'renewal', 'manual', 'cancellation']> & Schema.Attribute.Required;
+    reminders_sent: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'>;
+    status: Schema.Attribute.Enumeration<['issued', 'paid', 'cancelled']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'issued'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    vat_rate: Schema.Attribute.Decimal & Schema.Attribute.Required;
+  };
+}
+
 export interface ApiMediaItemMediaItem extends Struct.CollectionTypeSchema {
   collectionName: 'media_items';
   info: {
@@ -1240,6 +1309,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
       > &
       Schema.Attribute.DefaultTo<300>;
     auto_deploy_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    billing_renewal: Schema.Attribute.Boolean & Schema.Attribute.Private & Schema.Attribute.DefaultTo<true>;
     code_insee: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 5;
@@ -1868,6 +1938,7 @@ declare module '@strapi/strapi' {
       'api::content-version.content-version': ApiContentVersionContentVersion;
       'api::deployment.deployment': ApiDeploymentDeployment;
       'api::evenement.evenement': ApiEvenementEvenement;
+      'api::invoice.invoice': ApiInvoiceInvoice;
       'api::media-item.media-item': ApiMediaItemMediaItem;
       'api::newsletter-subscriber.newsletter-subscriber': ApiNewsletterSubscriberNewsletterSubscriber;
       'api::official-document.official-document': ApiOfficialDocumentOfficialDocument;

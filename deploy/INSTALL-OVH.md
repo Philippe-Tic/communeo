@@ -143,6 +143,8 @@ COMMUNEO_LEGAL_ADDRESS=
 COMMUNEO_SIRET=
 COMMUNEO_BILLING_EMAIL=
 COMMUNEO_VAT_RATE=0
+COMMUNEO_IBAN=
+COMMUNEO_BIC=
 
 SEED_SUPER_ADMIN_EMAIL=
 SEED_SUPER_ADMIN_PASSWORD=
@@ -172,6 +174,7 @@ nano .env        # enregistrer : Ctrl+O puis Entrée ; quitter : Ctrl+X
 | `HOSTING_NAME`, `HOSTING_ADDRESS`, `HOSTING_PHONE` | hébergeur **des sites publics** pour les mentions légales des communes : Netlify (nom et adresse tels qu'indiqués sur leur page légale) |
 | `COMMUNEO_LEGAL_NAME`, `COMMUNEO_LEGAL_ADDRESS`, `COMMUNEO_SIRET`, `COMMUNEO_BILLING_EMAIL` | ton identité sur les devis |
 | `COMMUNEO_VAT_RATE` | `0` en micro-entreprise (franchise de TVA), `0.2` sinon |
+| `COMMUNEO_IBAN`, `COMMUNEO_BIC` | le compte bancaire professionnel imprimé sur les factures (les mairies paient par virement) |
 | `SEED_SUPER_ADMIN_EMAIL`, `SEED_SUPER_ADMIN_PASSWORD` | ton compte de l'équipe Communeo (mot de passe fort, ≥ 10 caractères) |
 | `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY` | clés de l'utilisateur S3 OVH |
 

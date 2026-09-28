@@ -37,7 +37,13 @@ export type ActivityAction =
   | 'commune_go_live'
   | 'live_reject'
   | 'signup_reject'
-  | 'quote_sign';
+  | 'quote_sign'
+  | 'invoice_issue'
+  | 'invoice_paid'
+  | 'invoice_cancel'
+  | 'invoice_chorus'
+  | 'invoice_remind'
+  | 'billing_renewal';
 
 export interface ActivityInput {
   action: ActivityAction;

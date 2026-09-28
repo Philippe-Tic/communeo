@@ -6,13 +6,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { CalendarPlus, ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle, Rocket } from 'lucide-react';
-import { deletionDate, trialDaysLeft } from '@communeo/core';
+import { addCalendarDays, deletionDate, formatEuros, trialDaysLeft } from '@communeo/core';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
+import { formatCalendarDay, formatShortDay, invoicePdfUrl, stateBadge, stateOf as invoiceStateOf, teamBillingQuery } from '@/lib/billing';
 import { communeQuery, enterCommune, refreshCommunes, updateCommune, type CommuneDetail } from '@/lib/equipe';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { themeName } from '@/lib/session';
@@ -53,6 +54,57 @@ function Card({ title, children, action }: { title: string; children: ReactNode;
       </div>
       <div className="mt-2">{children}</div>
     </section>
+  );
+}
+
+/** Factures de la commune et renouvellement (#314) ; le suivi détaillé est dans l'écran Facturation */
+function BillingCard({ commune }: { commune: CommuneDetail }) {
+  const billing = useQuery(teamBillingQuery);
+  const invoices = billing.data?.invoices.filter((invoice) => invoice.site?.documentId === commune.documentId) ?? [];
+  const renewal = billing.data?.renewals.find((site) => site.documentId === commune.documentId);
+  if (commune.plan !== 'live' && invoices.length === 0) return null;
+  return (
+    <Card
+      title="Facturation"
+      action={
+        <Link to="/plateforme/facturation" className="text-[13px] font-medium text-brand hover:underline">
+          Suivi de la facturation
+        </Link>
+      }
+    >
+      {!billing.data ? (
+        <p className="text-secondary">{billing.isError ? "Les factures n'ont pas pu être chargées." : 'Chargement…'}</p>
+      ) : invoices.length === 0 ? (
+        <p className="text-secondary">Aucune facture : voyez « Communes en live sans facture » dans l'écran Facturation.</p>
+      ) : (
+        <ul className="divide-y divide-border">
+          {invoices.map((invoice) => {
+            const badge = stateBadge(invoiceStateOf(invoice, billing.data.today));
+            return (
+              <li key={invoice.documentId} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-[13px]">
+                <a href={invoicePdfUrl(invoice.documentId)} target="_blank" rel="noreferrer" className="font-semibold text-brand hover:underline">
+                  {invoice.number}
+                  <span className="sr-only"> (PDF, nouvel onglet)</span>
+                </a>
+                <span className="text-secondary">
+                  {formatShortDay(invoice.issuedAt)} · {formatEuros(invoice.kind === 'credit_note' ? -invoice.amountTTC : invoice.amountTTC)}
+                </span>
+                <span className="ml-auto">
+                  <StatusBadge tone={badge.tone}>{badge.label}</StatusBadge>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {renewal?.periodEnd && (
+        <p className="mt-2 text-[13px] text-secondary">
+          {renewal.enabled
+            ? `Renouvellement le ${formatCalendarDay(addCalendarDays(renewal.periodEnd, 1))}`
+            : `Résiliée : fin de l'abonnement le ${formatCalendarDay(renewal.periodEnd)}`}
+        </p>
+      )}
+    </Card>
   );
 }
 
@@ -240,6 +292,8 @@ function Detail({ commune }: { commune: CommuneDetail }) {
           ))}
         </ul>
       </Card>
+
+      <BillingCard commune={commune} />
 
       <div className="grid grid-cols-3 gap-4">
         {(

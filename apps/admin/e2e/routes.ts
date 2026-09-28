@@ -33,6 +33,7 @@ export const ROUTES = [
   '/passer-en-live',
   '/conformite',
   '/utilisateurs',
+  '/facturation',
   '/journal',
   '/assistant?etape=2',
   '/mon-compte',
@@ -42,6 +43,7 @@ export const ROUTES = [
 export const PLATFORM_ROUTES = [
   '/plateforme',
   '/plateforme/a-valider',
+  '/plateforme/facturation',
   '/plateforme/communes/site-bellefontaine',
   '/plateforme/utilisateurs',
   '/plateforme/statistiques',

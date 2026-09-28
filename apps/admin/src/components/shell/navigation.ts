@@ -21,6 +21,7 @@ import {
   Menu as MenuIcon,
   Newspaper,
   Palette,
+  Receipt,
   Recycle,
   Scale,
   Send,
@@ -100,6 +101,7 @@ export const NAVIGATION: NavGroup[] = [
 export const NAVIGATION_END: NavLink[] = [
   { label: 'Mise en ligne', to: '/mise-en-ligne', icon: CloudUpload },
   { label: 'Utilisateurs', to: '/utilisateurs', icon: Users, adminOnly: true },
+  { label: 'Facturation', to: '/facturation', icon: Receipt, adminOnly: true },
   { label: 'Conformité', to: '/conformite', icon: ListChecks },
   { label: "Journal d'activité", to: '/journal', icon: History, adminOnly: true },
 ];

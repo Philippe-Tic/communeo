@@ -1,0 +1,48 @@
+{
+  "kind": "collectionType",
+  "collectionName": "invoices",
+  "info": {
+    "singularName": "invoice",
+    "pluralName": "invoices",
+    "displayName": "Facture",
+    "description": "Factures et avoirs de l'abonnement Communeo (#314) : figés à l'émission, jamais modifiés ni supprimés"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "site": { "type": "relation", "relation": "manyToOne", "target": "api::site.site" },
+    "quote": { "type": "relation", "relation": "manyToOne", "target": "api::quote.quote" },
+    "number": { "type": "string", "required": true, "unique": true },
+    "kind": { "type": "enumeration", "enum": ["invoice", "credit_note"], "required": true, "default": "invoice" },
+    "reason": { "type": "enumeration", "enum": ["go_live", "renewal", "manual", "cancellation"], "required": true },
+    "status": { "type": "enumeration", "enum": ["issued", "paid", "cancelled"], "required": true, "default": "issued" },
+    "credit_for": { "type": "string" },
+    "cancel_reason": { "type": "text" },
+    "issued_at": { "type": "date", "required": true },
+    "due_at": { "type": "date", "required": true },
+    "period_start": { "type": "date" },
+    "period_end": { "type": "date" },
+    "label": { "type": "string", "required": true },
+    "customer_name": { "type": "string", "required": true },
+    "customer_siret": { "type": "string", "required": true },
+    "customer_address": { "type": "text", "required": true },
+    "customer_email": { "type": "email", "required": true },
+    "amount_ht": { "type": "decimal", "required": true },
+    "vat_rate": { "type": "decimal", "required": true },
+    "amount_ttc": { "type": "decimal", "required": true },
+    "paid_at": { "type": "date" },
+    "paid_amount": { "type": "decimal" },
+    "payment_note": { "type": "text", "private": true },
+    "chorus_deposited_at": { "type": "date" },
+    "chorus_reference": { "type": "string" },
+    "reminders_sent": { "type": "integer", "default": 0 },
+    "last_reminder_at": { "type": "datetime" },
+    "pdf": { "type": "text", "private": true },
+    "pdf_sha256": { "type": "string", "required": true }
+  }
+}

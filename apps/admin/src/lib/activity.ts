@@ -27,7 +27,13 @@ export type ActivityAction =
   | 'commune_go_live'
   | 'live_reject'
   | 'signup_reject'
-  | 'quote_sign';
+  | 'quote_sign'
+  | 'invoice_issue'
+  | 'invoice_paid'
+  | 'invoice_cancel'
+  | 'invoice_chorus'
+  | 'invoice_remind'
+  | 'billing_renewal';
 
 export interface ActivityEntry {
   id: number;
@@ -86,6 +92,12 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   live_reject: 'Passage en live refusé',
   signup_reject: 'Inscription refusée',
   quote_sign: 'Devis validé',
+  invoice_issue: 'Facture émise',
+  invoice_paid: 'Facture payée',
+  invoice_cancel: 'Facture annulée par un avoir',
+  invoice_chorus: 'Facture déposée sur Chorus Pro',
+  invoice_remind: 'Relance de facture',
+  billing_renewal: 'Renouvellement de l’abonnement modifié',
 };
 
 /** Actions qu'une commune voit (les autres concernent la plateforme) */
@@ -107,9 +119,13 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'commune_go_live',
   'live_reject',
   'quote_sign',
+  'invoice_issue',
+  'invoice_paid',
+  'invoice_cancel',
 ];
 
 const TYPE_LABELS: Record<string, string> = {
+  invoice: 'Facture',
   article: 'Actualité',
   page: 'Page',
   evenement: 'Événement',

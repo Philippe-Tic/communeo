@@ -50,7 +50,7 @@ export function ActivityLog({ platform }: { platform?: boolean }) {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-[13px]">
+        <label className="flex max-w-full min-w-0 items-center gap-2 text-[13px]">
           <span className="font-medium">Action</span>
           <select
             value={action}
@@ -58,7 +58,7 @@ export function ActivityLog({ platform }: { platform?: boolean }) {
               setAction(event.target.value as ActivityAction | '');
               setPage(1);
             }}
-            className={cn(controlClass, 'h-11 w-auto md:h-9')}
+            className={cn(controlClass, 'h-11 w-auto min-w-0 max-w-[260px] md:h-9')}
           >
             <option value="">Toutes</option>
             {actions.map((value) => (

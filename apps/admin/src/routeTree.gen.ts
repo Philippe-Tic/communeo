@@ -30,6 +30,7 @@ import { Route as AppDechetsRouteImport } from './routes/_app/dechets'
 import { Route as AppDocumentsRouteImport } from './routes/_app/documents'
 import { Route as AppEditeurDeBlocsRouteImport } from './routes/_app/editeur-de-blocs'
 import { Route as AppEquipeRouteImport } from './routes/_app/equipe'
+import { Route as AppFacturationRouteImport } from './routes/_app/facturation'
 import { Route as AppJournalRouteImport } from './routes/_app/journal'
 import { Route as AppMediathequeRouteImport } from './routes/_app/mediatheque'
 import { Route as AppMessagesRouteImport } from './routes/_app/messages'
@@ -42,6 +43,7 @@ import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
 import { Route as InscriptionConfirmerRouteImport } from './routes/inscription_.confirmer'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
 import { Route as PlateformeAValiderRouteImport } from './routes/plateforme/a-valider'
+import { Route as PlateformeFacturationRouteImport } from './routes/plateforme/facturation'
 import { Route as PlateformeJournalRouteImport } from './routes/plateforme/journal'
 import { Route as PlateformeStatistiquesRouteImport } from './routes/plateforme/statistiques'
 import { Route as PlateformeUtilisateursRouteImport } from './routes/plateforme/utilisateurs'
@@ -165,6 +167,11 @@ const AppEquipeRoute = AppEquipeRouteImport.update({
   path: '/equipe',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFacturationRoute = AppFacturationRouteImport.update({
+  id: '/facturation',
+  path: '/facturation',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppJournalRoute = AppJournalRouteImport.update({
   id: '/journal',
   path: '/journal',
@@ -223,6 +230,11 @@ const PlateformeIndexRoute = PlateformeIndexRouteImport.update({
 const PlateformeAValiderRoute = PlateformeAValiderRouteImport.update({
   id: '/a-valider',
   path: '/a-valider',
+  getParentRoute: () => PlateformeRoute,
+} as any)
+const PlateformeFacturationRoute = PlateformeFacturationRouteImport.update({
+  id: '/facturation',
+  path: '/facturation',
   getParentRoute: () => PlateformeRoute,
 } as any)
 const PlateformeJournalRoute = PlateformeJournalRouteImport.update({
@@ -338,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof AppDocumentsRoute
   '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
+  '/facturation': typeof AppFacturationRoute
   '/journal': typeof AppJournalRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
@@ -349,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
+  '/plateforme/facturation': typeof PlateformeFacturationRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -388,6 +402,7 @@ export interface FileRoutesByTo {
   '/documents': typeof AppDocumentsRoute
   '/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/equipe': typeof AppEquipeRoute
+  '/facturation': typeof AppFacturationRoute
   '/journal': typeof AppJournalRoute
   '/mediatheque': typeof AppMediathequeRoute
   '/messages': typeof AppMessagesRoute
@@ -399,6 +414,7 @@ export interface FileRoutesByTo {
   '/utilisateurs': typeof AppUtilisateursRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
+  '/plateforme/facturation': typeof PlateformeFacturationRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -442,6 +458,7 @@ export interface FileRoutesById {
   '/_app/documents': typeof AppDocumentsRoute
   '/_app/editeur-de-blocs': typeof AppEditeurDeBlocsRoute
   '/_app/equipe': typeof AppEquipeRoute
+  '/_app/facturation': typeof AppFacturationRoute
   '/_app/journal': typeof AppJournalRoute
   '/_app/mediatheque': typeof AppMediathequeRoute
   '/_app/messages': typeof AppMessagesRoute
@@ -453,6 +470,7 @@ export interface FileRoutesById {
   '/_app/utilisateurs': typeof AppUtilisateursRoute
   '/inscription_/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
+  '/plateforme/facturation': typeof PlateformeFacturationRoute
   '/plateforme/journal': typeof PlateformeJournalRoute
   '/plateforme/statistiques': typeof PlateformeStatistiquesRoute
   '/plateforme/utilisateurs': typeof PlateformeUtilisateursRoute
@@ -497,6 +515,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/editeur-de-blocs'
     | '/equipe'
+    | '/facturation'
     | '/journal'
     | '/mediatheque'
     | '/messages'
@@ -508,6 +527,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/inscription/confirmer'
     | '/plateforme/a-valider'
+    | '/plateforme/facturation'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -547,6 +567,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/editeur-de-blocs'
     | '/equipe'
+    | '/facturation'
     | '/journal'
     | '/mediatheque'
     | '/messages'
@@ -558,6 +579,7 @@ export interface FileRouteTypes {
     | '/utilisateurs'
     | '/inscription/confirmer'
     | '/plateforme/a-valider'
+    | '/plateforme/facturation'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -600,6 +622,7 @@ export interface FileRouteTypes {
     | '/_app/documents'
     | '/_app/editeur-de-blocs'
     | '/_app/equipe'
+    | '/_app/facturation'
     | '/_app/journal'
     | '/_app/mediatheque'
     | '/_app/messages'
@@ -611,6 +634,7 @@ export interface FileRouteTypes {
     | '/_app/utilisateurs'
     | '/inscription_/confirmer'
     | '/plateforme/a-valider'
+    | '/plateforme/facturation'
     | '/plateforme/journal'
     | '/plateforme/statistiques'
     | '/plateforme/utilisateurs'
@@ -795,6 +819,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEquipeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/facturation': {
+      id: '/_app/facturation'
+      path: '/facturation'
+      fullPath: '/facturation'
+      preLoaderRoute: typeof AppFacturationRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/journal': {
       id: '/_app/journal'
       path: '/journal'
@@ -877,6 +908,13 @@ declare module '@tanstack/react-router' {
       path: '/a-valider'
       fullPath: '/plateforme/a-valider'
       preLoaderRoute: typeof PlateformeAValiderRouteImport
+      parentRoute: typeof PlateformeRoute
+    }
+    '/plateforme/facturation': {
+      id: '/plateforme/facturation'
+      path: '/facturation'
+      fullPath: '/plateforme/facturation'
+      preLoaderRoute: typeof PlateformeFacturationRouteImport
       parentRoute: typeof PlateformeRoute
     }
     '/plateforme/journal': {
@@ -1020,6 +1058,7 @@ interface AppRouteChildren {
   AppDocumentsRoute: typeof AppDocumentsRoute
   AppEditeurDeBlocsRoute: typeof AppEditeurDeBlocsRoute
   AppEquipeRoute: typeof AppEquipeRoute
+  AppFacturationRoute: typeof AppFacturationRoute
   AppJournalRoute: typeof AppJournalRoute
   AppMediathequeRoute: typeof AppMediathequeRoute
   AppMessagesRoute: typeof AppMessagesRoute
@@ -1058,6 +1097,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDocumentsRoute: AppDocumentsRoute,
   AppEditeurDeBlocsRoute: AppEditeurDeBlocsRoute,
   AppEquipeRoute: AppEquipeRoute,
+  AppFacturationRoute: AppFacturationRoute,
   AppJournalRoute: AppJournalRoute,
   AppMediathequeRoute: AppMediathequeRoute,
   AppMessagesRoute: AppMessagesRoute,
@@ -1088,6 +1128,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PlateformeRouteChildren {
   PlateformeAValiderRoute: typeof PlateformeAValiderRoute
+  PlateformeFacturationRoute: typeof PlateformeFacturationRoute
   PlateformeJournalRoute: typeof PlateformeJournalRoute
   PlateformeStatistiquesRoute: typeof PlateformeStatistiquesRoute
   PlateformeUtilisateursRoute: typeof PlateformeUtilisateursRoute
@@ -1097,6 +1138,7 @@ interface PlateformeRouteChildren {
 
 const PlateformeRouteChildren: PlateformeRouteChildren = {
   PlateformeAValiderRoute: PlateformeAValiderRoute,
+  PlateformeFacturationRoute: PlateformeFacturationRoute,
   PlateformeJournalRoute: PlateformeJournalRoute,
   PlateformeStatistiquesRoute: PlateformeStatistiquesRoute,
   PlateformeUtilisateursRoute: PlateformeUtilisateursRoute,

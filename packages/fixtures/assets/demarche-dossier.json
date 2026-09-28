@@ -1,0 +1,263 @@
+{
+  "data": {
+    "id": "N358",
+    "type": "Dossier",
+    "audience": "particuliers",
+    "title": "Carte d'identité",
+    "description": "Pour demander une carte d'identité, les pièces à fournir dépendent de la situation (adulte ou enfant, possession d'un passeport...)",
+    "dateModification": "2026-04-09",
+    "theme": {
+      "id": "N19810",
+      "title": "Papiers - Citoyenneté - Élections"
+    },
+    "sousTheme": null,
+    "filDAriane": [
+      {
+        "id": "Particuliers",
+        "title": "Accueil particuliers"
+      },
+      {
+        "id": "N19810",
+        "title": "Papiers - Citoyenneté - Élections"
+      },
+      {
+        "id": "N358",
+        "title": "Carte d'identité"
+      }
+    ],
+    "dossierPere": {
+      "id": "N358",
+      "title": "Carte d'identité",
+      "sousDossiers": [
+        {
+          "id": "N358-1",
+          "title": "Pour un majeur",
+          "fiches": [
+            {
+              "id": "F1341",
+              "title": "Première demande"
+            },
+            {
+              "id": "F21089",
+              "title": "Renouvellement"
+            },
+            {
+              "id": "F1344",
+              "title": "Carte perdue"
+            },
+            {
+              "id": "F1759",
+              "title": "Carte volée"
+            }
+          ]
+        },
+        {
+          "id": "N358-2",
+          "title": "Pour un mineur",
+          "fiches": [
+            {
+              "id": "F1342",
+              "title": "Première demande"
+            },
+            {
+              "id": "F21090",
+              "title": "Renouvellement"
+            },
+            {
+              "id": "F1153",
+              "title": "Carte perdue"
+            },
+            {
+              "id": "F1794",
+              "title": "Carte volée"
+            }
+          ]
+        }
+      ]
+    },
+    "avertissement": null,
+    "introduction": [],
+    "content": [
+      {
+        "type": "paragraphe",
+        "text": "Pour demander une carte nationale d'identité, les documents à fournir dépendent de la situation : majeur ou mineur, première demande ou renouvellement, possession (ou non) d'un passeport,... Vous pouvez faire une pré-demande. Elle permet de gagner du temps lors du dépôt du dossier. Les délais de fabrication de la carte d’identité dépendent du lieu et de la période."
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Rechercher un rendez-vous pour une demande de carte d'identité",
+        "href": "https://rendezvouspasseport.ants.gouv.fr/",
+        "attributes": {
+          "serviceType": "Outil de recherche"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Pré-demande pour une 1re demande de carte d'identité",
+        "href": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Pré-demande pour un renouvellement de carte d'identité",
+        "href": "https://passeport.ants.gouv.fr/demarches-en-ligne/effectuer-le-renouvellement-de-votre-carte-didentite",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Suivre votre demande de carte d'identité",
+        "href": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance en France) - Service gratuit",
+        "href": "https://demarches.service-public.gouv.fr/mademarche/EtatCivil/demarche?action=NAISSANCE",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance à l'étranger) - Service gratuit",
+        "href": "https://demarches.service-public.gouv.fr/mademarche/delivrance_demat/demarche?action=NAISSANCE",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      }
+    ],
+    "references": {
+      "ouSAdresser": [],
+      "servicesEnLigne": [
+        {
+          "id": "R63715",
+          "title": "Rechercher un rendez-vous pour une demande de carte d'identité",
+          "url": "https://rendezvouspasseport.ants.gouv.fr/",
+          "type": "Outil de recherche"
+        },
+        {
+          "id": "R45668",
+          "title": "Pré-demande pour une 1re demande de carte d'identité",
+          "url": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R62483",
+          "title": "Pré-demande pour un renouvellement de carte d'identité",
+          "url": "https://passeport.ants.gouv.fr/demarches-en-ligne/effectuer-le-renouvellement-de-votre-carte-didentite",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R49786",
+          "title": "Suivre votre demande de carte d'identité",
+          "url": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R1406",
+          "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance en France) - Service gratuit",
+          "url": "https://demarches.service-public.gouv.fr/mademarche/EtatCivil/demarche?action=NAISSANCE",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R1405",
+          "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance à l'étranger) - Service gratuit",
+          "url": "https://demarches.service-public.gouv.fr/mademarche/delivrance_demat/demarche?action=NAISSANCE",
+          "type": "Téléservice"
+        }
+      ],
+      "references": [],
+      "voirAussi": [
+        {
+          "id": "",
+          "title": "PasseportPapiers - Citoyenneté - ÉlectionsDevenir FrançaisÉtranger - Europe"
+        }
+      ],
+      "definitions": [],
+      "questionsReponses": [
+        {
+          "id": "F12567",
+          "title": "Quels recours quand une demande est refusée ?"
+        },
+        {
+          "id": "F32303",
+          "title": "Peut-on voyager avec une carte d'identité de plus de 10 ans ?"
+        },
+        {
+          "id": "F1887",
+          "title": "Comment remplacer une carte d'identité abîmée ?"
+        },
+        {
+          "id": "F10774",
+          "title": "Que faire en cas de vol de tous ses papiers d'identité en même temps ?"
+        },
+        {
+          "id": "F10619",
+          "title": "Quelles photos sont admises ?"
+        },
+        {
+          "id": "F18713",
+          "title": "Comment prouver sa nationalité française ?"
+        },
+        {
+          "id": "F14807",
+          "title": "Comment justifier de son domicile ?"
+        },
+        {
+          "id": "F18605",
+          "title": "Comment prouver l'autorité parentale ?"
+        },
+        {
+          "id": "F11601",
+          "title": "Est-on obligé d'avoir une carte d'identité ?"
+        },
+        {
+          "id": "F16872",
+          "title": "Peut-on obtenir une carte d'identité en urgence ?"
+        },
+        {
+          "id": "F18704",
+          "title": "Que faire si on retrouve sa carte d'identité ou son passeport après la déclaration de perte ou de vol ?"
+        },
+        {
+          "id": "F12883",
+          "title": "Un majeur protégé (tutelle, curatelle...) peut-il demander un titre d'identité ?"
+        },
+        {
+          "id": "F556",
+          "title": "Doit-on obligatoirement se déplacer au guichet ?"
+        },
+        {
+          "id": "F31421",
+          "title": "Que faire en cas de perte de tous ses papiers d'identité en même temps ?"
+        },
+        {
+          "id": "F32675",
+          "title": "Quel justificatif de domicile pour la carte d'identité d'un mineur ?"
+        },
+        {
+          "id": "F33640",
+          "title": "Carte d'identité / Passeport : comment remplir le formulaire ou la pré-demande ?"
+        },
+        {
+          "id": "F33805",
+          "title": "Où acheter un timbre fiscal ?"
+        },
+        {
+          "id": "F34756",
+          "title": "Comment suivre l'état d'avancement d'une demande de carte d'identité ?"
+        },
+        {
+          "id": "F35005",
+          "title": "Quelle est la durée de validité d'une carte d'identité ?"
+        }
+      ],
+      "pourEnSavoirPlus": []
+    }
+  }
+}

@@ -13,16 +13,58 @@ import type {
   FicheResult,
   MenuResult,
 } from '../types/comarquage'
+import { DemarcheSearchIndex, type DemarcheIndexEntry } from '@communeo/core'
 import normalizer from './dila-normalizer'
 import { log } from '../utils/logger';
 
 const DILA_BASE_URL = 'https://lecomarquage.service-public.fr/vdd/3.4'
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000 // 24h
 
+const XML_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
+const decodeXml = (value: string) =>
+  value
+    .replace(/<[^>]+>/g, '')
+    .replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (entity, code: string) => {
+      if (code[0] === '#') {
+        const point = code[1] === 'x' || code[1] === 'X' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10)
+        return Number.isFinite(point) ? String.fromCodePoint(point) : entity
+      }
+      return XML_ENTITIES[code.toLowerCase()] ?? entity
+    })
+    .replace(/\s+/g, ' ')
+    .trim()
+
+const firstMatch = (xml: string, pattern: RegExp) => {
+  const match = pattern.exec(xml)
+  return match ? decodeXml(match[1]) : ''
+}
+
+/** Fiche ou dossier de l'archive → entrée de l'index de recherche (thèmes, questionnaires et ressources exclus) */
+export function indexEntry(xml: string): DemarcheIndexEntry | null {
+  const publication = /<Publication\b[^>]*>/.exec(xml)?.[0]
+  if (!publication) return null
+  const id = /\bID="([A-Z]\d+)"/.exec(publication)?.[1]
+  const kind = decodeXml(/\btype="([^"]*)"/.exec(publication)?.[1] ?? '')
+  // Les recherches guidées sont des questionnaires internes de service-public.fr (« [RG - …] »)
+  if (!id || !/^[FN]/.test(id) || kind === 'Theme' || kind === 'Recherche guidée') return null
+  const title = firstMatch(xml, /<dc:title>([\s\S]*?)<\/dc:title>/)
+  if (!title) return null
+  const folder = firstMatch(xml, /<DossierPere\b[^>]*>\s*<Titre>([\s\S]*?)<\/Titre>/)
+  return {
+    id,
+    title,
+    description: firstMatch(xml, /<dc:description>([\s\S]*?)<\/dc:description>/),
+    context: folder && folder !== title ? folder : firstMatch(xml, /<Theme\b[^>]*>\s*<Titre>([\s\S]*?)<\/Titre>/),
+    kind,
+  }
+}
+
 class ComarquageService {
   private cacheDir: string
   private ttlMs: number
   private downloadInProgress: Map<DilaAudience, Promise<void>> = new Map()
+  /** Index de recherche par public, reconstruit quand l'archive change */
+  private searchIndexes: Map<DilaAudience, { downloadedAt: string; index: Promise<DemarcheSearchIndex> }> = new Map()
 
   constructor() {
     this.cacheDir = path.join(os.tmpdir(), 'communeo-comarquage')
@@ -91,6 +133,41 @@ class ComarquageService {
     const stale = cacheAge > this.ttlMs
 
     return { themes, audience, cacheAge, stale }
+  }
+
+  /**
+   * Recherche dans toutes les fiches et tous les dossiers d'un public, quel que soit leur rang
+   */
+  async search(audience: DilaAudience, query: string, limit = 20) {
+    await this.ensureCache(audience)
+    const index = await this.searchIndex(audience)
+    return index.search(query, limit)
+  }
+
+  private async searchIndex(audience: DilaAudience): Promise<DemarcheSearchIndex> {
+    const downloadedAt = this.readMetadata(audience)?.downloadedAt ?? ''
+    const cached = this.searchIndexes.get(audience)
+    if (cached && cached.downloadedAt === downloadedAt) return cached.index
+
+    const index = this.buildSearchIndex(audience)
+    this.searchIndexes.set(audience, { downloadedAt, index })
+    // Un échec ne doit pas rester en cache
+    index.catch(() => this.searchIndexes.delete(audience))
+    return index
+  }
+
+  private async buildSearchIndex(audience: DilaAudience): Promise<DemarcheSearchIndex> {
+    const startTime = Date.now()
+    const audienceDir = this.audienceDir(audience)
+    const files = (await fs.promises.readdir(audienceDir).catch(() => [] as string[])).filter((file) => /^[FN]\d+\.xml$/.test(file))
+    const entries: DemarcheIndexEntry[] = []
+    for (const file of files) {
+      const xml = await fs.promises.readFile(path.join(audienceDir, file), 'utf-8').catch(() => '')
+      const entry = xml && indexEntry(xml)
+      if (entry) entries.push(entry)
+    }
+    log.info(`🔎 [COMARQUAGE] Search index for ${audience}: ${entries.length} entries in ${Date.now() - startTime} ms`)
+    return new DemarcheSearchIndex(entries)
   }
 
   /**

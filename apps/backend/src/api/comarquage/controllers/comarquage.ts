@@ -1,5 +1,5 @@
 import comarquageService from '../../../services/comarquage'
-import type { DilaAudience, DilaMenuNode } from '../../../types/comarquage'
+import type { DilaAudience } from '../../../types/comarquage'
 
 const VALID_AUDIENCES = ['particuliers', 'professionnels'] as const
 
@@ -10,23 +10,6 @@ function validateAudience(ctx: any): DilaAudience | null {
     return null
   }
   return audience as DilaAudience
-}
-
-function flattenMenuNodes(nodes: DilaMenuNode[], query: string): DilaMenuNode[] {
-  const results: DilaMenuNode[] = []
-  const lowerQuery = query.toLowerCase()
-
-  for (const node of nodes) {
-    if (node.title.toLowerCase().includes(lowerQuery)) {
-      // Retourner le nœud sans enfants (résultat plat pour la recherche)
-      results.push({ ...node, children: [] })
-    }
-    if (node.children?.length) {
-      results.push(...flattenMenuNodes(node.children, query))
-    }
-  }
-
-  return results
 }
 
 export default {
@@ -68,19 +51,25 @@ export default {
     }
   },
 
+  /** Recherche publique dans toutes les démarches (sites des communes) : `?q=` et `?limit=` (50 au plus) */
   async search(ctx: any) {
     const audience = validateAudience(ctx)
     if (!audience) return
 
-    const q = (ctx.query.q || '').trim()
+    const q = String(ctx.query.q ?? '').trim().slice(0, 100)
     if (!q) {
       return ctx.badRequest('Le paramètre de recherche "q" est requis')
     }
+    const limit = Math.min(Math.max(parseInt(String(ctx.query.limit ?? '20'), 10) || 20, 1), 50)
 
     try {
-      const menuResult = await comarquageService.getMenu(audience)
-      const results = flattenMenuNodes(menuResult.themes, q)
-      ctx.body = { data: results }
+      const { total, results } = await comarquageService.search(audience, q, limit)
+      // Réponse identique pour tous les visiteurs : les navigateurs et proxys peuvent la garder
+      ctx.set('Cache-Control', 'public, max-age=300')
+      ctx.body = {
+        data: results.map(({ id, title, description, context, kind }) => ({ id, title, description, context, kind })),
+        meta: { total, query: q },
+      }
     } catch (error: any) {
       ctx.internalServerError(`Erreur lors de la recherche: ${error.message}`)
     }

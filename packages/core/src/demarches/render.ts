@@ -5,7 +5,8 @@
  * page par page pour chaque commune) : cette fonction produit le balisage que le thème habille.
  * Tout texte est échappé ; seules les balises produites ici sont émises.
  */
-import type { DemarcheNode } from './types';
+import { demarcheHref } from './map';
+import type { DemarcheAudience, DemarcheNode } from './types';
 
 const CALLOUTS: Record<string, string> = {
   aSavoir: 'À savoir',
@@ -22,14 +23,22 @@ const safeHref = (href: string | undefined) => (href && /^(https?:\/\/|mailto:|t
 
 const heading = (level: number) => `h${Math.min(level, 6)}`;
 
-/** `level` : niveau du prochain titre (3 sous le H2 « La démarche » de la page). */
-export function renderNodes(nodes: DemarcheNode[] | undefined, level = 3): string {
-  return (nodes ?? []).map((node) => renderNode(node, level)).join('');
+/** Identifiant d'une fiche ou d'un dossier de la DILA (F1341, N358) ; les R… sont des ressources (glossaire…) */
+const FICHE_ID = /^[FN]\d+$/;
+const RESOURCE_ID = /^[A-Z]\d+$/;
+
+/**
+ * `level` : niveau du prochain titre (3 sous le H2 « La démarche » de la page) ; `audience` : public
+ * des liens vers les autres fiches, qui restent sur le site de la commune.
+ */
+export function renderNodes(nodes: DemarcheNode[] | undefined, level = 3, audience: DemarcheAudience = 'particuliers'): string {
+  return (nodes ?? []).map((node) => renderNode(node, level, audience)).join('');
 }
 
-function renderNode(node: DemarcheNode, level: number): string {
+function renderNode(node: DemarcheNode, level: number, audience: DemarcheAudience): string {
   const title = node.title?.trim();
-  const inner = () => renderNodes(node.children, level + 1);
+  const inner = () => renderNodes(node.children, level + 1, audience);
+  const renderInline = (child: DemarcheNode) => renderInlineFor(child, audience);
 
   switch (node.type) {
     case 'chapitre': {
@@ -44,13 +53,13 @@ function renderNode(node: DemarcheNode, level: number): string {
       return renderInline(node);
     case 'liste': {
       const tag = node.attributes?.listeType === 'ordonnee' ? 'ol' : 'ul';
-      return `<${tag}>${(node.children ?? []).map((item) => `<li>${renderNodes(item.children, level)}</li>`).join('')}</${tag}>`;
+      return `<${tag}>${(node.children ?? []).map((item) => `<li>${renderNodes(item.children, level, audience)}</li>`).join('')}</${tag}>`;
     }
     case 'element':
-      return `<li>${renderNodes(node.children, level)}</li>`;
+      return `<li>${renderNodes(node.children, level, audience)}</li>`;
     case 'tableau': {
       const rows = (node.children ?? [])
-        .map((row) => `<tr>${(row.children ?? []).map((cell) => `<td>${renderNodes(cell.children, level)}</td>`).join('')}</tr>`)
+        .map((row) => `<tr>${(row.children ?? []).map((cell) => renderCell(cell, level, audience)).join('')}</tr>`)
         .join('');
       const caption = title ? `<caption>${escapeHtml(title)}</caption>` : '';
       return `<div class="cn-demarche-table"><table>${caption}<tbody>${rows}</tbody></table></div>`;
@@ -60,6 +69,29 @@ function renderNode(node: DemarcheNode, level: number): string {
     case 'blocCas': {
       const tag = heading(level);
       return `<section class="cn-demarche-case">${title ? `<${tag}>${escapeHtml(title)}</${tag}>` : ''}${inner()}</section>`;
+    }
+    case 'complement':
+      return `<details class="cn-demarche-complement"><summary>${escapeHtml(title || 'En savoir plus')}</summary>${renderNodes(node.children, level, audience)}</details>`;
+    case 'titreFlottant':
+      return node.text?.trim() ? `<p class="cn-demarche-subtitle"><strong>${escapeHtml(node.text.trim())}</strong></p>` : '';
+    case 'serviceEnLigne': {
+      const href = safeHref(node.href);
+      return href && title
+        ? `<p class="cn-demarche-service"><a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a></p>`
+        : '';
+    }
+    case 'ouSAdresser': {
+      // « Mairie » : c'est la commune dont on est sur le site, sa page Contact répond
+      const townHall = node.attributes?.pivot === 'mairie';
+      const href = safeHref(node.href);
+      const place = title ? escapeHtml(title) : 'Mairie';
+      const target = href
+        ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${place}<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>`
+        : townHall
+          ? `<a href="/contact">${place}</a>`
+          : place;
+      const contact = townHall && href ? ` – <a href="/contact">contacter la mairie</a>` : '';
+      return `<aside class="cn-demarche-callout cn-demarche-where" aria-label="Où s'adresser ?"><p class="cn-demarche-callout-label"><strong>Où s'adresser ?</strong></p><p>${target}${contact}</p>${inner()}</aside>`;
     }
     case 'listeSituations':
       return `<div class="cn-demarche-cases">${inner()}</div>`;
@@ -76,8 +108,22 @@ function renderNode(node: DemarcheNode, level: number): string {
   }
 }
 
+/** Cellule : en-tête de colonne ou de ligne (`scope`), fusions ; une cellule d'en-tête vide reste un `td`. */
+function renderCell(cell: DemarcheNode, level: number, audience: DemarcheAudience): string {
+  const inner = renderNodes(cell.children, level, audience);
+  const attributes = cell.attributes ?? {};
+  const span = ['colspan', 'rowspan']
+    .filter((name) => /^([2-9]|[1-9]\d+)$/.test(attributes[name] ?? ''))
+    .map((name) => ` ${name}="${attributes[name]}"`)
+    .join('');
+  const empty = !inner.replace(/<[^>]+>/g, '').trim();
+  const header = attributes.header === 'col' || attributes.header === 'row' ? attributes.header : null;
+  return header && !empty ? `<th scope="${header}"${span}>${inner}</th>` : `<td${span}>${inner}</td>`;
+}
+
 /** Contenu d'un paragraphe : texte, mises en évidence, exposants et liens. */
-function renderInline(node: DemarcheNode): string {
+function renderInlineFor(node: DemarcheNode, audience: DemarcheAudience): string {
+  const renderInline = (child: DemarcheNode) => renderInlineFor(child, audience);
   const own = node.text ? escapeHtml(node.text) : '';
   const children = (node.children ?? [])
     .map((child) => {
@@ -95,14 +141,16 @@ function renderInline(node: DemarcheNode): string {
         }
         case 'lienInterne':
         case 'lienIntra': {
-          const href = safeHref(child.href);
+          const target = child.attributes?.ficheId || child.href || '';
           const label = renderInline(child);
-          return href ? `<a href="${escapeHtml(href)}">${label}</a>` : label;
+          // Renvoi au glossaire ou à une ressource : le texte seul (un lien vide ou sans page n'aide personne)
+          const href = FICHE_ID.test(target) ? demarcheHref(target, audience) : RESOURCE_ID.test(target) ? null : safeHref(child.href);
+          return href && label.replace(/<[^>]+>/g, '').trim() ? `<a href="${escapeHtml(href)}">${label}</a>` : label;
         }
         case 'paragraphe':
         case 'liste':
         case 'tableau':
-          return renderNode(child, 4);
+          return renderNode(child, 4, audience);
         default:
           return renderInline(child);
       }

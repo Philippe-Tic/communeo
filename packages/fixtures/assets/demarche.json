@@ -1,85 +1,1841 @@
 {
   "data": {
-    "id": "F17578",
-    "type": "Fiche pratique",
+    "id": "F1341",
+    "type": "Fiche d'information conditionnée",
     "audience": "particuliers",
-    "title": "Déclaration préalable de travaux",
-    "description": "La déclaration préalable de travaux est une autorisation d'urbanisme exigée pour les travaux de faible importance : abri de jardin, clôture, modification de façade, piscine.",
-    "dateModification": "2026-03-12",
+    "title": "Carte d'identité d'un majeur : première demande",
+    "description": "Pour demander une carte d’identité, il faut se rendre dans une mairie équipée avec les pièces justificatives. Une pré-demande peut être faite sur internet.",
+    "dateModification": "2026-04-08",
+    "theme": {
+      "id": "N19810",
+      "title": "Papiers - Citoyenneté - Élections"
+    },
+    "sousTheme": null,
     "filDAriane": [
-      { "id": "N19808", "title": "Logement" },
-      { "id": "N319", "title": "Urbanisme" }
+      {
+        "id": "Particuliers",
+        "title": "Accueil particuliers"
+      },
+      {
+        "id": "N19810",
+        "title": "Papiers - Citoyenneté - Élections"
+      },
+      {
+        "id": "N358",
+        "title": "Carte d'identité"
+      },
+      {
+        "id": "F1341",
+        "title": "Carte d'identité d'un majeur : première demande"
+      }
     ],
-    "avertissement": {
-      "type": "aNoter",
-      "title": "Travaux soumis à autorisation",
-      "children": [
+    "dossierPere": {
+      "id": "N358",
+      "title": "Carte d'identité",
+      "sousDossiers": [
         {
-          "type": "paragraphe",
-          "children": [
-            { "type": "texte", "text": "Des travaux réalisés sans autorisation peuvent entraîner une amende et une remise en état à vos frais." }
+          "id": "N358-1",
+          "title": "Pour un majeur",
+          "fiches": [
+            {
+              "id": "F1341",
+              "title": "Première demande"
+            },
+            {
+              "id": "F21089",
+              "title": "Renouvellement"
+            },
+            {
+              "id": "F1344",
+              "title": "Carte perdue"
+            },
+            {
+              "id": "F1759",
+              "title": "Carte volée"
+            }
+          ]
+        },
+        {
+          "id": "N358-2",
+          "title": "Pour un mineur",
+          "fiches": [
+            {
+              "id": "F1342",
+              "title": "Première demande"
+            },
+            {
+              "id": "F21090",
+              "title": "Renouvellement"
+            },
+            {
+              "id": "F1153",
+              "title": "Carte perdue"
+            },
+            {
+              "id": "F1794",
+              "title": "Carte volée"
+            }
           ]
         }
       ]
     },
-    "introduction": [
+    "avertissement": null,
+    "introduction": [],
+    "content": [
       {
         "type": "paragraphe",
         "children": [
-          { "type": "texte", "text": "La déclaration préalable est déposée en mairie avant le début des travaux. La mairie dispose d'un mois pour répondre, " },
-          { "type": "miseEnEvidence", "children": [{ "type": "texte", "text": "deux mois en secteur protégé" }] },
-          { "type": "texte", "text": "." }
-        ]
-      }
-    ],
-    "content": [
-      {
-        "type": "chapitre",
-        "title": "Travaux concernés",
-        "children": [
           {
-            "type": "paragraphe",
-            "children": [{ "type": "texte", "text": "Une déclaration préalable est nécessaire pour les travaux suivants :" }]
+            "type": "texte",
+            "text": "Vous êtes "
           },
           {
-            "type": "liste",
-            "attributes": { "listeType": "puce" },
+            "type": "miseEnEvidence",
+            "text": "majeur"
+          },
+          {
+            "type": "texte",
+            "text": " et souhaitez demander "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": "votre première carte nationale d'identité"
+          },
+          {
+            "type": "texte",
+            "text": " ? La "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": "procédure varie"
+          },
+          {
+            "type": "texte",
+            "text": " selon que la demande est "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": "faite en France ou à l'étranger"
+          },
+          {
+            "type": "texte",
+            "text": " et si vous avez "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": "déjà un passeport ou non."
+          },
+          {
+            "type": "texte",
+            "text": " Dans tous les cas, la carte d'identité est "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": "gratuite"
+          },
+          {
+            "type": "texte",
+            "text": ". Nous vous présentons les "
+          },
+          {
+            "type": "miseEnEvidence",
+            "text": ""
+          },
+          {
+            "type": "texte",
+            "text": "étapes de la démarche."
+          }
+        ]
+      },
+      {
+        "type": "listeSituations",
+        "children": [
+          {
+            "type": "situation",
+            "title": "En France",
             "children": [
               {
-                "type": "element",
+                "type": "chapitre",
+                "title": "Choisir le lieu où vous ferez la démarche et, en général, prendre rendez-vous",
                 "children": [
-                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Construction d'une surface de plancher entre 5 m² et 20 m² (abri de jardin, véranda, garage)" }] }
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Le lieu de la demande ne dépend pas de votre domicile. Vous pouvez vous rendre "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "dans n'importe quelle mairie"
+                      },
+                      {
+                        "type": "texte",
+                        "text": ", à condition qu'elle soit équipée d'une station d'enregistrement."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "ouSAdresser",
+                    "title": "Mairie délivrant des cartes d'identité",
+                    "href": "https://passeport.ants.gouv.fr/services/geolocaliser-une-mairie-habilitee",
+                    "children": [],
+                    "attributes": {}
+                  },
+                  {
+                    "type": "attention",
+                    "title": "Attention",
+                    "children": [
+                      {
+                        "type": "paragraphe",
+                        "children": [
+                          {
+                            "type": "texte",
+                            "text": "De nombreuses mairies exigent que le dépôt du dossier se fasse "
+                          },
+                          {
+                            "type": "miseEnEvidence",
+                            "text": "uniquement sur rendez-vous"
+                          },
+                          {
+                            "type": "texte",
+                            "text": "."
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "L'"
+                      },
+                      {
+                        "type": "lienInterne",
+                        "text": "ANTS",
+                        "href": "R50821",
+                        "attributes": {
+                          "ficheId": "R50821"
+                        }
+                      },
+                      {
+                        "type": "texte",
+                        "text": " met à disposition un "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "moteur de recherche"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " permettant de "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "trouver un rendez-vous"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " dans une mairie équipée :"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "serviceEnLigne",
+                    "title": "Rechercher un rendez-vous pour une demande de carte d'identité",
+                    "href": "https://rendezvouspasseport.ants.gouv.fr/",
+                    "attributes": {
+                      "serviceType": "Outil de recherche"
+                    }
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous pouvez préparer la démarche en faisant une "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "pré-demande en ligne"
+                      },
+                      {
+                        "type": "texte",
+                        "text": ", mais ce n'est pas une obligation. La pré-demande vous permet de gagner du temps lors du dépôt du dossier."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "serviceEnLigne",
+                    "title": "Pré-demande pour une 1re demande de carte d'identité",
+                    "href": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+                    "attributes": {
+                      "serviceType": "Téléservice"
+                    }
+                  }
                 ]
               },
               {
-                "type": "element",
+                "type": "chapitre",
+                "title": "Préparer les documents à présenter",
                 "children": [
-                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Modification de l'aspect extérieur : ravalement, changement de fenêtres, pose de panneaux solaires" }] }
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Il faut présenter les "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "documents "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "originaux"
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Les documents à présenter varient selon que vous avez déjà un "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "passeport ou non"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " :"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "blocCas",
+                    "attributes": {
+                      "affichage": "radio"
+                    },
+                    "children": [
+                      {
+                        "type": "situation",
+                        "title": "Vous avez un passeport valide",
+                        "children": [
+                          {
+                            "type": "paragraphe",
+                            "text": "Vous devez présenter les documents suivants :"
+                          },
+                          {
+                            "type": "liste",
+                            "attributes": {
+                              "listeType": "puce"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Votre passeport"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 photo d'identité de moins de 6 mois et "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "conforme aux normes",
+                                        "href": "F10619",
+                                        "attributes": {
+                                          "ficheId": "F10619"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "justificatif de domicile",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 1 an"
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "situation",
+                        "title": "Vous avez un passeport périmé",
+                        "children": [
+                          {
+                            "type": "blocCas",
+                            "attributes": {
+                              "affichage": "radio"
+                            },
+                            "children": [
+                              {
+                                "type": "situation",
+                                "title": "Date d’expiration : moins de 5 ans",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Vous devez présenter les documents suivants :"
+                                  },
+                                  {
+                                    "type": "liste",
+                                    "attributes": {
+                                      "listeType": "puce"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Votre passeport"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 photo d'identité de moins de 6 mois et "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "conforme aux normes",
+                                                "href": "F10619",
+                                                "attributes": {
+                                                  "ficheId": "F10619"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "justificatif de domicile",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 1 an"
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "situation",
+                                "title": "Date d’expration : + de 5 ans",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Vous devez présenter les documents suivants :"
+                                  },
+                                  {
+                                    "type": "liste",
+                                    "attributes": {
+                                      "listeType": "puce"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 photo d'identité de moins de 6 mois et "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "conforme aux normes",
+                                                "href": "F10619",
+                                                "attributes": {
+                                                  "ficheId": "F10619"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "justificatif de domicile",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 1 an"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "Si vous n’avez pas de passeport ou s’il est plus ancien, vérifiez si "
+                                              },
+                                              {
+                                                "type": "lienExterne",
+                                                "text": "l'état civil de votre lieu de naissance est dématérialisé",
+                                                "href": "https://passeport.ants.gouv.fr/services/villes-adherentes-a-la-dematerialisation"
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": ". Si ce n'est pas le cas, il faut fournir un "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "acte de naissance (copie intégrale ou extrait avec filiation)",
+                                                "href": "R1406",
+                                                "attributes": {
+                                                  "ficheId": "R1406"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 3 mois."
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "Justificatif de nationalité française",
+                                                "href": "F18713",
+                                                "attributes": {
+                                                  "ficheId": "F18713"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " si votre nationalité ne ressort pas de votre acte de naissance"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "situation",
+                        "title": "Vous n'avez pas de passeport",
+                        "children": [
+                          {
+                            "type": "paragraphe",
+                            "text": "Vous devez présenter les documents suivants :"
+                          },
+                          {
+                            "type": "liste",
+                            "attributes": {
+                              "listeType": "puce"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 photo d'identité de moins de 6 mois et "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "conforme aux normes",
+                                        "href": "F10619",
+                                        "attributes": {
+                                          "ficheId": "F10619"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "justificatif de domicile",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 1 an"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "Si vous n’avez pas de passeport ou s’il est plus ancien, vérifiez si "
+                                      },
+                                      {
+                                        "type": "lienExterne",
+                                        "text": "l'état civil de votre lieu de naissance est dématérialisé",
+                                        "href": "https://passeport.ants.gouv.fr/services/villes-adherentes-a-la-dematerialisation"
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": ". Si ce n'est pas le cas, il faut fournir un "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "acte de naissance (copie intégrale ou extrait avec filiation)",
+                                        "href": "R1406",
+                                        "attributes": {
+                                          "ficheId": "R1406"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 3 mois."
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "Justificatif de nationalité française",
+                                        "href": "F18713",
+                                        "attributes": {
+                                          "ficheId": "F18713"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " si votre nationalité ne ressort pas de votre acte de naissance"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "aSavoir",
+                    "title": "À savoir",
+                    "children": [
+                      {
+                        "type": "paragraphe",
+                        "children": [
+                          {
+                            "type": "texte",
+                            "text": "Pour utiliser un nom d'usage qui ne figure pas encore sur un titre d'identité, d'autres documents doivent être fournis selon la nature de ce 2e nom : "
+                          },
+                          {
+                            "type": "lienInterne",
+                            "text": "nom de l'époux(se)",
+                            "href": "F868",
+                            "attributes": {
+                              "ficheId": "F868"
+                            }
+                          },
+                          {
+                            "type": "texte",
+                            "text": " ou "
+                          },
+                          {
+                            "type": "lienInterne",
+                            "text": "nom de l'autre parent",
+                            "href": "F1343",
+                            "attributes": {
+                              "ficheId": "F1343"
+                            }
+                          },
+                          {
+                            "type": "texte",
+                            "text": "."
+                          }
+                        ]
+                      }
+                    ]
+                  }
                 ]
               },
               {
-                "type": "element",
+                "type": "chapitre",
+                "title": "Vous rendre au lieu que vous avez choisi pour faire la démarche",
                 "children": [
-                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Piscine dont le bassin mesure entre 10 m² et 100 m²" }] }
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous devez vous déplacer au lieu que vous avez choisi "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "en apportant les documents nécessaires"
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "Votre présence est indispensable"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " pour procéder à la prise d'empreintes."
+                      }
+                    ]
+                  }
                 ]
               },
               {
-                "type": "element",
+                "type": "chapitre",
+                "title": "Suivre l'avancement de la fabrication de la carte d'identité",
                 "children": [
-                  { "type": "paragraphe", "children": [{ "type": "texte", "text": "Clôture, dans les communes qui l'ont rendue obligatoire" }] }
+                  {
+                    "type": "paragraphe",
+                    "text": "La carte d'identité n'est pas fabriquée sur place et ne peut donc pas être délivrée immédiatement."
+                  },
+                  {
+                    "type": "paragraphe",
+                    "text": "Le délai de fabrication dépend du lieu et de la période de la demande. Il faut compter plusieurs semaines et, à l'approche des vacances d'été, les délais peuvent s'étendre."
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous pouvez "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "suivre votre demande"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " sur le site de l'"
+                      },
+                      {
+                        "type": "lienInterne",
+                        "text": "ANTS",
+                        "href": "R50821",
+                        "attributes": {
+                          "ficheId": "R50821"
+                        }
+                      },
+                      {
+                        "type": "texte",
+                        "text": " :"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "serviceEnLigne",
+                    "title": "Suivre votre demande de carte d'identité",
+                    "href": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+                    "attributes": {
+                      "serviceType": "Téléservice"
+                    }
+                  },
+                  {
+                    "type": "paragraphe",
+                    "text": "Si vous avez renseigné un numéro de téléphone portable lors de votre demande, vous recevrez un SMS lorsque votre carte d'identité sera disponible."
+                  }
+                ]
+              },
+              {
+                "type": "chapitre",
+                "title": "Retirer la carte d'identité quand elle est disponible",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous devez retirer la carte "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "personnellement"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " au lieu de dépôt du dossier."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Elle doit être retirée "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "dans les 3 mois."
+                      },
+                      {
+                        "type": "texte",
+                        "text": " Passé ce délai, elle sera détruite."
+                      }
+                    ]
+                  }
                 ]
               }
             ]
           },
           {
-            "type": "aSavoir",
+            "type": "situation",
+            "title": "À l'étranger",
             "children": [
               {
-                "type": "paragraphe",
+                "type": "chapitre",
+                "title": "Vous renseigner s'il faut prendre rendez-vous",
                 "children": [
-                  { "type": "texte", "text": "Au-delà de 20 m² de surface de plancher, c'est un " },
-                  { "type": "lienInterne", "href": "/demarches/fiche?id=F1986&public=particuliers", "children": [{ "type": "texte", "text": "permis de construire" }] },
-                  { "type": "texte", "text": " qui est exigé." }
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous devez vous déplacer "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "au consulat ou à l'ambassade"
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Le service peut exiger que le dépôt du dossier se fasse "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "uniquement sur rendez-vous"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " : vous devez vous renseigner soit sur le site internet du consulat ou de l'ambassade, soit par téléphone."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "ouSAdresser",
+                    "title": "Ambassade ou consulat français à l'étranger",
+                    "href": "https://www.diplomatie.gouv.fr/fr/le-ministere/reseau-diplomatique",
+                    "children": [],
+                    "attributes": {}
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous pouvez préparer la démarche en faisant une "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "pré-demande en ligne"
+                      },
+                      {
+                        "type": "texte",
+                        "text": ", mais ce n'est pas une obligation. La pré-demande vous permet de gagner du temps lors du dépôt du dossier."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "serviceEnLigne",
+                    "title": "Pré-demande pour une 1re demande de carte d'identité",
+                    "href": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+                    "attributes": {
+                      "serviceType": "Téléservice"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "chapitre",
+                "title": "Préparer les documents à présenter",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Il faut présenter les "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "documents "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "originaux"
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Les documents à présenter varient selon que vous avez déjà un "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "passeport ou non"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " :"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "blocCas",
+                    "attributes": {
+                      "affichage": "radio"
+                    },
+                    "children": [
+                      {
+                        "type": "situation",
+                        "title": "Vous avez un passeport valide",
+                        "children": [
+                          {
+                            "type": "paragraphe",
+                            "text": "Vous devez présenter les documents suivants :"
+                          },
+                          {
+                            "type": "liste",
+                            "attributes": {
+                              "listeType": "puce"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Votre passeport"
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 photo d'identité de moins de 6 mois et "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "conforme aux normes",
+                                        "href": "F10619",
+                                        "attributes": {
+                                          "ficheId": "F10619"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "justificatif de domicile",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 1 an"
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "situation",
+                        "title": "Vous avez un passeport périmé",
+                        "children": [
+                          {
+                            "type": "blocCas",
+                            "attributes": {
+                              "affichage": "radio"
+                            },
+                            "children": [
+                              {
+                                "type": "situation",
+                                "title": "Date d’expiration : moins de 5 ans",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Vous devez présenter les documents suivants :"
+                                  },
+                                  {
+                                    "type": "liste",
+                                    "attributes": {
+                                      "listeType": "puce"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Votre passeport"
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 photo d'identité de moins de 6 mois et "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "conforme aux normes",
+                                                "href": "F10619",
+                                                "attributes": {
+                                                  "ficheId": "F10619"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "justificatif de domicile",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 1 an"
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "situation",
+                                "title": "Date d’expiration : + de 5 ans",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Vous devez présenter les documents suivants :"
+                                  },
+                                  {
+                                    "type": "liste",
+                                    "attributes": {
+                                      "listeType": "puce"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 photo d'identité de moins de 6 mois et "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "conforme aux normes",
+                                                "href": "F10619",
+                                                "attributes": {
+                                                  "ficheId": "F10619"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "1 "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "justificatif de domicile",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 1 an"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "texte",
+                                                "text": "Si vous n’avez pas de passeport ou s’il est plus ancien, vérifiez si "
+                                              },
+                                              {
+                                                "type": "lienExterne",
+                                                "text": "l'état civil de votre lieu de naissance est dématérialisé",
+                                                "href": "https://passeport.ants.gouv.fr/services/villes-adherentes-a-la-dematerialisation"
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": ". Si ce n'est pas le cas, il faut fournir un "
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "acte de naissance (copie intégrale ou extrait avec filiation)",
+                                                "href": "R1406",
+                                                "attributes": {
+                                                  "ficheId": "R1406"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " de "
+                                              },
+                                              {
+                                                "type": "miseEnEvidence",
+                                                "text": "moins de 3 mois."
+                                              },
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "",
+                                                "href": "F14807",
+                                                "attributes": {
+                                                  "ficheId": "F14807"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "children": [
+                                              {
+                                                "type": "lienInterne",
+                                                "text": "Justificatif de nationalité française",
+                                                "href": "F18713",
+                                                "attributes": {
+                                                  "ficheId": "F18713"
+                                                }
+                                              },
+                                              {
+                                                "type": "texte",
+                                                "text": " si votre nationalité ne ressort pas de votre acte de naissance"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "element",
+                                        "children": [
+                                          {
+                                            "type": "paragraphe",
+                                            "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "situation",
+                        "title": "Vous n'avez pas de passeport",
+                        "children": [
+                          {
+                            "type": "paragraphe",
+                            "text": "Vous devez présenter les documents suivants :"
+                          },
+                          {
+                            "type": "liste",
+                            "attributes": {
+                              "listeType": "puce"
+                            },
+                            "children": [
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 photo d'identité de moins de 6 mois et "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "conforme aux normes",
+                                        "href": "F10619",
+                                        "attributes": {
+                                          "ficheId": "F10619"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "1 "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "justificatif de domicile",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 1 an"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "texte",
+                                        "text": "Si vous n’avez pas de passeport ou s’il est plus ancien, vérifiez si "
+                                      },
+                                      {
+                                        "type": "lienExterne",
+                                        "text": "l'état civil de votre lieu de naissance est dématérialisé",
+                                        "href": "https://passeport.ants.gouv.fr/services/villes-adherentes-a-la-dematerialisation"
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": ". Si ce n'est pas le cas, il faut fournir un "
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "acte de naissance (copie intégrale ou extrait avec filiation)",
+                                        "href": "R1406",
+                                        "attributes": {
+                                          "ficheId": "R1406"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " de "
+                                      },
+                                      {
+                                        "type": "miseEnEvidence",
+                                        "text": "moins de 3 mois."
+                                      },
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "",
+                                        "href": "F14807",
+                                        "attributes": {
+                                          "ficheId": "F14807"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "children": [
+                                      {
+                                        "type": "lienInterne",
+                                        "text": "Justificatif de nationalité française",
+                                        "href": "F18713",
+                                        "attributes": {
+                                          "ficheId": "F18713"
+                                        }
+                                      },
+                                      {
+                                        "type": "texte",
+                                        "text": " si votre nationalité ne ressort pas de votre acte de naissance"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "element",
+                                "children": [
+                                  {
+                                    "type": "paragraphe",
+                                    "text": "Si vous avez fait une pré-demande, le n° de pré-demande et/ou le QR code obtenus à la fin de la démarche (il est conseillé d'imprimer le récapitulatif de pré-demande)."
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "aSavoir",
+                    "title": "À savoir",
+                    "children": [
+                      {
+                        "type": "paragraphe",
+                        "children": [
+                          {
+                            "type": "texte",
+                            "text": "Pour utiliser un nom d'usage qui ne figure pas encore sur un titre d'identité, d'autres documents doivent être fournis selon la nature de ce 2e nom : "
+                          },
+                          {
+                            "type": "lienInterne",
+                            "text": "nom de l'époux(se)",
+                            "href": "F868",
+                            "attributes": {
+                              "ficheId": "F868"
+                            }
+                          },
+                          {
+                            "type": "texte",
+                            "text": " ou "
+                          },
+                          {
+                            "type": "lienInterne",
+                            "text": "nom de l'autre parent",
+                            "href": "F1343",
+                            "attributes": {
+                              "ficheId": "F1343"
+                            }
+                          },
+                          {
+                            "type": "texte",
+                            "text": "."
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "chapitre",
+                "title": "Vous rendre au consulat ou à l'ambassade",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous devez vous déplacer au consulat ou à l'ambassade en ayant avec vous les "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "documents nécessaires"
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "Votre présence est indispensable"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " pour procéder à la prise d'empreintes."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Si vous souhaitez retirer la carte d'identité auprès d'un "
+                      },
+                      {
+                        "type": "lienExterne",
+                        "text": "consul honoraire habilité",
+                        "href": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000052295016"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " ou d’un "
+                      },
+                      {
+                        "type": "lienIntra",
+                        "text": "chef de poste diplomatique ou consulaire",
+                        "href": "R72679",
+                        "attributes": {
+                          "ficheId": "R72679"
+                        }
+                      },
+                      {
+                        "type": "texte",
+                        "text": ", il faut l'indiquer au guichet au moment du dépôt du dossier."
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "chapitre",
+                "title": "Suivre l'avancement de la fabrication de la carte d'identité",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "text": "La carte d'identité n'est pas fabriquée sur place et n'est donc pas délivrée immédiatement."
+                  },
+                  {
+                    "type": "paragraphe",
+                    "text": "Les délais de fabrication dépendent du lieu et de la période de la demande."
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Il est possible de suivre l’état d’avancement de la demande sur le site de l'"
+                      },
+                      {
+                        "type": "lienInterne",
+                        "text": "ANTS",
+                        "href": "R50821",
+                        "attributes": {
+                          "ficheId": "R50821"
+                        }
+                      },
+                      {
+                        "type": "texte",
+                        "text": " :"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "serviceEnLigne",
+                    "title": "Suivre votre demande de carte d'identité",
+                    "href": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+                    "attributes": {
+                      "serviceType": "Téléservice"
+                    }
+                  },
+                  {
+                    "type": "paragraphe",
+                    "text": "Si un numéro de téléphone portable a été renseigné lors de la demande, un SMS sera envoyé lorsque la carte d'identité sera disponible."
+                  }
+                ]
+              },
+              {
+                "type": "chapitre",
+                "title": "Retirer la carte d'identité quand elle est prête",
+                "children": [
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Vous devez venir chercher votre carte d’identité soit au lieu du dépôt du dossier, soit auprès d'un "
+                      },
+                      {
+                        "type": "lienExterne",
+                        "text": "consul honoraire habilité",
+                        "href": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000052295016"
+                      },
+                      {
+                        "type": "texte",
+                        "text": " ou d’un "
+                      },
+                      {
+                        "type": "lienIntra",
+                        "text": "chef de poste diplomatique ou consulaire",
+                        "href": "R72679",
+                        "attributes": {
+                          "ficheId": "R72679"
+                        }
+                      },
+                      {
+                        "type": "texte",
+                        "text": "."
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraphe",
+                    "children": [
+                      {
+                        "type": "texte",
+                        "text": "Elle doit être retirée dans un délai de "
+                      },
+                      {
+                        "type": "miseEnEvidence",
+                        "text": "3 mois"
+                      },
+                      {
+                        "type": "texte",
+                        "text": ". Passé ce délai, la nouvelle carte est détruite."
+                      }
+                    ]
+                  }
                 ]
               }
             ]
@@ -87,114 +1843,158 @@
         ]
       },
       {
-        "type": "chapitre",
-        "title": "Délais d'instruction",
-        "children": [
-          {
-            "type": "tableau",
-            "title": "Délai selon la situation du terrain",
-            "children": [
-              {
-                "type": "rangee",
-                "children": [
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Situation" }] }] },
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Délai" }] }] }
-                ]
-              },
-              {
-                "type": "rangee",
-                "children": [
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Cas général" }] }] },
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "1 mois" }] }] }
-                ]
-              },
-              {
-                "type": "rangee",
-                "children": [
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "Abords d'un monument historique, site classé" }] }] },
-                  { "type": "cellule", "children": [{ "type": "paragraphe", "children": [{ "type": "texte", "text": "2 mois" }] }] }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "attention",
-            "children": [
-              {
-                "type": "paragraphe",
-                "children": [{ "type": "texte", "text": "L'absence de réponse de la mairie au terme du délai vaut accord, sauf en secteur protégé." }]
-              }
-            ]
-          }
-        ]
+        "type": "serviceEnLigne",
+        "title": "Rechercher un rendez-vous pour une demande de carte d'identité",
+        "href": "https://rendezvouspasseport.ants.gouv.fr/",
+        "attributes": {
+          "serviceType": "Outil de recherche"
+        }
       },
       {
-        "type": "chapitre",
-        "title": "Déposer la déclaration",
-        "children": [
-          {
-            "type": "listeSituations",
-            "children": [
-              {
-                "type": "situation",
-                "title": "En ligne",
-                "children": [
-                  {
-                    "type": "paragraphe",
-                    "children": [{ "type": "texte", "text": "Le dépôt se fait sur le guichet numérique des autorisations d'urbanisme, accessible avec FranceConnect." }]
-                  }
-                ]
-              },
-              {
-                "type": "situation",
-                "title": "Sur place ou par courrier",
-                "children": [
-                  {
-                    "type": "paragraphe",
-                    "children": [{ "type": "texte", "text": "Le dossier est déposé à l'accueil de la mairie en deux exemplaires, ou envoyé en recommandé avec accusé de réception." }]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
+        "type": "serviceEnLigne",
+        "title": "Pré-demande pour une 1re demande de carte d'identité",
+        "href": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance en France) - Service gratuit",
+        "href": "https://demarches.service-public.gouv.fr/mademarche/EtatCivil/demarche?action=NAISSANCE",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance à l'étranger) - Service gratuit",
+        "href": "https://demarches.service-public.gouv.fr/mademarche/delivrance_demat/demarche?action=NAISSANCE",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
+      },
+      {
+        "type": "serviceEnLigne",
+        "title": "Suivez votre demande de carte d'identité",
+        "href": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+        "attributes": {
+          "serviceType": "Téléservice"
+        }
       }
     ],
     "references": {
       "ouSAdresser": [],
       "servicesEnLigne": [
         {
-          "id": "R52221",
-          "title": "Déposer une demande d'autorisation d'urbanisme",
-          "url": "https://www.service-public.fr/particuliers/vosdroits/R52221",
-          "type": "teleservice"
+          "id": "R63715",
+          "title": "Rechercher un rendez-vous pour une demande de carte d'identité",
+          "url": "https://rendezvouspasseport.ants.gouv.fr/",
+          "type": "Outil de recherche"
         },
         {
-          "id": "R11646",
-          "title": "Déclaration préalable de travaux (constructions et travaux non soumis à permis)",
-          "url": "https://www.service-public.fr/particuliers/vosdroits/R11646",
-          "type": "formulaire",
-          "numeroCerfa": "13703*11"
+          "id": "R45668",
+          "title": "Pré-demande pour une 1re demande de carte d'identité",
+          "url": "https://passeport.ants.gouv.fr/demarches-en-ligne/faire-une-premiere-demande-de-carte-nationale-d-identite",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R1406",
+          "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance en France) - Service gratuit",
+          "url": "https://demarches.service-public.gouv.fr/mademarche/EtatCivil/demarche?action=NAISSANCE",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R1405",
+          "title": "Demande d'acte de naissance : copie intégrale ou extrait (naissance à l'étranger) - Service gratuit",
+          "url": "https://demarches.service-public.gouv.fr/mademarche/delivrance_demat/demarche?action=NAISSANCE",
+          "type": "Téléservice"
+        },
+        {
+          "id": "R1580",
+          "title": "Suivez votre demande de carte d'identité",
+          "url": "https://moncompte.ants.gouv.fr/suivi_cni_passeport",
+          "type": "Téléservice"
         }
       ],
       "references": [
         {
-          "id": "L1",
-          "title": "Code de l'urbanisme : articles R421-9 à R421-12",
-          "url": "https://www.legifrance.gouv.fr/codes/id/LEGISCTA000006188900"
+          "id": "R743",
+          "title": "Décret n°55-1397 du 22 octobre 1955 relatif à la carte d'identité : article 4 - Pièces à fournir pour une première demande",
+          "url": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000034729485"
+        },
+        {
+          "id": "R39016",
+          "title": "Décret n°55-1397 du 22 octobre 1955 relatif à la carte d'identité : article 5 - Retrait de la carte",
+          "url": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000033333772"
+        },
+        {
+          "id": "R23272",
+          "title": "Réponse ministérielle du 28 novembre 2019 relative au format de la carte d'identité",
+          "url": "http://www.senat.fr/questions/base/2018/qSEQ180706028.html"
+        },
+        {
+          "id": "R59347",
+          "title": "Arrêté du 11 mai 2021 portant application du décret n°2021-279 portant diverses dispositions relatives à la carte nationale d'identité et au traitement de données à caractère personnel (TES)",
+          "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000043496313"
         }
       ],
-      "voirAussi": [{ "id": "F1986", "title": "Permis de construire" }],
-      "definitions": [],
-      "questionsReponses": [],
+      "voirAussi": [],
+      "definitions": [
+        {
+          "id": "R48788",
+          "term": "Identification avec FranceConnect",
+          "texte": [
+            {
+              "type": "paragraphe",
+              "text": "Connexion avec l'identifiant et le mot de passe de l'un des comptes suivants : Impots.gouv, Ameli, L'identite numerique (La Poste), Yris, MSA, France identité ou TrustMe"
+            }
+          ]
+        },
+        {
+          "id": "R72679",
+          "term": "Chef de poste diplomatique ou consulaire",
+          "texte": [
+            {
+              "type": "paragraphe",
+              "text": "Représentant officiel de l’État chargé de diriger une ambassade ou un consulat à l’étranger"
+            }
+          ]
+        }
+      ],
+      "questionsReponses": [
+        {
+          "id": "F11601",
+          "title": "Est-on obligé d'avoir une carte d'identité ?"
+        },
+        {
+          "id": "F10619",
+          "title": "Quelle photo fournir pour un titre d'identité (passeport, carte d'identité...) ?"
+        },
+        {
+          "id": "F556",
+          "title": "La présence au guichet est-elle obligatoire ?"
+        },
+        {
+          "id": "F12883",
+          "title": "Un majeur protégé (tutelle, curatelle...) peut-il demander un titre d'identité ?"
+        },
+        {
+          "id": "F33640",
+          "title": "Carte d'identité / Passeport : comment remplir le formulaire ou la pré-demande ?"
+        },
+        {
+          "id": "F17317",
+          "title": "Sans domicile stable ou fixe (SDF) : en quoi consiste la domiciliation (ou élection de domicile) ?"
+        }
+      ],
       "pourEnSavoirPlus": [
         {
-          "id": "P1",
-          "title": "Urbanisme : les autorisations de travaux",
-          "url": "https://www.ecologie.gouv.fr/urbanisme"
+          "id": "R44353",
+          "title": "Consuls honoraires habilités à remettre les cartes d'identité et les passeports",
+          "url": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000052295016"
         }
       ]
     }
-  },
-  "meta": { "audience": "particuliers", "cacheAge": 0, "stale": false }
+  }
 }

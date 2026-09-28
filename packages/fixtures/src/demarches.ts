@@ -1,57 +1,69 @@
 /**
- * Démarches de la commune de démonstration : une arborescence réduite et une fiche complète,
- * au format que le backend produit à partir des archives de la DILA.
+ * Démarches de la commune de démonstration, au format exact que le backend produit à partir des
+ * archives de la DILA : l'arborescence (thème, sous-thème, dossier), un index de recherche réduit
+ * (`assets/demarches-index.json`), une fiche et un dossier (`assets/demarche.json`, `demarche-dossier.json`).
  */
 export const demarcheThemes = () => [
   {
-    id: 'N19803',
-    title: 'Papiers – Citoyenneté',
+    id: 'N19810',
+    title: 'Papiers - Citoyenneté - Élections',
+    type: 'theme',
     children: [
       {
-        id: 'N359',
-        title: "Carte d'identité, passeport",
-        children: [],
-        fiches: [
-          { id: 'F1371', title: "Carte nationale d'identité : première demande" },
-          { id: 'F14929', title: 'Passeport : première demande' },
-          { id: 'F21089', title: "Perte ou vol d'une carte d'identité" },
+        id: 'N31785',
+        title: 'État civil',
+        type: 'sousTheme',
+        children: [
+          { id: 'N359', title: "Actes d'état civil", type: 'dossier', children: [] },
         ],
       },
       {
-        id: 'N142',
-        title: 'État civil',
-        children: [],
-        fiches: [
-          { id: 'F1427', title: 'Acte de naissance : demande de copie' },
-          { id: 'F930', title: 'Reconnaissance d’un enfant' },
+        id: 'N103',
+        title: 'Identité - Authentification',
+        type: 'sousTheme',
+        children: [
+          { id: 'N358', title: "Carte d'identité", type: 'dossier', children: [] },
+          { id: 'N360', title: 'Passeport', type: 'dossier', children: [] },
+        ],
+      },
+      {
+        id: 'N20070',
+        title: 'Citoyenneté',
+        type: 'sousTheme',
+        children: [
+          { id: 'N47', title: 'Élections', type: 'dossier', children: [] },
         ],
       },
     ],
-    fiches: [],
+  },
+  {
+    id: 'N19805',
+    title: 'Famille - Scolarité',
+    type: 'theme',
+    children: [
+      {
+        id: 'N20092',
+        title: 'Couple',
+        type: 'sousTheme',
+        children: [
+          { id: 'N142', title: 'Mariage', type: 'dossier', children: [] },
+        ],
+      },
+    ],
   },
   {
     id: 'N19808',
     title: 'Logement',
+    type: 'theme',
     children: [
       {
-        id: 'N319',
+        id: 'N557',
         title: 'Urbanisme',
-        children: [],
-        fiches: [
-          { id: 'F17578', title: 'Déclaration préalable de travaux' },
-          { id: 'F1986', title: 'Permis de construire' },
+        type: 'sousTheme',
+        children: [
+          { id: 'N319', title: "Autorisations d'urbanisme", type: 'dossier', children: [] },
         ],
       },
-    ],
-    fiches: [],
-  },
-  {
-    id: 'N19805',
-    title: 'Famille – Scolarité',
-    children: [],
-    fiches: [
-      { id: 'F1878', title: 'Inscription à l’école primaire' },
-      { id: 'F2833', title: 'Recensement citoyen (à 16 ans)' },
     ],
   },
 ];

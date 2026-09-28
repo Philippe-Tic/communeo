@@ -3,7 +3,7 @@
  * est chargée par le navigateur — le corpus de la DILA compte des milliers de fiches, les
  * construire toutes pour chaque commune n'aurait pas de sens.
  */
-import { mapThemes, type DemarcheAudience, type DemarcheThemeVM } from '@communeo/core';
+import { DEMARCHE_AUDIENCES, mapThemes, type DemarcheAudience, type DemarcheThemeVM } from '@communeo/core';
 import { demarcheThemes } from '@communeo/fixtures';
 
 const env = process.env;
@@ -17,6 +17,17 @@ export const publicApiUrl = () => (env.STRAPI_PUBLIC_URL ?? env.STRAPI_URL ?? 'h
  */
 export const ficheEndpoint = () =>
   env.DATA_SOURCE === 'strapi' ? `${publicApiUrl()}/api/comarquage/fiche` : '/fixtures/demarche.json';
+
+/**
+ * Recherche dans toutes les démarches : l'API publique du backend, ou l'index réduit de la
+ * commune de démonstration (le navigateur y cherche lui-même).
+ */
+export const searchEndpoint = () =>
+  env.DATA_SOURCE === 'strapi' ? `${publicApiUrl()}/api/comarquage/search` : '/fixtures/demarches-index.json';
+
+/** Publics proposés par la commune, dans l'ordre d'affichage */
+export const demarcheAudiences = (audiences: string[]): DemarcheAudience[] =>
+  DEMARCHE_AUDIENCES.filter((audience) => audiences.includes(audience));
 
 const buildApiUrl = () => (env.STRAPI_URL ?? publicApiUrl()).replace(/\/$/, '');
 

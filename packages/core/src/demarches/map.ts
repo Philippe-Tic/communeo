@@ -1,6 +1,6 @@
 /** Réponses du backend (comarquage) → vues prêtes à afficher. */
 import { formatDate } from '../format';
-import { AUDIENCE_LABELS, type DemarcheAudience, type DemarcheLinkVM, type DemarcheRef, type DemarcheThemeVM, type DemarcheVM } from './types';
+import { AUDIENCE_LABELS, type DemarcheAudience, type DemarcheFolderVM, type DemarcheLinkVM, type DemarcheRef, type DemarcheThemeVM, type DemarcheVM } from './types';
 
 type Raw = Record<string, unknown>;
 
@@ -31,13 +31,30 @@ const link = (value: Raw): DemarcheLinkVM | null => {
 
 const links = (value: unknown) => list(value).map(link).filter((item): item is DemarcheLinkVM => item !== null);
 
+/** Un dossier est une page (liste de ses fiches), pas une rubrique : il devient un lien. */
+const isFolderLink = (node: Raw) => node.type === 'dossier' && list(node.children).length === 0;
+
 export function mapThemes(payload: unknown): DemarcheThemeVM[] {
-  return list(payload).map((theme) => ({
-    id: text(theme.id) ?? '',
-    title: text(theme.title) ?? '',
-    children: mapThemes(theme.children),
-    fiches: refs(theme.fiches),
-  }));
+  return list(payload)
+    .filter((node) => !isFolderLink(node))
+    .map((theme) => ({
+      id: text(theme.id) ?? '',
+      title: text(theme.title) ?? '',
+      children: mapThemes(theme.children),
+      fiches: [...refs(theme.fiches), ...refs(list(theme.children).filter(isFolderLink))],
+    }))
+    .filter((theme) => theme.children.length > 0 || theme.fiches.length > 0);
+}
+
+function mapFolder(value: unknown): DemarcheFolderVM | null {
+  const folder = (value ?? null) as Raw | null;
+  const id = folder && text(folder.id);
+  const title = folder && text(folder.title);
+  if (!folder || !id || !title) return null;
+  const groups = list(folder.sousDossiers)
+    .map((group) => ({ title: text(group.title) ?? '', fiches: refs(group.fiches) }))
+    .filter((group) => group.fiches.length > 0);
+  return { id, title, groups };
 }
 
 export function mapFiche(payload: unknown, audience: DemarcheAudience): DemarcheVM | null {
@@ -49,11 +66,14 @@ export function mapFiche(payload: unknown, audience: DemarcheAudience): Demarche
   const references = (fiche.references ?? {}) as Raw;
   const services = links(references.servicesEnLigne);
   const modified = text(fiche.dateModification);
+  const folder = mapFolder(fiche.dossierPere);
 
   return {
     id,
     audience,
     title,
+    isFolder: text(fiche.type)?.startsWith('Dossier') === true || folder?.id === id,
+    folder,
     description: text(fiche.description),
     trail: refs(fiche.filDAriane),
     warning: (fiche.avertissement as DemarcheVM['warning']) ?? null,

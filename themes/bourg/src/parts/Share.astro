@@ -12,7 +12,7 @@ const subject = encodeURIComponent(title);
 <p class="bo-share">
   <span class="bo-share-label">Partager</span>
   <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">
-    Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
+    <span class="cn-sr-only">Partager sur </span>Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
   </a>
   <a href={`mailto:?subject=${subject}&body=${encoded}`}>E-mail<span class="cn-sr-only"> : partager par e-mail</span></a>
   <button type="button" class="cn-js-only" data-bo-copy={url}>Copier le lien</button>

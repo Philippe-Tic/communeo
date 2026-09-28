@@ -3,8 +3,8 @@
   color-scheme: light;
 
   /* Couleurs */
-  --mo-accent: #00a86b; /* actions : texte encre dessus 7,6:1, jamais de blanc */
-  --mo-accent-hover: #00925d;
+  --mo-accent: #00a86b; /* actions : texte encre dessus 5,4:1, jamais de blanc */
+  --mo-accent-hover: #2cc184; /* plus clair au survol : texte encre dessus 7,2:1 (un vert plus foncé tombait à 4,2:1) */
   --mo-accent-text: #00755a; /* liens, libellés : 5,2:1 sur blanc */
   --mo-ink: #12211b; /* texte et surfaces sombres : blanc dessus 16,6:1 */
   --mo-deep: #1b3a2e; /* encarts dans le sombre : blanc dessus 11,4:1 */

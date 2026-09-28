@@ -104,7 +104,7 @@ export function ActivityLog({ platform }: { platform?: boolean }) {
       ) : !log.data ? (
         <div aria-busy="true" className="h-64 animate-pulse rounded-xl bg-neutral-bg" />
       ) : (
-        <section aria-label="Entrées du journal" className="rounded-xl border border-border bg-surface dark:bg-sidebar">
+        <section aria-label="Entrées du journal" className="relative overflow-x-auto rounded-xl border border-border bg-surface dark:bg-sidebar">
           <p role="status" className="sr-only">
             {total} entrée{total > 1 ? 's' : ''}
           </p>

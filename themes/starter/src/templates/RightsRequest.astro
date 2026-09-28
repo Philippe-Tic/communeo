@@ -17,6 +17,6 @@ const { ctx, form } = Astro.props;
     <p><label for="rg-email">E-mail (obligatoire)</label><input id="rg-email" name="email" type="email" required autocomplete="email" /></p>
     <p><label for="rg-message">Précisez votre demande (obligatoire)</label><textarea id="rg-message" name="message" rows="5" required></textarea></p>
     <input type="hidden" name="category" value="rgpd" />
-    <p class="st-meta">Vos coordonnées servent uniquement à traiter cette demande. <a href="/donnees-personnelles">En savoir plus</a></p>
+    <p class="st-meta">Vos coordonnées servent uniquement à traiter cette demande. <a href="/donnees-personnelles">En savoir plus<span class="cn-sr-only"> sur vos données personnelles</span></a></p>
   </ApiForm>
 </Layout>

@@ -19,7 +19,7 @@ const { ctx, form } = Astro.props;
       <p><label for="as-description">Présentation <span class="bo-optional">(facultatif)</span></label><textarea id="as-description" name="description" rows="5"></textarea></p>
       <p><label for="as-submitter">Votre nom</label><input id="as-submitter" name="submitted_by_name" required autocomplete="name" /></p>
       <p><label for="as-email">Votre e-mail</label><input id="as-email" name="submitted_by_email" type="email" required autocomplete="email" /></p>
-      <p class="bo-muted">Vos coordonnées servent uniquement à traiter cette proposition. <a href="/donnees-personnelles">En savoir plus</a></p>
+      <p class="bo-muted">Vos coordonnées servent uniquement à traiter cette proposition. <a href="/donnees-personnelles">En savoir plus<span class="cn-sr-only"> sur vos données personnelles</span></a></p>
     </ApiForm>
   </div>
 </Layout>

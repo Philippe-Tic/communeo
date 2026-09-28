@@ -161,7 +161,7 @@ export function PlatformUsersScreen() {
       ) : (
         <section
           aria-label="Liste des utilisateurs"
-          className="rounded-xl border border-border bg-surface dark:bg-sidebar"
+          className="relative overflow-x-auto rounded-xl border border-border bg-surface dark:bg-sidebar"
         >
           <p role="status" className="sr-only">
             {shown.length} utilisateur{shown.length > 1 ? 's' : ''}

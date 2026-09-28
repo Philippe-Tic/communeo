@@ -25,17 +25,20 @@ const { ctx, heading = ctx.title, full = false } = Astro.props;
 const { site } = ctx;
 ---
 <div class="jo-shell">
-  <header class="jo-topbar jo-on-dark">
-    <a href="/" class="jo-brand jo-brand-small">
-      {site.logo && (
-        <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="jo-brand-logo" />
-      )}
-      <span class="jo-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
-    </a>
-    <a href="/recherche" class="jo-topbar-search"><Search size={20} aria-hidden="true" /><span class="cn-sr-only">Rechercher</span></a>
-  </header>
+  {/* Une seule zone d'en-tête : barre du haut (mobile) et barre latérale (ordinateur) */}
+  <header class="jo-header">
+    <div class="jo-topbar jo-on-dark">
+      <a href="/" class="jo-brand jo-brand-small">
+        {site.logo && (
+          <img src={site.logo.src} alt="" width={site.logo.width ?? undefined} height={site.logo.height ?? undefined} class="jo-brand-logo" />
+        )}
+        <span class="jo-brand-name">{site.name}<span class="cn-sr-only"> – accueil</span></span>
+      </a>
+      <a href="/recherche" class="jo-topbar-search"><Search size={20} aria-hidden="true" /><span class="cn-sr-only">Rechercher</span></a>
+    </div>
 
-  <Sidebar ctx={ctx} />
+    <Sidebar ctx={ctx} />
+  </header>
 
   <div class="jo-column">
     <Alerts alerts={ctx.alerts} class="jo-alerts" />

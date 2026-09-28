@@ -15,7 +15,7 @@ const { ctx, alerts } = Astro.props;
           <p><strong>{alert.severity.label}</strong>{alert.type && <> · {alert.type.label}</>}{alert.period && <> · {alert.period}</>}</p>
           <p>{alert.message}</p>
           {(alert.area || alert.location) && <p>Secteur : {alert.area ?? alert.location}</p>}
-          {alert.link && <p><a href={alert.link.href}>{alert.link.label}</a></p>}
+          {alert.link && <p><a href={alert.link.href}>{alert.link.label}<span class="cn-sr-only"> : {alert.title}</span></a></p>}
         </li>
       ))}
     </ul>

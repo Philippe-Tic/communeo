@@ -29,7 +29,7 @@ const { alerts, class: className } = Astro.props;
             {alert.message}
             {alert.link && (
               <> <a href={alert.link.href} target={alert.link.external ? '_blank' : undefined} rel={alert.link.external ? 'noopener noreferrer' : undefined}>
-                {alert.link.label}{alert.link.external && <span class="cn-sr-only"> (nouvelle fenêtre)</span>}
+                {alert.link.label}<span class="cn-sr-only"> : {alert.title}{alert.link.external && ' (nouvelle fenêtre)'}</span>
               </a></>
             )}
           </span>

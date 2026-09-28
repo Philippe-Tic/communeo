@@ -1,6 +1,7 @@
 # Mise en production — Communeo V2
 
-Installation initiale du serveur. L'exploitation courante (déployer, revenir en arrière, sauvegardes,
+Installation initiale du serveur. Pas à pas pour OVH (VPS-2, Object Storage, DNS chez Netlify) :
+[deploy/INSTALL-OVH.md](deploy/INSTALL-OVH.md). L'exploitation courante (déployer, revenir en arrière, sauvegardes,
 restauration, supervision, incidents) est dans [PRODUCTION.md](PRODUCTION.md).
 
 ## Architecture
@@ -24,7 +25,7 @@ une version par commit (`IMAGE_TAG`). Le serveur n'a pas le code source : seulem
 
 ## 1. Le serveur
 
-- **Taille** : 4 vCPU, 8 Go de RAM, 75 Go de disque (OVH VPS-2 ou équivalent Scaleway), Ubuntu 24.04 LTS,
+- **Taille** : 4 vCPU, 8 Go de RAM, 75 Go de disque (OVH VPS-2 ou équivalent Scaleway), Ubuntu 26.04 LTS,
   datacenter en France. Mesuré : ~600 Mo de RAM au repos, ~0,5 Go de plus pendant un build.
 - **Capacité** : le disque limite en premier (photos et PDF des communes, 0,2 à 1 Go chacune, plus leur copie
   miroir) : environ **30 à 100 communes** sur 75 Go. Au-delà : disque supplémentaire, ou fichiers envoyés
@@ -60,6 +61,10 @@ La zone communeo.fr est gérée par Netlify (les adresses des sites y sont cré�
 | `app.communeo.fr` | A | IP du VPS |
 | `preview.communeo.fr` | A | IP du VPS |
 
+Ne pas mettre le `.env` de production dans le dépôt : tous les `.env*` sont ignorés par git (sauf les
+`.env.example`), et un fichier ignoré peut être écrasé sans avertissement par un changement de branche.
+Sa place : le serveur et un gestionnaire de mots de passe.
+
 L'admin et la preview partagent le même domaine parent : le cookie de la preview est envoyé dans le
 panneau d'aperçu de l'éditeur.
 
@@ -71,8 +76,7 @@ mkdir -p ~/communeo && cd ~/communeo
 # docker-compose.yml et deploy.sh : copiés par le workflow à chaque déploiement ; la première fois, à la main
 curl -fsSLO https://raw.githubusercontent.com/Philippe-Tic/communeo/main/docker-compose.yml
 curl -fsSLO https://raw.githubusercontent.com/Philippe-Tic/communeo/main/deploy/server/deploy.sh && chmod +x deploy.sh
-# Accès aux images (dépôt privé) : jeton GitHub avec le droit read:packages
-echo "$GHCR_TOKEN" | docker login ghcr.io -u philippe-tic --password-stdin
+# Images publiques sur GHCR (dépôt public) : pas de docker login
 ```
 
 Créer `~/communeo/.env` (droits 600). Les secrets se génèrent tous d'avance, **tokens d'API compris** :

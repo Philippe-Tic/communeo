@@ -355,7 +355,7 @@ export function UsersScreen() {
       ) : (
         <section
           aria-label="Comptes de la commune"
-          className="rounded-xl border border-border bg-surface dark:bg-sidebar"
+          className="relative overflow-x-auto rounded-xl border border-border bg-surface dark:bg-sidebar"
         >
           {/* Ordinateur : tableau ; mobile : une carte par personne */}
           <table className="w-full text-[13px] max-md:hidden">

@@ -16,7 +16,7 @@ const subject = encodeURIComponent(title);
 <p class="in-share">
   <span class="in-share-label"><Share2 size={20} aria-hidden="true" />Partager :</span>
   <a href={`https://www.facebook.com/sharer/sharer.php?u=${encoded}`} target="_blank" rel="noopener noreferrer">
-    Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
+    <span class="cn-sr-only">Partager sur </span>Facebook<span class="cn-sr-only"> (nouvelle fenêtre)</span>
   </a>
   <a href={`mailto:?subject=${subject}&body=${encoded}`}><Mail size={18} aria-hidden="true" />Par e-mail</a>
   <button type="button" class="in-share-copy cn-js-only" data-in-copy={url}>

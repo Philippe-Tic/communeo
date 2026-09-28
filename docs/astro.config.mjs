@@ -82,6 +82,7 @@ export default defineConfig({
         },
         { label: "Équipe Communeo", slug: "equipe-communeo" },
         { label: "Créer un thème (développeurs)", slug: "developpeurs/creer-un-theme" },
+        { label: "Déclaration d'accessibilité", slug: "accessibilite-communeo" },
       ],
     }),
   ],

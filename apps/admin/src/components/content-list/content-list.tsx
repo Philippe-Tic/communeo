@@ -254,7 +254,7 @@ export function ContentList<T extends ListRow>({
       {empty ? (
         <EmptyState icon={EmptyIcon} title={config.empty.title} text={config.empty.text} action={newButton()} />
       ) : (
-        <div className="rounded-xl border border-border bg-surface md:overflow-hidden">
+        <div className="relative rounded-xl border border-border bg-surface md:overflow-x-auto">
           {selected.length > 0 ? (
             <BulkBar
               label={`${countOf(noun, selected.length)} ${agree(noun, 'sélectionné', selected.length)}`}

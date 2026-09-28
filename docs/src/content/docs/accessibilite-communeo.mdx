@@ -1,0 +1,60 @@
+---
+title: "Déclaration d'accessibilité de Communeo"
+description: "État de conformité au RGAA de l'espace d'administration et des thèmes des sites Communeo."
+---
+
+Communeo s'engage à rendre accessibles son espace d'administration et les sites des communes, conformément à l'article 47 de la loi n° 2005-102 du 11 février 2005.
+
+Cette déclaration porte sur **l'espace d'administration** (`app.communeo.fr`) et sur **les thèmes des sites publics** (Institutionnel, Moderne, Journal, Bourg). Chaque site de commune publie sa propre déclaration, que la mairie complète dans **Mon site › Accessibilité** : elle dépend aussi des contenus qu'elle publie.
+
+## État de conformité
+
+L'espace d'administration et les thèmes de Communeo sont **non conformes** au RGAA 4.1.2 : aucun audit de conformité n'a encore été réalisé par un organisme indépendant. C'est la mention que le RGAA impose tant qu'un tel audit n'a pas eu lieu.
+
+## Évaluation interne
+
+En attendant cet audit, une évaluation interne a été menée en septembre 2026 ; elle est rejouée automatiquement à chaque modification du code :
+
+- **analyse automatique** (axe-core, WCAG 2.2 AA) de chaque écran de l'administration et de chaque page de la commune de démonstration, dans chaque thème, sur mobile et sur ordinateur (l'administration aussi en mode sombre) ;
+- **affichage à 320 px** de large sans défilement horizontal (critère 10.11) ;
+- **texte agrandi à 200 %** sans perte de contenu (critère 10.4) ;
+- **espacement du texte augmenté** sans texte coupé (critère 10.12) ;
+- **navigation au clavier** : prise de focus visible sur chaque élément atteint (critère 10.7), alternatives au glisser-déposer (boutons « Monter » et « Descendre ») ;
+- **structure** : un seul titre de niveau 1, pas de saut de niveau de titre, zones d'en-tête, de navigation, de contenu et de pied de page identifiées (critères 9.1 et 12.6), titres de page uniques (critère 8.6) ;
+- **liens explicites** : aucun lien dont l'intitulé seul ne dit pas la destination (critère 6.1) ;
+- **revue de l'arbre d'accessibilité** de chaque page : noms des boutons, champs, images et cadres, régions dynamiques (alertes, messages de confirmation).
+
+## Contenus non accessibles
+
+### Non-conformités connues
+
+- La vérification avec un lecteur d'écran (VoiceOver, NVDA) n'a pas encore été conduite de façon systématique sur tous les parcours : des défauts de restitution peuvent subsister.
+- Les fiches de démarches de Service-Public.fr sont reprises telles que la DILA les publie.
+
+### Contenus non soumis à l'obligation d'accessibilité
+
+- Les cartes interactives et les vidéos intégrées depuis un service tiers (OpenStreetMap, YouTube…) : un lien direct vers le contenu est toujours proposé.
+
+### Contenus publiés par les communes
+
+Les textes alternatifs des images, les intitulés de liens et l'accessibilité des documents PDF déposés dépendent de chaque commune. L'administration l'y aide : une image ne peut pas être publiée sans texte alternatif.
+
+## Établissement de cette déclaration
+
+Déclaration établie le 28 septembre 2026, à partir de l'évaluation interne décrite ci-dessus.
+
+Technologies utilisées : HTML, CSS, JavaScript (TypeScript), WAI-ARIA.
+
+Environnement de test : Chromium (Playwright) sur ordinateur (1 280 à 1 440 px) et mobile (320 et 390 px) ; VoiceOver sur macOS et iOS pour les parcours principaux (en cours).
+
+## Retour d'information et contact
+
+Si vous n'arrivez pas à accéder à un contenu ou à un service, écrivez à [accessibilite@communeo.fr](mailto:accessibilite@communeo.fr) : nous vous indiquerons une alternative accessible ou vous transmettrons le contenu sous une autre forme.
+
+## Voies de recours
+
+Si vous nous avez signalé un défaut d'accessibilité qui vous empêche d'accéder à un contenu ou à un service et que vous n'avez pas obtenu de réponse satisfaisante, vous pouvez :
+
+- écrire un message au [Défenseur des droits](https://formulaire.defenseurdesdroits.fr/) ;
+- contacter [le délégué du Défenseur des droits dans votre région](https://www.defenseurdesdroits.fr/saisir/delegues) ;
+- envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) : Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07.

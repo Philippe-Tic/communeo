@@ -24,6 +24,6 @@ const { contact } = ctx.site;
       <select id="ct-category" name="category" required>{(form.options ?? []).map((o) => <option value={o.key}>{o.label}</option>)}</select></p>
     <p><label for="ct-subject">Objet (obligatoire)</label><input id="ct-subject" name="subject" required /></p>
     <p><label for="ct-message">Message (obligatoire)</label><textarea id="ct-message" name="message" rows="6" required></textarea></p>
-    <p class="st-meta">Vos données servent uniquement à traiter votre demande. <a href="/donnees-personnelles">En savoir plus</a></p>
+    <p class="st-meta">Vos données servent uniquement à traiter votre demande. <a href="/donnees-personnelles">En savoir plus<span class="cn-sr-only"> sur vos données personnelles</span></a></p>
   </ApiForm>
 </Layout>

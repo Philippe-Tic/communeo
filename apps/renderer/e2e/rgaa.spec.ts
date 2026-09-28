@@ -2,7 +2,10 @@
  * Critères RGAA qu'axe ne vérifie pas, pour chaque thème et chaque page de la commune de démonstration :
  * - 10.11 / WCAG 1.4.10 : à 320 px de large, pas de défilement horizontal (mobile) ;
  * - 10.12 / WCAG 1.4.12 : espacement du texte augmenté, rien ne déborde ni n'est coupé (ordinateur) ;
- * - 10.7 / WCAG 2.4.7 : chaque élément atteint au clavier a une prise de focus visible (ordinateur).
+ * - 10.7 / WCAG 2.4.7 : chaque élément atteint au clavier a une prise de focus visible (ordinateur) ;
+ * - 10.4 / WCAG 1.4.4 : texte seul agrandi à 200 %, rien ne déborde ni n'est coupé (ordinateur) ;
+ * - 12.6 : une seule zone d'en-tête, de contenu principal et de pied de page, à chaque largeur ;
+ * - 6.1 : aucun lien dont l'intitulé seul (« En savoir plus », « Lire la suite »…) ne dit pas la destination.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { PAGES } from './pages';
@@ -29,7 +32,55 @@ const TEXT_SPACING = `
   p { margin-bottom: 2em !important; }
 `;
 
+/** Texte seul agrandi à 200 % (zoom du texte du navigateur) : les tailles sont en rem ou em */
+const TEXT_ZOOM = 'html { font-size: 200% !important; }';
+
+/** Blocs de texte qui masquent leur débordement vertical : le texte y est coupé */
+const clippedText = (page: Page) =>
+  page.evaluate(() =>
+    [...document.body.querySelectorAll<HTMLElement>('p, li, h1, h2, h3, a, button, label, dt, dd, span')]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        if (!['hidden', 'clip'].includes(style.overflowY) || element.closest('.cn-sr-only, [aria-hidden="true"]')) return false;
+        // Masqué visuellement à dessein (libellé pour lecteurs d'écran, piège à robots)
+        if (element.offsetWidth <= 1 || element.offsetHeight <= 1 || style.clipPath !== 'none') return false;
+        if (style.textOverflow === 'ellipsis' || style.webkitLineClamp !== 'none') return false;
+        return element.scrollHeight > element.clientHeight + 2 && element.textContent!.trim() !== '';
+      })
+      .slice(0, 5)
+      .map((element) => `${element.tagName.toLowerCase()}.${[...element.classList].join('.')} « ${element.textContent!.trim().slice(0, 40)} »`),
+  );
+
+/** Intitulés qui ne disent rien hors contexte (un complément masqué pour les lecteurs d'écran suffit) */
+const AMBIGUOUS_LINK = /^(en savoir plus|lire la suite|la suite|suite|voir|voir plus|plus|ici|cliquez ici|lien|facebook)( \(nouvelle fenêtre\))?$/i;
+
 for (const path of PAGES) {
+  test(`zones d'en-tête, de contenu et de pied de page uniques ${path}`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.getByRole('banner')).toHaveCount(1);
+    await expect(page.getByRole('main')).toHaveCount(1);
+    await expect(page.getByRole('contentinfo')).toHaveCount(1);
+  });
+
+  test(`liens explicites ${path}`, async ({ page }, info) => {
+    test.skip(!info.project.name.endsWith('desktop'), 'Intitulés identiques à chaque largeur');
+    await page.goto(path);
+    const names = await page.getByRole('link', { name: AMBIGUOUS_LINK, includeHidden: true }).evaluateAll((links) =>
+      links.map((link) => `« ${link.textContent!.trim()} » → ${link.getAttribute('href')}`),
+    );
+    expect(names).toEqual([]);
+  });
+
+  test(`texte agrandi à 200 % ${path}`, async ({ page }, info) => {
+    test.skip(!info.project.name.endsWith('desktop'), 'Agrandissement vérifié sur ordinateur');
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(path);
+    await page.addStyleTag({ content: TEXT_ZOOM });
+    const result = await overflowing(page, 1280);
+    expect(result.scrollWidth, result.found.join(', ')).toBeLessThanOrEqual(1280);
+    expect(await clippedText(page)).toEqual([]);
+  });
+
   test(`320 px sans défilement horizontal ${path}`, async ({ page }, info) => {
     test.skip(!info.project.name.endsWith('mobile'), 'Reflow vérifié à 320 px');
     await page.setViewportSize({ width: 320, height: 640 });
@@ -46,20 +97,7 @@ for (const path of PAGES) {
     const result = await overflowing(page, viewport);
     expect(result.scrollWidth, result.found.join(', ')).toBeLessThanOrEqual(viewport);
     // Texte coupé : un bloc de texte qui masque son débordement vertical
-    const clipped = await page.evaluate(() =>
-      [...document.body.querySelectorAll<HTMLElement>('p, li, h1, h2, h3, a, button, label, dt, dd, span')]
-        .filter((element) => {
-          const style = getComputedStyle(element);
-          if (!['hidden', 'clip'].includes(style.overflowY) || element.closest('.cn-sr-only, [aria-hidden="true"]')) return false;
-          // Masqué visuellement à dessein (libellé pour lecteurs d'écran, piège à robots)
-          if (element.offsetWidth <= 1 || element.offsetHeight <= 1 || style.clipPath !== 'none') return false;
-          if (style.textOverflow === 'ellipsis' || style.webkitLineClamp !== 'none') return false;
-          return element.scrollHeight > element.clientHeight + 2 && element.textContent!.trim() !== '';
-        })
-        .slice(0, 5)
-        .map((element) => `${element.tagName.toLowerCase()}.${[...element.classList].join('.')} « ${element.textContent!.trim().slice(0, 40)} »`),
-    );
-    expect(clipped).toEqual([]);
+    expect(await clippedText(page)).toEqual([]);
   });
 
   test(`focus visible au clavier ${path}`, async ({ page }, info) => {

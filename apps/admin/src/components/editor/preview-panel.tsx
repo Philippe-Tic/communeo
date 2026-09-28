@@ -154,7 +154,7 @@ function PreviewToolbar({
   onHide?: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
       <DevicePicker device={device} onChange={onDevice} />
       <p className="min-w-0 flex-1 truncate text-[13px] text-secondary">{state.caption ?? `Aperçu du brouillon — thème ${state.themeName}`}</p>
       <Button type="button" variant="ghost" size="icon" className="size-8" aria-label="Recharger l'aperçu" onClick={onReload} disabled={!state.url}>

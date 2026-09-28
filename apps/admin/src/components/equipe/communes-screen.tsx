@@ -355,7 +355,7 @@ export function CommunesScreen() {
       ) : !communes.data ? (
         <div aria-busy="true" className="h-64 animate-pulse rounded-xl bg-neutral-bg" />
       ) : (
-        <section aria-label="Liste des communes" className="rounded-xl border border-border bg-surface dark:bg-sidebar">
+        <section aria-label="Liste des communes" className="relative overflow-x-auto rounded-xl border border-border bg-surface dark:bg-sidebar">
           <p role="status" className="sr-only">
             {shown.length} commune{shown.length > 1 ? 's' : ''}
           </p>

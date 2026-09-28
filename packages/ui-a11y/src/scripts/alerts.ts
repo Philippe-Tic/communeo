@@ -34,9 +34,9 @@ const escape = (value: string) =>
 /** Même balisage que le rendu du build : le thème n'a qu'une seule mise en forme à écrire. */
 function render(alert: AlertVM): string {
   const link = alert.link
-    ? ` <a href="${escape(alert.link.href)}"${alert.link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escape(alert.link.label)}${
-        alert.link.external ? '<span class="cn-sr-only"> (nouvelle fenêtre)</span>' : ''
-      }</a>`
+    ? ` <a href="${escape(alert.link.href)}"${alert.link.external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escape(alert.link.label)}<span class="cn-sr-only"> : ${escape(alert.title)}${
+        alert.link.external ? ' (nouvelle fenêtre)' : ''
+      }</span></a>`
     : '';
   const close =
     alert.severity.key === 'critical'

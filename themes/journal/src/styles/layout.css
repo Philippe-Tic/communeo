@@ -56,6 +56,11 @@
   line-height: 1.15;
 }
 
+/* En-tête : n'ajoute aucune boîte, ses deux enfants restent dans la grille du squelette */
+.jo-header {
+  display: contents;
+}
+
 /* En-tête mobile */
 .jo-topbar {
   position: sticky;

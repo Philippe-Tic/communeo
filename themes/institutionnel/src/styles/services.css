@@ -357,14 +357,48 @@
   text-align: left;
 }
 
-.in-frame .cn-demarche-table td {
+.in-frame .cn-demarche-table :is(td, th) {
   padding: 0.625rem 0.75rem;
   border: 1px solid var(--in-border);
 }
 
-.in-frame .cn-demarche-table tr:first-child td {
+.in-frame .cn-demarche-table th[scope='col'] {
   font-weight: 600;
   background: var(--in-primary-light);
+}
+
+/* En-têtes de tableau (colonnes et lignes), compléments repliables, services en ligne */
+.in-frame .cn-demarche-table th {
+  font-weight: 600;
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Cas imbriqués d'une fiche : les titres profonds restent lisibles */
+.in-frame [data-cn-demarche] :is(h5, h6) {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.in-frame .cn-demarche-complement {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--in-border);
+  border-radius: var(--in-radius);
+}
+
+.in-frame .cn-demarche-complement > summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.in-frame .cn-demarche-service a,
+.in-frame .cn-demarche-subtitle {
+  font-weight: 600;
 }
 
 .in-frame .cn-demarche-links ul {

@@ -5,6 +5,9 @@
  * Les résultats reprennent le titre, le type de contenu (déduit du chemin) et l'extrait fourni par
  * Pagefind, où les termes trouvés sont déjà mis en évidence.
  */
+import type { DemarcheAudience } from '@communeo/core/client';
+import { resultCount, searchDemarches, searchResultItem } from './demarches-search';
+
 type PagefindResult = {
   data: () => Promise<{ url: string; meta?: { title?: string }; excerpt: string }>;
 };
@@ -33,6 +36,7 @@ export function initSearch() {
   if (!form || !input || !list || !count) return;
 
   let engine: Pagefind | null | undefined;
+  const demarches = initDemarchesResults();
 
   // L'index n'existe que sur le site construit : il est chargé à l'exécution, hors du bundle.
   // L'import passe par une fonction créée à la volée, sinon le bundler le réécrit et le casse.
@@ -50,6 +54,7 @@ export function initSearch() {
   };
 
   const render = async (term: string) => {
+    void demarches?.(term);
     list.innerHTML = '';
     if (empty) empty.hidden = true;
     if (!term) {
@@ -101,4 +106,34 @@ export function initSearch() {
     input.value = initial;
     void render(initial);
   }
+}
+
+/**
+ * Démarches de service-public.fr trouvées pour la même recherche (les 5 premières), avec un lien
+ * vers la page Démarches pour les voir toutes.
+ */
+function initDemarchesResults() {
+  const section = document.querySelector<HTMLElement>('[data-cn-search-demarches]');
+  const count = section?.querySelector<HTMLElement>('[data-cn-search-demarches-count]');
+  const list = section?.querySelector<HTMLOListElement>('[data-cn-search-demarches-results]');
+  const more = section?.querySelector<HTMLAnchorElement>('[data-cn-search-demarches-more]');
+  if (!section || !count || !list || !more) return null;
+  const endpoint = section.dataset.endpoint!;
+  const audience = section.dataset.audience as DemarcheAudience;
+  let latest = 0;
+
+  return async (term: string) => {
+    const request = ++latest;
+    list.replaceChildren();
+    count.textContent = '';
+    section.hidden = true;
+    if (!term) return;
+    const found = await searchDemarches(endpoint, audience, term, 5);
+    if (request !== latest || !found || !found.total) return;
+    count.textContent = resultCount(found.total, term);
+    list.replaceChildren(...found.results.map((result) => searchResultItem(result, audience)));
+    more.href = `/demarches?q=${encodeURIComponent(term)}`;
+    more.textContent = found.total > found.results.length ? `Voir les ${found.total} démarches pour « ${term} »` : 'Voir la page Démarches';
+    section.hidden = false;
+  };
 }

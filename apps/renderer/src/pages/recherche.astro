@@ -2,11 +2,14 @@
 /**
  * Recherche sur le site. L'index est produit par Pagefind au moment du build : la recherche
  * tourne entièrement dans le navigateur, sans serveur. Sans JavaScript, les rubriques sont proposées.
+ * Quand la commune propose les démarches, la même recherche porte aussi sur toutes les fiches de
+ * service-public.fr (API publique).
  */
 import { SECTIONS } from '@communeo/core';
 import theme from 'virtual:communeo/theme';
 import Document from '../layouts/Document.astro';
 import { getSource, simplePage } from '../lib/content';
+import { demarcheAudiences, searchEndpoint } from '../lib/demarches';
 
 const source = getSource();
 const site = await source.site();
@@ -17,6 +20,7 @@ const ctx = await simplePage(source, {
   noindex: true,
 });
 const { Frame } = theme.templates;
+const demarches = site.services.demarches.enabled ? demarcheAudiences(site.services.demarches.audiences)[0] : undefined;
 const suggestions = [
   SECTIONS.actualites,
   SECTIONS.agenda,
@@ -37,6 +41,15 @@ const suggestions = [
 
     <p role="status" data-cn-search-count></p>
     <ol data-cn-search-results></ol>
+
+    {demarches && (
+      <section aria-labelledby="cn-search-demarches" data-cn-search-demarches data-endpoint={searchEndpoint()} data-audience={demarches} hidden>
+        <h2 id="cn-search-demarches">Démarches administratives</h2>
+        <p role="status" data-cn-search-count data-cn-search-demarches-count></p>
+        <ol data-cn-search-results data-cn-search-demarches-results></ol>
+        <p><a href="/demarches" data-cn-search-demarches-more>Voir toutes les démarches</a></p>
+      </section>
+    )}
 
     <div data-cn-search-empty hidden>
       <p>Aucun résultat ne correspond à votre recherche. Essayez un mot plus court, ou parcourez les rubriques :</p>

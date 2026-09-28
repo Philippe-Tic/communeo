@@ -64,6 +64,19 @@ function getAllText(children: any[]): string {
   return parts.join('').replace(/\s+/g, ' ').trim()
 }
 
+/** Texte d'une balise en ligne : les espaces de bord comptent (« <MiseEnEvidence>documents </MiseEnEvidence>originaux ») */
+function inlineText(children: any[]): string {
+  const text = getAllText(children)
+  if (!text) return ''
+  const raw = Array.isArray(children) ? children.map((item: any) => (item['#text'] !== undefined ? String(item['#text']) : 'x')).join('') : ''
+  return `${/^\s/.test(raw) ? ' ' : ''}${text}${/\s$/.test(raw) ? ' ' : ''}`
+}
+
+/** Enfants dans l'ordre du document, chaque Texte (ou Corps) remplacé par son contenu */
+function unwrapText(children: any[]): any[] {
+  return (Array.isArray(children) ? children : []).flatMap((item: any) => (item.Texte ? item.Texte : item.Corps ? item.Corps : [item]))
+}
+
 /** Shortcut: get text of the first child with the given tag */
 function childText(children: any[], tag: string): string {
   const child = findChild(children, tag)
@@ -174,11 +187,10 @@ class DilaNormalizer {
     const introNode = findChild(pubChildren, 'Introduction')
     const introduction = introNode ? this.parseContentNodes(introNode.Introduction) : []
 
-    // Contenu principal — peut être dans Texte, Corps, ou directement sous Publication
-    const texteNode = findChild(pubChildren, 'Texte')
-    const corpsNode = findChild(pubChildren, 'Corps')
-    const contentSource = texteNode ? texteNode.Texte : corpsNode ? corpsNode.Corps : pubChildren
-    const content = this.parseContentNodes(contentSource)
+    // Contenu principal, dans l'ordre du document : un ou plusieurs Texte (ou Corps), et des blocs
+    // placés directement sous Publication (ListeSituations, ASavoir…). Ne lire que le premier Texte
+    // perdait l'essentiel des fiches conditionnées (une situation par public).
+    const content = this.parseContentNodes(unwrapText(pubChildren))
 
     // Sections de référence
     const references = this.parseReferenceSection(pubChildren)
@@ -251,6 +263,37 @@ class DilaNormalizer {
         case 'Rappel':       nodes.push(this.parseCallout(content, 'rappel')); break
         case 'ListeSituations':    nodes.push(this.parseListeSituations(content)); break
         case 'FragmentConditionne': nodes.push(this.parseFragmentConditionne(content, attrs)); break
+        // Introduction d'un cas ou d'une situation : ses paragraphes, dans le fil du texte
+        case 'Introduction': nodes.push(...this.parseContentNodes(unwrapText(content))); break
+        case 'TitreFlottant': nodes.push({ type: 'titreFlottant', text: getAllText(content) }); break
+        // Complément repliable (« Connaître les valeurs limites… ») : titre et contenu
+        case 'Complement': {
+          const body = this.parseContentNodes(unwrapText(content))
+          if (body.length) nodes.push({ type: 'complement', title: childText(content, 'Titre') || undefined, children: body })
+          break
+        }
+        // Lien commenté : le commentaire, puis le lien
+        case 'LienExterneCommente': {
+          const comment = findChild(content, 'Commentaire')
+          if (comment) nodes.push(...this.parseContentNodes(unwrapText(comment.Commentaire)))
+          const link = findChild(content, 'LienExterne')
+          if (link) nodes.push({ type: 'paragraphe', children: [this.parseInlineTag('LienExterne', link.LienExterne, getAttrs(link))] })
+          break
+        }
+        case 'ServiceEnLigne': {
+          const service = this.parseServiceEnLigne(content, attrs)
+          if (service.url) {
+            nodes.push({ type: 'serviceEnLigne', title: service.title, href: service.url, attributes: { serviceType: service.type } })
+          }
+          break
+        }
+        case 'OuSAdresser': {
+          const place = this.parseServiceInfo(content, attrs)
+          const attributes: Record<string, string> = {}
+          if (place.pivotLocal) attributes.pivot = place.pivotLocal
+          nodes.push({ type: 'ouSAdresser', title: place.title, href: place.url, children: place.texte ?? [], attributes })
+          break
+        }
         case 'Image':        nodes.push(this.parseImage(content, attrs)); break
         case 'Video':        nodes.push(this.parseVideo(content, attrs)); break
       }
@@ -310,7 +353,7 @@ class DilaNormalizer {
   }
 
   private parseInlineTag(tag: string, children: any[], attrs: Record<string, string>): DilaContentNode {
-    const text = getAllText(children)
+    const text = inlineText(children)
     switch (tag) {
       case 'MiseEnEvidence':
         return {
@@ -362,27 +405,47 @@ class DilaNormalizer {
     return { type: 'liste', attributes: { listeType }, children: listChildren }
   }
 
+  /**
+   * Tableau de la DILA : `Colonne` (type header : colonne d'en-têtes de ligne), `Rangée` (type header :
+   * ligne d'en-têtes), `Cellule` (fusionHorizontale / fusionVerticale : nombre de colonnes / lignes).
+   * Chaque cellule sait si c'est un en-tête (`header` : col ou row) et ses fusions.
+   */
   private parseTableau(children: any[]): DilaContentNode {
     const titre = childText(children, 'Titre') || undefined
-    const rangeeNodes = findChildren(children, 'Rangee')
-    const rows: DilaContentNode[] = rangeeNodes.map((rNode: any) => {
-      const rContent = rNode.Rangee
-      const rAttrs = getAttrs(rNode)
-      const colonneNodes = findChildren(rContent, 'Colonne')
-      const cells: DilaContentNode[] = colonneNodes.map((cNode: any) => {
-        const cContent = cNode.Colonne
+    const columnHeaders = findChildren(children, 'Colonne').map((node: any) => getAttr(node, '@_type') === 'header')
+    const rowNodes = [...findChildren(children, 'Rangée'), ...findChildren(children, 'Rangee')]
+    // Colonnes déjà occupées par une cellule fusionnée verticalement : rang restant par colonne
+    const spanned: number[] = []
+    const rows: DilaContentNode[] = rowNodes.map((rNode: any) => {
+      const rContent = rNode['Rangée'] ?? rNode.Rangee ?? []
+      const headerRow = getAttr(rNode, '@_type') === 'header'
+      let column = 0
+      const cells: DilaContentNode[] = findChildren(rContent, 'Cellule').map((cNode: any) => {
+        while ((spanned[column] ?? 0) > 0) column += 1
+        const cAttrs = getAttrs(cNode)
+        const colspan = Math.max(1, parseInt(cAttrs['@_fusionHorizontale'] || '1', 10) || 1)
+        const rowspan = Math.max(1, parseInt(cAttrs['@_fusionVerticale'] || '1', 10) || 1)
+        const header = headerRow ? 'col' : columnHeaders[column] ? 'row' : ''
+        for (let offset = 0; offset < colspan; offset += 1) spanned[column + offset] = rowspan
+        column += colspan
+        const cContent = cNode.Cellule ?? []
         const blockContent = this.parseContentNodes(cContent)
-        if (blockContent.length > 0) {
-          return { type: 'cellule' as const, children: blockContent }
+        const attributes: Record<string, string> = {}
+        if (header) attributes.header = header
+        if (colspan > 1) attributes.colspan = String(colspan)
+        if (rowspan > 1) attributes.rowspan = String(rowspan)
+        return {
+          type: 'cellule' as const,
+          children: blockContent.length > 0 ? blockContent : [this.parseParagraphe(cContent)],
+          attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
         }
-        const para = this.parseParagraphe(cContent)
-        return { type: 'cellule' as const, children: [para] }
       })
-      const isHeader = rAttrs['@_type'] === 'header'
+      // La ligne suivante : une ligne de moins pour chaque fusion verticale en cours
+      for (let index = 0; index < spanned.length; index += 1) if (spanned[index]) spanned[index] -= 1
       return {
         type: 'rangee' as const,
         children: cells,
-        attributes: isHeader ? { rowType: 'header' } : undefined,
+        attributes: headerRow ? { rowType: 'header' } : undefined,
       }
     })
     return { type: 'tableau', title: titre, children: rows }
@@ -394,8 +457,7 @@ class DilaNormalizer {
     const casChildren: DilaContentNode[] = casNodes.map((casNode: any) => {
       const casContent = casNode.Cas
       const title = childText(casContent, 'Titre')
-      const texteNode = findChild(casContent, 'Texte')
-      const contentChildren = texteNode ? texteNode.Texte : casContent
+      const contentChildren = unwrapText(casContent)
       return {
         type: 'situation' as const,
         title,
@@ -410,8 +472,7 @@ class DilaNormalizer {
     const sitChildren: DilaContentNode[] = situationNodes.map((sitNode: any) => {
       const sitContent = sitNode.Situation
       const title = childText(sitContent, 'Titre')
-      const texteNode = findChild(sitContent, 'Texte')
-      const contentChildren = texteNode ? texteNode.Texte : sitContent
+      const contentChildren = unwrapText(sitContent)
       return {
         type: 'situation' as const,
         title,
@@ -499,7 +560,7 @@ class DilaNormalizer {
       id: attrs['@_ID'] || '',
       title: childText(children, 'Titre') || getAllText(children) || '',
       type: attrs['@_type'] || '',
-      pivotLocal: attrs['@_pivotLocal'] || undefined,
+      pivotLocal: attrs['@_pivotLocal'] || childText(children, 'PivotLocal') || undefined,
       url: resWebAttrs['@_URL'] || attrs['@_URL'] || undefined,
       texte: texteNode ? this.parseContentNodes(texteNode.Texte) : undefined,
     }
@@ -593,18 +654,22 @@ class DilaNormalizer {
     const dpChildren = dpNode.DossierPere
     const dpAttrs = getAttrs(dpNode)
 
+    const fiche = (fNode: any) => ({
+      id: getAttr(fNode, '@_ID') || getAttr(fNode, '@_LienPublication') || getAllText(fNode.Fiche) || '',
+      title: childText(fNode.Fiche, 'Titre') || getAllText(fNode.Fiche) || '',
+    })
     const sousDossiers = findChildren(dpChildren, 'SousDossier').map((sdNode: any) => {
       const sdChildren = sdNode.SousDossier
       const sdAttrs = getAttrs(sdNode)
       return {
         id: sdAttrs['@_ID'] || '',
         title: childText(sdChildren, 'Titre') || '',
-        fiches: findChildren(sdChildren, 'Fiche').map((fNode: any) => ({
-          id: getAttr(fNode, '@_ID') || getAttr(fNode, '@_LienPublication') || getAllText(fNode.Fiche) || '',
-          title: childText(fNode.Fiche, 'Titre') || getAllText(fNode.Fiche) || '',
-        })),
+        fiches: findChildren(sdChildren, 'Fiche').map(fiche),
       }
     })
+    // Dossier sans sous-dossier : ses fiches sont directement sous DossierPere
+    const direct = findChildren(dpChildren, 'Fiche').map(fiche)
+    if (direct.length) sousDossiers.unshift({ id: dpAttrs['@_ID'] || '', title: '', fiches: direct })
 
     return {
       id: dpAttrs['@_ID'] || '',

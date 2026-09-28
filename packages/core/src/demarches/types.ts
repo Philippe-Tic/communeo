@@ -19,7 +19,10 @@ export interface DemarcheRef {
   title: string;
 }
 
-/** Rubrique de l'arborescence des démarches (thème puis sous-thèmes et fiches). */
+/**
+ * Rubrique de l'arborescence des démarches : thème, puis sous-thèmes, puis les dossiers (chacun
+ * regroupe les fiches d'un sujet : « Carte d'identité », « Passeport »…), rangés dans `fiches`.
+ */
 export interface DemarcheThemeVM {
   id: string;
   title: string;
@@ -34,11 +37,22 @@ export interface DemarcheLinkVM {
   cerfa: string | null;
 }
 
+/** Dossier : les fiches d'un sujet, par sous-dossier (« Pour un majeur », « Pour un mineur »…) */
+export interface DemarcheFolderVM {
+  id: string;
+  title: string;
+  groups: Array<{ title: string; fiches: DemarcheRef[] }>;
+}
+
 /** Fiche prête à afficher : le thème n'a rien à savoir du comarquage. */
 export interface DemarcheVM {
   id: string;
   audience: DemarcheAudience;
   title: string;
+  /** La page est un dossier : son contenu est d'abord la liste de ses fiches */
+  isFolder: boolean;
+  /** Dossier de la page (lui-même pour un dossier, son dossier pour une fiche) */
+  folder: DemarcheFolderVM | null;
   description: string | null;
   /** Rubriques d'origine, pour situer la fiche */
   trail: DemarcheRef[];

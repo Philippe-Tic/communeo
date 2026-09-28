@@ -55,13 +55,15 @@ async function structure(page: Page, routes: string[]) {
 }
 
 async function textZoom(page: Page, routes: string[]) {
+  // Texte seul agrandi à 200 % : taille de police par défaut de Chrome doublée (les rem et les points
+  // de rupture en rem suivent, comme chez l'internaute)
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Page.setFontSizes', { fontSizes: { standard: 32, fixed: 26 } });
   const found: string[] = [];
   for (const route of routes) {
     await page.goto(route);
     await page.waitForLoadState('networkidle');
     await expect(page.getByRole('heading', { level: 1 }), route).toBeVisible();
-    // Zoom du texte seul du navigateur : la taille de base double, les tailles en rem suivent
-    await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
     const result = await overflow(page);
     if (result.width > 1280) found.push(`${route} — ${result.width} px : ${result.culprits.join(', ')}`);
   }

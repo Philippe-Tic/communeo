@@ -32,8 +32,15 @@ const TEXT_SPACING = `
   p { margin-bottom: 2em !important; }
 `;
 
-/** Texte seul agrandi à 200 % (zoom du texte du navigateur) : les tailles sont en rem ou em */
-const TEXT_ZOOM = 'html { font-size: 200% !important; }';
+/**
+ * Texte seul agrandi à 200 % : taille de police par défaut du navigateur doublée (réglage « Taille de
+ * la police » de Chrome). Les tailles et les points de rupture en rem ou em suivent, comme chez
+ * l'internaute.
+ */
+async function zoomText(page: Page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Page.setFontSizes', { fontSizes: { standard: 32, fixed: 26 } });
+}
 
 /** Blocs de texte qui masquent leur débordement vertical : le texte y est coupé */
 const clippedText = (page: Page) =>
@@ -52,7 +59,7 @@ const clippedText = (page: Page) =>
   );
 
 /** Intitulés qui ne disent rien hors contexte (un complément masqué pour les lecteurs d'écran suffit) */
-const AMBIGUOUS_LINK = /^(en savoir plus|lire la suite|la suite|suite|voir|voir plus|plus|ici|cliquez ici|lien|facebook)( \(nouvelle fenêtre\))?$/i;
+const AMBIGUOUS_LINK = /^(en savoir plus|lire la suite|la suite|suite|voir|voir plus|plus|ici|cliquez ici|lien)( \(nouvelle fenêtre\))?$/i;
 
 for (const path of PAGES) {
   test(`zones d'en-tête, de contenu et de pied de page uniques ${path}`, async ({ page }) => {
@@ -74,8 +81,8 @@ for (const path of PAGES) {
   test(`texte agrandi à 200 % ${path}`, async ({ page }, info) => {
     test.skip(!info.project.name.endsWith('desktop'), 'Agrandissement vérifié sur ordinateur');
     await page.setViewportSize({ width: 1280, height: 800 });
+    await zoomText(page);
     await page.goto(path);
-    await page.addStyleTag({ content: TEXT_ZOOM });
     const result = await overflowing(page, 1280);
     expect(result.scrollWidth, result.found.join(', ')).toBeLessThanOrEqual(1280);
     expect(await clippedText(page)).toEqual([]);

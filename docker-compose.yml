@@ -52,12 +52,14 @@ services:
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       SITES_DOMAIN: ${SITES_DOMAIN:-}
-      # Émetteur des devis (#312)
+      # Émetteur des devis (#312) et des factures (#314)
       COMMUNEO_LEGAL_NAME: ${COMMUNEO_LEGAL_NAME:-}
       COMMUNEO_LEGAL_ADDRESS: ${COMMUNEO_LEGAL_ADDRESS:-}
       COMMUNEO_SIRET: ${COMMUNEO_SIRET:-}
       COMMUNEO_BILLING_EMAIL: ${COMMUNEO_BILLING_EMAIL:-}
       COMMUNEO_VAT_RATE: ${COMMUNEO_VAT_RATE:-0}
+      COMMUNEO_IBAN: ${COMMUNEO_IBAN:-}
+      COMMUNEO_BIC: ${COMMUNEO_BIC:-}
       # File des builds (schéma pgboss de la même base), traitée par le service worker
       QUEUE_DATABASE_URL: postgres://strapi:${POSTGRES_PASSWORD}@postgres:5432/strapi
       WORKER_SECRET: ${WORKER_SECRET}

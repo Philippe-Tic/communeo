@@ -114,10 +114,12 @@ const CAPTURES: Capture[] = [
   { name: 'conformite', route: '/conformite' },
   { name: 'utilisateurs', route: '/utilisateurs' },
   { name: 'journal', route: '/journal' },
+  { name: 'facturation', route: '/facturation' },
   { name: 'mon-compte', route: '/mon-compte' },
   { name: 'plateforme-communes', route: '/plateforme', options: { user: 'super_admin' } },
   { name: 'plateforme-commune', route: '/plateforme/communes/site-bellefontaine', options: { user: 'super_admin' } },
   { name: 'plateforme-statistiques', route: '/plateforme/statistiques', options: { user: 'super_admin' } },
+  { name: 'plateforme-facturation', route: '/plateforme/facturation', options: { user: 'super_admin' } },
 ];
 
 test.skip(!process.env.DOCS_CAPTURES, 'Captures de la documentation : DOCS_CAPTURES=1 (pnpm docs:captures)');

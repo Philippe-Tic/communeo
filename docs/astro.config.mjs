@@ -77,6 +77,7 @@ export default defineConfig({
             { label: "Conformité", slug: "administration/conformite" },
             { label: "Utilisateurs", slug: "administration/utilisateurs" },
             { label: "Journal d'activité", slug: "administration/journal" },
+            { label: "Facturation", slug: "administration/facturation" },
             { label: "Mon compte", slug: "administration/mon-compte" },
           ],
         },

@@ -12,3 +12,4 @@ export * from './page-templates';
 export * from './onboarding-checklist';
 export * from './trial';
 export * from './pricing';
+export * from './billing';

@@ -1,5 +1,6 @@
 import { purgeActivityLog } from '../src/services/activity-log';
 import { publishDueDocuments } from '../src/services/scheduled-publication';
+import { processBilling } from '../src/services/billing';
 import { processTrials } from '../src/services/trial';
 
 export default {
@@ -22,5 +23,12 @@ export default {
       await processTrials();
     },
     options: { rule: '0 * * * *', tz: 'Europe/Paris' },
+  },
+  // Facturation (#314) : factures de renouvellement à l'échéance, relances des factures en retard
+  billing: {
+    task: async () => {
+      await processBilling();
+    },
+    options: { rule: '0 7 * * *', tz: 'Europe/Paris' },
   },
 };

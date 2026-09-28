@@ -13,6 +13,7 @@
  */
 import { addDays, deletionDate, DELETION_NOTICE_DAYS, formatDate, TRIAL_DAYS, trialDaysLeft } from '@communeo/core';
 import { recordActivity } from './activity-log';
+import { issueGoLiveInvoice } from './billing';
 import { isBuildQueueConfigured } from './build-queue';
 import { deleteCommune } from './commune-deletion';
 import deploymentService from './deployment';
@@ -202,6 +203,12 @@ export async function goLive(site: any) {
   });
   await recordActivity({ action: 'commune_go_live', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
   await settleQuote(site, 'accepted');
+  // Première facture (#314) : un échec ne retient pas le passage en live, l'équipe peut l'émettre ensuite
+  try {
+    await issueGoLiveInvoice(site);
+  } catch (error) {
+    log.error(`[FACTURATION] Facture de passage en live de ${site.name} non émise :`, error);
+  }
   await republish(site, { ifPublished: true });
   await notifyAdmins(
     site,

@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject', 'quote_sign'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -122,6 +122,15 @@ export type DeploymentStep = (typeof deploymentStepValues)[number];
 
 export const evenementCategoryValues = ['cultural', 'sport', 'meeting', 'celebration', 'workshop', 'conference'] as const;
 export type EvenementCategory = (typeof evenementCategoryValues)[number];
+
+export const invoiceKindValues = ['invoice', 'credit_note'] as const;
+export type InvoiceKind = (typeof invoiceKindValues)[number];
+
+export const invoiceReasonValues = ['go_live', 'renewal', 'manual', 'cancellation'] as const;
+export type InvoiceReason = (typeof invoiceReasonValues)[number];
+
+export const invoiceStatusValues = ['issued', 'paid', 'cancelled'] as const;
+export type InvoiceStatus = (typeof invoiceStatusValues)[number];
 
 export const officialDocumentDocumentTypeValues = ['pv-conseil-municipal', 'deliberation', 'arrete', 'plu', 'scot', 'carte-communale', 'budget-primitif', 'compte-administratif', 'rapport-orientations-budgetaires', 'autre'] as const;
 export type OfficialDocumentDocumentType = (typeof officialDocumentDocumentTypeValues)[number];
@@ -551,6 +560,37 @@ export interface Evenement extends StrapiPublishableDocument {
   scheduled_at: string | null;
 }
 
+/** Content-type `api::invoice.invoice` — Factures et avoirs de l'abonnement Communeo (#314) : figés à l'émission, jamais modifiés ni supprimés */
+export interface Invoice extends StrapiDocument {
+  site?: Site | null;
+  quote?: Quote | null;
+  number: string;
+  kind: InvoiceKind;
+  reason: InvoiceReason;
+  status: InvoiceStatus;
+  credit_for: string | null;
+  cancel_reason: string | null;
+  issued_at: string;
+  due_at: string;
+  period_start: string | null;
+  period_end: string | null;
+  label: string;
+  customer_name: string;
+  customer_siret: string;
+  customer_address: string;
+  customer_email: string;
+  amount_ht: string;
+  vat_rate: string;
+  amount_ttc: string;
+  paid_at: string | null;
+  paid_amount: string | null;
+  chorus_deposited_at: string | null;
+  chorus_reference: string | null;
+  reminders_sent: number | null;
+  last_reminder_at: string | null;
+  pdf_sha256: string;
+}
+
 /** Content-type `api::media-item.media-item` — Bibliothèque de médias avec isolation par site */
 export interface MediaItem extends StrapiDocument {
   name: string;
@@ -769,6 +809,7 @@ export const pluralNames = {
   'api::content-version.content-version': 'content-versions',
   'api::deployment.deployment': 'deployments',
   'api::evenement.evenement': 'evenements',
+  'api::invoice.invoice': 'invoices',
   'api::media-item.media-item': 'media-items',
   'api::newsletter-subscriber.newsletter-subscriber': 'newsletter-subscribers',
   'api::official-document.official-document': 'official-documents',
@@ -793,6 +834,7 @@ export interface ContentTypes {
   'api::content-version.content-version': ContentVersion;
   'api::deployment.deployment': Deployment;
   'api::evenement.evenement': Evenement;
+  'api::invoice.invoice': Invoice;
   'api::media-item.media-item': MediaItem;
   'api::newsletter-subscriber.newsletter-subscriber': NewsletterSubscriber;
   'api::official-document.official-document': OfficialDocument;

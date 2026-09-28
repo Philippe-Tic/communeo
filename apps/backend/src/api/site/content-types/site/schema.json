@@ -137,6 +137,11 @@
       "type": "string",
       "private": true
     },
+    "billing_renewal": {
+      "type": "boolean",
+      "default": true,
+      "private": true
+    },
     "onboarding": {
       "type": "json"
     },

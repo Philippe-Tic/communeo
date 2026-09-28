@@ -14,8 +14,15 @@ Sur le serveur :
 ```bash
 ./deploy.sh <commit>     # une version précise
 ./deploy.sh rollback     # la version précédente
+./deploy.sh restart      # relance la version en ligne, par exemple après une modification du .env
 cat .deployed-tag .previous-tag
 ```
+
+**Après une modification du `.env`** (nouvelle variable, IBAN, clé…) : `./deploy.sh restart`. `deploy.sh`
+écrit aussi la version en ligne dans le `.env` (`IMAGE_TAG`, ne pas la modifier à la main) : un
+`docker compose up -d` relance donc toujours cette version. Sans elle, Docker prendrait l'image
+`latest` restée sur le serveur, souvent bien plus ancienne (incident du 29/09/2026 : Strapi relancé
+sur une ancienne version, API de facturation en 404).
 
 `deploy.sh` récupère les images, redémarre et attend que Strapi et nginx soient sains ; sinon il remet la
 version précédente et s'arrête en erreur. Les migrations de données (`apps/backend/database/migrations`)

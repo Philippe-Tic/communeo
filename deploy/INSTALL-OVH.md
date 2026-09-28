@@ -175,6 +175,8 @@ nano .env        # enregistrer : Ctrl+O puis Entrée ; quitter : Ctrl+X
 | `COMMUNEO_LEGAL_NAME`, `COMMUNEO_LEGAL_ADDRESS`, `COMMUNEO_SIRET`, `COMMUNEO_BILLING_EMAIL` | ton identité sur les devis |
 | `COMMUNEO_VAT_RATE` | `0` en micro-entreprise (franchise de TVA), `0.2` sinon |
 | `COMMUNEO_IBAN`, `COMMUNEO_BIC` | le compte bancaire professionnel imprimé sur les factures (les mairies paient par virement) |
+
+Plus tard, après toute modification du `.env` : `cd ~/communeo && ./deploy.sh restart` (jamais `docker compose up -d` seul avant le premier déploiement).
 | `SEED_SUPER_ADMIN_EMAIL`, `SEED_SUPER_ADMIN_PASSWORD` | ton compte de l'équipe Communeo (mot de passe fort, ≥ 10 caractères) |
 | `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY` | clés de l'utilisateur S3 OVH |
 

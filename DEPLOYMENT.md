@@ -21,7 +21,7 @@ preview.communeo.fr ────►│   TLS Let's Encrypt)└─ preview.*   �
 ```
 
 Images : publiées sur GHCR par `.github/workflows/deploy.yml` (`ghcr.io/philippe-tic/communeo-{backend,worker,preview,web,backup}`),
-une version par commit (`IMAGE_TAG`). Le serveur n'a pas le code source : seulement `docker-compose.yml`, `deploy.sh` et `.env`.
+une version par commit (`IMAGE_TAG`, tenue à jour dans le `.env` par `deploy.sh`). Le serveur n'a pas le code source : seulement `docker-compose.yml`, `deploy.sh` et `.env`. Après une modification du `.env` : `./deploy.sh restart`.
 
 ## 1. Le serveur
 

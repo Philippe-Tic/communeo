@@ -1,7 +1,7 @@
 /**
  * État de la mise en ligne dans l'en-tête : « Site à jour » ou « Modifications en attente de mise en ligne »
  * suivi de « Mettre en ligne » (seulement quand il y a quelque chose à mettre en ligne). Essai terminé :
- * le site est retiré, plus rien n'est mis en ligne.
+ * le site est retiré, plus rien n'est mis en ligne ; inscription pas encore approuvée : rien ne l'est encore.
  */
 import { useQuery } from '@tanstack/react-query';
 import { CircleAlert, Loader2 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/api';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { publicationQuery, usePublish } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
+import { awaitingApproval } from '@/lib/signup';
 import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,15 @@ export function PublicationStatus({ className, stacked }: { className?: string; 
       <div role="status" className={className}>
         <StatusBadge size="md" tone="danger">
           Site retiré : essai terminé
+        </StatusBadge>
+      </div>
+    );
+  }
+  if (awaitingApproval(user?.site)) {
+    return (
+      <div role="status" className={className}>
+        <StatusBadge size="md" tone="info">
+          {awaitingApproval(user?.site) === 'townhall' ? 'Mise en ligne après l’approbation de la mairie' : 'Mise en ligne après vérification'}
         </StatusBadge>
       </div>
     );

@@ -13,3 +13,4 @@ export * from './onboarding-checklist';
 export * from './trial';
 export * from './pricing';
 export * from './billing';
+export * from './signup';

@@ -69,6 +69,7 @@ async function summarize(site: any) {
     trialEndsAt: site.trial_ends_at ?? null,
     trialExpiredAt: site.trial_expired_at ?? null,
     liveRequestedAt: site.live_requested_at ?? null,
+    signupApproval: site.signup_approval ?? null,
     googleSiteVerification: site.google_site_verification ?? null,
     onboarding: site.onboarding ?? null,
     createdAt: site.createdAt,

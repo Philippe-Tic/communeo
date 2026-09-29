@@ -21,6 +21,8 @@ export interface CommuneSummary {
   trialEndsAt: string | null;
   trialExpiredAt: string | null;
   liveRequestedAt: string | null;
+  /** Inscription pas encore approuvée (#337) : rien n'est mis en ligne */
+  signupApproval?: 'townhall' | 'team' | null;
   /** Code de vérification Google Search Console posé par l'équipe */
   googleSiteVerification?: string | null;
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null } | null;

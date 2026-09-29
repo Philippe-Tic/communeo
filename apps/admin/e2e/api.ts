@@ -436,6 +436,8 @@ export interface MockOptions {
   validations?: 'some' | 'none';
   /** Période d'essai de Saint-Aubin (#310) : jours restants, ou essai terminé depuis N jours */
   trial?: { endsInDays: number; requested?: boolean } | { expiredDaysAgo: number; requested?: boolean };
+  /** Inscription pas encore approuvée (#337) : par la mairie ou par l'équipe */
+  approval?: 'townhall' | 'team';
 }
 
 export type MockMedia = {
@@ -1017,6 +1019,10 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
               lastName: 'Martin',
               email: 'julie@gmail.test',
               requestedAt: '2026-09-24T08:30:00.000Z',
+              waitingFor: 'team' as 'team' | 'townhall',
+              officialEmail: null as string | null,
+              approvalSentAt: null as string | null,
+              siteDocumentId: 'site-bourg-neuf' as string | null,
             },
           ],
           liveRequests: [
@@ -1033,7 +1039,10 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
             },
           ],
         }
-      : { signups: [] as Array<{ id: number; communeName: string; insee: string; firstName: string; lastName: string; email: string; requestedAt: string }>, liveRequests: [] as Array<{ documentId: string }> };
+      : {
+          signups: [] as Array<{ id: number; communeName: string; insee: string; firstName: string; lastName: string; email: string; requestedAt: string; waitingFor: 'team' | 'townhall'; officialEmail: string | null; approvalSentAt: string | null; siteDocumentId: string | null }>,
+          liveRequests: [] as Array<{ documentId: string }>,
+        };
   let signedQuote: {
     documentId: string;
     number: string;
@@ -1044,11 +1053,17 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     amountHT: number;
     amountTTC: number;
   } | null = null;
+  const approvalState = {
+    status: (options.approval ?? null) as 'townhall' | 'team' | null,
+    to: options.approval === 'townhall' ? 'm***@saint-aubin.fr' : null,
+    sentAt: options.approval === 'townhall' ? '2026-09-28T08:00:00.000Z' : (null as string | null),
+  };
   const sessionPlan = () => ({
     plan: plan.plan,
     trial_ends_at: plan.trialEndsAt,
     trial_expired_at: plan.trialExpiredAt,
     live_requested_at: plan.liveRequestedAt,
+    signup_approval: approvalState.status,
   });
   const communeSummary = (documentId: string, name: string, slug: string, theme: string | null) => ({
     documentId,
@@ -1402,7 +1417,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       const body = route.request().postDataJSON() as { insee: string; email: string };
       if (body.email === 'existe@saint-aubin.fr')
         return json({ error: { status: 409, message: 'Un compte existe déjà avec cet e-mail : connectez-vous.' } }, 409);
-      return json({ data: body.insee === '58998' ? { status: 'review' } : { status: 'sent', to: 'm***@bourg-neuf.fr' } }, 202);
+      return json({ data: { status: 'sent', to: body.email } }, 202);
     }
     if (url.pathname === '/api/signup/confirm') {
       const jeton = method === 'GET' ? url.searchParams.get('jeton') : (route.request().postDataJSON() as { jeton: string }).jeton;
@@ -1411,7 +1426,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       if (jeton !== 'jeton-inscription') return json({ error: { status: 400, message: 'Ce lien n’est pas valable ou a déjà été utilisé.' } }, 400);
       return method === 'GET'
         ? json({ data: { commune: 'Bourg-Neuf', firstName: 'Julie', lastName: 'Martin', email: 'julie@gmail.test' } })
-        : json({ data: { invitation: 'jeton-inscription-invitation' } });
+        : json({ data: { invitation: 'jeton-inscription-invitation', approval: 'townhall' } });
+    }
+    // Réponse de la mairie, depuis le lien reçu à son adresse officielle (#337)
+    if (['/api/signup/approve', '/api/signup/decline'].includes(url.pathname)) {
+      const jeton = method === 'GET' ? url.searchParams.get('jeton') : (route.request().postDataJSON() as { jeton: string }).jeton;
+      if (jeton === 'jeton-mairie-expire')
+        return json({ error: { status: 410, message: 'Ce lien a expiré : la personne qui a créé le site peut renvoyer la demande depuis son administration.' } }, 410);
+      if (jeton !== 'jeton-mairie') return json({ error: { status: 400, message: 'Ce lien n’est pas valable ou a déjà été utilisé.' } }, 400);
+      return json({ data: method === 'GET' ? { commune: 'Bourg-Neuf', firstName: 'Julie', lastName: 'Martin', email: 'julie@gmail.test' } : { commune: 'Bourg-Neuf' } });
     }
     if (
       url.pathname === '/api/user-management/request-invitation' ||
@@ -1932,7 +1955,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         return json({ success: true, defaultUrl: 'https://saint-aubin-mairie.netlify.app' });
       }
     }
+    if (url.pathname === '/api/signup/approval') return json({ data: approvalState });
+    if (url.pathname === '/api/signup/approval/resend' && method === 'POST') {
+      approvalState.sentAt = new Date().toISOString();
+      return json({ data: { to: approvalState.to, sentAt: approvalState.sentAt } });
+    }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
+      if (approvalState.status) {
+        return json({ error: { status: 403, message: 'Le site sera mis en ligne dès que la mairie aura approuvé la création du site.', details: { code: 'approval_pending' } } }, 403);
+      }
       state = 'running';
       deploy = { readsLeft: 1, triggeredAt: new Date().toISOString() };
       return json({ status: 'queued', queued: true }, 202);

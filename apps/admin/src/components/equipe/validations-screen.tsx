@@ -1,7 +1,9 @@
 /**
- * À valider (#313) : ce qui attend une décision de l'équipe Communeo. Inscriptions dont la mairie n'a
- * pas d'adresse officielle dans l'Annuaire (l'identité du demandeur est à vérifier), et passages en live
- * demandés par les communes. Valider ou refuser ; un refus envoie son motif par e-mail.
+ * À valider (#313) : ce qui attend une décision de l'équipe Communeo. Inscriptions pas encore
+ * approuvées (#337) : la commune prépare son site mais rien n'est mis en ligne ; sans adresse officielle
+ * dans l'Annuaire, l'équipe vérifie ; sinon la mairie n'a pas encore répondu et l'équipe peut approuver
+ * à sa place après l'avoir contactée. Et passages en live demandés par les communes. Valider ou refuser ;
+ * un refus envoie son motif par e-mail.
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
@@ -119,10 +121,10 @@ export function ValidationsScreen() {
         <>
           <Section
             id="inscriptions"
-            title="Inscriptions à vérifier"
+            title="Inscriptions à approuver"
             count={data.signups.length}
-            description="L'Annuaire ne connaît pas d'adresse pour ces mairies : la confirmation n'a pas pu leur être envoyée. Vérifiez auprès de la mairie que la demande vient bien d'elle."
-            empty="Aucune inscription à vérifier."
+            description="Ces communes préparent leur site, qui ne sera pas mis en ligne avant l'approbation. Vérifiez auprès de la mairie que la demande vient bien d'elle."
+            empty="Aucune inscription à approuver."
           >
             {data.signups.map((signup) => (
               <Item
@@ -132,7 +134,20 @@ export function ValidationsScreen() {
                     {signup.communeName} <span className="font-normal text-secondary">· INSEE {signup.insee}</span>
                   </>
                 }
-                lines={[`${signup.firstName} ${signup.lastName} · ${signup.email}`, `Demande du ${formatDay(new Date(signup.requestedAt))}`]}
+                lines={[
+                  `${signup.firstName} ${signup.lastName} · ${signup.email}`,
+                  signup.waitingFor === 'team'
+                    ? "Aucune adresse officielle dans l'Annuaire : à vérifier par l'équipe"
+                    : `Sans réponse de la mairie (${signup.officialEmail ?? 'adresse officielle'})${signup.approvalSentAt ? `, demande envoyée le ${formatDay(new Date(signup.approvalSentAt))}` : ''}`,
+                  `Inscription du ${formatDay(new Date(signup.requestedAt))}`,
+                  ...(signup.siteDocumentId
+                    ? [
+                        <Link key="fiche" to="/plateforme/communes/$documentId" params={{ documentId: signup.siteDocumentId }} className="text-brand underline underline-offset-2">
+                          Fiche de la commune
+                        </Link>,
+                      ]
+                    : []),
+                ]}
                 actions={
                   <>
                     {button('Valider…', () => setDecision({ kind: 'approve-signup', item: signup }), 'primary')}
@@ -194,16 +209,18 @@ export function ValidationsScreen() {
         onOpenChange={close}
         tone="info"
         icon={Building2}
-        title={decision?.kind === 'approve-signup' ? `Créer le site de ${decision.item.communeName} ?` : ''}
+        title={decision?.kind === 'approve-signup' ? `Approuver l'inscription de ${decision.item.communeName} ?` : ''}
         description={
           decision?.kind === 'approve-signup'
-            ? `La commune est créée en essai de 30 jours. ${decision.item.firstName} ${decision.item.lastName} reçoit une invitation à ${decision.item.email} pour choisir son mot de passe.`
+            ? decision.item.siteDocumentId
+              ? `Le site pourra être mis en ligne. ${decision.item.firstName} ${decision.item.lastName} en est prévenu à ${decision.item.email}.`
+              : `La commune est créée en essai de 30 jours. ${decision.item.firstName} ${decision.item.lastName} reçoit une invitation à ${decision.item.email} pour choisir son mot de passe.`
             : ''
         }
-        confirmLabel="Créer et inviter"
+        confirmLabel="Approuver"
         onConfirm={() =>
           decision?.kind === 'approve-signup'
-            ? decide(() => approveSignup(decision.item.id), `${decision.item.communeName} est créée, l'invitation est envoyée.`, "La commune n'a pas été créée")
+            ? decide(() => approveSignup(decision.item.id), `L'inscription de ${decision.item.communeName} est approuvée.`, "L'inscription n'a pas été approuvée")
             : undefined
         }
       />
@@ -231,7 +248,11 @@ export function ValidationsScreen() {
         open={decision?.kind === 'reject-signup'}
         onOpenChange={close}
         title={decision?.kind === 'reject-signup' ? `Refuser l'inscription de ${decision.item.communeName} ?` : ''}
-        description={decision?.kind === 'reject-signup' ? `${decision.item.firstName} ${decision.item.lastName} recevra votre motif à ${decision.item.email}. Aucune commune n'est créée.` : ''}
+        description={
+          decision?.kind === 'reject-signup'
+            ? `${decision.item.firstName} ${decision.item.lastName} recevra votre motif à ${decision.item.email}. ${decision.item.siteDocumentId ? 'Le site commencé, ses contenus et ses comptes seront supprimés.' : "Aucune commune n'est créée."}`
+            : ''
+        }
         confirmLabel="Refuser et envoyer le motif"
         onReject={(reason) =>
           decision?.kind === 'reject-signup'

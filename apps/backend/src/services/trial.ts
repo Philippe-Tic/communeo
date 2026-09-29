@@ -187,7 +187,7 @@ async function settleQuote(site: any, status: 'accepted' | 'rejected') {
  */
 async function republish(site: any, { ifPublished = false } = {}) {
   const published = !!(site.netlify_site_id || site.live_url);
-  if (!(isExpired(site) || (ifPublished && published)) || !isBuildQueueConfigured()) return;
+  if (!(isExpired(site) || (ifPublished && published)) || site.signup_approval || !isBuildQueueConfigured()) return;
   try {
     await deploymentService.requestBuild(site.documentId, { triggeredBy: null, reason: 'manual' });
   } catch (error) {
@@ -195,12 +195,29 @@ async function republish(site: any, { ifPublished = false } = {}) {
   }
 }
 
-/** Passage en live (équipe Communeo) : fin de l'essai ; le site est remis en ligne, sans bandeau d'essai */
+/**
+ * Passage en live (équipe Communeo) : fin de l'essai ; le site est remis en ligne, sans bandeau d'essai.
+ * L'équipe qui passe la commune en live vaut approbation d'une inscription encore en attente (#337).
+ */
 export async function goLive(site: any) {
   const updated = await strapi.documents(SITE).update({
     documentId: site.documentId,
-    data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null, live_requested_by: null } as any,
+    data: { plan: 'live', trial_expired_at: null, trial_notice: null, live_requested_at: null, live_requested_by: null, signup_approval: null } as any,
   });
+  if (site.signup_approval) {
+    const requests = await strapi.db.query('api::signup-request.signup-request').findMany({
+      where: { site: { documentId: site.documentId }, status: { $in: ['pending_townhall', 'awaiting_review'] } },
+      select: ['id'],
+    });
+    // updateMany ne filtre pas sur une relation : par identifiants
+    if (requests.length) {
+      await strapi.db.query('api::signup-request.signup-request').updateMany({
+        where: { id: { $in: requests.map((request: any) => request.id) } },
+        data: { status: 'confirmed', confirmed_at: new Date(), approval_token: null },
+      });
+    }
+    site = { ...site, signup_approval: null };
+  }
   await recordActivity({ action: 'commune_go_live', siteDocumentId: site.documentId, target: { type: 'site', id: site.documentId, label: site.name } });
   await settleQuote(site, 'accepted');
   // Première facture (#314) : un échec ne retient pas le passage en live, l'équipe peut l'émettre ensuite

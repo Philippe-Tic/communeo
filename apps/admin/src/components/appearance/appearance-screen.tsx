@@ -19,6 +19,7 @@ import { focusHeadingIfRequested } from '@/lib/focus';
 import { previewQuery } from '@/lib/preview';
 import { publicationQuery, usePublish } from '@/lib/publication';
 import { sessionQuery, themeName } from '@/lib/session';
+import { awaitingApproval } from '@/lib/signup';
 import { saveSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import { cn } from '@/lib/utils';
 
@@ -273,6 +274,9 @@ function SwitchStatus({ theme, published }: { theme: string; published: boolean 
 export function AppearanceScreen({ site }: { site: SiteSettings }) {
   const client = useQueryClient();
   const publish = usePublish();
+  // Inscription pas encore approuvée (#337) : rien n'est mis en ligne, pas de mise en ligne immédiate
+  const { data: user } = useQuery(sessionQuery);
+  const canPublish = !awaitingApproval(user?.site);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => focusHeadingIfRequested(heading.current), []);
   useEffect(() => {
@@ -302,7 +306,7 @@ export function AppearanceScreen({ site }: { site: SiteSettings }) {
     }
     setPreviewed(null);
     let published = false;
-    if (publishNow) {
+    if (publishNow && canPublish) {
       try {
         await publish.mutateAsync();
         published = true;
@@ -379,15 +383,17 @@ export function AppearanceScreen({ site }: { site: SiteSettings }) {
         confirmLabel={`Passer au thème ${choosing?.name ?? ''}`}
         onConfirm={confirm}
       >
-        <label className="flex cursor-pointer items-start gap-2.5">
-          <input
-            type="checkbox"
-            checked={publishNow}
-            onChange={(event) => setPublishNow(event.target.checked)}
-            className="mt-0.5 size-[18px] shrink-0 rounded accent-[var(--brand-button)]"
-          />
-          Mettre en ligne immédiatement après le changement
-        </label>
+        {canPublish && (
+          <label className="flex cursor-pointer items-start gap-2.5">
+            <input
+              type="checkbox"
+              checked={publishNow}
+              onChange={(event) => setPublishNow(event.target.checked)}
+              className="mt-0.5 size-[18px] shrink-0 rounded accent-[var(--brand-button)]"
+            />
+            Mettre en ligne immédiatement après le changement
+          </label>
+        )}
       </ConfirmDialog>
     </div>
   );

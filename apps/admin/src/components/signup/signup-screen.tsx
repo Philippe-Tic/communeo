@@ -1,12 +1,13 @@
 /**
- * Inscription d'une mairie en libre-service (#309) : commune (recherche dans le référentiel officiel),
- * nom et e-mail de la personne, conditions. La confirmation part à l'adresse officielle de la mairie ;
- * sans adresse connue, la demande attend l'équipe Communeo.
+ * Inscription d'une mairie en libre-service (#309, #337) : commune (recherche dans le référentiel
+ * officiel), nom et e-mail de la personne, conditions. Le lien de confirmation part à l'adresse saisie ;
+ * la mairie approuve ensuite depuis son adresse officielle avant la mise en ligne du site.
  */
 import { Link } from '@tanstack/react-router';
-import { CircleAlert, Loader2, MailCheck, Search, UserCheck } from 'lucide-react';
+import { CircleAlert, Loader2, MailCheck, Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
+import { ofCommune } from '@communeo/core';
 import { AuthLayout } from '@/components/auth-layout';
 import { CheckboxField, controlClass, Field, Form, TextField, useZodForm } from '@/components/form';
 import { Button } from '@/components/ui/button';
@@ -147,7 +148,7 @@ export function SignupScreen() {
           name="email"
           label="Votre e-mail"
           required
-          help="Ce sera votre identifiant. La confirmation, elle, part à l’adresse officielle de la mairie."
+          help="Ce sera votre identifiant : un lien de confirmation y sera envoyé."
           inputProps={{ type: 'email', autoComplete: 'email', inputMode: 'email' }}
         />
         {/* Piège à robots : invisible et ignoré par les personnes */}
@@ -192,28 +193,19 @@ function SignupSent({ result, commune }: { result: SignupResult; commune: string
   const heading = useRef<HTMLDivElement>(null);
   useEffect(() => heading.current?.focus(), []);
   return (
-    <AuthLayout title={result.status === 'sent' ? 'Vérifiez la boîte de la mairie' : 'Demande enregistrée'} documentTitle="Inscription envoyée">
+    <AuthLayout title="Vérifiez votre boîte de réception" documentTitle="Inscription envoyée">
       <div ref={heading} tabIndex={-1} role="status" className="flex gap-2.5 outline-none">
-        {result.status === 'sent' ? (
-          <>
-            <MailCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
-            <div className="space-y-2">
-              <p>
-                Pour vérifier que la demande vient bien de la commune, un e-mail de confirmation a été envoyé à l’adresse officielle de la mairie
-                {commune ? <> de {commune}</> : null} : <strong>{result.to}</strong>.
-              </p>
-              <p className="text-secondary">Le lien est valable 7 jours. Une fois la création confirmée, vous choisissez votre mot de passe et arrivez dans l’assistant de démarrage.</p>
-            </div>
-          </>
-        ) : (
-          <>
-            <UserCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
-            <div className="space-y-2">
-              <p>L’équipe Communeo vérifie la demande{commune ? <> pour {commune}</> : null} et vous écrit sous deux jours ouvrés.</p>
-              <p className="text-secondary">L’adresse officielle de la mairie n’est pas connue de l’annuaire du service public : la vérification se fait à la main.</p>
-            </div>
-          </>
-        )}
+        <MailCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
+        <div className="space-y-2">
+          <p>
+            Pour créer le site{commune ? ` ${ofCommune(commune)}` : null}, confirmez votre adresse : un lien vient d’être envoyé à <strong>{result.to}</strong>.
+          </p>
+          <p className="text-secondary">
+            Le lien est valable 7 jours. Vous choisirez ensuite votre mot de passe et pourrez préparer votre site tout de suite. Il sera mis en ligne une fois la
+            demande approuvée par la mairie, depuis son adresse officielle.
+          </p>
+          <p className="text-secondary">Rien reçu ? Regardez dans les indésirables, ou vérifiez l’adresse et refaites la demande.</p>
+        </div>
       </div>
       <Link to="/connexion" className="mt-5 inline-block font-semibold text-brand underline underline-offset-2">
         Retour à la connexion

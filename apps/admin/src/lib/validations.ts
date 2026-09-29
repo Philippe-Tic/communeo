@@ -1,5 +1,5 @@
 /**
- * File « À valider » de l'équipe Communeo (#313) : inscriptions sans adresse officielle de mairie et
+ * File « À valider » de l'équipe Communeo (#313) : inscriptions en attente d'approbation (#337) et
  * passages en live demandés, validés ou refusés (motif envoyé par e-mail).
  */
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
@@ -13,6 +13,12 @@ export interface SignupToReview {
   lastName: string;
   email: string;
   requestedAt: string;
+  /** `team` : aucune adresse officielle connue ; `townhall` : la mairie n'a pas encore répondu */
+  waitingFor: 'team' | 'townhall';
+  officialEmail: string | null;
+  approvalSentAt: string | null;
+  /** Commune déjà créée en essai (absente pour une demande antérieure à #337) */
+  siteDocumentId: string | null;
 }
 
 export interface LiveRequest {

@@ -130,6 +130,13 @@
         "deletion"
       ]
     },
+    "signup_approval": {
+      "type": "enumeration",
+      "enum": [
+        "townhall",
+        "team"
+      ]
+    },
     "live_requested_at": {
       "type": "datetime"
     },

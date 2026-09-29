@@ -1,13 +1,14 @@
 /**
- * Confirmation d'une inscription depuis le lien reçu à l'adresse officielle de la mairie (#309) :
- * la personne qui ouvre la boîte de la mairie approuve la création. Le site n'est créé qu'au clic
- * (les antivirus de messagerie ouvrent les liens tout seuls). Ensuite : choix du mot de passe du
- * demandeur, puis assistant de démarrage.
+ * Confirmation de l'adresse de la personne qui s'inscrit (#309, #337), depuis le lien reçu dans sa
+ * boîte : la commune n'est créée qu'au clic (les antivirus de messagerie ouvrent les liens tout
+ * seuls). Ensuite : choix de son mot de passe, puis assistant de démarrage ; la mairie approuve de
+ * son côté avant la mise en ligne du site.
  */
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { CircleAlert } from 'lucide-react';
 import { useState } from 'react';
+import { ofCommune } from '@communeo/core';
 import { AuthLayout } from '@/components/auth-layout';
 import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api';
@@ -25,8 +26,8 @@ export function SignupConfirmScreen({ token }: { token: string | undefined }) {
       <AuthLayout title={expired ? 'Ce lien a expiré' : 'Ce lien ne fonctionne pas'} documentTitle="Confirmation de l’inscription">
         <p className="text-secondary">
           {expired
-            ? 'Les liens de confirmation sont valables 7 jours. Refaites la demande : un nouvel e-mail partira à l’adresse de la mairie.'
-            : 'Le lien est incomplet ou a déjà servi. Si le site a déjà été créé, la personne qui l’a demandé peut se connecter.'}
+            ? 'Les liens de confirmation sont valables 7 jours. Refaites la demande : un nouveau lien vous sera envoyé.'
+            : 'Le lien est incomplet ou a déjà servi. Si vous avez déjà créé le site, connectez-vous.'}
         </p>
         <div className="mt-5 flex flex-col gap-3">
           <Button asChild size="lg" className="w-full">
@@ -52,7 +53,7 @@ export function SignupConfirmScreen({ token }: { token: string | undefined }) {
     setBusy(true);
     setError(null);
     try {
-      const invitation = await confirmSignup(token);
+      const { invitation } = await confirmSignup(token);
       await navigate({ to: '/invitation', search: { jeton: invitation } });
     } catch (caught) {
       setBusy(false);
@@ -61,14 +62,15 @@ export function SignupConfirmScreen({ token }: { token: string | undefined }) {
   };
 
   return (
-    <AuthLayout title={`Créer le site de ${request.commune}`} documentTitle="Confirmation de l’inscription">
+    <AuthLayout title={`Créer le site ${ofCommune(request.commune)}`} documentTitle="Confirmation de l’inscription">
       <p>
-        <strong>
-          {request.firstName} {request.lastName}
-        </strong>{' '}
-        ({request.email}) demande à créer le site internet de la commune sur Communeo.
+        Votre adresse <strong>{request.email}</strong> est confirmée. Vous allez devenir administrateur du site de la commune, avec 30 jours d’essai
+        gratuit.
       </p>
-      <p className="mt-3 text-secondary">En confirmant, vous approuvez cette demande au nom de la mairie. {request.firstName} deviendra administrateur du site, avec 30 jours d’essai gratuit.</p>
+      <p className="mt-3 text-secondary">
+        Vous choisirez ensuite votre mot de passe et pourrez préparer le site tout de suite. Il sera mis en ligne une fois la demande approuvée par la
+        mairie.
+      </p>
       {error && (
         <p role="alert" className="mt-4 flex gap-2 text-[13px] text-danger">
           <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
@@ -76,9 +78,9 @@ export function SignupConfirmScreen({ token }: { token: string | undefined }) {
         </p>
       )}
       <Button size="lg" className="mt-5 w-full" disabled={busy} onClick={() => void confirm()}>
-        {busy ? 'Création du site…' : 'Confirmer la création du site'}
+        {busy ? 'Création du site…' : 'Créer le site'}
       </Button>
-      <p className="mt-4 text-[13px] text-secondary">Si la mairie n’est pas à l’origine de cette demande, fermez cette page : rien ne sera créé.</p>
+      <p className="mt-4 text-[13px] text-secondary">Si vous n’êtes pas à l’origine de cette demande, fermez cette page : rien ne sera créé.</p>
     </AuthLayout>
   );
 }

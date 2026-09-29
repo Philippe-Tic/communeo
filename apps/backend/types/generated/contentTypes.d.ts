@@ -417,6 +417,7 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'live_request',
         'commune_go_live',
         'live_reject',
+        'signup_approve',
         'signup_reject',
         'quote_sign',
         'invoice_issue',
@@ -1238,7 +1239,7 @@ export interface ApiSchoolMenuSchoolMenu extends Struct.CollectionTypeSchema {
 export interface ApiSignupRequestSignupRequest extends Struct.CollectionTypeSchema {
   collectionName: 'signup_requests';
   info: {
-    description: "Inscription d'une mairie en libre-service, en attente de la confirmation envoy\u00E9e \u00E0 l'adresse officielle de la mairie ou de la v\u00E9rification par l'\u00E9quipe";
+    description: "Inscription d'une mairie en libre-service : adresse du demandeur \u00E0 v\u00E9rifier, puis approbation par la mairie depuis son adresse officielle ou par l'\u00E9quipe";
     displayName: "Demande d'inscription";
     pluralName: 'signup-requests';
     singularName: 'signup-request';
@@ -1255,12 +1256,16 @@ export interface ApiSignupRequestSignupRequest extends Struct.CollectionTypeSche
     };
   };
   attributes: {
+    approval: Schema.Attribute.Enumeration<['same_email', 'same_domain', 'townhall', 'team']>;
+    approval_sent_at: Schema.Attribute.DateTime;
+    approval_token: Schema.Attribute.String & Schema.Attribute.Private;
     code_insee: Schema.Attribute.String & Schema.Attribute.Required;
     commune_name: Schema.Attribute.String & Schema.Attribute.Required;
     confirmed_at: Schema.Attribute.DateTime;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
     email: Schema.Attribute.Email & Schema.Attribute.Required & Schema.Attribute.Private;
+    email_confirmed_at: Schema.Attribute.DateTime;
     first_name: Schema.Attribute.String & Schema.Attribute.Required;
     last_name: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
@@ -1272,9 +1277,11 @@ export interface ApiSignupRequestSignupRequest extends Struct.CollectionTypeSche
     reviewed_at: Schema.Attribute.DateTime;
     reviewed_by: Schema.Attribute.String;
     site: Schema.Attribute.Relation<'oneToOne', 'api::site.site'>;
-    status: Schema.Attribute.Enumeration<['pending_confirmation', 'awaiting_review', 'confirmed', 'rejected']> &
+    status: Schema.Attribute.Enumeration<
+      ['pending_email', 'pending_townhall', 'awaiting_review', 'confirmed', 'rejected', 'pending_confirmation']
+    > &
       Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<'pending_confirmation'>;
+      Schema.Attribute.DefaultTo<'pending_email'>;
     terms_accepted_at: Schema.Attribute.DateTime & Schema.Attribute.Required;
     token: Schema.Attribute.String & Schema.Attribute.Private;
     updatedAt: Schema.Attribute.DateTime;
@@ -1360,6 +1367,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     school_menus: Schema.Attribute.Relation<'oneToMany', 'api::school-menu.school-menu'>;
+    signup_approval: Schema.Attribute.Enumeration<['townhall', 'team']>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     social_links: Schema.Attribute.Component<'social.social-link', true>;
     ssl_enabled: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;

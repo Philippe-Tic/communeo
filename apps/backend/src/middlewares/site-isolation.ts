@@ -66,7 +66,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations', 'quote', 'billing'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations', 'quote', 'billing', 'signup'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [
@@ -86,6 +86,8 @@ const PROTECTED_SITE_FIELDS = [
   'trial_notice',
   'live_requested_at',
   'live_requested_by',
+  // inscription en attente de l'approbation de la mairie ou de l'équipe (#337)
+  'signup_approval',
   // facturation (#314) : renouvellement de l'abonnement, décidé par l'équipe
   'billing_renewal',
   // référencement : code de vérification Google Search Console, posé par l'équipe

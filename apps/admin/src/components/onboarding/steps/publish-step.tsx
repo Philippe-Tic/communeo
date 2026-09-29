@@ -6,9 +6,9 @@
  */
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Check, CloudUpload, ExternalLink, Info, Loader2, TriangleAlert } from 'lucide-react';
+import { Check, CloudUpload, ExternalLink, Hourglass, Info, Loader2, TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { THEMES } from '@communeo/core';
+import { ofCommune, THEMES } from '@communeo/core';
 import { PUBLICATION_STEPS } from '@/components/publication/publication-screen';
 import { ApiError, api } from '@/lib/api';
 import { publicationStatesQuery } from '@/lib/content-list';
@@ -16,6 +16,7 @@ import { checklistQuery } from '@/lib/onboarding';
 import { pageTemplatesQuery } from '@/lib/page-templates';
 import { publicationQuery } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
+import { approvalWaitingLabel, awaitingApproval, type SignupApproval } from '@/lib/signup';
 import { WizardActions, type StepProps } from '../onboarding-screen';
 import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
@@ -24,30 +25,35 @@ const COMMON_PAGES = 'Accueil, Contact, Mentions légales, Données personnelles
 const host = (url: string) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 const plural = (count: number, one: string, many: string) => `${count} ${count > 1 ? many : one}`;
 
-function Success({ siteName, liveUrl, seconds }: { siteName: string; liveUrl: string | null; seconds: number | null }) {
+/** Fin de l'assistant : site en ligne, ou prêt en attendant l'approbation de l'inscription (#337) */
+function Success({ siteName, liveUrl, seconds, waiting = null }: { siteName: string; liveUrl: string | null; seconds: number | null; waiting?: SignupApproval }) {
   const checklist = useQuery(checklistQuery);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     heading.current?.focus();
-    document.title = 'Site en ligne · Communeo';
-  }, []);
+    document.title = waiting ? 'Site prêt · Communeo' : 'Site en ligne · Communeo';
+  }, [waiting]);
   const todo = checklist.data?.todo.slice(0, 3) ?? [];
   return (
     <WizardFrame step={null} actions={null}>
       <div className="mx-auto flex max-w-[520px] flex-col items-center gap-4 py-6 text-center md:py-10">
         <span
           aria-hidden="true"
-          className="grid size-[72px] place-items-center rounded-full bg-success-bg text-success"
+          className={waiting ? 'grid size-[72px] place-items-center rounded-full bg-info-bg text-info' : 'grid size-[72px] place-items-center rounded-full bg-success-bg text-success'}
         >
-          <Check className="size-9" />
+          {waiting ? <Hourglass className="size-9" /> : <Check className="size-9" />}
         </span>
         <h1 ref={heading} tabIndex={-1} className="text-[28px] leading-tight outline-none">
-          Le site de {siteName} est en ligne
+          {waiting ? `Le site ${ofCommune(siteName)} est prêt` : `Le site ${ofCommune(siteName)} est en ligne`}
         </h1>
         <p className="text-[16px] text-secondary">
-          {seconds ? `Mise en ligne réussie en ${plural(seconds, 'seconde', 'secondes')}.` : 'Mise en ligne réussie.'}
+          {waiting
+            ? `${approvalWaitingLabel(waiting)} Vous pouvez continuer à le compléter d’ici là.`
+            : seconds
+              ? `Mise en ligne réussie en ${plural(seconds, 'seconde', 'secondes')}.`
+              : 'Mise en ligne réussie.'}
         </p>
-        {liveUrl && (
+        {liveUrl && !waiting && (
           <a
             href={liveUrl}
             target="_blank"
@@ -98,7 +104,8 @@ type Phase =
   | { kind: 'recap' }
   | { kind: 'running'; since: number }
   | { kind: 'failed'; message: string }
-  | { kind: 'done'; seconds: number | null };
+  | { kind: 'done'; seconds: number | null }
+  | { kind: 'waiting' };
 
 export function PublishStep({ site, step, back, later, complete, alert }: StepProps & { alert: ReactNode }) {
   const client = useQueryClient();
@@ -113,6 +120,19 @@ export function PublishStep({ site, step, back, later, complete, alert }: StepPr
     refetchIntervalInBackground: true,
   });
   const liveUrl = user.site?.live_url ?? null;
+  // Inscription pas encore approuvée : l'assistant se termine sans mise en ligne
+  const waitingFor = awaitingApproval(user.site);
+  const [finishing, setFinishing] = useState(false);
+  const finish = async () => {
+    setFinishing(true);
+    try {
+      await complete();
+      void client.invalidateQueries({ queryKey: checklistQuery.queryKey });
+      setPhase({ kind: 'waiting' });
+    } finally {
+      setFinishing(false);
+    }
+  };
 
   const trigger = useMutation({
     mutationFn: () => api<{ status: string }>('/api/deployment/trigger', { method: 'POST' }),
@@ -148,6 +168,7 @@ export function PublishStep({ site, step, back, later, complete, alert }: StepPr
   }, [succeeded, data, phase, complete, client]);
 
   if (phase.kind === 'done') return <Success siteName={site.name} liveUrl={liveUrl} seconds={phase.seconds} />;
+  if (phase.kind === 'waiting') return <Success siteName={site.name} liveUrl={null} seconds={null} waiting={waitingFor ?? 'townhall'} />;
 
   const running = trigger.isPending || (phase.kind === 'running' && !buildFailed);
   const error =
@@ -175,12 +196,16 @@ export function PublishStep({ site, step, back, later, complete, alert }: StepPr
         <WizardActions
           onBack={running ? undefined : back}
           tertiary={running ? undefined : { label: 'Enregistrer et continuer plus tard', onClick: () => void later() }}
-          primary={{
-            label: running ? 'Mise en ligne…' : error ? 'Réessayer' : 'Mettre le site en ligne',
-            icon: running ? undefined : CloudUpload,
-            busy: running,
-            onClick: () => trigger.mutate(),
-          }}
+          primary={
+            waitingFor
+              ? { label: finishing ? 'Enregistrement…' : 'Terminer', icon: finishing ? undefined : Check, busy: finishing, onClick: () => void finish() }
+              : {
+                  label: running ? 'Mise en ligne…' : error ? 'Réessayer' : 'Mettre le site en ligne',
+                  icon: running ? undefined : CloudUpload,
+                  busy: running,
+                  onClick: () => trigger.mutate(),
+                }
+          }
         />
       }
     >
@@ -193,8 +218,9 @@ export function PublishStep({ site, step, back, later, complete, alert }: StepPr
       )}
       <StepHeading step={step}>Mise en ligne</StepHeading>
       <p className="mt-2 text-secondary">
-        Votre site sera accessible à l'adresse provisoire ci-dessous. Vous pourrez ajouter votre propre nom de domaine
-        ensuite.
+        {waitingFor
+          ? `${approvalWaitingLabel(waitingFor)} Il sera alors accessible à une adresse provisoire ; vous pourrez ajouter votre propre nom de domaine ensuite.`
+          : "Votre site sera accessible à l'adresse provisoire ci-dessous. Vous pourrez ajouter votre propre nom de domaine ensuite."}
       </p>
       <dl className="mt-5 space-y-3 rounded-xl border border-border bg-surface p-4 dark:bg-sidebar">
         <Row label="Commune">

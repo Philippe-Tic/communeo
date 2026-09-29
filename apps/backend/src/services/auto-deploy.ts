@@ -12,6 +12,7 @@ import deploymentService from './deployment';
 import { isBuildQueueConfigured } from './build-queue';
 import { isCommuneDeletion } from './commune-deletion';
 import { isScheduledPublication, recordPendingChange, type PendingAction } from './pending-changes';
+import { isAwaitingApproval } from './signup-approval';
 import { log } from '../utils/logger';
 
 const SITE = 'api::site.site';
@@ -52,6 +53,8 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'trial_notice',
   'live_requested_at',
   'live_requested_by',
+  // Inscription en attente d'approbation (#337) : la mise en ligne suit l'approbation
+  'signup_approval',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */
@@ -113,8 +116,8 @@ class AutoDeployService {
       const scheduledPublication = isScheduledPublication();
       // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
       if (!site?.auto_deploy_enabled && !scheduledPublication) return;
-      // Commune suspendue ou essai terminé : plus aucune mise en ligne
-      if (site.suspended || site.plan === 'expired') return;
+      // Commune suspendue, essai terminé ou inscription pas encore approuvée : aucune mise en ligne
+      if (site.suspended || site.plan === 'expired' || isAwaitingApproval(site)) return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;

@@ -1,6 +1,10 @@
 /** Étape 1 — Bienvenue : une phrase, la durée, ce qu'il faut avoir sous la main */
 import { FileImage, Hash, UserRound } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
+import { ofCommune } from '@communeo/core';
+import { sessionQuery } from '@/lib/session';
+import { approvalWaitingLabel, awaitingApproval } from '@/lib/signup';
 import { WizardActions, type StepProps } from '../onboarding-screen';
 import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
@@ -12,17 +16,21 @@ const HANDY = [
 ];
 
 export function WelcomeStep({ site, step, next, alert }: StepProps & { alert: ReactNode }) {
+  // Inscription pas encore approuvée (#337) : on prépare le site, la mise en ligne viendra ensuite
+  const { data: user } = useQuery(sessionQuery);
+  const waitingFor = awaitingApproval(user?.site);
   return (
     <WizardFrame step={step} actions={<WizardActions primary={{ label: 'Commencer', onClick: () => void next() }} />}>
       {alert}
       <div className="mx-auto max-w-[520px] py-6 text-center md:py-12">
         <StepHeading step={step} className="text-[26px] outline-none md:text-[30px]">
-          Créons le site de {site.name}
+          Créons le site {ofCommune(site.name)}
         </StepHeading>
         <p className="mt-3 text-[16px] text-secondary">
           Sept étapes courtes pour mettre votre site en ligne, en{' '}
           <strong className="text-text">20 minutes environ</strong>. Vous pourrez tout modifier ensuite.
         </p>
+        {waitingFor && <p className="mt-2 text-[14px] text-secondary">{approvalWaitingLabel(waitingFor)}</p>}
         <section
           aria-labelledby="sous-la-main"
           className="mt-7 rounded-xl border border-border bg-surface p-4 text-left dark:bg-sidebar"

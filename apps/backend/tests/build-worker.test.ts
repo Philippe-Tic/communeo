@@ -55,6 +55,7 @@ describe('routes internes du worker', () => {
       hostId: null,
       customDomain: null,
       noindex: false,
+      redirects: [],
     });
 
     const retry = await start(1);

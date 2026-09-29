@@ -196,6 +196,13 @@ function DomainForm({ onSaved }: { onSaved: () => void }) {
         Par exemple saint-aubin-sur-loire.fr, avec ou sans « www ». Le nom de domaine s'achète auprès d'un registraire
         (OVH, Gandi…).
       </p>
+      <p className="text-[13px] text-secondary">
+        Votre commune avait déjà un site sur ce domaine ? Préparez d'abord les{' '}
+        <Link to="/mon-site/redirections" className="font-medium text-brand underline">
+          redirections de ses anciennes adresses
+        </Link>
+        , pour que les habitants et Google retrouvent les bonnes pages.
+      </p>
       {error && (
         <p id={`${id}-erreur`} role="alert" className="flex items-center gap-1.5 text-[13px] font-medium text-danger">
           <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />

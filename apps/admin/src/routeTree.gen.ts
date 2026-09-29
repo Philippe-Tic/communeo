@@ -59,6 +59,7 @@ import { Route as AppMonSiteInformationsRouteImport } from './routes/_app/mon-si
 import { Route as AppMonSiteLegalRouteImport } from './routes/_app/mon-site/legal'
 import { Route as AppMonSiteMenuRouteImport } from './routes/_app/mon-site/menu'
 import { Route as AppMonSiteOpenDataRouteImport } from './routes/_app/mon-site/open-data'
+import { Route as AppMonSiteRedirectionsRouteImport } from './routes/_app/mon-site/redirections'
 import { Route as AppMonSiteReseauxRouteImport } from './routes/_app/mon-site/reseaux'
 import { Route as AppPagesDocumentIdRouteImport } from './routes/_app/pages_.$documentId'
 import { Route as PlateformeCommunesDocumentIdRouteImport } from './routes/plateforme/communes.$documentId'
@@ -312,6 +313,11 @@ const AppMonSiteOpenDataRoute = AppMonSiteOpenDataRouteImport.update({
   path: '/mon-site/open-data',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMonSiteRedirectionsRoute = AppMonSiteRedirectionsRouteImport.update({
+  id: '/mon-site/redirections',
+  path: '/mon-site/redirections',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMonSiteReseauxRoute = AppMonSiteReseauxRouteImport.update({
   id: '/mon-site/reseaux',
   path: '/mon-site/reseaux',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/mon-site/legal': typeof AppMonSiteLegalRoute
   '/mon-site/menu': typeof AppMonSiteMenuRoute
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
+  '/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
   '/mon-site/legal': typeof AppMonSiteLegalRoute
   '/mon-site/menu': typeof AppMonSiteMenuRoute
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
+  '/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
@@ -488,6 +496,7 @@ export interface FileRoutesById {
   '/_app/mon-site/legal': typeof AppMonSiteLegalRoute
   '/_app/mon-site/menu': typeof AppMonSiteMenuRoute
   '/_app/mon-site/open-data': typeof AppMonSiteOpenDataRoute
+  '/_app/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/_app/mon-site/reseaux': typeof AppMonSiteReseauxRoute
   '/_app/pages_/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
@@ -544,6 +553,7 @@ export interface FileRouteTypes {
     | '/mon-site/legal'
     | '/mon-site/menu'
     | '/mon-site/open-data'
+    | '/mon-site/redirections'
     | '/mon-site/reseaux'
     | '/pages/$documentId'
     | '/plateforme/communes/$documentId'
@@ -597,6 +607,7 @@ export interface FileRouteTypes {
     | '/mon-site/legal'
     | '/mon-site/menu'
     | '/mon-site/open-data'
+    | '/mon-site/redirections'
     | '/mon-site/reseaux'
     | '/pages/$documentId'
     | '/plateforme/communes/$documentId'
@@ -652,6 +663,7 @@ export interface FileRouteTypes {
     | '/_app/mon-site/legal'
     | '/_app/mon-site/menu'
     | '/_app/mon-site/open-data'
+    | '/_app/mon-site/redirections'
     | '/_app/mon-site/reseaux'
     | '/_app/pages_/$documentId'
     | '/plateforme/communes/$documentId'
@@ -1022,6 +1034,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonSiteOpenDataRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/mon-site/redirections': {
+      id: '/_app/mon-site/redirections'
+      path: '/mon-site/redirections'
+      fullPath: '/mon-site/redirections'
+      preLoaderRoute: typeof AppMonSiteRedirectionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mon-site/reseaux': {
       id: '/_app/mon-site/reseaux'
       path: '/mon-site/reseaux'
@@ -1081,6 +1100,7 @@ interface AppRouteChildren {
   AppMonSiteLegalRoute: typeof AppMonSiteLegalRoute
   AppMonSiteMenuRoute: typeof AppMonSiteMenuRoute
   AppMonSiteOpenDataRoute: typeof AppMonSiteOpenDataRoute
+  AppMonSiteRedirectionsRoute: typeof AppMonSiteRedirectionsRoute
   AppMonSiteReseauxRoute: typeof AppMonSiteReseauxRoute
   AppPagesDocumentIdRoute: typeof AppPagesDocumentIdRoute
 }
@@ -1120,6 +1140,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonSiteLegalRoute: AppMonSiteLegalRoute,
   AppMonSiteMenuRoute: AppMonSiteMenuRoute,
   AppMonSiteOpenDataRoute: AppMonSiteOpenDataRoute,
+  AppMonSiteRedirectionsRoute: AppMonSiteRedirectionsRoute,
   AppMonSiteReseauxRoute: AppMonSiteReseauxRoute,
   AppPagesDocumentIdRoute: AppPagesDocumentIdRoute,
 }

@@ -16,6 +16,8 @@ export interface BuildSite {
   customDomain: string | null;
   /** Commune en période d'essai : le site ne doit pas être indexé */
   noindex?: boolean;
+  /** Redirections depuis l'ancien site de la commune (#335) : `/horaires.html` → `/contact` */
+  redirects?: Array<{ from: string; to: string }>;
 }
 
 export interface StartBuildRequest {

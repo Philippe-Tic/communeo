@@ -114,6 +114,7 @@ const CAPTURES: Capture[] = [
   { name: 'conformite', route: '/conformite' },
   { name: 'utilisateurs', route: '/utilisateurs' },
   { name: 'journal', route: '/journal' },
+  { name: 'redirections', route: '/mon-site/redirections' },
   { name: 'facturation', route: '/facturation' },
   { name: 'mon-compte', route: '/mon-compte' },
   { name: 'plateforme-communes', route: '/plateforme', options: { user: 'super_admin' } },

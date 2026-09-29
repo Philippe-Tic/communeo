@@ -14,3 +14,4 @@ export * from './trial';
 export * from './pricing';
 export * from './billing';
 export * from './redirects';
+export * from './signup';

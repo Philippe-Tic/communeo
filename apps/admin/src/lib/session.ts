@@ -21,6 +21,8 @@ export interface SessionSite {
   trial_ends_at?: string | null;
   trial_expired_at?: string | null;
   live_requested_at?: string | null;
+  /** Inscription pas encore approuvée par la mairie ou l'équipe (lib/signup.ts) : rien n'est mis en ligne */
+  signup_approval?: 'townhall' | 'team' | null;
 }
 
 export interface SessionUser {
@@ -59,6 +61,7 @@ export const sessionQuery = queryOptions({
         trial_ends_at: site.trialEndsAt,
         trial_expired_at: site.trialExpiredAt,
         live_requested_at: site.liveRequestedAt,
+        signup_approval: site.signupApproval ?? null,
       },
     };
   },

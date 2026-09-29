@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_approve', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -147,8 +147,11 @@ export type QuoteStatus = (typeof quoteStatusValues)[number];
 export const schoolMenuMenuModeValues = ['image', 'manual'] as const;
 export type SchoolMenuMenuMode = (typeof schoolMenuMenuModeValues)[number];
 
-export const signupRequestStatusValues = ['pending_confirmation', 'awaiting_review', 'confirmed', 'rejected'] as const;
+export const signupRequestStatusValues = ['pending_email', 'pending_townhall', 'awaiting_review', 'confirmed', 'rejected', 'pending_confirmation'] as const;
 export type SignupRequestStatus = (typeof signupRequestStatusValues)[number];
+
+export const signupRequestApprovalValues = ['same_email', 'same_domain', 'townhall', 'team'] as const;
+export type SignupRequestApproval = (typeof signupRequestApprovalValues)[number];
 
 export const siteThemeValues = ['institutionnel', 'moderne', 'journal', 'bourg'] as const;
 export type SiteTheme = (typeof siteThemeValues)[number];
@@ -164,6 +167,9 @@ export type SitePlan = (typeof sitePlanValues)[number];
 
 export const siteTrialNoticeValues = ['reminder_7', 'reminder_1', 'expired', 'deletion'] as const;
 export type SiteTrialNotice = (typeof siteTrialNoticeValues)[number];
+
+export const siteSignupApprovalValues = ['townhall', 'team'] as const;
+export type SiteSignupApproval = (typeof siteSignupApprovalValues)[number];
 
 export const siteOpenDataPlatformValues = ['data-gouv-fr', 'opendatasoft', 'custom', 'none'] as const;
 export type SiteOpenDataPlatform = (typeof siteOpenDataPlatformValues)[number];
@@ -691,14 +697,17 @@ export interface SchoolMenu extends StrapiDocument {
   site?: Site | null;
 }
 
-/** Content-type `api::signup-request.signup-request` — Inscription d'une mairie en libre-service, en attente de la confirmation envoyée à l'adresse officielle de la mairie ou de la vérification par l'équipe */
+/** Content-type `api::signup-request.signup-request` — Inscription d'une mairie en libre-service : adresse du demandeur à vérifier, puis approbation par la mairie depuis son adresse officielle ou par l'équipe */
 export interface SignupRequest extends StrapiDocument {
   code_insee: string;
   commune_name: string;
   first_name: string;
   last_name: string;
   status: SignupRequestStatus;
+  approval_sent_at: string | null;
+  approval: SignupRequestApproval | null;
   terms_accepted_at: string;
+  email_confirmed_at: string | null;
   confirmed_at: string | null;
   reviewed_at: string | null;
   reviewed_by: string | null;
@@ -726,6 +735,7 @@ export interface Site extends StrapiDocument {
   trial_ends_at: string | null;
   trial_expired_at: string | null;
   trial_notice: SiteTrialNotice | null;
+  signup_approval: SiteSignupApproval | null;
   live_requested_at: string | null;
   google_site_verification: string | null;
   onboarding: JsonValue | null;

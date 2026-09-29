@@ -13,27 +13,29 @@ test('file vide : explications, pas de compteur', async ({ page }) => {
   await mockApi(page, { user: 'super_admin' });
   await page.goto('/plateforme/a-valider');
   await expect(page.getByRole('heading', { level: 1, name: 'À valider' })).toBeVisible();
-  await expect(page.getByText('Aucune inscription à vérifier.')).toBeVisible();
+  await expect(page.getByText('Aucune inscription à approuver.')).toBeVisible();
   await expect(page.getByText('Aucun passage en live demandé.')).toBeVisible();
   await expect(nav(page).getByRole('link', { name: 'À valider' })).toHaveAttribute('aria-current', 'page');
   await expectNoViolations(page);
 });
 
-test('inscription : valider crée la commune et invite le demandeur', async ({ page }) => {
+test('inscription : approuver permet la mise en ligne du site déjà créé', async ({ page }) => {
   const { bodies } = await mockApi(page, { user: 'super_admin', validations: 'some' });
   await page.goto('/plateforme/a-valider');
   await expect(nav(page).getByRole('link', { name: 'À valider 2 en attente' })).toBeVisible();
-  const signups = page.getByRole('region', { name: 'Inscriptions à vérifier · 1' });
+  const signups = page.getByRole('region', { name: 'Inscriptions à approuver · 1' });
   await expect(signups.getByRole('listitem')).toContainText('Julie Martin · julie@gmail.test');
+  await expect(signups.getByRole('listitem')).toContainText("Aucune adresse officielle dans l'Annuaire");
+  await expect(signups.getByRole('link', { name: 'Fiche de la commune' })).toHaveAttribute('href', '/plateforme/communes/site-bourg-neuf');
   await expectNoViolations(page);
 
   await signups.getByRole('button', { name: 'Valider…' }).click();
-  const dialog = page.getByRole('alertdialog', { name: 'Créer le site de Bourg-Neuf ?' });
-  await expect(dialog).toContainText('Julie Martin reçoit une invitation à julie@gmail.test');
-  await dialog.getByRole('button', { name: 'Créer et inviter' }).click();
+  const dialog = page.getByRole('alertdialog', { name: "Approuver l'inscription de Bourg-Neuf ?" });
+  await expect(dialog).toContainText('Le site pourra être mis en ligne. Julie Martin en est prévenu à julie@gmail.test');
+  await dialog.getByRole('button', { name: 'Approuver' }).click();
   await expect(dialog).toBeHidden();
   expect(bodies.at(-1)?.call).toBe('approve signups 41');
-  await expect(page.getByText('Aucune inscription à vérifier.')).toBeVisible();
+  await expect(page.getByText('Aucune inscription à approuver.')).toBeVisible();
   await expect(nav(page).getByRole('link', { name: 'À valider 1 en attente' })).toBeVisible();
 });
 

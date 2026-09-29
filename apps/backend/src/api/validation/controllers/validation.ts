@@ -2,11 +2,12 @@
  * File de validation de l'équipe Communeo (#313), réservée aux super admins.
  *
  * GET  /api/validations → { signups, liveRequests }
- *   - inscriptions à vérifier : commune sans adresse officielle dans l'Annuaire (la confirmation n'a
- *     pas pu partir à la mairie) ;
+ *   - inscriptions à approuver (#337) : la commune est déjà créée en essai mais rien n'est mis en
+ *     ligne ; `waitingFor: 'team'` sans adresse officielle dans l'Annuaire, `'townhall'` quand la
+ *     mairie n'a pas encore répondu (l'équipe peut approuver à sa place après l'avoir contactée) ;
  *   - passages en live demandés : devis validé en ligne par la commune (#312), joint à la demande.
- * POST /api/validations/signups/:id/approve → crée la commune en essai et invite le demandeur
- * POST /api/validations/signups/:id/reject  → { reason } envoyé au demandeur
+ * POST /api/validations/signups/:id/approve → le site peut être mis en ligne
+ * POST /api/validations/signups/:id/reject  → { reason } envoyé au demandeur ; la commune est supprimée
  * POST /api/validations/live/:documentId/approve → passage en live (services/trial.ts), devis accepté
  * POST /api/validations/live/:documentId/reject  → { reason } envoyé aux administrateurs, devis refusé
  *
@@ -14,9 +15,9 @@
  */
 import { recordActivity } from '../../../services/activity-log';
 import { createCommune, emailTaken } from '../../../services/commune-creation';
+import { approveSignup, declineSignup, emailRejection } from '../../../services/signup-approval';
 import { goLive, rejectGoLive } from '../../../services/trial';
 import { log } from '../../../utils/logger';
-import { escapeHtml } from '../../../utils/security';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 
 const REQUEST = 'api::signup-request.signup-request';
@@ -62,8 +63,10 @@ function reasonOf(ctx): string | null {
   return reason;
 }
 
+const WAITING = ['awaiting_review', 'pending_townhall'];
+
 async function pendingSignup(ctx) {
-  const request = await strapi.db.query(REQUEST).findOne({ where: { id: Number(ctx.params.id), status: 'awaiting_review' } });
+  const request = await strapi.db.query(REQUEST).findOne({ where: { id: Number(ctx.params.id), status: { $in: WAITING } }, populate: ['site'] });
   if (!request) ctx.notFound('Demande introuvable ou déjà traitée');
   return request;
 }
@@ -81,7 +84,7 @@ export default {
   async list(ctx) {
     await requireSuperAdmin(ctx);
     const [signups, sites] = await Promise.all([
-      strapi.db.query(REQUEST).findMany({ where: { status: 'awaiting_review' }, orderBy: { createdAt: 'asc' } }),
+      strapi.db.query(REQUEST).findMany({ where: { status: { $in: WAITING } }, orderBy: { createdAt: 'asc' }, populate: ['site'] }),
       strapi.db.query(SITE).findMany({ where: { live_requested_at: { $notNull: true }, plan: { $in: ['trial', 'expired'] } }, orderBy: { live_requested_at: 'asc' } }),
     ]);
     ctx.body = {
@@ -94,6 +97,10 @@ export default {
           lastName: request.last_name,
           email: request.email,
           requestedAt: request.createdAt,
+          waitingFor: request.status === 'pending_townhall' ? 'townhall' : 'team',
+          officialEmail: request.official_email ?? null,
+          approvalSentAt: request.approval_sent_at ?? null,
+          siteDocumentId: request.site?.documentId ?? null,
         })),
         liveRequests: await Promise.all(sites.map(async (site: any) => ({
           quote: await signedQuote(site.documentId),
@@ -114,6 +121,12 @@ export default {
     const reviewer = await requireSuperAdmin(ctx);
     const request = await pendingSignup(ctx);
     if (!request) return;
+    if (request.site) {
+      await approveSignup(request, 'team', nameOf(reviewer));
+      ctx.body = { data: { documentId: request.site.documentId } };
+      return;
+    }
+    // Demande déposée avant #337 : la commune n'existe pas encore
     if (await strapi.query(SITE).count({ where: { code_insee: request.code_insee } })) {
       return ctx.conflict('Cette commune a déjà un site Communeo : refusez la demande.');
     }
@@ -151,34 +164,13 @@ export default {
     if (!request) return;
     const reason = reasonOf(ctx);
     if (!reason) return;
-    await strapi.db.query(REQUEST).update({
-      where: { id: request.id },
-      data: { status: 'rejected', reviewed_at: new Date(), reviewed_by: nameOf(reviewer), rejection_reason: reason },
-    });
-    await recordActivity({
-      action: 'signup_reject',
-      siteDocumentId: null,
-      target: { type: 'signup-request', id: request.id, label: request.commune_name },
-      details: { email: request.email, reason },
-    });
-    try {
-      await strapi.plugin('email').service('email').send({
-        to: request.email,
-        subject: `Votre demande de site pour ${request.commune_name} — Communeo`,
-        html: `
-          <p>Bonjour ${escapeHtml(request.first_name)},</p>
-          <p>L'équipe Communeo n'a pas pu valider la création du site de <strong>${escapeHtml(request.commune_name)}</strong> :</p>
-          <p>${escapeHtml(reason)}</p>
-          <p>L'équipe Communeo</p>
-        `,
-        text: `Bonjour ${request.first_name}, l'équipe Communeo n'a pas pu valider la création du site de ${request.commune_name} : ${reason}`,
-      });
-    } catch (error) {
-      log.error('[VALIDATION] Motif de refus non envoyé :', error);
-      ctx.body = { data: { emailed: false } };
-      return;
-    }
-    ctx.body = { data: { emailed: true } };
+    await declineSignup(request, 'team', { reason, reviewer: nameOf(reviewer) });
+    const emailed = await emailRejection(request, [
+      `L'équipe Communeo n'a pas pu valider la création du site de ${request.commune_name} :`,
+      reason,
+      ...(request.site ? ['Le site que vous aviez commencé et ses contenus ont été supprimés.'] : []),
+    ]);
+    ctx.body = { data: { emailed } };
   },
 
   async approveLive(ctx) {

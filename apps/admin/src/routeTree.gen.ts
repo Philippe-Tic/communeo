@@ -40,6 +40,7 @@ import { Route as AppNewsletterRouteImport } from './routes/_app/newsletter'
 import { Route as AppPagesRouteImport } from './routes/_app/pages'
 import { Route as AppPasserEnLiveRouteImport } from './routes/_app/passer-en-live'
 import { Route as AppUtilisateursRouteImport } from './routes/_app/utilisateurs'
+import { Route as InscriptionApprouverRouteImport } from './routes/inscription_.approuver'
 import { Route as InscriptionConfirmerRouteImport } from './routes/inscription_.confirmer'
 import { Route as PlateformeIndexRouteImport } from './routes/plateforme/index'
 import { Route as PlateformeAValiderRouteImport } from './routes/plateforme/a-valider'
@@ -218,6 +219,11 @@ const AppUtilisateursRoute = AppUtilisateursRouteImport.update({
   path: '/utilisateurs',
   getParentRoute: () => AppRoute,
 } as any)
+const InscriptionApprouverRoute = InscriptionApprouverRouteImport.update({
+  id: '/inscription_/approuver',
+  path: '/inscription/approuver',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscriptionConfirmerRoute = InscriptionConfirmerRouteImport.update({
   id: '/inscription_/confirmer',
   path: '/inscription/confirmer',
@@ -366,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/pages': typeof AppPagesRoute
   '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription/approuver': typeof InscriptionApprouverRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/facturation': typeof PlateformeFacturationRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/pages': typeof AppPagesRoute
   '/passer-en-live': typeof AppPasserEnLiveRoute
   '/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription/approuver': typeof InscriptionApprouverRoute
   '/inscription/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/facturation': typeof PlateformeFacturationRoute
@@ -476,6 +484,7 @@ export interface FileRoutesById {
   '/_app/pages': typeof AppPagesRoute
   '/_app/passer-en-live': typeof AppPasserEnLiveRoute
   '/_app/utilisateurs': typeof AppUtilisateursRoute
+  '/inscription_/approuver': typeof InscriptionApprouverRoute
   '/inscription_/confirmer': typeof InscriptionConfirmerRoute
   '/plateforme/a-valider': typeof PlateformeAValiderRoute
   '/plateforme/facturation': typeof PlateformeFacturationRoute
@@ -534,6 +543,7 @@ export interface FileRouteTypes {
     | '/pages'
     | '/passer-en-live'
     | '/utilisateurs'
+    | '/inscription/approuver'
     | '/inscription/confirmer'
     | '/plateforme/a-valider'
     | '/plateforme/facturation'
@@ -587,6 +597,7 @@ export interface FileRouteTypes {
     | '/pages'
     | '/passer-en-live'
     | '/utilisateurs'
+    | '/inscription/approuver'
     | '/inscription/confirmer'
     | '/plateforme/a-valider'
     | '/plateforme/facturation'
@@ -643,6 +654,7 @@ export interface FileRouteTypes {
     | '/_app/pages'
     | '/_app/passer-en-live'
     | '/_app/utilisateurs'
+    | '/inscription_/approuver'
     | '/inscription_/confirmer'
     | '/plateforme/a-valider'
     | '/plateforme/facturation'
@@ -679,6 +691,7 @@ export interface RootRouteChildren {
   MotDePasseOublieRoute: typeof MotDePasseOublieRoute
   NouveauMotDePasseRoute: typeof NouveauMotDePasseRoute
   PlateformeRoute: typeof PlateformeRouteWithChildren
+  InscriptionApprouverRoute: typeof InscriptionApprouverRoute
   InscriptionConfirmerRoute: typeof InscriptionConfirmerRoute
 }
 
@@ -900,6 +913,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/utilisateurs'
       preLoaderRoute: typeof AppUtilisateursRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/inscription_/approuver': {
+      id: '/inscription_/approuver'
+      path: '/inscription/approuver'
+      fullPath: '/inscription/approuver'
+      preLoaderRoute: typeof InscriptionApprouverRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/inscription_/confirmer': {
       id: '/inscription_/confirmer'
@@ -1181,6 +1201,7 @@ const rootRouteChildren: RootRouteChildren = {
   MotDePasseOublieRoute: MotDePasseOublieRoute,
   NouveauMotDePasseRoute: NouveauMotDePasseRoute,
   PlateformeRoute: PlateformeRouteWithChildren,
+  InscriptionApprouverRoute: InscriptionApprouverRoute,
   InscriptionConfirmerRoute: InscriptionConfirmerRoute,
 }
 export const routeTree = rootRouteImport

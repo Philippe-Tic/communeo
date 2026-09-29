@@ -16,15 +16,21 @@ export const SHARE_HEIGHT = 630;
 
 const VOWEL = /^[aeiouyàâäéèêëîïôöùûüœæ]/i;
 
+/** « de Saint-Aubin », « d’Arles », « du Mans », « des Andelys » : le nom d'une commune après « de » */
+export function ofCommune(name: string): string {
+  const trimmed = name.trim();
+  const le = /^Le\s+(.+)$/.exec(trimmed);
+  if (le) return `du ${le[1]}`;
+  const les = /^Les\s+(.+)$/.exec(trimmed);
+  if (les) return `des ${les[1]}`;
+  return VOWEL.test(trimmed) && !/^(La|L’|L')\b/.test(trimmed) ? `d’${trimmed}` : `de ${trimmed}`;
+}
+
 /** « Mairie de Saint-Aubin », « Mairie d’Arles », « Mairie du Mans », « Mairie des Andelys » */
 export function mairieOf(name: string): string {
   const trimmed = name.trim();
   if (/^mairie\b/i.test(trimmed)) return trimmed;
-  const le = /^Le\s+(.+)$/.exec(trimmed);
-  if (le) return `Mairie du ${le[1]}`;
-  const les = /^Les\s+(.+)$/.exec(trimmed);
-  if (les) return `Mairie des ${les[1]}`;
-  return VOWEL.test(trimmed) && !/^(La|L’|L')\b/.test(trimmed) ? `Mairie d’${trimmed}` : `Mairie de ${trimmed}`;
+  return `Mairie ${ofCommune(trimmed)}`;
 }
 
 /** Titre de l'accueil : ce que les habitants cherchent (« mairie de … ») */

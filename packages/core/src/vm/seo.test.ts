@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { blocksExcerpt, describe as describeText, homeTitle, mairieOf, shareImage, truncate } from './seo';
+import { blocksExcerpt, describe as describeText, homeTitle, mairieOf, ofCommune, shareImage, truncate } from './seo';
 import type { BlockVM, ImageVM } from './types';
 
 describe('nom de la mairie', () => {
@@ -14,6 +14,12 @@ describe('nom de la mairie', () => {
     ['Mairie de Test', 'Mairie de Test'],
   ])('%s → %s', (name, expected) => {
     expect(mairieOf(name)).toBe(expected);
+  });
+
+  it('le nom après « de » : le site d’Imphy, du Mans', () => {
+    expect(`Le site ${ofCommune('Imphy')}`).toBe('Le site d’Imphy');
+    expect(ofCommune('Le Mans')).toBe('du Mans');
+    expect(ofCommune('Decize')).toBe('de Decize');
   });
 
   it('titre de l’accueil', () => {

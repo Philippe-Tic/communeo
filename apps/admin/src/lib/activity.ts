@@ -26,6 +26,7 @@ export type ActivityAction =
   | 'live_request'
   | 'commune_go_live'
   | 'live_reject'
+  | 'signup_approve'
   | 'signup_reject'
   | 'quote_sign'
   | 'invoice_issue'
@@ -90,6 +91,7 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   live_request: 'Passage en live demandé',
   commune_go_live: 'Passage en live',
   live_reject: 'Passage en live refusé',
+  signup_approve: 'Inscription approuvée',
   signup_reject: 'Inscription refusée',
   quote_sign: 'Devis validé',
   invoice_issue: 'Facture émise',

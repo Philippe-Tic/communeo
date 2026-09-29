@@ -246,6 +246,18 @@ test('mise en ligne : récapitulatif, suivi, succès ; l’assistant est termin�
   await expect(page.getByRole('region', { name: 'Terminez la création de votre site' })).toHaveCount(0);
 });
 
+test('inscription à approuver : l’assistant se termine sans mise en ligne, le site est prêt', async ({ page }) => {
+  const { bodies, calls } = await mockApi(page, { onboarding: { step: 7 }, publication: 'idle', trial: { endsInDays: 30 }, approval: 'townhall' });
+  await page.goto('/assistant?etape=7');
+  await expect(page.getByText('Le site sera mis en ligne dès que la mairie aura approuvé sa création').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Mettre le site en ligne' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Terminer' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Le site de Saint-Aubin-sur-Loire est prêt' })).toBeFocused();
+  expect(calls).not.toContain('POST /api/deployment/trigger');
+  expect(lastSitePut(bodies)?.onboarding).toMatchObject({ completedAt: expect.any(String) });
+  await expectNoViolations(page);
+});
+
 test('mise en ligne en échec : message avec la référence, « Réessayer »', async ({ page }) => {
   await mockApi(page, { onboarding: { step: 7 }, deployOutcome: 'failed', publication: 'idle' });
   await page.goto('/assistant?etape=7');

@@ -5,7 +5,7 @@
     "singularName": "signup-request",
     "pluralName": "signup-requests",
     "displayName": "Demande d'inscription",
-    "description": "Inscription d'une mairie en libre-service, en attente de la confirmation envoyée à l'adresse officielle de la mairie ou de la vérification par l'équipe"
+    "description": "Inscription d'une mairie en libre-service : adresse du demandeur à vérifier, puis approbation par la mairie depuis son adresse officielle ou par l'équipe"
   },
   "options": {
     "draftAndPublish": false
@@ -23,12 +23,16 @@
     "official_email": { "type": "email", "private": true },
     "status": {
       "type": "enumeration",
-      "enum": ["pending_confirmation", "awaiting_review", "confirmed", "rejected"],
+      "enum": ["pending_email", "pending_townhall", "awaiting_review", "confirmed", "rejected", "pending_confirmation"],
       "required": true,
-      "default": "pending_confirmation"
+      "default": "pending_email"
     },
     "token": { "type": "string", "private": true },
+    "approval_token": { "type": "string", "private": true },
+    "approval_sent_at": { "type": "datetime" },
+    "approval": { "type": "enumeration", "enum": ["same_email", "same_domain", "townhall", "team"] },
     "terms_accepted_at": { "type": "datetime", "required": true },
+    "email_confirmed_at": { "type": "datetime" },
     "confirmed_at": { "type": "datetime" },
     "reviewed_at": { "type": "datetime" },
     "reviewed_by": { "type": "string" },

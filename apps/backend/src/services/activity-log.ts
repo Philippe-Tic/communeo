@@ -36,6 +36,7 @@ export type ActivityAction =
   | 'live_request'
   | 'commune_go_live'
   | 'live_reject'
+  | 'signup_approve'
   | 'signup_reject'
   | 'quote_sign'
   | 'invoice_issue'

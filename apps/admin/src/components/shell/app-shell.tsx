@@ -12,6 +12,7 @@ import type { SessionUser } from '@/lib/session';
 import { Header } from './header';
 import { ImpersonationBanner } from './impersonation-banner';
 import { SessionExpiredDialog } from './session-expired-dialog';
+import { ApprovalBanner } from './approval-banner';
 import { TrialBanner } from './trial-banner';
 import { Sidebar, type NavCounters } from './sidebar';
 
@@ -55,6 +56,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
     <div className="flex min-h-dvh flex-col">
       {impersonating && <ImpersonationBanner siteName={user.site?.name ?? 'cette commune'} onQuit={quitImpersonation} />}
       <TrialBanner site={user.site} />
+      <ApprovalBanner user={user} />
       <a
         href={`#${MAIN_ID}`}
         className="fixed top-3 left-3 z-50 -translate-y-24 rounded-lg bg-surface px-4 py-2 text-sm font-semibold text-text shadow-menu focus:translate-y-0"

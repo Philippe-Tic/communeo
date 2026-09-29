@@ -37,6 +37,7 @@ export function mapSite(ctx: MapContext, site: Site): SiteVM {
     theme: (THEME_IDS as string[]).includes(site.theme) ? (site.theme as ThemeId) : DEFAULT_THEME,
     url: ctx.siteUrl,
     inPreparation: site.plan === 'trial',
+    googleSiteVerification: text(site.google_site_verification),
     logo: mapImage(ctx, site.logo),
     favicon: mapImage(ctx, site.favicon),
     population: info?.population ?? null,

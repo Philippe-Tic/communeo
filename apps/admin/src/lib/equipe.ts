@@ -21,6 +21,8 @@ export interface CommuneSummary {
   trialEndsAt: string | null;
   trialExpiredAt: string | null;
   liveRequestedAt: string | null;
+  /** Code de vérification Google Search Console posé par l'équipe */
+  googleSiteVerification?: string | null;
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null } | null;
   createdAt: string;
   lastActivity: string;
@@ -81,7 +83,7 @@ export const createCommune = (values: {
 
 export const updateCommune = (
   documentId: string,
-  data: { name?: string; suspended?: boolean; plan?: 'live'; extendTrialDays?: number },
+  data: { name?: string; suspended?: boolean; plan?: 'live'; extendTrialDays?: number; googleSiteVerification?: string },
 ) =>
   api<{ data: CommuneSummary }>(`/api/site-management/${documentId}`, { method: 'PUT', json: { data } });
 

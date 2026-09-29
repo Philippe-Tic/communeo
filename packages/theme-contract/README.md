@@ -27,7 +27,7 @@ auquel il manque un template ou un bloc, ou dont les props ne correspondent pas 
 
 | Élément | Rôle |
 |---|---|
-| `manifest` | Identifiant, nom, description, vignette (`thumbnail.png`, 1200 × 800), sections d'accueil gérées, menus |
+| `manifest` | Identifiant, nom, description, vignette (`thumbnail.png`, 1200 × 800), sections d'accueil gérées, menus, palette de l'image de partage (`share` : fond, texte ≥ 4,5:1, accent) |
 | `stylesheet` | URL de la feuille de styles du thème : `import stylesheet from './styles.css?url'` |
 | `templates` | 19 composants de page : `Home`, `Page`, `ArticleList`, `Article`, `EventList`, `Event`, `DocumentList`, `Document`, `Team`, `AssociationList`, `Association`, `AssociationProposal`, `RightsRequest`, `Contact`, `Waste`, `Canteen`, `Disruptions`, `Frame`, `NotFound` |
 | `blocks` | 9 composants de blocs : `text`, `image`, `buttons`, `callout`, `documents`, `gallery`, `faq`, `contact`, `video` |

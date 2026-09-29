@@ -8,3 +8,4 @@ export * from './site';
 export * from './content';
 export * from './practical';
 export * from './home';
+export * from './seo';

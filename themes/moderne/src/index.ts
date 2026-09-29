@@ -32,6 +32,7 @@ export default defineTheme({
     homeSections: [...themeHomeSections('moderne')],
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
+    share: { background: '#12211b', foreground: '#ffffff', accent: '#00a86b' },
   },
   stylesheet,
   templates: {

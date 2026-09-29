@@ -32,6 +32,7 @@ export default defineTheme({
     homeSections: [...themeHomeSections('institutionnel')],
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
+    share: { background: '#1f5a3c', foreground: '#ffffff', accent: '#e3efe7' },
   },
   stylesheet,
   templates: {

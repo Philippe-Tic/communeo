@@ -34,6 +34,7 @@ export default defineTheme({
     homeSections: HOMEPAGE_SECTION_IDS,
     menus: { main: true, footer: true },
     thumbnail: '',
+    share: { background: '#1a1a1a', foreground: '#ffffff', accent: '#cccccc' },
   },
   stylesheet,
   templates: {

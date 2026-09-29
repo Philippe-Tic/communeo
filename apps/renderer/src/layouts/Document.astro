@@ -5,7 +5,7 @@
  * seule (en preview, tous les thèmes sont chargés mais chaque page ne reçoit que celle de son thème).
  */
 import type { PageContext } from '@communeo/theme-contract';
-import { toSchemaOrgOpeningHours } from '@communeo/core';
+import { homeTitle, mairieOf, SHARE_HEIGHT, SHARE_WIDTH, shareImage, toSchemaOrgOpeningHours } from '@communeo/core';
 import CookieBanner from '@communeo/ui-a11y/CookieBanner.astro';
 import SkipLinks from '@communeo/ui-a11y/SkipLinks.astro';
 import theme from 'virtual:communeo/theme';
@@ -16,12 +16,18 @@ interface Props {
 
 const { ctx } = Astro.props;
 const { site, seo } = ctx;
-const title = ctx.path === '/' ? site.name : `${seo.title} – ${site.name}`;
+const home = ctx.path === '/';
+// Accueil : « Mairie de … – site officiel », ce que cherchent les habitants
+const title = home ? homeTitle(site.name) : `${seo.title} – ${site.name}`;
+// Partage : la photo de la page (version redimensionnée), sinon l'image générée de la commune
+const pageImage = shareImage(seo.image);
+const share = pageImage ?? { src: `${site.url}/og.png`, width: SHARE_WIDTH, height: SHARE_HEIGHT, alt: `${mairieOf(site.name)} : site officiel de la commune` };
+const shareSrc = /^https?:\/\//.test(share.src) ? share.src : `${site.url}${share.src}`;
 
 const organization = {
   '@context': 'https://schema.org',
   '@type': 'GovernmentOrganization',
-  name: `Mairie de ${site.name}`,
+  name: mairieOf(site.name),
   url: site.url,
   email: site.contact.email.label,
   ...(site.contact.phone ? { telephone: site.contact.phone.label } : {}),
@@ -65,14 +71,18 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     {site.favicon ? <link rel="icon" href={site.favicon.src} /> : site.logo && <link rel="icon" href={site.logo.src} />}
     {(site.favicon ?? site.logo) && <link rel="apple-touch-icon" href={(site.favicon ?? site.logo)!.src} />}
     <link rel="manifest" href="/site.webmanifest" />
-    <meta property="og:type" content={ctx.path === '/' ? 'website' : 'article'} />
-    <meta property="og:site_name" content={site.name} />
-    <meta property="og:title" content={seo.title} />
+    {site.googleSiteVerification && <meta name="google-site-verification" content={site.googleSiteVerification} />}
+    <meta property="og:type" content={seo.type} />
+    <meta property="og:site_name" content={mairieOf(site.name)} />
+    <meta property="og:title" content={home ? homeTitle(site.name) : seo.title} />
     <meta property="og:url" content={seo.canonical} />
     <meta property="og:locale" content="fr_FR" />
     {seo.description && <meta property="og:description" content={seo.description} />}
-    {seo.image && <meta property="og:image" content={seo.image.src} />}
-    <meta name="twitter:card" content={seo.image ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={shareSrc} />
+    {share.width && <meta property="og:image:width" content={String(share.width)} />}
+    {share.height && <meta property="og:image:height" content={String(share.height)} />}
+    {share.alt && <meta property="og:image:alt" content={share.alt} />}
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="alternate" type="application/rss+xml" title={`Actualités – ${site.name}`} href="/rss.xml" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
   </head>

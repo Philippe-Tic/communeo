@@ -137,6 +137,9 @@
       "type": "string",
       "private": true
     },
+    "google_site_verification": {
+      "type": "string"
+    },
     "billing_renewal": {
       "type": "boolean",
       "default": true,

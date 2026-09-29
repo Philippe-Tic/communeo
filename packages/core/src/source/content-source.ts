@@ -41,9 +41,11 @@ export function createContentSource(loader: RawLoader, baseCtx: MapContext, opti
     canteen: memo(() => loader.canteen()),
   };
 
+  // Contexte avec le nom de la commune : les actualités et événements sont signés « Mairie de … »
+  const named = memo(async (): Promise<MapContext> => ({ ...ctx, siteName: (await raw.site()).name }));
   const articles = memo(async () => {
-    const list = await raw.articles();
-    return list.map((article) => mapArticle(ctx, article, list.slice(0, 4)));
+    const [list, context] = await Promise.all([raw.articles(), named()]);
+    return list.map((article) => mapArticle(context, article, list.slice(0, 4)));
   });
 
   return {
@@ -64,7 +66,10 @@ export function createContentSource(loader: RawLoader, baseCtx: MapContext, opti
     practical: memo(async () => mapPractical(ctx, await raw.site(), await raw.waste(), now)),
     pages: memo(async () => (await raw.pages()).map((page) => mapPage(ctx, page))),
     articles,
-    events: memo(async () => (await raw.events()).map((event) => mapEvent(ctx, event))),
+    events: memo(async () => {
+      const [list, context] = await Promise.all([raw.events(), named()]);
+      return list.map((event) => mapEvent(context, event));
+    }),
     documents: memo(async () => (await raw.documents()).map((doc) => mapDocument(ctx, doc))),
     team: memo(async () => mapTeam(ctx, await raw.team())),
     associations: memo(async () => {

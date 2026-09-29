@@ -32,6 +32,7 @@ export default defineTheme({
     homeSections: [...themeHomeSections('journal')],
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
+    share: { background: '#1b2430', foreground: '#ffffff', accent: '#7fa3d6' },
   },
   stylesheet,
   templates: {

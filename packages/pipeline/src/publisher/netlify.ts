@@ -174,6 +174,7 @@ export class NetlifyPublisher implements SitePublisher {
     const netlifySite = await this.ensureNetlifySite(site);
     const host = this.toHostSite(netlifySite);
     await this.redirectToCanonical(dir, netlifySite, site.customDomain ?? null);
+    if (site.redirects?.length) await this.communeRedirects(dir, site.redirects);
     if (site.noindex) await this.noindexHeaders(dir);
     const zip = await zipDirectory(dir);
     this.log.info(`[NETLIFY] Dépôt de ${(zip.length / 1024 / 1024).toFixed(2)} Mo sur ${host.hostId}`);
@@ -308,6 +309,14 @@ export class NetlifyPublisher implements SitePublisher {
     const existing = await fs.readFile(file, 'utf8').catch(() => '');
     const rules = others.map((host) => `https://${host}/* https://${canonical}/:splat 301!\n`).join('');
     await fs.writeFile(file, rules + existing, 'utf8');
+  }
+
+  /** Redirections de l'ancien site de la commune, après celles vers l'adresse principale */
+  private async communeRedirects(dir: string, redirects: Array<{ from: string; to: string }>): Promise<void> {
+    const file = path.join(dir, '_redirects');
+    const existing = await fs.readFile(file, 'utf8').catch(() => '');
+    const rules = netlifyRedirectRules(redirects);
+    if (rules) await fs.writeFile(file, `${existing}${existing && !existing.endsWith('\n') ? '\n' : ''}${rules}\n`, 'utf8');
   }
 
   /** Site en préparation : aucune page indexée, quel que soit le robot (règle en tête de `_headers`) */
@@ -460,4 +469,20 @@ export function zipDirectory(dir: string): Promise<Buffer> {
     archive.directory(dir, false);
     archive.finalize();
   });
+}
+
+/**
+ * Lignes `_redirects` de Netlify : `/ancienne /nouvelle 301`, et pour une requête
+ * `/index.php page=horaires /contact 301`. Sans `!` : une page réellement présente à cette adresse
+ * sur le nouveau site reste servie ; une règle vers elle-même est écartée.
+ */
+export function netlifyRedirectRules(redirects: Array<{ from: string; to: string }>): string {
+  return redirects
+    .filter(({ from, to }) => from.split('?')[0]!.replace(/\.html?$/, '') !== to.split('?')[0])
+    .map(({ from, to }) => {
+      const [pathname, query = ''] = from.split('?') as [string, string?];
+      const params = [...new URLSearchParams(query)].map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+      return [pathname, ...params, to, '301'].join(' ');
+    })
+    .join('\n');
 }

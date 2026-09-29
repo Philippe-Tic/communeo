@@ -29,6 +29,7 @@ export const ROUTES = [
   '/mon-site/reseaux',
   '/mon-site/demarches',
   '/mon-site/open-data',
+  '/mon-site/redirections',
   '/mise-en-ligne',
   '/passer-en-live',
   '/conformite',

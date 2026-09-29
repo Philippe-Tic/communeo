@@ -209,6 +209,19 @@ describe('adresse Communeo (SITES_DOMAIN)', () => {
     );
   });
 
+  it('redirections de l’ancien site, après celles vers l’adresse principale ; jamais vers elle-même', async () => {
+    const { p } = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });
+    const redirects = [
+      { from: '/horaires.html', to: '/contact' },
+      { from: '/index.php?page=etat-civil&id=3', to: '/etat-civil' },
+      { from: '/contact.html', to: '/contact' },
+    ];
+    await p.publish({ ...site, hostId: 'site-lyon', redirects }, dir);
+    expect(fs.readFileSync(path.join(dir, '_redirects'), 'utf8')).toBe(
+      'https://lyon-mairie.netlify.app/* https://lyon.communeo.fr/:splat 301!\n/horaires.html /contact 301\n/index.php page=etat-civil id=3 /etat-civil 301\n',
+    );
+  });
+
   it('site en préparation : en-tête X-Robots-Tag sur toutes les pages, en plus des en-têtes du site', async () => {
     fs.writeFileSync(path.join(dir, '_headers'), '/fixtures/*\n  Cache-Control: max-age=60\n');
     const { p } = publisher(api({ custom_domain: 'lyon.communeo.fr' }), { sitesDomain: 'communeo.fr' });

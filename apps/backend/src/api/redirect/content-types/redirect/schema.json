@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "redirects",
+  "info": {
+    "singularName": "redirect",
+    "pluralName": "redirects",
+    "displayName": "Redirection",
+    "description": "Redirections 301 depuis l'ancien site de la commune (#335) : ancienne adresse → page du site"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": { "visible": false },
+    "content-type-builder": { "visible": false }
+  },
+  "attributes": {
+    "site": { "type": "relation", "relation": "manyToOne", "target": "api::site.site" },
+    "from_path": { "type": "string", "required": true },
+    "to_path": { "type": "string", "required": true }
+  }
+}

@@ -1007,6 +1007,16 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     { ...billedBellefontaine, enabled: true, periodEnd: billingDay(304) },
   ];
   const publicInvoice = ({ site: _site, chorusReference: _c, paymentNote: _p, remindersSent: _r, lastReminderAt: _l, customerEmail: _e, customerSiret: _s, ...rest }: MockInvoice) => rest;
+  // Redirections depuis l'ancien site (#335)
+  let redirects: Array<{ from: string; to: string }> = [{ from: '/horaires.html', to: '/contact' }];
+  const redirectDestinations = [
+    { path: '/', label: 'Accueil', kind: 'Rubrique' },
+    { path: '/contact', label: 'Contact', kind: 'Rubrique' },
+    { path: '/actualites', label: 'Actualités', kind: 'Rubrique' },
+    { path: '/documents', label: 'Documents officiels', kind: 'Rubrique' },
+    { path: '/etat-civil', label: 'État civil', kind: 'Page' },
+    { path: '/salle-des-fetes', label: 'Location de la salle des fêtes', kind: 'Page' },
+  ];
   const validationQueue =
     options.validations === 'some'
       ? {
@@ -1641,6 +1651,28 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         members.splice(members.indexOf(member), 1);
         return json({ data: { id: member.id } });
       }
+    }
+    // Redirections (#335)
+    if (url.pathname === '/api/redirects' && method === 'GET') return json({ data: { redirects, destinations: redirectDestinations } });
+    if (url.pathname === '/api/redirects' && method === 'PUT') {
+      const body = route.request().postDataJSON() as { redirects: Array<{ from: string; to: string }> };
+      bodies.push({ call: 'save redirects', body: { data: body } });
+      redirects = [...body.redirects].sort((a, b) => a.from.localeCompare(b.from));
+      return json({ data: { redirects } });
+    }
+    if (url.pathname === '/api/redirects/suggest' && method === 'POST') {
+      const body = route.request().postDataJSON() as { addresses: string; sitemapUrl: string };
+      if (body.sitemapUrl.includes('interne')) return json({ error: { status: 400, message: 'Plan du site illisible : Adresse non publique refusée.' } }, 400);
+      const guess: Record<string, { to: string | null; confidence: 'sure' | 'probable' | null }> = {
+        '/services/etat-civil.html': { to: '/etat-civil', confidence: 'sure' },
+        '/conseil/comptes-rendus': { to: '/documents', confidence: 'probable' },
+      };
+      const suggestions = body.addresses
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((address) => new URL(address, 'https://ancien.test').pathname)
+        .map((from) => ({ from, ...(guess[from] ?? { to: null, confidence: null }) }));
+      return json({ data: { suggestions, truncated: false } });
     }
     // Facturation (#314)
     if (url.pathname === '/api/billing/invoices' && method === 'GET')

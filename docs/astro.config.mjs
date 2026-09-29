@@ -69,6 +69,7 @@ export default defineConfig({
             { label: "Mentions légales et données personnelles", slug: "mon-site/legal" },
             { label: "Accessibilité", slug: "mon-site/accessibilite" },
             { label: "Réseaux sociaux, démarches, open data", slug: "mon-site/autres-reglages" },
+            { label: "Redirections", slug: "mon-site/redirections" },
           ],
         },
         {

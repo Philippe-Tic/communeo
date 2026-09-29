@@ -101,7 +101,15 @@ export async function cleanWorkDir(workDir: string): Promise<void> {
 }
 
 function toPublisherSite(site: BuildSite): PublisherSite {
-  return { documentId: site.documentId, slug: site.slug, name: site.name, hostId: site.hostId, customDomain: site.customDomain, noindex: !!site.noindex };
+  return {
+    documentId: site.documentId,
+    slug: site.slug,
+    name: site.name,
+    hostId: site.hostId,
+    customDomain: site.customDomain,
+    noindex: !!site.noindex,
+    redirects: site.redirects ?? [],
+  };
 }
 
 function errorMessage(error: unknown, signal: AbortSignal): string {

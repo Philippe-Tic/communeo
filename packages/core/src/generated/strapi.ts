@@ -673,6 +673,13 @@ export interface Quote extends StrapiDocument {
   pdf_sha256: string | null;
 }
 
+/** Content-type `api::redirect.redirect` — Redirections 301 depuis l'ancien site de la commune (#335) : ancienne adresse → page du site */
+export interface Redirect extends StrapiDocument {
+  site?: Site | null;
+  from_path: string;
+  to_path: string;
+}
+
 /** Content-type `api::school-menu.school-menu` — Menus de cantine scolaire par semaine */
 export interface SchoolMenu extends StrapiDocument {
   week_start: string;
@@ -817,6 +824,7 @@ export const pluralNames = {
   'api::page.page': 'pages',
   'api::pending-change.pending-change': 'pending-changes',
   'api::quote.quote': 'quotes',
+  'api::redirect.redirect': 'redirects',
   'api::school-menu.school-menu': 'school-menus',
   'api::signup-request.signup-request': 'signup-requests',
   'api::site.site': 'sites',
@@ -842,6 +850,7 @@ export interface ContentTypes {
   'api::page.page': Page;
   'api::pending-change.pending-change': PendingChange;
   'api::quote.quote': Quote;
+  'api::redirect.redirect': Redirect;
   'api::school-menu.school-menu': SchoolMenu;
   'api::signup-request.signup-request': SignupRequest;
   'api::site.site': Site;

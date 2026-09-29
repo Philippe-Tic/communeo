@@ -21,6 +21,7 @@ import {
   Menu as MenuIcon,
   Newspaper,
   Palette,
+  Route as RouteIcon,
   Receipt,
   Recycle,
   Scale,
@@ -64,6 +65,7 @@ export const MY_SITE_LINKS: NavLink[] = [
   { label: 'Réseaux sociaux', to: '/mon-site/reseaux', icon: Share2 },
   { label: 'Démarches', to: '/mon-site/demarches', icon: List },
   { label: 'Open data', to: '/mon-site/open-data', icon: Database },
+  { label: 'Redirections', to: '/mon-site/redirections', icon: RouteIcon, adminOnly: true },
 ];
 
 export const NAVIGATION: NavGroup[] = [

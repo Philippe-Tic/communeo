@@ -16,6 +16,8 @@ export interface PublisherSite {
   customDomain?: string | null;
   /** Site à ne pas indexer (commune en période d'essai) : l'hébergeur ajoute `X-Robots-Tag` */
   noindex?: boolean;
+  /** Redirections 301 depuis l'ancien site de la commune : ancienne adresse (chemin et requête) → page */
+  redirects?: Array<{ from: string; to: string }>;
 }
 
 export type DeployState = 'building' | 'ready' | 'error';

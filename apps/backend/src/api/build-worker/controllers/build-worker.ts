@@ -9,6 +9,7 @@ import crypto from 'crypto';
 import { DEFAULT_THEME } from '@communeo/core';
 import { BUILD_STEPS, type BuildSite, type FinishBuildRequest, type ProgressBuildRequest, type StartBuildRequest } from '@communeo/pipeline';
 import { clearPendingChanges } from '../../../services/pending-changes';
+import { listRedirects } from '../../../services/redirects';
 import { log } from '../../../utils/logger';
 
 const DEPLOYMENT = 'api::deployment.deployment';
@@ -104,6 +105,8 @@ export default {
       customDomain: site.domain_status === 'verified' ? site.custom_domain || null : null,
       // Période d'essai (#311) : site « en préparation », jamais indexé
       noindex: site.plan === 'trial',
+      // Redirections depuis l'ancien site de la commune (#335)
+      redirects: await listRedirects(site.documentId),
     };
     ctx.body = { deploymentId: deployment.documentId, site: buildSite };
   },

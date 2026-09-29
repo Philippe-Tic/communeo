@@ -32,6 +32,7 @@ export default defineTheme({
     homeSections: [...themeHomeSections('bourg')],
     menus: { main: true, footer: true },
     thumbnail: 'thumbnail.png',
+    share: { background: '#1f6f6b', foreground: '#ffffff', accent: '#f8f3ed' },
   },
   stylesheet,
   templates: {

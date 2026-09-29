@@ -80,6 +80,8 @@ export interface TocEntryVM {
 
 export interface SeoVM {
   title: string;
+  /** Type Open Graph : « article » pour une actualité, « website » sinon */
+  type: 'website' | 'article';
   description: string | null;
   canonical: string;
   image: ImageVM | null;
@@ -149,6 +151,8 @@ export interface SiteVM {
    * demande aux moteurs de ne pas indexer le site. Les thèmes n'ont rien à faire.
    */
   inPreparation: boolean;
+  /** Code de vérification Google Search Console, posé par l'équipe Communeo (balise meta) */
+  googleSiteVerification: string | null;
   logo: ImageVM | null;
   favicon: ImageVM | null;
   population: number | null;

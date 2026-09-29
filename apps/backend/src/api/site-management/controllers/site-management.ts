@@ -69,6 +69,7 @@ async function summarize(site: any) {
     trialEndsAt: site.trial_ends_at ?? null,
     trialExpiredAt: site.trial_expired_at ?? null,
     liveRequestedAt: site.live_requested_at ?? null,
+    googleSiteVerification: site.google_site_verification ?? null,
     onboarding: site.onboarding ?? null,
     createdAt: site.createdAt,
     lastActivity: dates.length ? new Date(Math.max(...dates)).toISOString() : site.createdAt,
@@ -248,7 +249,7 @@ export default {
   },
 
   /**
-   * PUT /api/site-management/:documentId — { name?, suspended?, plan?: 'live', extendTrialDays? }
+   * PUT /api/site-management/:documentId — { name?, suspended?, plan?: 'live', extendTrialDays?, googleSiteVerification? }
    * Suspendre : les utilisateurs de la commune ne peuvent plus se connecter (session coupée) et
    * rien n'est plus mis en ligne ; le site public reste en ligne tel quel.
    * Passer en live ou prolonger l'essai (1 à 90 jours) : voir services/trial.ts.
@@ -265,11 +266,22 @@ export default {
       return ctx.badRequest("La prolongation de l'essai va de 1 à 90 jours.");
     }
     if (data.plan !== undefined && data.plan !== 'live') return ctx.badRequest('Seul le passage en live est possible.');
+    // Code de vérification Google Search Console : le code seul, ou la balise <meta> copiée telle quelle
+    let verification: string | null | undefined;
+    if (data.googleSiteVerification !== undefined) {
+      const raw = String(data.googleSiteVerification ?? '').trim();
+      verification = /content=["']([^"']*)["']/.exec(raw)?.[1]?.trim() ?? raw;
+      if (verification && !/^[A-Za-z0-9_-]{10,100}$/.test(verification)) {
+        return ctx.badRequest('Code de vérification Google invalide : collez le code, ou la balise <meta name="google-site-verification"> fournie par la Search Console.');
+      }
+      verification ||= null;
+    }
     if (extend !== undefined && site.plan === 'live') return ctx.badRequest("Cette commune est en live : il n'y a pas d'essai à prolonger.");
 
     const update: Record<string, unknown> = {};
     if (typeof data.name === 'string' && data.name.trim()) update.name = data.name.trim();
     if (typeof data.suspended === 'boolean') update.suspended = data.suspended;
+    if (verification !== undefined) update.google_site_verification = verification;
     if (Object.keys(update).length) await strapi.documents('api::site.site').update({ documentId, data: update as any });
     if (typeof data.suspended === 'boolean' && data.suspended !== !!site.suspended)
       await recordActivity({

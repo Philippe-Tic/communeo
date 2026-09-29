@@ -11,7 +11,7 @@ import { outDir } from './themes.mjs';
 
 const [theme, port] = process.argv.slice(2);
 const root = fileURLToPath(outDir(theme));
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.pdf': 'application/pdf', '.ics': 'text/calendar', '.json': 'application/json', '.xml': 'application/xml' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.txt': 'text/plain; charset=utf-8', '.pdf': 'application/pdf', '.ics': 'text/calendar', '.json': 'application/json', '.xml': 'application/xml' };
 
 createServer((req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://x').pathname);

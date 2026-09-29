@@ -3,6 +3,7 @@ import { formatDate, formatEventPeriod, isMultiDay } from '../format';
 import { slugify } from '../site/slug';
 import { SECTIONS } from '../site/navigation';
 import { mapBlocks } from './blocks';
+import { blocksExcerpt, describe, mairieOf } from './seo';
 import { absoluteUrl, type MapContext } from './context';
 import {
   ARTICLE_CATEGORY_LABELS,
@@ -39,26 +40,17 @@ export function breadcrumb(...items: Array<{ label: string; href: string }>): Li
   return [HOME, ...items.map((item) => ({ ...item, external: false }))];
 }
 
-function breadcrumbJsonLd(ctx: MapContext, items: LinkVM[]) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.label,
-      item: absoluteUrl(ctx, item.href),
-    })),
-  };
-}
+/** La mairie, éditrice du site (données structurées) */
+const publisher = (ctx: MapContext) => ({ '@type': 'GovernmentOrganization', name: ctx.siteName ? mairieOf(ctx.siteName) : 'Mairie', url: ctx.siteUrl });
 
 export function seo(
   ctx: MapContext,
-  options: { title: string; description?: string | null; path: string; image?: ImageVM | null; jsonLd?: Record<string, unknown>[]; noindex?: boolean },
+  options: { title: string; description?: string | null; path: string; image?: ImageVM | null; jsonLd?: Record<string, unknown>[]; noindex?: boolean; type?: SeoVM['type'] },
 ): SeoVM {
   return {
     title: options.title,
-    description: text(options.description),
+    type: options.type ?? 'website',
+    description: describe(options.description),
     canonical: absoluteUrl(ctx, options.path),
     image: options.image ?? null,
     jsonLd: options.jsonLd ?? [],
@@ -83,7 +75,8 @@ export function mapPage(ctx: MapContext, page: Page): PageVM {
     toc,
     updatedAt: dateVM(page.updatedAt),
     breadcrumb: trail,
-    seo: seo(ctx, { title: page.title, description: page.meta_description ?? page.lead, path: href, image, jsonLd: [breadcrumbJsonLd(ctx, trail)] }),
+    // Le fil d'Ariane des données structurées est ajouté par le document, pour toutes les pages
+    seo: seo(ctx, { title: page.title, description: describe(page.meta_description, page.lead, blocksExcerpt(blocks)), path: href, image }),
   };
 }
 
@@ -122,9 +115,10 @@ export function mapArticle(ctx: MapContext, article: Article, related: Article[]
     related: related.filter((other) => other.documentId !== article.documentId).map((other) => mapArticleCard(ctx, other)),
     seo: seo(ctx, {
       title: article.title,
-      description: article.meta_description ?? article.summary,
+      description: describe(article.meta_description, article.summary, blocksExcerpt(blocks)),
       path: card.href,
       image: card.image,
+      type: 'article',
       jsonLd: [
         {
           '@context': 'https://schema.org',
@@ -133,9 +127,11 @@ export function mapArticle(ctx: MapContext, article: Article, related: Article[]
           datePublished: card.date.iso,
           dateModified: article.updatedAt,
           ...(card.image ? { image: card.image.src } : {}),
-          ...(article.author ? { author: { '@type': 'Person', name: article.author } } : {}),
+          // Sans auteur nommé, la mairie signe l'article
+          author: article.author ? { '@type': 'Person', name: article.author } : publisher(ctx),
+          publisher: publisher(ctx),
+          mainEntityOfPage: absoluteUrl(ctx, card.href),
         },
-        breadcrumbJsonLd(ctx, trail),
       ],
     }),
   };
@@ -188,7 +184,8 @@ export function mapEvent(ctx: MapContext, event: Evenement): EventVM {
     breadcrumb: trail,
     seo: seo(ctx, {
       title: event.title,
-      description: card.period,
+      // « Samedi 3 octobre, de 14 h à 18 h · Salle des fêtes. » puis le début du contenu
+      description: describe(`${[card.period, card.location].filter(Boolean).join(' · ')}. ${blocksExcerpt(blocks, 120) ?? ''}`),
       path: card.href,
       image: card.image,
       jsonLd: [
@@ -204,10 +201,9 @@ export function mapEvent(ctx: MapContext, event: Evenement): EventVM {
             ? { location: { '@type': 'Place', name: card.location ?? address, ...(address ? { address } : {}) } }
             : {}),
           ...(card.image ? { image: card.image.src } : {}),
-          ...(event.organizer ? { organizer: { '@type': 'Organization', name: event.organizer } } : {}),
           isAccessibleForFree: formatPrice(event.price) === 'Gratuit',
+          organizer: event.organizer ? { '@type': 'Organization', name: event.organizer } : publisher(ctx),
         },
-        breadcrumbJsonLd(ctx, trail),
       ],
     }),
   };
@@ -306,6 +302,6 @@ export function mapAssociation(ctx: MapContext, association: Association, slug: 
     website: mapLink(ctx, 'Site de l’association', association.website),
     address: text(association.address),
     breadcrumb: trail,
-    seo: seo(ctx, { title: association.name, description: card.summary, path: card.href, image: card.logo, jsonLd: [breadcrumbJsonLd(ctx, trail)] }),
+    seo: seo(ctx, { title: association.name, description: card.summary, path: card.href, image: card.logo }),
   };
 }

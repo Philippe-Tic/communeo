@@ -1329,6 +1329,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     domain_type: Schema.Attribute.Enumeration<['apex', 'subdomain']>;
     evenements: Schema.Attribute.Relation<'oneToMany', 'api::evenement.evenement'>;
     favicon: Schema.Attribute.Media<'images'>;
+    google_site_verification: Schema.Attribute.String;
     homepage: Schema.Attribute.Component<'homepage.homepage', false>;
     infos_pratiques: Schema.Attribute.Component<'legal.infos-pratiques', false>;
     live_requested_at: Schema.Attribute.DateTime;

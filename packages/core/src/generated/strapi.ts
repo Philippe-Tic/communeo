@@ -720,6 +720,7 @@ export interface Site extends StrapiDocument {
   trial_expired_at: string | null;
   trial_notice: SiteTrialNotice | null;
   live_requested_at: string | null;
+  google_site_verification: string | null;
   onboarding: JsonValue | null;
   pages?: Page[];
   articles?: Article[];

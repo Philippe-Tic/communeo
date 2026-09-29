@@ -1,4 +1,5 @@
 /** Manifeste d'application : nom de la commune et icône, pour l'ajout à l'écran d'accueil. */
+import { mairieOf } from '@communeo/core';
 import type { APIRoute } from 'astro';
 import { getSource } from '../lib/content';
 
@@ -6,7 +7,7 @@ export const GET: APIRoute = async () => {
   const site = await getSource().site();
   const icon = site.favicon ?? site.logo;
   const manifest = {
-    name: `Mairie de ${site.name}`,
+    name: mairieOf(site.name),
     short_name: site.name,
     lang: 'fr',
     start_url: '/',

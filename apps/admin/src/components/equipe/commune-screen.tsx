@@ -8,6 +8,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { CalendarPlus, ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle, Rocket } from 'lucide-react';
 import { addCalendarDays, deletionDate, formatEuros, trialDaysLeft } from '@communeo/core';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { controlClass, Field } from '@/components/form/field';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -19,6 +20,7 @@ import { focusHeadingIfRequested } from '@/lib/focus';
 import { themeName } from '@/lib/session';
 import { fullName, resendInvitation, roleLabel, stateOf } from '@/lib/users';
 import { formatDay } from '@/lib/trial';
+import { cn } from '@/lib/utils';
 import { PublicationBadge, siteAddress } from './communes-screen';
 import { PlanBadge } from './plan-badge';
 
@@ -54,6 +56,59 @@ function Card({ title, children, action }: { title: string; children: ReactNode;
       </div>
       <div className="mt-2">{children}</div>
     </section>
+  );
+}
+
+/**
+ * Référencement : code de vérification Google Search Console de la commune. L'équipe vérifie le
+ * domaine depuis son propre compte Search Console, sans que la commune touche à son DNS ; la balise
+ * est posée sur le site à la prochaine mise en ligne.
+ */
+function SearchConsoleCard({ commune }: { commune: CommuneDetail }) {
+  const client = useQueryClient();
+  const [value, setValue] = useState(commune.googleSiteVerification ?? '');
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const save = async () => {
+    setPending(true);
+    setError(null);
+    try {
+      await updateCommune(commune.documentId, { googleSiteVerification: value.trim() });
+      void refreshCommunes(client);
+      toast.success(value.trim() ? 'Code enregistré : il sera sur le site à la prochaine mise en ligne.' : 'Code retiré.');
+    } catch (caught) {
+      setError(failure(caught));
+    } finally {
+      setPending(false);
+    }
+  };
+  return (
+    <Card title="Référencement">
+      <Field
+        name="google-site-verification"
+        label="Vérification Google Search Console"
+        help="Le code de la méthode « Balise HTML », ou la balise entière. Vide : aucune balise."
+        error={error ?? undefined}
+      >
+        {(props) => (
+          <div className="flex flex-wrap gap-2">
+            <input
+              {...props}
+              value={value}
+              onChange={(event) => {
+                setValue(event.target.value);
+                if (error) setError(null);
+              }}
+              spellCheck={false}
+              className={cn(controlClass, 'h-10 min-w-0 flex-1 basis-64 font-mono text-[13px]')}
+            />
+            <Button type="button" variant="secondary" disabled={pending || value.trim() === (commune.googleSiteVerification ?? '')} onClick={() => void save()}>
+              Enregistrer
+            </Button>
+          </div>
+        )}
+      </Field>
+    </Card>
   );
 }
 
@@ -294,6 +349,8 @@ function Detail({ commune }: { commune: CommuneDetail }) {
       </Card>
 
       <BillingCard commune={commune} />
+
+      {commune.plan === 'live' && <SearchConsoleCard commune={commune} />}
 
       <div className="grid grid-cols-3 gap-4">
         {(

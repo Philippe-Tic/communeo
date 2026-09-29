@@ -12,3 +12,11 @@ onlyBuiltDependencies:
   - esbuild
   - sharp
   - sqlite3
+
+# @strapi/content-type-builder charge @strapi/types à l'exécution sans le déclarer comme dépendance : il
+# le trouvait par le hissage automatique, qui saute dès que deux variantes coexistent (ajout d'une
+# dépendance ailleurs dans le dépôt). La dépendance est déclarée ici, pnpm la relie directement.
+packageExtensions:
+  "@strapi/content-type-builder@5":
+    dependencies:
+      "@strapi/types": "5.36.0"

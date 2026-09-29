@@ -53,6 +53,11 @@ export interface ThemeManifest {
   menus: { main: true; footer: boolean };
   /** Vignette 1200 × 800 pour le sélecteur de thème de l'admin, relative au package (`thumbnail.png`) */
   thumbnail: string;
+  /**
+   * Image de partage générée pour la commune (1200 × 630, réseaux sociaux) quand une page n'a pas de
+   * photo : fond, texte (contraste ≥ 4,5:1 sur le fond) et couleur d'accent.
+   */
+  share: { background: string; foreground: string; accent: string };
 }
 
 // --- Contexte commun à toutes les pages ----------------------------------------------------------

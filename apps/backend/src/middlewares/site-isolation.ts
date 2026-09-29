@@ -88,6 +88,8 @@ const PROTECTED_SITE_FIELDS = [
   'live_requested_by',
   // facturation (#314) : renouvellement de l'abonnement, décidé par l'équipe
   'billing_renewal',
+  // référencement : code de vérification Google Search Console, posé par l'équipe
+  'google_site_verification',
   // relations : empêchent de rattacher les contenus d'une autre commune
   'pages',
   'articles',

@@ -9,6 +9,8 @@ export interface MapContext {
    * s'il est publié maintenant.
    */
   now?: string;
+  /** Nom de la commune, pour signer les contenus dans les données structurées (« Mairie de … ») */
+  siteName?: string;
 }
 
 export const absoluteUrl = (ctx: MapContext, path: string) => (/^https?:\/\//.test(path) ? path : `${ctx.siteUrl}${path}`);

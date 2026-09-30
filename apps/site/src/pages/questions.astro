@@ -1,0 +1,280 @@
+---
+import Accordeon from '../components/Accordeon.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+import { PRIX_MAX, PRIX_MIN } from '../lib/tarifs';
+
+const groupes = [
+  {
+    id: 'demarrer',
+    t: 'Démarrer',
+    items: [
+      {
+        q: 'Faut-il des compétences en informatique ?',
+        a: 'Non. L’administration s’utilise comme un traitement de texte, dans un navigateur, sans rien installer. Une aide est intégrée à chaque écran et une documentation complète, avec captures, est en ligne.',
+      },
+      {
+        q: 'Combien de temps pour avoir un site en ligne ?',
+        a: 'L’inscription prend deux minutes. L’assistant de création pré-remplit aussitôt le site avec les données publiques de la commune, et il est en ligne sur son adresse Communeo dès que l’inscription est validée. Comptez une journée pour le compléter.',
+      },
+      {
+        q: 'Qui peut inscrire la commune ?',
+        a: 'Un élu ou un agent de la mairie. L’inscription est validée depuis l’adresse officielle de la mairie connue de l’Annuaire de l’administration ; si elle n’y figure pas, l’équipe Communeo vérifie la demande.',
+      },
+      {
+        q: 'Pouvons-nous reprendre les contenus de notre ancien site ?',
+        a: 'Les données publiques (coordonnées, horaires, population) sont reprises automatiquement ; les autres contenus se copient dans l’éditeur. Les adresses de l’ancien site peuvent être redirigées vers les nouvelles pages, pour que les liens existants continuent de fonctionner.',
+      },
+    ],
+  },
+  {
+    id: 'site',
+    t: 'Le site',
+    items: [
+      {
+        q: 'Pouvons-nous garder notre nom de domaine actuel ?',
+        a: 'Oui. Au passage à l’abonnement, le site passe sur le domaine de la commune, par exemple mairie-saint-aubin.fr, avec certificat HTTPS. Si la commune n’a pas de domaine, son achat reste à sa charge.',
+      },
+      {
+        q: 'Le site apparaît-il dans Google ?',
+        a: 'Pas pendant l’essai : un bandeau « Site en préparation » s’affiche et le site est masqué aux moteurs de recherche. Après la mise en ligne définitive, il devient visible.',
+      },
+      {
+        q: 'Comment les habitants sont-ils prévenus d’une coupure d’eau ?',
+        a: 'Vous publiez une alerte depuis l’administration, avec un niveau de gravité et une date de fin. Le bandeau apparaît sur tout le site en moins d’une minute.',
+      },
+      {
+        q: 'Les démarches Service-Public sont-elles à jour ?',
+        a: 'Oui. Plus de 3 000 fiches officielles sont tenues à jour par l’État et consultables depuis votre site. Quand une fiche indique « Où s’adresser : mairie », le lien mène à votre page contact.',
+      },
+      { q: 'Pouvons-nous changer de thème ?', a: 'Oui, à tout moment. Vos contenus suivent : rien à ressaisir.' },
+      {
+        q: 'Pouvons-nous choisir nos couleurs ?',
+        a: 'Chaque thème a ses propres palettes, choisies pour le contraste. La commune ajoute son logo ou son blason ; les couleurs ne se personnalisent pas.',
+      },
+    ],
+  },
+  {
+    id: 'admin',
+    t: 'L’administration',
+    items: [
+      {
+        q: 'Qui peut modifier le site ? Combien d’utilisateurs ?',
+        a: 'Plusieurs personnes peuvent travailler sur le site, sans limite de nombre, avec deux rôles : administrateur (tout) et rédacteur (contenus, vie pratique, messages, médiathèque). Un journal d’activité garde six mois d’historique.',
+      },
+      { q: 'Peut-on préparer une publication à l’avance ?', a: 'Oui : vous voyez l’aperçu dans votre thème, puis vous choisissez la date et l’heure de publication.' },
+      { q: 'Et si je fais une erreur sur une page ?', a: 'L’historique des versions permet de revenir à une version précédente de la page.' },
+    ],
+  },
+  {
+    id: 'conformite',
+    t: 'Conformité',
+    items: [
+      {
+        q: 'Le site est-il accessible aux personnes handicapées ?',
+        a: 'Les thèmes sont testés automatiquement à chaque modification : contrastes, structure, focus clavier, affichage à 320 px et texte agrandi à 200 %, complétés par des vérifications au lecteur d’écran. La conformité finale dépend aussi de vos contenus : textes alternatifs des images, documents PDF.',
+      },
+      {
+        q: 'Le site dépose-t-il des cookies ?',
+        a: 'Aucun traceur publicitaire. Les vidéos et cartes ne se chargent qu’après accord de l’habitant. Une page de gestion des cookies est générée.',
+      },
+      {
+        q: 'Quelles pages légales sont fournies ?',
+        a: 'Mentions légales, données personnelles, déclaration d’accessibilité, gestion des cookies, exercice des droits et plan du site. Elles se remplissent avec les informations de la commune.',
+      },
+    ],
+  },
+  {
+    id: 'tarifs',
+    t: 'Tarifs et facturation',
+    items: [
+      {
+        q: 'Combien cela coûte-t-il ?',
+        a: `De ${PRIX_MIN} € à ${PRIX_MAX} € HT par an selon la population INSEE, sans frais de mise en service. TVA non applicable, art. 293 B du CGI.`,
+      },
+      {
+        q: 'Comment se passe la facturation pour une commune ?',
+        a: 'Le maire valide le devis en ligne. La facture arrive par Chorus Pro et se règle par virement (mandat administratif) sous 30 jours.',
+      },
+      {
+        q: 'Faut-il une mise en concurrence ?',
+        a: 'Non : marché de faible montant, dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).',
+      },
+      {
+        q: 'Que se passe-t-il à la fin de l’essai ?',
+        a: 'Sans abonnement, le site est retiré et l’administration passe en lecture seule. Les données sont conservées six mois, puis supprimées.',
+      },
+    ],
+  },
+  {
+    id: 'donnees',
+    t: 'Données et sécurité',
+    items: [
+      { q: 'Que deviennent nos contenus si nous arrêtons ?', a: 'Ils sont conservés six mois après la fin de l’abonnement ou de l’essai, puis supprimés.' },
+      {
+        q: 'Nos données sont-elles sauvegardées ?',
+        a: 'Oui : sauvegardes chiffrées quotidiennes, conservées 90 jours hors du serveur. Chaque commune ne voit que ses propres données.',
+      },
+      { q: 'Comment obtenir de l’aide ?', a: `Par e-mail à ${CONTACT_EMAIL}, avec une réponse sous 72 heures, et grâce à la documentation en ligne.` },
+    ],
+  },
+];
+---
+
+<Base
+  titre="Questions fréquentes sur le site de mairie · Communeo"
+  description="Compétences, délais, nom de domaine, accessibilité, cookies, facturation Chorus Pro, fin d’essai : les réponses aux questions des mairies."
+  courant="questions"
+>
+  <BandeauPage
+    surtitre="Questions fréquentes"
+    titre="Les réponses aux questions que se posent les mairies."
+    chapo={`Une question sans réponse ici ? Écrivez-nous à ${CONTACT_EMAIL}, nous répondons sous 72 heures.`}
+    seed={0.9}
+  />
+
+  <div class="section corps">
+    <div class="conteneur disposition">
+      <nav class="sommaire" aria-labelledby="t-sommaire">
+        <span id="t-sommaire" class="titre-sommaire">Sommaire</span>
+        {
+          groupes.map((g) => (
+            <a href={`#${g.id}`}>
+              {g.t}
+              <span class="nombre">
+                {g.items.length}
+                <span class="sr-only"> questions</span>
+              </span>
+            </a>
+          ))
+        }
+      </nav>
+      <div class="groupes">
+        {
+          groupes.map((g) => (
+            <section id={g.id} class="groupe" aria-labelledby={`t-${g.id}`}>
+              <h2 id={`t-${g.id}`}>{g.t}</h2>
+              <Accordeon items={g.items} prefixe={g.id} />
+            </section>
+          ))
+        }
+        <div class="pas-trouve">
+          <div class="pile" style="gap:6px">
+            <h2>Vous n’avez pas trouvé votre réponse ?</h2>
+            <p class="doux">Nous répondons par e-mail sous 72 heures.</p>
+          </div>
+          <a class="bouton bouton--sapin" href="/contact">Nous écrire</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .corps {
+    padding-block: clamp(48px, 6vw, 88px);
+  }
+
+  .disposition {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: flex-start;
+  }
+
+  .sommaire {
+    flex: 1 1 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  @media (min-width: 56.25em) {
+    .sommaire {
+      position: sticky;
+      top: 24px;
+      max-width: 300px;
+    }
+  }
+
+  .titre-sommaire {
+    margin-bottom: 8px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--tuile);
+  }
+
+  .sommaire a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .sommaire a:hover {
+    background: var(--sauge);
+  }
+
+  .sommaire a:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .nombre {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--encre-douce);
+  }
+
+  .groupes {
+    flex: 3 1 560px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(48px, 6vw, 72px);
+  }
+
+  .groupe {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    scroll-margin-top: 24px;
+  }
+
+  .groupe h2 {
+    margin: 0;
+    font: 400 clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem) / 1.1 var(--serif);
+    color: var(--sapin);
+  }
+
+  .pas-trouve {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px;
+    border-radius: 16px;
+    background: var(--blanc);
+    border: 1px solid var(--grege);
+  }
+
+  .pas-trouve h2 {
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+
+  .pas-trouve p {
+    margin: 0;
+    font-size: 1.0625rem;
+  }
+</style>

@@ -1,0 +1,36 @@
+---
+/** Logo ou pictogramme de Communeo, en SVG dans la page : il prend la couleur du texte */
+import logo from '../assets/logo-communeo.svg?raw';
+import picto from '../assets/picto-communeo.svg?raw';
+
+interface Props {
+  variante?: 'logo' | 'picto';
+  class?: string;
+  /** Nom accessible ; sans lui, décoratif */
+  label?: string;
+}
+
+const { variante = 'logo', class: className, label } = Astro.props;
+const svg = (variante === 'logo' ? logo : picto).replace('<svg ', `<svg aria-hidden="true" focusable="false" `);
+---
+
+{
+  label ? (
+    <span class:list={['logo', className]} role="img" aria-label={label} set:html={svg} />
+  ) : (
+    <span class:list={['logo', className]} aria-hidden="true" set:html={svg} />
+  )
+}
+
+<style>
+  .logo {
+    display: block;
+    line-height: 0;
+  }
+
+  .logo :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

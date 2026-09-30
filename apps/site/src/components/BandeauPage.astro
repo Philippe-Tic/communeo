@@ -1,0 +1,67 @@
+---
+/** Bandeau sapin en tête des pages (sauf l'accueil et la page introuvable) : surtitre, titre, chapô */
+import Topo from './Topo.astro';
+
+interface Props {
+  surtitre: string;
+  titre: string;
+  chapo?: string;
+  seed?: number;
+}
+
+const { surtitre, titre, chapo, seed = 0.4 } = Astro.props;
+---
+
+<section class="bandeau sombre">
+  <Topo viewBox="0 0 1440 480" cx={1200} cy={300} rings={12} gap={58} r0={40} seed={seed} sx={1.35} wobble={10} />
+  <div class="interieur">
+    <span class="surtitre-bandeau">{surtitre}</span>
+    <h1 id="contenu" tabindex="-1">{titre}</h1>
+    {chapo && <p>{chapo}</p>}
+  </div>
+</section>
+
+<style>
+  .bandeau {
+    position: relative;
+    overflow: hidden;
+    background: var(--sapin);
+  }
+
+  .interieur {
+    position: relative;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: clamp(40px, 6vw, 88px) var(--gouttiere) clamp(56px, 7vw, 104px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .surtitre-bandeau {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ble);
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 17em;
+    font: 400 var(--h1) / 1.04 var(--serif);
+    letter-spacing: -0.01em;
+    color: var(--papier);
+    text-wrap: balance;
+    outline: none;
+  }
+
+  p {
+    margin: 0;
+    max-width: 36em;
+    font-size: var(--chapo);
+    line-height: 1.5;
+    color: var(--papier);
+    text-wrap: pretty;
+  }
+</style>

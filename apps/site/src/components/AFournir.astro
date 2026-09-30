@@ -1,0 +1,42 @@
+---
+/**
+ * Contenu que Communeo doit encore fournir (textes juridiques, parcours…) : marqué dans la page et
+ * listé par `pnpm --filter @communeo/site a-fournir` avant la mise en ligne.
+ */
+interface Props {
+  bloc?: boolean;
+}
+
+const { bloc = false } = Astro.props;
+---
+
+{
+  bloc ? (
+    <div class="a-fournir bloc" data-a-fournir>
+      <slot />
+    </div>
+  ) : (
+    <span class="a-fournir" data-a-fournir>
+      <slot />
+    </span>
+  )
+}
+
+<style>
+  .a-fournir:not(.bloc) {
+    padding: 0 4px;
+    border-radius: 3px;
+    background: var(--vigilance-fond);
+    color: var(--vigilance);
+  }
+
+  .bloc {
+    padding: 22px;
+    border-radius: 14px;
+    border: 1.5px dashed var(--taupe);
+    background: var(--blanc);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--encre-douce);
+  }
+</style>

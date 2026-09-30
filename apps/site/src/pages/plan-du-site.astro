@@ -1,0 +1,39 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { LEGAL } from '../lib/site';
+
+const pages = [
+  { label: 'Accueil', href: '/' },
+  { label: 'Fonctionnalités', href: '/fonctionnalites' },
+  { label: 'Thèmes', href: '/themes' },
+  { label: 'Tarifs', href: '/tarifs' },
+  { label: 'Comment ça marche', href: '/comment-ca-marche' },
+  { label: 'Questions fréquentes', href: '/questions' },
+  { label: 'Contact', href: '/contact' },
+  { label: 'À propos', href: '/a-propos' },
+];
+const legal = LEGAL.filter((item) => item.href !== '/plan-du-site');
+---
+
+<Legal titre="Plan du site" description="Toutes les pages du site de Communeo.">
+  <ul>
+    {
+      pages.map((page) => (
+        <li>
+          <a href={page.href}>{page.label}</a>
+        </li>
+      ))
+    }
+    <li>
+      Informations légales :
+      {
+        legal.map((item, index) => (
+          <>
+            <a href={item.href}>{item.label.toLowerCase()}</a>
+            {index < legal.length - 1 ? ', ' : ''}
+          </>
+        ))
+      }
+    </li>
+  </ul>
+</Legal>

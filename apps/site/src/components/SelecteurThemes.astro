@@ -1,0 +1,226 @@
+---
+/**
+ * Aperçu des quatre thèmes : un bouton par thème (`aria-pressed`), les captures superposées en fondu
+ * et la description du thème choisi (`aria-live`). Sans JavaScript, le premier thème reste affiché.
+ * `page` : la version de la page Thèmes (boutons groupés, grand aperçu, description dessous).
+ */
+import Navigateur from './Navigateur.astro';
+import { THEMES_PRESENTES } from '../lib/themes';
+
+interface Props {
+  page?: boolean;
+  /** Titre à côté des boutons (page Thèmes) */
+  titre?: string;
+}
+
+const { page = false, titre } = Astro.props;
+const [premier] = THEMES_PRESENTES;
+---
+
+<div class:list={['selecteur', { page }]} data-selecteur-themes>
+  <div class="haut">
+    {page && titre && <h2 id="t-essai" class="h2">{titre}</h2>}
+    <div class="boutons" role="group" aria-label="Choisir un thème à prévisualiser">
+      {
+        THEMES_PRESENTES.map((theme, index) => (
+          <button type="button" aria-pressed={index === 0 ? 'true' : 'false'} data-theme={theme.key} data-label={theme.label} data-d={theme.d} data-ideal={theme.ideal}>
+            {theme.label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+  <div class="corps">
+    <div class="apercus">
+      {
+        THEMES_PRESENTES.map((theme, index) => (
+          <div class="apercu" data-apercu={theme.key} aria-hidden={index === 0 ? undefined : 'true'}>
+            <Navigateur
+              src={theme.capture}
+              adresse="mairie-saint-aubin.fr"
+              largeur={page ? 1312 : 640}
+              alt={`Page d’accueil de Saint-Aubin-sur-Loire dans le thème ${theme.label}.`}
+            />
+          </div>
+        ))
+      }
+    </div>
+    {
+      page ? (
+        <p class="description-page" aria-live="polite">
+          <b class="nom">{premier!.label}</b> · <span class="d">{premier!.d}</span>
+        </p>
+      ) : (
+        <div class="description" aria-live="polite">
+          <h3 class="h3-serif nom">{premier!.label}</h3>
+          <p class="texte d">{premier!.d}</p>
+          <p class="ideal">
+            <b>Idéal pour</b> <span class="i">{premier!.ideal}</span>
+          </p>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  for (const selector of document.querySelectorAll<HTMLElement>('[data-selecteur-themes]')) {
+    const buttons = [...selector.querySelectorAll<HTMLButtonElement>('button[data-theme]')];
+    const previews = [...selector.querySelectorAll<HTMLElement>('[data-apercu]')];
+    const text = (name: string) => selector.querySelector<HTMLElement>(`.${name}`);
+    const pick = (button: HTMLButtonElement) => {
+      buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
+      previews.forEach((preview) => {
+        const on = preview.dataset.apercu === button.dataset.theme;
+        preview.classList.toggle('actif', on);
+        if (on) preview.removeAttribute('aria-hidden');
+        else preview.setAttribute('aria-hidden', 'true');
+      });
+      text('nom')!.textContent = button.dataset.label ?? '';
+      text('d')!.textContent = button.dataset.d ?? '';
+      const ideal = text('i');
+      if (ideal) ideal.textContent = button.dataset.ideal ?? '';
+    };
+    buttons.forEach((button) => button.addEventListener('click', () => pick(button)));
+    pick(buttons[0]!);
+  }
+</script>
+
+<style>
+  .selecteur {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .page {
+    gap: 28px;
+  }
+
+  .haut {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+  }
+
+  .haut .h2 {
+    flex: 1 1 400px;
+  }
+
+  /* 4 boutons de front, 2 × 2 sur téléphone */
+  .boutons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: 10px;
+    width: min(100%, 750px);
+  }
+
+  .page .boutons {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+    gap: 6px;
+    padding: 6px;
+    border-radius: 18px;
+    background: var(--blanc);
+    border: 1px solid var(--grege);
+    width: min(100%, 640px);
+  }
+
+  button {
+    min-height: 48px;
+    padding: 0 20px;
+    border-radius: 24px;
+    border: 1.5px solid var(--sapin);
+    background: var(--blanc);
+    color: var(--sapin);
+    font: 600 1rem var(--sans);
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      color 0.2s;
+    white-space: nowrap;
+  }
+
+  .page button {
+    border: none;
+    background: transparent;
+  }
+
+  .page button:focus-visible {
+    outline-offset: 2px;
+  }
+
+  button[aria-pressed='true'],
+  .page button[aria-pressed='true'] {
+    background: var(--sapin);
+    color: var(--papier);
+  }
+
+  .corps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 32px;
+    align-items: center;
+  }
+
+  .page .corps {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 28px;
+  }
+
+  .apercus {
+    display: grid;
+  }
+
+  .apercu {
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.45s var(--ease),
+      visibility 0.45s;
+  }
+
+  .apercu:first-child,
+  .apercu.actif {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .apercus:has(.actif) .apercu:not(.actif) {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .description {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 34em;
+  }
+
+  .ideal {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--encre-douce);
+  }
+
+  .ideal b {
+    color: var(--encre);
+  }
+
+  .description-page {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--encre-douce);
+  }
+
+  .description-page b {
+    color: var(--encre);
+  }
+</style>

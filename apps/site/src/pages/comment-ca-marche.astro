@@ -1,0 +1,284 @@
+---
+import AFournir from '../components/AFournir.astro';
+import AppelFinal from '../components/AppelFinal.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Base from '../layouts/Base.astro';
+
+const etapes = [
+  {
+    t: 'Inscription en ligne',
+    d: '2 minutes',
+    vous: 'Vous cherchez votre commune, vous indiquez votre nom et votre e-mail.',
+    nous: 'Pour vérifier que la demande vient bien de la mairie, l’inscription est validée depuis l’adresse officielle de la mairie connue de l’Annuaire de l’administration. Si elle n’y figure pas, l’équipe vérifie la demande.',
+  },
+  {
+    t: 'Essai gratuit de 30 jours',
+    d: '30 jours',
+    vous: 'Vous choisissez votre thème, complétez les contenus et invitez vos collègues.',
+    nous: 'L’assistant pré-remplit le site avec les données publiques. Toutes les fonctions sont comprises, sans carte bancaire ni engagement.',
+  },
+  {
+    t: 'Le site en ligne dès l’essai',
+    d: 'Dès l’inscription validée',
+    vous: 'Vous montrez le site aux élus sur son adresse Communeo.',
+    nous: 'Un bandeau « Site en préparation » s’affiche et le site n’apparaît pas dans Google pendant l’essai. Rappels par e-mail 7 jours et 1 jour avant la fin.',
+  },
+  {
+    t: 'Passer à l’abonnement',
+    d: 'Quelques minutes',
+    vous: 'Le maire, ou une personne ayant délégation, valide le devis en ligne.',
+    nous: 'Le prix s’affiche selon la population INSEE. Devis et bon de commande en PDF, horodatés.',
+  },
+  {
+    t: 'Mise en ligne définitive',
+    d: null,
+    vous: 'Vous indiquez le domaine de la commune si vous en avez un, par exemple mairie-saint-aubin.fr.',
+    nous: 'Après validation par l’équipe, le bandeau disparaît, le site devient visible dans les moteurs de recherche et peut passer sur votre domaine, avec certificat HTTPS.',
+  },
+  {
+    t: 'Facturation',
+    d: 'Virement sous 30 jours',
+    vous: 'Vous réglez par virement, comme n’importe quelle dépense de la commune.',
+    nous: 'La facture est transmise par Chorus Pro. L’abonnement est annuel, reconduit tacitement, résiliable à l’échéance avec un mois de préavis.',
+  },
+  {
+    t: 'Et si vous ne continuez pas',
+    d: 'Données gardées 6 mois',
+    vous: 'Rien à faire : sans abonnement, l’essai s’arrête simplement.',
+    nous: 'Le site est retiré et l’administration passe en lecture seule. Les données sont conservées six mois, le temps de changer d’avis, puis supprimées.',
+  },
+];
+---
+
+<Base
+  titre="Comment ça marche : du site à la facture · Communeo"
+  description="Inscription en 2 minutes, essai gratuit de 30 jours, devis en ligne, mise en ligne sur le domaine de la commune, facture Chorus Pro : les 7 étapes."
+  courant="comment"
+>
+  <BandeauPage
+    surtitre="Comment ça marche"
+    titre="De l’inscription au site en ligne, en sept étapes."
+    chapo="Comptez deux minutes pour l’inscription et une journée pour compléter le site. Vous avez ensuite trente jours pour décider."
+    seed={3.1}
+  />
+
+  <section class="section etapes-section" aria-labelledby="t-etapes">
+    <div class="pile" style="max-width:1100px;margin:0 auto;gap:40px">
+      <h2 id="t-etapes" class="h2">Les sept étapes</h2>
+      <div class="frise" data-frise>
+        <div class="rail" aria-hidden="true"></div>
+        <div class="progression" aria-hidden="true"></div>
+        <ol>
+          {
+            etapes.map((s, index) => (
+              <li data-etape={index}>
+                <span class="pastille" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <div class="carte">
+                  <div class="carte-tete">
+                    <h3>
+                      <span class="sr-only">Étape {index + 1} : </span>
+                      {s.t}
+                    </h3>
+                    <span class="duree">
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      {s.d ?? <AFournir>[Délai à confirmer]</AFournir>}
+                    </span>
+                  </div>
+                  <div class="roles">
+                    <div class="pile" style="gap:6px">
+                      <span class="role vous">Ce que vous faites</span>
+                      <p>{s.vous}</p>
+                    </div>
+                    <div class="pile" style="gap:6px">
+                      <span class="role nous">Ce que fait Communeo</span>
+                      <p class="doux">{s.nous}</p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <AppelFinal titre="Commencez par l’inscription, elle prend deux minutes" mention="30 jours gratuits · Sans engagement · Sans carte bancaire" />
+</Base>
+
+<script>
+  // La ligne de la frise se remplit au défilement (repère à 65 % de la hauteur de la fenêtre)
+  const frise = document.querySelector<HTMLElement>('[data-frise]');
+  if (frise) {
+    const steps = [...frise.querySelectorAll<HTMLElement>('li')];
+    const set = (progress: number) => {
+      frise.style.setProperty('--progression', progress.toFixed(3));
+      steps.forEach((step, index) => step.classList.toggle('atteinte', progress >= (index / (steps.length - 1)) * 0.96 - 0.02));
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) set(1);
+    else {
+      let frame = 0;
+      const measure = () => {
+        frame = 0;
+        const rect = frise.getBoundingClientRect();
+        set(Math.max(0, Math.min(1, (innerHeight * 0.65 - rect.top) / rect.height)));
+      };
+      const schedule = () => (frame ||= requestAnimationFrame(measure));
+      addEventListener('scroll', schedule, { passive: true });
+      addEventListener('resize', schedule);
+      measure();
+    }
+  }
+</script>
+
+<style>
+  .etapes-section {
+    padding-block: clamp(56px, 7vw, 96px) clamp(64px, 8vw, 112px);
+  }
+
+  .frise {
+    --pastille: clamp(44px, 8vw, 60px);
+    --progression: 1;
+    position: relative;
+  }
+
+  :global(html.js) .frise {
+    --progression: 0;
+  }
+
+  .rail,
+  .progression {
+    position: absolute;
+    left: calc(var(--pastille) / 2 - 1px);
+    top: 30px;
+    width: 2px;
+  }
+
+  .rail {
+    bottom: 30px;
+    background: var(--grege);
+  }
+
+  .progression {
+    height: calc((100% - 60px) * var(--progression));
+    background: var(--sapin);
+  }
+
+  ol {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 4vw, 48px);
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: var(--pastille) minmax(0, 1fr);
+    gap: clamp(12px, 3vw, 32px);
+  }
+
+  .pastille {
+    width: var(--pastille);
+    height: var(--pastille);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 400 clamp(22px, 3vw, 28px) var(--serif);
+    background: var(--blanc);
+    color: var(--sapin);
+    border: 2px solid var(--sapin);
+    box-shadow: 0 0 0 8px var(--papier);
+    transition:
+      background 0.4s,
+      color 0.4s;
+  }
+
+  .carte {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: clamp(18px, 3vw, 22px) clamp(16px, 3vw, 32px);
+    border-radius: 16px;
+    background: var(--blanc);
+    border: 1px solid var(--grege);
+    transition:
+      transform 0.6s var(--ease),
+      border-color 0.4s;
+  }
+
+  :global(html.js) li:not(:first-child):not(.atteinte) .carte {
+    transform: translateY(12px);
+  }
+
+  li.atteinte .pastille,
+  :global(html:not(.js)) .pastille {
+    background: var(--sapin);
+    color: var(--papier);
+  }
+
+  li.atteinte .carte {
+    border-color: var(--sapin);
+  }
+
+  .carte-tete {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px 16px;
+  }
+
+  h3 {
+    margin: 0;
+    font: 400 clamp(1.5rem, 1.3rem + 0.8vw, 2rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  .duree {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: var(--sauge);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--sapin);
+  }
+
+  .roles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+
+  .role {
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .vous {
+    color: var(--tuile);
+  }
+
+  .nous {
+    color: var(--sapin);
+  }
+
+  .roles p {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+</style>

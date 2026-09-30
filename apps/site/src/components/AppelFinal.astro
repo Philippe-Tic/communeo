@@ -1,0 +1,78 @@
+---
+/**
+ * Section d'appel final sapin : titre et bouton vers l'inscription. `grand` : celle de l'accueil, avec
+ * le pictogramme et les courbes de niveau.
+ */
+import { TRIAL_URL } from '../lib/site';
+import Icone from './Icone.astro';
+import Logo from './Logo.astro';
+import Topo from './Topo.astro';
+
+interface Props {
+  titre: string;
+  bouton?: string;
+  mention?: string;
+  grand?: boolean;
+}
+
+const { titre, bouton = 'Créer le site de ma commune', mention, grand = false } = Astro.props;
+---
+
+<section class:list={['final sombre', { grand }]} aria-labelledby="t-final">
+  {grand && <Topo viewBox="0 0 1440 600" align="xMidYMid" cx={720} cy={300} rings={12} gap={54} r0={30} seed={2.4} sx={1.6} />}
+  <div class="interieur">
+    {grand && <Logo variante="picto" class="picto-final" />}
+    <h2 id="t-final">{titre}</h2>
+    <a class="bouton bouton--final bouton--papier bouton--fleche" href={TRIAL_URL}>{bouton}<Icone nom="fleche" /></a>
+    {mention && <span class="mention">{mention}</span>}
+  </div>
+</section>
+
+<style>
+  .final {
+    position: relative;
+    overflow: hidden;
+    background: var(--sapin);
+    padding: clamp(64px, 8vw, 112px) var(--gouttiere);
+  }
+
+  .grand {
+    padding: clamp(72px, 9vw, 136px) var(--gouttiere);
+  }
+
+  .interieur {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .grand .interieur {
+    gap: 28px;
+  }
+
+  .interieur :global(.picto-final) {
+    width: 64px;
+    color: var(--papier);
+  }
+
+  h2 {
+    margin: 0;
+    font: 400 clamp(2rem, 1.5rem + 2vw, 3.5rem) / 1.08 var(--serif);
+    color: var(--papier);
+    text-wrap: balance;
+  }
+
+  .grand h2 {
+    font: 400 clamp(2.25rem, 1.6rem + 2.6vw, 4rem) / 1.05 var(--serif);
+  }
+
+  .mention {
+    font-size: 1rem;
+    color: var(--papier);
+  }
+</style>

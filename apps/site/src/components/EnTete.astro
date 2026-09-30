@@ -1,0 +1,251 @@
+---
+/**
+ * En-tête : lien d'évitement, logo, navigation principale. Sous 1240 px, le bouton « Menu » déplie la
+ * navigation (sans JavaScript, elle reste dépliée).
+ */
+import { LOGIN_URL, NAV, TRIAL_URL, type NavKey } from '../lib/site';
+import Icone from './Icone.astro';
+import Logo from './Logo.astro';
+
+interface Props {
+  courant?: NavKey;
+}
+
+const { courant } = Astro.props;
+---
+
+<header class="entete sombre">
+  <a class="evitement" href="#contenu">Aller au contenu</a>
+  <div class="barre">
+    <a class="accueil" href="/" aria-label="Communeo, retour à l’accueil"><Logo class="logo-entete" /></a>
+    <nav class="nav-large" aria-label="Navigation principale">
+      {
+        NAV.map((item) => (
+          <a href={item.href} aria-current={item.key === courant ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+    <div class="actions">
+      <a class="connexion" href={LOGIN_URL}>Se connecter</a>
+      <a class="bouton bouton--papier essai" href={TRIAL_URL}>Essayer gratuitement</a>
+    </div>
+    <button class="bouton-menu" type="button" aria-expanded="false" aria-controls="menu-mobile" hidden>
+      <Icone nom="menu" class="icone-menu" /><Icone nom="fermer" class="icone-fermer" /><span>Menu</span>
+    </button>
+  </div>
+  <nav id="menu-mobile" class="menu-mobile" aria-label="Navigation principale">
+    {
+      NAV.map((item) => (
+        <a href={item.href} aria-current={item.key === courant ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))
+    }
+    <a class="sans-trait" href={LOGIN_URL}>Se connecter</a>
+    <a class="bouton bouton--papier" href={TRIAL_URL}>Essayer gratuitement 30 jours</a>
+  </nav>
+</header>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.bouton-menu');
+  const menu = document.getElementById('menu-mobile');
+  if (button && menu) {
+    const label = button.querySelector('span')!;
+    const set = (open: boolean) => {
+      button.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Fermer' : 'Menu';
+      menu.hidden = !open;
+    };
+    button.hidden = false;
+    set(false);
+    button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+        set(false);
+        button.focus();
+      }
+    });
+    // Passage en affichage large : le menu replié n'a plus lieu d'être
+    matchMedia('(min-width: 77.5em)').addEventListener('change', (event) => event.matches && set(false));
+  }
+</script>
+
+<style>
+  .entete {
+    position: relative;
+    z-index: 20;
+    background: var(--sapin);
+  }
+
+  .evitement {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 30;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: var(--papier);
+    color: var(--sapin);
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  .evitement:focus {
+    top: 12px;
+    outline: 3px solid var(--ble);
+    outline-offset: 2px;
+  }
+
+  .barre {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px var(--gouttiere);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .accueil {
+    display: block;
+    flex: none;
+    padding: 4px 0;
+    border-radius: 6px;
+    color: var(--papier);
+  }
+
+  .accueil:focus-visible {
+    outline-offset: 4px;
+  }
+
+  .accueil :global(.logo-entete) {
+    width: clamp(138px, 12vw, 172px);
+  }
+
+  .nav-large {
+    display: flex;
+    gap: clamp(18px, 2.2vw, 34px);
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  .nav-large a,
+  .connexion {
+    padding: 10px 0;
+    border-radius: 4px;
+    color: var(--papier);
+    text-decoration: none;
+    text-underline-offset: 8px;
+    white-space: nowrap;
+  }
+
+  .connexion {
+    text-decoration: underline;
+  }
+
+  .nav-large a:hover,
+  .connexion:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--papier);
+  }
+
+  .nav-large a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--ble);
+    text-decoration-thickness: 2px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .connexion {
+    font-size: 1.0625rem;
+    font-weight: 500;
+  }
+
+  .essai {
+    min-height: 48px;
+    padding: 0 20px;
+  }
+
+  .bouton-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--papier);
+    background: transparent;
+    color: var(--papier);
+    font: 600 1rem var(--sans);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .bouton-menu[hidden] {
+    display: none;
+  }
+
+  .bouton-menu[aria-expanded='true'] :global(.icone-menu),
+  .bouton-menu[aria-expanded='false'] :global(.icone-fermer) {
+    display: none;
+  }
+
+  .menu-mobile {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 20px 28px;
+    border-top: 1px solid var(--sapin-moyen);
+  }
+
+  .menu-mobile[hidden] {
+    display: none;
+  }
+
+  .menu-mobile a:not(.bouton) {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    border-bottom: 1px solid var(--sapin-moyen);
+    color: var(--papier);
+    font-size: 1.1875rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-underline-offset: 6px;
+    white-space: nowrap;
+  }
+
+  .menu-mobile .sans-trait {
+    border-bottom: none;
+  }
+
+  .menu-mobile a[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-color: var(--ble);
+  }
+
+  .menu-mobile .bouton {
+    min-height: 54px;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 77.49em) {
+    .nav-large,
+    .actions {
+      display: none;
+    }
+  }
+
+  @media (min-width: 77.5em) {
+    .bouton-menu,
+    .menu-mobile {
+      display: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,86 @@
+---
+import AFournir from '../components/AFournir.astro';
+import AppelFinal from '../components/AppelFinal.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+---
+
+<Base titre="À propos de Communeo · Communeo" description="Communeo est édité par Philippe Chevreul, entrepreneur individuel.">
+  <BandeauPage surtitre="À propos" titre="Qui fait Communeo" seed={2.8} />
+
+  <section class="section corps" aria-labelledby="t-nom">
+    <div class="pile contenu">
+      <div class="pile" style="gap:14px">
+        <h2 id="t-nom" class="h2">Philippe Chevreul</h2>
+        <AFournir bloc
+          >[Contenu à fournir : parcours de Philippe Chevreul, en trois ou quatre phrases. Par exemple son métier d’origine, son lien avec les communes, ce qui l’a amené à créer
+          Communeo.]</AFournir
+        >
+      </div>
+      <div class="pile" style="gap:14px">
+        <h2 class="titre-pourquoi">Pourquoi Communeo</h2>
+        <AFournir bloc>[Contenu à fournir : la motivation. Le constat de départ dans les petites mairies, et ce que Communeo veut changer pour elles.]</AFournir>
+      </div>
+      <dl class="identite">
+        <div>
+          <dt>Statut</dt>
+          <dd>Entrepreneur individuel, sous le nom commercial Communeo</dd>
+        </div>
+        <div>
+          <dt>SIREN</dt>
+          <dd class="chiffres">911 592 764</dd>
+        </div>
+        <div>
+          <dt>Contact</dt>
+          <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <AppelFinal titre="Votre commune mérite un site à jour." />
+</Base>
+
+<style>
+  .corps {
+    padding-block: clamp(56px, 7vw, 96px);
+  }
+
+  .contenu {
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 28px;
+  }
+
+  .titre-pourquoi {
+    margin: 0;
+    font: 400 clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  .identite {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 12px;
+  }
+
+  .identite div {
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--papier-clair);
+  }
+
+  dt {
+    font-size: 0.9375rem;
+    color: var(--encre-douce);
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+</style>

@@ -1,0 +1,427 @@
+---
+import AFournir from '../components/AFournir.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Icone from '../components/Icone.astro';
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL, CONTACT_ENDPOINT, DOC_URL } from '../lib/site';
+
+const champs: Array<{ id: string; label: string; type: 'text' | 'email'; ac: string; aide: string; erreur: string }> = [
+  { id: 'nom', label: 'Nom et prénom', type: 'text', ac: 'name', aide: '', erreur: 'Indiquez votre nom.' },
+  { id: 'fonction', label: 'Fonction', type: 'text', ac: 'organization-title', aide: 'Par exemple : secrétaire de mairie, maire, adjoint', erreur: 'Indiquez votre fonction.' },
+  { id: 'commune', label: 'Commune', type: 'text', ac: 'off', aide: '', erreur: 'Indiquez votre commune.' },
+  { id: 'email', label: 'Adresse e-mail', type: 'email', ac: 'email', aide: '', erreur: 'Indiquez une adresse e-mail valide, par exemple mairie@saint-aubin.fr.' },
+];
+---
+
+<Base titre="Contacter Communeo · Communeo" description="Une question sur le site internet de votre commune ? Écrivez-nous : réponse par e-mail sous 72 heures.">
+  <BandeauPage
+    surtitre="Contact"
+    titre="Écrivez-nous."
+    chapo="Une question avant de vous inscrire, un point sur la facturation, une demande de la mairie : nous répondons par e-mail sous 72 heures."
+    seed={1.9}
+  />
+
+  <div class="section corps">
+    <div class="disposition">
+      <div class="colonne-form">
+        <div class="envoye" role="status" tabindex="-1" hidden data-envoye>
+          <h2>Merci, votre message est bien parti.</h2>
+          <p>Nous vous répondons à <b data-email-affiche></b> sous 72 heures.</p>
+          <a class="lien-fort" href="/">Retour à l’accueil</a>
+        </div>
+        <form class="formulaire" novalidate aria-labelledby="t-form" data-formulaire action={CONTACT_ENDPOINT} method="post">
+          <h2 id="t-form">Votre message</h2>
+          <p class="doux" style="margin:0;font-size:0.9375rem">Tous les champs sont obligatoires.</p>
+          <div class="recap" role="alert" data-recap hidden>
+            <Icone nom="erreur" taille={20} />
+            <span><b data-nombre></b> Corrigez les champs signalés ci-dessous.</span>
+          </div>
+          <div class="grille-champs">
+            {
+              champs.map((c) => (
+                <div class="champ" data-champ={c.id} data-erreur={c.erreur}>
+                  <label for={c.id}>{c.label}</label>
+                  {c.aide && (
+                    <span id={`aide-${c.id}`} class="aide">
+                      {c.aide}
+                    </span>
+                  )}
+                  <input id={c.id} name={c.id} type={c.type} autocomplete={c.ac} required aria-describedby={c.aide ? `aide-${c.id}` : undefined} />
+                </div>
+              ))
+            }
+          </div>
+          <div class="champ" data-champ="message" data-erreur="Écrivez votre message.">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="6" required></textarea>
+          </div>
+          <!-- Champ piège : caché aux personnes, rempli par les robots -->
+          <div class="piege" aria-hidden="true">
+            <label for="site_web">Ne pas remplir</label>
+            <input id="site_web" name="site_web" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <div class="champ consentement" data-champ="consent" data-erreur="Cochez la case pour que nous puissions vous répondre.">
+            <label class="case">
+              <input id="consent" name="consent" type="checkbox" required />
+              <span
+                >J’accepte que Communeo utilise ces informations pour répondre à mon message. Elles ne servent à rien d’autre et sont supprimées <AFournir
+                  >[durée de conservation à confirmer]</AFournir
+                >. <a href="/donnees-personnelles">En savoir plus sur vos données</a>.</span
+              >
+            </label>
+          </div>
+          <p class="echec" role="alert" data-echec hidden></p>
+          <button type="submit" class="bouton bouton--grand bouton--sapin bouton--fleche envoyer">Envoyer le message<Icone nom="fleche" /></button>
+        </form>
+      </div>
+      <aside class="a-cote" aria-label="Autres moyens de contact">
+        <div class="par-email sombre">
+          <h2>Par e-mail</h2>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <p>Réponse sous 72 heures. L’assistance se fait uniquement par e-mail.</p>
+        </div>
+        <div class="deja-client">
+          <h2>Déjà client ?</h2>
+          <p class="doux">La documentation en ligne répond à la plupart des questions, écran par écran.</p>
+          <a class="lien-doc" href={DOC_URL} target="_blank" rel="noopener">Ouvrir la documentation (nouvelle fenêtre)</a>
+        </div>
+        <a class="lien-fort" href="/questions">Voir les questions fréquentes</a>
+      </aside>
+    </div>
+  </div>
+</Base>
+
+<script>
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const form = document.querySelector<HTMLFormElement>('[data-formulaire]');
+  if (form) {
+    const recap = form.querySelector<HTMLElement>('[data-recap]')!;
+    const failure = form.querySelector<HTMLElement>('[data-echec]')!;
+    const fields = [...form.querySelectorAll<HTMLElement>('[data-champ]')];
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+    const control = (field: HTMLElement) => field.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')!;
+    const valid = (field: HTMLElement) => {
+      const input = control(field);
+      if (input instanceof HTMLInputElement && input.type === 'checkbox') return input.checked;
+      if (field.dataset.champ === 'email') return EMAIL.test(input.value.trim());
+      return input.value.trim() !== '';
+    };
+    const describedBy = (input: Element, id: string, on: boolean) => {
+      const ids = new Set((input.getAttribute('aria-describedby') ?? '').split(' ').filter(Boolean));
+      if (on) ids.add(id);
+      else ids.delete(id);
+      if (ids.size) input.setAttribute('aria-describedby', [...ids].join(' '));
+      else input.removeAttribute('aria-describedby');
+    };
+    const mark = (field: HTMLElement, invalid: boolean) => {
+      const input = control(field);
+      const id = `err-${field.dataset.champ}`;
+      field.querySelector(`#${id}`)?.remove();
+      field.classList.toggle('invalide', invalid);
+      if (invalid) {
+        input.setAttribute('aria-invalid', 'true');
+        const message = document.createElement('span');
+        message.id = id;
+        message.className = 'message-erreur';
+        message.innerHTML =
+          '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 8v4M12 16h.01"></path></svg>';
+        message.append(field.dataset.erreur ?? '');
+        field.append(message);
+      } else input.removeAttribute('aria-invalid');
+      describedBy(input, id, invalid);
+    };
+
+    let tried = false;
+    const check = () => {
+      const invalid = fields.filter((field) => !valid(field));
+      fields.forEach((field) => mark(field, invalid.includes(field)));
+      recap.hidden = invalid.length === 0;
+      recap.querySelector('[data-nombre]')!.textContent = `${invalid.length} erreur${invalid.length > 1 ? 's' : ''}.`;
+      return invalid;
+    };
+    form.addEventListener('input', () => tried && check());
+    form.addEventListener('change', () => tried && check());
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      tried = true;
+      failure.hidden = true;
+      const invalid = check();
+      if (invalid.length) {
+        control(invalid[0]!).focus();
+        return;
+      }
+      const data = new FormData(form);
+      const body = {
+        nom: data.get('nom'),
+        fonction: data.get('fonction'),
+        commune: data.get('commune'),
+        email: data.get('email'),
+        message: data.get('message'),
+        consent: true,
+        site_web: data.get('site_web'),
+      };
+      submit.disabled = true;
+      try {
+        const response = await fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if (!response.ok) {
+          const payload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
+          throw new Error(payload?.error?.message || 'Le message n’a pas pu partir.');
+        }
+        const sent = document.querySelector<HTMLElement>('[data-envoye]')!;
+        sent.querySelector('[data-email-affiche]')!.textContent = String(body.email);
+        form.hidden = true;
+        sent.hidden = false;
+        sent.focus();
+      } catch (error) {
+        failure.textContent = `${error instanceof Error ? error.message : 'Le message n’a pas pu partir.'} Vous pouvez aussi écrire à contact@communeo.fr.`;
+        failure.hidden = false;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .corps {
+    padding-block: clamp(48px, 6vw, 88px);
+  }
+
+  .disposition {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: flex-start;
+  }
+
+  .colonne-form {
+    flex: 2 1 520px;
+    min-width: 0;
+  }
+
+  .formulaire,
+  .envoye {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding: clamp(24px, 4vw, 48px);
+    border-radius: 20px;
+    background: var(--blanc);
+    border: 1px solid var(--grege);
+  }
+
+  .formulaire[hidden],
+  .envoye[hidden] {
+    display: none;
+  }
+
+  .envoye {
+    gap: 20px;
+    outline: none;
+  }
+
+  .envoye h2 {
+    margin: 0;
+    font: 400 clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem) / 1.1 var(--serif);
+    color: var(--sapin);
+  }
+
+  .envoye p {
+    margin: 0;
+    font-size: 1.125rem;
+    line-height: 1.6;
+  }
+
+  .envoye a {
+    align-self: flex-start;
+  }
+
+  .formulaire h2 {
+    margin: 0;
+    font: 400 clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  .recap,
+  .echec {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    padding: 16px 18px;
+    border-radius: 12px;
+    background: var(--erreur-fond);
+    color: var(--erreur);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .recap[hidden],
+  .echec[hidden] {
+    display: none;
+  }
+
+  .recap :global(svg) {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .grille-champs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 22px;
+  }
+
+  .champ {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .champ > label {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+
+  .aide {
+    font-size: 0.9375rem;
+    color: var(--encre-douce);
+  }
+
+  input:not([type='checkbox']),
+  textarea {
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: 1.5px solid var(--taupe);
+    background: var(--blanc);
+    font: 400 1.0625rem var(--sans);
+    color: var(--encre);
+  }
+
+  textarea {
+    padding: 14px 16px;
+    line-height: 1.55;
+    resize: vertical;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .invalide input:not([type='checkbox']),
+  .invalide textarea {
+    border: 2px solid var(--erreur);
+  }
+
+  .champ :global(.message-erreur) {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--erreur);
+  }
+
+  .consentement :global(.message-erreur) {
+    padding-left: 38px;
+  }
+
+  .case {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 1rem;
+    line-height: 1.55;
+    cursor: pointer;
+  }
+
+  .case input {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    margin: 1px 0 0;
+    accent-color: var(--sapin);
+  }
+
+  .piege {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .envoyer {
+    align-self: flex-start;
+  }
+
+  .envoyer:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .a-cote {
+    flex: 1 1 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .par-email,
+  .deja-client {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 28px;
+    border-radius: 16px;
+  }
+
+  .par-email {
+    background: var(--sapin);
+    color: var(--papier);
+  }
+
+  .par-email h2 {
+    margin: 0;
+    font: 400 1.625rem/1.2 var(--serif);
+  }
+
+  .par-email a {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--papier);
+    overflow-wrap: anywhere;
+  }
+
+  .par-email p,
+  .deja-client p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .deja-client {
+    background: var(--blanc);
+    border: 1px solid var(--grege);
+  }
+
+  .deja-client h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .lien-doc {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .a-cote > .lien-fort {
+    align-self: flex-start;
+  }
+</style>

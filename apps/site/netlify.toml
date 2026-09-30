@@ -1,0 +1,21 @@
+# Site Netlify de communeo.fr, « Base directory » = apps/site. Le site fait partie du monorepo pnpm :
+# l'installation et le build partent de la racine (il dépend de @communeo/core).
+[build]
+  command = "cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build --filter @communeo/site..."
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.communeo.fr; form-action https://app.communeo.fr; frame-ancestors 'none'; base-uri 'self'"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

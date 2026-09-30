@@ -1,0 +1,172 @@
+---
+import AppelFinal from '../components/AppelFinal.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Icone from '../components/Icone.astro';
+import Navigateur from '../components/Navigateur.astro';
+import SelecteurThemes from '../components/SelecteurThemes.astro';
+import Base from '../layouts/Base.astro';
+import { THEMES_PRESENTES } from '../lib/themes';
+
+const rappels = [
+  { t: 'Le même contenu', p: 'Pages, actualités, agenda et documents s’affichent dans tous les thèmes, sans rien ressaisir.' },
+  { t: 'Changement à tout moment', p: 'Un clic dans l’administration, et le site change de mise en page.' },
+  { t: 'Votre logo ou votre blason', p: 'Il apparaît en tête de toutes les pages, quel que soit le thème.' },
+  { t: 'Des palettes pensées pour le contraste', p: 'Chaque thème a ses couleurs, choisies et testées pour rester lisibles par tous.' },
+];
+---
+
+<Base
+  titre="Quatre thèmes pour le site de votre commune · Communeo"
+  description="Institutionnel, Moderne, Journal ou Bourg : quatre vraies mises en page pour le site de votre mairie. Changez de thème quand vous voulez, vos contenus suivent."
+  courant="themes"
+>
+  <BandeauPage
+    surtitre="Thèmes"
+    titre="Quatre mises en page au choix pour le site de votre commune."
+    chapo="Vous fournissez le logo ou le blason, le nom de la commune et vos contenus ; le thème fait le reste. Vous en changez quand vous voulez."
+    seed={2.2}
+  />
+
+  <section class="section essai" aria-labelledby="t-essai">
+    <div class="conteneur">
+      <SelecteurThemes page titre="La même page d’accueil de Saint-Aubin-sur-Loire, dans chaque thème" />
+    </div>
+  </section>
+
+  {
+    THEMES_PRESENTES.map((theme, index) => (
+      <section class:list={['section theme', { 'fond-clair': index % 2 === 1 }]} aria-labelledby={`t-${theme.key}`}>
+        <div class="conteneur theme-grille">
+          <div class:list={['pile theme-texte', { apres: index % 2 === 1 }]}>
+            <span class="surtitre">Thème {String(index + 1).padStart(2, '0')}</span>
+            <h2 id={`t-${theme.key}`}>{theme.label}</h2>
+            <p class="d">{theme.d}</p>
+            <p class="ideal">
+              <b>Idéal pour</b> {theme.ideal}
+            </p>
+            <ul class="coches">
+              {theme.forts.map((fort) => (
+                <li>
+                  <Icone nom="coche" taille={20} epaisseur={2.2} couleur="#0E4033" />
+                  {fort}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Navigateur src={theme.capture} adresse="mairie-saint-aubin.fr" largeur={640} alt={`Page d’accueil de Saint-Aubin-sur-Loire dans le thème ${theme.label}.`} />
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="section fond-blanc" aria-labelledby="t-rappels">
+    <div class="conteneur pile" style="gap:32px">
+      <h2 id="t-rappels" class="h2">Quel que soit le thème</h2>
+      <ul class="rappels">
+        {
+          rappels.map((r) => (
+            <li>
+              <h3>{r.t}</h3>
+              <p>{r.p}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <AppelFinal titre="Essayez les quatre thèmes avec vos propres contenus" />
+</Base>
+
+<style>
+  .essai,
+  .theme {
+    padding-block: clamp(56px, 7vw, 96px);
+  }
+
+  .theme {
+    border-top: 1px solid var(--grege);
+  }
+
+  .theme-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: clamp(32px, 4vw, 64px);
+    align-items: center;
+  }
+
+  .theme-texte {
+    gap: 18px;
+  }
+
+  .apres {
+    order: 2;
+  }
+
+  .theme h2 {
+    margin: 0;
+    font: 400 clamp(2.25rem, 1.8rem + 1.8vw, 3.5rem) / 1.05 var(--serif);
+    color: var(--sapin);
+  }
+
+  .d {
+    margin: 0;
+    font-size: clamp(1.125rem, 1.05rem + 0.3vw, 1.3125rem);
+    line-height: 1.55;
+  }
+
+  .ideal {
+    margin: 0;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: var(--sauge);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--sapin);
+  }
+
+  .coches {
+    gap: 10px;
+  }
+
+  .coches li {
+    gap: 10px;
+  }
+
+  .coches :global(svg) {
+    margin-top: 2px;
+  }
+
+  .rappels {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: 16px;
+  }
+
+  .rappels li {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    border-radius: 14px;
+    background: var(--papier-clair);
+    border: 1px solid var(--grege);
+  }
+
+  .rappels h3 {
+    margin: 0;
+    font-size: 1.1875rem;
+    font-weight: 600;
+    color: var(--sapin);
+  }
+
+  .rappels p {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+    color: var(--encre-douce);
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+/** Document HTML de chaque page : en-tête de document, en-tête, contenu, pied de page */
+import '../styles/global.css';
+import EnTete from '../components/EnTete.astro';
+import PiedDePage from '../components/PiedDePage.astro';
+import type { NavKey } from '../lib/site';
+
+interface Props {
+  /** Titre complet de l'onglet, « … · Communeo » */
+  titre: string;
+  description: string;
+  courant?: NavKey;
+  /** Page introuvable : ni canonique ni indexation */
+  introuvable?: boolean;
+}
+
+const { titre, description, courant, introuvable = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/'), Astro.site).href;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    <title>{titre}</title>
+    <meta name="description" content={description} />
+    {introuvable ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#0E4033" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Communeo" />
+    <meta property="og:title" content={titre} />
+    <meta property="og:description" content={description} />
+    {!introuvable && <meta property="og:url" content={canonical} />}
+  </head>
+  <body>
+    <EnTete courant={courant} />
+    <main>
+      <slot />
+    </main>
+    <PiedDePage />
+  </body>
+</html>

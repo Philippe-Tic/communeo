@@ -1,0 +1,17 @@
+---
+import AFournir from '../components/AFournir.astro';
+import Legal from '../layouts/Legal.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+---
+
+<Legal titre="Mentions légales" description="Éditeur et hébergeur du site de Communeo.">
+  <h2>Éditeur</h2>
+  <p>
+    Philippe Chevreul, entrepreneur individuel (EI), exerçant sous le nom commercial Communeo.<br />SIREN : 911 592 764<br />Adresse : <AFournir>[à compléter]</AFournir><br
+    />E-mail : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />Directeur de la publication : Philippe Chevreul
+  </p>
+  <h2>Hébergeur</h2>
+  <p><AFournir>[à compléter selon l’hébergement retenu : raison sociale, adresse, téléphone]</AFournir></p>
+  <h2>Propriété intellectuelle</h2>
+  <p><AFournir>[Texte à fournir]</AFournir></p>
+</Legal>

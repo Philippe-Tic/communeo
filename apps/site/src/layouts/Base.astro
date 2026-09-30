@@ -35,6 +35,11 @@ const canonical = new URL(Astro.url.pathname.replace(/\.html$/, '').replace(/\/i
     <meta property="og:title" content={titre} />
     <meta property="og:description" content={description} />
     {!introuvable && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={new URL('/partage.png', Astro.site).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Communeo, le site internet des communes : votre commune a sa place en ligne." />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <EnTete courant={courant} />

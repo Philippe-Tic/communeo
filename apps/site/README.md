@@ -32,6 +32,8 @@ pnpm --filter @communeo/site captures:themes   # captures des thèmes (voir plus
 - `src/assets/themes/` : l'accueil de Saint-Aubin-sur-Loire dans chaque thème, capturé depuis les builds
   de démonstration du renderer (`E2E_THEMES=institutionnel,moderne,journal,bourg node e2e/build.mjs`
   dans apps/renderer, puis `pnpm captures:themes`). À refaire quand un thème change d'aspect.
+- `public/partage.png` : l'image de partage (1 200 × 630, balises `og:image`), dessinée en HTML avec les
+  polices et couleurs du site par `pnpm image:partage`.
 
 ## Formulaire de contact
 

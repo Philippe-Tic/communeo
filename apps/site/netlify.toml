@@ -1,11 +1,42 @@
-# Site Netlify de communeo.fr, « Base directory » = apps/site. Le site fait partie du monorepo pnpm :
-# l'installation et le build partent de la racine (il dépend de @communeo/core).
+# Site Netlify de communeo.fr. Réglages du site : « Base directory » vide (racine du monorepo, où
+# Netlify installe les dépendances avec pnpm), « Package directory » = apps/site (ce fichier).
 [build]
-  command = "cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm turbo run build --filter @communeo/site..."
-  publish = "dist"
+  command = "pnpm turbo run build --filter @communeo/site..."
+  publish = "apps/site/dist"
 
 [build.environment]
   NODE_VERSION = "24"
+
+# Adresses de l'ancien site (communeo-landing)
+[[redirects]]
+  from = "/cgv/*"
+  to = "/conditions"
+  status = 301
+
+[[redirects]]
+  from = "/cgv"
+  to = "/conditions"
+  status = 301
+
+[[redirects]]
+  from = "/faq/*"
+  to = "/questions"
+  status = 301
+
+[[redirects]]
+  from = "/faq"
+  to = "/questions"
+  status = 301
+
+[[redirects]]
+  from = "/mentions-legales/"
+  to = "/mentions-legales"
+  status = 301
+
+[[redirects]]
+  from = "/sitemap-index.xml"
+  to = "/sitemap.xml"
+  status = 301
 
 [[headers]]
   for = "/*"

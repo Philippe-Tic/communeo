@@ -42,6 +42,7 @@ l'expéditeur en réponse. Rien n'est enregistré. `PUBLIC_API_URL` au build : S
 
 ## Mise en ligne
 
-Site Netlify, « Base directory » `apps/site` : `netlify.toml` construit depuis la racine du monorepo et
-pose les en-têtes de sécurité (CSP, rejouée par le serveur des tests). Les pages sont servies sans
-extension (`/tarifs` → `tarifs.html`).
+Site Netlify relié à ce dépôt : « Base directory » vide (racine du monorepo : Netlify installe avec
+pnpm), « Package directory » `apps/site`. `netlify.toml` porte la commande de build, le dossier publié,
+les redirections des adresses de l'ancien site (communeo-landing) et les en-têtes de sécurité (CSP,
+rejouée par le serveur des tests). Les pages sont servies sans extension (`/tarifs` → `tarifs.html`).

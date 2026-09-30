@@ -3,6 +3,10 @@
 [build]
   command = "pnpm turbo run build --filter @communeo/site..."
   publish = "apps/site/dist"
+  # Pas de build (ni d'aperçu de PR) quand le commit ne touche ni le site, ni @communeo/core (tarifs), ni
+  # les dépendances ou la config du monorepo : une mise à jour de Strapi, de l'admin ou d'un thème n'en
+  # déclenche pas. Captures des thèmes : `pnpm captures:themes`, dont le commit déclenche le build.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/site packages/core pnpm-lock.yaml package.json pnpm-workspace.yaml turbo.json"
 
 [build.environment]
   NODE_VERSION = "24"

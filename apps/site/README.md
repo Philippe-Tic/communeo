@@ -46,3 +46,5 @@ Site Netlify relié à ce dépôt : « Base directory » vide (racine du monorep
 pnpm), « Package directory » `apps/site`. `netlify.toml` porte la commande de build, le dossier publié,
 les redirections des adresses de l'ancien site (communeo-landing) et les en-têtes de sécurité (CSP,
 rejouée par le serveur des tests). Les pages sont servies sans extension (`/tarifs` → `tarifs.html`).
+Pas de build quand un commit ne touche ni le site, ni `@communeo/core`, ni les dépendances ou la config
+du monorepo (`ignore`) ; un build manuel reste possible (Deploys → Trigger deploy).

@@ -12,7 +12,7 @@ const pages = [
   { label: 'Contact', href: '/contact' },
   { label: 'À propos', href: '/a-propos' },
 ];
-const legal = LEGAL.filter((item) => item.href !== '/plan-du-site');
+const legal = [...LEGAL.filter((item) => item.href !== '/plan-du-site'), { label: 'Accord de sous-traitance', href: '/sous-traitance' }];
 ---
 
 <Legal titre="Plan du site" description="Toutes les pages du site de Communeo.">

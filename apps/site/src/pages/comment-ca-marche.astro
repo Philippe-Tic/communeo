@@ -1,5 +1,4 @@
 ---
-import AFournir from '../components/AFournir.astro';
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Base from '../layouts/Base.astro';
@@ -31,7 +30,7 @@ const etapes = [
   },
   {
     t: 'Mise en ligne définitive',
-    d: null,
+    d: 'Sous 2 jours ouvrés',
     vous: 'Vous indiquez le domaine de la commune si vous en avez un, par exemple mairie-saint-aubin.fr.',
     nous: 'Après validation par l’équipe, le bandeau disparaît, le site devient visible dans les moteurs de recherche et peut passer sur votre domaine, avec certificat HTTPS.',
   },
@@ -86,7 +85,7 @@ const etapes = [
                         <circle cx="12" cy="12" r="10" />
                         <path d="M12 6v6l4 2" />
                       </svg>
-                      {s.d ?? <AFournir>[Délai à confirmer]</AFournir>}
+                      {s.d}
                     </span>
                   </div>
                   <div class="roles">

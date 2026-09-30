@@ -1,5 +1,4 @@
 ---
-import AFournir from '../components/AFournir.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Icone from '../components/Icone.astro';
 import Base from '../layouts/Base.astro';
@@ -64,9 +63,7 @@ const champs: Array<{ id: string; label: string; type: 'text' | 'email'; ac: str
             <label class="case">
               <input id="consent" name="consent" type="checkbox" required />
               <span
-                >J’accepte que Communeo utilise ces informations pour répondre à mon message. Elles ne servent à rien d’autre et sont supprimées <AFournir
-                  >[durée de conservation à confirmer]</AFournir
-                >. <a href="/donnees-personnelles">En savoir plus sur vos données</a>.</span
+                >J’accepte que Communeo utilise ces informations pour répondre à mon message. Elles ne servent à rien d’autre et sont supprimées au bout d’un an. <a href="/donnees-personnelles">En savoir plus sur vos données</a>.</span
               >
             </label>
           </div>

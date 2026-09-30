@@ -1,17 +1,24 @@
 ---
-import AFournir from '../components/AFournir.astro';
 import Legal from '../layouts/Legal.astro';
 import { CONTACT_EMAIL } from '../lib/site';
 ---
 
-<Legal titre="Mentions légales" description="Éditeur et hébergeur du site de Communeo.">
+<Legal titre="Mentions légales" description="Éditeur et hébergeurs du site de Communeo.">
   <h2>Éditeur</h2>
   <p>
-    Philippe Chevreul, entrepreneur individuel (EI), exerçant sous le nom commercial Communeo.<br />SIREN : 911 592 764<br />Adresse : <AFournir>[à compléter]</AFournir><br
-    />E-mail : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />Directeur de la publication : Philippe Chevreul
+    Philippe Chevreul, entrepreneur individuel (EI), exerçant sous le nom commercial Communeo.<br />SIREN : 911 592 764<br />Adresse : 10 rue du Général de Gaulle, 76250
+    Déville-lès-Rouen<br />E-mail : <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />Directeur de la publication : Philippe Chevreul
   </p>
-  <h2>Hébergeur</h2>
-  <p><AFournir>[à compléter selon l’hébergement retenu : raison sociale, adresse, téléphone]</AFournir></p>
+  <h2>Hébergeurs</h2>
+  <p>
+    <b>Ce site</b> : Netlify, Inc., 101 2nd Street, San Francisco, CA 94105, États-Unis. Téléphone : +1 415 691 1573.
+  </p>
+  <p>
+    <b>Application et données des communes (app.communeo.fr)</b> : OVH SAS, 2 rue Kellermann, 59100 Roubaix, France. Téléphone : 09 72 10 10 07.
+  </p>
   <h2>Propriété intellectuelle</h2>
-  <p><AFournir>[Texte à fournir]</AFournir></p>
+  <p>
+    Les textes, le logo, les illustrations et les captures d’écran de ce site appartiennent à Communeo. Toute reproduction, même partielle, demande un accord écrit préalable. Les
+    fiches Service-Public citées en exemple appartiennent à leurs auteurs.
+  </p>
 </Legal>

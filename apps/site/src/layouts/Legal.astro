@@ -109,6 +109,49 @@ const courant = Astro.url.pathname.replace(/\.html$/, '');
     margin: 0;
   }
 
+  .texte-legal :global(h3) {
+    margin: 8px 0 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  /* Tableaux des annexes : défilement horizontal dans leur cadre plutôt que dans la page */
+  .texte-legal :global(.tableau) {
+    max-width: 100%;
+    overflow-x: auto;
+    border-radius: 4px;
+  }
+
+  .texte-legal :global(table) {
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .texte-legal :global(th),
+  .texte-legal :global(td) {
+    padding: 10px 12px;
+    border: 1px solid var(--grege);
+    text-align: left;
+    vertical-align: top;
+    min-width: 12em;
+  }
+
+  .texte-legal :global(th) {
+    background: var(--papier-clair);
+  }
+
+  .texte-legal :global(blockquote) {
+    margin: 0;
+    padding: 12px 18px;
+    border-left: 3px solid var(--grege);
+  }
+
+  .texte-legal :global(ol),
+  .texte-legal :global(ul) {
+    margin: 0;
+  }
+
   .texte-legal :global(ul) {
     padding-left: 22px;
     display: flex;

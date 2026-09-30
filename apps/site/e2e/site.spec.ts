@@ -17,6 +17,7 @@ const PAGES = [
   '/a-propos',
   '/mentions-legales',
   '/conditions',
+  '/sous-traitance',
   '/donnees-personnelles',
   '/accessibilite',
   '/plan-du-site',

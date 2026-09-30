@@ -50,7 +50,7 @@ const habitants: Array<{ icone: IconeNom; t: string; p: string }> = [
   { icone: 'horloge', t: 'Horaires', p: 'Avec l’indication « ouvert » ou « fermé » en direct' },
   { icone: 'actualites', t: 'Actualités', p: 'Classées par catégories' },
   { icone: 'agenda', t: 'Agenda', p: 'La fête du village, le conseil municipal' },
-  { icone: 'demarches', t: 'Démarches', p: 'Plus de 3 000 fiches Service-Public' },
+  { icone: 'demarches', t: 'Démarches', p: 'Toutes les fiches Service-Public' },
   { icone: 'alerte', t: 'Alertes', p: 'Coupure d’eau, route barrée, vigilance météo' },
   { icone: 'cantine', t: 'Cantine', p: 'Le menu de la semaine' },
   { icone: 'collectes', t: 'Collectes', p: 'Les prochains ramassages, encombrants compris' },
@@ -62,7 +62,7 @@ const fonctionsAdmin = [
   { t: 'Aperçu avant publication', p: 'Vous voyez le brouillon dans votre thème avant de le publier.' },
   { t: 'Publication programmée', p: 'Vous pouvez par exemple préparer le menu de la cantine et le publier lundi à 7 h.' },
   { t: 'Alertes en direct', p: 'Un bandeau sur tout le site, avec une date de fin.' },
-  { t: 'Mise en ligne en un clic', p: 'Environ 30 secondes, ou automatiquement quelques instants après vos changements.' },
+  { t: 'Mise en ligne en un clic', p: 'En moins d’une minute, ou automatiquement quelques instants après vos changements.' },
 ];
 
 const etapesPublication = ['Vérification', 'Génération des pages', 'Publication', 'En ligne'];
@@ -282,7 +282,7 @@ const faq = [
     <div class="conteneur deux-colonnes">
       <div class="pile" style="gap:20px">
         <span class="surtitre">Les démarches Service-Public intégrées</span>
-        <p class="grand-chiffre"><span class="chiffre chiffres">3 000</span><span class="unite">fiches officielles</span></p>
+        <p class="grand-chiffre"><span class="chiffre">Toutes</span><span class="unite">les fiches officielles</span></p>
         <h2 id="t-sp" class="titre-sp">Carte d’identité, passeport, état civil, urbanisme, élections : tout est déjà sur votre site.</h2>
         <p class="texte doux">
           Les fiches de Service-Public.fr sont tenues à jour par l’État. Vos habitants les consultent et les recherchent depuis le site de la commune. Quand une fiche indique « Où

@@ -1,6 +1,5 @@
 ---
 import { CONTACT_EMAIL, DOC_URL, LEGAL, LOGIN_URL, NAV, TRIAL_URL } from '../lib/site';
-import AFournir from './AFournir.astro';
 import Logo from './Logo.astro';
 
 const produit = NAV.map((item) => ({ ...item, label: item.key === 'questions' ? 'Questions fréquentes' : item.label }));
@@ -31,9 +30,7 @@ const produit = NAV.map((item) => ({ ...item, label: item.key === 'questions' ? 
         {
           LEGAL.map((item) =>
             item.href === '/accessibilite' ? (
-              <a href={item.href}>
-                Accessibilité : partiellement conforme <AFournir>[à confirmer]</AFournir>
-              </a>
+              <a href={item.href}>Accessibilité : non conforme</a>
             ) : (
               <a href={item.href}>{item.label}</a>
             ),

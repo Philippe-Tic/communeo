@@ -1,11 +1,14 @@
 ---
 import AFournir from '../components/AFournir.astro';
 import TexteMarkdown from '../components/TexteMarkdown.astro';
-import { compiledContent } from '../contenus/conditions.md';
+import { compiledContent } from '../contenus/sous-traitance.md';
 import Legal from '../layouts/Legal.astro';
 ---
 
-<Legal titre="Conditions générales" description="Conditions générales de vente et d’utilisation de Communeo.">
+<Legal
+  titre="Accord de sous-traitance des données personnelles"
+  description="Comment Communeo traite les données des habitants, des agents et des élus pour le compte des communes (article 28 du RGPD)."
+>
   <AFournir bloc>[Texte en cours de relecture juridique : à valider avant la mise en ligne du site.]</AFournir>
   <TexteMarkdown html={await compiledContent()} />
 </Legal>

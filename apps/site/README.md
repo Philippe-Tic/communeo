@@ -17,8 +17,12 @@ pnpm --filter @communeo/site captures:themes   # captures des thèmes (voir plus
 - Les textes viennent des maquettes, corrigés quand le produit ne fait pas ce qu'ils annonçaient
   (inscription validée par la mairie, pré-remplissage par l'assistant, sauvegardes restaurées par l'équipe).
 - Les tarifs viennent de `@communeo/core` (`PRICING_TIERS`), la même grille que les devis.
-- Ce qui reste à fournir (textes juridiques, parcours, délais) est marqué par `<AFournir>` : visible dans
-  la page, listé par `pnpm a-fournir`. Le site n'est pas mis en ligne tant que la liste n'est pas vide.
+- Conditions générales et accord de sous-traitance : `src/contenus/*.md`, la partie publiée des brouillons
+  de travail de `v2/contenus-site/` (avec le registre des traitements, non publié). À recopier quand ces
+  brouillons changent.
+- Ce qui reste à fournir ou à valider est marqué par `<AFournir>` : visible dans la page, listé par
+  `pnpm a-fournir`. Le site n'est pas mis en ligne tant que la liste n'est pas vide (aujourd'hui : la
+  relecture juridique des conditions générales et de l'accord de sous-traitance).
 - Vidéos (V1, V2, V3, V5) et illustrations des maquettes : leurs emplacements ne sont pas affichés tant
   qu'elles n'existent pas.
 

@@ -1,5 +1,4 @@
 ---
-import AFournir from '../components/AFournir.astro';
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Base from '../layouts/Base.astro';
@@ -13,14 +12,17 @@ import { CONTACT_EMAIL } from '../lib/site';
     <div class="pile contenu">
       <div class="pile" style="gap:14px">
         <h2 id="t-nom" class="h2">Philippe Chevreul</h2>
-        <AFournir bloc
-          >[Contenu à fournir : parcours de Philippe Chevreul, en trois ou quatre phrases. Par exemple son métier d’origine, son lien avec les communes, ce qui l’a amené à créer
-          Communeo.]</AFournir
-        >
+        <p class="texte">
+          Designer et développeur depuis huit ans, j’aime rendre accessible ce qui ne l’est pas encore pour tout le monde. Pour moi, un site internet de mairie est une nécessité. Ce
+          n’est pas encore le cas partout, et les offres existantes sont souvent inadaptées, avec une expérience parfois médiocre.
+        </p>
       </div>
       <div class="pile" style="gap:14px">
         <h2 class="titre-pourquoi">Pourquoi Communeo</h2>
-        <AFournir bloc>[Contenu à fournir : la motivation. Le constat de départ dans les petites mairies, et ce que Communeo veut changer pour elles.]</AFournir>
+        <p class="texte">
+          Dans les petites mairies, le coût d’un site paraît élevé, et on sous-estime souvent le travail qu’il demande. Avec Communeo, vous avez un outil simple pour tenir un site
+          propre, accessible et complet, avec toutes les fonctions dont une mairie a besoin, et un accompagnement direct.
+        </p>
       </div>
       <dl class="identite">
         <div>

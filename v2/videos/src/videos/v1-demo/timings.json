@@ -13,7 +13,7 @@
   "segments": [
     {
       "debut": 0,
-      "fin": 11,
+      "fin": 10.2,
       "parole": {
         "debut": 0.4,
         "fin": 7.636,
@@ -30,91 +30,91 @@
       }
     },
     {
-      "debut": 11,
-      "fin": 26,
+      "debut": 10.2,
+      "fin": 23.4,
       "parole": {
-        "debut": 11.4,
-        "fin": 20.647,
+        "debut": 10.6,
+        "fin": 19.847,
         "phrases": [
           {
-            "debut": 11.4,
-            "fin": 18.103
+            "debut": 10.6,
+            "fin": 17.303
           },
           {
-            "debut": 18.336,
-            "fin": 20.647
+            "debut": 17.536,
+            "fin": 19.847
           }
         ]
       }
     },
     {
-      "debut": 26,
-      "fin": 48,
+      "debut": 23.4,
+      "fin": 43.2,
       "parole": {
-        "debut": 26.4,
-        "fin": 35.882,
+        "debut": 23.8,
+        "fin": 33.282,
         "phrases": [
           {
-            "debut": 26.4,
-            "fin": 31.97
+            "debut": 23.8,
+            "fin": 29.37
           },
           {
-            "debut": 32.208,
-            "fin": 35.882
+            "debut": 29.608,
+            "fin": 33.282
           }
         ]
       }
     },
     {
-      "debut": 48,
-      "fin": 64,
+      "debut": 43.2,
+      "fin": 58.2,
       "parole": {
-        "debut": 48.4,
-        "fin": 53.833,
+        "debut": 43.6,
+        "fin": 49.033,
         "phrases": [
           {
-            "debut": 48.4,
-            "fin": 51.718
+            "debut": 43.6,
+            "fin": 46.918
           },
           {
-            "debut": 51.947,
-            "fin": 53.833
+            "debut": 47.147,
+            "fin": 49.033
           }
         ]
       }
     },
     {
-      "debut": 64,
-      "fin": 84,
+      "debut": 58.2,
+      "fin": 76.2,
       "parole": {
-        "debut": 64.4,
-        "fin": 73.882,
+        "debut": 58.6,
+        "fin": 68.082,
         "phrases": [
           {
-            "debut": 64.4,
-            "fin": 71.822
+            "debut": 58.6,
+            "fin": 66.022
           },
           {
-            "debut": 72.048,
-            "fin": 73.882
+            "debut": 66.248,
+            "fin": 68.082
           }
         ]
       }
     },
     {
-      "debut": 84,
-      "fin": 91,
+      "debut": 76.2,
+      "fin": 82.8,
       "parole": {
-        "debut": 84.4,
-        "fin": 89.99,
+        "debut": 76.6,
+        "fin": 82.19,
         "phrases": [
           {
-            "debut": 84.4,
-            "fin": 87.583
+            "debut": 76.6,
+            "fin": 79.783
           },
           {
-            "debut": 87.817,
-            "fin": 89.99
+            "debut": 80.017,
+            "fin": 82.19
           }
         ]
       }

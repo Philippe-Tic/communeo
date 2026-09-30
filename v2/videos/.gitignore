@@ -5,3 +5,5 @@ out/
 public/captures/*
 !public/captures/test/
 public/voix/
+# Musique générée par pnpm videos:musique (ou déposée à la place)
+public/musique/

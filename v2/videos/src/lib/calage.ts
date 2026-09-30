@@ -18,16 +18,20 @@ export const ENTREE_VOIX = 0.4;
 
 /**
  * Segments mis bout à bout (voix segment par segment) : chacun dure le temps de sa phrase, mais jamais
- * moins que la durée prévue au script (une scène montre plus que ce qu'on en dit).
+ * moins que la durée prévue au script (une scène montre plus que ce qu'on en dit), arrondi au temps
+ * de musique suivant quand le script a un tempo.
  */
 export function calerSurPhrases(script: ScriptVideo, durees: Array<number | null>): Timings['segments'] {
   let t = script.segments[0]?.debut ?? 0;
+  const temps = script.tempo ? 60 / script.tempo : 0;
   return script.segments.map((segment, i) => {
     const duree = durees[i];
     const debut = t;
     const prevue = segment.fin - segment.debut;
     const parlee = duree === null || duree === undefined ? 0 : ENTREE_VOIX + duree + SOUFFLE;
-    const fin = debut + Math.max(prevue, parlee);
+    const juste = Math.max(prevue, parlee);
+    // Avec un tempo : arrondi au temps suivant, le changement de scène tombe sur la musique
+    const fin = debut + (temps ? Math.ceil(juste / temps - 1e-6) * temps : juste);
     t = fin;
     return parlee
       ? { debut: round(debut), fin: round(fin), parole: { debut: round(debut + ENTREE_VOIX), fin: round(debut + ENTREE_VOIX + duree!) } }

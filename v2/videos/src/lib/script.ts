@@ -15,14 +15,21 @@ export interface Segment {
   prononciation?: string;
   /** Ce qu'on voit à l'écran (transcription) */
   ecran: string;
+  /** Entrée de la scène : `fondu` quand elle continue sur le même écran que la précédente (sinon elle glisse) */
+  entree?: 'fondu';
 }
 
 export interface ScriptVideo {
   /** Identifiant de la composition et nom des fichiers : v1-demo, v2-alerte… */
   id: string;
   titre: string;
-  /** Seconde de l'image d'aperçu */
-  apercu: number;
+  /** Image d'aperçu : une seconde, ou un moment d'une scène (qui suit la voix quand les heures bougent) */
+  apercu: number | { segment: number; apres: number };
+  /**
+   * Tempo de la musique (battements par minute) : chaque scène dure un nombre entier de temps, pour que
+   * les changements de scène tombent sur la musique.
+   */
+  tempo?: number;
   /** Silence après le dernier segment, en secondes */
   finale?: number;
   segments: Segment[];
@@ -67,6 +74,14 @@ export function dureeEnImages(script: ScriptVideo, timings?: Timings | null): nu
   const segments = chronologie(script, timings);
   const fin = segments.length ? segments[segments.length - 1]!.fin : 0;
   return Math.max(1, Math.round((fin + (script.finale ?? 0.6)) * FPS));
+}
+
+/** Seconde de l'image d'aperçu */
+export function secondeApercu(script: ScriptVideo, timings?: Timings | null): number {
+  if (typeof script.apercu === 'number') return script.apercu;
+  const segment = chronologie(script, timings)[script.apercu.segment];
+  if (!segment) throw new Error(`Aperçu : pas de segment ${script.apercu.segment}`);
+  return segment.debut + script.apercu.apres;
 }
 
 /** Première image d'un segment du script, repérée par un extrait de son texte d'écran */

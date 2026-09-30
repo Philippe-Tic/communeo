@@ -24,6 +24,16 @@ describe('calage sur la voix', () => {
     ]);
   });
 
+  it('arrondit chaque scène au temps de musique suivant quand le script a un tempo', () => {
+    // 100 battements par minute : un temps = 0,6 s
+    const heures = calerSurPhrases({ ...script, tempo: 100 }, [4.5, 1.5, null]);
+    expect(heures.map((h) => [h.debut, h.fin])).toEqual([
+      [0, 5.4],
+      [5.4, 9.6],
+      [9.6, 12],
+    ]);
+  });
+
   it('retrouve les passages parlés entre les silences', () => {
     expect(passagesParles([{ debut: 0, fin: 0.5 }, { debut: 2, fin: 2.2 }, { debut: 3, fin: 4 }], 6)).toEqual([
       { debut: 0.5, fin: 2 },

@@ -1,9 +1,10 @@
 /**
  * Curseur : va d'un point à l'autre en courbe (jamais en ligne droite), avec un clic discret (léger
  * enfoncement et onde). Les points sont dans le repère du contenu ; `versEcran` (Camera) les place
- * dans l'image, pour que le curseur garde sa taille pendant un zoom.
+ * dans l'image, pour que le curseur garde sa taille pendant un zoom. Chaque clic s'entend
+ * (public/sons/clic.wav, généré par `pnpm videos:musique`).
  */
-import { Easing, useCurrentFrame } from 'remotion';
+import { Audio, Easing, getStaticFiles, Sequence, staticFile, useCurrentFrame } from 'remotion';
 import type { VersEcran } from './Camera';
 import type { Point } from '../lib/geometrie';
 
@@ -45,10 +46,19 @@ export function Cursor({ points, versEcran = (p) => p, echelle = 1 }: { points: 
   const taille = Math.min(60, Math.max(30, 25 * echelle));
   const { x, y } = versEcran(position(frame, points));
   const clic = points.find((p) => p.clic && frame >= p.image && frame < p.image + DUREE_CLIC);
+  const son = getStaticFiles().some((f) => f.name === 'sons/clic.wav');
   const t = clic ? (frame - clic.image) / DUREE_CLIC : 1;
   const enfonce = clic ? 1 - 0.14 * Math.sin(Math.min(1, t * 2) * Math.PI) : 1;
   return (
     <>
+      {son &&
+        points
+          .filter((p) => p.clic)
+          .map((p) => (
+            <Sequence key={p.image} from={p.image} durationInFrames={6} layout="none">
+              <Audio src={staticFile('sons/clic.wav')} volume={0.5} />
+            </Sequence>
+          ))}
       {clic && (
         <div
           style={{

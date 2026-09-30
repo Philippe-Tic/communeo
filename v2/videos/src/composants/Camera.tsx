@@ -27,8 +27,8 @@ export type VersEcran = (point: Point) => Point;
 
 /** Zoom maximal : au-delà, la capture (2x) deviendrait floue */
 const ZOOM_MAX = 2.2;
-/** Mouvement doux, sans à-coup au départ ni à l'arrivée */
-const DOUX = Easing.bezier(0.45, 0, 0.2, 1);
+/** Mouvement franc mais sans à-coup : démarre vite, se pose en douceur */
+const DOUX = Easing.bezier(0.6, 0, 0.12, 1);
 
 interface Vue {
   echelle: number;

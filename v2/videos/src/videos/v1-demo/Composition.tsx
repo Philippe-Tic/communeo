@@ -1,13 +1,14 @@
 /**
  * V1. Démonstration : de l'inscription au site en ligne (1 min 30).
  *
- * Six scènes, une par segment du script (leurs heures suivent la voix, voir timings.json), en fondu
- * enchaîné. Dans une scène, les heures sont en secondes depuis son début (`s(…)`). Règles de montage :
- * un seul mouvement de caméra à la fois, jamais pendant un changement d'écran ; chaque écran reste au
- * moins 2 s à l'image avant qu'on agisse dessus ; 5 légendes au plus dans toute la vidéo.
+ * Six scènes, une par segment du script (leurs heures suivent la voix, voir timings.json, et tombent
+ * sur les temps de la musique) : chacune glisse par-dessus la précédente en un temps. Dans une scène,
+ * les repères sont écrits en secondes à vitesse posée (`s(…)`), que TEMPO resserre. Règles de
+ * montage : un seul mouvement de caméra à la fois, jamais pendant un changement d'écran ; chaque écran
+ * reste à l'image avant qu'on agisse dessus ; 5 légendes au plus dans toute la vidéo.
  */
 import type { ReactNode } from 'react';
-import { AbsoluteFill, Easing, interpolate, Sequence, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Easing, interpolate, Sequence, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { BARRE, BrowserFrame } from '../../composants/BrowserFrame';
 import { Callout } from '../../composants/Callout';
 import { Camera, versEcranPour, type EtapeCamera } from '../../composants/Camera';
@@ -15,6 +16,8 @@ import { Cursor, type PointCurseur } from '../../composants/Cursor';
 import { EndCard } from '../../composants/EndCard';
 import { Etat } from '../../composants/Etat';
 import { Fond } from '../../composants/Fond';
+import { Glissade } from '../../composants/Glissade';
+import { Musique } from '../../composants/Musique';
 import { BORD, ETAT, PhoneFrame } from '../../composants/PhoneFrame';
 import { Typing, TypingCaptures } from '../../composants/Typing';
 import { VoixOff } from '../../composants/VoixOff';
@@ -52,12 +55,16 @@ import siteTelephoneDemarches from '../../../public/captures/v1-demo/site-teleph
 
 const C = <T,>(capture: T) => capture as unknown as Capture;
 
-/** Secondes → images, dans le repère de la scène */
-const s = (secondes: number) => Math.round(secondes * FPS);
-/** Fondu enchaîné entre deux scènes, ou deux écrans d'une même scène */
-const FONDU = 10;
+/** Accélération des repères écrits à vitesse posée : le montage avance d'un pas plus vif */
+const TEMPO = 1.12;
+/** Secondes (à vitesse posée) → images, dans le repère de la scène */
+const s = (secondes: number) => Math.round((secondes * FPS) / TEMPO);
+/** Glissade d'une scène à l'autre : un temps de musique (100 temps/min) */
+const TRANSITION = 18;
+/** Passage d'un écran à un autre dans une scène */
+const FONDU = 8;
 /** Durée d'un mouvement de caméra */
-const MOUVEMENT = 1;
+const MOUVEMENT = 0.8;
 
 /** Rectangle d'une capture placée dans un navigateur (sous la barre) */
 const nav = (r: Rect): Rect => decale(r, 0, BARRE);
@@ -68,15 +75,21 @@ const union = (...rects: Rect[]): Rect => {
 };
 const marge = (r: Rect, m: number): Rect => ({ x: r.x - m, y: r.y - m, width: r.width + 2 * m, height: r.height + 2 * m });
 
+/** Sous la barre de l'admin : un cadrage qui ne montre jamais de boutons coupés en haut */
+const SOUS_LA_BARRE: Rect = { x: 0, y: BARRE, width: 1440, height: 900 };
+/** Fin de la scène 3 et début de la scène 4 : même écran, même cadrage (le fondu ne se voit pas) */
+const cadreEnregistre = () => marge(nav(element(C(editeurEnregistre), 'enregistrement')), 110);
+
 /** Mouvement de caméra de `de` secondes pendant 1 s, vers `cadre` (`null` : tout) */
 const vers = (de: number, cadre: Rect | null, bornes?: Rect): EtapeCamera => ({ de: s(de), a: s(de + MOUVEMENT), cadre, bornes });
 /** Point du curseur à la seconde `t` */
 const au = (t: number, point: { x: number; y: number }, clic = false): PointCurseur => ({ image: s(t), ...point, clic });
 
-/** Apparition en fondu (une scène ou un écran qui entre) */
+/** Un nouvel écran dans une scène : fondu court, avec un léger recul (on « entre » dans l'écran) */
 function Entree({ children }: { children: ReactNode }) {
   const frame = useCurrentFrame();
-  return <AbsoluteFill style={{ opacity: interpolate(frame, [0, FONDU], [0, 1], { extrapolateRight: 'clamp' }) }}>{children}</AbsoluteFill>;
+  const t = interpolate(frame, [0, FONDU], [0, 1], { extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
+  return <AbsoluteFill style={{ opacity: t, transform: `scale(${1.03 - 0.03 * t})` }}>{children}</AbsoluteFill>;
 }
 
 /** Un navigateur cadré par la caméra, avec le curseur */
@@ -140,7 +153,7 @@ function Inscription() {
       <Etat capture={commune} de={s(6.4)} />
       <TypingCaptures rempli={remplie} cadre={element(remplie, 'prenom')} de={s(7.5)} caracteres={6} vitesse={11} />
       <TypingCaptures rempli={remplie} cadre={element(remplie, 'nom')} de={s(8.3)} caracteres={5} vitesse={11} />
-      <TypingCaptures rempli={remplie} cadre={element(remplie, 'email')} de={s(9)} caracteres={36} vitesse={22} />
+      <TypingCaptures rempli={remplie} cadre={element(remplie, 'email')} de={s(9)} caracteres={36} vitesse={30} />
     </Navigateur>
   );
 }
@@ -222,7 +235,7 @@ function Editeur() {
               vers(T.image + 0.5, marge(nav(element(image, 'image')), 190)),
               vers(T.document + 0.5, marge(nav(element(document, 'document')), 150)),
               vers(T.dezoom, null),
-              vers(T.enregistre + 0.5, marge(nav(element(enregistre, 'enregistrement')), 110), { x: 0, y: BARRE, width: 1440, height: 900 }),
+              vers(T.enregistre + 0.5, cadreEnregistre(), SOUS_LA_BARRE),
             ]}
             curseur={[
               au(0, { x: 1100, y: 800 }),
@@ -263,7 +276,8 @@ function MiseEnLigne() {
       <Sequence durationInFrames={s(MEL_A) + FONDU}>
         <Navigateur
           capture={enregistre}
-          etapes={[vers(0.8, barre), vers(2.8, null), vers(5.8, barre)]}
+          // La scène commence sur le cadrage où l'éditeur s'est arrêté, puis remonte vers la barre
+          etapes={[{ de: -1, a: 0, cadre: cadreEnregistre(), bornes: SOUS_LA_BARRE }, vers(0.8, barre), vers(2.8, null), vers(5.8, barre)]}
           curseur={[
             au(0, { x: 1100, y: 420 }),
             au(2.1, centre(nav(element(enregistre, 'apercu'))), true),
@@ -297,6 +311,7 @@ function SitePublic() {
   const ordinateur = C(siteOrdinateur);
   const telephone = C(siteTelephone);
   const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
   const ECART = 80;
   const hauteurTel = 780;
   const telephoneLargeur = telephone.largeur + 2 * BORD;
@@ -344,7 +359,8 @@ function SitePublic() {
           <div style={{ position: 'absolute', left: 0, top: 0 }}>
             <BrowserFrame capture={ordinateur} defilement={defilement} />
           </div>
-          <div style={{ position: 'absolute', left: xTel, top: yTel }}>
+          {/* Le téléphone arrive par le bas, juste après la glissade de la scène */}
+          <div style={{ position: 'absolute', left: xTel, top: yTel, transform: `translateY(${(1 - spring({ frame: frame - TRANSITION - 4, fps, config: { damping: 16, stiffness: 120 } })) * 900}px)` }}>
             <PhoneFrame capture={telephone} hauteur={hauteurTel}>
               <Etat capture={C(siteTelephoneDemarches)} de={s(T.demarches + 1.4)} />
               {/* Retour à l'accueil pour le bandeau « Site en préparation » */}
@@ -360,22 +376,38 @@ function SitePublic() {
 
 // ---------------------------------------------------------------------------------------------------
 
-const SCENES = [Inscription, Assistant, Editeur, MiseEnLigne, SitePublic, EndCard];
+function Fin() {
+  // La carte monte pendant la glissade : ses éléments arrivent ensuite
+  return <EndCard de={TRANSITION} />;
+}
+
+const SCENES = [Inscription, Assistant, Editeur, MiseEnLigne, SitePublic, Fin];
 
 export function V1Demo() {
   const segments = chronologie(script, timings as Timings);
+  const derniere = segments.length - 1;
+  const sens = (i: number) => (segments[i]?.entree === 'fondu' ? 'fondu' : i === derniere ? 'bas' : 'droite');
   return (
     <AbsoluteFill>
       <Fond />
       {segments.map((segment, i) => {
         const Scene = SCENES[i]!;
-        const de = i === 0 ? segment.de : segment.de - FONDU;
+        // Chaque scène glisse pendant le temps qui précède son début : elle est en place sur le temps
+        const de = i === 0 ? segment.de : segment.de - TRANSITION;
+        const suivante = segments[i + 1];
         return (
-          <Sequence key={i} from={de} durationInFrames={i < segments.length - 1 ? segment.a - de + FONDU : undefined}>
-            {i === 0 ? <Scene /> : <Entree><Scene /></Entree>}
+          <Sequence key={i} from={de} durationInFrames={suivante ? suivante.de - de : undefined}>
+            <Glissade
+              duree={TRANSITION}
+              entree={i === 0 ? undefined : sens(i)}
+              sortie={suivante ? { de: suivante.de - TRANSITION - de, sens: sens(i + 1) } : undefined}
+            >
+              <Scene />
+            </Glissade>
           </Sequence>
         );
       })}
+      <Musique id={script.id} segments={segments} />
       <VoixOff timings={timings as Timings} segments={segments} />
     </AbsoluteFill>
   );

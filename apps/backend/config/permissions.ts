@@ -64,6 +64,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('page-template', ['list', 'create']),
     ...custom('quote', ['offer', 'draft', 'sign', 'pdf']),
     ...custom('redirect', ['list', 'save', 'suggest']),
+    ...custom('seo', ['checklist', 'declare']),
     ...custom('billing', ['list', 'pdf', 'team', 'markPaid', 'markDeposited', 'remind', 'cancel', 'issueFirst', 'renewal']),
     ...custom('signup', ['approvalState', 'resendApproval']),
     ...custom('validation', ['list', 'approveSignup', 'rejectSignup', 'approveLive', 'rejectLive']),

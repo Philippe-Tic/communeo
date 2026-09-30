@@ -42,6 +42,7 @@ import { approvalWaitingLabel, awaitingApproval } from '@/lib/signup';
 import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 import { DomainSection } from './domain-section';
+import { SeoChecklistSection } from './seo-checklist-section';
 
 export const PUBLICATION_STEPS = [
   { id: 'checking', label: 'Vérification des contenus' },
@@ -564,6 +565,8 @@ export function PublicationScreen() {
       <History />
 
       {admin && !isReadOnly(user.site) && <DomainSection />}
+
+      {admin && !isReadOnly(user.site) && <SeoChecklistSection />}
     </div>
   );
 }

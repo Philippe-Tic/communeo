@@ -35,6 +35,8 @@ const IGNORED_UIDS = new Set([
 export const TECHNICAL_SITE_FIELDS = new Set([
   // Progression de l'assistant de création : rien de visible sur le site
   'onboarding',
+  // Liste de contrôle du référencement (#336) : démarches de la mairie hors du site
+  'seo_checklist',
   'netlify_site_id',
   'live_url',
   'custom_domain',

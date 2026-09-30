@@ -45,7 +45,7 @@ async function adminEmails(siteDocumentId: string): Promise<string[]> {
 }
 
 /** E-mail aux administrateurs de la commune ; un échec est consigné sans bloquer la suite */
-async function notifyAdmins(site: any, subject: string, paragraphs: string[], action?: { label: string; path: string }) {
+export async function notifyAdmins(site: any, subject: string, paragraphs: string[], action?: { label: string; path: string }) {
   const to = await adminEmails(site.documentId);
   if (!to.length) return;
   const link = action ? `${adminUrl()}${action.path}` : null;

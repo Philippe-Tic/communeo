@@ -1,0 +1,14 @@
+---
+/**
+ * Texte en Markdown (conditions générales, accord de sous-traitance). Les tableaux sont placés dans une
+ * zone qui défile horizontalement sur téléphone, atteignable au clavier et nommée pour les lecteurs
+ * d'écran (le HTML vient de nos propres fichiers, pas d'une saisie).
+ */
+interface Props {
+  html: string;
+}
+
+const html = Astro.props.html.replace(/<table>([\s\S]*?)<\/table>/g, '<div class="tableau" tabindex="0" role="region" aria-label="Tableau"><table>$1</table></div>');
+---
+
+<Fragment set:html={html} />

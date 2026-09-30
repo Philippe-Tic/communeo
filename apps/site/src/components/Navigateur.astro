@@ -1,0 +1,59 @@
+---
+/** Image dans un cadre de navigateur (captures de l'administration et des thèmes) */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  /** Adresse affichée dans la barre ; sans elle, l'image seule */
+  adresse?: string;
+  /** Largeur d'affichage maximale, pour les variantes générées */
+  largeur?: number;
+  chargement?: 'lazy' | 'eager';
+}
+
+const { src, alt, adresse, largeur = 1100, chargement = 'lazy' } = Astro.props;
+---
+
+<figure class="capture navigateur">
+  {
+    adresse && (
+      <div class="barre" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span class="adresse">{adresse}</span>
+      </div>
+    )
+  }
+  <Image src={src} alt={alt} widths={[560, largeur, largeur * 2].filter((w) => w <= src.width)} sizes={`(min-width: 1312px) ${largeur}px, 100vw`} loading={chargement} />
+</figure>
+
+<style>
+  .barre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 14px;
+    border-bottom: 1px solid var(--grege);
+    background: var(--papier-clair);
+  }
+
+  .barre span:not(.adresse) {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--grege);
+  }
+
+  .adresse {
+    margin-left: 12px;
+    font-size: 0.8125rem;
+    color: var(--encre-douce);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>

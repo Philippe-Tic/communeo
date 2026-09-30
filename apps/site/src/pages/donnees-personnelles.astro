@@ -1,0 +1,36 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+---
+
+<Legal titre="Données personnelles" description="Ce que Communeo fait des données envoyées depuis ce site et par les communes clientes.">
+  <p>Ce site ne dépose aucun traceur publicitaire. Les informations envoyées par le formulaire de contact servent uniquement à répondre à votre message.</p>
+  <h2>Responsable du traitement</h2>
+  <p>Philippe Chevreul, entrepreneur individuel (Communeo), <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+  <h2>Formulaire de contact</h2>
+  <ul>
+    <li><b>Données collectées</b> : nom et prénom, fonction, commune, adresse e-mail et message.</li>
+    <li><b>Finalité et base légale</b> : répondre à votre message, sur la base de votre consentement (case à cocher du formulaire).</li>
+    <li>
+      <b>Destinataires</b> : Communeo uniquement. Le message est transmis par e-mail via le prestataire d’envoi Resend (Plus Five Five, Inc., États-Unis, certifié Data Privacy
+      Framework) ; il n’est pas enregistré sur les serveurs de Communeo.
+    </li>
+    <li><b>Durée de conservation</b> : un an, puis suppression.</li>
+  </ul>
+  <h2>Communes clientes</h2>
+  <p>
+    Pour l’inscription, l’essai, les devis, la facturation et l’assistance, Communeo traite les coordonnées des élus et agents qui utilisent le service (nom, e-mail, fonction), ainsi
+    que les informations de validation des devis et de facturation. Base légale : l’exécution du contrat et, pour les factures, une obligation légale. Durées : tant que la commune
+    est cliente, puis six mois ; devis et factures, dix ans.
+  </p>
+  <p>
+    Les données des habitants que les communes gèrent avec Communeo (messages, inscrits à la lettre d’information) relèvent de chaque commune, responsable du traitement ; Communeo
+    agit pour elle selon l’<a href="/sous-traitance">accord de sous-traitance</a>.
+  </p>
+  <h2>Vos droits</h2>
+  <p>
+    Vous pouvez demander l’accès à vos données, leur rectification, leur effacement, vous opposer à leur traitement ou retirer votre consentement, en écrivant à <a
+      href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a
+    >. Vous pouvez aussi adresser une réclamation à la CNIL (<a href="https://www.cnil.fr">www.cnil.fr</a>).
+  </p>
+</Legal>

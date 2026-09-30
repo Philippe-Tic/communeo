@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<title>Communeo · Direction artistique</title>
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&family=Fraunces:opsz,wght@9..144,400..600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#D6D3C9;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+*{box-sizing:border-box}
+</style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;gap:120px;padding:96px;width:max-content">
+
+<section id="tour1" style="display:flex;flex-direction:column;gap:72px">
+  <header style="display:flex;flex-direction:column;gap:12px;max-width:1100px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <span style="display:block;width:240px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+    </div>
+    <h1 style="margin:24px 0 0;font:400 64px/1.05 'DM Serif Display',serif;color:#0E4033">Direction artistique · « le papier et le sapin »</h1>
+    <p style="margin:0;font-size:22px;line-height:1.5;color:#4A4942;max-width:60ch">Planche logo, palette, typographie, motif et trois pistes d’accroche pour l’accueil. À valider avant l’arborescence et les maquettes. Les pistes sont repérées <a href="#1a">1a</a>, <a href="#1b">1b</a> et <a href="#1c">1c</a>.</p>
+  </header>
+
+  <!-- ============ 01 LOGO ============ -->
+  <div id="logo" data-screen-label="01 Logo" style="width:1440px;background:#F7F6F2;border-radius:24px;padding:72px;display:flex;flex-direction:column;gap:56px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid #D9D6C9;padding-bottom:20px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">01</span>
+      <h2 style="margin:0;font:400 44px/1.1 'DM Serif Display',serif;color:#0E4033">Planche logo</h2>
+      <span style="margin-left:auto;font-size:16px;color:#4A4942">Le vert des fichiers (#004643) est aligné sur le sapin du brief, #0E4033.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="height:220px;border-radius:16px;background:#EFECE5;display:flex;align-items:center;justify-content:center"><span role="img" aria-label="Communeo" style="display:block;width:230px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><div style="font-size:15px;color:#4A4942"><b style="color:#1C1B18">Principal</b> · sapin #0E4033 sur papier #EFECE5 · 9,9:1</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="height:220px;border-radius:16px;background:#0E4033;display:flex;align-items:center;justify-content:center"><span role="img" aria-label="Communeo" style="display:block;width:230px;aspect-ratio:538/70;background:#EFECE5;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><div style="font-size:15px;color:#4A4942"><b style="color:#1C1B18">Inversé</b> · papier sur sapin · 9,9:1</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="height:220px;border-radius:16px;background:#12120E;display:flex;align-items:center;justify-content:center"><span role="img" aria-label="Communeo" style="display:block;width:230px;aspect-ratio:538/70;background:#86C2AE;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><div style="font-size:15px;color:#4A4942"><b style="color:#1C1B18">Mode sombre</b> · sapin éclairci #86C2AE sur #12120E · 9,3:1</div></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="height:220px;border-radius:16px;background:#FFFFFF;border:1px solid #D9D6C9;display:flex;align-items:center;justify-content:center"><span role="img" aria-label="Communeo" style="display:block;width:230px;aspect-ratio:538/70;background:#000000;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><div style="font-size:15px;color:#4A4942"><b style="color:#1C1B18">Impression</b> · noir 100 % sur blanc</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:40px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h3 style="margin:0;font-size:22px;font-weight:600">Pictogramme seul : favicon, avatar, image de partage</h3>
+        <div style="display:flex;align-items:flex-end;gap:28px;background:#EFECE5;border-radius:16px;padding:32px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><div style="width:128px;height:128px;border-radius:28px;background:#0E4033;display:flex;align-items:center;justify-content:center"><span style="display:block;width:72px;height:72px;background:#EFECE5;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span></div><span style="font-size:15px;color:#4A4942">512 px</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><div style="width:72px;height:72px;border-radius:16px;background:#0E4033;display:flex;align-items:center;justify-content:center"><span style="display:block;width:40px;height:40px;background:#EFECE5;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span></div><span style="font-size:15px;color:#4A4942">180 px</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><span style="display:block;width:32px;height:32px;background:#0E4033;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span><span style="font-size:15px;color:#4A4942">32 px</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><span style="display:block;width:20px;height:20px;background:#0E4033;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span><span style="font-size:15px;color:#4A4942">20 px min.</span></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#FFFFFF;border-radius:10px 10px 0 0;padding:10px 16px;border:1px solid #D9D6C9;border-bottom:none">
+            <span style="display:block;width:16px;height:16px;background:#0E4033;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span><span style="font-size:14px;color:#1C1B18">Communeo · Le site de…</span>
+          </div>
+        </div>
+        <p style="margin:0;font-size:16px;line-height:1.55;color:#4A4942">Le pictogramme reste lisible à 20 px : les deux formes et la courbe blanche tiennent sans retouche. Aucun ajustement d’épaisseur proposé pour l’instant ; à revérifier sur écran non Retina.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h3 style="margin:0;font-size:22px;font-weight:600">Zone de protection et taille minimale</h3>
+        <div style="background:#EFECE5;border-radius:16px;padding:40px;display:flex;flex-direction:column;align-items:center;gap:16px">
+          <div style="position:relative;padding:36px;outline:1.5px dashed #A8452A;outline-offset:0">
+            <span style="display:block;width:440px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+            <span style="position:absolute;top:0;left:50%;width:1.5px;height:36px;background:#A8452A"></span>
+            <span style="position:absolute;top:8px;left:calc(50% + 8px);font-size:13px;font-weight:700;color:#A8452A">h(o)</span>
+          </div>
+          <p style="margin:0;font-size:15px;color:#4A4942;text-align:center">Marge = hauteur du « o » tout autour · logo complet 120 px de large minimum · pictogramme 20 px</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-size:22px;font-weight:600">À ne pas faire</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+        <div style="display:flex;flex-direction:column;gap:10px"><div style="height:140px;border-radius:12px;background:#EFECE5;display:flex;align-items:center;justify-content:center;overflow:hidden"><span style="display:block;width:180px;aspect-ratio:538/70;background:#0E4033;transform:scaleX(1.35) scaleY(.8);-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#9B2C1F;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B2C1F" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Déformer</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px"><div style="height:140px;border-radius:12px;background:#EFECE5;display:flex;align-items:center;justify-content:center"><span style="display:block;width:180px;aspect-ratio:538/70;background:#2B4A9B;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#9B2C1F;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B2C1F" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Changer la couleur</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px"><div style="height:140px;border-radius:12px;background:#EFECE5;display:flex;align-items:center;justify-content:center"><span style="display:block;width:180px;aspect-ratio:538/70;background:#0E4033;filter:drop-shadow(4px 5px 3px rgba(0,0,0,.45));-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#9B2C1F;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B2C1F" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Ajouter une ombre</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px"><div style="height:140px;border-radius:12px;background:repeating-linear-gradient(45deg,#6F7F5E 0 7px,#C9B489 7px 13px,#4E5E47 13px 20px);display:flex;align-items:center;justify-content:center"><span style="display:block;width:180px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span></div><span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#9B2C1F;font-weight:600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B2C1F" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>Poser sur une image chargée</span></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:40px;align-items:center;background:#0E4033;border-radius:20px;padding:48px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#E3B55B">M1 · LOGO ANIMÉ · 2 S</span>
+        <h3 style="margin:0;font:400 36px/1.15 'DM Serif Display',serif;color:#EFECE5">Le pictogramme se lève, puis le logotype s’écrit.</h3>
+        <p style="margin:0;font-size:17px;line-height:1.6;color:#EFECE5">0 – 0,7 s : le pictogramme monte depuis sa base. 0,7 – 1,6 s : le logotype se dévoile de gauche à droite. 1,6 – 2 s : état fixe. Courbe cubic-bezier(0.2, 0.8, 0.2, 1). Avec « réduire les animations », le logo s’affiche directement.</p>
+        <button type="button" onClick="{{ replayLogo }}" style="align-self:flex-start;min-height:44px;padding:0 18px;border-radius:10px;border:1.5px solid #EFECE5;background:transparent;color:#EFECE5;font:600 16px 'DM Sans';cursor:pointer" style-hover="background:#0A2F26" style-focus="outline:3px solid #E3B55B;outline-offset:3px">Rejouer</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="height:200px;border-radius:14px;background:#EFECE5;display:flex;align-items:center;justify-content:center">
+          <div role="img" aria-label="Communeo" style="position:relative;width:420px;aspect-ratio:538/70">
+            <span style="position:absolute;left:0;top:0;height:100%;aspect-ratio:1;background:#0E4033;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat;clip-path:{{ lgPicto }};transition:clip-path .7s cubic-bezier(.2,.8,.2,1)"></span>
+            <span style="position:absolute;inset:0;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat;clip-path:{{ lgWord }};transition:clip-path .9s cubic-bezier(.2,.8,.2,1) .7s"></span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:8px;background:#EFECE5"></div><span style="font-size:14px;color:#EFECE5">0 s · papier vide</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:8px;background:#EFECE5;display:flex;align-items:center;padding-left:14px"><span style="display:block;width:28px;height:28px;background:#0E4033;clip-path:inset(55% 0 0 0);-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span></div><span style="font-size:14px;color:#EFECE5">0,35 s · les champs</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:8px;background:#EFECE5;display:flex;align-items:center;padding-left:14px"><span style="display:block;width:28px;height:28px;background:#0E4033;-webkit-mask:url(assets/picto-communeo.svg) center/contain no-repeat;mask:url(assets/picto-communeo.svg) center/contain no-repeat"></span></div><span style="font-size:14px;color:#EFECE5">0,7 s · le toit</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="height:56px;border-radius:8px;background:#EFECE5;display:flex;align-items:center;padding-left:14px"><span style="display:block;width:190px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) left/contain no-repeat;mask:url(assets/logo-communeo.svg) left/contain no-repeat"></span></div><span style="font-size:14px;color:#EFECE5">2 s · état final</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 02 PALETTE ============ -->
+  <div id="palette" data-screen-label="02 Palette" style="width:1440px;background:#F7F6F2;border-radius:24px;padding:72px;display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid #D9D6C9;padding-bottom:20px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">02</span>
+      <h2 style="margin:0;font:400 44px/1.1 'DM Serif Display',serif;color:#0E4033">Palette</h2>
+      <span style="margin-left:auto;font-size:16px;color:#4A4942">Dosage : 60 % papier et blanc · 30 % sapin et encre · 10 % accents</span>
+    </div>
+    <div style="display:flex;height:28px;border-radius:8px;overflow:hidden">
+      <span style="flex:35;background:#EFECE5;border:1px solid #D9D6C9"></span><span style="flex:15;background:#F7F6F2;border:1px solid #D9D6C9"></span><span style="flex:10;background:#FFFFFF;border:1px solid #D9D6C9"></span><span style="flex:22;background:#0E4033"></span><span style="flex:8;background:#1C1B18"></span><span style="flex:6;background:#A8452A"></span><span style="flex:4;background:#E3B55B"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ palette }}" as="c" hint-placeholder-count="12">
+        <div style="display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:#FFFFFF;border:1px solid #D9D6C9">
+          <div style="height:110px;background:{{ c.hex }};display:flex;align-items:flex-end;padding:12px;border-bottom:1px solid #D9D6C9"><span style="font:400 30px 'DM Serif Display',serif;color:{{ c.on }}">Aa</span></div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:16px;font-weight:700">{{ c.name }}</span>
+            <span style="font-size:15px;font-variant-numeric:tabular-nums;color:#4A4942">{{ c.hex }}</span>
+            <span style="font-size:15px;line-height:1.4;color:#4A4942">{{ c.use }}</span>
+            <span style="font-size:15px;font-weight:600;color:#0E4033">{{ c.ratio }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:22px;font-weight:600">Statuts (toujours avec icône et libellé)</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:10px;background:#DCEFE3;color:#0E5A34;font-size:16px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>Succès · Site mis en ligne</div>
+          <div style="display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:10px;background:#E3E8F5;color:#2B4A9B;font-size:16px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg>Information · Brouillon enregistré</div>
+          <div style="display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:10px;background:#FBEBD0;color:#7A4B00;font-size:16px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"></path><path d="M12 9v4M12 17h.01"></path></svg>Vigilance · Coupure d’eau mardi</div>
+          <div style="display:flex;gap:10px;align-items:center;padding:14px 16px;border-radius:10px;background:#F8E1DE;color:#9B2C1F;font-size:16px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>Erreur · Adresse e-mail invalide</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:22px;font-weight:600">Mode sombre (repris de l’administration)</h3>
+        <div style="border-radius:14px;background:#12120E;padding:20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+          <div style="border-radius:10px;background:#26251E;border:1px solid #3A392F;padding:14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#F1EFE6">Texte</span><span style="font-size:15px;color:#B4B1A4">#F1EFE6 · 16,3:1</span></div>
+          <div style="border-radius:10px;background:#26251E;border:1px solid #3A392F;padding:14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#86C2AE">Sapin éclairci</span><span style="font-size:15px;color:#B4B1A4">#86C2AE · 9,3:1</span></div>
+          <div style="border-radius:10px;background:#155C4A;padding:14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#F1EFE6">Bouton</span><span style="font-size:15px;color:#F1EFE6">#155C4A · 6,9:1</span></div>
+          <div style="border-radius:10px;background:#26251E;border:1px solid #3A392F;padding:14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#E89A7A">Tuile éclaircie</span><span style="font-size:15px;color:#B4B1A4">#E89A7A · 8,3:1</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 03 TYPO ============ -->
+  <div id="typo" data-screen-label="03 Typographie" style="width:1440px;background:#F7F6F2;border-radius:24px;padding:72px;display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid #D9D6C9;padding-bottom:20px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">03</span>
+      <h2 style="margin:0;font:400 44px/1.1 'DM Serif Display',serif;color:#0E4033">Typographie : avec ou sans serif</h2>
+      <span style="margin-left:auto;font-size:16px;color:#4A4942">Texte et interface : DM Sans partout</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+      <div style="display:flex;flex-direction:column;gap:18px;background:#EFECE5;border-radius:16px;padding:32px;outline:2px solid #0E4033;outline-offset:-2px">
+        <span style="align-self:flex-start;font-size:14px;font-weight:700;letter-spacing:.08em;color:#FFFFFF;background:#0E4033;padding:5px 10px;border-radius:6px">RECOMMANDÉ · DM SERIF DISPLAY</span>
+        <div style="font:400 60px/1.02 'DM Serif Display',serif;color:#0E4033;letter-spacing:-.01em">Le site de votre commune.</div>
+        <div style="font:400 36px/1.1 'DM Serif Display',serif;color:#1C1B18">Trois promesses</div>
+        <div style="font:400 64px/1 'DM Serif Display',serif;color:#0E4033;font-variant-numeric:tabular-nums">1 290 €</div>
+        <p style="margin:0;font-size:16px;line-height:1.55;color:#4A4942">Même famille que DM Sans : les deux se répondent sans effort. Contraste marqué et terminaisons en goutte, proches du logotype. Une seule graisse, ce qui garde les titres calmes.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;background:#EFECE5;border-radius:16px;padding:32px">
+        <span style="align-self:flex-start;font-size:14px;font-weight:700;letter-spacing:.08em;color:#0E4033;background:#E1E9E4;padding:5px 10px;border-radius:6px">BRIEF · FRAUNCES</span>
+        <div style="font:500 60px/1.02 'Fraunces',serif;color:#0E4033;letter-spacing:-.02em">Le site de votre commune.</div>
+        <div style="font:500 36px/1.1 'Fraunces',serif;color:#1C1B18">Trois promesses</div>
+        <div style="font:500 64px/1 'Fraunces',serif;color:#0E4033;font-variant-numeric:tabular-nums">1 290 €</div>
+        <p style="margin:0;font-size:16px;line-height:1.55;color:#4A4942">Plus chaleureuse et plus « éditoriale ». Très utilisée sur les sites récents, elle distingue moins Communeo ; ses chiffres sont plus irréguliers dans les tarifs.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;background:#EFECE5;border-radius:16px;padding:32px">
+        <span style="align-self:flex-start;font-size:14px;font-weight:700;letter-spacing:.08em;color:#0E4033;background:#E1E9E4;padding:5px 10px;border-radius:6px">SANS SERIF · DM SANS SEULE</span>
+        <div style="font:700 58px/1.02 'DM Sans',sans-serif;color:#0E4033;letter-spacing:-.035em">Le site de votre commune.</div>
+        <div style="font:700 34px/1.1 'DM Sans',sans-serif;color:#1C1B18;letter-spacing:-.02em">Trois promesses</div>
+        <div style="font:700 62px/1 'DM Sans',sans-serif;color:#0E4033;letter-spacing:-.03em;font-variant-numeric:tabular-nums">1 290 €</div>
+        <p style="margin:0;font-size:16px;line-height:1.55;color:#4A4942">Identique à l’administration : cohérence maximale, mais moins de caractère. Le logotype porte seul l’élégance.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:180px 110px 110px minmax(0,1fr);border-top:1px solid #D9D6C9;font-size:16px">
+      <span style="padding:12px 0;font-weight:700;border-bottom:1px solid #D9D6C9">Rôle</span><span style="padding:12px 0;font-weight:700;border-bottom:1px solid #D9D6C9">390 px</span><span style="padding:12px 0;font-weight:700;border-bottom:1px solid #D9D6C9">1440 px</span><span style="padding:12px 0;font-weight:700;border-bottom:1px solid #D9D6C9">Valeur fluide</span>
+      <sc-for list="{{ scale }}" as="r" hint-placeholder-count="6">
+        <span style="padding:12px 0;border-bottom:1px solid #D9D6C9">{{ r.role }}</span><span style="padding:12px 0;border-bottom:1px solid #D9D6C9;font-variant-numeric:tabular-nums">{{ r.min }}</span><span style="padding:12px 0;border-bottom:1px solid #D9D6C9;font-variant-numeric:tabular-nums">{{ r.max }}</span><code style="padding:12px 0;border-bottom:1px solid #D9D6C9;font-size:15px;color:#4A4942">{{ r.clamp }}</code>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ============ 04 MOTIF & SIGNES ============ -->
+  <div id="motif" data-screen-label="04 Motif et signes" style="width:1440px;background:#F7F6F2;border-radius:24px;padding:72px;display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;align-items:baseline;gap:20px;border-bottom:1px solid #D9D6C9;padding-bottom:20px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">04</span>
+      <h2 style="margin:0;font:400 44px/1.1 'DM Serif Display',serif;color:#0E4033">Motif, tampon, souligné</h2>
+      <span style="margin-left:auto;font-size:16px;color:#4A4942">Décoratifs, masqués aux lecteurs d’écran</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative;height:260px;border-radius:16px;background:#EFECE5;overflow:hidden">
+          <svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 420 260" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0"><path d="{{ topoTile }}" fill="none" stroke="#0E4033" stroke-width="1.2" opacity="{{ moLight }}"></path></svg>
+        </div>
+        <span style="font-size:16px"><b>Fond d’accroche</b> · courbes de niveau sapin, 1,2 px, 14 % d’opacité</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative;height:260px;border-radius:16px;background:#FFFFFF;border:1px solid #D9D6C9;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:32px">
+          <span style="font-size:18px;font-weight:600">Fin de la section « Le constat »</span>
+          <svg aria-hidden="true" width="100%" height="24" viewBox="0 0 360 24" preserveAspectRatio="none"><path d="M0 12 C 40 2, 80 22, 120 12 S 200 2, 240 12 S 320 22, 360 12" fill="none" stroke="#0E4033" stroke-width="1.5" opacity=".5"></path><path d="M0 18 C 40 8, 80 28, 120 18 S 200 8, 240 18 S 320 28, 360 18" fill="none" stroke="#0E4033" stroke-width="1" opacity=".25"></path></svg>
+          <span style="font-size:18px;font-weight:600">Début de « Trois promesses »</span>
+        </div>
+        <span style="font-size:16px"><b>Séparateur</b> · deux lignes du pictogramme entre deux sections</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="position:relative;height:260px;border-radius:16px;background:#FFFFFF;border:1px solid #D9D6C9;padding:28px;display:flex;align-items:center">
+          <svg aria-hidden="true" width="100%" height="120" viewBox="0 0 360 120" preserveAspectRatio="none" style="position:absolute;left:0;right:0;top:70px"><path d="M20 60 C 80 10, 120 110, 180 60 S 280 10, 340 60" fill="none" stroke="#0E4033" stroke-width="2"></path></svg>
+          <div style="position:relative;display:flex;justify-content:space-between;width:100%">
+            <span style="width:44px;height:44px;border-radius:50%;background:#0E4033;color:#EFECE5;display:flex;align-items:center;justify-content:center;font-weight:700">1</span>
+            <span style="width:44px;height:44px;border-radius:50%;background:#0E4033;color:#EFECE5;display:flex;align-items:center;justify-content:center;font-weight:700">2</span>
+            <span style="width:44px;height:44px;border-radius:50%;background:#FFFFFF;border:2px solid #0E4033;color:#0E4033;display:flex;align-items:center;justify-content:center;font-weight:700">3</span>
+            <span style="width:44px;height:44px;border-radius:50%;background:#FFFFFF;border:2px solid #8F8C7E;color:#4A4942;display:flex;align-items:center;justify-content:center;font-weight:700">4</span>
+          </div>
+        </div>
+        <span style="font-size:16px"><b>Frise des étapes</b> · la courbe relie les étapes et se trace au défilement</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:center">
+      <div style="display:flex;align-items:center;gap:24px;background:#EFECE5;border-radius:16px;padding:28px">
+        <svg aria-hidden="true" width="150" height="150" viewBox="0 0 160 160" style="flex:none;transform:rotate(-9deg)"><defs><path id="stampLogo" d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs><circle cx="80" cy="80" r="77" fill="none" stroke="#A8452A" stroke-width="3"></circle><circle cx="80" cy="80" r="51" fill="none" stroke="#A8452A" stroke-width="1.5"></circle><text font-family="DM Sans" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#A8452A"><textPath href="#stampLogo">SANS ENGAGEMENT · SANS CARTE BANCAIRE ·</textPath></text><text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#A8452A">30</text><text x="80" y="101" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">JOURS</text><text x="80" y="114" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">GRATUITS</text></svg>
+        <span style="font-size:16px;line-height:1.5"><b>Tampon</b> · tuile, incliné de −6 à −10°, trois messages au plus. Le texte existe aussi en HTML à côté.</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;background:#EFECE5;border-radius:16px;padding:28px">
+        <span style="font:400 44px/1.1 'DM Serif Display',serif;color:#0E4033">Le site de <span style="position:relative;display:inline-block">votre<svg aria-hidden="true" viewBox="0 0 200 16" preserveAspectRatio="none" style="position:absolute;left:-3%;bottom:-.06em;width:106%;height:.24em;overflow:visible"><path d="M3 11 C 50 4, 120 2, 197 8" fill="none" stroke="#A8452A" stroke-width="4" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></span> commune</span>
+        <span style="font-size:16px"><b>Souligné à la main</b> · un seul mot par titre, tuile sur fond clair, blé sur sapin</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;background:#EFECE5;border-radius:16px;padding:28px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a href="#" style="display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 22px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none" style-hover="background:#0A2F26">Créer le site de ma commune<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:52px;padding:0 22px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none;outline:3px solid #0E4033;outline-offset:3px">Focus clavier</a>
+        </div>
+        <span style="font-size:16px"><b>Bouton et focus</b> · anneau sapin 3 px décalé de 3 px, toujours visible</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 05 PISTES ============ -->
+  <div style="display:flex;flex-direction:column;gap:12px;max-width:1100px">
+    <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">05 · TROIS PISTES D’ACCROCHE</span>
+    <h2 style="margin:0;font:400 48px/1.1 'DM Serif Display',serif;color:#0E4033">Choisissez une piste, je la décline sur tout le site.</h2>
+    <p style="margin:0;font-size:19px;line-height:1.55;color:#4A4942">Même contenu, trois lectures du concept. Le panneau Tweaks bascule les grands titres entre DM Serif Display, Fraunces et DM Sans. Sur le téléphone, « le site se remplit tout seul » se joue une fois à l’affichage.</p>
+  </div>
+
+  <!-- 1a AFFICHE -->
+  <div id="1a" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px"><span style="font-size:16px;font-weight:700;color:#FFFFFF;background:#0E4033;padding:6px 12px;border-radius:8px">1a</span><span style="font-size:24px;font-weight:600">L’affiche de mairie</span><span style="font-size:17px;color:#4A4942">Typographique, papier, tampon. Le produit parle à droite.</span></div>
+    <div style="display:flex;gap:48px;align-items:flex-start">
+      <div data-screen-label="1a Accueil ordinateur" style="position:relative;width:1440px;height:900px;background:#EFECE5;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+        <svg aria-hidden="true" width="900" height="900" viewBox="0 0 900 900" style="position:absolute;right:-120px;top:-40px"><path d="{{ topoA }}" fill="none" stroke="#0E4033" stroke-width="1.2" opacity="{{ moLight }}"></path></svg>
+        <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:28px 64px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:172px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <nav style="display:flex;gap:34px;font-size:17px;font-weight:500"><a href="#" style="color:#1C1B18;text-decoration:none">Fonctionnalités</a><a href="#" style="color:#1C1B18;text-decoration:none">Thèmes</a><a href="#" style="color:#1C1B18;text-decoration:none">Tarifs</a><a href="#" style="color:#1C1B18;text-decoration:none">Comment ça marche</a><a href="#" style="color:#1C1B18;text-decoration:none">Questions</a></nav>
+          <div style="display:flex;align-items:center;gap:24px"><a href="#" style="font-size:17px;font-weight:500;color:#0E4033">Se connecter</a><a href="#" style="display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none" style-hover="background:#0A2F26">Essayer gratuitement</a></div>
+        </header>
+        <div style="position:relative;display:grid;grid-template-columns:680px minmax(0,1fr);gap:40px;padding:56px 64px 0">
+          <div style="display:flex;flex-direction:column;gap:28px">
+            <div style="display:flex;align-items:center;gap:14px"><span style="font-size:15px;font-weight:700;letter-spacing:.16em;color:#A8452A">LE SITE INTERNET DES COMMUNES</span><span style="flex:1;height:1px;background:#A8452A;opacity:.5"></span></div>
+            <h1 style="margin:0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:78px;line-height:1.02;color:#0E4033;text-wrap:balance">Le site de <span style="position:relative;display:inline-block">votre<svg aria-hidden="true" viewBox="0 0 200 16" preserveAspectRatio="none" style="position:absolute;left:-3%;bottom:-.05em;width:106%;height:.22em;overflow:visible"><path d="M3 11 C 50 4, 120 2, 197 8" fill="none" stroke="#A8452A" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></span> commune, prêt en une journée.</h1>
+            <p style="margin:0;font-size:23px;line-height:1.5;color:#4A4942;max-width:31em">Conforme, facile à tenir à jour, sans prestataire. Communeo remplit déjà votre site avec les données publiques de votre commune.</p>
+            <div style="display:flex;gap:14px">
+              <a href="#" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 26px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#0A2F26">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+              <a href="#" style="display:inline-flex;align-items:center;min-height:56px;padding:0 26px;border-radius:10px;border:1.5px solid #0E4033;color:#0E4033;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#E1E9E4">Voir les tarifs</a>
+            </div>
+            <div style="display:flex;gap:22px;font-size:16px;color:#4A4942">
+              <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Sans engagement</span>
+              <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Sans carte bancaire</span>
+              <span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Sans frais de mise en service</span>
+            </div>
+          </div>
+          <div style="position:relative;height:620px">
+            <div style="position:absolute;left:90px;top:10px;width:760px;border-radius:16px;background:#FFFFFF;border:1px solid #D9D6C9;overflow:hidden;box-shadow:0 40px 80px -40px rgba(14,64,51,.35)">
+              <div style="display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-bottom:1px solid #D9D6C9;background:#F7F6F2"><span style="width:10px;height:10px;border-radius:50%;background:#D9D6C9"></span><span style="width:10px;height:10px;border-radius:50%;background:#D9D6C9"></span><span style="width:10px;height:10px;border-radius:50%;background:#D9D6C9"></span><span style="margin-left:14px;font-size:13px;color:#4A4942;background:#FFFFFF;border:1px solid #D9D6C9;border-radius:6px;padding:3px 10px">app.communeo.fr</span></div>
+              <img src="assets/captures/tableau-de-bord.png" alt="Tableau de bord de l’administration de Saint-Aubin-sur-Loire : une alerte coupure d’eau en cours, des modifications en attente de mise en ligne, la conformité à 50 % et trois messages non lus." style="display:block;width:100%">
+            </div>
+            <div style="position:absolute;left:0;top:70px"><dc-import name="TelephoneCommune" animate="{{ true }}" hint-size="280px,580px"></dc-import></div>
+            <svg aria-hidden="true" width="150" height="150" viewBox="0 0 160 160" style="position:absolute;left:640px;top:420px;transform:rotate(-9deg);mix-blend-mode:multiply"><defs><path id="stampA" d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs><circle cx="80" cy="80" r="77" fill="#EFECE5" stroke="#A8452A" stroke-width="3"></circle><circle cx="80" cy="80" r="51" fill="none" stroke="#A8452A" stroke-width="1.5"></circle><text font-family="DM Sans" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#A8452A"><textPath href="#stampA">SANS ENGAGEMENT · SANS CARTE BANCAIRE ·</textPath></text><text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#A8452A">30</text><text x="80" y="101" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">JOURS</text><text x="80" y="114" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">GRATUITS</text></svg>
+          </div>
+        </div>
+        <div style="position:absolute;left:64px;right:64px;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #0E4033;background:#EFECE5">
+          <div style="padding:20px 24px 26px 0;display:flex;align-items:baseline;gap:14px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:34px;color:#0E4033">2 min</span><span style="font-size:16px;color:#4A4942">pour s’inscrire en ligne</span></div>
+          <div style="padding:20px 24px 26px;display:flex;align-items:baseline;gap:14px;border-left:1px solid #D9D6C9"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:34px;color:#0E4033">30 jours</span><span style="font-size:16px;color:#4A4942">d’essai, toutes les fonctions</span></div>
+          <div style="padding:20px 24px 26px;display:flex;align-items:baseline;gap:14px;border-left:1px solid #D9D6C9"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:34px;color:#0E4033">4 thèmes</span><span style="font-size:16px;color:#4A4942">à changer quand vous voulez</span></div>
+        </div>
+      </div>
+
+      <div data-screen-label="1a Accueil mobile" style="position:relative;width:390px;background:#EFECE5;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding-bottom:40px">
+        <svg aria-hidden="true" width="600" height="600" viewBox="0 0 900 900" style="position:absolute;right:-230px;top:520px"><path d="{{ topoA }}" fill="none" stroke="#0E4033" stroke-width="1.6" opacity="{{ moLight }}"></path></svg>
+        <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:138px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <button type="button" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;border:1.5px solid #0E4033;background:transparent;color:#0E4033;font:600 16px 'DM Sans'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>Menu</button>
+        </header>
+        <div style="position:relative;display:flex;flex-direction:column;gap:20px;padding:28px 20px 0">
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:13px;font-weight:700;letter-spacing:.14em;color:#A8452A">LE SITE INTERNET DES COMMUNES</span><span style="flex:1;height:1px;background:#A8452A;opacity:.5"></span></div>
+          <h1 style="margin:0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:42px;line-height:1.05;color:#0E4033">Le site de <span style="position:relative;display:inline-block">votre<svg aria-hidden="true" viewBox="0 0 200 16" preserveAspectRatio="none" style="position:absolute;left:-3%;bottom:-.05em;width:106%;height:.22em;overflow:visible"><path d="M3 11 C 50 4, 120 2, 197 8" fill="none" stroke="#A8452A" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></span> commune, prêt en une journée.</h1>
+          <p style="margin:0;font-size:19px;line-height:1.5;color:#4A4942">Conforme, facile à tenir à jour, sans prestataire. Communeo remplit déjà votre site avec les données publiques de votre commune.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="#" style="display:flex;justify-content:center;align-items:center;gap:10px;min-height:54px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            <a href="#" style="display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:10px;border:1.5px solid #0E4033;color:#0E4033;font-size:17px;font-weight:600;text-decoration:none">Voir les tarifs</a>
+          </div>
+          <span style="font-size:15px;line-height:1.5;color:#4A4942;text-align:center">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+          <div style="position:relative;display:flex;justify-content:center;padding-top:16px">
+            <dc-import name="TelephoneCommune" animate="{{ true }}" hint-size="280px,580px"></dc-import>
+            <svg aria-hidden="true" width="112" height="112" viewBox="0 0 160 160" style="position:absolute;right:-6px;top:340px;transform:rotate(-9deg)"><defs><path id="stampAm" d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs><circle cx="80" cy="80" r="77" fill="#EFECE5" stroke="#A8452A" stroke-width="3"></circle><circle cx="80" cy="80" r="51" fill="none" stroke="#A8452A" stroke-width="1.5"></circle><text font-family="DM Sans" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#A8452A"><textPath href="#stampAm">SANS ENGAGEMENT · SANS CARTE BANCAIRE ·</textPath></text><text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#A8452A">30</text><text x="80" y="101" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">JOURS</text><text x="80" y="114" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">GRATUITS</text></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1b CARTE -->
+  <div id="1b" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px"><span style="font-size:16px;font-weight:700;color:#FFFFFF;background:#0E4033;padding:6px 12px;border-radius:8px">1b</span><span style="font-size:24px;font-weight:600">La carte IGN</span><span style="font-size:17px;color:#4A4942">Plein sapin, courbes de niveau, la commune repérée sur la carte.</span></div>
+    <div style="display:flex;gap:48px;align-items:flex-start">
+      <div data-screen-label="1b Accueil ordinateur" style="position:relative;width:1440px;height:900px;background:#0E4033;overflow:hidden;border-radius:6px">
+        <svg aria-hidden="true" width="1440" height="900" viewBox="0 0 1440 900" style="position:absolute;inset:0"><path d="{{ topoB }}" fill="none" stroke="#86C2AE" stroke-width="1.2" opacity="{{ moDark }}"></path></svg>
+        <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:28px 64px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:172px;aspect-ratio:538/70;background:#EFECE5;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <nav style="display:flex;gap:34px;font-size:17px;font-weight:500"><a href="#" style="color:#EFECE5;text-decoration:none">Fonctionnalités</a><a href="#" style="color:#EFECE5;text-decoration:none">Thèmes</a><a href="#" style="color:#EFECE5;text-decoration:none">Tarifs</a><a href="#" style="color:#EFECE5;text-decoration:none">Comment ça marche</a><a href="#" style="color:#EFECE5;text-decoration:none">Questions</a></nav>
+          <div style="display:flex;align-items:center;gap:24px"><a href="#" style="font-size:17px;font-weight:500;color:#EFECE5">Se connecter</a><a href="#" style="display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:10px;background:#EFECE5;color:#0E4033;font-size:17px;font-weight:600;text-decoration:none" style-hover="background:#FFFFFF">Essayer gratuitement</a></div>
+        </header>
+        <div style="position:relative;display:grid;grid-template-columns:700px minmax(0,1fr);gap:40px;padding:72px 64px 0">
+          <div style="display:flex;flex-direction:column;gap:28px">
+            <span style="font-size:15px;font-weight:700;letter-spacing:.16em;color:#E3B55B">POUR LES MAIRIES DE TOUTES TAILLES</span>
+            <h1 style="margin:0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:82px;line-height:1.02;color:#EFECE5;text-wrap:balance">Votre commune a <span style="position:relative;display:inline-block">sa place<svg aria-hidden="true" viewBox="0 0 200 16" preserveAspectRatio="none" style="position:absolute;left:-2%;bottom:-.05em;width:104%;height:.22em;overflow:visible"><path d="M3 11 C 50 4, 120 2, 197 8" fill="none" stroke="#E3B55B" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></span> en ligne.</h1>
+            <p style="margin:0;font-size:23px;line-height:1.5;color:#EFECE5;max-width:30em">Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+            <div style="display:flex;gap:14px">
+              <a href="#" style="display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 26px;border-radius:10px;background:#EFECE5;color:#0E4033;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#FFFFFF">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+              <a href="#" style="display:inline-flex;align-items:center;min-height:56px;padding:0 26px;border-radius:10px;border:1.5px solid #86C2AE;background:#0A2F26;color:#EFECE5;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#155C4A">Voir les tarifs</a>
+            </div>
+            <span style="font-size:16px;color:#EFECE5">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+          </div>
+          <div style="position:relative;height:640px">
+            <div style="position:absolute;left:30px;top:60px;display:flex;align-items:center;gap:10px">
+              <span style="width:14px;height:14px;border-radius:50%;background:#E3B55B;box-shadow:0 0 0 6px rgba(227,181,91,.25)"></span>
+              <span style="font-size:14px;font-weight:600;letter-spacing:.06em;color:#0E4033;background:#EFECE5;padding:6px 10px;border-radius:4px">SAINT-AUBIN-SUR-LOIRE · COMMUNE DE DÉMONSTRATION</span>
+            </div>
+            <svg aria-hidden="true" width="300" height="200" viewBox="0 0 300 200" style="position:absolute;left:36px;top:80px"><path d="M4 4 C 30 90, 140 60, 200 150" fill="none" stroke="#E3B55B" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round"></path></svg>
+            <div style="position:absolute;left:220px;top:130px"><dc-import name="TelephoneCommune" animate="{{ true }}" hint-size="280px,580px"></dc-import></div>
+            <svg aria-hidden="true" width="140" height="140" viewBox="0 0 160 160" style="position:absolute;left:460px;top:190px;transform:rotate(8deg)"><defs><path id="stampB" d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs><circle cx="80" cy="80" r="77" fill="#0E4033" stroke="#E3B55B" stroke-width="3"></circle><circle cx="80" cy="80" r="51" fill="none" stroke="#E3B55B" stroke-width="1.5"></circle><text font-family="DM Sans" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#E3B55B"><textPath href="#stampB">SANS FRAIS DE MISE EN SERVICE ·</textPath></text><text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#E3B55B">30</text><text x="80" y="101" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#E3B55B">JOURS</text><text x="80" y="114" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#E3B55B">GRATUITS</text></svg>
+          </div>
+        </div>
+        <div style="position:absolute;left:64px;bottom:40px;display:flex;align-items:center;gap:12px;font-family:ui-monospace,monospace;font-size:14px;color:#EFECE5;border:1px dashed #86C2AE;border-radius:6px;padding:10px 14px">[Illustration à dessiner : le village vu de loin, clocher, mairie, école, lavoir, champs en courbes de niveau]</div>
+      </div>
+
+      <div data-screen-label="1b Accueil mobile" style="position:relative;width:390px;background:#0E4033;overflow:hidden;border-radius:6px;padding-bottom:40px">
+        <svg aria-hidden="true" width="390" height="1200" viewBox="0 0 390 1200" style="position:absolute;inset:0"><path d="{{ topoM }}" fill="none" stroke="#86C2AE" stroke-width="1" opacity="{{ moDark }}"></path></svg>
+        <header style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:138px;aspect-ratio:538/70;background:#EFECE5;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <button type="button" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;border:1.5px solid #EFECE5;background:transparent;color:#EFECE5;font:600 16px 'DM Sans'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>Menu</button>
+        </header>
+        <div style="position:relative;display:flex;flex-direction:column;gap:20px;padding:32px 20px 0">
+          <span style="font-size:13px;font-weight:700;letter-spacing:.14em;color:#E3B55B">POUR LES MAIRIES DE TOUTES TAILLES</span>
+          <h1 style="margin:0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:44px;line-height:1.04;color:#EFECE5">Votre commune a <span style="position:relative;display:inline-block">sa place<svg aria-hidden="true" viewBox="0 0 200 16" preserveAspectRatio="none" style="position:absolute;left:-2%;bottom:-.05em;width:104%;height:.22em;overflow:visible"><path d="M3 11 C 50 4, 120 2, 197 8" fill="none" stroke="#E3B55B" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"></path></svg></span> en ligne.</h1>
+          <p style="margin:0;font-size:19px;line-height:1.5;color:#EFECE5">Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="#" style="display:flex;justify-content:center;align-items:center;gap:10px;min-height:54px;border-radius:10px;background:#EFECE5;color:#0E4033;font-size:17px;font-weight:600;text-decoration:none">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            <a href="#" style="display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:10px;border:1.5px solid #86C2AE;background:#0A2F26;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none">Voir les tarifs</a>
+          </div>
+          <span style="font-size:15px;line-height:1.5;color:#EFECE5;text-align:center">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+          <div style="display:flex;align-items:center;gap:8px;padding-top:12px"><span style="width:12px;height:12px;border-radius:50%;background:#E3B55B"></span><span style="font-size:13px;font-weight:600;letter-spacing:.05em;color:#0E4033;background:#EFECE5;padding:5px 8px;border-radius:4px">SAINT-AUBIN-SUR-LOIRE</span></div>
+          <div style="display:flex;justify-content:center"><dc-import name="TelephoneCommune" animate="{{ true }}" hint-size="280px,580px"></dc-import></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1c BULLETIN -->
+  <div id="1c" style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:14px"><span style="font-size:16px;font-weight:700;color:#FFFFFF;background:#0E4033;padding:6px 12px;border-radius:8px">1c</span><span style="font-size:24px;font-weight:600">Le bulletin municipal</span><span style="font-size:17px;color:#4A4942">Une de journal : bandeau, colonnes, filets, légendes.</span></div>
+    <div style="display:flex;gap:48px;align-items:flex-start">
+      <div data-screen-label="1c Accueil ordinateur" style="position:relative;width:1440px;height:900px;background:#F7F6F2;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:28px 64px 20px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:172px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <nav style="display:flex;gap:34px;font-size:17px;font-weight:500"><a href="#" style="color:#1C1B18;text-decoration:none">Fonctionnalités</a><a href="#" style="color:#1C1B18;text-decoration:none">Thèmes</a><a href="#" style="color:#1C1B18;text-decoration:none">Tarifs</a><a href="#" style="color:#1C1B18;text-decoration:none">Comment ça marche</a><a href="#" style="color:#1C1B18;text-decoration:none">Questions</a></nav>
+          <div style="display:flex;align-items:center;gap:24px"><a href="#" style="font-size:17px;font-weight:500;color:#0E4033">Se connecter</a><a href="#" style="display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none" style-hover="background:#0A2F26">Essayer gratuitement</a></div>
+        </header>
+        <div style="margin:0 64px;border-top:3px solid #0E4033;border-bottom:1px solid #0E4033;padding:3px 0 0"><div style="border-top:1px solid #0E4033;display:flex;justify-content:space-between;padding:9px 0;font-size:14px;font-weight:700;letter-spacing:.14em;color:#0E4033"><span>ÉDITION SPÉCIALE</span><span>LE SITE INTERNET DES COMMUNES</span><span style="color:#A8452A">ESSAI : 30 JOURS GRATUITS</span></div></div>
+        <h1 style="margin:28px 64px 0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:92px;line-height:1;color:#0E4033;text-wrap:balance">Votre mairie, ouverte en ligne à toute heure.</h1>
+        <div style="margin:28px 64px 0;border-top:1px solid #0E4033;display:grid;grid-template-columns:300px minmax(0,1fr) 330px">
+          <div style="padding:22px 28px 0 0;display:flex;flex-direction:column;gap:18px;border-right:1px solid #D9D6C9">
+            <span style="font-size:14px;font-weight:700;letter-spacing:.14em;color:#A8452A">À LA UNE</span>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:26px;color:#0E4033">Simple</span><span style="font-size:16px;line-height:1.5;color:#4A4942">Vous le faites vous-même, sans formation, pendant la permanence.</span></div>
+            <div style="height:1px;background:#D9D6C9"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:26px;color:#0E4033">Prêt tout de suite</span><span style="font-size:16px;line-height:1.5;color:#4A4942">Pré-rempli avec les données publiques, en ligne dès le premier jour.</span></div>
+            <div style="height:1px;background:#D9D6C9"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:26px;color:#0E4033">Conforme</span><span style="font-size:16px;line-height:1.5;color:#4A4942">Accessibilité, RGPD, mentions légales, démarches Service-Public.</span></div>
+          </div>
+          <figure style="margin:0;padding:22px 28px 0;display:flex;flex-direction:column;gap:10px;border-right:1px solid #D9D6C9">
+            <div style="border-radius:12px;background:#FFFFFF;border:1px solid #D9D6C9;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-bottom:1px solid #D9D6C9;background:#EFECE5"><span style="width:9px;height:9px;border-radius:50%;background:#D9D6C9"></span><span style="width:9px;height:9px;border-radius:50%;background:#D9D6C9"></span><span style="width:9px;height:9px;border-radius:50%;background:#D9D6C9"></span></div>
+              <img src="assets/captures/tableau-de-bord.png" alt="Tableau de bord de l’administration de Saint-Aubin-sur-Loire : alerte en cours, mise en ligne, conformité et messages." style="display:block;width:100%">
+            </div>
+            <figcaption style="font-size:15px;font-style:italic;color:#4A4942">Le tableau de bord de la mairie de Saint-Aubin-sur-Loire : l’alerte en cours, les messages des habitants, le bouton « Mettre en ligne ».</figcaption>
+          </figure>
+          <div style="position:relative;padding:22px 0 0 28px;display:flex;flex-direction:column;gap:22px">
+            <p style="margin:0;font-size:21px;line-height:1.5;color:#1C1B18">Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <a href="#" style="display:flex;justify-content:center;align-items:center;gap:10px;min-height:56px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#0A2F26">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+              <a href="#" style="display:flex;justify-content:center;align-items:center;min-height:56px;border-radius:10px;border:1.5px solid #0E4033;color:#0E4033;font-size:18px;font-weight:600;text-decoration:none" style-hover="background:#E1E9E4">Voir les tarifs</a>
+            </div>
+            <span style="font-size:15px;line-height:1.6;color:#4A4942">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+            <svg aria-hidden="true" width="130" height="130" viewBox="0 0 160 160" style="align-self:flex-end;transform:rotate(-8deg)"><defs><path id="stampC" d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs><circle cx="80" cy="80" r="77" fill="none" stroke="#A8452A" stroke-width="3"></circle><circle cx="80" cy="80" r="51" fill="none" stroke="#A8452A" stroke-width="1.5"></circle><text font-family="DM Sans" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#A8452A"><textPath href="#stampC">PENSÉ POUR L’ACCESSIBILITÉ · RGAA ·</textPath></text><text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#A8452A">30</text><text x="80" y="101" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">JOURS</text><text x="80" y="114" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" letter-spacing="1.4" fill="#A8452A">GRATUITS</text></svg>
+          </div>
+        </div>
+      </div>
+
+      <div data-screen-label="1c Accueil mobile" style="position:relative;width:390px;background:#F7F6F2;overflow:hidden;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding-bottom:40px">
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+          <span role="img" aria-label="Communeo, accueil" style="display:block;width:138px;aspect-ratio:538/70;background:#0E4033;-webkit-mask:url(assets/logo-communeo.svg) center/contain no-repeat;mask:url(assets/logo-communeo.svg) center/contain no-repeat"></span>
+          <button type="button" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:10px;border:1.5px solid #0E4033;background:transparent;color:#0E4033;font:600 16px 'DM Sans'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>Menu</button>
+        </header>
+        <div style="margin:0 20px;border-top:3px solid #0E4033;border-bottom:1px solid #0E4033;padding-top:3px"><div style="border-top:1px solid #0E4033;display:flex;justify-content:space-between;padding:8px 0;font-size:12px;font-weight:700;letter-spacing:.12em;color:#0E4033"><span>ÉDITION SPÉCIALE</span><span style="color:#A8452A">30 JOURS GRATUITS</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:20px;padding:22px 20px 0">
+          <h1 style="margin:0;font-family:{{ tf }};font-weight:{{ tw }};letter-spacing:{{ tls }};font-size:44px;line-height:1.02;color:#0E4033">Votre mairie, ouverte en ligne à toute heure.</h1>
+          <p style="margin:0;font-size:19px;line-height:1.5;color:#1C1B18">Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <a href="#" style="display:flex;justify-content:center;align-items:center;gap:10px;min-height:54px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none">Essayer gratuitement 30 jours<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+            <a href="#" style="display:flex;justify-content:center;align-items:center;min-height:54px;border-radius:10px;border:1.5px solid #0E4033;color:#0E4033;font-size:17px;font-weight:600;text-decoration:none">Voir les tarifs</a>
+          </div>
+          <span style="font-size:15px;line-height:1.5;color:#4A4942;text-align:center">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+          <figure style="margin:0;display:flex;flex-direction:column;gap:8px;border-top:1px solid #0E4033;padding-top:16px">
+            <div style="border-radius:10px;background:#FFFFFF;border:1px solid #D9D6C9;overflow:hidden"><img src="assets/captures/tableau-de-bord.png" alt="Tableau de bord de l’administration de Saint-Aubin-sur-Loire." style="display:block;width:100%"></div>
+            <figcaption style="font-size:15px;font-style:italic;color:#4A4942">Le tableau de bord de la mairie de Saint-Aubin-sur-Loire.</figcaption>
+          </figure>
+          <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #0E4033;padding-top:16px">
+            <span style="font-size:13px;font-weight:700;letter-spacing:.14em;color:#A8452A">À LA UNE</span>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:24px;color:#0E4033">Simple</span><span style="font-size:17px;line-height:1.5;color:#4A4942">Vous le faites vous-même, sans formation, pendant la permanence.</span></div>
+            <div style="height:1px;background:#D9D6C9"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:24px;color:#0E4033">Prêt tout de suite</span><span style="font-size:17px;line-height:1.5;color:#4A4942">Pré-rempli avec les données publiques, en ligne dès le premier jour.</span></div>
+            <div style="height:1px;background:#D9D6C9"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:{{ tf }};font-weight:{{ tw }};font-size:24px;color:#0E4033">Conforme</span><span style="font-size:17px;line-height:1.5;color:#4A4942">Accessibilité, RGPD, mentions légales, démarches Service-Public.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 06 SUITE ============ -->
+  <div data-screen-label="06 Suite" style="width:1440px;background:#F7F6F2;border-radius:24px;padding:56px 72px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">06 · ILLUSTRATIONS</span>
+      <p style="margin:0;font-size:18px;line-height:1.6">Style retenu : dessin au trait sapin 2 px, aplats limités à la sauge, au blé et à la tuile, aucun visage détaillé. Les illustrations finales sont à confier à un illustrateur ; les emplacements sont marqués dans les maquettes.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+        <div style="height:120px;border-radius:10px;background:repeating-linear-gradient(135deg,#EFECE5 0 8px,#E6E2D8 8px 16px);display:flex;align-items:flex-end;padding:10px;font-family:ui-monospace,monospace;font-size:13px;color:#4A4942">ordinateur poussiéreux + cadenas</div>
+        <div style="height:120px;border-radius:10px;background:repeating-linear-gradient(135deg,#EFECE5 0 8px,#E6E2D8 8px 16px);display:flex;align-items:flex-end;padding:10px;font-family:ui-monospace,monospace;font-size:13px;color:#4A4942">chaise vide + carton</div>
+        <div style="height:120px;border-radius:10px;background:repeating-linear-gradient(135deg,#EFECE5 0 8px,#E6E2D8 8px 16px);display:flex;align-items:flex-end;padding:10px;font-family:ui-monospace,monospace;font-size:13px;color:#4A4942">textes de loi + « ? »</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <span style="font:600 14px 'DM Sans';letter-spacing:.14em;color:#A8452A">PROCHAINE ÉTAPE</span>
+      <p style="margin:0;font-size:18px;line-height:1.6">Après votre choix de piste et de typographie : maquettes complètes de l’Accueil et des Tarifs (avec simulateur), en 390 et 1440 px, puis storyboards V1 à V5 et fiches d’animation.</p>
+    </div>
+  </div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;titleFont&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;DM Serif Display&quot;,&quot;Fraunces&quot;,&quot;DM Sans&quot;],&quot;default&quot;:&quot;DM Serif Display&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pistes d’accroche&quot;},&quot;motif&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Pistes d’accroche&quot;}}">
+class Component extends DCLogic {
+  state = { logoOn: false };
+  componentDidMount() { this.playLogo(); }
+  playLogo() {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { this.setState({ logoOn: true }); return; }
+    this.setState({ logoOn: false });
+    clearTimeout(this.t); this.t = setTimeout(() => this.setState({ logoOn: true }), 400);
+  }
+  topo(hills, n, gap, clean) {
+    let d = '';
+    hills.forEach(([cx, cy, r0, seed, sx]) => {
+      for (let i = 0; i < n; i++) {
+        const r = r0 + i * gap;
+        for (let k = 0; k <= 120; k++) {
+          const a = k / 120 * Math.PI * 2;
+          const rr = clean
+            ? r * (1 + .12 * Math.sin(3 * a + seed) + .05 * Math.sin(5 * a + seed * 2)) + gap * .18 * Math.sin(2 * a + seed + i * .35)
+            : r * (1 + .16 * Math.sin(3 * a + seed + i * .12) + .07 * Math.sin(5 * a + seed * 2 - i * .18) + .04 * Math.sin(2 * a + i * .4));
+          d += (k ? 'L' : 'M') + (cx + rr * Math.cos(a) * sx).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1);
+        }
+        d += 'Z';
+      }
+    });
+    return d;
+  }
+  renderVals() {
+    if (!this.cache) this.cache = {
+      topoA: this.topo([[480, 430, 30, 1.2, 1.25]], 16, 26),
+      topoB: this.topo([[1120, 520, 40, 0.4, 1.35]], 13, 58, true),
+      topoM: this.topo([[330, 980, 30, 2.6, 1.2]], 11, 48, true),
+      topoTile: this.topo([[260, 150, 14, 0.8, 1.35]], 12, 18)
+    };
+    const f = this.props.titleFont ?? 'DM Serif Display';
+    const fonts = {
+      'DM Serif Display': ["'DM Serif Display', Georgia, serif", 400, '-0.01em'],
+      'Fraunces': ["'Fraunces', Georgia, serif", 500, '-0.02em'],
+      'DM Sans': ["'DM Sans', sans-serif", 700, '-0.035em']
+    }[f] || ["'DM Serif Display', Georgia, serif", 400, '-0.01em'];
+    const mo = this.props.motif ?? 1;
+    const on = this.state.logoOn;
+    return {
+      ...this.cache,
+      tf: fonts[0], tw: fonts[1], tls: fonts[2],
+      moLight: (0.14 * mo).toFixed(3), moDark: (0.16 * mo).toFixed(3),
+      lgPicto: on ? 'inset(0 0 0 0)' : 'inset(100% 0 0 0)',
+      lgWord: on ? 'inset(0 0 0 16%)' : 'inset(0 100% 0 16%)',
+      replayLogo: () => this.playLogo(),
+      palette: [
+        { name: 'Sapin', hex: '#0E4033', on: '#EFECE5', use: 'Logo, boutons, liens, titres, aplats', ratio: '11,7:1 blanc · 9,9:1 papier' },
+        { name: 'Sapin profond', hex: '#0A2F26', on: '#FFFFFF', use: 'Survol et appui des boutons', ratio: 'Blanc dessus 14,5:1' },
+        { name: 'Sauge', hex: '#E1E9E4', on: '#0E4033', use: 'Encadrés, badges, fonds de section', ratio: 'Sapin dessus 9,4:1' },
+        { name: 'Papier', hex: '#EFECE5', on: '#0E4033', use: 'Fond général du site', ratio: 'Encre dessus 14,6:1' },
+        { name: 'Papier clair', hex: '#F7F6F2', on: '#0E4033', use: 'Alternance de sections, cartes', ratio: 'Sapin dessus 10,8:1' },
+        { name: 'Blanc', hex: '#FFFFFF', on: '#0E4033', use: 'Cartes, champs, cadres d’écran', ratio: 'Surface' },
+        { name: 'Encre', hex: '#1C1B18', on: '#EFECE5', use: 'Texte courant', ratio: '14,6:1 sur papier' },
+        { name: 'Encre douce', hex: '#4A4942', on: '#EFECE5', use: 'Sous-titres, légendes', ratio: '7,7:1 sur papier' },
+        { name: 'Grège', hex: '#D9D6C9', on: '#1C1B18', use: 'Séparateurs, contours décoratifs', ratio: 'Décoratif' },
+        { name: 'Taupe', hex: '#8F8C7E', on: '#FFFFFF', use: 'Contour des champs, sur blanc seulement', ratio: '3,4:1 sur blanc' },
+        { name: 'Tuile', hex: '#A8452A', on: '#FFFFFF', use: 'Étiquettes, soulignés, tampon', ratio: '5,9:1 blanc · 5,0:1 papier' },
+        { name: 'Blé', hex: '#E3B55B', on: '#1C1B18', use: 'Illustrations, surlignage ; jamais de texte sur clair', ratio: '6,1:1 sur sapin' }
+      ],
+      scale: [
+        { role: 'H1', min: '40 px', max: '72 px', clamp: 'clamp(2.5rem, 1.757rem + 3.048vw, 4.5rem)' },
+        { role: 'H2', min: '30 px', max: '48 px', clamp: 'clamp(1.875rem, 1.457rem + 1.714vw, 3rem)' },
+        { role: 'H3', min: '22 px', max: '28 px', clamp: 'clamp(1.375rem, 1.236rem + 0.571vw, 1.75rem)' },
+        { role: 'Chapô', min: '20 px', max: '24 px', clamp: 'clamp(1.25rem, 1.157rem + 0.381vw, 1.5rem)' },
+        { role: 'Texte', min: '17 px', max: '18 px', clamp: 'clamp(1.0625rem, 1.039rem + 0.095vw, 1.125rem) · interligne 1,6 · 70 car. max' },
+        { role: 'Petit texte', min: '15 px', max: '15 px', clamp: '0.9375rem, jamais en dessous' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

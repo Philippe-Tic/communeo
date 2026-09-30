@@ -1,0 +1,27 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+---
+
+<Legal titre="Déclaration d’accessibilité" description="Déclaration d’accessibilité du site de Communeo.">
+  <p>Communeo s’engage à rendre ce site accessible, conformément à l’article 47 de la loi n° 2005-102 du 11 février 2005.</p>
+  <h2>État de conformité</h2>
+  <p>Le site communeo.fr est non conforme au RGAA 4.1, faute d’audit.</p>
+  <h2>Tests réalisés</h2>
+  <p>
+    À chaque modification, toutes les pages sont testées automatiquement (axe, règles WCAG 2.2 AA) en largeur téléphone et ordinateur, à 320 px de large, avec le texte agrandi à 200 %,
+    et au clavier.
+  </p>
+  <h2>Contenus non accessibles</h2>
+  <p>Aucun contenu non accessible n’est connu à ce jour. Les vidéos, quand elles seront publiées, auront des sous-titres et une transcription.</p>
+  <h2>Établissement de cette déclaration</h2>
+  <p>Cette déclaration a été établie le 30 septembre 2026.</p>
+  <h2>Retour d’information et contact</h2>
+  <p>
+    Si vous n’arrivez pas à accéder à un contenu, écrivez à <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> ; nous vous répondrons sous 72 heures.
+  </p>
+  <h2>Voies de recours</h2>
+  <p>
+    Si vous n’obtenez pas de réponse satisfaisante, vous pouvez saisir le Défenseur des droits (<a href="https://www.defenseurdesdroits.fr">www.defenseurdesdroits.fr</a>).
+  </p>
+</Legal>

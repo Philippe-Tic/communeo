@@ -1,0 +1,126 @@
+---
+import { CONTACT_EMAIL, DOC_URL, LEGAL, LOGIN_URL, NAV, TRIAL_URL } from '../lib/site';
+import Logo from './Logo.astro';
+
+const produit = NAV.map((item) => ({ ...item, label: item.key === 'questions' ? 'Questions fréquentes' : item.label }));
+---
+
+<footer class="pied">
+  <div class="interieur">
+    <div class="colonnes">
+      <div class="marque">
+        <Logo class="logo-pied" label="Communeo" />
+        <p>Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+        <a class="courriel" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      </div>
+      <nav aria-labelledby="pied-produit">
+        <h2 id="pied-produit">Produit</h2>
+        {produit.map((item) => <a href={item.href}>{item.label}</a>)}
+      </nav>
+      <nav aria-labelledby="pied-communeo">
+        <h2 id="pied-communeo">Communeo</h2>
+        <a href="/a-propos">À propos</a>
+        <a href="/contact">Contact</a>
+        <a href={DOC_URL} target="_blank" rel="noopener">Documentation (nouvelle fenêtre)</a>
+        <a href={LOGIN_URL}>Se connecter</a>
+        <a href={TRIAL_URL}>Créer le site de ma commune</a>
+      </nav>
+      <nav aria-labelledby="pied-legal">
+        <h2 id="pied-legal">Informations légales</h2>
+        {
+          LEGAL.map((item) =>
+            item.href === '/accessibilite' ? (
+              <a href={item.href}>Accessibilité : non conforme</a>
+            ) : (
+              <a href={item.href}>{item.label}</a>
+            ),
+          )
+        }
+      </nav>
+    </div>
+    <div class="bas">
+      <span>Communeo, édité par Philippe Chevreul, entrepreneur individuel</span>
+      <span>Ce site ne dépose aucun traceur publicitaire.</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .pied {
+    background: var(--papier-clair);
+    border-top: 1px solid var(--grege);
+  }
+
+  .interieur {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: clamp(48px, 6vw, 80px) var(--gouttiere) 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .colonnes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 40px;
+  }
+
+  .marque {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    color: var(--sapin);
+  }
+
+  .marque :global(.logo-pied) {
+    width: 160px;
+  }
+
+  .marque p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--encre-douce);
+  }
+
+  .courriel {
+    align-self: flex-start;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--tuile);
+  }
+
+  nav a {
+    align-self: flex-start;
+    padding: 6px 0;
+    font-size: 1rem;
+    color: var(--encre);
+  }
+
+  .bas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--grege);
+    font-size: 0.9375rem;
+    color: var(--encre-douce);
+  }
+</style>

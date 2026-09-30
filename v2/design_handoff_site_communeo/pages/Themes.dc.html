@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Quatre thèmes pour le site de votre commune · Communeo</title>
+<meta name="description" content="Institutionnel, Moderne, Journal ou Bourg : quatre vraies mises en page pour le site de votre mairie. Changez de thème quand vous voulez, vos contenus suivent.">
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</helmet>
+
+<dc-import name="EnTete" current="themes" hint-size="100%,88px"></dc-import>
+<main>
+<dc-import name="BandeauPage" kicker="Thèmes" title="Quatre mises en page au choix pour le site de votre commune." lead="Vous fournissez le logo ou le blason, le nom de la commune et vos contenus ; le thème fait le reste. Vous en changez quand vous voulez." seed="{{ 2.2 }}" hint-size="100%,380px"></dc-import>
+
+<section aria-labelledby="t-essai" style="padding:clamp(56px,7vw,96px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:1312px;margin:0 auto;display:flex;flex-direction:column;gap:28px">
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px">
+      <h2 id="t-essai" style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033;text-wrap:balance">La même page d’accueil de Saint-Aubin-sur-Loire, dans chaque thème</h2>
+      <div role="group" aria-label="Choisir un thème à prévisualiser" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:6px;padding:6px;border-radius:18px;background:#FFFFFF;border:1px solid #D9D6C9;width:min(100%,640px)">
+        <sc-for list="{{ btns }}" as="b" hint-placeholder-count="4">
+          <button type="button" aria-pressed="{{ b.pressed }}" onClick="{{ b.pick }}" style="min-height:48px;padding:0 20px;border-radius:24px;border:none;background:{{ b.bg }};color:{{ b.fg }};font:600 16px 'DM Sans';cursor:pointer;transition:background .2s,color .2s;white-space:nowrap" style-focus="outline:3px solid #0E4033;outline-offset:2px">{{ b.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid">
+      <sc-for list="{{ btns }}" as="b" hint-placeholder-count="1">
+        <div aria-hidden="{{ b.hideA }}" style="grid-area:1/1;opacity:{{ b.op }};transition:opacity .45s cubic-bezier(.2,.8,.2,1)"><dc-import name="ApercuTheme" theme="{{ b.key }}" hint-size="100%,760px"></dc-import></div>
+      </sc-for>
+    </div>
+    <p aria-live="polite" style="margin:0;font-size:18px;line-height:1.6;color:#4A4942"><b style="color:#1C1B18">{{ cur.label }}</b> · {{ cur.d }}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+      <a href="#" style="display:inline-flex;align-items:center;gap:10px;font-size:17px;font-weight:600"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="#0E4033"><path d="M7 4v16l13-8z"></path></svg>Un contenu, quatre thèmes · 15 s</a>
+      <span style="font-family:ui-monospace,monospace;font-size:14px;color:#4A4942">[Vidéo à produire : V3]</span>
+    </div>
+  </div>
+</section>
+
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="4">
+  <section aria-labelledby="{{ t.hid }}" style="padding:clamp(56px,7vw,96px) clamp(20px,4.4vw,64px);background:{{ t.bg }};border-top:1px solid #D9D6C9">
+    <div style="max-width:1312px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(32px,4vw,64px);align-items:center">
+      <div style="display:flex;flex-direction:column;gap:18px;order:{{ t.order }}">
+        <span style="font-size:15px;font-weight:700;letter-spacing:.16em;color:#A8452A">THÈME {{ t.n }}</span>
+        <h2 id="{{ t.hid }}" style="margin:0;font:400 clamp(2.25rem,1.8rem + 1.8vw,3.5rem)/1.05 'DM Serif Display',Georgia,serif;color:#0E4033">{{ t.label }}</h2>
+        <p style="margin:0;font-size:clamp(1.125rem,1.05rem + .3vw,1.3125rem);line-height:1.55">{{ t.d }}</p>
+        <p style="margin:0;padding:14px 18px;border-radius:12px;background:#E1E9E4;font-size:17px;line-height:1.5;color:#0E4033"><b>Idéal pour</b> {{ t.ideal }}</p>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px">
+          <sc-for list="{{ t.forts }}" as="f" hint-placeholder-count="3"><li style="display:flex;gap:10px;font-size:17px;line-height:1.5"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg>{{ f }}</li></sc-for>
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <dc-import name="ApercuTheme" theme="{{ t.key }}" hint-size="100%,420px"></dc-import>
+        <span style="font-family:ui-monospace,monospace;font-size:13px;color:#4A4942">[Vignette à fournir : themes/{{ t.key }}/thumbnail.png, ordinateur et mobile]</span>
+      </div>
+    </div>
+  </section>
+</sc-for>
+
+<section aria-labelledby="t-rappels" style="padding:clamp(56px,7vw,96px) clamp(20px,4.4vw,64px);background:#FFFFFF">
+  <div style="max-width:1312px;margin:0 auto;display:flex;flex-direction:column;gap:32px">
+    <h2 id="t-rappels" style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Quel que soit le thème</h2>
+    <ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
+      <sc-for list="{{ rappels }}" as="r" hint-placeholder-count="4">
+        <li style="display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:14px;background:#F7F6F2;border:1px solid #D9D6C9"><h3 style="margin:0;font-size:19px;font-weight:600;color:#0E4033">{{ r.t }}</h3><p style="margin:0;font-size:17px;line-height:1.55;color:#4A4942">{{ r.p }}</p></li>
+      </sc-for>
+    </ul>
+  </div>
+</section>
+
+<section aria-labelledby="t-final" style="background:#0E4033;padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:900px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center">
+    <h2 id="t-final" style="margin:0;font:400 clamp(2rem,1.5rem + 2vw,3.5rem)/1.08 'DM Serif Display',Georgia,serif;color:#EFECE5;text-wrap:balance">Essayez les quatre thèmes avec vos propres contenus</h2>
+    <a href="https://app.communeo.fr/inscription" style="display:inline-flex;align-items:center;gap:10px;min-height:58px;padding:0 clamp(18px,4vw,28px);border-radius:10px;background:#EFECE5;color:#0E4033;font-size:clamp(15px,13px + .6vw,18px);font-weight:600;text-decoration:none;transition:gap .2s;white-space:nowrap" style-hover="background:#FFFFFF;gap:16px" style-focus="outline:3px solid #E3B55B;outline-offset:3px">Créer le site de ma commune<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+  </div>
+</section>
+</main>
+<dc-import name="PiedDePage" hint-size="100%,420px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { theme: 'institutionnel' };
+  renderVals() {
+    const T = [
+      { key: 'institutionnel', label: 'Institutionnel', d: 'Sobre et très lisible, pour tous les publics.', ideal: 'les communes qui veulent la lisibilité avant tout.', forts: ['Accès rapides aux démarches dès l’arrivée', 'Menu horizontal classique, repérable par tous', 'Grands caractères et contrastes marqués'] },
+      { key: 'moderne', label: 'Moderne', d: 'Dynamique et typographique : photos en grand, agenda et actualités dès le premier écran.', ideal: 'les communes qui publient beaucoup de photos et d’événements.', forts: ['Une grande photo en ouverture', 'L’agenda visible sans défiler', 'Des titres très présents'] },
+      { key: 'journal', label: 'Journal', d: 'Le journal de la commune : navigation en barre latérale, une de journal, rubriques en colonnes.', ideal: 'les communes à l’actualité riche.', forts: ['Une « une » pour l’actualité principale', 'Rubriques en colonnes, comme un bulletin', 'Navigation latérale toujours visible'] },
+      { key: 'bourg', label: 'Bourg', d: 'Chaleureux et pratique : mairie, alertes, collectes et météo toujours à portée de main.', ideal: 'les villages qui veulent le pratique au premier plan.', forts: ['Horaires de la mairie en tête de page', 'Collectes, météo et cantine en cartes', 'Alertes en bandeau très visibles'] }
+    ];
+    const cur = this.state.theme;
+    return {
+      btns: T.map(t => ({ key: t.key, label: t.label, pressed: t.key === cur ? 'true' : 'false', bg: t.key === cur ? '#0E4033' : 'transparent', fg: t.key === cur ? '#EFECE5' : '#0E4033', op: t.key === cur ? 1 : 0, hideA: t.key === cur ? undefined : 'true', pick: () => this.setState({ theme: t.key }) })),
+      cur: T.find(t => t.key === cur),
+      themes: T.map((t, i) => ({ ...t, n: String(i + 1).padStart(2, '0'), hid: 't-' + t.key, bg: i % 2 ? '#F7F6F2' : '#EFECE5', order: i % 2 ? 2 : 0 })),
+      rappels: [
+        { t: 'Le même contenu', p: 'Pages, actualités, agenda et documents s’affichent dans tous les thèmes, sans rien ressaisir.' },
+        { t: 'Changement à tout moment', p: 'Un clic dans l’administration, et le site change de mise en page.' },
+        { t: 'Votre logo ou votre blason', p: 'Il apparaît en tête de toutes les pages, quel que soit le thème.' },
+        { t: 'Des palettes pensées pour le contraste', p: 'Chaque thème a ses couleurs, choisies et testées pour rester lisibles par tous.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+---
+import Accordeon from '../components/Accordeon.astro';
+import AppelFinal from '../components/AppelFinal.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Icone from '../components/Icone.astro';
+import Base from '../layouts/Base.astro';
+import { TRIAL_URL } from '../lib/site';
+import { TRANCHES, trancheFor } from '../lib/tarifs';
+
+const POPULATION = 800;
+const EXEMPLES = [180, 800, 2400, 12000];
+const initiale = trancheFor(POPULATION);
+const nombre = (value: number) => value.toLocaleString('fr-FR').replace(/[  ]/g, ' ');
+/** Prix sur 5 caractères, chaque chiffre dans sa colonne défilante (espace fine entre les milliers) */
+const colonnes = (price: string) => price.replace(/ /g, '\u00a0').padStart(5, ' ').split('');
+
+const compris = [
+  'Le site internet de la commune, sur son adresse Communeo et sur le domaine de la commune, avec certificat HTTPS (la connexion sécurisée, le cadenas du navigateur).',
+  'Tous les thèmes, modules et mises à jour, sans frais de mise en service.',
+  'La conformité : mentions légales, RGPD, déclaration d’accessibilité, démarches Service-Public.',
+  'L’assistance par e-mail et la documentation en ligne.',
+];
+
+const facturation = [
+  { n: '1', t: 'Devis validé en ligne', p: 'Le maire, ou une personne ayant délégation, valide le devis. Devis et bon de commande en PDF, horodatés.' },
+  { n: '2', t: 'Facture sur Chorus Pro', p: 'Chorus Pro est la plateforme de l’État qui reçoit les factures des collectivités. Rien à saisir de votre côté.' },
+  { n: '3', t: 'Paiement par virement', p: 'Par mandat administratif, sous 30 jours, comme n’importe quelle dépense de la commune.' },
+  { n: '4', t: 'Reconduction annuelle', p: 'L’abonnement est reconduit tacitement chaque année. Vous pouvez le résilier à l’échéance, avec un mois de préavis.' },
+];
+
+const mentions = [
+  { t: 'TVA', p: 'TVA non applicable, art. 293 B du CGI : le prix HT est le prix payé.' },
+  { t: 'Essai', p: '30 jours d’essai gratuit, sans engagement, sans carte bancaire.' },
+  { t: 'Commande publique', p: 'Marché de faible montant : dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).' },
+  { t: 'Nom de domaine', p: 'Le nom de domaine de la commune reste à sa charge s’il n’en a pas déjà un.' },
+];
+
+const faq = [
+  { q: 'Y a-t-il des frais de mise en service ?', a: 'Non. Le prix annuel est le seul montant facturé.' },
+  {
+    q: 'Que se passe-t-il après l’essai ?',
+    a: 'Pour continuer, le maire valide le devis en ligne. Sans abonnement, le site est retiré et l’administration passe en lecture seule ; vos données sont conservées six mois, puis supprimées.',
+  },
+  { q: 'Puis-je résilier ?', a: 'Oui, à l’échéance annuelle, avec un mois de préavis.' },
+  { q: 'Comment est calculée la population ?', a: 'Communeo reprend la population municipale publiée par l’INSEE pour votre commune.' },
+  { q: 'Pouvons-nous payer par virement, par mandat administratif ?', a: 'Oui. La facture est transmise par Chorus Pro et se règle par virement sous 30 jours.' },
+  {
+    q: 'Le nom de domaine est-il compris ?',
+    a: 'Non. Si la commune n’a pas encore de nom de domaine, son achat reste à sa charge. Le site fonctionne en attendant sur son adresse Communeo.',
+  },
+  {
+    q: 'Faut-il une mise en concurrence ?',
+    a: 'Non. Il s’agit d’un marché de faible montant, dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).',
+  },
+];
+---
+
+<Base
+  titre="Tarifs du site internet pour commune · Communeo"
+  description="De 290 € à 1 290 € HT par an selon la population INSEE, sans frais de mise en service. Devis en ligne, facture Chorus Pro, paiement par virement."
+  courant="tarifs"
+>
+  <BandeauPage
+    surtitre="Tarifs"
+    titre="Un prix clair, selon la taille de votre commune."
+    chapo="Abonnement annuel, hors taxes, sans frais de mise en service. Les 30 premiers jours sont gratuits et sans engagement."
+  />
+
+  <!-- Simulateur -->
+  <section class="simulateur-section" aria-labelledby="t-simu">
+    <div class="simulateur" data-simulateur data-tranches={JSON.stringify(TRANCHES)}>
+      <div class="saisie">
+        <h2 id="t-simu">Combien d’habitants dans votre commune ?</h2>
+        <label for="pop">Population municipale INSEE</label>
+        <div class="champ-pop">
+          <input id="pop" type="text" inputmode="numeric" autocomplete="off" value={String(POPULATION)} aria-describedby="pop-aide" />
+          <span class="doux">habitants</span>
+        </div>
+        <p id="pop-aide" class="doux aide">Au moment du devis, Communeo reprend automatiquement la population INSEE de votre commune.</p>
+        <div class="exemples" role="group" aria-label="Exemples">
+          {EXEMPLES.map((n) => <button type="button" data-pop={n}>{nombre(n)} hab.</button>)}
+        </div>
+      </div>
+      <div class="resultat">
+        <span class="doux tranche-label">Tranche : {initiale.label.charAt(0).toLowerCase() + initiale.label.slice(1)}</span>
+        <div class="prix-geant chiffres" aria-hidden="true">
+          <span class="colonnes">
+            {
+              colonnes(initiale.price).map((ch) =>
+                /\d/.test(ch) ? (
+                  <span class="colonne">
+                    <span class="rouleau" style={`transform:translateY(${-Number(ch)}em)`}>
+                      {Array.from({ length: 10 }, (_, digit) => (
+                        <span>{digit}</span>
+                      ))}
+                    </span>
+                  </span>
+                ) : (
+                  <span class:list={['colonne', ch === ' ' ? 'vide' : 'espace']}>
+                    <span class="rouleau" />
+                  </span>
+                ),
+              )
+            }
+          </span>
+          <span class="euro">€</span>
+        </div>
+        <span class="mensuel">HT par an · soit <span class="mois">{initiale.month}</span> € par mois</span>
+        <span class="sr-only" aria-live="polite" data-annonce></span>
+        <ul class="avantages">
+          <li><Icone nom="coche" epaisseur={2.5} couleur="#0E4033" />Sans frais de mise en service</li>
+          <li><Icone nom="coche" epaisseur={2.5} couleur="#0E4033" />TVA non applicable : le prix HT est le prix payé</li>
+        </ul>
+        <a class="bouton bouton--sapin bouton--fleche essayer" href={TRIAL_URL}>Essayer gratuitement 30 jours<Icone nom="fleche" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grille -->
+  <section class="grille-section" aria-labelledby="t-grille">
+    <div class="conteneur pile" style="gap:28px">
+      <h2 id="t-grille" class="h2">La grille complète</h2>
+      <ul class="grille" data-grille>
+        {
+          TRANCHES.map((t) => (
+            <li aria-current={t.annualHT === initiale.annualHT ? 'true' : undefined} data-prix={t.annualHT}>
+              <span class="sous">{t.label}</span>
+              <span class="prix chiffres">{t.price} €</span>
+              <span class="sous petit">HT par an · soit {t.month} € par mois</span>
+              <span class="votre">Votre commune</span>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="doux" style="margin:0;font-size:1rem">Population municipale INSEE. Abonnement annuel, hors taxes.</p>
+    </div>
+  </section>
+
+  <!-- Compris, facturation -->
+  <section class="section compris-section" aria-labelledby="t-compris">
+    <div class="conteneur deux">
+      <div class="pile" style="gap:1.25rem">
+        <h2 id="t-compris" class="h2">Ce qui est compris</h2>
+        <ul class="compris">
+          {
+            compris.map((c) => (
+              <li>
+                <Icone nom="coche" taille={22} epaisseur={2.2} couleur="#0E4033" />
+                {c}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="encadre encadre--vigilance">
+          <Icone nom="info" taille={20} /><span
+            ><b>Non compris :</b> le nom de domaine de la commune (par exemple mairie-saint-aubin.fr) reste à votre charge si vous n’en avez pas déjà un.</span
+          >
+        </p>
+      </div>
+      <div class="pile" style="gap:1.25rem">
+        <h2 class="h2">Comment se passe la facturation</h2>
+        <ol class="facturation">
+          {
+            facturation.map((f) => (
+              <li>
+                <span class="rond" aria-hidden="true">
+                  {f.n}
+                </span>
+                <div class="pile" style="gap:0.25rem;padding-top:8px">
+                  <h3>{f.t}</h3>
+                  <p class="doux">{f.p}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pour votre secrétariat -->
+  <section class="section fond-blanc mentions-section" aria-labelledby="t-mentions">
+    <div class="conteneur">
+      <div class="pile mentions-bloc">
+        <h2 id="t-mentions" class="titre-mentions">Pour votre secrétariat</h2>
+        <dl class="mentions">
+          {
+            mentions.map((m) => (
+              <div>
+                <dt>{m.t}</dt>
+                <dd>{m.p}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions sur les tarifs -->
+  <section class="section faq-section" aria-labelledby="t-faq">
+    <div class="pile" style="max-width:960px;margin:0 auto;gap:28px">
+      <h2 id="t-faq" class="h2">Questions sur les tarifs</h2>
+      <Accordeon items={faq} prefixe="faq-tarifs" />
+    </div>
+  </section>
+
+  <AppelFinal titre="Essayez gratuitement pendant 30 jours" mention="Sans engagement · Sans carte bancaire · Sans frais de mise en service" />
+</Base>
+
+<script>
+  interface Tranche {
+    label: string;
+    price: string;
+    month: number;
+    annualHT: number;
+    from: number;
+    to: number | null;
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-simulateur]');
+  if (root) {
+    const tranches = JSON.parse(root.dataset.tranches!) as Tranche[];
+    const input = root.querySelector<HTMLInputElement>('#pop')!;
+    const label = root.querySelector('.tranche-label')!;
+    const month = root.querySelector('.mois')!;
+    const announce = root.querySelector('[data-annonce]')!;
+    const columns = [...root.querySelectorAll<HTMLElement>('.colonne')];
+    const grid = [...document.querySelectorAll<HTMLLIElement>('[data-grille] li')];
+    const format = (value: number) => value.toLocaleString('fr-FR').replace(/[  ]/g, ' ');
+
+    const update = () => {
+      const digits = input.value.replace(/\D/g, '');
+      if (input.value !== digits) input.value = digits;
+      const population = digits === '' ? null : Number(digits);
+      const tranche = tranches.find((t) => population !== null && population >= t.from && (t.to === null || population <= t.to)) ?? tranches[0]!;
+      label.textContent = population === null ? 'Saisissez la population' : `Tranche : ${tranche.label.charAt(0).toLowerCase()}${tranche.label.slice(1)}`;
+      month.textContent = String(tranche.month);
+      announce.textContent = population === null ? '' : `${tranche.price} € HT par an pour ${format(population)} habitants`;
+      tranche.price
+        .replace(/ /g, '\u00a0')
+        .padStart(5, ' ')
+        .split('')
+        .forEach((ch, index) => {
+          const column = columns[index]!;
+          const digit = /\d/.test(ch);
+          column.classList.toggle('vide', ch === ' ');
+          column.classList.toggle('espace', !digit && ch !== ' ');
+          column.querySelector<HTMLElement>('.rouleau')!.style.transform = `translateY(${digit ? -Number(ch) : 0}em)`;
+        });
+      grid.forEach((li) => {
+        if (population !== null && Number(li.dataset.prix) === tranche.annualHT) li.setAttribute('aria-current', 'true');
+        else li.removeAttribute('aria-current');
+      });
+    };
+
+    // Chaque colonne reçoit les dix chiffres (celles qui étaient vides au build aussi)
+    columns.forEach((column) => {
+      const roll = column.querySelector('.rouleau')!;
+      if (!roll.children.length) roll.innerHTML = Array.from({ length: 10 }, (_, digit) => `<span>${digit}</span>`).join('');
+    });
+    input.addEventListener('input', update);
+    root.querySelectorAll<HTMLButtonElement>('[data-pop]').forEach((button) =>
+      button.addEventListener('click', () => {
+        input.value = button.dataset.pop!;
+        update();
+      }),
+    );
+    update();
+  }
+</script>
+
+<style>
+  /* Simulateur, en chevauchement du bandeau */
+  .simulateur-section {
+    position: relative;
+    padding: 0 var(--gouttiere);
+    margin-top: clamp(-56px, -4vw, -32px);
+  }
+
+  .simulateur {
+    max-width: 1100px;
+    margin: 0 auto;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--grege);
+    border: 1px solid var(--grege);
+    box-shadow: 0 30px 60px -40px rgba(14, 64, 51, 0.45);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+    gap: 1px;
+  }
+
+  .saisie,
+  .resultat {
+    padding: clamp(24px, 4vw, 48px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .saisie {
+    gap: 18px;
+    background: var(--blanc);
+  }
+
+  .saisie h2 {
+    margin: 0;
+    font: 400 clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  label {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .champ-pop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .champ-pop .doux {
+    font-size: 1.125rem;
+  }
+
+  input {
+    width: min(100%, 240px);
+    min-height: 60px;
+    padding: 0 18px;
+    border-radius: 10px;
+    border: 1.5px solid var(--taupe);
+    background: var(--blanc);
+    font: 600 1.625rem var(--sans);
+    font-variant-numeric: tabular-nums;
+    color: var(--encre);
+  }
+
+  input:focus-visible {
+    outline-offset: 2px;
+    border-color: var(--sapin);
+  }
+
+  .aide {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .exemples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .exemples button {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 22px;
+    border: 1px solid var(--grege);
+    background: var(--papier-clair);
+    color: var(--sapin);
+    font: 600 0.9375rem var(--sans);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .exemples button:hover {
+    border-color: var(--sapin);
+  }
+
+  .exemples button:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .resultat {
+    position: relative;
+    gap: 12px;
+    background: var(--papier-clair);
+  }
+
+  .tranche-label {
+    font-size: 1rem;
+  }
+
+  .prix-geant {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    height: 1em;
+    font: 400 clamp(4rem, 3rem + 4vw, 6.5rem) / 1 var(--serif);
+    color: var(--sapin);
+  }
+
+  .colonnes {
+    display: inline-flex;
+    height: 1em;
+  }
+
+  .colonne {
+    display: block;
+    width: 0.56em;
+    height: 1em;
+    overflow: hidden;
+  }
+
+  .colonne.vide {
+    width: 0;
+  }
+
+  .colonne.espace {
+    width: 0.12em;
+  }
+
+  .rouleau {
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.45s var(--ease);
+  }
+
+  .rouleau :global(span) {
+    height: 1em;
+    line-height: 1;
+  }
+
+  .espace .rouleau,
+  .vide .rouleau {
+    visibility: hidden;
+  }
+
+  .euro {
+    display: block;
+    height: 1em;
+    line-height: 1;
+  }
+
+  .mensuel {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .avantages {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 1rem;
+  }
+
+  .avantages li {
+    display: flex;
+    gap: 8px;
+  }
+
+  .avantages :global(svg) {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .essayer {
+    margin-top: 12px;
+    align-self: flex-start;
+    min-height: 54px;
+    padding: 0 24px;
+  }
+
+  /* Grille */
+  .grille-section {
+    padding: clamp(64px, 8vw, 112px) var(--gouttiere) 0;
+  }
+
+  .grille {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 14px;
+  }
+
+  .grille li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 24px;
+    border-radius: 14px;
+    background: var(--blanc);
+    border: 1.5px solid var(--grege);
+    transition: all 0.25s;
+  }
+
+  .grille .sous {
+    font-size: 1rem;
+    color: var(--encre-douce);
+  }
+
+  .grille .petit {
+    font-size: 0.9375rem;
+  }
+
+  .grille .prix {
+    font: 400 3rem/1 var(--serif);
+    color: var(--sapin);
+  }
+
+  .votre {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--ble);
+    opacity: 0;
+  }
+
+  .grille li[aria-current='true'] {
+    background: var(--sapin);
+    border-color: var(--sapin);
+  }
+
+  .grille li[aria-current='true'] :is(.sous, .prix) {
+    color: var(--papier);
+  }
+
+  .grille li[aria-current='true'] .votre {
+    opacity: 1;
+  }
+
+  /* Compris, facturation */
+  .compris-section,
+  .mentions-section,
+  .faq-section {
+    padding-block: clamp(64px, 8vw, 112px);
+  }
+
+  .deux {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+    gap: clamp(32px, 4vw, 64px);
+  }
+
+  .compris {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .compris li {
+    display: flex;
+    gap: 14px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--grege);
+    font-size: 1.125rem;
+    line-height: 1.55;
+  }
+
+  .compris :global(svg) {
+    flex: none;
+    margin-top: 3px;
+  }
+
+  .facturation {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .facturation li {
+    display: flex;
+    gap: 18px;
+    padding: 0 0 22px;
+  }
+
+  .facturation .rond {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--sapin);
+    color: var(--papier);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font: 400 1.375rem var(--serif);
+  }
+
+  .facturation h3 {
+    margin: 0;
+    font-size: 1.1875rem;
+    font-weight: 600;
+  }
+
+  .facturation p {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+
+  /* Pour votre secrétariat */
+  .mentions-bloc {
+    gap: 18px;
+  }
+
+  .titre-mentions {
+    margin: 0;
+    font: 400 clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  .mentions {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 16px;
+  }
+
+  .mentions div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--papier-clair);
+  }
+
+  dt {
+    font-size: 1.0625rem;
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--encre-douce);
+  }
+</style>

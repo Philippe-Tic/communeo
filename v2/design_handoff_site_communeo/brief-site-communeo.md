@@ -70,7 +70,7 @@ Livrables attendus, dans cet ordre :
 
 ## 4. Identité visuelle et direction artistique
 
-Communeo a déjà une identité, portée par son **logo** (vert sapin #0E4033, beige papier #EFECE5) et reprise par l'administration (DM Sans, fonds papier) : **la garder et l'amplifier**, pas la réinventer. Ce sont les **couleurs du logo** qui font référence : l'administration, aujourd'hui en #004643 / #EFEDE4, sera alignée dessus [à confirmer]. Le site vitrine est l'endroit où cette identité prend de l'ampleur : plus d'espace, plus de caractère, des illustrations et du mouvement.
+Communeo a déjà une identité, portée par son **logo** (vert sapin #0E4033, beige papier #EFECE5) et reprise par l'administration (DM Sans, fonds papier) : **la garder et l'amplifier**, pas la réinventer. Ce sont les **couleurs du logo** qui font référence : l'administration, aujourd'hui en #004643 / #EFEDE4 et une couleur en plus si besoin qui va bien avec en complément, sera alignée dessus. Le site vitrine est l'endroit où cette identité prend de l'ampleur : plus d'espace, plus de caractère, des illustrations et du mouvement.
 
 ### 4.1 Le concept : « le papier et le sapin »
 
@@ -210,13 +210,12 @@ Règles :
 ### 4.9 Livrables de direction artistique
 
 À fournir **avant** les maquettes des pages, pour validation :
-1. **Planche d'ambiance** : références visuelles (affiches, cartes, cadastre, signalétique), palette, typographies, textures, en une page.
-2. **Planche logo** (§ 4.2) et favicon.
-3. **Palette** avec rapports de contraste, clair et sombre (§ 4.3).
-4. **Échelle typographique** (§ 4.4) sur une page d'exemple.
-5. **Trois pistes d'accroche** de l'accueil (desktop et mobile), qui explorent le concept différemment ; je choisis, tu déclines.
-6. **Style d'illustration** : deux illustrations de la liste § 4.6 finalisées, les autres en croquis.
-7. **Storyboards** V1 à V5 et M1 (§ 4.7) et fiches des animations signatures (§ 4.8).
+1. **Planche logo** (§ 4.2) et favicon.
+2. **Palette** avec rapports de contraste, clair et sombre (§ 4.3).
+3. **Échelle typographique** (§ 4.4) sur une page d'exemple.
+4. **Trois pistes d'accroche** de l'accueil (desktop et mobile), qui explorent le concept différemment ; je choisis, tu déclines.
+5. **Style d'illustration** : deux illustrations de la liste § 4.6 finalisées, les autres en croquis.
+6. **Storyboards** V1 à V5 et M1 (§ 4.7) et fiches des animations signatures (§ 4.8).
 
 ---
 
@@ -292,7 +291,7 @@ Lien de chaque bouton d'inscription : **https://app.communeo.fr/inscription**. L
 
 ---
 
-## 8. Tarifs (grille actuelle) [à confirmer avant publication]
+## 8. Tarifs (grille actuelle)
 
 Abonnement **annuel**, **hors taxes**, **sans frais de mise en service**, selon la **population municipale INSEE** :
 
@@ -311,11 +310,11 @@ Compris dans l'abonnement (liste exacte du devis) :
 - Assistance par e-mail.
 
 Mentions à afficher près de la grille :
-- « TVA non applicable, art. 293 B du CGI » : le prix HT est le prix payé. [à confirmer selon le régime de TVA]
+- « TVA non applicable, art. 293 B du CGI » : le prix HT est le prix payé.
 - 30 jours d'essai gratuit, sans engagement.
 - Devis validé en ligne, facture sur Chorus Pro, paiement par virement (mandat administratif) sous 30 jours.
 - Marché de faible montant : dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).
-- Le nom de domaine de la commune (par exemple `mairie-saint-aubin.fr`) reste à la charge de la commune s'il n'en a pas déjà un. [à confirmer]
+- Le nom de domaine de la commune (par exemple `mairie-saint-aubin.fr`) reste à la charge de la commune s'il n'en a pas déjà un.
 
 Propose un **simulateur simple** : « Combien d'habitants dans votre commune ? » → le prix s'affiche (ou un tableau lisible sur mobile : cartes empilées plutôt que tableau large).
 
@@ -400,10 +399,8 @@ Rédige 20 à 25 questions-réponses, groupées (Démarrer ; Le site ; L'adminis
 (Une réponse inconnue ou non garantie : ne pas l'inventer, la marquer [à confirmer].)
 
 ### 11.7 Contact
-Formulaire : nom, fonction, commune, e-mail, message, case de consentement RGPD claire ; adresse **contact@communeo.fr** ; délai de réponse [à confirmer, par exemple « sous 2 jours ouvrés »]. Pas de téléphone.
+Formulaire : nom, fonction, commune, e-mail, message, case de consentement RGPD claire ; adresse **contact@communeo.fr** ; délai de réponse sous 72 heures. Pas de téléphone.
 
-### 11.8 À propos
-Emplacements pour : qui est derrière Communeo, pourquoi ce projet (le constat des petites mairies), les engagements (simplicité, transparence des prix, accessibilité, pas de publicité ni de revente de données). [texte à fournir, propose un premier jet à valider]
 
 ### 11.9 Mentions légales (données connues)
 - Éditeur : **Philippe Chevreul, entrepreneur individuel (EI)**, exerçant sous le nom commercial Communeo ; SIREN **911 592 764** ; adresse [à compléter] ; e-mail contact@communeo.fr ; directeur de la publication : Philippe Chevreul.

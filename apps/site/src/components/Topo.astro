@@ -1,0 +1,24 @@
+---
+/** Motif de courbes de niveau (décoratif) en fond d'une section sapin */
+import { topo, type TopoOptions } from '../lib/topo';
+
+interface Props extends TopoOptions {
+  viewBox: string;
+  align?: string;
+  opacite?: number;
+}
+
+const { viewBox, align = 'xMaxYMid', opacite = 0.16, ...options } = Astro.props;
+---
+
+<svg aria-hidden="true" class="topo" width="100%" height="100%" viewBox={viewBox} preserveAspectRatio={`${align} slice`}>
+  <path d={topo(options)} fill="none" stroke="#86C2AE" stroke-width="1.2" opacity={opacite}></path>
+</svg>
+
+<style>
+  .topo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+</style>

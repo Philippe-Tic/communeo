@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base titre="Page introuvable · Communeo" description="Cette page n’existe pas ou a changé d’adresse." introuvable>
+  <div class="introuvable">
+    <div class="pile" style="gap:22px">
+      <span class="surtitre">Erreur 404</span>
+      <h1 id="contenu" tabindex="-1">Cette page est introuvable.</h1>
+      <p>Elle n’existe pas ou a changé d’adresse. Vous pouvez reprendre à partir de ces pages :</p>
+      <ul>
+        <li><a href="/">Retour à l’accueil</a></li>
+        <li><a href="/tarifs">Voir les tarifs</a></li>
+        <li><a href="/questions">Questions fréquentes</a></li>
+        <li><a href="/contact">Nous écrire</a></li>
+      </ul>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .introuvable {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(56px, 8vw, 120px) var(--gouttiere);
+  }
+
+  h1 {
+    margin: 0;
+    font: 400 var(--h1) / 1.04 var(--serif);
+    color: var(--sapin);
+    outline: none;
+  }
+
+  p {
+    margin: 0;
+    max-width: 34em;
+    font-size: 1.25rem;
+    line-height: 1.55;
+    color: var(--encre-douce);
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 1.125rem;
+  }
+
+  a {
+    font-weight: 600;
+  }
+</style>

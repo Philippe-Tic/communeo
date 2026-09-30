@@ -1,0 +1,20 @@
+---
+/** Tampon « 30 jours gratuits » (décoratif : l'information existe aussi dans la page) */
+interface Props {
+  texte: string;
+  class?: string;
+}
+
+const { texte, class: className } = Astro.props;
+const id = `tampon-${texte.length}`;
+---
+
+<svg aria-hidden="true" class={className} viewBox="0 0 160 160">
+  <defs><path id={id} d="M80 80 m-63 0 a63 63 0 1 1 126 0 a63 63 0 1 1 -126 0"></path></defs>
+  <circle cx="80" cy="80" r="77" fill="#0E4033" stroke="#E3B55B" stroke-width="3"></circle>
+  <circle cx="80" cy="80" r="51" fill="none" stroke="#E3B55B" stroke-width="1.5"></circle>
+  <text font-family="DM Sans Variable, DM Sans, sans-serif" font-size="12.5" font-weight="700" letter-spacing="2.4" fill="#E3B55B"><textPath href={`#${id}`}>{texte}</textPath></text>
+  <text x="80" y="84" text-anchor="middle" font-family="DM Serif Display, serif" font-size="46" fill="#E3B55B">30</text>
+  <text x="80" y="101" text-anchor="middle" font-family="DM Sans Variable, DM Sans, sans-serif" font-size="10" font-weight="700" letter-spacing="1.4" fill="#E3B55B">JOURS</text>
+  <text x="80" y="114" text-anchor="middle" font-family="DM Sans Variable, DM Sans, sans-serif" font-size="10" font-weight="700" letter-spacing="1.4" fill="#E3B55B">GRATUITS</text>
+</svg>

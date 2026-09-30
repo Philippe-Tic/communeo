@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Tarifs du site internet pour commune · Communeo</title>
+<meta name="description" content="De 290 € à 1 290 € HT par an selon la population INSEE, sans frais de mise en service. Devis en ligne, facture Chorus Pro, paiement par virement.">
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</helmet>
+
+<dc-import name="EnTete" current="tarifs" hint-size="100%,88px"></dc-import>
+<main>
+<dc-import name="BandeauPage" kicker="Tarifs" title="Un prix clair, selon la taille de votre commune." lead="Abonnement annuel, hors taxes, sans frais de mise en service. Les 30 premiers jours sont gratuits et sans engagement." hint-size="100%,380px"></dc-import>
+
+<!-- SIMULATEUR -->
+<section aria-labelledby="t-simu" style="padding:0 clamp(20px,4.4vw,64px);margin-top:clamp(-56px,-4vw,-32px);position:relative">
+  <div style="max-width:1100px;margin:0 auto;border-radius:20px;overflow:hidden;background:#D9D6C9;border:1px solid #D9D6C9;box-shadow:0 30px 60px -40px rgba(14,64,51,.45);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:1px">
+    <div style="padding:clamp(24px,4vw,48px);display:flex;flex-direction:column;gap:18px;background:#FFFFFF">
+      <h2 id="t-simu" style="margin:0;font:400 clamp(1.625rem,1.3rem + 1.2vw,2.25rem)/1.15 'DM Serif Display',Georgia,serif;color:#0E4033">Combien d’habitants dans votre commune ?</h2>
+      <label for="pop" style="font-size:16px;font-weight:600">Population municipale INSEE</label>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+        <input id="pop" type="number" inputmode="numeric" min="0" value="{{ popStr }}" onInput="{{ onPop }}" aria-describedby="pop-aide" style="width:min(100%,240px);min-height:60px;padding:0 18px;border-radius:10px;border:1.5px solid #8F8C7E;background:#FFFFFF;font:600 26px 'DM Sans';font-variant-numeric:tabular-nums;color:#1C1B18" style-focus="outline:3px solid #0E4033;outline-offset:2px;border-color:#0E4033">
+        <span style="font-size:18px;color:#4A4942">habitants</span>
+      </div>
+      <p id="pop-aide" style="margin:0;font-size:15px;line-height:1.5;color:#4A4942">Au moment du devis, Communeo reprend automatiquement la population INSEE de votre commune.</p>
+      <div role="group" aria-label="Exemples" style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ presets }}" as="p" hint-placeholder-count="4">
+          <button type="button" onClick="{{ p.pick }}" style="min-height:44px;padding:0 14px;border-radius:22px;border:1px solid #D9D6C9;background:#F7F6F2;color:#0E4033;font:600 15px 'DM Sans';font-variant-numeric:tabular-nums;cursor:pointer;white-space:nowrap" style-hover="border-color:#0E4033" style-focus="outline:3px solid #0E4033;outline-offset:2px">{{ p.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="position:relative;padding:clamp(24px,4vw,48px);display:flex;flex-direction:column;gap:12px;background:#F7F6F2">
+      <span style="font-size:16px;color:#4A4942">{{ tierLabel }}</span>
+      <div aria-hidden="true" style="display:flex;align-items:flex-start;gap:8px;height:1em;font:400 clamp(4rem,3rem + 4vw,6.5rem)/1 'DM Serif Display',Georgia,serif;color:#0E4033;font-variant-numeric:tabular-nums">
+        <span style="display:inline-flex;height:1em">
+          <sc-for list="{{ digits }}" as="d" hint-placeholder-count="3">
+            <span style="display:block;height:1em;overflow:hidden;width:{{ d.w }}">
+              <span style="display:flex;flex-direction:column;transform:translateY({{ d.y }}em);transition:transform .45s cubic-bezier(.2,.8,.2,1)">
+                <sc-for list="{{ d.col }}" as="n" hint-placeholder-count="10"><span style="height:1em;line-height:1">{{ n }}</span></sc-for>
+              </span>
+            </span>
+          </sc-for>
+        </span>
+        <span style="display:block;height:1em;line-height:1">€</span>
+      </div>
+      <span style="font-size:18px;font-weight:600">HT par an · soit {{ month }} € par mois</span>
+      <span aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{{ srPrice }}</span>
+      <ul style="margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:16px;color:#1C1B18">
+        <li style="display:flex;gap:8px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg>Sans frais de mise en service</li>
+        <li style="display:flex;gap:8px"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px"><path d="M20 6 9 17l-5-5"></path></svg>TVA non applicable : le prix HT est le prix payé</li>
+      </ul>
+      <a href="https://app.communeo.fr/inscription" style="margin-top:12px;align-self:flex-start;display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 24px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none;transition:gap .2s,background .2s;white-space:nowrap" style-hover="background:#0A2F26;gap:16px" style-focus="outline:3px solid #0E4033;outline-offset:3px">Essayer gratuitement 30 jours<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- GRILLE -->
+<section aria-labelledby="t-grille" style="padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px) 0">
+  <div style="max-width:1312px;margin:0 auto;display:flex;flex-direction:column;gap:28px">
+    <h2 id="t-grille" style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">La grille complète</h2>
+    <ul style="margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px">
+      <sc-for list="{{ tiers }}" as="t" hint-placeholder-count="5">
+        <li aria-current="{{ t.cur }}" style="position:relative;display:flex;flex-direction:column;gap:8px;padding:24px;border-radius:14px;background:{{ t.bg }};border:1.5px solid {{ t.bd }};transition:all .25s">
+          <span style="font-size:16px;color:{{ t.sub }}">{{ t.label }}</span>
+          <span style="font:400 48px/1 'DM Serif Display',Georgia,serif;color:{{ t.fg }};font-variant-numeric:tabular-nums">{{ t.price }} €</span>
+          <span style="font-size:15px;color:{{ t.sub }}">HT par an · soit {{ t.month }} € par mois</span>
+          <span style="font-size:14px;font-weight:700;color:#E3B55B;opacity:{{ t.tagOp }}">Votre commune</span>
+        </li>
+      </sc-for>
+    </ul>
+    <p style="margin:0;font-size:16px;color:#4A4942">Population municipale INSEE. Abonnement annuel, hors taxes.</p>
+  </div>
+</section>
+
+<!-- COMPRIS -->
+<section aria-labelledby="t-compris" style="padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:1312px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(32px,4vw,64px)">
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <h2 id="t-compris" style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Ce qui est compris</h2>
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+        <sc-for list="{{ compris }}" as="c" hint-placeholder-count="4">
+          <li style="display:flex;gap:14px;padding:18px 0;border-bottom:1px solid #D9D6C9;font-size:18px;line-height:1.55"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:3px"><path d="M20 6 9 17l-5-5"></path></svg>{{ c }}</li>
+        </sc-for>
+      </ul>
+      <p style="margin:0;padding:16px 18px;border-radius:12px;background:#FBEBD0;color:#7A4B00;font-size:16px;line-height:1.55;display:flex;gap:12px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4M12 8h.01"></path></svg><span><b>Non compris :</b> le nom de domaine de la commune (par exemple mairie-saint-aubin.fr) reste à votre charge si vous n’en avez pas déjà un.</span></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Comment se passe la facturation</h2>
+      <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0">
+        <sc-for list="{{ factu }}" as="f" hint-placeholder-count="4">
+          <li style="display:flex;gap:18px;padding:0 0 22px">
+            <span aria-hidden="true" style="flex:none;width:44px;height:44px;border-radius:50%;background:#0E4033;color:#EFECE5;display:flex;align-items:center;justify-content:center;font:400 22px 'DM Serif Display',Georgia,serif">{{ f.n }}</span>
+            <div style="display:flex;flex-direction:column;gap:4px;padding-top:8px"><h3 style="margin:0;font-size:19px;font-weight:600">{{ f.t }}</h3><p style="margin:0;font-size:17px;line-height:1.55;color:#4A4942">{{ f.p }}</p></div>
+          </li>
+        </sc-for>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- MENTIONS + V5 -->
+<section aria-labelledby="t-mentions" style="padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px);background:#FFFFFF">
+  <div style="max-width:1312px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:clamp(32px,4vw,64px);align-items:start">
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <h2 id="t-mentions" style="margin:0;font:400 clamp(1.625rem,1.3rem + 1.2vw,2.25rem)/1.15 'DM Serif Display',Georgia,serif;color:#0E4033">Pour votre secrétariat</h2>
+      <dl style="margin:0;display:flex;flex-direction:column;gap:16px">
+        <sc-for list="{{ mentions }}" as="m" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:12px;background:#F7F6F2"><dt style="font-size:17px;font-weight:700">{{ m.t }}</dt><dd style="margin:0;font-size:16px;line-height:1.55;color:#4A4942">{{ m.p }}</dd></div>
+        </sc-for>
+      </dl>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="position:relative;aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:repeating-linear-gradient(135deg,#E1E9E4 0 14px,#D8E2DC 14px 28px);display:flex;align-items:center;justify-content:center">
+        <button type="button" aria-label="Lire la vidéo : le devis en ligne (20 secondes)" style="display:flex;align-items:center;gap:12px;min-height:56px;padding:0 22px 0 10px;border-radius:30px;border:none;background:#0E4033;color:#EFECE5;font:600 17px 'DM Sans';cursor:pointer;white-space:nowrap" style-focus="outline:3px solid #0E4033;outline-offset:4px"><span style="width:38px;height:38px;border-radius:50%;background:#EFECE5;display:flex;align-items:center;justify-content:center"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="#0E4033"><path d="M7 4v16l13-8z"></path></svg></span>Le devis en ligne · 20 s</button>
+        <span style="position:absolute;left:14px;top:14px;font-family:ui-monospace,monospace;font-size:14px;color:#0E4033;background:#FFFFFF;padding:4px 10px;border-radius:4px">[Vidéo à produire : V5]</span>
+      </div>
+      <a href="#" style="align-self:flex-start;font-size:16px;font-weight:600">Lire la transcription</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ TARIFS -->
+<section aria-labelledby="t-faq" style="padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:28px">
+    <h2 id="t-faq" style="margin:0;font:400 clamp(1.875rem,1.457rem + 1.714vw,3rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Questions sur les tarifs</h2>
+    <dc-import name="Accordeon" items="{{ faq }}" id-prefix="faq-tarifs" hint-size="100%,460px"></dc-import>
+  </div>
+</section>
+
+<section aria-labelledby="t-final" style="background:#0E4033;padding:clamp(64px,8vw,112px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:900px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:24px;text-align:center">
+    <h2 id="t-final" style="margin:0;font:400 clamp(2rem,1.5rem + 2vw,3.5rem)/1.08 'DM Serif Display',Georgia,serif;color:#EFECE5;text-wrap:balance">Essayez gratuitement pendant 30 jours</h2>
+    <a href="https://app.communeo.fr/inscription" style="display:inline-flex;align-items:center;gap:10px;min-height:58px;padding:0 clamp(18px,4vw,28px);border-radius:10px;background:#EFECE5;color:#0E4033;font-size:clamp(15px,13px + .6vw,18px);font-weight:600;text-decoration:none;transition:gap .2s;white-space:nowrap" style-hover="background:#FFFFFF;gap:16px" style-focus="outline:3px solid #E3B55B;outline-offset:3px">Créer le site de ma commune<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></a>
+    <span style="font-size:16px;color:#EFECE5">Sans engagement · Sans carte bancaire · Sans frais de mise en service</span>
+  </div>
+</section>
+</main>
+<dc-import name="PiedDePage" hint-size="100%,420px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { pop: 800 };
+  tiersData = [
+    { max: 499, label: 'Moins de 500 habitants', price: 290, month: 24 },
+    { max: 1999, label: 'De 500 à 1 999 habitants', price: 390, month: 33 },
+    { max: 4999, label: 'De 2 000 à 4 999 habitants', price: 590, month: 49 },
+    { max: 9999, label: 'De 5 000 à 9 999 habitants', price: 890, month: 74 },
+    { max: Infinity, label: '10 000 habitants et plus', price: 1290, month: 108 }
+  ];
+  fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); }
+  renderVals() {
+    const pop = this.state.pop;
+    const has = pop !== '' && !isNaN(pop);
+    const ti = has ? this.tiersData.findIndex(t => pop <= t.max) : 0;
+    const t = this.tiersData[ti];
+    const s = this.fmt(t.price).padStart(5, ' ');
+    const col = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const digits = s.split('').map(ch => /\d/.test(ch) ? { col, y: -Number(ch), w: '0.56em' } : { col: [' '], y: 0, w: ch === ' ' ? '0' : '0.12em' });
+    return {
+      popStr: has ? String(pop) : '',
+      onPop: e => { const v = e.target.value.replace(/\D/g, ''); this.setState({ pop: v === '' ? '' : Number(v) }); },
+      presets: [180, 800, 2400, 12000].map(n => ({ label: this.fmt(n) + ' hab.', pick: () => this.setState({ pop: n }) })),
+      tierLabel: has ? 'Tranche : ' + t.label.charAt(0).toLowerCase() + t.label.slice(1) : 'Saisissez la population',
+      digits, month: t.month,
+      srPrice: has ? this.fmt(t.price) + ' € HT par an pour ' + this.fmt(pop) + ' habitants' : '',
+      tiers: this.tiersData.map((x, i) => {
+        const on = has && i === ti;
+        return { label: x.label, price: this.fmt(x.price), month: x.month, cur: on ? 'true' : undefined, bg: on ? '#0E4033' : '#FFFFFF', bd: on ? '#0E4033' : '#D9D6C9', fg: on ? '#EFECE5' : '#0E4033', sub: on ? '#EFECE5' : '#4A4942', tagOp: on ? 1 : 0 };
+      }),
+      compris: [
+        'Le site internet de la commune, sur son adresse Communeo et sur le domaine de la commune, avec certificat HTTPS (la connexion sécurisée, le cadenas du navigateur).',
+        'Tous les thèmes, modules et mises à jour, sans frais de mise en service.',
+        'La conformité : mentions légales, RGPD, déclaration d’accessibilité, démarches Service-Public.',
+        'L’assistance par e-mail et la documentation en ligne.'
+      ],
+      factu: [
+        { n: '1', t: 'Devis validé en ligne', p: 'Le maire, ou une personne ayant délégation, valide le devis. Devis et bon de commande en PDF, horodatés.' },
+        { n: '2', t: 'Facture sur Chorus Pro', p: 'Chorus Pro est la plateforme de l’État qui reçoit les factures des collectivités. Rien à saisir de votre côté.' },
+        { n: '3', t: 'Paiement par virement', p: 'Par mandat administratif, sous 30 jours, comme n’importe quelle dépense de la commune.' },
+        { n: '4', t: 'Reconduction annuelle', p: 'L’abonnement est reconduit tacitement chaque année. Vous pouvez le résilier à l’échéance, avec un mois de préavis.' }
+      ],
+      mentions: [
+        { t: 'TVA', p: 'TVA non applicable, art. 293 B du CGI : le prix HT est le prix payé.' },
+        { t: 'Essai', p: '30 jours d’essai gratuit, sans engagement, sans carte bancaire.' },
+        { t: 'Commande publique', p: 'Marché de faible montant : dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).' },
+        { t: 'Nom de domaine', p: 'Le nom de domaine de la commune reste à sa charge s’il n’en a pas déjà un.' }
+      ],
+      faq: [
+        { q: 'Y a-t-il des frais de mise en service ?', a: 'Non. Le prix annuel est le seul montant facturé.' },
+        { q: 'Que se passe-t-il après l’essai ?', a: 'Pour continuer, le maire valide le devis en ligne. Sans abonnement, le site est retiré et l’administration passe en lecture seule ; vos données sont conservées six mois, puis supprimées.' },
+        { q: 'Puis-je résilier ?', a: 'Oui, à l’échéance annuelle, avec un mois de préavis.' },
+        { q: 'Comment est calculée la population ?', a: 'Communeo reprend la population municipale publiée par l’INSEE pour votre commune.' },
+        { q: 'Pouvons-nous payer par virement, par mandat administratif ?', a: 'Oui. La facture est transmise par Chorus Pro et se règle par virement sous 30 jours.' },
+        { q: 'Le nom de domaine est-il compris ?', a: 'Non. Si la commune n’a pas encore de nom de domaine, son achat reste à sa charge. Le site fonctionne en attendant sur son adresse Communeo.' },
+        { q: 'Faut-il une mise en concurrence ?', a: 'Non. Il s’agit d’un marché de faible montant, dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

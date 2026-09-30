@@ -1,0 +1,135 @@
+---
+/**
+ * Questions-réponses dépliables : `<h3><button aria-expanded>` et région reliée. Plusieurs panneaux
+ * peuvent être ouverts ; sans JavaScript, tout reste déplié.
+ */
+import Icone from './Icone.astro';
+
+interface Props {
+  items: Array<{ q: string; a: string }>;
+  prefixe: string;
+}
+
+const { items, prefixe } = Astro.props;
+---
+
+<div class="accordeon" data-accordeon>
+  {
+    items.map((item, index) => (
+      <div class="rang">
+        <h3>
+          <button type="button" id={`${prefixe}-q${index}`} aria-expanded="true" aria-controls={`${prefixe}-r${index}`}>
+            <span>{item.q}</span>
+            <span class="puce" aria-hidden="true">
+              <Icone nom="chevron" epaisseur={2.2} />
+            </span>
+          </button>
+        </h3>
+        <div class="panneau" id={`${prefixe}-r${index}`} role="region" aria-labelledby={`${prefixe}-q${index}`}>
+          <div class="contenu">
+            <p>{item.a}</p>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  for (const accordion of document.querySelectorAll<HTMLElement>('[data-accordeon]')) {
+    for (const button of accordion.querySelectorAll<HTMLButtonElement>('button[aria-controls]')) {
+      button.setAttribute('aria-expanded', 'false');
+      button.addEventListener('click', () => button.setAttribute('aria-expanded', String(button.getAttribute('aria-expanded') !== 'true')));
+    }
+  }
+</script>
+
+<style>
+  .accordeon {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--grege);
+  }
+
+  .rang {
+    border-bottom: 1px solid var(--grege);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: inherit;
+  }
+
+  button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    min-height: 64px;
+    padding: 16px 4px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    text-align: left;
+    font: 600 clamp(1.0625rem, 1rem + 0.2vw, 1.1875rem) / 1.4 var(--sans);
+    color: var(--encre);
+    cursor: pointer;
+  }
+
+  button:hover {
+    color: var(--sapin);
+  }
+
+  button:focus-visible {
+    outline-offset: 2px;
+  }
+
+  .puce {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--papier);
+    color: var(--sapin);
+    transition:
+      transform 0.25s var(--ease),
+      background 0.2s;
+  }
+
+  button[aria-expanded='true'] .puce {
+    transform: rotate(180deg);
+    background: var(--sauge);
+  }
+
+  .panneau {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 0.25s var(--ease),
+      visibility 0.25s;
+  }
+
+  /* Replié : hors de l'ordre de tabulation et des lecteurs d'écran (visibility), avec l'animation */
+  h3:has(button[aria-expanded='false']) + .panneau {
+    grid-template-rows: 0fr;
+    visibility: hidden;
+  }
+
+  .contenu {
+    overflow: hidden;
+  }
+
+  p {
+    margin: 0;
+    padding: 0 56px 22px 4px;
+    max-width: 44em;
+    font-size: clamp(1.0625rem, 1.039rem + 0.095vw, 1.125rem);
+    line-height: 1.6;
+    color: var(--encre-douce);
+    text-wrap: pretty;
+  }
+</style>

@@ -21,6 +21,8 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 - **themes/** — one package per public-site theme (`@communeo/theme-<id>`). `themes/starter` implements the whole contract in plain accessible HTML (template for new themes, reference for renderer tests); `themes/institutionnel` is the reference theme and the renderer's default. Moderne, Journal, Bourg mockups are in `v2/`.
 - **packages/fixtures** — demo commune Saint-Aubin-sur-Loire in Strapi format (`createFixtureLoader({ variant: complete | minimal | empty })`, `FIXTURE_NOW`), goes through the same mappers as production; assets served under `/fixtures`.
 
+- **apps/site/** — communeo.fr, the Communeo marketing site (#315): Astro static pages from the Claude Design mockups (`v2/design_handoff_site_communeo/`), prices from `@communeo/core`, theme screenshots captured from the renderer demo builds, contact form → `POST /api/prospect-contact` (public, rate-limited, e-mailed to `SIGNUP_NOTIFY_EMAIL`, nothing stored). Content still to provide is marked with `<AFournir>` and listed by `pnpm --filter @communeo/site a-fournir`. Deployed on Netlify (base directory `apps/site`).
+
 **docs/** (Starlight) is the user documentation, one page per admin screen, deployed on Netlify; its screenshots are generated with `pnpm docs:captures`.
 
 ### Production (#179)
@@ -52,6 +54,7 @@ THEME=<id> pnpm --filter @communeo/renderer build  # static site in apps/rendere
 pnpm --filter @communeo/renderer test:e2e     # every theme × every demo page: axe (WCAG 2.2 AA) at 390/1440 px + structure
 pnpm --filter @communeo/renderer test:parity  # static build HTML == server (preview) HTML
 pnpm --filter @communeo/renderer test:preview # preview server access: 401 without token, token → HttpOnly cookie
+pnpm --filter @communeo/site test:e2e         # communeo.fr: axe (WCAG 2.2 AA), 320 px, text at 200 %, interactions, at 390/1440 px
 pnpm --filter @communeo/worker dev   # build worker (apps/worker/.env: QUEUE_DATABASE_URL, STRAPI_URL, STRAPI_API_TOKEN, WORKER_SECRET, NETLIFY_TOKEN or PUBLISH_DIR)
 docker run -d -p 55432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_DB=queue postgres:16-alpine   # queue for local tests: TEST_QUEUE_DATABASE_URL=postgres://postgres:test@localhost:55432/queue pnpm test
 deploy/e2e/run.sh        # production stack end to end (images, health, commune + uploaded file, published by the worker, preview, encrypted S3 backup, restore from S3 only); E2E_KEEP=1 keeps it on :8088

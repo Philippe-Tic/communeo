@@ -1,0 +1,52 @@
+# Site Netlify de communeo.fr. Réglages du site : « Base directory » vide (racine du monorepo, où
+# Netlify installe les dépendances avec pnpm), « Package directory » = apps/site (ce fichier).
+[build]
+  command = "pnpm turbo run build --filter @communeo/site..."
+  publish = "apps/site/dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+# Adresses de l'ancien site (communeo-landing)
+[[redirects]]
+  from = "/cgv/*"
+  to = "/conditions"
+  status = 301
+
+[[redirects]]
+  from = "/cgv"
+  to = "/conditions"
+  status = 301
+
+[[redirects]]
+  from = "/faq/*"
+  to = "/questions"
+  status = 301
+
+[[redirects]]
+  from = "/faq"
+  to = "/questions"
+  status = 301
+
+[[redirects]]
+  from = "/mentions-legales/"
+  to = "/mentions-legales"
+  status = 301
+
+[[redirects]]
+  from = "/sitemap-index.xml"
+  to = "/sitemap.xml"
+  status = 301
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://app.communeo.fr; form-action https://app.communeo.fr; frame-ancestors 'none'; base-uri 'self'"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

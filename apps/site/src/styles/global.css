@@ -1,0 +1,330 @@
+/*
+ * Site de Communeo (communeo.fr, #315) : jetons de la direction artistique « le papier et le sapin »
+ * (v2/design_handoff_site_communeo/README.md) et styles communs à toutes les pages.
+ */
+@import '@fontsource-variable/dm-sans/opsz.css';
+@import '@fontsource/dm-serif-display/400.css';
+
+:root {
+  --sapin: #0e4033;
+  --sapin-profond: #0a2f26;
+  --sapin-moyen: #155c4a;
+  --sapin-eclairci: #86c2ae;
+  --sauge: #e1e9e4;
+  --papier: #efece5;
+  --papier-clair: #f7f6f2;
+  --blanc: #ffffff;
+  --encre: #1c1b18;
+  --encre-douce: #4a4942;
+  --grege: #d9d6c9;
+  --taupe: #8f8c7e;
+  --tuile: #a8452a;
+  --ble: #e3b55b;
+  --succes: #0e5a34;
+  --succes-fond: #dcefe3;
+  --info: #2b4a9b;
+  --info-fond: #e3e8f5;
+  --vigilance: #7a4b00;
+  --vigilance-fond: #fbebd0;
+  --erreur: #9b2c1f;
+  --erreur-fond: #f8e1de;
+
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans Variable', 'DM Sans', system-ui, sans-serif;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --gouttiere: clamp(20px, 4.4vw, 64px);
+  --section-y: clamp(64px, 8vw, 120px);
+  --ombre-capture: 0 40px 80px -48px rgba(14, 64, 51, 0.45);
+
+  --h1: clamp(2.5rem, 1.757rem + 3.048vw, 4.5rem);
+  --h2: clamp(1.875rem, 1.457rem + 1.714vw, 3rem);
+  --h3-serif: clamp(1.625rem, 1.4rem + 0.8vw, 2.125rem);
+  --chapo: clamp(1.25rem, 1.157rem + 0.381vw, 1.5rem);
+  --btn-font: clamp(0.9375rem, 0.8125rem + 0.6vw, 1.125rem);
+  --btn-pad: clamp(16px, 4vw, 26px);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  /* Texte agrandi : une adresse longue (nom-de-la-commune.communeo.fr) passe à la ligne plutôt que déborder */
+  overflow-wrap: anywhere;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: var(--sapin);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sapin);
+  outline-offset: 3px;
+}
+
+.sombre :focus-visible {
+  outline-color: var(--ble);
+}
+
+button {
+  font-family: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mise en page */
+.section {
+  padding: var(--section-y) var(--gouttiere);
+}
+
+.conteneur {
+  max-width: 1312px;
+  margin: 0 auto;
+}
+
+.pile {
+  display: flex;
+  flex-direction: column;
+}
+
+.entete-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+}
+
+.fond-clair {
+  background: var(--papier-clair);
+}
+
+.fond-blanc {
+  background: var(--blanc);
+}
+
+/* Typographie */
+.surtitre {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tuile);
+}
+
+.h2 {
+  margin: 0;
+  font: 400 var(--h2) / 1.1 var(--serif);
+  letter-spacing: -0.01em;
+  color: var(--sapin);
+  text-wrap: balance;
+}
+
+.h3-serif {
+  margin: 0;
+  font: 400 var(--h3-serif) / 1.15 var(--serif);
+  color: var(--sapin);
+}
+
+.texte {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.doux {
+  color: var(--encre-douce);
+}
+
+.lien-fort {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+.chiffres {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Boutons (liens ou boutons) */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    gap 0.2s var(--ease),
+    background 0.2s;
+}
+
+.bouton:hover {
+  text-decoration: none;
+}
+
+.bouton:active {
+  transform: translateY(1px);
+}
+
+.bouton--grand {
+  min-height: 56px;
+  padding: 0 var(--btn-pad);
+  font-size: var(--btn-font);
+}
+
+.bouton--final {
+  min-height: 58px;
+  padding: 0 clamp(18px, 4vw, 28px);
+  font-size: var(--btn-font);
+}
+
+.bouton--fleche:hover {
+  gap: 16px;
+}
+
+.bouton--papier {
+  background: var(--papier);
+  color: var(--sapin);
+}
+
+.bouton--papier:hover {
+  background: var(--blanc);
+}
+
+.bouton--sapin {
+  background: var(--sapin);
+  color: var(--papier);
+}
+
+.bouton--sapin:hover {
+  background: var(--sapin-profond);
+}
+
+.bouton--contour {
+  border: 1.5px solid var(--sapin-eclairci);
+  background: var(--sapin-profond);
+  color: var(--papier);
+}
+
+.bouton--contour:hover {
+  background: var(--sapin-moyen);
+}
+
+/* Capture d'écran de l'administration ou d'un thème, dans un cadre de navigateur */
+.capture {
+  margin: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--grege);
+  background: var(--blanc);
+  box-shadow: var(--ombre-capture);
+}
+
+.capture img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Encadrés */
+.encadre {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.encadre > svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.encadre--info {
+  background: var(--info-fond);
+  color: var(--info);
+}
+
+.encadre--vigilance {
+  background: var(--vigilance-fond);
+  color: var(--vigilance);
+}
+
+/* Listes cochées */
+.coches {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.coches li {
+  display: flex;
+  gap: 12px;
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+
+.coches svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

@@ -142,6 +142,35 @@ jobs:
           path: apps/admin/test-results
           retention-days: 7
 
+  site:
+    name: Site de Communeo (accessibilité, interactions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo run build --filter "@communeo/site..."
+
+      - run: pnpm --filter @communeo/site exec playwright install --with-deps chromium
+
+      - name: Pages du site (axe WCAG 2.2 AA, 320 px, texte à 200 %) et interactions, en 390 et 1440 px
+        run: pnpm --filter @communeo/site exec playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-playwright-site
+          path: apps/site/test-results
+          retention-days: 7
+
   docker:
     name: Image Docker (${{ matrix.app }})
     runs-on: ubuntu-latest

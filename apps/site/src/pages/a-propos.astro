@@ -1,0 +1,88 @@
+---
+import AppelFinal from '../components/AppelFinal.astro';
+import BandeauPage from '../components/BandeauPage.astro';
+import Base from '../layouts/Base.astro';
+import { CONTACT_EMAIL } from '../lib/site';
+---
+
+<Base titre="À propos de Communeo · Communeo" description="Communeo est édité par Philippe Chevreul, entrepreneur individuel.">
+  <BandeauPage surtitre="À propos" titre="Qui fait Communeo" seed={2.8} />
+
+  <section class="section corps" aria-labelledby="t-nom">
+    <div class="pile contenu">
+      <div class="pile" style="gap:14px">
+        <h2 id="t-nom" class="h2">Philippe Chevreul</h2>
+        <p class="texte">
+          Designer et développeur depuis huit ans, j’aime rendre accessible ce qui ne l’est pas encore pour tout le monde. Pour moi, un site internet de mairie est une nécessité. Ce
+          n’est pas encore le cas partout, et les offres existantes sont souvent inadaptées, avec une expérience parfois médiocre.
+        </p>
+      </div>
+      <div class="pile" style="gap:14px">
+        <h2 class="titre-pourquoi">Pourquoi Communeo</h2>
+        <p class="texte">
+          Dans les petites mairies, le coût d’un site paraît élevé, et on sous-estime souvent le travail qu’il demande. Avec Communeo, vous avez un outil simple pour tenir un site
+          propre, accessible et complet, avec toutes les fonctions dont une mairie a besoin, et un accompagnement direct.
+        </p>
+      </div>
+      <dl class="identite">
+        <div>
+          <dt>Statut</dt>
+          <dd>Entrepreneur individuel, sous le nom commercial Communeo</dd>
+        </div>
+        <div>
+          <dt>SIREN</dt>
+          <dd class="chiffres">911 592 764</dd>
+        </div>
+        <div>
+          <dt>Contact</dt>
+          <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <AppelFinal titre="Votre commune mérite un site à jour." />
+</Base>
+
+<style>
+  .corps {
+    padding-block: clamp(56px, 7vw, 96px);
+  }
+
+  .contenu {
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 28px;
+  }
+
+  .titre-pourquoi {
+    margin: 0;
+    font: 400 clamp(1.625rem, 1.3rem + 1.2vw, 2.25rem) / 1.15 var(--serif);
+    color: var(--sapin);
+  }
+
+  .identite {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 12px;
+  }
+
+  .identite div {
+    padding: 18px;
+    border-radius: 12px;
+    background: var(--papier-clair);
+  }
+
+  dt {
+    font-size: 0.9375rem;
+    color: var(--encre-douce);
+  }
+
+  dd {
+    margin: 4px 0 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+</style>

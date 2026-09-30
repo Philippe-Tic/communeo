@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Questions fréquentes sur le site de mairie · Communeo</title>
+<meta name="description" content="Compétences, délais, nom de domaine, accessibilité, cookies, facturation Chorus Pro, fin d’essai : les réponses aux questions des mairies.">
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
+</style>
+</helmet>
+
+<dc-import name="EnTete" current="questions" hint-size="100%,88px"></dc-import>
+<main>
+<dc-import name="BandeauPage" kicker="Questions fréquentes" title="Les réponses aux questions que se posent les mairies." lead="Une question sans réponse ici ? Écrivez-nous à contact@communeo.fr, nous répondons sous 72 heures." seed="{{ 0.9 }}" hint-size="100%,380px"></dc-import>
+
+<div style="padding:clamp(48px,6vw,88px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:1312px;margin:0 auto;display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);align-items:flex-start">
+    <nav aria-label="Thèmes des questions" style="flex:1 1 240px;max-width:{{ navMax }};position:{{ navPos }};top:24px;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:14px;font-weight:700;letter-spacing:.14em;color:#A8452A;margin-bottom:8px">SOMMAIRE</span>
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+        <a href="{{ g.hash }}" style="display:flex;justify-content:space-between;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4" style-focus="outline:3px solid #0E4033;outline-offset:1px">{{ g.t }}<span style="font-size:14px;font-weight:500;color:#4A4942">{{ g.count }}</span></a>
+      </sc-for>
+    </nav>
+    <div style="flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:clamp(48px,6vw,72px)">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+        <section id="{{ g.id }}" aria-labelledby="{{ g.hid }}" style="display:flex;flex-direction:column;gap:18px;scroll-margin-top:24px">
+          <h2 id="{{ g.hid }}" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">{{ g.t }}</h2>
+          <dc-import name="Accordeon" items="{{ g.items }}" id-prefix="{{ g.id }}" hint-size="100%,300px"></dc-import>
+        </section>
+      </sc-for>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;padding:28px;border-radius:16px;background:#FFFFFF;border:1px solid #D9D6C9">
+        <div style="display:flex;flex-direction:column;gap:6px"><h2 style="margin:0;font-size:22px;font-weight:600">Vous n’avez pas trouvé votre réponse ?</h2><p style="margin:0;font-size:17px;color:#4A4942">Nous répondons par e-mail sous 72 heures.</p></div>
+        <a href="Contact.dc.html" style="display:inline-flex;align-items:center;min-height:52px;padding:0 22px;border-radius:10px;background:#0E4033;color:#EFECE5;font-size:17px;font-weight:600;text-decoration:none;white-space:nowrap" style-hover="background:#0A2F26" style-focus="outline:3px solid #0E4033;outline-offset:3px">Nous écrire</a>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<dc-import name="PiedDePage" hint-size="100%,420px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { wide: typeof window !== 'undefined' && window.innerWidth >= 900 };
+  componentDidMount() { this.onR = () => { const w = window.innerWidth >= 900; if (w !== this.state.wide) this.setState({ wide: w }); }; window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() {
+    const G = [
+      { id: 'demarrer', t: 'Démarrer', items: [
+        { q: 'Faut-il des compétences en informatique ?', a: 'Non. L’administration s’utilise comme un traitement de texte, dans un navigateur, sans rien installer. Une aide est intégrée à chaque écran et une documentation complète, avec captures, est en ligne.' },
+        { q: 'Combien de temps pour avoir un site en ligne ?', a: 'L’inscription prend deux minutes. Le site est aussitôt pré-rempli avec les données publiques de la commune et en ligne sur son adresse Communeo. Comptez une journée pour le compléter.' },
+        { q: 'Qui peut inscrire la commune ?', a: 'Un élu ou un agent de la mairie. La confirmation est envoyée à l’adresse officielle de la mairie connue de l’Annuaire de l’administration ; si elle n’y figure pas, l’équipe Communeo vérifie la demande.' },
+        { q: 'Pouvons-nous reprendre les contenus de notre ancien site ?', a: '[À confirmer : existe-t-il une aide à la reprise des contenus ?] Les données publiques (coordonnées, horaires, population) sont reprises automatiquement ; les autres contenus se copient dans l’éditeur.' }
+      ] },
+      { id: 'site', t: 'Le site', items: [
+        { q: 'Pouvons-nous garder notre nom de domaine actuel ?', a: 'Oui. Au passage à l’abonnement, le site passe sur le domaine de la commune, par exemple mairie-saint-aubin.fr, avec certificat HTTPS. Si la commune n’a pas de domaine, son achat reste à sa charge.' },
+        { q: 'Le site apparaît-il dans Google ?', a: 'Pas pendant l’essai : un bandeau « Site en préparation » s’affiche et le site est masqué aux moteurs de recherche. Après la mise en ligne définitive, il devient visible.' },
+        { q: 'Comment les habitants sont-ils prévenus d’une coupure d’eau ?', a: 'Vous publiez une alerte depuis l’administration, avec un niveau de gravité et une date de fin. Le bandeau apparaît sur tout le site en moins d’une minute.' },
+        { q: 'Les démarches Service-Public sont-elles à jour ?', a: 'Oui. Plus de 3 000 fiches officielles sont tenues à jour par l’État et consultables depuis votre site. Quand une fiche indique « Où s’adresser : mairie », le lien mène à votre page contact.' },
+        { q: 'Pouvons-nous changer de thème ?', a: 'Oui, à tout moment. Vos contenus suivent : rien à ressaisir.' },
+        { q: 'Pouvons-nous choisir nos couleurs ?', a: 'Chaque thème a ses propres palettes, choisies pour le contraste. La commune ajoute son logo ou son blason ; les couleurs ne se personnalisent pas.' }
+      ] },
+      { id: 'admin', t: 'L’administration', items: [
+        { q: 'Qui peut modifier le site ? Combien d’utilisateurs ?', a: 'Plusieurs personnes peuvent travailler sur le site, avec deux rôles : administrateur (tout) et rédacteur (contenus, vie pratique, messages, médiathèque). Un journal d’activité garde six mois d’historique. [Nombre maximal d’utilisateurs à confirmer]' },
+        { q: 'Peut-on préparer une publication à l’avance ?', a: 'Oui : vous voyez l’aperçu dans votre thème, puis vous choisissez la date et l’heure de publication.' },
+        { q: 'Et si je fais une erreur sur une page ?', a: 'L’historique des versions permet de revenir à une version précédente de la page.' }
+      ] },
+      { id: 'conformite', t: 'Conformité', items: [
+        { q: 'Le site est-il accessible aux personnes handicapées ?', a: 'Les thèmes sont testés automatiquement à chaque modification : contrastes, structure, focus clavier, affichage à 320 px et texte agrandi à 200 %, complétés par des vérifications au lecteur d’écran. La conformité finale dépend aussi de vos contenus : textes alternatifs des images, documents PDF.' },
+        { q: 'Le site dépose-t-il des cookies ?', a: 'Aucun traceur publicitaire. Les vidéos et cartes ne se chargent qu’après accord de l’habitant. Une page de gestion des cookies est générée.' },
+        { q: 'Quelles pages légales sont fournies ?', a: 'Mentions légales, données personnelles, déclaration d’accessibilité, gestion des cookies, exercice des droits et plan du site. Elles se remplissent avec les informations de la commune.' }
+      ] },
+      { id: 'tarifs', t: 'Tarifs et facturation', items: [
+        { q: 'Combien cela coûte-t-il ?', a: 'De 290 € à 1 290 € HT par an selon la population INSEE, sans frais de mise en service. TVA non applicable, art. 293 B du CGI.' },
+        { q: 'Comment se passe la facturation pour une commune ?', a: 'Le maire valide le devis en ligne. La facture arrive par Chorus Pro et se règle par virement (mandat administratif) sous 30 jours.' },
+        { q: 'Faut-il une mise en concurrence ?', a: 'Non : marché de faible montant, dispensé de publicité et de mise en concurrence (art. R. 2122-8 du Code de la commande publique).' },
+        { q: 'Que se passe-t-il à la fin de l’essai ?', a: 'Sans abonnement, le site est retiré et l’administration passe en lecture seule. Les données sont conservées six mois, puis supprimées.' }
+      ] },
+      { id: 'donnees', t: 'Données et sécurité', items: [
+        { q: 'Que deviennent nos contenus si nous arrêtons ?', a: 'Ils sont conservés six mois après la fin de l’abonnement ou de l’essai, puis supprimés. [À confirmer : possibilité d’exporter les contenus]' },
+        { q: 'Nos données sont-elles sauvegardées ?', a: 'Oui : sauvegardes chiffrées quotidiennes, conservées 90 jours hors du serveur. Chaque commune ne voit que ses propres données.' },
+        { q: 'Comment obtenir de l’aide ?', a: 'Par e-mail à contact@communeo.fr, avec une réponse sous 72 heures, et grâce à la documentation en ligne.' }
+      ] }
+    ];
+    return { navPos: this.state.wide ? 'sticky' : 'static', navMax: this.state.wide ? '300px' : 'none', groups: G.map(g => ({ ...g, hash: '#' + g.id, hid: 't-' + g.id, count: String(g.items.length) })) };
+  }
+}
+</script>
+</body>
+</html>

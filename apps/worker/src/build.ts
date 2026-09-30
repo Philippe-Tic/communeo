@@ -8,6 +8,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import type { BuildJob, BuildSite, BuildStep, Logger, PublisherSite, SitePublisher } from '@communeo/pipeline';
+import type { IndexNow } from './indexnow';
 import type { Renderer } from './renderer';
 import type { StrapiReporter } from './strapi';
 
@@ -19,6 +20,8 @@ export interface BuildDeps {
   timeoutSeconds: number;
   logger: Logger;
   now?: () => number;
+  /** Signalement des adresses changées aux moteurs (IndexNow) ; absent : rien n'est signalé */
+  indexNow?: IndexNow;
 }
 
 const MAX_ERROR_LENGTH = 4000;
@@ -59,8 +62,11 @@ export async function processBuild(job: BuildJob, deps: BuildDeps): Promise<void
     await step('rendering');
     await deps.renderer.build({ site, outDir, siteUrl, signal });
     signal.throwIfAborted();
+    // IndexNow : fichier de la clé déposé avec les pages, adresses changées depuis la version en ligne
+    const indexNow = deps.indexNow ? await deps.indexNow.prepare(outDir, siteUrl, !!site.noindex).catch(() => null) : null;
     await step('publishing');
     const result = await deps.publisher.publish(toPublisherSite({ ...site, hostId }), outDir, { onUploaded: () => step('cache') });
+    if (indexNow && result.state === 'ready') await deps.indexNow!.submit(indexNow);
 
     const buildSeconds = (now() - started) / 1000;
     await deps.strapi.finish(job.id, {

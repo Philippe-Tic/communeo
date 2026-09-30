@@ -3,6 +3,7 @@
  */
 import { consoleLogger, createBuildQueue, getPublisher } from '@communeo/pipeline';
 import { readConfig } from './config';
+import { createIndexNow } from './indexnow';
 import { createAstroRenderer } from './renderer';
 import { createStrapiReporter } from './strapi';
 import { startWorker } from './worker';
@@ -20,6 +21,8 @@ await startWorker(queue, {
   workDir: config.workDir,
   timeoutSeconds: config.timeoutSeconds,
   logger: log,
+  // Adresses changées signalées aux moteurs (Bing…) ; INDEXNOW=off pour ne rien signaler
+  ...(process.env.INDEXNOW === 'off' ? {} : { indexNow: createIndexNow({ secret: config.workerSecret, logger: log }) }),
 });
 log.info(`[WORKER] En attente de builds (renderer : ${config.rendererDir})`);
 

@@ -1202,6 +1202,39 @@ export interface ApiQuoteQuote extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiRedirectRedirect extends Struct.CollectionTypeSchema {
+  collectionName: 'redirects';
+  info: {
+    description: "Redirections 301 depuis l'ancien site de la commune (#335) : ancienne adresse \u2192 page du site";
+    displayName: 'Redirection';
+    pluralName: 'redirects';
+    singularName: 'redirect';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  pluginOptions: {
+    'content-manager': {
+      visible: false;
+    };
+    'content-type-builder': {
+      visible: false;
+    };
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+    from_path: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::redirect.redirect'> & Schema.Attribute.Private;
+    publishedAt: Schema.Attribute.DateTime;
+    site: Schema.Attribute.Relation<'manyToOne', 'api::site.site'>;
+    to_path: Schema.Attribute.String & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> & Schema.Attribute.Private;
+  };
+}
+
 export interface ApiSchoolMenuSchoolMenu extends Struct.CollectionTypeSchema {
   collectionName: 'school_menus';
   info: {
@@ -1954,6 +1987,7 @@ declare module '@strapi/strapi' {
       'api::page.page': ApiPagePage;
       'api::pending-change.pending-change': ApiPendingChangePendingChange;
       'api::quote.quote': ApiQuoteQuote;
+      'api::redirect.redirect': ApiRedirectRedirect;
       'api::school-menu.school-menu': ApiSchoolMenuSchoolMenu;
       'api::signup-request.signup-request': ApiSignupRequestSignupRequest;
       'api::site.site': ApiSiteSite;

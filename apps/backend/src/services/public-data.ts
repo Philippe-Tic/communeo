@@ -77,3 +77,55 @@ export async function communePopulation(insee: string): Promise<number | null> {
   });
   return typeof record?.population === 'number' ? record.population : null;
 }
+
+const WIKIDATA = () => process.env.WIKIDATA_SPARQL_URL || 'https://query.wikidata.org/sparql';
+
+/**
+ * Référencement (#336) : la fiche de la mairie dans l'Annuaire et les sites qu'elle indique.
+ * `null` si la mairie n'y figure pas ; PublicDataUnavailable si l'Annuaire ne répond pas.
+ */
+export async function townHallListing(insee: string, communeName: string): Promise<{ pageUrl: string | null; websites: string[] } | null> {
+  if (!/^\d[\dAB]\d{3}$/.test(insee)) return null;
+  const where = `code_insee_commune="${insee}" and pivot like "mairie"`;
+  const { results } = await getJson(`${ANNUAIRE()}?${new URLSearchParams({ where, limit: '5' })}`);
+  const halls: any[] = Array.isArray(results) ? results : [];
+  const main = halls.find((hall) => String(hall?.nom ?? '').toLowerCase() === `mairie - ${communeName.toLowerCase()}`) ?? halls[0];
+  if (!main) return null;
+  // site_internet : liste (parfois une chaîne JSON) de { valeur }
+  let sites: any = main.site_internet;
+  if (typeof sites === 'string') {
+    try {
+      sites = JSON.parse(sites);
+    } catch {
+      sites = [{ valeur: sites }];
+    }
+  }
+  const websites = (Array.isArray(sites) ? sites : []).map((site: any) => String(site?.valeur ?? '').trim()).filter(Boolean);
+  return { pageUrl: typeof main.url_service_public === 'string' ? main.url_service_public : null, websites };
+}
+
+/** La commune dans Wikidata (code INSEE, P374) : fiche, article Wikipédia en français, site officiel (P856) */
+export async function wikidataCommune(insee: string): Promise<{ itemUrl: string | null; articleUrl: string | null; website: string | null } | null> {
+  if (!/^\d[\dAB]\d{3}$/.test(insee)) return null;
+  const query = `SELECT ?item ?site ?article WHERE { ?item wdt:P374 "${insee}". OPTIONAL { ?item wdt:P856 ?site } OPTIONAL { ?article schema:about ?item; schema:isPartOf <https://fr.wikipedia.org/> } } LIMIT 5`;
+  let response: Response;
+  try {
+    response = await fetch(`${WIKIDATA()}?${new URLSearchParams({ query })}`, {
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      // Wikidata demande un User-Agent qui identifie le service
+      headers: { accept: 'application/sparql-results+json', 'accept-encoding': 'identity', 'user-agent': 'Communeo/1.0 (https://communeo.fr; contact@communeo.fr)' },
+    });
+  } catch {
+    throw new PublicDataUnavailable('Wikidata ne répond pas');
+  }
+  if (!response.ok) throw new PublicDataUnavailable(`Réponse ${response.status}`);
+  const bindings: any[] = ((await response.json()) as any)?.results?.bindings ?? [];
+  if (!bindings.length) return null;
+  const value = (key: string) => bindings.map((binding) => binding?.[key]?.value).find(Boolean) ?? null;
+  const entity = value('item');
+  return {
+    itemUrl: entity ? entity.replace('http://www.wikidata.org/entity/', 'https://www.wikidata.org/wiki/') : null,
+    articleUrl: value('article'),
+    website: value('site'),
+  };
+}

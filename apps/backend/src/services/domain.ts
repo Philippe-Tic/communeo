@@ -7,6 +7,7 @@ import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 import { log } from '../utils/logger';
 import { isBuildQueueConfigured } from './build-queue';
 import deploymentService from './deployment';
+import { sendChecklistEmail } from './seo-checklist';
 
 interface DomainConfiguration {
   domain: string;
@@ -106,6 +107,8 @@ class DomainService {
 
       log.info(`Custom domain ${domain} activated successfully`);
       await this.rebuildForDomain(site.documentId);
+      // Référencement (#336) : Annuaire, fiche Google, Wikipédia, avec les liens directs
+      await sendChecklistEmail(site.documentId);
       return { success: true, url: customUrl };
 
     } catch (error: any) {

@@ -1017,6 +1017,31 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     { path: '/etat-civil', label: 'État civil', kind: 'Page' },
     { path: '/salle-des-fetes', label: 'Location de la salle des fêtes', kind: 'Page' },
   ];
+  // Référencement au passage sur le domaine (#336)
+  const seoDeclared: Record<string, boolean> = {};
+  const seoChecklist = () => ({
+    siteUrl: 'https://saint-aubin-sur-loire.fr',
+    items: [
+      {
+        id: 'annuaire', title: 'Annuaire de l’administration (service-public.fr)', why: 'C’est la référence officielle.', checkable: true,
+        steps: ['Ouvrez la fiche de votre mairie dans l’Annuaire.', 'Suivez le lien de mise à jour proposé sur la fiche.'],
+        links: [{ label: 'Fiche de la mairie dans l’Annuaire', href: 'https://lannuaire.service-public.gouv.fr/test' }],
+        state: 'verified', detail: 'L’Annuaire indique bien votre site.',
+      },
+      {
+        id: 'google', title: 'Fiche Google de la mairie', why: 'L’encadré de Google et Maps.', checkable: false,
+        steps: ['Cherchez « Mairie de votre commune » dans Google.', 'Indiquez le site dans la fiche.'],
+        links: [{ label: 'Google Business Profile', href: 'https://business.google.com/' }],
+        state: seoDeclared.google ? 'declared' : 'todo', detail: null,
+      },
+      {
+        id: 'wikipedia', title: 'Wikipédia', why: 'L’article de la commune affiche son site officiel.', checkable: true,
+        steps: ['Ouvrez la fiche Wikidata de la commune.', 'Indiquez le site officiel.'],
+        links: [{ label: 'Fiche Wikidata de la commune', href: 'https://www.wikidata.org/wiki/Q1' }],
+        state: seoDeclared.wikipedia ? 'declared' : 'todo', detail: 'Wikidata indique encore : http://ancien.fr.',
+      },
+    ],
+  });
   const validationQueue =
     options.validations === 'some'
       ? {
@@ -1651,6 +1676,15 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         members.splice(members.indexOf(member), 1);
         return json({ data: { id: member.id } });
       }
+    }
+    // Référencement (#336)
+    if (url.pathname === '/api/seo/checklist' && method === 'GET') return json({ data: seoChecklist() });
+    const seoStep = /^\/api\/seo\/checklist\/([a-z]+)$/.exec(url.pathname);
+    if (seoStep && method === 'PUT') {
+      const body = route.request().postDataJSON() as { done: boolean };
+      bodies.push({ call: `seo ${seoStep[1]}`, body: { data: body } });
+      seoDeclared[seoStep[1]!] = body.done;
+      return json({ data: seoChecklist() });
     }
     // Redirections (#335)
     if (url.pathname === '/api/redirects' && method === 'GET') return json({ data: { redirects, destinations: redirectDestinations } });

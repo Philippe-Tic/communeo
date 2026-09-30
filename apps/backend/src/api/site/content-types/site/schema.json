@@ -144,6 +144,10 @@
       "type": "string",
       "private": true
     },
+    "seo_checklist": {
+      "type": "json",
+      "private": true
+    },
     "google_site_verification": {
       "type": "string"
     },

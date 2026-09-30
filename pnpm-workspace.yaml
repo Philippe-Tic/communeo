@@ -3,6 +3,8 @@ packages:
   - "apps/*"
   - "packages/*"
   - "themes/*"
+  # Vidéos de communeo.fr (Remotion) : outil de production, jamais déployé
+  - "v2/videos"
 
 # pnpm 10 n'exécute pas les scripts d'installation par défaut : liste des dépendances natives autorisées
 onlyBuiltDependencies:

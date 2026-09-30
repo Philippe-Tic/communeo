@@ -1,0 +1,7 @@
+# Rendus de travail (les vidéos finales vont dans v2/contenus-site/videos/)
+out/
+# Captures et voix : régénérées par pnpm videos:captures / videos:voix (sauf la vidéo de test, dont la
+# composition importe les captures)
+public/captures/*
+!public/captures/test/
+public/voix/

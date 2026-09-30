@@ -23,6 +23,8 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 
 - **apps/site/** — communeo.fr, the Communeo marketing site (#315): Astro static pages from the Claude Design mockups (`v2/design_handoff_site_communeo/`), prices from `@communeo/core`, theme screenshots captured from the renderer demo builds, contact form → `POST /api/prospect-contact` (public, rate-limited, e-mailed to `SIGNUP_NOTIFY_EMAIL`, nothing stored). Content still to provide is marked with `<AFournir>` and listed by `pnpm --filter @communeo/site a-fournir`. Deployed on Netlify (base directory `apps/site`).
 
+- **v2/videos/** — communeo.fr videos (V1, V2, V3, V5) in Remotion, a production tool never deployed: one `script.ts` per video is the single source (scenes, `.vtt`, transcription), timings recalibrated on the voice (ElevenLabs or a dropped `voix.mp3`), captures taken with Playwright on the admin build + its test API mock and on the renderer demo builds (never production). `pnpm videos:captures|voix|recaler|render|planche <id>`; see v2/videos/README.md.
+
 **docs/** (Starlight) is the user documentation, one page per admin screen, deployed on Netlify; its screenshots are generated with `pnpm docs:captures`.
 
 ### Production (#179)

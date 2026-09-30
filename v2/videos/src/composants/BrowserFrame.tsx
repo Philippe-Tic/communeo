@@ -1,6 +1,7 @@
 /**
  * Fenêtre de navigateur sobre autour d'une capture : barre à pastilles et adresse lisible. Les enfants
- * sont placés dans le repère de la capture (pixels CSS), sous la barre.
+ * sont placés dans le repère de la capture (pixels CSS), sous la barre, et défilent avec la page.
+ * Capture pleine page : la fenêtre montre `capture.vue` pixels de haut, à partir de `defilement`.
  */
 import type { ReactNode } from 'react';
 import { Img, staticFile } from 'remotion';
@@ -10,12 +11,13 @@ import type { Capture } from '../lib/geometrie';
 /** Hauteur de la barre du navigateur, en pixels CSS de la capture */
 export const BARRE = 56;
 
-export function BrowserFrame({ capture, url, children }: { capture: Capture; url?: string; children?: ReactNode }) {
+export function BrowserFrame({ capture, url, defilement = 0, children }: { capture: Capture; url?: string; defilement?: number; children?: ReactNode }) {
+  const vue = capture.vue ?? capture.hauteur;
   return (
     <div
       style={{
         width: capture.largeur,
-        height: capture.hauteur + BARRE,
+        height: vue + BARRE,
         borderRadius: 18,
         overflow: 'hidden',
         background: C.blanc,
@@ -52,9 +54,11 @@ export function BrowserFrame({ capture, url, children }: { capture: Capture; url
           {url ?? capture.url}
         </div>
       </div>
-      <div style={{ position: 'absolute', left: 0, top: BARRE, width: capture.largeur, height: capture.hauteur }}>
-        <Img src={staticFile(capture.image)} style={{ display: 'block', width: capture.largeur, height: capture.hauteur }} />
-        {children}
+      <div style={{ position: 'absolute', left: 0, top: BARRE, width: capture.largeur, height: vue, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', left: 0, top: 0, width: capture.largeur, height: capture.hauteur, transform: `translateY(${-defilement}px)` }}>
+          <Img src={staticFile(capture.image)} style={{ display: 'block', width: capture.largeur, height: capture.hauteur }} />
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -20,6 +20,8 @@ export interface Capture {
   echelle: number;
   /** Adresse à afficher dans la barre du navigateur */
   url: string;
+  /** Hauteur de la fenêtre du navigateur (capture pleine page : la page est plus haute) */
+  vue?: number;
   /** Éléments repérés (boutons, champs…) : leur rectangle dans la capture */
   elements: Record<string, Rect>;
 }

@@ -11,6 +11,8 @@ export interface Segment {
   fin: number;
   /** Texte dit par la voix off (et sous-titré) */
   voix: string;
+  /** Texte donné à la synthèse vocale quand l'écrit se prononce mal (« communeo point f r ») */
+  prononciation?: string;
   /** Ce qu'on voit à l'écran (transcription) */
   ecran: string;
 }
@@ -27,11 +29,19 @@ export interface ScriptVideo {
 }
 
 export interface Timings {
-  /** D'où viennent les heures : estimées dans le script, voix générée, piste déposée */
-  source: 'estimation' | 'elevenlabs' | 'piste';
+  /** D'où viennent les heures : estimées dans le script, voix générée (ElevenLabs, ou provisoire de macOS), piste déposée */
+  source: 'estimation' | 'elevenlabs' | 'systeme' | 'piste';
   /** Voix off : un fichier par segment (dans public/), ou une piste entière */
   audio: null | { segments: string[] } | { piste: string };
-  segments: Array<{ debut: number; fin: number }>;
+  /** Heures de chaque segment, et de sa voix (le sous-titre tombe sur la phrase, pas sur toute la scène) */
+  segments: Array<{ debut: number; fin: number; parole?: Parole }>;
+}
+
+/** Heures de la voix d'un segment, et de chacune de ses phrases quand on les a repérées */
+export interface Parole {
+  debut: number;
+  fin: number;
+  phrases?: Array<{ debut: number; fin: number }>;
 }
 
 export interface SegmentCale extends Segment {
@@ -39,14 +49,16 @@ export interface SegmentCale extends Segment {
   /** En images */
   de: number;
   a: number;
+  /** Heures de la voix, en secondes (à défaut : tout le segment) */
+  parole?: Parole;
 }
 
 /** Segments aux heures définitives (celles de timings.json quand elles correspondent au script) */
 export function chronologie(script: ScriptVideo, timings?: Timings | null): SegmentCale[] {
   const heures = timings && timings.segments.length === script.segments.length ? timings.segments : script.segments;
   return script.segments.map((segment, index) => {
-    const { debut, fin } = heures[index]!;
-    return { ...segment, debut, fin, index, de: Math.round(debut * FPS), a: Math.round(fin * FPS) };
+    const { debut, fin, parole } = heures[index] as Timings['segments'][number];
+    return { ...segment, debut, fin, parole, index, de: Math.round(debut * FPS), a: Math.round(fin * FPS) };
   });
 }
 

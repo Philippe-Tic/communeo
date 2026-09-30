@@ -8,8 +8,11 @@ export const SORTIE_FINALE = fileURLToPath(new URL('../../contenus-site/videos/'
 
 export const IDS = ['v1-demo', 'v2-alerte', 'v3-themes', 'v5-devis', 'test'] as const;
 
+/** Raccourcis : `v1` pour `v1-demo`… */
+const ALIAS: Record<string, string> = { v1: 'v1-demo', v2: 'v2-alerte', v3: 'v3-themes', v5: 'v5-devis' };
+
 export function videoDemandee(): string {
-  const id = process.argv[2];
+  const id = ALIAS[process.argv[2] ?? ''] ?? process.argv[2];
   if (!id || !(IDS as readonly string[]).includes(id)) {
     console.error(`Vidéo inconnue : ${id ?? '(aucune)'}. Au choix : ${IDS.join(', ')}`);
     process.exit(1);

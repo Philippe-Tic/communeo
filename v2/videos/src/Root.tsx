@@ -1,6 +1,6 @@
 /**
  * Compositions des vidéos de communeo.fr (1920 × 1080, 30 images/s). Leur durée vient du script calé
- * sur la voix (timings.json). V1, V2, V3 et V5 sont encore des storyboards (Brouillon).
+ * sur la voix (timings.json). V2, V3 et V5 sont encore des storyboards (Brouillon).
  */
 import { Composition } from 'remotion';
 import { Brouillon } from './composants/Brouillon';
@@ -16,11 +16,11 @@ import v3Timings from './videos/v3-themes/timings.json';
 import { script as v5 } from './videos/v5-devis/script';
 import v5Timings from './videos/v5-devis/timings.json';
 import { Test } from './videos/test/Composition';
+import { V1Demo } from './videos/v1-demo/Composition';
 import { script as test } from './videos/test/script';
 import testTimings from './videos/test/timings.json';
 
 const brouillons: Array<[ScriptVideo, Timings]> = [
-  [v1, v1Timings as Timings],
   [v2, v2Timings as Timings],
   [v3, v3Timings as Timings],
   [v5, v5Timings as Timings],
@@ -44,6 +44,18 @@ export function Root() {
           height={HAUTEUR}
         />
       ))}
+      <Composition
+        id="v1-demo"
+        component={() => (
+          <Charte>
+            <V1Demo />
+          </Charte>
+        )}
+        durationInFrames={dureeEnImages(v1, v1Timings as Timings)}
+        fps={FPS}
+        width={LARGEUR}
+        height={HAUTEUR}
+      />
       <Composition
         id="test"
         component={() => (

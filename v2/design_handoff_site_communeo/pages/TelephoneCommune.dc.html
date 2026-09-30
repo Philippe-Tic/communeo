@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div role="img" aria-label="Le site de Saint-Aubin-sur-Loire sur un téléphone : nom de la commune, horaires, adresse et population se remplissent avec les données publiques." style="width:280px;display:flex;flex-direction:column;align-items:center;gap:14px;font-family:'DM Sans',sans-serif">
+  <div style="width:280px;height:580px;box-sizing:border-box;padding:9px;border-radius:42px;background:#1C1B18;box-shadow:0 30px 60px -30px rgba(14,64,51,.45),0 2px 6px rgba(28,27,24,.18)">
+    <div style="position:relative;width:100%;height:100%;border-radius:33px;background:#FFFFFF;overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 22px 6px;font-size:12px;font-weight:600;color:#1C1B18">
+        <span>9:41</span>
+        <span style="width:74px;height:20px;border-radius:12px;background:#1C1B18"></span>
+        <span style="display:flex;gap:3px;align-items:flex-end"><span style="width:3px;height:5px;background:#1C1B18;border-radius:1px"></span><span style="width:3px;height:7px;background:#1C1B18;border-radius:1px"></span><span style="width:3px;height:9px;background:#1C1B18;border-radius:1px"></span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px 12px;border-bottom:1px solid #D9D6C9">
+        <div style="width:34px;height:40px;flex:none;border-radius:4px 4px 17px 17px;background:#E1E9E4;border:1.5px solid #0E4033;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0E4033">SA</div>
+        <div style="position:relative;flex:1;height:36px">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:6px;opacity:{{ ph1 }};transition:opacity .5s cubic-bezier(.2,.8,.2,1)"><span style="width:80%;height:9px;border-radius:5px;background:#ECEAE3"></span><span style="width:45%;height:7px;border-radius:4px;background:#ECEAE3"></span></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:{{ f1 }};transform:translateY({{ t1 }}px);transition:all .5s cubic-bezier(.2,.8,.2,1)"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#4A4942">Mairie de</span><span style="font-size:15px;font-weight:700;color:#0E4033;line-height:1.1">Saint-Aubin-sur-Loire</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px"><span style="width:16px;height:2px;background:#1C1B18"></span><span style="width:16px;height:2px;background:#1C1B18"></span><span style="width:16px;height:2px;background:#1C1B18"></span></div>
+      </div>
+      <div style="height:120px;flex:none;background:repeating-linear-gradient(135deg,#E1E9E4 0 8px,#D5E0D9 8px 16px);display:flex;align-items:flex-end;padding:10px 14px;box-sizing:border-box">
+        <span style="font-family:ui-monospace,monospace;font-size:10px;color:#0E4033;background:rgba(255,255,255,.8);padding:2px 6px;border-radius:3px">[photo à fournir : la place du village]</span>
+      </div>
+      <div style="padding:14px 14px 0;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:14px;font-weight:700;color:#1C1B18">La mairie</span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:#0E4033;background:#E1E9E4;padding:3px 8px;border-radius:20px;opacity:{{ chip }};transition:opacity .5s"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0E4033" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Données publiques</span>
+        </div>
+        <div style="border:1px solid #D9D6C9;border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:9px">
+          <div style="position:relative;height:34px">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:6px;opacity:{{ ph2 }};transition:opacity .5s"><span style="width:40%;height:8px;border-radius:4px;background:#ECEAE3"></span><span style="width:70%;height:8px;border-radius:4px;background:#ECEAE3"></span></div>
+            <div style="position:absolute;inset:0;opacity:{{ f2 }};transform:translateY({{ t2 }}px);transition:all .5s cubic-bezier(.2,.8,.2,1)"><div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#0E5A34"><span style="width:7px;height:7px;border-radius:50%;background:#0E5A34"></span>Ouvert maintenant</div><div style="font-size:12px;color:#4A4942;margin-top:2px">Du lundi au vendredi, 9 h-12 h et 14 h-17 h</div></div>
+          </div>
+          <div style="height:1px;background:#EDEBE4"></div>
+          <div style="position:relative;height:18px">
+            <span style="position:absolute;left:0;top:5px;width:60%;height:8px;border-radius:4px;background:#ECEAE3;opacity:{{ ph3 }};transition:opacity .5s"></span>
+            <span style="position:absolute;inset:0;font-size:12px;color:#1C1B18;opacity:{{ f3 }};transform:translateY({{ t3 }}px);transition:all .5s cubic-bezier(.2,.8,.2,1)">1 place de la Mairie, 45 190 Saint-Aubin</span>
+          </div>
+          <div style="height:1px;background:#EDEBE4"></div>
+          <div style="position:relative;height:18px">
+            <span style="position:absolute;left:0;top:5px;width:35%;height:8px;border-radius:4px;background:#ECEAE3;opacity:{{ ph4 }};transition:opacity .5s"></span>
+            <span style="position:absolute;inset:0;font-size:12px;color:#1C1B18;opacity:{{ f4 }};transform:translateY({{ t4 }}px);transition:all .5s cubic-bezier(.2,.8,.2,1)"><b>1 240</b> habitants <span style="color:#4A4942">· INSEE</span></span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="border-radius:8px;background:#F7F6F2;padding:10px;font-size:12px;font-weight:600;color:#0E4033">Démarches</div>
+          <div style="border-radius:8px;background:#F7F6F2;padding:10px;font-size:12px;font-weight:600;color:#0E4033">Actualités</div>
+          <div style="border-radius:8px;background:#F7F6F2;padding:10px;font-size:12px;font-weight:600;color:#0E4033">Agenda</div>
+          <div style="border-radius:8px;background:#F7F6F2;padding:10px;font-size:12px;font-weight:600;color:#0E4033">Cantine</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <sc-if value="{{ showReplay }}" hint-placeholder-val="{{ false }}">
+    <button type="button" onClick="{{ replay }}" style="min-height:44px;padding:0 16px;border-radius:10px;border:1px solid #8F8C7E;background:#FFFFFF;color:#0E4033;font:600 14px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap" style-hover="border-color:#0E4033" style-focus="outline:3px solid #0E4033;outline-offset:2px">Rejouer « le site se remplit »</button>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:300,&quot;height&quot;:660},&quot;animate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showReplay&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { step: 0 };
+  componentDidMount() { this.run(); }
+  componentWillUnmount() { (this.timers || []).forEach(clearTimeout); }
+  run() {
+    (this.timers || []).forEach(clearTimeout);
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this.props.animate === false || reduce) { this.setState({ step: 5 }); return; }
+    this.setState({ step: 0 });
+    this.timers = [1, 2, 3, 4, 5].map(s => setTimeout(() => this.setState({ step: s }), 500 + s * 650));
+  }
+  renderVals() {
+    const s = this.state.step, v = {};
+    [1, 2, 3, 4].forEach(i => { const on = s >= i; v['f' + i] = on ? 1 : 0; v['ph' + i] = on ? 0 : 1; v['t' + i] = on ? 0 : 6; });
+    return { ...v, chip: s >= 5 ? 1 : 0, showReplay: !!this.props.showReplay, replay: () => this.run() };
+  }
+}
+</script>
+</body>
+</html>

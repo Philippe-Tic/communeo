@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Informations légales · Communeo</title>
+<meta name="description" content="Mentions légales, conditions générales, données personnelles, déclaration d’accessibilité et plan du site de Communeo.">
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</helmet>
+
+<dc-import name="EnTete" current="" hint-size="100%,88px"></dc-import>
+<main>
+<dc-import name="BandeauPage" kicker="Informations légales" title="Mentions légales et conditions d’utilisation" lead="" seed="{{ 0.2 }}" hint-size="100%,300px"></dc-import>
+
+<div style="padding:clamp(48px,6vw,88px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);align-items:flex-start">
+    <nav aria-label="Sommaire" style="flex:1 1 240px;max-width:{{ navMax }};position:{{ navPos }};top:24px;display:flex;flex-direction:column;gap:4px">
+      <a href="#mentions" style="display:flex;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4">Mentions légales</a>
+      <a href="#conditions" style="display:flex;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4">Conditions générales</a>
+      <a href="#donnees" style="display:flex;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4">Données personnelles</a>
+      <a href="#accessibilite" style="display:flex;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4">Accessibilité</a>
+      <a href="#plan" style="display:flex;align-items:center;min-height:48px;padding:0 14px;border-radius:10px;font-size:17px;font-weight:600;color:#0E4033;text-decoration:none;white-space:nowrap" style-hover="background:#E1E9E4">Plan du site</a>
+    </nav>
+    <div style="flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:56px;max-width:760px;font-size:18px;line-height:1.6">
+      <section id="mentions" aria-labelledby="t-mentions" style="display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px">
+        <h2 id="t-mentions" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Mentions légales</h2>
+        <h3 style="margin:8px 0 0;font-size:20px;font-weight:600">Éditeur</h3>
+        <p style="margin:0">Philippe Chevreul, entrepreneur individuel (EI), exerçant sous le nom commercial Communeo.<br>SIREN : 911 592 764<br>Adresse : <span style="background:#FBEBD0;color:#7A4B00;padding:0 4px;border-radius:3px">[à compléter]</span><br>E-mail : <a href="mailto:contact@communeo.fr">contact@communeo.fr</a><br>Directeur de la publication : Philippe Chevreul</p>
+        <h3 style="margin:8px 0 0;font-size:20px;font-weight:600">Hébergeur</h3>
+        <p style="margin:0"><span style="background:#FBEBD0;color:#7A4B00;padding:0 4px;border-radius:3px">[à compléter selon l’hébergement retenu : raison sociale, adresse, téléphone]</span></p>
+        <h3 style="margin:8px 0 0;font-size:20px;font-weight:600">Propriété intellectuelle</h3>
+        <p style="margin:0"><span style="background:#FBEBD0;color:#7A4B00;padding:0 4px;border-radius:3px">[Texte à fournir]</span></p>
+      </section>
+      <section id="conditions" aria-labelledby="t-cond" style="display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px">
+        <h2 id="t-cond" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Conditions générales</h2>
+        <div style="padding:22px;border-radius:14px;border:1.5px dashed #8F8C7E;background:#FFFFFF;color:#4A4942">[Texte fourni séparément : conditions générales de vente et d’utilisation (CGV/CGU), contrat de sous-traitance RGPD.]</div>
+      </section>
+      <section id="donnees" aria-labelledby="t-donnees" style="display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px">
+        <h2 id="t-donnees" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Données personnelles</h2>
+        <p style="margin:0">Ce site ne dépose aucun traceur publicitaire. Les informations envoyées par le formulaire de contact servent uniquement à répondre à votre message.</p>
+        <div style="padding:22px;border-radius:14px;border:1.5px dashed #8F8C7E;background:#FFFFFF;color:#4A4942">[Texte à fournir : responsable du traitement, finalités, base légale, durées de conservation, destinataires, vos droits (accès, rectification, effacement, opposition) et comment les exercer, droit de réclamation auprès de la CNIL.]</div>
+      </section>
+      <section id="accessibilite" aria-labelledby="t-access" style="display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px">
+        <h2 id="t-access" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Déclaration d’accessibilité</h2>
+        <p style="margin:0">Communeo s’engage à rendre ce site accessible, conformément à l’article 47 de la loi n° 2005-102 du 11 février 2005.</p>
+        <div style="padding:22px;border-radius:14px;border:1.5px dashed #8F8C7E;background:#FFFFFF;color:#4A4942">[Texte à reprendre de la documentation : état de conformité au RGAA 4.1, résultats des tests, contenus non accessibles, établissement de la déclaration, retour d’information et contact, voies de recours.]</div>
+      </section>
+      <section id="plan" aria-labelledby="t-plan" style="display:flex;flex-direction:column;gap:16px;scroll-margin-top:24px">
+        <h2 id="t-plan" style="margin:0;font:400 clamp(1.75rem,1.4rem + 1.4vw,2.5rem)/1.1 'DM Serif Display',Georgia,serif;color:#0E4033">Plan du site</h2>
+        <ul style="margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px">
+          <li><a href="Accueil.dc.html">Accueil</a></li>
+          <li><a href="Fonctionnalites.dc.html">Fonctionnalités</a></li>
+          <li><a href="Themes.dc.html">Thèmes</a></li>
+          <li><a href="Tarifs.dc.html">Tarifs</a></li>
+          <li><a href="Comment-ca-marche.dc.html">Comment ça marche</a></li>
+          <li><a href="Questions.dc.html">Questions fréquentes</a></li>
+          <li><a href="Contact.dc.html">Contact</a></li>
+          <li><a href="A-propos.dc.html">À propos</a></li>
+          <li>Informations légales : <a href="#mentions">mentions légales</a>, <a href="#conditions">conditions générales</a>, <a href="#donnees">données personnelles</a>, <a href="#accessibilite">accessibilité</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
+</main>
+<dc-import name="PiedDePage" hint-size="100%,420px"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { wide: typeof window !== 'undefined' && window.innerWidth >= 900 };
+  componentDidMount() { this.onR = () => { const w = window.innerWidth >= 900; if (w !== this.state.wide) this.setState({ wide: w }); }; window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() { return { navPos: this.state.wide ? 'sticky' : 'static', navMax: this.state.wide ? '300px' : 'none' }; }
+}
+</script>
+</body>
+</html>

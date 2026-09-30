@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Page introuvable · Communeo</title>
+<meta name="description" content="Cette page n’existe pas ou a changé d’adresse.">
+<link rel="icon" href="assets/picto-communeo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EFECE5;color:#1C1B18;font-family:'DM Sans',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#0E4033;text-decoration:underline;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+</style>
+</helmet>
+<dc-import name="EnTete" current="" hint-size="100%,88px"></dc-import>
+<main style="padding:clamp(56px,8vw,120px) clamp(20px,4.4vw,64px)">
+  <div style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);align-items:center">
+    <div style="flex:1 1 360px;aspect-ratio:1;max-width:460px;border-radius:20px;background:repeating-linear-gradient(135deg,#F7F6F2 0 10px,#E6E2D8 10px 20px);display:flex;align-items:flex-end;padding:14px"><span style="font-family:ui-monospace,monospace;font-size:13px;color:#4A4942">[Illustration : un panneau de direction « Communeo » perdu dans un champ]</span></div>
+    <div style="flex:1 1 380px;display:flex;flex-direction:column;gap:22px">
+      <span style="font-size:15px;font-weight:700;letter-spacing:.16em;color:#A8452A">ERREUR 404</span>
+      <h1 id="contenu" tabindex="-1" style="margin:0;font:400 clamp(2.5rem,1.757rem + 3.048vw,4.5rem)/1.04 'DM Serif Display',Georgia,serif;color:#0E4033;outline:none">Cette page est introuvable.</h1>
+      <p style="margin:0;font-size:20px;line-height:1.55;color:#4A4942">Elle n’existe pas ou a changé d’adresse. Vous pouvez reprendre à partir de ces pages :</p>
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:18px">
+        <li><a href="Accueil.dc.html" style="font-weight:600">Retour à l’accueil</a></li>
+        <li><a href="Tarifs.dc.html" style="font-weight:600">Voir les tarifs</a></li>
+        <li><a href="Questions.dc.html" style="font-weight:600">Questions fréquentes</a></li>
+        <li><a href="Contact.dc.html" style="font-weight:600">Nous écrire</a></li>
+      </ul>
+    </div>
+  </div>
+</main>
+<dc-import name="PiedDePage" hint-size="100%,420px"></dc-import>
+</x-dc>
+</body>
+</html>

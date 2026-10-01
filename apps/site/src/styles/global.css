@@ -57,6 +57,16 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* L'en-tête colle en haut : une ancre ou un élément atteint au clavier ne passe pas dessous (WCAG
+   2.4.11). Marge portée par le contenu, pas par la page (scroll-padding) : sinon le focus d'un élément
+   de l'en-tête lui-même (bouton « Menu ») ferait défiler la page. */
+main,
+main *,
+footer,
+footer * {
+  scroll-margin-top: calc(var(--hauteur-entete, 0px) + 16px);
+}
+
 body {
   margin: 0;
   background: var(--papier);

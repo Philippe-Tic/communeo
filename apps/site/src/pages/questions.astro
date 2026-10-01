@@ -206,7 +206,7 @@ const groupes = [
   @media (min-width: 56.25em) {
     .sommaire {
       position: sticky;
-      top: 24px;
+      top: calc(var(--hauteur-entete, 0px) + 24px);
       max-width: 300px;
     }
   }
@@ -259,7 +259,7 @@ const groupes = [
     display: flex;
     flex-direction: column;
     gap: 18px;
-    scroll-margin-top: 24px;
+    scroll-margin-top: calc(var(--hauteur-entete, 0px) + 24px);
   }
 
   .groupe h2 {

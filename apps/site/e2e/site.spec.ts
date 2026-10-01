@@ -221,3 +221,25 @@ test.describe('vidéos', () => {
     await expect(lien).toBeFocused();
   });
 });
+
+test('en-tête collé en haut au défilement ; ancres et menu ne passent pas dessous', async ({ page, isMobile }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/fonctionnalites');
+  await page.evaluate(() => window.scrollTo(0, 2000));
+  const entete = page.locator('header.entete');
+  await expect.poll(async () => (await entete.boundingBox())?.y).toBe(0);
+  const basEntete = (await entete.boundingBox())!.height;
+  // La sous-navigation colle juste sous l'en-tête
+  await expect.poll(async () => Math.round((await page.locator('.sous-nav').boundingBox())!.y)).toBe(Math.round(basEntete));
+  // Lien de la sous-navigation : la section arrive sous l'en-tête et la sous-navigation
+  await page.locator('.sous-nav a[href="#regles"]').click();
+  const basSousNav = await page.locator('.sous-nav').evaluate((nav) => nav.getBoundingClientRect().bottom);
+  await expect.poll(async () => (await page.locator('#t-regles').boundingBox())!.y).toBeGreaterThan(basSousNav);
+  if (isMobile) {
+    // Le menu s'ouvre par-dessus la page : le contenu ne bouge pas
+    const avant = await page.locator('#t-regles').boundingBox();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(page.locator('#menu-mobile')).toBeVisible();
+    expect(await page.locator('#t-regles').boundingBox()).toEqual(avant);
+  }
+});

@@ -3,6 +3,13 @@
  * En-tête : lien d'évitement, logo, navigation principale. Sous 1240 px, le bouton « Menu » déplie la
  * navigation (sans JavaScript, elle reste dépliée). Avec JavaScript, elle est repliée dès le premier
  * rendu (classe `js` posée dans Base.astro avant l'affichage) : la page ne saute pas au chargement.
+ *
+ * L'en-tête reste en haut de l'écran au défilement (`position: sticky`, dans le flux : rien ne passe
+ * dessous au chargement), sauf sur un écran très bas (téléphone à l'horizontale, fort zoom) où il
+ * prendrait trop de place. Une fois la page défilée, il prend une ombre (sans changer de hauteur : le
+ * contenu ne bouge pas pendant le défilement). Sa hauteur est
+ * publiée dans `--hauteur-entete` : marge des ancres et du focus clavier (global.css), éléments
+ * collants placés dessous (sous-navigation, sommaires).
  */
 import { LOGIN_URL, NAV, TRIAL_URL, type NavKey } from '../lib/site';
 import Icone from './Icone.astro';
@@ -72,6 +79,36 @@ const { courant } = Astro.props;
     // Passage en affichage large : le menu replié n'a plus lieu d'être
     matchMedia('(min-width: 77.5em)').addEventListener('change', (event) => event.matches && set(false));
   }
+
+  const header = document.querySelector<HTMLElement>('.entete');
+  if (header) {
+    // Hauteur de l'en-tête collant (0 quand il ne colle pas : écran trop bas), menu replié
+    const root = document.documentElement;
+    const publish = () => {
+      const sticky = getComputedStyle(header).position === 'sticky';
+      const height = sticky ? header.querySelector<HTMLElement>('.barre')!.offsetHeight : 0;
+      root.style.setProperty('--hauteur-entete', `${height}px`);
+    };
+    new ResizeObserver(publish).observe(header);
+    matchMedia('(min-height: 30em)').addEventListener('change', publish);
+    publish();
+    // Page défilée : une ombre sous l'en-tête
+    let pending = false;
+    const update = () => {
+      pending = false;
+      header.classList.toggle('defile', window.scrollY > 8);
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(update);
+      },
+      { passive: true },
+    );
+    update();
+  }
 </script>
 
 <style>
@@ -79,6 +116,19 @@ const { courant } = Astro.props;
     position: relative;
     z-index: 20;
     background: var(--sapin);
+    transition: box-shadow 0.25s var(--ease);
+  }
+
+  /* Collé en haut, sauf sur un écran trop bas pour lui laisser la place */
+  @media (min-height: 30em) {
+    .entete {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  .entete.defile {
+    box-shadow: 0 10px 30px -18px rgba(11, 42, 34, 0.75);
   }
 
   .evitement {
@@ -108,6 +158,12 @@ const { courant } = Astro.props;
     align-items: center;
     justify-content: space-between;
     gap: 24px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .entete {
+      transition: none;
+    }
   }
 
   .accueil {
@@ -201,6 +257,20 @@ const { courant } = Astro.props;
 
   :global(html.js) .menu-mobile:not(.ouvert) {
     display: none;
+  }
+
+  /* Avec JavaScript, le menu ouvert recouvre la page sous la barre, sans changer la hauteur de
+     l'en-tête (la page ne saute pas) ; plus haut que l'écran, il défile */
+  :global(html.js) .menu-mobile {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - var(--hauteur-entete, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--sapin);
+    box-shadow: 0 24px 40px -24px rgba(11, 42, 34, 0.8);
   }
 
   .bouton-menu[aria-expanded='true'] :global(.icone-menu),

@@ -57,7 +57,7 @@ const courant = Astro.url.pathname.replace(/\.html$/, '');
   @media (min-width: 56.25em) {
     .sommaire {
       position: sticky;
-      top: 24px;
+      top: calc(var(--hauteur-entete, 0px) + 24px);
       max-width: 300px;
     }
   }

@@ -48,6 +48,7 @@ const PDF_BORNES: Rect = { x: 0, y: BARRE + 300, width: 1440, height: 1960 - 300
 /** Client, désignation, montants */
 const PDF_MONTANTS: Rect = nav({ x: 180, y: 315, width: 1080, height: 485 });
 /** Conditions et « Bon pour accord » horodaté */
+/** (aussi le recul de la fin, après le zoom sur la phrase des conditions) */
 const PDF_ACCORD: Rect = nav({ x: 180, y: 970, width: 1080, height: 295 });
 
 // ---------------------------------------------------------------------------------------------------
@@ -131,17 +132,38 @@ function Validation() {
 }
 
 // ---------------------------------------------------------------------------------------------------
-// 4. Les conditions du devis : Chorus Pro, virement sous 30 jours
+// 4. Les conditions du devis (Chorus Pro, virement sous 30 jours), puis retour au devis validé
+
+/**
+ * La phrase des conditions : « …déposée sur Chorus Pro ; » (fin de la 1re ligne, x ≈ 1127) puis
+ * « virement sous 30 jours » (début de la 2e, x 192). Zoom ×2 : la fin de la 1re ligne (« elle est
+ * payable par ») sort au bord droit, le blanc sous « Bon pour accord » reste à l'image pour la légende.
+ */
+const PDF_CONDITIONS: Rect = nav({ x: 230, y: 1000, width: 860, height: 90 });
 
 function Conditions() {
   const pdf = C(devisPdf);
-  const versEcran = versEcranPour(PDF_ACCORD, { largeur: pdf.largeur, hauteur: pdf.hauteur + BARRE }, 90, PDF_BORNES);
+  const valide = C(devisValide);
+  const T = { serre: 0.75, legende: 1.6, recul: 3.9, admin: 5.5 };
+  const versEcran = versEcranPour(PDF_CONDITIONS, { largeur: pdf.largeur, hauteur: pdf.hauteur + BARRE }, 90, PDF_BORNES);
   // Sous l'encadré « Bon pour accord » : le blanc du bas de la page
-  const legende = versEcran(nav({ x: 192, y: 1272, width: 0, height: 0 }));
+  const legende = versEcran(nav({ x: 192, y: 1258, width: 0, height: 0 }));
   return (
     <AbsoluteFill>
-      <Navigateur capture={pdf} etapes={[{ de: -1, a: 0, cadre: PDF_ACCORD, bornes: PDF_BORNES }]} />
-      <Callout texte="Chorus Pro, virement sous 30 jours" de={s(1.4)} position={legende} />
+      <Sequence durationInFrames={s(T.admin) + 8}>
+        <Navigateur
+          capture={pdf}
+          etapes={[{ de: -1, a: 0, cadre: PDF_ACCORD, bornes: PDF_BORNES }, vers(T.serre, PDF_CONDITIONS, PDF_BORNES), vers(T.recul, PDF_ACCORD, PDF_BORNES)]}
+        />
+        {/* La légende part avant le recul : jamais de légende pendant un mouvement */}
+        <Callout texte="Chorus Pro, virement sous 30 jours" de={s(T.legende)} a={s(T.recul)} position={legende} />
+      </Sequence>
+      {/* Retour à l'administration : le devis validé, l'équipe Communeo prend la suite */}
+      <Sequence from={s(T.admin)}>
+        <Entree>
+          <Navigateur capture={valide} etapes={[{ de: -1, a: 0, cadre: marge(nav(element(valide, 'valide')), 60), bornes: SOUS_LA_BARRE }]} />
+        </Entree>
+      </Sequence>
     </AbsoluteFill>
   );
 }

@@ -40,10 +40,10 @@ export const script: ScriptVideo = {
     {
       debut: 14.4,
       fin: 18.6,
-      // Toujours le PDF : ses conditions
+      // Toujours le PDF (ses conditions), puis retour à l'administration
       entree: 'fondu',
       voix: 'La facture arrive par Chorus Pro, à régler par virement sous trente jours.',
-      ecran: 'Les conditions du devis : facture déposée sur Chorus Pro, payable par virement sous 30 jours. Légende « Chorus Pro, virement sous 30 jours ».',
+      ecran: 'Zoom sur les conditions du devis : facture déposée sur Chorus Pro, payable par virement sous 30 jours. Légende « Chorus Pro, virement sous 30 jours ». Retour à l’écran « Passer en live » : le devis validé, l’équipe Communeo passe la commune en live.',
     },
   ],
 };

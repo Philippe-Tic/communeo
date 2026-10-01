@@ -17,8 +17,12 @@ const json = (route: Route, body: unknown) => route.fulfill({ contentType: 'appl
 const VALIDATION = '2026-10-06T10:12:00+02:00';
 /** Population INSEE de Saint-Aubin-sur-Loire dans les données de démonstration (assistant de création, V1) */
 const POPULATION = 3240;
-/** SIRET fictif : celui de la mairie dans le mock (Annuaire), clé de Luhn corrigée pour être accepté */
-export const SIRET = '215 802 365 00019';
+/**
+ * SIRET manifestement fictif (suite 123 456 789) : le formulaire et le backend ne contrôlent que le
+ * format et la clé de Luhn (isValidSiret), qu'il respecte. Jamais « 21 + code INSEE », la forme des
+ * SIREN des communes, qui pourrait désigner une vraie commune.
+ */
+export const SIRET = '123 456 789 00015';
 const SIGNATAIRE = { nom: 'Claire Martin', qualite: 'Maire' };
 const COMMUNE = {
   name: 'Saint-Aubin-sur-Loire',

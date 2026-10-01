@@ -14,4 +14,4 @@ _À l'écran : Clic sur « Valider le devis » : « Devis DEV-2026-0001 validé 
 
 **0:14**. « La facture arrive par Chorus Pro, à régler par virement sous trente jours. »
 
-_À l'écran : Les conditions du devis : facture déposée sur Chorus Pro, payable par virement sous 30 jours. Légende « Chorus Pro, virement sous 30 jours »._
+_À l'écran : Zoom sur les conditions du devis : facture déposée sur Chorus Pro, payable par virement sous 30 jours. Légende « Chorus Pro, virement sous 30 jours ». Retour à l’écran « Passer en live » : le devis validé, l’équipe Communeo passe la commune en live._

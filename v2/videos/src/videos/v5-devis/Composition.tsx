@@ -135,11 +135,12 @@ function Validation() {
 // 4. Les conditions du devis (Chorus Pro, virement sous 30 jours), puis retour au devis validé
 
 /**
- * La phrase des conditions : « …déposée sur Chorus Pro ; » (fin de la 1re ligne, x ≈ 1127) puis
- * « virement sous 30 jours » (début de la 2e, x 192). Zoom ×2 : la fin de la 1re ligne (« elle est
- * payable par ») sort au bord droit, le blanc sous « Bon pour accord » reste à l'image pour la légende.
+ * Le bloc « Conditions » sur toute sa largeur (x 192 → 1248) : aucune ligne coupée au bord, d'où un
+ * zoom modéré (×1,6, la largeur commande).
  */
-const PDF_CONDITIONS: Rect = nav({ x: 230, y: 1000, width: 860, height: 90 });
+const PDF_CONDITIONS: Rect = nav({ x: 180, y: 975, width: 1080, height: 135 });
+/** Recul : toute la largeur de la page (x 86 → 1354), conditions et « Bon pour accord » */
+const PDF_RECUL: Rect = nav({ x: 80, y: 900, width: 1280, height: 380 });
 
 function Conditions() {
   const pdf = C(devisPdf);
@@ -147,13 +148,13 @@ function Conditions() {
   const T = { serre: 0.75, legende: 1.6, recul: 3.9, admin: 5.5 };
   const versEcran = versEcranPour(PDF_CONDITIONS, { largeur: pdf.largeur, hauteur: pdf.hauteur + BARRE }, 90, PDF_BORNES);
   // Sous l'encadré « Bon pour accord » : le blanc du bas de la page
-  const legende = versEcran(nav({ x: 192, y: 1258, width: 0, height: 0 }));
+  const legende = versEcran(nav({ x: 192, y: 1272, width: 0, height: 0 }));
   return (
     <AbsoluteFill>
       <Sequence durationInFrames={s(T.admin) + 8}>
         <Navigateur
           capture={pdf}
-          etapes={[{ de: -1, a: 0, cadre: PDF_ACCORD, bornes: PDF_BORNES }, vers(T.serre, PDF_CONDITIONS, PDF_BORNES), vers(T.recul, PDF_ACCORD, PDF_BORNES)]}
+          etapes={[{ de: -1, a: 0, cadre: PDF_ACCORD, bornes: PDF_BORNES }, vers(T.serre, PDF_CONDITIONS, PDF_BORNES), vers(T.recul, PDF_RECUL, PDF_BORNES)]}
         />
         {/* La légende part avant le recul : jamais de légende pendant un mouvement */}
         <Callout texte="Chorus Pro, virement sous 30 jours" de={s(T.legende)} a={s(T.recul)} position={legende} />

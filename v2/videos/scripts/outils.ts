@@ -1,5 +1,6 @@
 /** Outils des scripts : lancer un serveur et attendre qu'il réponde, ffmpeg / ffprobe de Remotion */
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
+import { renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 export const RACINE = fileURLToPath(new URL('../../../', import.meta.url));
@@ -48,6 +49,17 @@ export function arreter(processus: ChildProcess): void {
 export function remotionOutil(outil: 'ffmpeg' | 'ffprobe', args: string[]): { code: number; stdout: string; stderr: string } {
   const resultat = spawnSync('pnpm', ['exec', 'remotion', outil, ...args], { cwd: VIDEOS, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   return { code: resultat.status ?? 1, stdout: resultat.stdout, stderr: resultat.stderr };
+}
+
+/**
+ * Voix au niveau habituel du web (−16 LUFS, crêtes sous −1,5 dB) : d'une voix de synthèse à l'autre le
+ * volume varie beaucoup. Réécrit le fichier en place ; la durée ne change pas.
+ */
+export function normaliserVoix(fichier: string): void {
+  const temp = `${fichier}.normalise.mp3`;
+  const resultat = remotionOutil('ffmpeg', ['-y', '-v', 'error', '-i', fichier, '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11', '-ar', '44100', '-codec:a', 'libmp3lame', '-b:a', '160k', temp]);
+  if (resultat.code !== 0) throw new Error(`Normalisation de ${fichier} : ${resultat.stderr}`);
+  renameSync(temp, fichier);
 }
 
 export function dureeAudio(fichier: string): number {

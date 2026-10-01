@@ -1,5 +1,5 @@
 {
-  "source": "systeme",
+  "source": "elevenlabs",
   "audio": {
     "segments": [
       "voix/v1-demo/01.mp3",
@@ -16,15 +16,15 @@
       "fin": 10.2,
       "parole": {
         "debut": 0.4,
-        "fin": 7.636,
+        "fin": 7.035,
         "phrases": [
           {
             "debut": 0.4,
-            "fin": 2.904
+            "fin": 2.436
           },
           {
-            "debut": 3.139,
-            "fin": 7.636
+            "debut": 2.844,
+            "fin": 6.484
           }
         ]
       }
@@ -34,15 +34,15 @@
       "fin": 23.4,
       "parole": {
         "debut": 10.6,
-        "fin": 19.847,
+        "fin": 19.142,
         "phrases": [
           {
             "debut": 10.6,
-            "fin": 17.303
+            "fin": 16.367
           },
           {
-            "debut": 17.536,
-            "fin": 19.847
+            "debut": 16.933,
+            "fin": 18.576
           }
         ]
       }
@@ -52,15 +52,15 @@
       "fin": 43.2,
       "parole": {
         "debut": 23.8,
-        "fin": 33.282,
+        "fin": 31.872,
         "phrases": [
           {
             "debut": 23.8,
-            "fin": 29.37
+            "fin": 28.279
           },
           {
-            "debut": 29.608,
-            "fin": 33.282
+            "debut": 28.695,
+            "fin": 31.442
           }
         ]
       }
@@ -70,15 +70,15 @@
       "fin": 58.2,
       "parole": {
         "debut": 43.6,
-        "fin": 49.033,
+        "fin": 49.53,
         "phrases": [
           {
             "debut": 43.6,
-            "fin": 46.918
+            "fin": 46.806
           },
           {
-            "debut": 47.147,
-            "fin": 49.033
+            "debut": 47.339,
+            "fin": 48.95
           }
         ]
       }
@@ -88,33 +88,33 @@
       "fin": 76.2,
       "parole": {
         "debut": 58.6,
-        "fin": 68.082,
+        "fin": 66.959,
         "phrases": [
           {
             "debut": 58.6,
-            "fin": 66.022
+            "fin": 64.45
           },
           {
-            "debut": 66.248,
-            "fin": 68.082
+            "debut": 64.788,
+            "fin": 66.357
           }
         ]
       }
     },
     {
       "debut": 76.2,
-      "fin": 82.8,
+      "fin": 83.4,
       "parole": {
         "debut": 76.6,
-        "fin": 82.19,
+        "fin": 82.53,
         "phrases": [
           {
             "debut": 76.6,
-            "fin": 79.783
+            "fin": 79.798
           },
           {
-            "debut": 80.017,
-            "fin": 82.19
+            "debut": 80.47,
+            "fin": 82.15
           }
         ]
       }

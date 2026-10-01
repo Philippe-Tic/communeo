@@ -19,7 +19,7 @@ import { calerSurPhrases, couperEnPhrases, passagesParles, type Intervalle } fro
 import { phrases } from '../src/lib/sous-titres';
 import type { Timings } from '../src/lib/script';
 import { ecrireSousTitres } from './sous-titres';
-import { charger, dureeAudio, remotionOutil, VIDEOS, videoDemandee } from './outils';
+import { charger, dureeAudio, normaliserVoix, remotionOutil, VIDEOS, videoDemandee } from './outils';
 
 try {
   process.loadEnvFile(join(VIDEOS, '.env'));
@@ -82,6 +82,7 @@ for (const [i, segment] of script.segments.entries()) {
     const mp3 = remotionOutil('ffmpeg', ['-y', '-i', wav, '-codec:a', 'libmp3lame', '-b:a', '128k', fichier]);
     rmSync(temp, { recursive: true, force: true });
     if (mp3.code !== 0) throw new Error(mp3.stderr);
+    normaliserVoix(fichier);
     const duree = dureeAudio(fichier);
     fichiers.push(`voix/${id}/${String(i + 1).padStart(2, '0')}.mp3`);
     durees.push(duree);
@@ -105,6 +106,7 @@ for (const [i, segment] of script.segments.entries()) {
   });
   if (!reponse.ok) throw new Error(`ElevenLabs, segment ${i + 1} : ${reponse.status} ${await reponse.text()}`);
   writeFileSync(fichier, Buffer.from(await reponse.arrayBuffer()));
+  normaliserVoix(fichier);
   const duree = dureeAudio(fichier);
   fichiers.push(`voix/${id}/${String(i + 1).padStart(2, '0')}.mp3`);
   durees.push(duree);

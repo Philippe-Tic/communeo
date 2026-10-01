@@ -27,7 +27,14 @@ const { src, alt, adresse, largeur = 1100, chargement = 'lazy' } = Astro.props;
       </div>
     )
   }
-  <Image src={src} alt={alt} widths={[560, largeur, largeur * 2].filter((w) => w <= src.width)} sizes={`(min-width: 1312px) ${largeur}px, 100vw`} loading={chargement} />
+  {/* Largeurs intermédiaires pour les téléphones ; sur un écran étroit, l'image prend la largeur moins les gouttières */}
+  <Image
+    src={src}
+    alt={alt}
+    widths={[...new Set([400, 640, 800, largeur, largeur * 2])].filter((w) => w <= src.width).sort((a, b) => a - b)}
+    sizes={`(min-width: ${largeur + 128}px) ${largeur}px, calc(100vw - 40px)`}
+    loading={chargement}
+  />
 </figure>
 
 <style>

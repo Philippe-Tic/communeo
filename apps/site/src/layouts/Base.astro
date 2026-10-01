@@ -3,6 +3,7 @@
 import '../styles/global.css';
 import EnTete from '../components/EnTete.astro';
 import PiedDePage from '../components/PiedDePage.astro';
+import { filAriane, graphe, organisation, siteWeb, type JsonLd } from '../lib/seo';
 import type { NavKey } from '../lib/site';
 
 interface Props {
@@ -12,10 +13,19 @@ interface Props {
   courant?: NavKey;
   /** Page introuvable : ni canonique ni indexation */
   introuvable?: boolean;
+  /** Données structurées propres à la page (l'organisation, le site et le fil d'Ariane sont ajoutés) */
+  jsonLd?: JsonLd[];
+  /** Image de partage (réseaux sociaux, messageries) propre à la page, 1200 × 630 PNG dans public/ */
+  partage?: { src: string; alt: string };
 }
 
-const { titre, description, courant, introuvable = false } = Astro.props;
+const { titre, description, courant, introuvable = false, jsonLd = [], partage } = Astro.props;
 const canonical = new URL(Astro.url.pathname.replace(/\.html$/, '').replace(/\/index$/, '/'), Astro.site).href;
+const image = partage ?? { src: '/partage.png', alt: 'Communeo, le site internet des communes : votre commune a sa place en ligne.' };
+const accueil = canonical === new URL('/', Astro.site).href;
+// Fil d'Ariane : l'accueil puis la page, nommée comme son titre sans « · Communeo »
+const fil = introuvable || accueil ? [] : [filAriane({ nom: titre.replace(/\s*·\s*Communeo$/, ''), url: canonical })];
+const donnees = introuvable ? null : graphe([organisation(), siteWeb(), ...fil, ...jsonLd]);
 ---
 
 <!doctype html>
@@ -28,6 +38,8 @@ const canonical = new URL(Astro.url.pathname.replace(/\.html$/, '').replace(/\/i
     <meta name="description" content={description} />
     {introuvable ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#0E4033" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_FR" />
@@ -35,11 +47,13 @@ const canonical = new URL(Astro.url.pathname.replace(/\.html$/, '').replace(/\/i
     <meta property="og:title" content={titre} />
     <meta property="og:description" content={description} />
     {!introuvable && <meta property="og:url" content={canonical} />}
-    <meta property="og:image" content={new URL('/partage.png', Astro.site).href} />
+    <meta property="og:image" content={new URL(image.src, Astro.site).href} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Communeo, le site internet des communes : votre commune a sa place en ligne." />
+    <meta property="og:image:alt" content={image.alt} />
     <meta name="twitter:card" content="summary_large_image" />
+    {donnees && <script is:inline type="application/ld+json" set:html={donnees} />}
   </head>
   <body>
     <EnTete courant={courant} />

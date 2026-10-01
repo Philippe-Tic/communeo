@@ -1,0 +1,46 @@
+{
+  "image": "captures/v3-themes/apercu-institutionnel.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/mon-site/apparence",
+  "vue": 900,
+  "elements": {
+    "barre": {
+      "x": 180,
+      "y": 8,
+      "width": 1244,
+      "height": 32
+    },
+    "page": {
+      "x": 80,
+      "y": 114,
+      "width": 1280,
+      "height": 770
+    },
+    "institutionnel": {
+      "x": 180,
+      "y": 8,
+      "width": 134,
+      "height": 32
+    },
+    "moderne": {
+      "x": 317,
+      "y": 8,
+      "width": 79,
+      "height": 32
+    },
+    "journal": {
+      "x": 400,
+      "y": 8,
+      "width": 69,
+      "height": 32
+    },
+    "bourg": {
+      "x": 473,
+      "y": 8,
+      "width": 60,
+      "height": 32
+    }
+  }
+}

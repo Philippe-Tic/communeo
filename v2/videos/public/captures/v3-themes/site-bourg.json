@@ -1,8 +1,9 @@
 {
-  "image": "captures/v3-themes/moderne.png",
+  "image": "captures/v3-themes/site-bourg.png",
   "largeur": 1440,
-  "hauteur": 900,
+  "hauteur": 3305,
   "echelle": 2,
   "url": "saint-aubin.communeo.fr",
+  "vue": 900,
   "elements": {}
 }

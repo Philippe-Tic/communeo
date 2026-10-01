@@ -24,6 +24,7 @@ import { adminUrl, notifyTeam } from '../../../services/team-notifications';
 import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { communeDetails, PublicDataUnavailable, searchCommunes } from '../../../services/public-data';
 import { approveSignup, declineSignup, emailRejection, maskEmail, sendApprovalEmail } from '../../../services/signup-approval';
+import { isTestAddress } from '../../../utils/test-signup';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
 import { createInvitationToken, createRateLimiter, escapeHtml, lookupInvitationToken } from '../../../utils/security';
@@ -173,7 +174,8 @@ export default {
         first_name: firstName,
         last_name: lastName,
         email,
-        official_email: details.townHall?.email?.trim().toLowerCase() || null,
+        // Inscription de test de l'équipe : jamais l'adresse de la vraie mairie (l'équipe approuve)
+        official_email: isTestAddress(email) ? null : details.townHall?.email?.trim().toLowerCase() || null,
         terms_accepted_at: new Date(),
         status: 'pending_email',
         token: stored,
@@ -248,7 +250,12 @@ export default {
     }
     const fiche = `${adminUrl()}/plateforme/communes/${site.documentId}`;
     const who = `${request.first_name} ${request.last_name} (${request.email})`;
-    if (waitingFor === 'team') {
+    if (waitingFor === 'team' && isTestAddress(request.email)) {
+      await notifyTeam(
+        `Inscription de test : ${request.commune_name}`,
+        `${who} a créé le site de test ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}), adresse de test (SIGNUP_TEST_EMAILS) : aucune demande n'est partie à la mairie. Approuvez-la pour tester la mise en ligne, dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
+      );
+    } else if (waitingFor === 'team') {
       await notifyTeam(
         `Inscription à vérifier : ${request.commune_name}`,
         `${who} a créé le site ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}). Aucune adresse officielle de mairie n'est connue : le site ne sera pas mis en ligne avant votre vérification, dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,

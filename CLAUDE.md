@@ -76,7 +76,8 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 - `PREVIEW_SECRET` — HMAC secret of the signed preview tokens (same value on the preview server); `PREVIEW_URL` — preview server base URL
 - `ADMIN_URL` — admin base URL, used in e-mailed links (invitation, sign-up confirmation)
 - `COMMUNEO_LEGAL_NAME`, `COMMUNEO_LEGAL_ADDRESS`, `COMMUNEO_SIRET`, `COMMUNEO_BILLING_EMAIL`, `COMMUNEO_VAT_RATE` — issuer of the quotes (#312) and invoices; `COMMUNEO_IBAN`, `COMMUNEO_BIC` — bank account printed on invoices (#314). Unset fields print « [à compléter] » on the PDF and are listed in the team's Facturation screen
-- `SIGNUP_NOTIFY_EMAIL` — Communeo team address notified of self-service sign-ups that need a manual check (no official town-hall e-mail in the Annuaire)
+- `SIGNUP_NOTIFY_EMAIL` — Communeo team address notified of self-service sign-ups that need a manual check (no official town-hall e-mail in the Annuaire), live requests and communeo.fr contact messages
+- `SIGNUP_TEST_EMAILS` — team test addresses or `@domains` (comma-separated): their sign-up never e-mails the real town hall (team review in « À valider », site contact = tester, no Annuaire e-mail in the assistant; `utils/test-signup.ts`), to test the real customer journey in production; no invoice unless the team approves the live request
 - `HOSTING_NAME`, `HOSTING_ADDRESS`, `HOSTING_PHONE` — host shown in every commune's legal notice (`config/platform.ts`); enforced on each Site write and synced at boot, never editable by communes. Unset: values already stored are kept
 
 ### Worker (`apps/worker/.env.example`)

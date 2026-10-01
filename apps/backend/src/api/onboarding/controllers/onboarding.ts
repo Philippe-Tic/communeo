@@ -11,6 +11,7 @@
 import { onboardingChecklist } from '@communeo/core';
 import { getEffectiveSite } from '../../../utils/getEffectiveSite';
 import { communeDetails, PublicDataUnavailable, searchCommunes } from '../../../services/public-data';
+import { isTestAddress } from '../../../utils/test-signup';
 
 const PAGE = 'api::page.page';
 
@@ -64,7 +65,9 @@ export default {
     try {
       const details = await communeDetails(String(ctx.params.insee));
       if (!details) return ctx.notFound('Commune introuvable');
-      ctx.body = { data: details };
+      // Site de test de l'équipe : pas l'e-mail de la vraie mairie comme contact du site
+      const test = isTestAddress(ctx.state.user?.email) && details.townHall;
+      ctx.body = { data: test ? { ...details, townHall: { ...details.townHall, email: null } } : details };
     } catch (error) {
       if (error instanceof PublicDataUnavailable) return unavailable(ctx);
       throw error;

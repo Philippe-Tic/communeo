@@ -1,11 +1,9 @@
 ---
-import AFournir from '../components/AFournir.astro';
 import TexteMarkdown from '../components/TexteMarkdown.astro';
 import { compiledContent } from '../contenus/conditions.md';
 import Legal from '../layouts/Legal.astro';
 ---
 
 <Legal titre="Conditions générales" description="Conditions générales de vente et d’utilisation de Communeo.">
-  <AFournir bloc>[Texte en cours de relecture juridique : à valider avant la mise en ligne du site.]</AFournir>
   <TexteMarkdown html={await compiledContent()} />
 </Legal>

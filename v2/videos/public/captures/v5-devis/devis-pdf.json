@@ -1,0 +1,9 @@
+{
+  "image": "captures/v5-devis/devis-pdf.png",
+  "largeur": 1440,
+  "hauteur": 1960,
+  "echelle": 2,
+  "url": "app.communeo.fr/api/quote/q-1/pdf",
+  "vue": 1960,
+  "elements": {}
+}

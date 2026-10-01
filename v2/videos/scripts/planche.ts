@@ -26,7 +26,8 @@ const COLONNES = 4;
 
 const total = duree(video);
 const heures: number[] = [];
-for (let t = 0; t < total - 0.01; t += pas) heures.push(Math.min(t + 0.02, total - 0.04));
+// Jamais au-delà de la dernière image (la piste audio peut dépasser la vidéo de quelques millisecondes)
+for (let t = 0; t + 0.02 < total - 0.04; t += pas) heures.push(t + 0.02);
 
 const dossier = await mkdtemp(join(tmpdir(), `planche-${id}-`));
 try {

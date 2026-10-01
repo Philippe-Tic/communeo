@@ -17,13 +17,13 @@ import { script as v5 } from './videos/v5-devis/script';
 import v5Timings from './videos/v5-devis/timings.json';
 import { Test } from './videos/test/Composition';
 import { V1Demo } from './videos/v1-demo/Composition';
+import { V5Devis } from './videos/v5-devis/Composition';
 import { script as test } from './videos/test/script';
 import testTimings from './videos/test/timings.json';
 
 const brouillons: Array<[ScriptVideo, Timings]> = [
   [v2, v2Timings as Timings],
   [v3, v3Timings as Timings],
-  [v5, v5Timings as Timings],
 ];
 
 export function Root() {
@@ -52,6 +52,18 @@ export function Root() {
           </Charte>
         )}
         durationInFrames={dureeEnImages(v1, v1Timings as Timings)}
+        fps={FPS}
+        width={LARGEUR}
+        height={HAUTEUR}
+      />
+      <Composition
+        id="v5-devis"
+        component={() => (
+          <Charte>
+            <V5Devis />
+          </Charte>
+        )}
+        durationInFrames={dureeEnImages(v5, v5Timings as Timings)}
         fps={FPS}
         width={LARGEUR}
         height={HAUTEUR}

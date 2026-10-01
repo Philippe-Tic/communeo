@@ -1,1 +1,69 @@
-{ "source": "estimation", "audio": null, "segments": [] }
+{
+  "source": "elevenlabs",
+  "audio": {
+    "segments": [
+      "voix/v5-devis/01.mp3",
+      "voix/v5-devis/02.mp3",
+      "voix/v5-devis/03.mp3",
+      "voix/v5-devis/04.mp3"
+    ]
+  },
+  "segments": [
+    {
+      "debut": 0,
+      "fin": 4.2,
+      "parole": {
+        "debut": 0.4,
+        "fin": 3.744,
+        "phrases": [
+          {
+            "debut": 0.4,
+            "fin": 3.744
+          }
+        ]
+      }
+    },
+    {
+      "debut": 4.2,
+      "fin": 9.6,
+      "parole": {
+        "debut": 4.6,
+        "fin": 8.205,
+        "phrases": [
+          {
+            "debut": 4.6,
+            "fin": 8.205
+          }
+        ]
+      }
+    },
+    {
+      "debut": 9.6,
+      "fin": 14.4,
+      "parole": {
+        "debut": 10,
+        "fin": 13.762,
+        "phrases": [
+          {
+            "debut": 10,
+            "fin": 13.762
+          }
+        ]
+      }
+    },
+    {
+      "debut": 14.4,
+      "fin": 19.2,
+      "parole": {
+        "debut": 14.8,
+        "fin": 18.509,
+        "phrases": [
+          {
+            "debut": 14.8,
+            "fin": 18.509
+          }
+        ]
+      }
+    }
+  ]
+}

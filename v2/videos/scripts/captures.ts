@@ -9,6 +9,8 @@
  * - admin : le build de l'admin servi en local (vite preview), API Strapi simulée par le mock des tests
  *   (apps/admin/e2e/api.ts : commune fictive Saint-Aubin-sur-Loire, données publiques, devis simulés) ;
  * - site : le site de démonstration construit par le renderer à partir des fixtures.
+ * Les images de démonstration (emplacements hachurés) sont remplacées par les photos libres de droits de
+ * photos/ (voir photos/README.md), sur le site comme dans l'admin : rien ne change dans les fixtures.
  *
  * Préalables : admin compilé (`--build` le recompile), builds de démonstration du renderer
  * (`E2E_THEMES=institutionnel,moderne,journal,bourg node e2e/build.mjs` dans apps/renderer).
@@ -102,6 +104,18 @@ async function vraiApercu(page: Page) {
   });
 }
 
+/** Photos libres de droits (photos/<nom>.jpg) à la place des images de démonstration de même nom */
+const PHOTOS = join(VIDEOS, 'photos');
+async function photos(page: Page) {
+  // Enregistrée en dernier : prioritaire sur les routes du mock et de l'aperçu
+  await page.route(/\/(fixtures|uploads)\/[\w-]+\.(svg|jpe?g|png)(\?.*)?$/, (route) => {
+    const nom = new URL(route.request().url()).pathname.split('/').pop()!.replace(/\.\w+$/, '');
+    const photo = join(PHOTOS, `${nom}.jpg`);
+    if (!existsSync(photo)) return route.fallback();
+    return route.fulfill({ status: 200, contentType: 'image/jpeg', body: readFileSync(photo) });
+  });
+}
+
 const browser = await chromium.launch({ args: ['--lang=fr-FR'] });
 try {
   for (const plan of captures) {
@@ -114,6 +128,7 @@ try {
       await vraiApercu(page);
     }
     await plan.donnees?.(page);
+    await photos(page);
     await page.goto(base + plan.chemin);
     await page.waitForLoadState('networkidle');
     if (plan.ou === 'admin') await page.getByRole('heading', { level: 1 }).first().waitFor();

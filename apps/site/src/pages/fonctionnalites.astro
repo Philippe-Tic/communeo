@@ -193,7 +193,8 @@ const rubriques = [
 <style>
   .sous-nav {
     position: sticky;
-    top: 0;
+    /* Juste sous l'en-tête collant */
+    top: var(--hauteur-entete, 0px);
     z-index: 5;
     background: var(--papier);
     border-bottom: 1px solid var(--grege);
@@ -231,7 +232,8 @@ const rubriques = [
 
   .groupe {
     padding-block: clamp(64px, 8vw, 112px);
-    scroll-margin-top: 56px;
+    /* Sous l'en-tête et la sous-navigation (56 px), tous deux collants */
+    scroll-margin-top: calc(var(--hauteur-entete, 0px) + 56px);
   }
 
   .intro {

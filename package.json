@@ -18,7 +18,14 @@
     "create-theme": "node scripts/create-theme.mjs",
     "theme:dev": "node scripts/theme-dev.mjs",
     "theme:thumbnail": "node scripts/theme-thumbnail.mjs",
-    "docs:captures": "E2E_THEMES=institutionnel pnpm --filter @communeo/renderer exec node e2e/build.mjs && pnpm --filter @communeo/admin exec vite build && DOCS_CAPTURES=1 pnpm --filter @communeo/admin exec playwright test docs-captures --project laptop-1366"
+    "docs:captures": "E2E_THEMES=institutionnel pnpm --filter @communeo/renderer exec node e2e/build.mjs && pnpm --filter @communeo/admin exec vite build && DOCS_CAPTURES=1 pnpm --filter @communeo/admin exec playwright test docs-captures --project laptop-1366",
+    "videos:studio": "pnpm --filter @communeo/videos studio",
+    "videos:captures": "pnpm --filter @communeo/videos captures",
+    "videos:voix": "pnpm --filter @communeo/videos voix",
+    "videos:recaler": "pnpm --filter @communeo/videos recaler",
+    "videos:sous-titres": "pnpm --filter @communeo/videos sous-titres",
+    "videos:render": "pnpm --filter @communeo/videos render",
+    "videos:planche": "pnpm --filter @communeo/videos planche"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

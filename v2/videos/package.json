@@ -1,0 +1,34 @@
+{
+  "name": "@communeo/videos",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "captures": "tsx scripts/captures.ts",
+    "voix": "tsx scripts/voix.ts",
+    "recaler": "tsx scripts/recaler.ts",
+    "sous-titres": "tsx scripts/sous-titres.ts",
+    "render": "tsx scripts/render.ts",
+    "planche": "tsx scripts/planche.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.531",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "4.0.531"
+  },
+  "devDependencies": {
+    "@communeo/core": "workspace:*",
+    "@playwright/test": "^1.63.0",
+    "@remotion/eslint-config-flat": "4.0.531",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "sharp": "^0.35.4",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

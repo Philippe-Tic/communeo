@@ -5,10 +5,20 @@
  * du renderer (`E2E_THEMES=institutionnel,moderne,journal,bourg node e2e/build.mjs` dans apps/renderer).
  *
  *   pnpm --filter @communeo/site captures:themes
+ *
+ * Options (reprises par les vidéos, v2/videos) : `--echelle 2` (captures retina), `--sortie <dossier>`
+ * (au lieu de src/assets/themes/) ; avec `--sortie`, un JSON par capture (taille en pixels CSS, adresse),
+ * où l'image est nommée `<--prefixe><thème>.png`.
  */
 import { spawn } from 'node:child_process';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseArgs } from 'node:util';
 import { chromium } from '@playwright/test';
+
+const { values } = parseArgs({ options: { echelle: { type: 'string', default: '1' }, sortie: { type: 'string' }, prefixe: { type: 'string', default: '' } } });
+const echelle = Number(values.echelle);
 
 const THEMES = ['institutionnel', 'moderne', 'journal', 'bourg'];
 const renderer = fileURLToPath(new URL('../../renderer/', import.meta.url));
@@ -18,7 +28,7 @@ for (const [index, theme] of THEMES.entries()) {
   const port = 4570 + index;
   const server = spawn('node', ['e2e/serve.mjs', theme, String(port)], { cwd: renderer, stdio: 'ignore' });
   try {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: echelle, reducedMotion: 'reduce' });
     // Choix des cookies déjà fait : pas de bandeau de consentement sur la capture
     await page.addInitScript(() => localStorage.setItem('communeo-consent-v1', JSON.stringify({ media: false })));
     for (let attempt = 0; ; attempt += 1) {
@@ -31,8 +41,13 @@ for (const [index, theme] of THEMES.entries()) {
       }
     }
     await page.evaluate(() => document.fonts.ready);
-    const file = fileURLToPath(new URL(`../src/assets/themes/${theme}.png`, import.meta.url));
+    const file = values.sortie ? join(values.sortie, `${theme}.png`) : fileURLToPath(new URL(`../src/assets/themes/${theme}.png`, import.meta.url));
     await page.screenshot({ path: file });
+    if (values.sortie) {
+      // Même format que les captures des vidéos (v2/videos/scripts/captures.ts)
+      const meta = { image: `${values.prefixe}${theme}.png`, largeur: 1440, hauteur: 900, echelle, url: 'saint-aubin.communeo.fr', elements: {} };
+      writeFileSync(join(values.sortie, `${theme}.json`), `${JSON.stringify(meta, null, 2)}\n`);
+    }
     console.log(`✓ ${theme}`);
   } finally {
     server.kill();

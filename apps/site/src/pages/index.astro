@@ -9,7 +9,7 @@ import Navigateur from '../components/Navigateur.astro';
 import SelecteurThemes from '../components/SelecteurThemes.astro';
 import Tampon from '../components/Tampon.astro';
 import LienVideo from '../components/LienVideo.astro';
-import TelephoneCommune from '../components/TelephoneCommune.astro';
+import TelephoneSite from '../components/TelephoneSite.astro';
 import Topo from '../components/Topo.astro';
 import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
@@ -132,7 +132,10 @@ const faq = [
       <div class="accroche-visuel">
         <div class="etiquette" aria-hidden="true"><span class="point"></span><span class="texte-etiquette">SAINT-AUBIN-SUR-LOIRE · COMMUNE DE DÉMONSTRATION</span></div>
         <div class="telephone-tampon">
-          <TelephoneCommune anime />
+          <TelephoneSite
+            vue="accueil"
+            alt="Le site de Saint-Aubin-sur-Loire sur un téléphone : une alerte « Coupure d’eau » en haut, l’accueil de la commune, les boutons « Faire une démarche » et « Contacter la mairie », la photo du vieux pont."
+          />
           <Tampon texte="SANS FRAIS DE MISE EN SERVICE ·" class="tampon" />
         </div>
       </div>
@@ -212,7 +215,12 @@ const faq = [
           }
         </ul>
       </div>
-      <div class="site-telephone"><TelephoneCommune /></div>
+      <div class="site-telephone">
+        <TelephoneSite
+          vue="mairie"
+          alt="Sur le téléphone, la mairie de Saint-Aubin-sur-Loire : « Ouverte · ferme à 12h », adresse, téléphone et horaires de la semaine, puis la météo et les prochaines collectes."
+        />
+      </div>
     </div>
   </section>
 
@@ -321,28 +329,10 @@ const faq = [
   <section class="section alertes" aria-labelledby="t-alertes">
     <div class="conteneur alertes-grille" data-demo-alerte>
       <div class="alertes-telephone">
-        <div
-          class="appareil-alerte"
-          role="img"
-          aria-label="Sur le téléphone d’un habitant, le bandeau « Coupure d’eau mardi de 9 h à 12 h » apparaît en haut du site de la commune, 42 secondes après sa publication."
-        >
-          <div class="ecran-alerte">
-            <div class="ilot-alerte"><span></span></div>
-            <div class="bandeau-alerte">
-              <div class="alerte">
-                <Icone nom="triangle" taille={20} couleur="#7A4B00" />
-                <div class="pile" style="gap:0.125rem">
-                  <span class="niveau">ALERTE · ATTENTION</span>
-                  <span class="titre-alerte">Coupure d’eau mardi de 9 h à 12 h</span>
-                  <span class="detail-alerte">Rue des Lilas et rue du Stade</span>
-                </div>
-              </div>
-            </div>
-            <div class="tete-alerte"><span class="blason-alerte"></span><span>Saint-Aubin-sur-Loire</span></div>
-            <div class="photo-alerte"></div>
-            <div class="lignes"><span style="width:70%"></span><span style="width:90%"></span><span style="width:60%"></span></div>
-          </div>
-        </div>
+        <TelephoneSite
+          vue="alerte"
+          alt="Sur le téléphone d’un habitant, le bandeau « Attention – Coupure d’eau » apparaît en haut du site de la commune, moins d’une minute après sa publication."
+        />
       </div>
       <div class="pile alertes-texte">
         <span class="surtitre">Alertes en direct</span>
@@ -1085,133 +1075,6 @@ const faq = [
     display: flex;
     justify-content: center;
     margin: 0 auto;
-  }
-
-  .appareil-alerte {
-    position: relative;
-    width: 280px;
-    height: 560px;
-    padding: 9px;
-    border-radius: 42px;
-    background: var(--encre);
-    box-shadow: 0 30px 60px -30px rgba(14, 64, 51, 0.45);
-  }
-
-  .ecran-alerte {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 33px;
-    background: var(--blanc);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .ilot-alerte {
-    display: flex;
-    justify-content: center;
-    padding: 12px 0 6px;
-  }
-
-  .ilot-alerte span {
-    width: 74px;
-    height: 20px;
-    border-radius: 12px;
-    background: var(--encre);
-  }
-
-  .bandeau-alerte {
-    height: 0;
-    overflow: hidden;
-    transition: height 0.5s var(--ease);
-  }
-
-  .alerte {
-    margin: 4px 10px 0;
-    padding: 12px;
-    border-radius: 12px;
-    background: var(--vigilance-fond);
-    border: 1px solid #e7c98e;
-    display: flex;
-    gap: 10px;
-    transform: translateY(-80px);
-    transition: transform 0.5s var(--ease);
-  }
-
-  .alerte :global(svg) {
-    flex: none;
-  }
-
-  .alerte-visible .bandeau-alerte {
-    height: 86px;
-  }
-
-  .alerte-visible .alerte {
-    transform: none;
-  }
-
-  .niveau {
-    font-size: 0.6875rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: var(--vigilance);
-  }
-
-  .titre-alerte {
-    font-size: 0.875rem;
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--encre);
-  }
-
-  .detail-alerte {
-    font-size: 0.75rem;
-    color: var(--encre-douce);
-  }
-
-  .tete-alerte {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
-    margin-top: 8px;
-    border-bottom: 1px solid var(--grege);
-    font-size: 0.9375rem;
-    font-weight: 700;
-    color: var(--sapin);
-  }
-
-  .blason-alerte {
-    width: 30px;
-    height: 36px;
-    border-radius: 4px 4px 15px 15px;
-    background: var(--sauge);
-    border: 1.5px solid var(--sapin);
-  }
-
-  .photo-alerte {
-    height: 110px;
-    background: repeating-linear-gradient(135deg, #e1e9e4 0 8px, #d5e0d9 8px 16px);
-  }
-
-  .lignes {
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .lignes span {
-    height: 8px;
-    border-radius: 4px;
-    background: #f1efea;
-  }
-
-  .lignes span:first-child {
-    height: 10px;
-    border-radius: 5px;
-    background: #eceae3;
   }
 
   .alertes-texte {

@@ -8,8 +8,10 @@ import Logo from '../components/Logo.astro';
 import Navigateur from '../components/Navigateur.astro';
 import SelecteurThemes from '../components/SelecteurThemes.astro';
 import Tampon from '../components/Tampon.astro';
+import LienVideo from '../components/LienVideo.astro';
 import TelephoneCommune from '../components/TelephoneCommune.astro';
 import Topo from '../components/Topo.astro';
+import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
 import { TRIAL_URL } from '../lib/site';
 import { PRIX_MAX, PRIX_MIN, TRANCHES } from '../lib/tarifs';
@@ -134,6 +136,14 @@ const faq = [
           <Tampon texte="SANS FRAIS DE MISE EN SERVICE ·" class="tampon" />
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Vidéo de démonstration (V1) -->
+  <section class="section video-demo" aria-labelledby="t-video">
+    <div class="conteneur pile video-demo-interieur">
+      <h2 id="t-video" class="h2">De l’inscription au site en ligne, en une minute et demie</h2>
+      <Video id="v1-demo" libelle="La démonstration · 1 min 24" />
     </div>
   </section>
 
@@ -346,6 +356,7 @@ const faq = [
           <span class="chrono chiffres" aria-hidden="true">0:00</span>
           <span class="doux">entre la publication et<br />l’affichage chez l’habitant</span>
         </div>
+        <LienVideo id="v2-alerte" />
       </div>
     </div>
   </section>
@@ -1045,6 +1056,16 @@ const faq = [
 
   .ou-sadresser :global(svg) {
     flex: none;
+  }
+
+  /* Vidéo de démonstration */
+  .video-demo {
+    padding-bottom: 0;
+  }
+
+  .video-demo-interieur {
+    max-width: 1100px;
+    gap: 16px;
   }
 
   /* 8 Alertes */

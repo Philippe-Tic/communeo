@@ -1,0 +1,109 @@
+---
+/**
+ * Lien « Voir la vidéo · 20 s » qui ouvre la vidéo dans une fenêtre (dialog modale : focus piégé,
+ * Échap ferme, le focus revient au lien). La vidéo s'arrête à la fermeture. Sans JavaScript, le lien
+ * mène au fichier MP4.
+ */
+import { fichiersVideo, VIDEOS, type IdVideo } from '../lib/videos';
+import Video from './Video.astro';
+
+interface Props {
+  id: IdVideo;
+  /** Texte du lien ; par défaut « Voir la vidéo · <durée> » */
+  libelle?: string;
+}
+
+const { id, libelle } = Astro.props;
+const { titre, duree } = VIDEOS[id];
+const { mp4 } = await fichiersVideo(id);
+const idTitre = `titre-fenetre-${id}`;
+---
+
+<a class="lien-video lien-fort" href={mp4} data-ouvrir-video={id}>
+  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"></path></svg>
+  {libelle ?? `Voir la vidéo · ${duree}`}
+</a>
+<dialog class="fenetre-video" aria-labelledby={idTitre} data-fenetre-video={id}>
+  <div class="entete">
+    <h2 id={idTitre} class="titre-fenetre">{titre}</h2>
+    <button type="button" class="fermer" data-fermer aria-label="Fermer la vidéo">
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </button>
+  </div>
+  <Video id={id} compact />
+</dialog>
+
+<script>
+  for (const lien of document.querySelectorAll<HTMLAnchorElement>('[data-ouvrir-video]')) {
+    const fenetre = document.querySelector<HTMLDialogElement>(`[data-fenetre-video="${lien.dataset.ouvrirVideo}"]`);
+    if (!fenetre) continue;
+    lien.addEventListener('click', (evenement) => {
+      evenement.preventDefault();
+      fenetre.showModal();
+    });
+    fenetre.querySelector('[data-fermer]')?.addEventListener('click', () => fenetre.close());
+    // Clic sur le fond (hors de la fenêtre) : fermer
+    fenetre.addEventListener('click', (evenement) => {
+      if (evenement.target === fenetre) fenetre.close();
+    });
+    fenetre.addEventListener('close', () => fenetre.querySelector('video')?.pause());
+  }
+</script>
+
+<style>
+  .lien-video {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+  }
+
+  .fenetre-video {
+    width: min(1040px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: clamp(16px, 3vw, 28px);
+    border: none;
+    border-radius: 20px;
+    background: var(--papier-clair);
+    color: var(--encre);
+    overflow: auto;
+  }
+
+  .fenetre-video::backdrop {
+    background: rgba(11, 42, 34, 0.72);
+  }
+
+  .entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .titre-fenetre {
+    margin: 0;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+    color: var(--sapin);
+  }
+
+  .fermer {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid var(--grege);
+    border-radius: 50%;
+    background: var(--blanc);
+    color: var(--sapin);
+    cursor: pointer;
+  }
+
+  .fermer:hover {
+    background: var(--papier);
+  }
+</style>

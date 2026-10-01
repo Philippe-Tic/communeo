@@ -3,7 +3,7 @@
  *
  * MP4 H.264 1920 × 1080 avec sa musique de fond (générée si elle manque), sous 20 Mo (le CRF monte jusqu'à passer sous la limite), image d'aperçu PNG
  * (`remotion still` sur la seconde `apercu` du script), sous-titres et transcription, dans
- * v2/contenus-site/videos/ avec le nommage du brief (v1-demo.mp4, v1-demo-apercu.png, v1-demo.vtt,
+ * apps/site/src/videos/ (le site communeo.fr les sert ; MP4 versionné) avec le nommage du brief (v1-demo.mp4, v1-demo-apercu.png, v1-demo.vtt,
  * v1-demo-transcription.md). La vidéo de test sort dans out/.
  */
 import { existsSync, mkdirSync, statSync } from 'node:fs';

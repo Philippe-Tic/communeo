@@ -7,17 +7,20 @@ import tableauDeBord from '../assets/captures/tableau-de-bord.png';
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Navigateur from '../components/Navigateur.astro';
+import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
-import { THEMES_PRESENTES } from '../lib/themes';
+import type { IdVideo } from '../lib/videos';
 
 interface Groupe {
   id: string;
   part: string;
   t: string;
   intro: string;
-  image: ImageMetadata;
+  /** Capture à droite de l'introduction, ou une vidéo à sa place */
+  image?: ImageMetadata;
+  video?: { id: IdVideo; libelle: string };
   adresse?: string;
-  alt: string;
+  alt?: string;
   rubriques?: boolean;
   feats: Array<{ t: string; p: string; ex?: string }>;
 }
@@ -28,9 +31,7 @@ const groupes: Groupe[] = [
     part: 'Le site public',
     t: 'Informer vos habitants',
     intro: 'Un site clair, lisible sur téléphone, qui fonctionne même avec une connexion lente. Vos habitants y trouvent l’essentiel sans appeler la mairie.',
-    image: THEMES_PRESENTES[0]!.capture,
-    adresse: 'mairie-saint-aubin.fr',
-    alt: 'Page d’accueil du site de Saint-Aubin-sur-Loire : accès rapides aux démarches, actualités, horaires de la mairie.',
+    video: { id: 'v2-alerte', libelle: 'Voir l’alerte · 20 s' },
     rubriques: true,
     feats: [
       { t: 'Alertes en bandeau', p: 'Visibles sur le site en moins d’une minute, avec un niveau de gravité et une date de fin.', ex: '« Route barrée entre le bourg et le lavoir jusqu’à vendredi. »' },
@@ -155,7 +156,7 @@ const rubriques = [
               </h2>
               <p class="chapo-groupe">{g.intro}</p>
             </div>
-            <Navigateur src={g.image} adresse={g.adresse} alt={g.alt} largeur={640} />
+            {g.video ? <Video id={g.video.id} libelle={g.video.libelle} compact /> : g.image && <Navigateur src={g.image} adresse={g.adresse} alt={g.alt ?? ''} largeur={640} />}
           </div>
           <ul class="fonctions">
             {g.feats.map((f) => (

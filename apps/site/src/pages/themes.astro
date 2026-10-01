@@ -2,6 +2,7 @@
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Icone from '../components/Icone.astro';
+import LienVideo from '../components/LienVideo.astro';
 import Navigateur from '../components/Navigateur.astro';
 import SelecteurThemes from '../components/SelecteurThemes.astro';
 import Base from '../layouts/Base.astro';
@@ -30,6 +31,7 @@ const rappels = [
   <section class="section essai" aria-labelledby="t-essai">
     <div class="conteneur">
       <SelecteurThemes page titre="La même page d’accueil de Saint-Aubin-sur-Loire, dans chaque thème" />
+      <div class="video-themes"><LienVideo id="v3-themes" libelle="Un contenu, quatre thèmes · 15 s" /></div>
     </div>
   </section>
 
@@ -168,5 +170,9 @@ const rappels = [
     font-size: 1.0625rem;
     line-height: 1.55;
     color: var(--encre-douce);
+  }
+
+  .video-themes {
+    margin-top: 24px;
   }
 </style>

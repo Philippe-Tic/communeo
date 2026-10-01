@@ -1,7 +1,7 @@
 # Vidéos et illustrations à produire pour communeo.fr
 
 Rien n'est bloquant : le site est complet sans ces médias, leurs emplacements sont simplement masqués.
-Déposez les fichiers dans `v2/contenus-site/videos/` et `v2/contenus-site/illustrations/`, je les intègre.
+Vidéos : produites dans `v2/videos/` (Remotion), rendues dans `apps/site/src/videos/` et intégrées au site. Illustrations : à déposer dans `v2/contenus-site/illustrations/`.
 
 Priorité conseillée : **V1**, puis les **3 illustrations du constat** (accueil), puis le reste.
 

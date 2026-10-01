@@ -1,9 +1,25 @@
 /** Outils des scripts : lancer un serveur et attendre qu'il réponde, ffmpeg / ffprobe de Remotion */
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
-import { renameSync } from 'node:fs';
+import { existsSync, renameSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const RACINE = fileURLToPath(new URL('../../../', import.meta.url));
+
+/**
+ * Dépôt principal : dans une copie de travail (git worktree, une vidéo par copie), les fichiers ignorés
+ * par git (builds de l'admin et des sites de démonstration, v2/videos/.env) n'existent que là.
+ */
+export const RACINE_PRINCIPALE = (() => {
+  const commun = spawnSync('git', ['rev-parse', '--path-format=absolute', '--git-common-dir'], { cwd: RACINE, encoding: 'utf8' }).stdout.trim();
+  return commun ? `${dirname(commun)}/` : RACINE;
+})();
+
+/** Un fichier ignoré par git : celui de cette copie s'il existe, sinon celui du dépôt principal */
+export function partage(chemin: string): string {
+  const ici = join(RACINE, chemin);
+  return existsSync(ici) ? ici : join(RACINE_PRINCIPALE, chemin);
+}
 export const VIDEOS = fileURLToPath(new URL('../', import.meta.url));
 export const SORTIE_FINALE = fileURLToPath(new URL('../../contenus-site/videos/', import.meta.url));
 
@@ -11,6 +27,15 @@ export const IDS = ['v1-demo', 'v2-alerte', 'v3-themes', 'v5-devis', 'test'] as 
 
 /** Raccourcis : `v1` pour `v1-demo`… */
 const ALIAS: Record<string, string> = { v1: 'v1-demo', v2: 'v2-alerte', v3: 'v3-themes', v5: 'v5-devis' };
+
+/**
+ * Ports des serveurs de capture, propres à chaque vidéo : plusieurs vidéos peuvent être capturées en
+ * même temps (une par copie de travail) sans se gêner.
+ */
+export function ports(id: string): { admin: number; site: number } {
+  const rang = Math.max(0, (IDS as readonly string[]).indexOf(id));
+  return { admin: 4810 + 100 * rang, site: 4820 + 100 * rang };
+}
 
 export function videoDemandee(): string {
   const id = ALIAS[process.argv[2] ?? ''] ?? process.argv[2];

@@ -2,28 +2,20 @@
  * V1. Démonstration : de l'inscription au site en ligne (1 min 30).
  *
  * Six scènes, une par segment du script (leurs heures suivent la voix, voir timings.json, et tombent
- * sur les temps de la musique) : chacune glisse par-dessus la précédente en un temps. Dans une scène,
- * les repères sont écrits en secondes à vitesse posée (`s(…)`), que TEMPO resserre. Règles de
- * montage : un seul mouvement de caméra à la fois, jamais pendant un changement d'écran ; chaque écran
- * reste à l'image avant qu'on agisse dessus ; 5 légendes au plus dans toute la vidéo.
+ * sur les temps de la musique), montées avec le montage commun (composants/Montage.tsx). Dans une
+ * scène, les repères sont écrits en secondes à vitesse posée (`s(…)`), que le rythme resserre.
  */
-import type { ReactNode } from 'react';
 import { AbsoluteFill, Easing, interpolate, Sequence, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { BARRE, BrowserFrame } from '../../composants/BrowserFrame';
 import { Callout } from '../../composants/Callout';
-import { Camera, versEcranPour, type EtapeCamera } from '../../composants/Camera';
-import { Cursor, type PointCurseur } from '../../composants/Cursor';
-import { EndCard } from '../../composants/EndCard';
+import { Camera, versEcranPour } from '../../composants/Camera';
 import { Etat } from '../../composants/Etat';
 import { Fond } from '../../composants/Fond';
-import { Glissade } from '../../composants/Glissade';
-import { Musique } from '../../composants/Musique';
+import { Entree, Fin, FONDU, marge, nav, Navigateur, rythme, Scenes, TRANSITION, union } from '../../composants/Montage';
 import { BORD, ETAT, PhoneFrame } from '../../composants/PhoneFrame';
 import { Typing, TypingCaptures } from '../../composants/Typing';
-import { VoixOff } from '../../composants/VoixOff';
-import { FPS } from '../../lib/format';
 import { centre, decale, element, type Capture, type Rect } from '../../lib/geometrie';
-import { chronologie, type Timings } from '../../lib/script';
+import type { Timings } from '../../lib/script';
 import { script } from './script';
 import timings from './timings.json';
 
@@ -55,73 +47,12 @@ import siteTelephoneDemarches from '../../../public/captures/v1-demo/site-teleph
 
 const C = <T,>(capture: T) => capture as unknown as Capture;
 
-/** Accélération des repères écrits à vitesse posée : le montage avance d'un pas plus vif */
-const TEMPO = 1.12;
-/** Secondes (à vitesse posée) → images, dans le repère de la scène */
-const s = (secondes: number) => Math.round((secondes * FPS) / TEMPO);
-/** Glissade d'une scène à l'autre : un temps de musique (100 temps/min) */
-const TRANSITION = 18;
-/** Passage d'un écran à un autre dans une scène */
-const FONDU = 8;
-/** Durée d'un mouvement de caméra */
-const MOUVEMENT = 0.8;
-
-/** Rectangle d'une capture placée dans un navigateur (sous la barre) */
-const nav = (r: Rect): Rect => decale(r, 0, BARRE);
-const union = (...rects: Rect[]): Rect => {
-  const x = Math.min(...rects.map((r) => r.x));
-  const y = Math.min(...rects.map((r) => r.y));
-  return { x, y, width: Math.max(...rects.map((r) => r.x + r.width)) - x, height: Math.max(...rects.map((r) => r.y + r.height)) - y };
-};
-const marge = (r: Rect, m: number): Rect => ({ x: r.x - m, y: r.y - m, width: r.width + 2 * m, height: r.height + 2 * m });
+const { s, vers, au } = rythme();
 
 /** Sous la barre de l'admin : un cadrage qui ne montre jamais de boutons coupés en haut */
 const SOUS_LA_BARRE: Rect = { x: 0, y: BARRE, width: 1440, height: 900 };
 /** Fin de la scène 3 et début de la scène 4 : même écran, même cadrage (le fondu ne se voit pas) */
 const cadreEnregistre = () => marge(nav(element(C(editeurEnregistre), 'enregistrement')), 110);
-
-/** Mouvement de caméra de `de` secondes pendant 1 s, vers `cadre` (`null` : tout) */
-const vers = (de: number, cadre: Rect | null, bornes?: Rect): EtapeCamera => ({ de: s(de), a: s(de + MOUVEMENT), cadre, bornes });
-/** Point du curseur à la seconde `t` */
-const au = (t: number, point: { x: number; y: number }, clic = false): PointCurseur => ({ image: s(t), ...point, clic });
-
-/** Un nouvel écran dans une scène : fondu court, avec un léger recul (on « entre » dans l'écran) */
-function Entree({ children }: { children: ReactNode }) {
-  const frame = useCurrentFrame();
-  const t = interpolate(frame, [0, FONDU], [0, 1], { extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic) });
-  return <AbsoluteFill style={{ opacity: t, transform: `scale(${1.03 - 0.03 * t})` }}>{children}</AbsoluteFill>;
-}
-
-/** Un navigateur cadré par la caméra, avec le curseur */
-function Navigateur({
-  capture,
-  etapes,
-  curseur,
-  defilement,
-  children,
-}: {
-  capture: Capture;
-  etapes: EtapeCamera[];
-  curseur?: PointCurseur[];
-  defilement?: number;
-  children?: ReactNode;
-}) {
-  return (
-    <AbsoluteFill>
-      <Fond />
-      <Camera
-        largeur={capture.largeur}
-        hauteur={(capture.vue ?? capture.hauteur) + BARRE}
-        etapes={etapes}
-        superposition={(versEcran, echelle) => (curseur ? <Cursor points={curseur} versEcran={versEcran} echelle={echelle} /> : null)}
-      >
-        <BrowserFrame capture={capture} defilement={defilement}>
-          {children}
-        </BrowserFrame>
-      </Camera>
-    </AbsoluteFill>
-  );
-}
 
 // ---------------------------------------------------------------------------------------------------
 // 1. Inscription : la commune, puis le nom et l'e-mail
@@ -376,39 +307,8 @@ function SitePublic() {
 
 // ---------------------------------------------------------------------------------------------------
 
-function Fin() {
-  // La carte monte pendant la glissade : ses éléments arrivent ensuite
-  return <EndCard de={TRANSITION} />;
-}
-
 const SCENES = [Inscription, Assistant, Editeur, MiseEnLigne, SitePublic, Fin];
 
 export function V1Demo() {
-  const segments = chronologie(script, timings as Timings);
-  const derniere = segments.length - 1;
-  const sens = (i: number) => (segments[i]?.entree === 'fondu' ? 'fondu' : i === derniere ? 'bas' : 'droite');
-  return (
-    <AbsoluteFill>
-      <Fond />
-      {segments.map((segment, i) => {
-        const Scene = SCENES[i]!;
-        // Chaque scène glisse pendant le temps qui précède son début : elle est en place sur le temps
-        const de = i === 0 ? segment.de : segment.de - TRANSITION;
-        const suivante = segments[i + 1];
-        return (
-          <Sequence key={i} from={de} durationInFrames={suivante ? suivante.de - de : undefined}>
-            <Glissade
-              duree={TRANSITION}
-              entree={i === 0 ? undefined : sens(i)}
-              sortie={suivante ? { de: suivante.de - TRANSITION - de, sens: sens(i + 1) } : undefined}
-            >
-              <Scene />
-            </Glissade>
-          </Sequence>
-        );
-      })}
-      <Musique id={script.id} segments={segments} />
-      <VoixOff timings={timings as Timings} segments={segments} />
-    </AbsoluteFill>
-  );
+  return <Scenes script={script} timings={timings as Timings} scenes={SCENES} />;
 }

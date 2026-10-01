@@ -22,11 +22,10 @@ import type { ChildProcess } from 'node:child_process';
 import { chromium, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { mockApi } from '../../../apps/admin/e2e/api';
 import type { Plan } from '../src/lib/plans';
-import { arreter, executer, RACINE, serveur, VIDEOS, videoDemandee } from './outils';
+import { arreter, executer, partage, ports, RACINE, serveur, VIDEOS, videoDemandee } from './outils';
 
 const id = videoDemandee();
-const PORT_ADMIN = 4810;
-const PORT_SITE = 4820;
+const { admin: PORT_ADMIN, site: PORT_SITE } = ports(id);
 const ORDINATEUR = { width: 1440, height: 900 };
 const TELEPHONE = { width: 390, height: 844 };
 
@@ -44,6 +43,8 @@ let adminPret = false;
 
 async function admin(): Promise<string> {
   if (!adminPret) {
+    // Le build de l'admin de cette copie de travail : le mock de l'API (et donc ses changements) est
+    // appliqué au moment de la capture, mais un changement d'un écran de l'admin demande `--build`
     if (process.argv.includes('--build') || !existsSync(join(RACINE, 'apps/admin/dist/index.html'))) {
       executer('pnpm', ['--filter', '@communeo/admin', 'exec', 'vite', 'build'], RACINE);
     }
@@ -54,12 +55,14 @@ async function admin(): Promise<string> {
 }
 
 async function site(theme: string): Promise<string> {
-  if (!existsSync(join(RACINE, `apps/renderer/.e2e/${theme}/index.html`))) {
+  // Builds de démonstration : ceux de cette copie de travail, sinon ceux du dépôt principal
+  const renderer = partage(`apps/renderer/.e2e/${theme}/index.html`).replace(/\.e2e\/[^/]+\/index\.html$/, '');
+  if (!existsSync(join(renderer, `.e2e/${theme}/index.html`))) {
     throw new Error(`Site de démonstration « ${theme} » absent : E2E_THEMES=${theme} node e2e/build.mjs dans apps/renderer`);
   }
   if (!sites.has(theme)) {
     const port = PORT_SITE + sites.size;
-    serveurs.push(await serveur('node', ['e2e/serve.mjs', theme, String(port)], `http://127.0.0.1:${port}/`, join(RACINE, 'apps/renderer')));
+    serveurs.push(await serveur('node', ['e2e/serve.mjs', theme, String(port)], `http://127.0.0.1:${port}/`, renderer));
     sites.set(theme, port);
   }
   return `http://127.0.0.1:${sites.get(theme)}`;
@@ -88,7 +91,7 @@ const TYPES: Record<string, string> = { '.html': 'text/html', '.css': 'text/css'
  * que la page simulée des tests. Une adresse du mock est rapprochée d'une page du même type.
  */
 async function vraiApercu(page: Page) {
-  const site = join(RACINE, 'apps/renderer/.e2e/institutionnel/');
+  const site = `${partage('apps/renderer/.e2e/institutionnel')}/`;
   if (!existsSync(site)) return;
   await page.route('http://preview.test/**', (route) => {
     const { pathname } = new URL(route.request().url());

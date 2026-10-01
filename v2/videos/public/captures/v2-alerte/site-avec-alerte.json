@@ -1,0 +1,22 @@
+{
+  "image": "captures/v2-alerte/site-avec-alerte.png",
+  "largeur": 390,
+  "hauteur": 844,
+  "echelle": 2,
+  "url": "saint-aubin-sur-loire.fr",
+  "vue": 844,
+  "elements": {
+    "bandeau": {
+      "x": 0,
+      "y": 65,
+      "width": 390,
+      "height": 115
+    },
+    "entete": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 65
+    }
+  }
+}

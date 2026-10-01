@@ -1,0 +1,22 @@
+{
+  "image": "captures/v2-alerte/alerte-publiee.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/alertes/nouvelle",
+  "vue": 900,
+  "elements": {
+    "toast": {
+      "x": 1048,
+      "y": 824,
+      "width": 326,
+      "height": 40
+    },
+    "ligne": {
+      "x": 338,
+      "y": 212,
+      "width": 275,
+      "height": 26
+    }
+  }
+}

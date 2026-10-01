@@ -68,6 +68,14 @@ services:
       PREVIEW_URL: https://${PREVIEW_DOMAIN}
       RESEND_API_KEY: ${RESEND_API_KEY}
       EMAIL_DEFAULT_FROM: ${EMAIL_DEFAULT_FROM:-noreply@communeo.fr}
+      # Équipe : inscriptions, passages en live, formulaire de contact de communeo.fr
+      SIGNUP_NOTIFY_EMAIL: ${SIGNUP_NOTIFY_EMAIL:-}
+      # Adresses de test de l'équipe (inscription sans écrire à la vraie mairie)
+      SIGNUP_TEST_EMAILS: ${SIGNUP_TEST_EMAILS:-}
+      # Hébergeur affiché dans les mentions légales de chaque commune (config/platform.ts)
+      HOSTING_NAME: ${HOSTING_NAME:-}
+      HOSTING_ADDRESS: ${HOSTING_ADDRESS:-}
+      HOSTING_PHONE: ${HOSTING_PHONE:-}
       ADMIN_URL: https://${DOMAIN}
       DOMAIN: ${DOMAIN}
       # Seed initial admin (first boot only, optional)

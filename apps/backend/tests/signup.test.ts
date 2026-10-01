@@ -33,6 +33,7 @@ const COMMUNES: Record<string, { nom: string; codesPostaux: string[]; hall: Reco
   '58086': { nom: 'Cosne', codesPostaux: ['58200'], hall: { nom: 'Mairie - Cosne', adresse_courriel: 'accueil@mairie-cosne.test' } },
   '58100': { nom: 'Sans-Annuaire', codesPostaux: ['58100'], hall: null },
   '58101': { nom: 'Sans-Annuaire-Bis', codesPostaux: ['58101'], hall: null },
+  '58102': { nom: 'Essai-sur-Loire', codesPostaux: ['58102'], hall: { nom: 'Mairie - Essai-sur-Loire', adresse_courriel: 'mairie@essai-sur-loire.test' } },
 };
 
 const geo = (code: string) => ({
@@ -318,5 +319,26 @@ describe('sans adresse officielle : l’équipe vérifie', () => {
     const mail = sentEmails.find((email) => email.to === 'paul@sans-annuaire-bis.test' && /Votre demande/.test(email.subject));
     expect(mail?.text).toContain('Nous n’avons pas pu joindre la mairie.');
     expect(mail?.text).toContain('ont été supprimés');
+  });
+});
+
+describe('inscription de test de l’équipe (SIGNUP_TEST_EMAILS)', () => {
+  it('rien ne part vers la vraie mairie : l’équipe approuve, le site a l’adresse du testeur', async () => {
+    process.env.SIGNUP_TEST_EMAILS = 'autre@exemple.test, @essai-communeo.test';
+    try {
+      const { site, jwt, approval } = await withTeamAddress(() => signupAndConfirm('58102', 'philippe@essai-communeo.test'));
+      expect(await strapi.db.query(REQUEST).findOne({ where: { code_insee: '58102' } })).toMatchObject({ official_email: null, status: 'awaiting_review' });
+      expect(approval).toBe('team');
+      expect(site).toMatchObject({ signup_approval: 'team', contact_mail: 'philippe@essai-communeo.test', plan: 'trial' });
+      expect(sentEmails.filter((mail) => mail.to === 'mairie@essai-sur-loire.test')).toHaveLength(0);
+      expect(sentEmails.find((mail) => mail.to === 'equipe@communeo.test' && /Essai-sur-Loire/.test(mail.subject))?.subject).toBe('Inscription de test : Essai-sur-Loire');
+      // L'assistant ne propose pas l'e-mail de la mairie comme contact du site de test
+      const details = await api.get('/api/onboarding/communes/58102').set(auth(jwt));
+      expect(details.status).toBe(200);
+      expect(details.body.data.townHall.email).toBeNull();
+      expect(details.body.data.name).toBe('Essai-sur-Loire');
+    } finally {
+      delete process.env.SIGNUP_TEST_EMAILS;
+    }
   });
 });

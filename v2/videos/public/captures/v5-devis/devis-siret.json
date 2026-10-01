@@ -1,0 +1,64 @@
+{
+  "image": "captures/v5-devis/devis-siret.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/passer-en-live",
+  "vue": 900,
+  "elements": {
+    "titre": {
+      "x": 456,
+      "y": -356,
+      "width": 362,
+      "height": 34
+    },
+    "offre": {
+      "x": 456,
+      "y": -273,
+      "width": 760,
+      "height": 342
+    },
+    "prix": {
+      "x": 477,
+      "y": -216,
+      "width": 718,
+      "height": 32
+    },
+    "devis": {
+      "x": 456,
+      "y": 262,
+      "width": 760,
+      "height": 610
+    },
+    "siret": {
+      "x": 477,
+      "y": 439,
+      "width": 718,
+      "height": 40
+    },
+    "signataire": {
+      "x": 477,
+      "y": 714,
+      "width": 351,
+      "height": 40
+    },
+    "qualite": {
+      "x": 844,
+      "y": 714,
+      "width": 351,
+      "height": 40
+    },
+    "accepte": {
+      "x": 477,
+      "y": 772,
+      "width": 18,
+      "height": 18
+    },
+    "valider": {
+      "x": 477,
+      "y": 807,
+      "width": 141,
+      "height": 44
+    }
+  }
+}

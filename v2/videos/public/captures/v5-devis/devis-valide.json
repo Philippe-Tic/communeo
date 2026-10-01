@@ -1,0 +1,22 @@
+{
+  "image": "captures/v5-devis/devis-valide.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/passer-en-live",
+  "vue": 900,
+  "elements": {
+    "valide": {
+      "x": 456,
+      "y": 702,
+      "width": 760,
+      "height": 109
+    },
+    "pdf": {
+      "x": 1003,
+      "y": 723,
+      "width": 192,
+      "height": 21
+    }
+  }
+}

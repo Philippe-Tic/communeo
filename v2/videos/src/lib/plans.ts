@@ -39,6 +39,12 @@ export interface Plan {
    * repérés dans la page entière
    */
   pleinePage?: boolean;
+  /**
+   * Document PDF (devis…) : `chemin` mène à un PDF, affiché par la visionneuse de Chromium. Capturé avec
+   * le Chromium complet (le navigateur sans interface des captures télécharge les PDF au lieu de les
+   * afficher) ; pas d'éléments repérables dans la visionneuse.
+   */
+  pdf?: boolean;
   /** Éléments repérés : leur rectangle est enregistré dans le JSON (curseur, zooms, saisies) */
   elements?: Record<string, (page: Page) => Locator>;
 }

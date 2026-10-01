@@ -133,10 +133,13 @@ async function photos(page: Page) {
 }
 
 const browser = await chromium.launch({ args: ['--lang=fr-FR'] });
+/** Chromium complet, pour les PDF (visionneuse intégrée) : lancé seulement si un plan en montre un */
+let complet: Browser | null = null;
 try {
   for (const plan of captures) {
     const base = plan.ou === 'admin' ? await admin() : await site(plan.theme ?? 'institutionnel');
-    const context = await contexte(browser, plan);
+    if (plan.pdf) complet ??= await chromium.launch({ channel: 'chromium', args: ['--lang=fr-FR'] });
+    const context = await contexte(plan.pdf ? complet! : browser, plan);
     const page = await context.newPage();
     if (plan.heure) await page.clock.setFixedTime(new Date(plan.heure));
     if (plan.ou === 'admin') {
@@ -147,7 +150,7 @@ try {
     await photos(page);
     await page.goto(base + plan.chemin);
     await page.waitForLoadState('networkidle');
-    if (plan.ou === 'admin') await page.getByRole('heading', { level: 1 }).first().waitFor();
+    if (plan.ou === 'admin' && !plan.pdf) await page.getByRole('heading', { level: 1 }).first().waitFor();
     await page.evaluate(() => document.fonts.ready);
     await plan.avant?.(page);
     // Pas de curseur clignotant ni d'animation dans les images
@@ -169,5 +172,6 @@ try {
   }
 } finally {
   await browser.close();
+  await complet?.close();
   serveurs.forEach(arreter);
 }

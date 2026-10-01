@@ -1,0 +1,16 @@
+{
+  "image": "captures/v1-demo/editeur-image.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/pages/location-de-la-salle-des-fetes",
+  "vue": 900,
+  "elements": {
+    "image": {
+      "x": 296,
+      "y": 467,
+      "width": 64,
+      "height": 64
+    }
+  }
+}

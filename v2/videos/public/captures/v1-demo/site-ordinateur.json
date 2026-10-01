@@ -1,0 +1,28 @@
+{
+  "image": "captures/v1-demo/site-ordinateur.png",
+  "largeur": 1440,
+  "hauteur": 5734,
+  "echelle": 2,
+  "url": "saint-aubin.communeo.fr",
+  "vue": 900,
+  "elements": {
+    "ouvert": {
+      "x": 714,
+      "y": 88,
+      "width": 142,
+      "height": 22
+    },
+    "actualites": {
+      "x": 0,
+      "y": 1399,
+      "width": 1440,
+      "height": 756
+    },
+    "preparation": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 44
+    }
+  }
+}

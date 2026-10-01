@@ -1,0 +1,52 @@
+{
+  "image": "captures/v1-demo/assistant-rempli.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/assistant",
+  "vue": 900,
+  "elements": {
+    "population": {
+      "x": 377,
+      "y": 426,
+      "width": 335,
+      "height": 40
+    },
+    "adresse": {
+      "x": 377,
+      "y": 509,
+      "width": 686,
+      "height": 40
+    },
+    "telephone": {
+      "x": 377,
+      "y": 592,
+      "width": 335,
+      "height": 40
+    },
+    "email": {
+      "x": 728,
+      "y": 592,
+      "width": 335,
+      "height": 40
+    },
+    "gps": {
+      "x": 377,
+      "y": 700,
+      "width": 686,
+      "height": 40
+    },
+    "horaires": {
+      "x": 377,
+      "y": 782,
+      "width": 686,
+      "height": 81
+    },
+    "continuer": {
+      "x": 724,
+      "y": 852,
+      "width": 248,
+      "height": 36
+    }
+  }
+}

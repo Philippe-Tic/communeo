@@ -1,0 +1,22 @@
+{
+  "image": "captures/v1-demo/assistant-theme-choisi.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/assistant",
+  "vue": 900,
+  "elements": {
+    "institutionnel": {
+      "x": 370,
+      "y": 461,
+      "width": 252,
+      "height": 21
+    },
+    "continuer": {
+      "x": 856,
+      "y": 852,
+      "width": 228,
+      "height": 36
+    }
+  }
+}

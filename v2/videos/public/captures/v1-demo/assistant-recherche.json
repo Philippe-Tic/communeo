@@ -1,0 +1,58 @@
+{
+  "image": "captures/v1-demo/assistant-recherche.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/assistant",
+  "vue": 900,
+  "elements": {
+    "population": {
+      "x": 377,
+      "y": 423,
+      "width": 335,
+      "height": 40
+    },
+    "adresse": {
+      "x": 377,
+      "y": 506,
+      "width": 686,
+      "height": 40
+    },
+    "telephone": {
+      "x": 377,
+      "y": 589,
+      "width": 335,
+      "height": 40
+    },
+    "email": {
+      "x": 728,
+      "y": 589,
+      "width": 335,
+      "height": 40
+    },
+    "gps": {
+      "x": 377,
+      "y": 672,
+      "width": 686,
+      "height": 40
+    },
+    "horaires": {
+      "x": 377,
+      "y": 753,
+      "width": 686,
+      "height": 81
+    },
+    "continuer": {
+      "x": 724,
+      "y": 852,
+      "width": 248,
+      "height": 36
+    },
+    "suggestion": {
+      "x": 357,
+      "y": 274,
+      "width": 726,
+      "height": 48
+    }
+  }
+}

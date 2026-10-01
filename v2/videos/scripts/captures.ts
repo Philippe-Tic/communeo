@@ -10,7 +10,7 @@
  *   (apps/admin/e2e/api.ts : commune fictive Saint-Aubin-sur-Loire, données publiques, devis simulés) ;
  * - site : le site de démonstration construit par le renderer à partir des fixtures.
  * Les images de démonstration (emplacements hachurés) sont remplacées par les photos libres de droits de
- * photos/ (voir photos/README.md), sur le site comme dans l'admin : rien ne change dans les fixtures.
+ * packages/fixtures/photos/ (voir son README), sur le site comme dans l'admin : les fixtures ne changent pas.
  *
  * Préalables : admin compilé (`--build` le recompile), builds de démonstration du renderer
  * (`E2E_THEMES=institutionnel,moderne,journal,bourg node e2e/build.mjs` dans apps/renderer).
@@ -104,8 +104,8 @@ async function vraiApercu(page: Page) {
   });
 }
 
-/** Photos libres de droits (photos/<nom>.jpg) à la place des images de démonstration de même nom */
-const PHOTOS = join(VIDEOS, 'photos');
+/** Photos libres de droits (packages/fixtures/photos/<nom>.jpg) à la place des images de démonstration de même nom */
+const PHOTOS = join(RACINE, 'packages/fixtures/photos');
 async function photos(page: Page) {
   // Enregistrée en dernier : prioritaire sur les routes du mock et de l'aperçu
   await page.route(/\/(fixtures|uploads)\/[\w-]+\.(svg|jpe?g|png)(\?.*)?$/, (route) => {

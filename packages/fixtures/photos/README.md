@@ -1,9 +1,11 @@
-# Photos des vidéos
+# Photos des supports de communication
 
-Substituées aux emplacements hachurés du site de démonstration **au moment des captures seulement**
-(`scripts/captures.ts`) : les fixtures partagées (tests, miniatures des thèmes) ne changent pas. Une
-photo remplace l'image de même nom servie sous `/fixtures/<nom>.svg` (site) ou `/uploads/<nom>.jpg`
-(médiathèque de l'admin).
+Vraies photos à la place des emplacements hachurés de la commune de démonstration, **au moment des
+captures seulement** : captures des thèmes de communeo.fr (`apps/site/scripts/captures-themes.mjs`) et des
+vidéos (`v2/videos/scripts/captures.ts`). Les fixtures servies par le renderer (tests, `theme:dev`,
+miniatures des thèmes) restent des SVG légers. Une photo remplace l'image de même nom servie sous
+`/fixtures/<nom>.svg` (site) ou `/uploads/<nom>.jpg` (médiathèque de l'admin) ; une image sans photo
+garde son emplacement.
 
 Source : [Pexels](https://www.pexels.com), [licence Pexels](https://www.pexels.com/license/) (usage
 commercial gratuit, attribution non requise). Recadrées au format de l'emplacement, métadonnées retirées.

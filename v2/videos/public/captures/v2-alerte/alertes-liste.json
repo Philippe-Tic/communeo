@@ -1,0 +1,22 @@
+{
+  "image": "captures/v2-alerte/alertes-liste.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/alertes/nouvelle",
+  "vue": 900,
+  "elements": {
+    "titre": {
+      "x": 264,
+      "y": 84,
+      "width": 624,
+      "height": 34
+    },
+    "carte": {
+      "x": 264,
+      "y": 190,
+      "width": 960,
+      "height": 170
+    }
+  }
+}

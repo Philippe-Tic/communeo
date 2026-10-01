@@ -8,6 +8,7 @@ import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { BarChart3, Building2, ClipboardCheck, History, LogOut, Receipt, Users } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { ColorSchemeToggle } from '@/components/shell/color-scheme-toggle';
+import { CommuneoPicto } from '@/components/shell/logo';
 import { SessionExpiredDialog } from '@/components/shell/session-expired-dialog';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/lib/api';
@@ -89,9 +90,7 @@ export function EquipeShell({ user, children }: { user: SessionUser; children: R
       {/* Ordinateur et tablette : barre latérale de couleur de marque */}
       <aside className="sticky top-0 hidden h-dvh w-[232px] shrink-0 flex-col bg-brand-button p-3 text-on-brand md:flex">
         <div className="flex items-center gap-2.5 px-2 py-2">
-          <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-white/15 font-semibold">
-            C
-          </span>
+          <CommuneoPicto className="size-8 shrink-0 text-on-brand" />
           <div className="min-w-0 leading-tight">
             <p className="font-semibold">Communeo</p>
             <p className="text-[12px] opacity-80">Équipe · super admin</p>

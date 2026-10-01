@@ -33,6 +33,7 @@ import alerteMessage from '../../../public/captures/v2-alerte/alerte-message.jso
 import alerteFin from '../../../public/captures/v2-alerte/alerte-fin.json';
 import alerteApercu from '../../../public/captures/v2-alerte/alerte-apercu.json';
 import alertePubliee from '../../../public/captures/v2-alerte/alerte-publiee.json';
+import alertesListe from '../../../public/captures/v2-alerte/alertes-liste.json';
 import siteSansAlerte from '../../../public/captures/v2-alerte/site-sans-alerte.json';
 import siteAvecAlerte from '../../../public/captures/v2-alerte/site-avec-alerte.json';
 
@@ -41,7 +42,7 @@ const C = <T,>(capture: T) => capture as unknown as Capture;
 const SEGMENTS = chronologie(script, timings as Timings);
 /** Image à `secondes` après le début du segment `i` */
 const a = (i: number, secondes: number) => SEGMENTS[i]!.de + Math.round(secondes * FPS);
-const vers = (de: number, duree: number, cadre: Rect | null): EtapeCamera => ({ de, a: de + Math.round(duree * FPS), cadre });
+const vers = (de: number, duree: number, cadre: Rect | null, bornes?: Rect): EtapeCamera => ({ de, a: de + Math.round(duree * FPS), cadre, bornes });
 
 // ---------------------------------------------------------------------------------------------------
 // Repères (secondes depuis le début du segment)
@@ -63,11 +64,15 @@ const T = {
   clicApercu: a(1, 4.4),
   recul: a(1, 4.9),
   clicPublier: a(1, 6.1),
-  // 2. Publiée ; le téléphone recharge la page, le bandeau apparaît
+  // 2. Publiée ; le téléphone recharge la page, le bandeau apparaît ; gros plan, puis l'écran partagé
   versTelephone: a(2, 0.4),
   rechargement: a(2, 1.6),
-  // 3. Gros plan sur le bandeau, la légende
-  versBandeau: a(3, 0.1),
+  grosPlan: a(2, 2.5),
+  // (l'administration, hors champ, a fermé sa notification)
+  liste: a(2, 3.0),
+  ecranPartage: a(2, 4.6),
+  // 3. L'alerte en ligne dans l'administration, son retrait automatique : la légende
+  versListe: a(3, 0.1),
   legende: a(3, 1.0),
 };
 const DUREE_RECHARGEMENT = 16;
@@ -110,10 +115,21 @@ const FORMULAIRE_BAS: Rect = { x: 470, y: nav(element(vide, 'message')).y - 30, 
  * cadre s'arrête dans l'écart entre les deux écrans, l'administration n'apparaît pas coupée au bord
  */
 const HAUT_TELEPHONE: Rect = { x: X_TEL - 20, y: Y_TEL - 10, width: 1040, height: 520 };
-/** Le bandeau, plus serré, avec à sa droite le fond où se pose la légende */
+/** Gros plan sur le bandeau ; la vue ne remonte pas sur l'administration (jamais d'écran coupé au bord) */
 const bandeau = surTelephone(element(telephoneAvec, 'bandeau'));
-const BANDEAU: Rect = { x: X_TEL - 20, y: bandeau.y - 110, width: 980, height: 330 };
-const POSITION_LEGENDE = versEcranPour(BANDEAU, { largeur: LARGEUR, hauteur: HAUTEUR }, MARGE)({ x: X_TEL + LARGEUR_TEL + 50, y: bandeau.y + bandeau.height / 2 });
+const BANDEAU: Rect = { x: bandeau.x - 40, y: bandeau.y - 90, width: bandeau.width + 80, height: bandeau.height + 180 };
+const A_DROITE_DE_L_ADMIN: Rect = { x: X_TEL - 60, y: -1000, width: 3000, height: 3000 };
+/**
+ * L'alerte en ligne dans la liste de l'administration, et sous elle la place de la légende. Cadre calculé
+ * pour montrer la carte entière sans la barre latérale (coupée au bord sinon) : vue de 1 008 px de large
+ * à partir du bord de la barre latérale.
+ */
+const liste = C(alertesListe);
+const carte = nav(element(liste, 'carte'));
+const BORD_BARRE_LATERALE = carte.x - 32;
+const SOUS_LA_BARRE_LATERALE: Rect = { x: BORD_BARRE_LATERALE, y: BARRE, width: liste.largeur - BORD_BARRE_LATERALE, height: VUE };
+const LISTE: Rect = { x: carte.x + carte.width / 2 - 467, y: carte.y - 40, width: 934, height: 400 };
+const POSITION_LEGENDE = versEcranPour(LISTE, { largeur: LARGEUR, hauteur: HAUTEUR }, MARGE, SOUS_LA_BARRE_LATERALE)({ x: carte.x, y: carte.y + carte.height + 56 });
 
 // ---------------------------------------------------------------------------------------------------
 
@@ -165,6 +181,7 @@ function Administration() {
       </BrowserFrame>
       <Ecran capture={C(alerteApercu)} de={APERCU} />
       <Ecran capture={C(alertePubliee)} de={PUBLIEE} />
+      <Ecran capture={liste} de={T.liste} />
     </div>
   );
 }
@@ -215,7 +232,9 @@ export function V2Alerte() {
           // Tout l'écran partagé, une fois l'aperçu affiché : la publication, le téléphone à côté
           vers(T.recul, 0.8, null),
           vers(T.versTelephone, 0.8, HAUT_TELEPHONE),
-          vers(T.versBandeau, 0.8, BANDEAU),
+          vers(T.grosPlan, 0.8, BANDEAU, A_DROITE_DE_L_ADMIN),
+          vers(T.ecranPartage, 0.8, null),
+          vers(T.versListe, 0.8, LISTE, SOUS_LA_BARRE_LATERALE),
         ]}
         superposition={(versEcran, echelle) => <Cursor points={curseur()} versEcran={versEcran} echelle={echelle} />}
       >
@@ -224,7 +243,7 @@ export function V2Alerte() {
           <Telephone />
         </div>
       </Camera>
-      <Chronometre de={T.clicPublier} a={BANDEAU_VISIBLE} />
+      <Chronometre de={T.clicPublier} a={BANDEAU_VISIBLE} jusqua={T.versListe} />
       <Callout texte="Retrait automatique mardi à 12 h" de={T.legende} position={{ x: POSITION_LEGENDE.x, y: POSITION_LEGENDE.y - 44 }} />
       <Musique id={script.id} segments={SEGMENTS} />
       <VoixOff timings={timings as Timings} segments={SEGMENTS} />

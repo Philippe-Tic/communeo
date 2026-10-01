@@ -149,6 +149,19 @@ export const captures: Plan[] = [
     toast: (p) => p.getByText(/Alerte publiée/).first(),
     ligne: (p) => p.locator('main').getByText(ALERTE.titre).first(),
   }),
+  // La liste, une fois la notification fermée : l'alerte en ligne et ses dates d'affichage
+  nouvelleAlerte(
+    'alertes-liste',
+    async (page) => {
+      await publiee(page);
+      await page.getByRole('button', { name: 'Fermer la notification' }).click();
+      await page.getByText(/Alerte publiée/).waitFor({ state: 'hidden' });
+    },
+    {
+      titre: (p) => p.getByRole('heading', { level: 1 }),
+      carte: (p) => p.locator('main').getByText(ALERTE.titre).first().locator('xpath=ancestor::*[contains(@class, "border")][1]'),
+    },
+  ),
 
   telephone('site-sans-alerte', []),
   telephone('site-avec-alerte', [alertePubliee]),

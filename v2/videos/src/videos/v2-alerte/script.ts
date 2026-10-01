@@ -11,8 +11,8 @@ import type { ScriptVideo } from '../../lib/script';
 export const script: ScriptVideo = {
   id: 'v2-alerte',
   titre: 'Une alerte, de l’administration au téléphone',
-  // Le bandeau vient d'apparaître sur le téléphone, l'administration à côté
-  apercu: { segment: 2, apres: 3.2 },
+  // Gros plan sur le bandeau qui vient d'apparaître sur le téléphone
+  apercu: { segment: 2, apres: 3.6 },
   finale: 0.5,
   // Musique à 100 temps/min : chaque segment tombe sur un temps
   tempo: 100,
@@ -32,14 +32,14 @@ export const script: ScriptVideo = {
     {
       debut: 11.4,
       fin: 16.8,
-      voix: 'Sur leur téléphone, le bandeau apparaît aussitôt, sans remettre le site en ligne.',
-      ecran: 'L’administration confirme « Alerte publiée ». Le téléphone recharge la page : le bandeau « Attention – Coupure d’eau mardi de 9 h à 12 h » apparaît en haut du site. Le chronomètre s’arrête.',
+      voix: 'Sur leur téléphone, le bandeau apparaît en moins d’une minute, sans remettre le site en ligne.',
+      ecran: 'L’administration confirme « Alerte publiée ». Le téléphone recharge la page : le bandeau « Attention – Coupure d’eau mardi de 9 h à 12 h » apparaît en haut du site, le chronomètre s’arrête. Gros plan sur le bandeau, puis retour à l’écran partagé.',
     },
     {
       debut: 16.8,
       fin: 19.8,
       voix: 'Il disparaît tout seul à la date de fin.',
-      ecran: 'Gros plan sur le bandeau du téléphone, avec la légende « Retrait automatique mardi à 12 h ».',
+      ecran: 'Dans l’administration, la liste « Alertes et perturbations » : l’alerte est active, affichée du lundi 5 octobre à 16 h au mardi 6 octobre à 12 h. Légende « Retrait automatique mardi à 12 h ».',
     },
   ],
 };

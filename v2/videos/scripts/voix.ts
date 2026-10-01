@@ -9,11 +9,14 @@
  * dépôt principal).
  * Sans clé : déposer une piste public/voix/<vidéo>/voix.mp3 et lancer `pnpm videos:recaler <vidéo>`.
  *
+ * `--segment <n>` (n à partir de 1, répétable) : ne régénère que ce segment ; les autres gardent leur
+ * fichier déjà généré (même prise, même intonation), seules les heures sont recalées.
+ *
  * `--systeme` : voix PROVISOIRE de macOS (`say`, voix Thomas) pour caler le montage sans ElevenLabs ;
  * à remplacer avant publication (timings.json porte `source: 'systeme'`).
  */
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { calerSurPhrases, couperEnPhrases, passagesParles, type Intervalle } from '../src/lib/calage';
@@ -31,6 +34,8 @@ try {
 
 const id = videoDemandee();
 const systeme = process.argv.includes('--systeme');
+/** Segments à régénérer (numérotés à partir de 1) ; vide : tous */
+const seuls = process.argv.flatMap((arg, i) => (process.argv[i - 1] === '--segment' ? [Number(arg)] : []));
 const cle = process.env.ELEVENLABS_API_KEY;
 const voix = process.env.ELEVENLABS_VOICE_ID;
 if (!systeme && (!cle || !voix)) {
@@ -75,6 +80,15 @@ for (const [i, segment] of script.segments.entries()) {
   }
   const fichier = join(dossier, `${String(i + 1).padStart(2, '0')}.mp3`);
   const texte = segment.prononciation ?? segment.voix;
+  if (seuls.length && !seuls.includes(i + 1) && existsSync(fichier)) {
+    // Prise conservée : sa durée et ses phrases sont relues
+    const duree = dureeAudio(fichier);
+    fichiers.push(`voix/${id}/${String(i + 1).padStart(2, '0')}.mp3`);
+    durees.push(duree);
+    heuresDesPhrases[i] = reperer(fichier, segment.voix, duree);
+    console.log(`= segment ${i + 1} (conservé) : ${duree.toFixed(2)} s`);
+    continue;
+  }
   if (systeme) {
     // Synthèse de macOS : WAV (le ffmpeg de Remotion ne lit pas l'AIFF), puis MP3
     const temp = mkdtempSync(join(tmpdir(), 'voix-'));

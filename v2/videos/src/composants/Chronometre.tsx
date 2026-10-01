@@ -1,17 +1,19 @@
 /**
  * Chronomètre discret dans un coin de l'image (repère de l'écran, il ne suit pas la caméra) : il
  * apparaît et démarre à l'image `de`, s'arrête à l'image `a` et reste affiché, en vert, avec le temps
- * écoulé. Il compte le temps réel de la vidéo : rien n'est accéléré.
+ * écoulé. Il compte le temps réel de la vidéo : rien n'est accéléré. `jusqua` : il s'efface à cette
+ * image (pour ne pas couvrir un plan suivant).
  */
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion';
 import { C, POLICES } from '../charte';
 
 const secondes = (images: number, fps: number) => `${(images / fps).toFixed(1).replace('.', ',')} s`;
 
-export function Chronometre({ de, a, haut = 56, droite = 64 }: { de: number; a: number; haut?: number; droite?: number }) {
+export function Chronometre({ de, a, jusqua, haut = 56, droite = 64 }: { de: number; a: number; jusqua?: number; haut?: number; droite?: number }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  if (frame < de) return null;
+  if (frame < de || (jusqua !== undefined && frame >= jusqua + 8)) return null;
+  const sortie = jusqua === undefined ? 1 : interpolate(frame, [jusqua, jusqua + 8], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
   const arrete = frame >= a;
   const ecoule = Math.min(frame, a) - de;
   const entree = spring({ frame: frame - de, fps, config: { damping: 16, stiffness: 160 } });
@@ -33,7 +35,7 @@ export function Chronometre({ de, a, haut = 56, droite = 64 }: { de: number; a: 
         background: C.papier,
         border: `2px solid ${arrete ? C.sapin : C.grege}`,
         boxShadow: '0 18px 36px -22px rgba(14, 64, 51, 0.5)',
-        opacity: entree,
+        opacity: entree * sortie,
         transform: `translateY(${(1 - entree) * -20}px) scale(${battement})`,
         fontFamily: POLICES.sans,
         fontWeight: 600,

@@ -1,0 +1,16 @@
+{
+  "image": "captures/v1-demo/tableau-de-bord.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr",
+  "vue": 900,
+  "elements": {
+    "page": {
+      "x": 1049,
+      "y": 509,
+      "width": 338,
+      "height": 21
+    }
+  }
+}

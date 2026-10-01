@@ -23,6 +23,7 @@
     "videos:captures": "pnpm --filter @communeo/videos captures",
     "videos:voix": "pnpm --filter @communeo/videos voix",
     "videos:recaler": "pnpm --filter @communeo/videos recaler",
+    "videos:musique": "pnpm --filter @communeo/videos musique",
     "videos:sous-titres": "pnpm --filter @communeo/videos sous-titres",
     "videos:render": "pnpm --filter @communeo/videos render",
     "videos:planche": "pnpm --filter @communeo/videos planche"

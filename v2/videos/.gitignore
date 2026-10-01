@@ -1,7 +1,10 @@
 # Rendus de travail (les vidéos finales vont dans v2/contenus-site/videos/)
 out/
-# Captures et voix : régénérées par pnpm videos:captures / videos:voix (sauf la vidéo de test, dont la
-# composition importe les captures)
-public/captures/*
-!public/captures/test/
+# Captures et voix : régénérées par pnpm videos:captures / videos:voix. Les JSON des captures (taille,
+# éléments repérés) restent versionnés : les compositions les importent (typecheck en CI). Les images de
+# la vidéo de test aussi.
+public/captures/**/*.png
+!public/captures/test/**
 public/voix/
+# Musique générée par pnpm videos:musique (ou déposée à la place)
+public/musique/

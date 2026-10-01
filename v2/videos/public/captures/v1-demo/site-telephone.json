@@ -1,0 +1,16 @@
+{
+  "image": "captures/v1-demo/site-telephone.png",
+  "largeur": 390,
+  "hauteur": 844,
+  "echelle": 2,
+  "url": "saint-aubin.communeo.fr",
+  "vue": 844,
+  "elements": {
+    "preparation": {
+      "x": 0,
+      "y": 0,
+      "width": 390,
+      "height": 89
+    }
+  }
+}

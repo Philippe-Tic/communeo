@@ -1,1 +1,123 @@
-{ "source": "estimation", "audio": null, "segments": [] }
+{
+  "source": "elevenlabs",
+  "audio": {
+    "segments": [
+      "voix/v1-demo/01.mp3",
+      "voix/v1-demo/02.mp3",
+      "voix/v1-demo/03.mp3",
+      "voix/v1-demo/04.mp3",
+      "voix/v1-demo/05.mp3",
+      "voix/v1-demo/06.mp3"
+    ]
+  },
+  "segments": [
+    {
+      "debut": 0,
+      "fin": 10.2,
+      "parole": {
+        "debut": 0.4,
+        "fin": 7.035,
+        "phrases": [
+          {
+            "debut": 0.4,
+            "fin": 2.436
+          },
+          {
+            "debut": 2.844,
+            "fin": 6.484
+          }
+        ]
+      }
+    },
+    {
+      "debut": 10.2,
+      "fin": 23.4,
+      "parole": {
+        "debut": 10.6,
+        "fin": 19.142,
+        "phrases": [
+          {
+            "debut": 10.6,
+            "fin": 16.367
+          },
+          {
+            "debut": 16.933,
+            "fin": 18.576
+          }
+        ]
+      }
+    },
+    {
+      "debut": 23.4,
+      "fin": 43.2,
+      "parole": {
+        "debut": 23.8,
+        "fin": 31.872,
+        "phrases": [
+          {
+            "debut": 23.8,
+            "fin": 28.279
+          },
+          {
+            "debut": 28.695,
+            "fin": 31.442
+          }
+        ]
+      }
+    },
+    {
+      "debut": 43.2,
+      "fin": 58.2,
+      "parole": {
+        "debut": 43.6,
+        "fin": 49.53,
+        "phrases": [
+          {
+            "debut": 43.6,
+            "fin": 46.806
+          },
+          {
+            "debut": 47.339,
+            "fin": 48.95
+          }
+        ]
+      }
+    },
+    {
+      "debut": 58.2,
+      "fin": 76.2,
+      "parole": {
+        "debut": 58.6,
+        "fin": 66.959,
+        "phrases": [
+          {
+            "debut": 58.6,
+            "fin": 64.45
+          },
+          {
+            "debut": 64.788,
+            "fin": 66.357
+          }
+        ]
+      }
+    },
+    {
+      "debut": 76.2,
+      "fin": 83.4,
+      "parole": {
+        "debut": 76.6,
+        "fin": 82.53,
+        "phrases": [
+          {
+            "debut": 76.6,
+            "fin": 79.798
+          },
+          {
+            "debut": 80.47,
+            "fin": 82.15
+          }
+        ]
+      }
+    }
+  ]
+}

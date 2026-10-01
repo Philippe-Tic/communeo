@@ -438,6 +438,11 @@ export interface MockOptions {
   trial?: { endsInDays: number; requested?: boolean } | { expiredDaysAgo: number; requested?: boolean };
   /** Inscription pas encore approuvée (#337) : par la mairie ou par l'équipe */
   approval?: 'townhall' | 'team';
+  /**
+   * Commune tout juste inscrite : ni code INSEE, ni adresse, téléphone, population ou horaires (l'assistant
+   * les reprend des données publiques). Pour les vidéos de communeo.fr (v2/videos).
+   */
+  freshCommune?: boolean;
 }
 
 export type MockMedia = {
@@ -931,6 +936,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     publicData = 'ok',
     legalMissing = false,
     deployOutcome = 'running',
+    freshCommune = false,
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
@@ -1297,9 +1303,9 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     logo: null as unknown,
     favicon: null as unknown,
     contact_mail: 'mairie@saint-aubin-sur-loire.fr',
-    contact_phone: '03 86 00 00 00' as string | null,
-    address: '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire' as string | null,
-    infos_pratiques: {
+    contact_phone: (freshCommune ? null : '03 86 00 00 00') as string | null,
+    address: (freshCommune ? null : '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire') as string | null,
+    infos_pratiques: (freshCommune ? { opening_hours: null, population: null, latitude: null, longitude: null } : {
       opening_hours: {
         days: {
           monday: [
@@ -1320,7 +1326,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       contact_form_intro: 'Une question ? Le secrétariat vous répond sous 48 heures ouvrées.',
       latitude: 46.7412,
       longitude: 3.7891,
-    } as unknown,
+    }) as unknown,
     mentions_legales: {
       siret: legalMissing ? null : '215 803 205 00017',
       publication_director: legalMissing ? null : 'Claire Martin',
@@ -1372,7 +1378,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       newsletter: { enabled: false },
       meta_description: null,
     } as unknown,
-    code_insee: '58236' as string | null,
+    code_insee: (freshCommune ? null : '58236') as string | null,
     comarquage_audiences: ['particuliers'] as string[] | null,
     open_data_url: null as string | null,
     open_data_platform: null as string | null,

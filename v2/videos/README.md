@@ -19,8 +19,9 @@ polices, logo, courbes de niveau). Outil de production, jamais déployé.
 pnpm videos:captures <id> [--build]   # écrans en 2x + JSON des éléments → public/captures/<id>/
 pnpm videos:voix <id>                 # voix ElevenLabs (ELEVENLABS_API_KEY, ELEVENLABS_VOICE_ID), recalage, sous-titres
 pnpm videos:recaler <id>              # sans ElevenLabs : recale sur public/voix/<id>/voix.mp3 (silences)
+pnpm videos:musique <id>              # musique de fond composée par code → public/musique/<id>.mp3 (+ clic de souris)
 pnpm videos:sous-titres <id>          # <id>.vtt (42 car./ligne, 2 lignes) et <id>-transcription.md
-pnpm videos:render <id>               # MP4 < 20 Mo, aperçu PNG, sous-titres → v2/contenus-site/videos/
+pnpm videos:render <id>               # MP4 < 20 Mo (musique générée si elle manque), aperçu PNG, sous-titres → v2/contenus-site/videos/
 pnpm videos:planche <id> [--pas 0.5] [--rendre]   # planche contact → out/<id>-planche.png
 pnpm videos:studio                    # éditeur Remotion, aperçu en direct
 ```
@@ -44,14 +45,28 @@ Les coordonnées du curseur, des zooms et des saisies viennent du JSON de chaque
 `BrowserFrame` et `PhoneFrame` (cadres), `Camera` (zoom et déplacement doux ; `bornes` pour ne jamais
 montrer une barre coupée), `Cursor` (trajet courbe, clic discret), `Typing` / `TypingCaptures`
 (saisie superposée, ou dévoilement de la capture remplie), `Callout` (3 à 6 mots, sur une zone calme),
-`EndCard`, `Fond`, `VoixOff`, `Brouillon`.
+`EndCard`, `Fond`, `Glissade` (passage d'une scène à l'autre), `Musique` (baissée sous la voix),
+`VoixOff`, `Brouillon`.
 
 ## Voix off
 
 - Avec ElevenLabs : une phrase par segment, voix posée ; chaque segment prend la durée réelle de sa phrase.
 - Sans : enregistrer la voix d'une traite, avec **un silence net (≥ 0,4 s) entre chaque segment**, dans
   `public/voix/<id>/voix.mp3`, puis `pnpm videos:recaler <id>` (`--seuil -35 --silence 0.4` si besoin).
-- Pas de musique forte : au plus une nappe très basse, à ajouter dans la composition.
+- Pas de musique forte : la musique est réglée 9 dB sous la voix, et baisse encore sous chaque phrase.
+
+## Musique et rythme
+
+- `pnpm videos:musique <id>` compose la musique de fond note à note (`scripts/synthe.ts` : corde pincée,
+  nappe, basse, percussions légères, réverbération) : **libre de droits par construction**, rien n'est
+  téléchargé. Elle suit le montage : au `tempo` du script (100 temps/min pour V1), un souffle à chaque
+  changement de scène, un accord final sur la carte de fin.
+- Avec un `tempo`, le calage arrondit chaque scène au temps suivant : les scènes changent sur la musique.
+  Une scène glisse par-dessus la précédente en un temps ; `entree: 'fondu'` dans le script quand elle
+  continue sur le même écran.
+- Pour une autre musique (une piste libre de droits choisie ailleurs) : la déposer à la place de
+  `public/musique/<id>.mp3`. `videos:render` la garde ; `videos:musique` l'écraserait.
+- Chaque clic du curseur s'entend (`public/sons/clic.wav`, généré avec la musique).
 
 ffmpeg et ffprobe sont ceux fournis par Remotion (aucune installation système), réduits : pas de filtre
 `fps` ni `tile`, d'où l'assemblage des planches avec sharp.

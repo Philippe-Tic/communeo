@@ -1,0 +1,16 @@
+{
+  "image": "captures/v1-demo/mise-en-ligne-publication.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/mise-en-ligne",
+  "vue": 900,
+  "elements": {
+    "etat": {
+      "x": 356,
+      "y": 163,
+      "width": 960,
+      "height": 229
+    }
+  }
+}

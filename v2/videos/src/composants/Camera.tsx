@@ -27,8 +27,8 @@ export type VersEcran = (point: Point) => Point;
 
 /** Zoom maximal : au-delà, la capture (2x) deviendrait floue */
 const ZOOM_MAX = 2.2;
-/** Mouvement doux, sans à-coup au départ ni à l'arrivée */
-const DOUX = Easing.bezier(0.45, 0, 0.2, 1);
+/** Mouvement franc mais sans à-coup : démarre vite, se pose en douceur */
+const DOUX = Easing.bezier(0.6, 0, 0.12, 1);
 
 interface Vue {
   echelle: number;
@@ -50,6 +50,15 @@ function vue(cadre: Rect, marge: number, bornes?: Rect): Vue {
     cy = borne(cy, HAUTEUR / echelle, bornes.y, bornes.height);
   }
   return { echelle, cx, cy };
+}
+
+/**
+ * Où tombe un point du contenu à l'écran, une fois la caméra posée sur `cadre` : pour placer une
+ * légende sur une zone calme connue de la capture, sans deviner.
+ */
+export function versEcranPour(cadre: Rect | null, contenu: { largeur: number; hauteur: number }, marge = 90, bornes?: Rect): VersEcran {
+  const { echelle, cx, cy } = vue(cadre ?? { x: 0, y: 0, width: contenu.largeur, height: contenu.hauteur }, marge, bornes);
+  return (p) => ({ x: LARGEUR / 2 + (p.x - cx) * echelle, y: HAUTEUR / 2 + (p.y - cy) * echelle });
 }
 
 export function vueA(frame: number, etapes: EtapeCamera[], contenu: { largeur: number; hauteur: number }, marge: number): Vue {

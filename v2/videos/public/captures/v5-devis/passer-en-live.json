@@ -1,0 +1,33 @@
+{
+  "image": "captures/v5-devis/passer-en-live.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/passer-en-live",
+  "elements": {
+    "siret": {
+      "x": 477,
+      "y": 920,
+      "width": 718,
+      "height": 40
+    },
+    "signataire": {
+      "x": 477,
+      "y": 1195,
+      "width": 351,
+      "height": 40
+    },
+    "qualite": {
+      "x": 844,
+      "y": 1195,
+      "width": 351,
+      "height": 40
+    },
+    "valider": {
+      "x": 477,
+      "y": 1288,
+      "width": 141,
+      "height": 44
+    }
+  }
+}

@@ -8,6 +8,15 @@ import type { SegmentCale } from './script';
 export const LIGNE_MAX = 42;
 export const LIGNES_MAX = 2;
 
+/** Phrases d'un texte (coupure après . ! ? suivis d'une majuscule) */
+export function phrases(texte: string): string[] {
+  return texte
+    .trim()
+    .split(/(?<=[.!?…])\s+(?=[«A-ZÀ-Ý])/u)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
 /** Coupe un texte en lignes de `max` caractères au plus, sans couper les mots */
 export function lignes(texte: string, max = LIGNE_MAX): string[] {
   const resultat: string[] = [];
@@ -24,26 +33,48 @@ export function lignes(texte: string, max = LIGNE_MAX): string[] {
   return resultat;
 }
 
-/**
- * Découpe un texte en sous-titres de 2 lignes au plus. On coupe de préférence après une ponctuation,
- * pour que chaque sous-titre se lise seul.
- */
-export function blocs(texte: string): string[][] {
-  const toutes = lignes(texte);
-  const resultat: string[][] = [];
-  for (let i = 0; i < toutes.length; ) {
-    const une = toutes[i]!;
-    const deux = toutes[i + 1];
-    // Une phrase qui se termine sur la 1re ligne ne déborde pas sur la 2e si la suite est longue
-    if (deux !== undefined && !/[.!?:;]$/.test(une)) {
-      resultat.push([une, deux]);
-      i += 2;
-    } else {
-      resultat.push([une]);
-      i += 1;
-    }
+/** Un morceau de 2 lignes au plus, coupé au plus près du milieu (deux lignes de longueur voisine) */
+function equilibre(texte: string): string[] {
+  if (texte.length <= LIGNE_MAX) return [texte];
+  const mots = texte.split(/\s+/);
+  let meilleur: string[] | null = null;
+  for (let i = 1; i < mots.length; i += 1) {
+    const a = mots.slice(0, i).join(' ');
+    const b = mots.slice(i).join(' ');
+    if (a.length > LIGNE_MAX || b.length > LIGNE_MAX) continue;
+    if (!meilleur || Math.abs(a.length - b.length) < Math.abs(meilleur[0]!.length - meilleur[1]!.length)) meilleur = [a, b];
   }
-  return resultat;
+  return meilleur ?? lignes(texte);
+}
+
+/**
+ * Sous-titres d'une phrase : elle tient en un sous-titre de 2 lignes si possible ; sinon elle est coupée
+ * après une ponctuation (virgule, deux-points), en morceaux de longueur voisine.
+ */
+export function blocsDePhrase(phrase: string): string[][] {
+  const max = LIGNE_MAX * LIGNES_MAX;
+  if (phrase.length <= max && equilibre(phrase).length <= LIGNES_MAX) return [equilibre(phrase)];
+  const morceaux = phrase.split(/(?<=[,:;])\s+/);
+  // Regroupe les morceaux voisins tant qu'ils tiennent en 2 lignes
+  const groupes: string[] = [];
+  for (const morceau of morceaux) {
+    const dernier = groupes.at(-1);
+    if (dernier && `${dernier} ${morceau}`.length <= max && equilibre(`${dernier} ${morceau}`).length <= LIGNES_MAX) groupes[groupes.length - 1] = `${dernier} ${morceau}`;
+    else groupes.push(morceau);
+  }
+  // Un morceau encore trop long (sans ponctuation) : coupé en blocs de 2 lignes
+  return groupes.flatMap((g) => {
+    if (equilibre(g).length <= LIGNES_MAX) return [equilibre(g)];
+    const ls = lignes(g);
+    const blocs: string[][] = [];
+    for (let i = 0; i < ls.length; i += LIGNES_MAX) blocs.push(ls.slice(i, i + LIGNES_MAX));
+    return blocs;
+  });
+}
+
+/** Sous-titres d'un texte : phrase par phrase */
+export function blocs(texte: string): string[][] {
+  return phrases(texte).flatMap(blocsDePhrase);
 }
 
 const horodatage = (secondes: number) => {
@@ -55,17 +86,30 @@ const horodatage = (secondes: number) => {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}.${String(reste).padStart(3, '0')}`;
 };
 
+/** Répartit des sous-titres sur un intervalle, au prorata de leur longueur */
+function repartir(parts: string[][], depart: number, fin: number, cues: string[]) {
+  const total = parts.reduce((n, part) => n + part.join(' ').length, 0);
+  let debut = depart;
+  for (const part of parts) {
+    const duree = ((fin - depart) * part.join(' ').length) / total;
+    cues.push(`${horodatage(debut)} --> ${horodatage(debut + duree)}\n${part.join('\n')}`);
+    debut += duree;
+  }
+}
+
 export function vtt(segments: SegmentCale[]): string {
   const cues: string[] = [];
   for (const segment of segments) {
     if (!segment.voix.trim()) continue;
-    const parts = blocs(segment.voix);
-    const total = parts.reduce((n, part) => n + part.join(' ').length, 0);
-    let debut = segment.debut;
-    for (const part of parts) {
-      const duree = ((segment.fin - segment.debut) * part.join(' ').length) / total;
-      cues.push(`${horodatage(debut)} --> ${horodatage(debut + duree)}\n${part.join('\n')}`);
-      debut += duree;
+    const liste = phrases(segment.voix);
+    const heures = segment.parole?.phrases;
+    if (heures && heures.length === liste.length) {
+      // Chaque phrase sur son passage dans la voix (repéré aux silences)
+      liste.forEach((phrase, i) => repartir(blocsDePhrase(phrase), heures[i]!.debut, heures[i]!.fin, cues));
+    } else {
+      // Sinon, au prorata sur la voix du segment (ou tout le segment)
+      const { debut, fin } = segment.parole ?? segment;
+      repartir(blocs(segment.voix), debut, fin, cues);
     }
   }
   return `WEBVTT\n\n${cues.map((cue, i) => `${i + 1}\n${cue}`).join('\n\n')}\n`;

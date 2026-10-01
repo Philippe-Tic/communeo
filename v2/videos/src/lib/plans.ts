@@ -15,15 +15,30 @@ export interface Plan {
   ou: 'admin' | 'site';
   /** Chemin dans l'admin ou le site */
   chemin: string;
-  /** Thème du site (build de démonstration du renderer), par défaut institutionnel */
+  /**
+   * Site de démonstration (build du renderer) : un thème, ou `essai` (thème Institutionnel, commune en
+   * période d'essai : bandeau « Site en préparation »). Par défaut institutionnel.
+   */
   theme?: string;
+  /** Heure du navigateur (ISO) : horaires « ouvert maintenant », dates relatives */
+  heure?: string;
   appareil?: 'ordinateur' | 'telephone';
   /** Réglages de l'API simulée (utilisateur, alertes, état de mise en ligne…) */
   options?: MockOptions;
   /** Adresse affichée dans la barre du navigateur de la vidéo */
   url: string;
-  /** Préparation avant la capture : remplir un champ, ouvrir un panneau… */
+  /**
+   * Données de démonstration, avant d'ouvrir la page : réponses de l'API simulée remplacées
+   * (`page.route`) pour obtenir un état précis (commune neuve, étape de mise en ligne…)
+   */
+  donnees?: (page: Page) => Promise<void>;
+  /** Préparation avant la capture, par l'interface : remplir un champ, ouvrir un panneau… */
   avant?: (page: Page) => Promise<void>;
+  /**
+   * Toute la hauteur de la page (pour la faire défiler dans le cadre) ; les éléments sont alors
+   * repérés dans la page entière
+   */
+  pleinePage?: boolean;
   /** Éléments repérés : leur rectangle est enregistré dans le JSON (curseur, zooms, saisies) */
   elements?: Record<string, (page: Page) => Locator>;
 }

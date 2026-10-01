@@ -70,11 +70,15 @@ export function Typing({
   );
 }
 
-export function TypingCaptures({ cadre, de, vitesse = 13, rempli, caracteres }: Commun & { rempli: Capture; caracteres: number }) {
+/**
+ * `depuis` : part du champ déjà écrite dans l'écran de base (compléter un texte existant) : le
+ * dévoilement commence là.
+ */
+export function TypingCaptures({ cadre, de, vitesse = 13, rempli, caracteres, depuis = 0 }: Commun & { rempli: Capture; caracteres: number; depuis?: number }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   if (frame < de) return null;
-  const part = tapes(frame, de, fps, vitesse, caracteres) / caracteres;
+  const part = depuis + (1 - depuis) * (tapes(frame, de, fps, vitesse, caracteres) / caracteres);
   return (
     <div style={{ position: 'absolute', left: cadre.x, top: cadre.y, width: cadre.width, height: cadre.height, overflow: 'hidden', clipPath: `inset(0 ${(1 - part) * 100}% 0 0)` }}>
       <Img

@@ -1,0 +1,27 @@
+{
+  "image": "captures/v3-themes/apparence.png",
+  "largeur": 1440,
+  "hauteur": 900,
+  "echelle": 2,
+  "url": "app.communeo.fr/mon-site/apparence",
+  "elements": {
+    "moderne": {
+      "x": 1013,
+      "y": 608,
+      "width": 79,
+      "height": 36
+    },
+    "journal": {
+      "x": 525,
+      "y": 1093,
+      "width": 79,
+      "height": 36
+    },
+    "bourg": {
+      "x": 1013,
+      "y": 1093,
+      "width": 79,
+      "height": 36
+    }
+  }
+}

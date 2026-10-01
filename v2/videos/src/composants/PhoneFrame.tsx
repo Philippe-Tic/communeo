@@ -11,7 +11,7 @@ export const BORD = 14;
 export const ETAT = 50;
 
 /** Hauteur d'écran visible : les captures mobiles sont prises à 844 px de haut */
-export function PhoneFrame({ capture, hauteur = 780, children }: { capture: Capture; hauteur?: number; children?: ReactNode }) {
+export function PhoneFrame({ capture, hauteur = 780, defilement = 0, children }: { capture: Capture; hauteur?: number; defilement?: number; children?: ReactNode }) {
   const largeur = capture.largeur;
   return (
     <div
@@ -47,8 +47,10 @@ export function PhoneFrame({ capture, hauteur = 780, children }: { capture: Capt
           </span>
         </div>
         <div style={{ position: 'absolute', left: 0, top: ETAT, width: largeur, height: hauteur, overflow: 'hidden' }}>
-          <Img src={staticFile(capture.image)} style={{ display: 'block', width: largeur, height: capture.hauteur }} />
-          {children}
+          <div style={{ position: 'absolute', left: 0, top: 0, width: largeur, height: capture.hauteur, transform: `translateY(${-defilement}px)` }}>
+            <Img src={staticFile(capture.image)} style={{ display: 'block', width: largeur, height: capture.hauteur }} />
+            {children}
+          </div>
         </div>
       </div>
     </div>

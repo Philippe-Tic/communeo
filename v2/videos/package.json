@@ -12,7 +12,8 @@
     "render": "tsx scripts/render.ts",
     "planche": "tsx scripts/planche.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "musique": "tsx scripts/musique.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.531",

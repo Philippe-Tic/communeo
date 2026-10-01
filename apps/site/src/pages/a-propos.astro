@@ -2,14 +2,19 @@
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Base from '../layouts/Base.astro';
+import { DEFINITION } from '../lib/seo';
 import { CONTACT_EMAIL } from '../lib/site';
 ---
 
-<Base titre="À propos de Communeo · Communeo" description="Communeo est édité par Philippe Chevreul, entrepreneur individuel.">
+<Base
+  titre="À propos de Communeo · Communeo"
+  description="Communeo, logiciel en ligne français de site internet pour les mairies, est édité par Philippe Chevreul, entrepreneur individuel près de Rouen."
+>
   <BandeauPage surtitre="À propos" titre="Qui fait Communeo" seed={2.8} />
 
   <section class="section corps" aria-labelledby="t-nom">
     <div class="pile contenu">
+      <p class="texte">{DEFINITION}</p>
       <div class="pile" style="gap:14px">
         <h2 id="t-nom" class="h2">Philippe Chevreul</h2>
         <p class="texte">
@@ -32,6 +37,14 @@ import { CONTACT_EMAIL } from '../lib/site';
         <div>
           <dt>SIREN</dt>
           <dd class="chiffres">911 592 764</dd>
+        </div>
+        <div>
+          <dt>Siège</dt>
+          <dd>Déville-lès-Rouen (Seine-Maritime)</dd>
+        </div>
+        <div>
+          <dt>Données des communes</dt>
+          <dd>Hébergées en France, chez OVH à Roubaix</dd>
         </div>
         <div>
           <dt>Contact</dt>

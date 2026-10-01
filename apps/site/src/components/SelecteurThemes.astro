@@ -34,7 +34,7 @@ const [premier] = THEMES_PRESENTES;
     <div class="apercus">
       {
         THEMES_PRESENTES.map((theme, index) => (
-          <div class="apercu" data-apercu={theme.key} aria-hidden={index === 0 ? undefined : 'true'}>
+          <div class:list={['apercu', { vu: index === 0 }]} data-apercu={theme.key} aria-hidden={index === 0 ? undefined : 'true'}>
             <Navigateur
               src={theme.capture}
               adresse="mairie-saint-aubin.fr"
@@ -72,7 +72,12 @@ const [premier] = THEMES_PRESENTES;
       buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
       previews.forEach((preview) => {
         const on = preview.dataset.apercu === button.dataset.theme;
-        preview.classList.toggle('actif', on);
+        // Un aperçu jamais montré n'est pas affiché (son image n'est pas chargée) : affiché au premier
+        // choix, il apparaît en fondu à l'image suivante
+        if (on && !preview.classList.contains('vu')) {
+          preview.classList.add('vu');
+          requestAnimationFrame(() => requestAnimationFrame(() => preview.classList.add('actif')));
+        } else preview.classList.toggle('actif', on);
         if (on) preview.removeAttribute('aria-hidden');
         else preview.setAttribute('aria-hidden', 'true');
       });
@@ -182,6 +187,11 @@ const [premier] = THEMES_PRESENTES;
     transition:
       opacity 0.45s var(--ease),
       visibility 0.45s;
+  }
+
+  /* Aperçus jamais montrés : pas affichés, donc leur image (lazy) n'est pas chargée */
+  .apercu:not(.vu) {
+    display: none;
   }
 
   .apercu:first-child,

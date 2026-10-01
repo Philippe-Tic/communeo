@@ -1,7 +1,8 @@
 ---
 /**
  * En-tête : lien d'évitement, logo, navigation principale. Sous 1240 px, le bouton « Menu » déplie la
- * navigation (sans JavaScript, elle reste dépliée).
+ * navigation (sans JavaScript, elle reste dépliée). Avec JavaScript, elle est repliée dès le premier
+ * rendu (classe `js` posée dans Base.astro avant l'affichage) : la page ne saute pas au chargement.
  */
 import { LOGIN_URL, NAV, TRIAL_URL, type NavKey } from '../lib/site';
 import Icone from './Icone.astro';
@@ -57,6 +58,7 @@ const { courant } = Astro.props;
       button.setAttribute('aria-expanded', String(open));
       label.textContent = open ? 'Fermer' : 'Menu';
       menu.hidden = !open;
+      menu.classList.toggle('ouvert', open);
     };
     button.hidden = false;
     set(false);
@@ -189,6 +191,15 @@ const { courant } = Astro.props;
   }
 
   .bouton-menu[hidden] {
+    display: none;
+  }
+
+  /* Avec JavaScript : bouton visible et menu replié avant même l'exécution du script */
+  :global(html.js) .bouton-menu[hidden] {
+    display: flex;
+  }
+
+  :global(html.js) .menu-mobile:not(.ouvert) {
     display: none;
   }
 

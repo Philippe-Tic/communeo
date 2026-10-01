@@ -13,6 +13,7 @@ import TelephoneSite from '../components/TelephoneSite.astro';
 import Topo from '../components/Topo.astro';
 import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
+import { DEFINITION, logiciel } from '../lib/seo';
 import { TRIAL_URL } from '../lib/site';
 import { PRIX_MAX, PRIX_MIN, TRANCHES } from '../lib/tarifs';
 
@@ -44,7 +45,7 @@ const promesses = [
   {
     n: '03',
     t: 'Conforme',
-    p: 'Accessibilité, RGPD, mentions légales, démarches Service-Public : les pages obligatoires sont générées, et les thèmes testés en continu.',
+    p: 'Accessibilité (RGAA), RGPD, mentions légales, démarches Service-Public : les pages obligatoires sont générées, et les thèmes testés en continu.',
   },
 ];
 
@@ -103,6 +104,7 @@ const faq = [
 <Base
   titre="Site internet pour mairie, prêt en une journée · Communeo"
   description="Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire. Essai gratuit 30 jours, sans engagement."
+  jsonLd={[logiciel()]}
 >
   <!-- 1 Accroche -->
   <section class="accroche sombre">
@@ -118,7 +120,7 @@ const faq = [
             ></span
           > en ligne.
         </h1>
-        <p class="chapo-accroche">Le site internet de votre commune, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
+        <p class="chapo-accroche">Le site internet de votre mairie, prêt en une journée, conforme et facile à tenir à jour, sans prestataire.</p>
         <div class="ctas">
           <a class="bouton bouton--grand bouton--papier bouton--fleche" href={TRIAL_URL}>Essayer gratuitement 30 jours<Icone nom="fleche" /></a>
           <a class="bouton bouton--grand bouton--contour" href="/tarifs">Voir les tarifs</a>
@@ -146,6 +148,7 @@ const faq = [
   <section class="section video-demo" aria-labelledby="t-video">
     <div class="conteneur pile video-demo-interieur">
       <h2 id="t-video" class="h2">De l’inscription au site en ligne, en une minute et demie</h2>
+      <p class="texte definition">{DEFINITION}</p>
       <Video id="v1-demo" libelle="La démonstration · 1 min 24" />
     </div>
   </section>
@@ -358,7 +361,7 @@ const faq = [
         <span class="surtitre">Conformité</span>
         <h2 id="t-conf" class="h2">Ce que la loi demande, point par point</h2>
         <p class="texte">
-          L’écran Conformité liste les obligations du site d’une commune : mentions légales, RGPD (le règlement sur les données personnelles), accessibilité, publication des actes. Pour
+          L’écran Conformité liste les obligations du site d’une commune : mentions légales, RGPD (le règlement sur les données personnelles), accessibilité (le RGAA, référentiel des services publics), publication des actes. Pour
           chaque point, il indique l’écran où le compléter.
         </p>
         <ul class="coches">
@@ -1051,6 +1054,11 @@ const faq = [
   /* Vidéo de démonstration */
   .video-demo {
     padding-bottom: 0;
+  }
+
+  .definition {
+    max-width: 52em;
+    margin: 0 0 8px;
   }
 
   .video-demo-interieur {

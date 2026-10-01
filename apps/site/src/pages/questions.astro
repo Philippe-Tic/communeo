@@ -2,6 +2,7 @@
 import Accordeon from '../components/Accordeon.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Base from '../layouts/Base.astro';
+import { faq } from '../lib/seo';
 import { CONTACT_EMAIL } from '../lib/site';
 import { PRIX_MAX, PRIX_MIN } from '../lib/tarifs';
 
@@ -17,6 +18,10 @@ const groupes = [
       {
         q: 'Combien de temps pour avoir un site en ligne ?',
         a: 'L’inscription prend deux minutes. L’assistant de création pré-remplit aussitôt le site avec les données publiques de la commune, et il est en ligne sur son adresse Communeo dès que l’inscription est validée. Comptez une journée pour le compléter.',
+      },
+      {
+        q: 'Communeo convient-il aux petites communes et aux communes rurales ?',
+        a: `Oui, c’est pour elles qu’il est pensé : le prix suit la population INSEE (${PRIX_MIN} € HT par an pour moins de 500 habitants), l’administration ne demande aucune compétence technique, et le site reste lisible sur téléphone, même avec une connexion lente.`,
       },
       {
         q: 'Qui peut inscrire la commune ?',
@@ -73,7 +78,7 @@ const groupes = [
     items: [
       {
         q: 'Le site est-il accessible aux personnes handicapées ?',
-        a: 'Les thèmes sont testés automatiquement à chaque modification : contrastes, structure, focus clavier, affichage à 320 px et texte agrandi à 200 %, complétés par des vérifications au lecteur d’écran. La conformité finale dépend aussi de vos contenus : textes alternatifs des images, documents PDF.',
+        a: 'Le référentiel des sites publics est le RGAA (référentiel général d’amélioration de l’accessibilité), fondé sur les critères WCAG. Les thèmes sont testés automatiquement à chaque modification selon les critères WCAG 2.2 AA : contrastes, structure, focus clavier, affichage à 320 px et texte agrandi à 200 %, complétés par des vérifications au lecteur d’écran. La conformité finale dépend aussi de vos contenus : textes alternatifs des images, documents PDF.',
       },
       {
         q: 'Le site dépose-t-il des cookies ?',
@@ -116,6 +121,10 @@ const groupes = [
         a: 'Ils sont conservés six mois après la fin de l’abonnement ou de l’essai, puis supprimés. Sur simple demande, vous recevez une archive complète : votre site tel qu’il est publié, vos contenus, vos fichiers d’origine, vos messages et vos inscrits.',
       },
       {
+        q: 'Où sont hébergées les données de la commune ?',
+        a: 'En France : l’application et les données des communes sont hébergées chez OVH, à Roubaix. Les sites publics, qui ne contiennent que des informations publiées, sont diffusés par Netlify, pour s’afficher vite partout.',
+      },
+      {
         q: 'Nos données sont-elles sauvegardées ?',
         a: 'Oui : sauvegardes chiffrées quotidiennes, conservées 90 jours hors du serveur. Chaque commune ne voit que ses propres données.',
       },
@@ -129,6 +138,7 @@ const groupes = [
   titre="Questions fréquentes sur le site de mairie · Communeo"
   description="Compétences, délais, nom de domaine, accessibilité, cookies, facturation Chorus Pro, fin d’essai : les réponses aux questions des mairies."
   courant="questions"
+  jsonLd={[faq(groupes.flatMap((g) => g.items))]}
 >
   <BandeauPage
     surtitre="Questions fréquentes"

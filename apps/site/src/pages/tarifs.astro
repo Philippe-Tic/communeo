@@ -5,8 +5,9 @@ import BandeauPage from '../components/BandeauPage.astro';
 import Icone from '../components/Icone.astro';
 import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
+import { faq as faqLd, logiciel } from '../lib/seo';
 import { TRIAL_URL } from '../lib/site';
-import { TRANCHES, trancheFor } from '../lib/tarifs';
+import { PRIX_MAX, PRIX_MIN, TRANCHES, trancheFor } from '../lib/tarifs';
 
 const POPULATION = 800;
 const EXEMPLES = [180, 800, 2400, 12000];
@@ -60,6 +61,8 @@ const faq = [
   titre="Tarifs du site internet pour commune · Communeo"
   description="De 290 € à 1 290 € HT par an selon la population INSEE, sans frais de mise en service. Devis en ligne, facture Chorus Pro, paiement par virement."
   courant="tarifs"
+  jsonLd={[logiciel(), faqLd(faq)]}
+  partage={{ src: '/partage-tarifs.png', alt: `Tarifs de Communeo : de ${PRIX_MIN} à ${PRIX_MAX} € HT par an, selon la population INSEE, sans frais de mise en service.` }}
 >
   <BandeauPage
     surtitre="Tarifs"

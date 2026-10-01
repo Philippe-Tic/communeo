@@ -75,3 +75,31 @@ ffmpeg et ffprobe sont ceux fournis par Remotion (aucune installation système),
 
 Toujours regarder la planche (`pnpm videos:planche <id> --pas 0.5`) avant de livrer : bords coupés,
 légende sur un libellé, texte illisible, fondu raté se voient tout de suite.
+
+## Faire une nouvelle vidéo (V2, V3, V5)
+
+Brief et déroulé : `v2/contenus-site/medias-a-produire.md`. Cible : une secrétaire de mairie sans
+compétence technique ; vouvoiement, ton posé, aucun superlatif marketing.
+
+1. `src/videos/<id>/script.ts` : segments `{ debut, fin, voix, ecran }` (durées prévues = minimum),
+   `tempo: 100`, `apercu: { segment, apres }`, `prononciation` pour « Communeo » (« Communéo ») et
+   « communeo.fr » (« communéo point f r »), `entree: 'fondu'` quand une scène continue sur le même écran.
+2. `captures.ts` : les écrans, uniquement l'admin simulé (`apps/admin/e2e/api.ts`, options et routes
+   `donnees` si un état manque) et les sites de démonstration ; jamais une image retouchée. Les photos
+   de `packages/fixtures/photos/` remplacent les emplacements hachurés (Pexels : demander avant de
+   télécharger une nouvelle photo, noter sa source dans le README du dossier). `pnpm videos:captures <id>`.
+3. `Composition.tsx` : le montage commun (`composants/Montage.tsx` : `Scenes`, `Navigateur`, `rythme`,
+   `Entree`, `Fin`), comme `src/videos/v1-demo/Composition.tsx` ; l'enregistrer dans `src/Root.tsx`.
+   Rythme vif : glissades, clics audibles, légendes en ressort ; un seul mouvement de caméra à la fois,
+   jamais pendant un changement d'écran ; 1 ou 2 légendes pour 20 s, jamais le texte de la voix.
+4. `pnpm videos:voix <id>` (ElevenLabs, `.env`), `pnpm videos:musique <id>`, `pnpm videos:render <id>`.
+5. Avant de livrer : planche (`pnpm videos:planche <id> --pas 0.5`) regardée image par image, chaque
+   sous-titre sur sa phrase (`<id>.vtt`), taille < 20 Mo, image d'aperçu. Le MP4 reste hors de git.
+
+## Plusieurs vidéos en parallèle (git worktree)
+
+Une vidéo par copie de travail. Les ports des serveurs de capture dépendent de la vidéo (`ports()` dans
+`scripts/outils.ts`) ; les fichiers ignorés par git (`v2/videos/.env`, builds de démonstration
+`apps/renderer/.e2e/`) sont lus dans le dépôt principal quand la copie n'en a pas (`partage()`). Dans la
+copie : `pnpm install`, puis les commandes habituelles (le build de l'admin se fait au premier
+`videos:captures`).

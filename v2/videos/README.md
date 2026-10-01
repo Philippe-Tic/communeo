@@ -21,7 +21,7 @@ pnpm videos:voix <id>                 # voix ElevenLabs (ELEVENLABS_API_KEY, ELE
 pnpm videos:recaler <id>              # sans ElevenLabs : recale sur public/voix/<id>/voix.mp3 (silences)
 pnpm videos:musique <id>              # musique de fond composée par code → public/musique/<id>.mp3 (+ clic de souris)
 pnpm videos:sous-titres <id>          # <id>.vtt (42 car./ligne, 2 lignes) et <id>-transcription.md
-pnpm videos:render <id>               # MP4 < 20 Mo (musique générée si elle manque), aperçu PNG, sous-titres → v2/contenus-site/videos/
+pnpm videos:render <id>               # MP4 < 20 Mo (musique générée si elle manque), aperçu PNG, sous-titres → apps/site/src/videos/ (servis par communeo.fr)
 pnpm videos:planche <id> [--pas 0.5] [--rendre]   # planche contact → out/<id>-planche.png
 pnpm videos:studio                    # éditeur Remotion, aperçu en direct
 ```
@@ -94,7 +94,8 @@ compétence technique ; vouvoiement, ton posé, aucun superlatif marketing.
    jamais pendant un changement d'écran ; 1 ou 2 légendes pour 20 s, jamais le texte de la voix.
 4. `pnpm videos:voix <id>` (ElevenLabs, `.env`), `pnpm videos:musique <id>`, `pnpm videos:render <id>`.
 5. Avant de livrer : planche (`pnpm videos:planche <id> --pas 0.5`) regardée image par image, chaque
-   sous-titre sur sa phrase (`<id>.vtt`), taille < 20 Mo, image d'aperçu. Le MP4 reste hors de git.
+   sous-titre sur sa phrase (`<id>.vtt`), taille < 20 Mo, image d'aperçu. Le rendu est servi par
+   communeo.fr (`apps/site/src/videos/`, MP4 versionné) : un nouveau rendu se voit au déploiement suivant.
 
 ## Plusieurs vidéos en parallèle (git worktree)
 

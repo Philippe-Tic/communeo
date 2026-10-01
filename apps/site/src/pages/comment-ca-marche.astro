@@ -1,6 +1,7 @@
 ---
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
+import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
 
 const etapes = [
@@ -60,6 +61,12 @@ const etapes = [
     chapo="Comptez deux minutes pour l’inscription et une journée pour compléter le site. Vous avez ensuite trente jours pour décider."
     seed={3.1}
   />
+
+  <section class="section video-demo" aria-label="Vidéo de démonstration">
+    <div class="conteneur video-demo-interieur">
+      <Video id="v1-demo" libelle="La démonstration · 1 min 24" />
+    </div>
+  </section>
 
   <section class="section etapes-section" aria-labelledby="t-etapes">
     <div class="pile" style="max-width:1100px;margin:0 auto;gap:40px">
@@ -279,5 +286,13 @@ const etapes = [
     margin: 0;
     font-size: 1.0625rem;
     line-height: 1.55;
+  }
+
+  .video-demo {
+    padding-bottom: 0;
+  }
+
+  .video-demo-interieur {
+    max-width: 1000px;
   }
 </style>

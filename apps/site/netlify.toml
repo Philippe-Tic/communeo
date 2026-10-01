@@ -54,3 +54,9 @@
   for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Sous-titres des vidéos (lus par le lecteur du navigateur)
+[[headers]]
+  for = "/_astro/*.vtt"
+  [headers.values]
+    Content-Type = "text/vtt; charset=utf-8"

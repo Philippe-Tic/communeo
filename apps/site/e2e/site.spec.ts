@@ -1,7 +1,7 @@
 /**
  * Site de Communeo : chaque page passe axe (WCAG 2.2 AA), a un seul titre de niveau 1, s'affiche à
  * 320 px sans défilement horizontal ; menu, questions, sélecteur de thèmes, simulateur de tarifs et
- * formulaire de contact fonctionnent au clavier et sont annoncés.
+ * formulaire de contact fonctionnent au clavier et sont annoncés ; les vidéos ne se chargent qu’au clic.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
@@ -184,5 +184,40 @@ test.describe('formulaire de contact', () => {
     await page.getByRole('button', { name: 'Envoyer le message' }).click();
     await expect(page.locator('[data-echec]')).toContainText('Plusieurs messages ont déjà été envoyés.');
     await expect(page.getByLabel('Message', { exact: true })).toHaveValue('Bonjour');
+  });
+});
+
+test.describe('vidéos', () => {
+  test('rien ne se charge avant le clic, puis le lecteur du navigateur prend la main', async ({ page }) => {
+    const mp4: string[] = [];
+    page.on('request', (requete) => requete.url().endsWith('.mp4') && mp4.push(requete.url()));
+    await page.goto('/tarifs');
+    const figure = page.locator('[data-video]').first();
+    const video = figure.locator('video');
+    await expect(video).toHaveAttribute('preload', 'none');
+    await expect(video.locator('track[kind="captions"][srclang="fr"]')).toHaveAttribute('default', '');
+    expect(await video.evaluate((v: HTMLVideoElement) => v.paused && !v.autoplay)).toBe(true);
+    expect(mp4).toHaveLength(0);
+    const lire = figure.getByRole('button', { name: 'Lire la vidéo : Le devis en ligne · 20 s' });
+    await lire.click();
+    await expect(lire).toBeHidden();
+    expect(await video.evaluate((v: HTMLVideoElement) => v.controls)).toBe(true);
+    await expect(video).toBeFocused();
+    // Transcription dépliable sous la vidéo
+    await figure.getByText('Lire la transcription').click();
+    await expect(figure.locator('.texte')).toContainText('Chorus Pro');
+  });
+
+  test('« Voir la vidéo » ouvre une fenêtre, Échap la ferme et rend le focus au lien', async ({ page }) => {
+    await page.goto('/themes');
+    const lien = page.getByRole('link', { name: 'Un contenu, quatre thèmes · 15 s' });
+    await lien.click();
+    const fenetre = page.getByRole('dialog', { name: 'Un contenu, quatre thèmes' });
+    await expect(fenetre).toBeVisible();
+    await expect(fenetre.getByRole('button', { name: /Lire la vidéo : Un contenu, quatre thèmes/ })).toBeVisible();
+    expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+    await page.keyboard.press('Escape');
+    await expect(fenetre).toBeHidden();
+    await expect(lien).toBeFocused();
   });
 });

@@ -3,6 +3,7 @@ import Accordeon from '../components/Accordeon.astro';
 import AppelFinal from '../components/AppelFinal.astro';
 import BandeauPage from '../components/BandeauPage.astro';
 import Icone from '../components/Icone.astro';
+import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
 import { TRIAL_URL } from '../lib/site';
 import { TRANCHES, trancheFor } from '../lib/tarifs';
@@ -180,7 +181,7 @@ const faq = [
 
   <!-- Pour votre secrétariat -->
   <section class="section fond-blanc mentions-section" aria-labelledby="t-mentions">
-    <div class="conteneur">
+    <div class="conteneur mentions-grille">
       <div class="pile mentions-bloc">
         <h2 id="t-mentions" class="titre-mentions">Pour votre secrétariat</h2>
         <dl class="mentions">
@@ -194,6 +195,7 @@ const faq = [
           }
         </dl>
       </div>
+      <Video id="v5-devis" libelle="Le devis en ligne · 20 s" compact />
     </div>
   </section>
 
@@ -603,6 +605,13 @@ const faq = [
   }
 
   /* Pour votre secrétariat */
+  .mentions-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+    gap: clamp(32px, 4vw, 64px);
+    align-items: start;
+  }
+
   .mentions-bloc {
     gap: 18px;
   }

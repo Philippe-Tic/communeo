@@ -1,4 +1,4 @@
-# Rendus de travail (les vidéos finales vont dans v2/contenus-site/videos/)
+# Rendus de travail (les vidéos finales vont dans apps/site/src/videos/, servies par communeo.fr)
 out/
 # Captures et voix : régénérées par pnpm videos:captures / videos:voix. Les JSON des captures (taille,
 # éléments repérés) restent versionnés : les compositions les importent (typecheck en CI). Les images de

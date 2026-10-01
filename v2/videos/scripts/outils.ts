@@ -21,7 +21,8 @@ export function partage(chemin: string): string {
   return existsSync(ici) ? ici : join(RACINE_PRINCIPALE, chemin);
 }
 export const VIDEOS = fileURLToPath(new URL('../', import.meta.url));
-export const SORTIE_FINALE = fileURLToPath(new URL('../../contenus-site/videos/', import.meta.url));
+/** Vidéos finales : dans le site communeo.fr, qui les sert (apps/site/src/videos/) */
+export const SORTIE_FINALE = fileURLToPath(new URL('../../../apps/site/src/videos/', import.meta.url));
 
 export const IDS = ['v1-demo', 'v2-alerte', 'v3-themes', 'v5-devis', 'test'] as const;
 
@@ -108,5 +109,5 @@ export async function charger(id: string): Promise<{ script: import('../src/lib/
   return { script, timings, fichierTimings };
 }
 
-/** Dossier de sortie : v2/contenus-site/videos/ pour les vraies vidéos, out/ pour la vidéo de test */
+/** Dossier de sortie : apps/site/src/videos/ pour les vraies vidéos, out/ pour la vidéo de test */
 export const dossierSortie = (id: string) => (id === 'test' ? `${VIDEOS}out/` : SORTIE_FINALE);

@@ -1,8 +1,9 @@
 {
-  "image": "captures/v3-themes/journal.png",
+  "image": "captures/v3-themes/site-journal.png",
   "largeur": 1440,
-  "hauteur": 900,
+  "hauteur": 2946,
   "echelle": 2,
   "url": "saint-aubin.communeo.fr",
+  "vue": 900,
   "elements": {}
 }

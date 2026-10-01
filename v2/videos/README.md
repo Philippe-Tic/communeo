@@ -35,7 +35,7 @@ pnpm videos:studio                    # éditeur Remotion, aperçu en direct
   (INSEE, Annuaire), devis et SIRET passent par ce mock : aucun appel à une API externe.
 - **Site** : le site de démonstration construit par le renderer depuis les fixtures
   (`E2E_THEMES=institutionnel,moderne,journal,bourg node e2e/build.mjs` dans apps/renderer).
-- **Thèmes (V3)** : `apps/site/scripts/captures-themes.mjs` réutilisé en 2x (`--echelle 2 --sortie`).
+- **Thèmes (V3)** : l'aperçu de l'écran Apparence sert le build de démonstration du thème demandé (`?theme=<id>`).
 
 Les coordonnées du curseur, des zooms et des saisies viennent du JSON de chaque capture
 (`element(capture, 'nom')`) : aucune coordonnée devinée.

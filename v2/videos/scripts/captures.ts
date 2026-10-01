@@ -86,22 +86,35 @@ async function contexte(browser: Browser, plan: Plan): Promise<BrowserContext> {
 
 const TYPES: Record<string, string> = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.json': 'application/json' };
 
+/** Thèmes des builds de démonstration servis par l'aperçu */
+const THEMES_APERCU = ['institutionnel', 'moderne', 'journal', 'bourg'];
+
+/** Thème demandé à l'aperçu (`?theme=<id>`, comme le vrai serveur de preview) : par la page, ou par celle qui la charge */
+function themeApercu(url: URL, referent?: string): string | undefined {
+  const theme = url.searchParams.get('theme') ?? (referent?.startsWith('http://preview.test/') ? new URL(referent).searchParams.get('theme') : null);
+  return theme && THEMES_APERCU.includes(theme) ? theme : undefined;
+}
+
 /**
  * Aperçu de l'éditeur : les vraies pages du site de démonstration (comme les captures de la doc) plutôt
- * que la page simulée des tests. Une adresse du mock est rapprochée d'une page du même type.
+ * que la page simulée des tests. Une adresse du mock est rapprochée d'une page du même type. Le thème
+ * vient de l'adresse (`theme`, écran Apparence), Institutionnel par défaut ; un fichier absent de son
+ * build (police chargée par une feuille de style, sans le paramètre) est cherché dans les autres.
  */
 async function vraiApercu(page: Page) {
-  const site = `${partage('apps/renderer/.e2e/institutionnel')}/`;
-  if (!existsSync(site)) return;
+  if (!existsSync(`${partage('apps/renderer/.e2e/institutionnel')}/`)) return;
   await page.route('http://preview.test/**', (route) => {
-    const { pathname } = new URL(route.request().url());
+    const url = new URL(route.request().url());
+    const { pathname } = url;
+    const demande = themeApercu(url, route.request().headers().referer) ?? 'institutionnel';
+    const sites = [demande, ...THEMES_APERCU.filter((t) => t !== demande)].map((t) => `${partage(`apps/renderer/.e2e/${t}`)}/`);
     const candidats = [
       pathname === '/' ? 'index.html' : pathname.slice(1),
       `${pathname.slice(1)}.html`,
       pathname.startsWith('/actualites/') ? 'actualites/reouverture-de-la-mediatheque.html' : '',
       extname(pathname) ? '' : 'salle-des-fetes.html',
     ].filter(Boolean);
-    const fichier = candidats.map((c) => `${site}${c}`).find((p) => existsSync(p) && !p.endsWith('/'));
+    const fichier = sites.flatMap((site) => candidats.map((c) => `${site}${c}`)).find((p) => existsSync(p) && !p.endsWith('/'));
     if (!fichier) return route.fulfill({ status: 404, body: '' });
     return route.fulfill({ status: 200, contentType: TYPES[extname(fichier)] ?? 'application/octet-stream', body: readFileSync(fichier) });
   });

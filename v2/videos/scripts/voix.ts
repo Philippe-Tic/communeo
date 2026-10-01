@@ -4,7 +4,8 @@
  * Une phrase par segment (voix posée, débit calme), dans public/voix/<vidéo>/<n>.mp3 ; les segments sont
  * ensuite recalés sur la durée réelle de chaque phrase (timings.json), puis les sous-titres regénérés.
  * Variables : ELEVENLABS_API_KEY (obligatoire), ELEVENLABS_VOICE_ID (voix française choisie dans la
- * bibliothèque ElevenLabs), ELEVENLABS_MODEL (défaut eleven_multilingual_v2).
+ * bibliothèque ElevenLabs), ELEVENLABS_MODEL (défaut eleven_multilingual_v2), lues dans l'environnement ou
+ * dans v2/videos/.env (ignoré par git : la clé n'est jamais commitée).
  * Sans clé : déposer une piste public/voix/<vidéo>/voix.mp3 et lancer `pnpm videos:recaler <vidéo>`.
  *
  * `--systeme` : voix PROVISOIRE de macOS (`say`, voix Thomas) pour caler le montage sans ElevenLabs ;
@@ -19,6 +20,12 @@ import { phrases } from '../src/lib/sous-titres';
 import type { Timings } from '../src/lib/script';
 import { ecrireSousTitres } from './sous-titres';
 import { charger, dureeAudio, remotionOutil, VIDEOS, videoDemandee } from './outils';
+
+try {
+  process.loadEnvFile(join(VIDEOS, '.env'));
+} catch {
+  // pas de fichier .env : variables d'environnement seules
+}
 
 const id = videoDemandee();
 const systeme = process.argv.includes('--systeme');

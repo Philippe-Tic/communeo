@@ -1,1 +1,54 @@
-{ "source": "estimation", "audio": null, "segments": [] }
+{
+  "source": "elevenlabs",
+  "audio": {
+    "segments": [
+      "voix/v3-themes/01.mp3",
+      "voix/v3-themes/02.mp3",
+      "voix/v3-themes/03.mp3"
+    ]
+  },
+  "segments": [
+    {
+      "debut": 0,
+      "fin": 3.6,
+      "parole": {
+        "debut": 0.4,
+        "fin": 2.986,
+        "phrases": [
+          {
+            "debut": 0.4,
+            "fin": 2.986
+          }
+        ]
+      }
+    },
+    {
+      "debut": 3.6,
+      "fin": 10.8,
+      "parole": {
+        "debut": 4,
+        "fin": 9.042,
+        "phrases": [
+          {
+            "debut": 4,
+            "fin": 9.042
+          }
+        ]
+      }
+    },
+    {
+      "debut": 10.8,
+      "fin": 14.4,
+      "parole": {
+        "debut": 11.2,
+        "fin": 12.767,
+        "phrases": [
+          {
+            "debut": 11.2,
+            "fin": 12.767
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1588,6 +1588,26 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       };
       return json({ data: q.startsWith('saint-aubin') || q === '58300' ? [match] : [] });
     }
+    // Emplacement de la commune (#362) : Base adresse nationale simulée
+    if (url.pathname === '/api/onboarding/places') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      const q = (url.searchParams.get('q') ?? '').toLowerCase();
+      const context = '58, Nièvre, Bourgogne-Franche-Comté';
+      const places = [
+        { label: '1 Place de la Mairie 58300 Saint-Aubin-sur-Loire', context, kind: 'adresse', latitude: 46.74389, longitude: 3.79052 },
+        { label: 'Place de la Mairie 58300 Saint-Aubin-sur-Loire', context, kind: 'rue', latitude: 46.7437, longitude: 3.7901 },
+        { label: 'Saint-Aubin-sur-Loire', context, kind: 'commune', latitude: 46.7412, longitude: 3.7891 },
+      ];
+      return json({
+        data: q.includes('mairie') ? places.slice(0, 2) : q.startsWith('saint-aubin') ? places.slice(2) : [],
+      });
+    }
+    if (url.pathname === '/api/onboarding/places/commune') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      return json({ data: { name: 'Saint-Aubin-sur-Loire', postalCode: '58300' } });
+    }
     if (url.pathname === '/api/onboarding/communes/58236') {
       if (publicData === 'down')
         return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);

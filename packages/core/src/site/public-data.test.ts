@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fromGeo, hoursFromAnnuaire, townHallFromAnnuaire } from './public-data';
+import { fromGeo, hoursFromAnnuaire, placesFromGeocoding, townHallFromAnnuaire } from './public-data';
 
 // Extraits réels des API (Saint-Pierre-le-Moûtier, 58264)
 const geo = {
@@ -57,5 +57,28 @@ describe('données publiques', () => {
     expect(hoursFromAnnuaire([])).toBeNull();
     expect(hoursFromAnnuaire('pas du json')).toBeNull();
     expect(townHallFromAnnuaire({ siret: '123' })).toEqual({ address: null, phone: null, email: null, siret: null, hours: null });
+  });
+});
+
+describe('géocodage (Base adresse nationale, #362)', () => {
+  it('lieux trouvés : libellé, contexte, nature, latitude et longitude dans le bon ordre', () => {
+    const context = '58, Nièvre, Bourgogne-Franche-Comté';
+    const response = {
+      type: 'FeatureCollection',
+      features: [
+        { geometry: { type: 'Point', coordinates: [3.1374, 46.7915] }, properties: { label: 'Saint-Pierre-le-Moûtier', context, type: 'municipality' } },
+        {
+          geometry: { type: 'Point', coordinates: [3.1402, 46.7921] },
+          properties: { label: "33 Place de l'Église 58240 Saint-Pierre-le-Moûtier", context, type: 'housenumber' },
+        },
+        { geometry: null, properties: { label: 'Sans position', type: 'street' } },
+      ],
+    };
+    expect(placesFromGeocoding(response)).toEqual([
+      { label: 'Saint-Pierre-le-Moûtier', context, kind: 'commune', latitude: 46.7915, longitude: 3.1374 },
+      { label: "33 Place de l'Église 58240 Saint-Pierre-le-Moûtier", context, kind: 'adresse', latitude: 46.7921, longitude: 3.1402 },
+    ]);
+    expect(placesFromGeocoding({})).toEqual([]);
+    expect(placesFromGeocoding(null)).toEqual([]);
   });
 });

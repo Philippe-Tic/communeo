@@ -1,6 +1,6 @@
 /**
  * Informations de la commune (handoff 6.10, ticket #143) : identité (nom, logo, favicon, population,
- * coordonnées GPS), coordonnées de la mairie, horaires d'ouverture et fermetures exceptionnelles.
+ * emplacement sur la carte, #362), coordonnées de la mairie, horaires d'ouverture et fermetures exceptionnelles.
  * Bouton « Enregistrer » explicite ; l'adresse est requise pour la conformité (mentions légales).
  */
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,6 +15,7 @@ import { focusHeadingIfRequested } from '@/lib/focus';
 import type { LibraryFile } from '@/lib/media-library';
 import { saveSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import { ComplianceBadge } from './compliance-badge';
+import { LocationField, parseCoordinates } from './location-field';
 import { OpeningHoursEditor, type Closure } from './opening-hours-editor';
 import { SettingsScreen } from './settings-screen';
 
@@ -39,19 +40,6 @@ const dayRanges = (day: Weekday) =>
     }
   });
 
-/** « 46.7412, 3.7891 » (ou séparées par un espace, un point-virgule) → latitude et longitude */
-export function parseCoordinates(text: string): { latitude: number; longitude: number } | null {
-  const parts = text
-    .trim()
-    .split(/\s*[,;]\s*|\s+/)
-    .filter(Boolean);
-  if (parts.length !== 2) return null;
-  const [latitude, longitude] = parts.map(Number) as [number, number];
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
-    return null;
-  return { latitude, longitude };
-}
-
 /** Réglages « Informations de la commune » (repris par l'étape « Votre commune » de l'assistant) */
 export const informationsSchema = z.object({
   name: z
@@ -69,7 +57,7 @@ export const informationsSchema = z.object({
     .string()
     .refine(
       (value) => !value.trim() || parseCoordinates(value) !== null,
-      'Indiquez la latitude puis la longitude, séparées par une virgule (ex. 46.7412, 3.7891)',
+      'Choisissez un lieu dans la liste des résultats de la recherche',
     ),
   address: z.string().max(300, "L'adresse ne doit pas dépasser 300 caractères"),
   contact_phone: z
@@ -234,13 +222,8 @@ export function InformationsScreen({ site }: { site: SiteSettings }) {
               inputProps={{ inputMode: 'numeric' }}
               help="Nombre d'habitants."
             />
-            <TextField
-              name="coordinates"
-              label="Coordonnées GPS"
-              help="Latitude, longitude. Utilisées pour la carte et la météo."
-              inputProps={{ placeholder: '46.7412, 3.7891' }}
-            />
           </div>
+          <LocationField />
         </FormSection>
 
         <FormSection

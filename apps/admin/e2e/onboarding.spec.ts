@@ -61,6 +61,31 @@ test('votre commune : pré-remplie depuis les données publiques, sources affich
   });
 });
 
+test('votre commune : le centre trouvé par l’INSEE, ou une adresse cherchée, sans coordonnées à saisir (#362)', async ({
+  page,
+}) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 2 } });
+  await page.goto('/assistant?etape=2');
+  await chooseCommune(page);
+  const location = page.locator('[data-field="coordinates"]');
+  await expect(location).toContainText('Centre de Saint-Aubin-sur-Loire');
+  await expect(location).toContainText('Source : INSEE');
+  await expect(location).not.toContainText('46.7412');
+
+  // Plus précis : l'adresse de la mairie
+  await page.getByRole('searchbox', { name: /^Emplacement sur la carte/ }).fill('1 place de la mairie');
+  await page
+    .getByRole('list', { name: 'Lieux trouvés' })
+    .getByRole('button', { name: /^1 Place de la Mairie 58300 Saint-Aubin-sur-Loire/ })
+    .click();
+  await expect(location).toContainText('1 Place de la Mairie 58300 Saint-Aubin-sur-Loire');
+  await expectNoViolations(page);
+
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Votre logo' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ infos_pratiques: { latitude: 46.74389, longitude: 3.79052 } });
+});
+
 test('données publiques en panne : on saisit à la main', async ({ page }) => {
   await mockApi(page, { onboarding: { step: 2 }, publicData: 'down' });
   await page.goto('/assistant?etape=2');

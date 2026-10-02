@@ -1,8 +1,10 @@
 /**
  * Étape 2 — Votre commune (#150) : recherche par nom ou code postal, puis pré-remplissage depuis
- * les données publiques (population et coordonnées : INSEE / geo.api.gouv.fr ; mairie : Annuaire
- * de l'administration). Chaque valeur trouvée porte sa source ; tout reste modifiable. Si les
- * services ne répondent pas, on saisit à la main. Le SIRET trouvé est gardé pour les mentions légales.
+ * les données publiques (population et centre de la commune : INSEE / geo.api.gouv.fr ; mairie :
+ * Annuaire de l'administration). L'emplacement sur la carte se change en cherchant une ville ou une
+ * adresse (#362), sans coordonnées à saisir. Chaque valeur trouvée porte sa source ; tout reste
+ * modifiable. Si les services ne répondent pas, on saisit à la main. Le SIRET trouvé est gardé pour
+ * les mentions légales.
  */
 import { Check, CircleAlert, Loader2, Search } from 'lucide-react';
 import { useEffect, useId, useState, type ReactNode } from 'react';
@@ -15,6 +17,7 @@ import {
   informationsValues,
   type InformationsValues,
 } from '@/components/settings/informations-screen';
+import { formatCoordinates, LocationField } from '@/components/settings/location-field';
 import { OpeningHoursEditor } from '@/components/settings/opening-hours-editor';
 import { Button } from '@/components/ui/button';
 import { ApiError } from '@/lib/api';
@@ -54,6 +57,8 @@ export function CommuneStep({ site, step, next, back, later, alert }: StepProps 
   const [state, setState] = useState<'idle' | 'loading' | 'found' | 'partial' | 'unavailable'>('idle');
   const [sources, setSources] = useState<Partial<Record<keyof InformationsValues, Source>>>({});
   const [editHours, setEditHours] = useState(false);
+  // Position trouvée par l'INSEE : nommée « Centre de … » dans le champ d'emplacement
+  const [centre, setCentre] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   // Résultats affichés tant qu'on cherche (pas après un choix, ni sous 2 caractères)
   const shown = edited && !chosen && query.trim().length >= 2 ? matches : null;
@@ -98,8 +103,11 @@ export function CommuneStep({ site, step, next, back, later, alert }: StepProps 
     };
     setInsee(details.insee);
     if (details.population != null) set('population', String(details.population), 'INSEE');
-    if (details.latitude != null && details.longitude != null)
-      set('coordinates', `${details.latitude}, ${details.longitude}`, 'INSEE');
+    if (details.latitude != null && details.longitude != null) {
+      const coordinates = formatCoordinates(details.latitude, details.longitude);
+      set('coordinates', coordinates, 'INSEE');
+      setCentre({ [coordinates]: `Centre de ${details.name}` });
+    }
     const hall = details.townHall;
     if (hall?.address) set('address', hall.address, 'Annuaire du service public');
     if (hall?.phone) set('contact_phone', hall.phone, 'Annuaire du service public');
@@ -281,13 +289,7 @@ export function CommuneStep({ site, step, next, back, later, alert }: StepProps 
             inputProps={{ type: 'email', autoComplete: 'off' }}
           />
         </div>
-        <TextField
-          name="coordinates"
-          label="Coordonnées GPS"
-          badge={<SourceBadge source={sources.coordinates} />}
-          help="Latitude, longitude : pour la carte et la météo du site."
-          inputProps={{ autoComplete: 'off' }}
-        />
+        <LocationField badge={<SourceBadge source={sources.coordinates} />} knownLabels={centre} />
         <div>
           <p className="flex flex-wrap items-center gap-2 font-medium">
             Horaires d'ouverture <SourceBadge source={sources.hours} />

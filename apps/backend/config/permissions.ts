@@ -61,7 +61,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('compliance', ['report']),
     ...custom('activity-log', ['find']),
     ...custom('content-version', ['list', 'findOne', 'checkpoint']),
-    ...custom('onboarding', ['search', 'details', 'checklist', 'hideChecklist']),
+    ...custom('onboarding', ['search', 'details', 'places', 'placeCommune', 'checklist', 'hideChecklist']),
     ...custom('page-template', ['list', 'create']),
     ...custom('quote', ['offer', 'draft', 'sign', 'pdf']),
     ...custom('redirect', ['list', 'save', 'suggest']),

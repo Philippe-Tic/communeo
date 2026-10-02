@@ -426,6 +426,8 @@ export interface MockOptions {
   pageImageWithoutAlt?: boolean;
   /** SIRET et directeur de publication pas encore renseignés */
   legalMissing?: boolean;
+  /** Logo de la commune (adresse du fichier) ; aucun par défaut */
+  logo?: string;
   /** Assistant de création en cours (commune créée par l'équipe) */
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null; checklistHiddenAt?: string | null };
   /** Mise en ligne demandée : reste en cours (défaut), réussit ou échoue à la lecture suivante de l'état */
@@ -933,6 +935,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     failUploadFor,
     pageImageWithoutAlt = false,
     onboarding,
+    logo,
     publicData = 'ok',
     legalMissing = false,
     deployOutcome = 'running',
@@ -1312,7 +1315,9 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     updatedAt: '2026-09-22T14:30:00.000Z',
     name: SITE.name,
     theme,
-    logo: null as unknown,
+    logo: (logo
+      ? { id: 77, name: logo.split('/').at(-1), ext: '.svg', size: 1, url: logo, width: null, height: null, alternativeText: null, caption: null, credit: null }
+      : null) as unknown,
     favicon: null as unknown,
     contact_mail: 'mairie@saint-aubin-sur-loire.fr',
     contact_phone: (freshCommune ? null : '03 86 00 00 00') as string | null,

@@ -137,6 +137,33 @@ test('votre thème : la commune dans chaque vignette, tous les thèmes proposés
   expect(lastSitePut(bodies)).toMatchObject({ theme: 'institutionnel', onboarding: { step: 5 } });
 });
 
+test('votre thème : le logo garde ses proportions dans l’en-tête des vignettes, l’en-tête de l’aperçu tient sur mobile (#363)', async ({
+  page,
+}) => {
+  await mockApi(page, { onboarding: { step: 4 }, logo: '/uploads/logo-horizontal.svg' });
+  await page.route('**/uploads/logo-horizontal.svg', (route) =>
+    route.fulfill({ path: new URL('../../../packages/fixtures/assets/logo-horizontal.svg', import.meta.url).pathname }),
+  );
+  await page.goto('/assistant?etape=4');
+  const themes = page.getByRole('group', { name: 'Thème du site' });
+  // Logo en longueur (480 × 120) : il n'est plus écrasé dans une pastille ronde de 14 px
+  for (const logo of await themes.locator('img').all()) {
+    await expect(logo).toHaveJSProperty('complete', true);
+    const box = (await logo.boundingBox())!;
+    expect(box.width).toBeGreaterThan(box.height * 2.5);
+  }
+
+  await themes.getByRole('button', { name: 'Aperçu de votre site dans le thème Moderne' }).click();
+  const preview = page.getByRole('dialog', { name: /Aperçu de votre site dans le thème Moderne/ });
+  const close = (await preview.getByRole('button', { name: "Fermer l'aperçu" }).boundingBox())!;
+  const choose = (await preview.getByRole('button', { name: 'Choisir le thème Moderne' }).boundingBox())!;
+  const moderne = (await preview.getByText('Moderne', { exact: true }).boundingBox())!;
+  // Fermer et choisir sur une ligne, les thèmes en dessous (sous 768 px) ou à côté, jamais en colonne
+  expect(Math.abs(close.y + close.height / 2 - (choose.y + choose.height / 2))).toBeLessThan(2);
+  expect(choose.x + choose.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  expect(moderne.y + moderne.height).toBeLessThan(close.y + close.height + 80);
+});
+
 test('votre thème déjà choisi : rien à changer, on continue', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
   await page.goto('/assistant?etape=4');

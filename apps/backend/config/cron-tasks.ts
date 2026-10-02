@@ -3,6 +3,7 @@ import { publishDueDocuments } from '../src/services/scheduled-publication';
 import { processBilling } from '../src/services/billing';
 import { purgeExpiredMessages } from '../src/services/message-retention';
 import { processTrials } from '../src/services/trial';
+import { processDeletionRequests } from '../src/services/commune-deletion-request';
 
 export default {
   scheduledPublication: {
@@ -32,6 +33,13 @@ export default {
       await processTrials();
     },
     options: { rule: '0 * * * *', tz: 'Europe/Paris' },
+  },
+  // Suppression demandée par une commune (#391) : rappel la veille, suppression à la date prévue
+  communeDeletions: {
+    task: async () => {
+      await processDeletionRequests();
+    },
+    options: { rule: '15 * * * *', tz: 'Europe/Paris' },
   },
   // Facturation (#314) : factures de renouvellement à l'échéance, relances des factures en retard
   billing: {

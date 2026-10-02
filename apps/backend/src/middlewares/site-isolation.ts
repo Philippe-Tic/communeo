@@ -68,7 +68,7 @@ const ITEM_ACTIONS: Record<string, string[]> = {
 };
 
 // APIs custom dont les contrôleurs résolvent eux-mêmes le site (getEffectiveSite) et les rôles
-const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations', 'quote', 'billing', 'redirects', 'signup', 'seo', 'prospect-contact'];
+const SELF_GUARDED_APIS = ['deployment', 'domain', 'comarquage', 'user-management', 'site-management', 'preview', 'session', 'publication', 'compliance', 'activity-log', 'content-versions', 'onboarding', 'page-templates', 'trial', 'validations', 'quote', 'billing', 'redirects', 'signup', 'seo', 'prospect-contact', 'commune-deletion'];
 
 // Champs du Site qu'un utilisateur de commune ne peut pas modifier via /api/sites
 const PROTECTED_SITE_FIELDS = [
@@ -90,6 +90,10 @@ const PROTECTED_SITE_FIELDS = [
   'live_requested_by',
   // inscription en attente de l'approbation de la mairie ou de l'équipe (#337)
   'signup_approval',
+  // suppression demandée par la commune (#391) : /api/commune-deletion seulement
+  'deletion_scheduled_at',
+  'deletion_requested_by',
+  'deletion_reminded',
   // facturation (#314) : renouvellement de l'abonnement, décidé par l'équipe
   'billing_renewal',
   // référencement : code de vérification Google Search Console, posé par l'équipe
@@ -112,10 +116,10 @@ const PROTECTED_SITE_FIELDS = [
 ];
 
 // Essai terminé (#310) : l'administration est en lecture seule, sauf la session, le compte de la
-// personne, l'aperçu et la demande de passage en live
+// personne, l'aperçu, la demande de passage en live et la demande de suppression (#391)
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const writableWhenExpired = (apiId: string | null, id: string | null) =>
-  ['session', 'auth', 'preview', 'quote'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
+  ['session', 'auth', 'preview', 'quote', 'commune-deletion'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
 
 /** Jeton émis avant le dernier changement de mot de passe (`iat` en secondes) */
 const revokedByPasswordChange = (user: { password_changed_at?: string | Date | null }, decoded: { iat?: number }) =>

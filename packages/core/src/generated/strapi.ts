@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_approve', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal', 'messages_purge'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'deletion_request', 'deletion_cancel', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_approve', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal', 'messages_purge'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -740,6 +740,7 @@ export interface Site extends StrapiDocument {
   trial_notice: SiteTrialNotice | null;
   signup_approval: SiteSignupApproval | null;
   live_requested_at: string | null;
+  deletion_scheduled_at: string | null;
   google_site_verification: string | null;
   onboarding: JsonValue | null;
   pages?: Page[];

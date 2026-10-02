@@ -5,6 +5,7 @@
 
 import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { deleteCommune } from '../../../services/commune-deletion';
+import { cancelDeletion } from '../../../services/commune-deletion-request';
 import { extendTrial, goLive } from '../../../services/trial';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME, isReservedSiteSlug } from '@communeo/core';
@@ -69,6 +70,8 @@ async function summarize(site: any) {
     trialEndsAt: site.trial_ends_at ?? null,
     trialExpiredAt: site.trial_expired_at ?? null,
     liveRequestedAt: site.live_requested_at ?? null,
+    // Suppression demandée par la commune (#391) : date prévue
+    deletionScheduledAt: site.deletion_scheduled_at ? new Date(site.deletion_scheduled_at).toISOString() : null,
     signupApproval: site.signup_approval ?? null,
     googleSiteVerification: site.google_site_verification ?? null,
     onboarding: site.onboarding ?? null,
@@ -250,10 +253,11 @@ export default {
   },
 
   /**
-   * PUT /api/site-management/:documentId — { name?, suspended?, plan?: 'live', extendTrialDays?, googleSiteVerification? }
+   * PUT /api/site-management/:documentId — { name?, suspended?, plan?: 'live', extendTrialDays?, googleSiteVerification?, cancelDeletion?: true }
    * Suspendre : les utilisateurs de la commune ne peuvent plus se connecter (session coupée) et
    * rien n'est plus mis en ligne ; le site public reste en ligne tel quel.
    * Passer en live ou prolonger l'essai (1 à 90 jours) : voir services/trial.ts.
+   * Annuler la suppression demandée par la commune : voir services/commune-deletion-request.ts.
    */
   async update(ctx) {
     await requireSuperAdmin(ctx);
@@ -292,6 +296,10 @@ export default {
       });
     if (data.plan === 'live' && site.plan !== 'live') await goLive(site);
     else if (extend !== undefined) await extendTrial(site, extend);
+    if (data.cancelDeletion === true) {
+      const user = ctx.state.user ?? {};
+      await cancelDeletion(site, `L'équipe Communeo (${[user.first_name, user.last_name].filter(Boolean).join(' ') || user.email})`);
+    }
 
     const updated = await strapi.documents('api::site.site').findOne({ documentId, populate: ['infos_pratiques'] as any });
     ctx.body = { data: await summarize(updated) };
@@ -299,7 +307,8 @@ export default {
 
   /**
    * DELETE /api/site-management/:documentId — la commune, son site chez l'hébergeur, ses comptes et
-   * tous ses contenus (services/commune-deletion.ts)
+   * tous ses contenus (services/commune-deletion.ts), tout de suite, demande en cours ou non ; les
+   * factures et les devis sont conservés
    */
   async delete(ctx) {
     await requireSuperAdmin(ctx);

@@ -31,6 +31,8 @@ export type ActivityAction =
   | 'commune_suspend'
   | 'commune_unsuspend'
   | 'commune_delete'
+  | 'deletion_request'
+  | 'deletion_cancel'
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'

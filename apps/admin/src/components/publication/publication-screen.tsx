@@ -38,7 +38,6 @@ import {
   type PublicationStatus,
 } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
-import { approvalWaitingLabel, awaitingApproval } from '@/lib/signup';
 import { isReadOnly } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 import { DomainSection } from './domain-section';
@@ -532,13 +531,6 @@ export function PublicationScreen() {
               Passer en live
             </Link>
           </p>
-        </section>
-      ) : awaitingApproval(user.site) ? (
-        <section aria-labelledby="etat-titre" className="rounded-xl border border-info/30 bg-info-bg p-5">
-          <h2 id="etat-titre" className="text-base font-semibold">
-            {awaitingApproval(user.site) === 'townhall' ? 'En attente de l’approbation de la mairie' : 'Demande en cours de vérification'}
-          </h2>
-          <p className="mt-1">{approvalWaitingLabel(awaitingApproval(user.site)!)} Vos modifications sont enregistrées et partiront à ce moment-là.</p>
         </section>
       ) : status.isError ? (
         <div role="alert" className="rounded-xl border border-danger bg-danger-alert-bg p-5">

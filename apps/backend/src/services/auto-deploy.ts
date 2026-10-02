@@ -12,7 +12,6 @@ import deploymentService from './deployment';
 import { isBuildQueueConfigured } from './build-queue';
 import { isCommuneDeletion } from './commune-deletion';
 import { isScheduledPublication, recordPendingChange, type PendingAction } from './pending-changes';
-import { isAwaitingApproval } from './signup-approval';
 import { log } from '../utils/logger';
 
 const SITE = 'api::site.site';
@@ -118,8 +117,9 @@ class AutoDeployService {
       const scheduledPublication = isScheduledPublication();
       // Une publication programmée part toujours : c'est tout l'intérêt de la programmer
       if (!site?.auto_deploy_enabled && !scheduledPublication) return;
-      // Commune suspendue, essai terminé ou inscription pas encore approuvée : aucune mise en ligne
-      if (site.suspended || site.plan === 'expired' || isAwaitingApproval(site)) return;
+      // Commune suspendue ou essai terminé : aucune mise en ligne (une inscription pas encore approuvée
+      // publie son site d'essai, #369)
+      if (site.suspended || site.plan === 'expired') return;
       if (!isBuildQueueConfigured()) {
         log.warn(`[AUTO-DEPLOY] File des builds non configurée : pas de mise en ligne automatique pour ${site.slug}`);
         return;

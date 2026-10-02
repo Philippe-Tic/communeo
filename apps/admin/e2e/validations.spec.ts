@@ -31,7 +31,7 @@ test('inscription : approuver permet la mise en ligne du site déjà créé', as
 
   await signups.getByRole('button', { name: 'Valider…' }).click();
   const dialog = page.getByRole('alertdialog', { name: "Approuver l'inscription de Bourg-Neuf ?" });
-  await expect(dialog).toContainText('Le site pourra être mis en ligne. Julie Martin en est prévenu à julie@gmail.test');
+  await expect(dialog).toContainText("L'essai continue normalement. Julie Martin en est prévenu à julie@gmail.test");
   await dialog.getByRole('button', { name: 'Approuver' }).click();
   await expect(dialog).toBeHidden();
   expect(bodies.at(-1)?.call).toBe('approve signups 41');

@@ -3,33 +3,21 @@
  *
  * La personne qui s'inscrit vérifie d'abord sa propre adresse : la commune est alors créée en essai
  * et elle travaille tout de suite dans l'administration. Tant que la mairie (depuis son adresse
- * officielle) ou l'équipe Communeo (sans adresse officielle connue) n'a pas approuvé, le site n'est
- * jamais mis en ligne : `site.signup_approval` vaut `townhall` ou `team`, et la mise en ligne
- * manuelle, automatique et le worker s'arrêtent là. Refusée, la demande supprime la commune.
+ * officielle) ou l'équipe Communeo (sans adresse officielle connue) n'a pas approuvé,
+ * `site.signup_approval` vaut `townhall` ou `team`. Le site d'essai est publié quand même sur son
+ * adresse Communeo (#369), avec les garde-fous de l'essai : bandeau « Site en préparation », jamais
+ * indexé, pas de domaine personnalisé, pas de passage en live sans l'équipe. Refusée, la demande
+ * supprime la commune et retire son site de l'hébergeur.
  */
 import { ofCommune } from '@communeo/core';
 import { recordActivity } from './activity-log';
-import { isBuildQueueConfigured } from './build-queue';
 import { deleteCommune } from './commune-deletion';
-import deploymentService from './deployment';
-import { listPendingChanges } from './pending-changes';
 import { adminUrl, notifyTeam } from './team-notifications';
 import { log } from '../utils/logger';
 import { escapeHtml } from '../utils/security';
 
 const REQUEST = 'api::signup-request.signup-request';
 const SITE = 'api::site.site';
-
-export const APPROVAL_PENDING_MESSAGE =
-  "Le site sera mis en ligne dès que la mairie aura approuvé la création du site. Vous pouvez continuer à le préparer.";
-export const TEAM_REVIEW_PENDING_MESSAGE =
-  "Le site sera mis en ligne dès que l'équipe Communeo aura vérifié votre demande. Vous pouvez continuer à le préparer.";
-
-/** Vrai tant que la mairie ou l'équipe n'a pas approuvé l'inscription : rien n'est mis en ligne */
-export const isAwaitingApproval = (site: { signup_approval?: string | null } | null | undefined) => !!site?.signup_approval;
-
-export const approvalPendingMessage = (site: { signup_approval?: string | null }) =>
-  site.signup_approval === 'team' ? TEAM_REVIEW_PENDING_MESSAGE : APPROVAL_PENDING_MESSAGE;
 
 /** « m***@saint-aubin.fr » : assez pour reconnaître la boîte, sans l'exposer */
 export const maskEmail = (email: string) => {
@@ -54,11 +42,11 @@ export async function sendApprovalEmail(request: any, token: string) {
       <h2>Création du site internet ${escapeHtml(ofName)}</h2>
       <p>Bonjour,</p>
       <p><strong>${person}</strong> (${email}) a créé le site internet de la commune <strong>${commune}</strong> sur Communeo et prépare ses contenus.</p>
-      <p>Ce message est envoyé à l'adresse officielle de la mairie, connue de l'Annuaire de l'administration, pour vérifier que la demande vient bien de la commune. Le site ne sera mis en ligne qu'après votre approbation.</p>
+      <p>Ce message est envoyé à l'adresse officielle de la mairie, connue de l'Annuaire de l'administration, pour vérifier que la demande vient bien de la commune. En attendant votre réponse, le site d'essai est visible sur son adresse Communeo, avec un bandeau « Site en préparation », sans être proposé aux moteurs de recherche.</p>
       <p>${button(link, 'Répondre à la demande')}</p>
-      <p>Sur la page qui s'ouvre, vous pourrez approuver la demande, ou la refuser si la mairie n'en est pas à l'origine : le site et ses contenus seront alors supprimés. Ce lien est valable 7 jours.</p>
+      <p>Sur la page qui s'ouvre, vous pourrez approuver la demande, ou la refuser si la mairie n'en est pas à l'origine : le site sera alors retiré et ses contenus supprimés. Ce lien est valable 7 jours.</p>
     `,
-    text: `${request.first_name} ${request.last_name} (${request.email}) a créé le site internet ${ofName} sur Communeo. Le site ne sera mis en ligne qu'après l'approbation de la mairie. Pour approuver ou refuser la demande (lien valable 7 jours) : ${link}`,
+    text: `${request.first_name} ${request.last_name} (${request.email}) a créé le site internet ${ofName} sur Communeo. En attendant votre réponse, le site d'essai est visible sur son adresse Communeo, avec un bandeau « Site en préparation ». Pour approuver la demande, ou la refuser (le site sera alors retiré et ses contenus supprimés), lien valable 7 jours : ${link}`,
   });
   await strapi.db.query(REQUEST).update({ where: { id: request.id }, data: { approval_sent_at: new Date() } });
 }
@@ -83,8 +71,8 @@ async function emailRequester(request: any, subject: string, paragraphs: string[
 }
 
 /**
- * Inscription approuvée (par la mairie ou l'équipe) : le site peut être mis en ligne. Les
- * modifications faites pendant l'attente partent aussitôt si la mise en ligne automatique est active.
+ * Inscription approuvée (par la mairie ou l'équipe) : l'essai continue. Le site d'essai, déjà publié
+ * pendant l'attente (#369), n'a rien à reconstruire.
  */
 export async function approveSignup(request: any, by: 'townhall' | 'team', reviewer?: string) {
   const site: any = await strapi.db.query(SITE).findOne({ where: { id: request.site?.id ?? request.site } });
@@ -103,34 +91,25 @@ export async function approveSignup(request: any, by: 'townhall' | 'team', revie
   });
   await emailRequester(
     request,
-    `Le site ${ofCommune(site.name)} peut être mis en ligne — Communeo`,
+    `Création du site ${ofCommune(site.name)} approuvée — Communeo`,
     [
       by === 'townhall'
         ? `La mairie ${ofCommune(site.name)} a approuvé la création du site depuis son adresse officielle.`
         : `L'équipe Communeo a vérifié votre demande pour ${site.name}.`,
-      "Le site peut maintenant être mis en ligne sur son adresse Communeo, avec le bandeau « Site en préparation » pendant l'essai.",
+      "Votre essai continue : le site reste en ligne sur son adresse Communeo, avec le bandeau « Site en préparation ». Pour le garder au-delà de l'essai, validez votre devis depuis l'administration.",
     ],
-    { label: 'Ouvrir la mise en ligne', path: '/mise-en-ligne' },
+    { label: 'Passer en live', path: '/passer-en-live' },
   );
   await notifyTeam(
     `Inscription approuvée : ${site.name}`,
     `${site.name} (INSEE ${site.code_insee ?? '?'}) : inscription approuvée par ${by === 'townhall' ? "la mairie, depuis son adresse officielle" : reviewer ?? "l'équipe"}. Fiche : ${adminUrl()}/plateforme/communes/${site.documentId}`,
   );
-
-  if (site.auto_deploy_enabled && !site.suspended && site.plan !== 'expired' && isBuildQueueConfigured()) {
-    try {
-      if ((await listPendingChanges(site.documentId)).length) {
-        await deploymentService.requestBuild(site.documentId, { triggeredBy: null, reason: 'manual' });
-      }
-    } catch (error) {
-      log.error(`[INSCRIPTION] Mise en ligne de ${site.slug} après approbation impossible :`, error);
-    }
-  }
 }
 
 /**
  * Inscription refusée (la mairie n'en est pas à l'origine, ou l'équipe la refuse) : la commune créée
- * pendant l'attente est supprimée, avec ses comptes et ses contenus ; le demandeur est prévenu.
+ * pendant l'attente est supprimée, avec ses comptes, ses contenus et son site d'essai chez
+ * l'hébergeur (`deleteCommune`) ; le demandeur est prévenu.
  */
 export async function declineSignup(request: any, by: 'townhall' | 'team', options: { reason?: string; reviewer?: string } = {}) {
   const site: any = request.site ? await strapi.db.query(SITE).findOne({ where: { id: request.site?.id ?? request.site } }) : null;
@@ -164,7 +143,7 @@ export async function declineSignup(request: any, by: 'townhall' | 'team', optio
   }
   await notifyTeam(
     `Inscription refusée : ${request.commune_name}`,
-    `${request.first_name} ${request.last_name} (${request.email}) pour ${request.commune_name} (INSEE ${request.code_insee}) : refusée par ${by === 'townhall' ? "la mairie, depuis son adresse officielle" : options.reviewer ?? "l'équipe"}.${site ? ' La commune et ses contenus ont été supprimés.' : ''}`,
+    `${request.first_name} ${request.last_name} (${request.email}) pour ${request.commune_name} (INSEE ${request.code_insee}) : refusée par ${by === 'townhall' ? "la mairie, depuis son adresse officielle" : options.reviewer ?? "l'équipe"}.${site ? " La commune, ses contenus et son site d'essai ont été supprimés." : ''}`,
   );
 }
 

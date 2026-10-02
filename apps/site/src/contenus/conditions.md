@@ -31,8 +31,9 @@ agir pour elle et accepte les présentes Conditions.
 
 Pour vérifier que la demande vient bien de la mairie, l'inscription est validée depuis l'adresse
 électronique officielle de la mairie publiée dans l'Annuaire de l'administration (service-public.fr).
-Si cette adresse n'y figure pas, l'équipe Communeo vérifie la demande avant d'ouvrir le Service. Une
-inscription refusée par la mairie est supprimée avec les données saisies.
+Si cette adresse n'y figure pas, l'équipe Communeo vérifie la demande. En attendant, le site d'essai
+peut être publié sur son adresse Communeo. Une inscription refusée par la mairie ou par l'équipe
+Communeo est supprimée avec les données saisies, et le site d'essai est retiré.
 
 Une seule inscription est possible par commune.
 

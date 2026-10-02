@@ -1,6 +1,6 @@
 /**
  * À valider (#313) : ce qui attend une décision de l'équipe Communeo. Inscriptions pas encore
- * approuvées (#337) : la commune prépare son site mais rien n'est mis en ligne ; sans adresse officielle
+ * approuvées (#337) : la commune est en essai et son site d'essai peut être en ligne (#369) ; sans adresse officielle
  * dans l'Annuaire, l'équipe vérifie ; sinon la mairie n'a pas encore répondu et l'équipe peut approuver
  * à sa place après l'avoir contactée. Et passages en live demandés par les communes. Valider ou refuser ;
  * un refus envoie son motif par e-mail.
@@ -123,7 +123,7 @@ export function ValidationsScreen() {
             id="inscriptions"
             title="Inscriptions à approuver"
             count={data.signups.length}
-            description="Ces communes préparent leur site, qui ne sera pas mis en ligne avant l'approbation. Vérifiez auprès de la mairie que la demande vient bien d'elle."
+            description="Ces communes sont en essai : leur site d'essai peut déjà être en ligne. Vérifiez auprès de la mairie que la demande vient bien d'elle ; un refus supprime la commune et retire son site."
             empty="Aucune inscription à approuver."
           >
             {data.signups.map((signup) => (
@@ -213,7 +213,7 @@ export function ValidationsScreen() {
         description={
           decision?.kind === 'approve-signup'
             ? decision.item.siteDocumentId
-              ? `Le site pourra être mis en ligne. ${decision.item.firstName} ${decision.item.lastName} en est prévenu à ${decision.item.email}.`
+              ? `L'essai continue normalement. ${decision.item.firstName} ${decision.item.lastName} en est prévenu à ${decision.item.email}.`
               : `La commune est créée en essai de 30 jours. ${decision.item.firstName} ${decision.item.lastName} reçoit une invitation à ${decision.item.email} pour choisir son mot de passe.`
             : ''
         }
@@ -250,7 +250,7 @@ export function ValidationsScreen() {
         title={decision?.kind === 'reject-signup' ? `Refuser l'inscription de ${decision.item.communeName} ?` : ''}
         description={
           decision?.kind === 'reject-signup'
-            ? `${decision.item.firstName} ${decision.item.lastName} recevra votre motif à ${decision.item.email}. ${decision.item.siteDocumentId ? 'Le site commencé, ses contenus et ses comptes seront supprimés.' : "Aucune commune n'est créée."}`
+            ? `${decision.item.firstName} ${decision.item.lastName} recevra votre motif à ${decision.item.email}. ${decision.item.siteDocumentId ? "Le site d'essai sera retiré, ses contenus et ses comptes supprimés." : "Aucune commune n'est créée."}`
             : ''
         }
         confirmLabel="Refuser et envoyer le motif"

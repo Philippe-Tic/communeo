@@ -155,4 +155,20 @@ describe.skipIf(!process.env.TEST_QUEUE_DATABASE_URL)('debounce dans la file (Po
     await http.post('/api/deployment/trigger').set(auth);
     expect((await http.get('/api/deployment/state').set(auth)).body).toMatchObject({ state: 'running', step: 'queued', scheduledAt: null });
   });
+
+  it("inscription pas encore approuvée (#369) : le site d'essai part quand même, automatiquement ou à la demande", async () => {
+    await strapi.db.query('api::site.site').update({ where: { documentId: siteId }, data: { plan: 'trial', signup_approval: 'townhall' } });
+    try {
+      await strapi.documents('api::team-member.team-member').create({ data: { first_name: 'Irène', last_name: 'Joliot', role: 'adjoint', site: siteId } as any });
+      const [scheduled] = await waiting();
+      expect(scheduled?.data).toMatchObject({ siteDocumentId: siteId, reason: 'content' });
+
+      const admin = (await http.post('/api/auth/local').send({ identifier: 'test@example.com', password: 'test123' })).body.jwt;
+      const res = await http.post('/api/deployment/trigger').set({ Authorization: `Bearer ${admin}` });
+      expect(res.status).toBe(202);
+      expect(res.body).toMatchObject({ queued: true, status: 'advanced', jobId: scheduled!.id });
+    } finally {
+      await strapi.db.query('api::site.site').update({ where: { documentId: siteId }, data: { plan: 'live', signup_approval: null } });
+    }
+  });
 });

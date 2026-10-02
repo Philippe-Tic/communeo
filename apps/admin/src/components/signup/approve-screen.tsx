@@ -27,8 +27,8 @@ function Done({ approved, commune }: { approved: boolean; commune: string }) {
         <Icon aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-brand" />
         <p>
           {approved
-            ? `Merci. Le site ${ofCommune(commune)} pourra être mis en ligne. La personne qui l’a créé en est prévenue par e-mail.`
-            : `Le site ${ofCommune(commune)} et ses contenus ont été supprimés. La personne qui l’avait créé en est prévenue par e-mail.`}
+            ? `Merci. Le site ${ofCommune(commune)} continue son essai. La personne qui l’a créé en est prévenue par e-mail.`
+            : `Le site ${ofCommune(commune)} a été retiré et ses contenus supprimés. La personne qui l’avait créé en est prévenue par e-mail.`}
         </p>
       </div>
       <p className="mt-4 text-[13px] text-secondary">Vous pouvez fermer cette page.</p>
@@ -99,8 +99,8 @@ export function SignupApproveScreen({ token }: { token: string | undefined }) {
         ({request.email}) a créé le site internet de la commune sur Communeo et prépare ses contenus.
       </p>
       <p className="mt-3 text-secondary">
-        Ce message a été envoyé à l’adresse officielle de la mairie pour vérifier que la demande vient bien de la commune. Le site ne sera mis en ligne
-        qu’après votre approbation.
+        Ce message a été envoyé à l’adresse officielle de la mairie pour vérifier que la demande vient bien de la commune. En attendant votre réponse, son site
+        d’essai peut être en ligne sur son adresse Communeo, avec un bandeau « Site en préparation ».
       </p>
       {error && (
         <p role="alert" className="mt-4 flex gap-2 text-[13px] text-danger">
@@ -116,12 +116,12 @@ export function SignupApproveScreen({ token }: { token: string | undefined }) {
           Refuser la demande
         </Button>
       </div>
-      <p className="mt-4 text-[13px] text-secondary">Refusez-la si la mairie n’est pas à l’origine de cette demande : le site et ses contenus seront supprimés.</p>
+      <p className="mt-4 text-[13px] text-secondary">Refusez-la si la mairie n’est pas à l’origine de cette demande : le site sera retiré et ses contenus supprimés.</p>
       <ConfirmDialog
         open={declining}
         onOpenChange={setDeclining}
         title="Refuser la demande ?"
-        description={`Le site ${ofCommune(request.commune)} créé par ${request.firstName} ${request.lastName}, ses contenus et son compte seront supprimés. ${request.firstName} en sera prévenu par e-mail.`}
+        description={`Le site ${ofCommune(request.commune)} créé par ${request.firstName} ${request.lastName}, ses contenus et son compte seront supprimés, et le site retiré d’internet. ${request.firstName} en sera prévenu par e-mail.`}
         confirmLabel="Refuser et supprimer"
         onConfirm={decline}
       />

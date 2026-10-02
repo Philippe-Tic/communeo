@@ -2033,9 +2033,6 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return json({ data: { to: approvalState.to, sentAt: approvalState.sentAt } });
     }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
-      if (approvalState.status) {
-        return json({ error: { status: 403, message: 'Le site sera mis en ligne dès que la mairie aura approuvé la création du site.', details: { code: 'approval_pending' } } }, 403);
-      }
       state = 'running';
       deploy = { readsLeft: 1, triggeredAt: new Date().toISOString() };
       return json({ status: 'queued', queued: true }, 202);

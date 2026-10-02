@@ -20,7 +20,7 @@ export interface NewCommune {
   admin: { email: string; firstName: string; lastName: string };
   /** Inscription en libre-service : 30 jours d'essai (sinon, commune créée par l'équipe : en live) */
   trial?: boolean;
-  /** Inscription à approuver par la mairie ou l'équipe (#337) : rien n'est mis en ligne d'ici là */
+  /** Inscription à approuver par la mairie ou l'équipe (#337) ; le site d'essai est publié d'ici là (#369) */
   awaitingApproval?: 'townhall' | 'team' | null;
 }
 
@@ -57,10 +57,10 @@ export async function createCommune(input: NewCommune): Promise<{ site: any; inv
     } as any,
   });
 
-  // 2. Le site chez l'hébergeur (sinon créé à la première mise en ligne) ; rien chez l'hébergeur
-  // tant que l'inscription attend son approbation
+  // 2. Le site chez l'hébergeur (sinon créé à la première mise en ligne), même si l'inscription attend
+  // son approbation (#369) : un refus le retire avec la commune
   const publisher = getPublisher();
-  if (publisher.configured && !input.awaitingApproval) {
+  if (publisher.configured) {
     try {
       const host = await publisher.ensureSite(toPublisherSite(site));
       await strapi.documents('api::site.site').update({ documentId: site.documentId, data: { netlify_site_id: host.hostId, live_url: host.defaultUrl } as any });

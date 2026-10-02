@@ -2,12 +2,12 @@
  * File de validation de l'équipe Communeo (#313), réservée aux super admins.
  *
  * GET  /api/validations → { signups, liveRequests }
- *   - inscriptions à approuver (#337) : la commune est déjà créée en essai mais rien n'est mis en
- *     ligne ; `waitingFor: 'team'` sans adresse officielle dans l'Annuaire, `'townhall'` quand la
+ *   - inscriptions à approuver (#337) : la commune est déjà créée en essai et son site d'essai
+ *     publié (#369) ; `waitingFor: 'team'` sans adresse officielle dans l'Annuaire, `'townhall'` quand la
  *     mairie n'a pas encore répondu (l'équipe peut approuver à sa place après l'avoir contactée) ;
  *   - passages en live demandés : devis validé en ligne par la commune (#312), joint à la demande.
- * POST /api/validations/signups/:id/approve → le site peut être mis en ligne
- * POST /api/validations/signups/:id/reject  → { reason } envoyé au demandeur ; la commune est supprimée
+ * POST /api/validations/signups/:id/approve → l'essai continue
+ * POST /api/validations/signups/:id/reject  → { reason } envoyé au demandeur ; la commune et son site d'essai sont supprimés
  * POST /api/validations/live/:documentId/approve → passage en live (services/trial.ts), devis accepté
  * POST /api/validations/live/:documentId/reject  → { reason } envoyé aux administrateurs, devis refusé
  *
@@ -168,7 +168,7 @@ export default {
     const emailed = await emailRejection(request, [
       `L'équipe Communeo n'a pas pu valider la création du site de ${request.commune_name} :`,
       reason,
-      ...(request.site ? ['Le site que vous aviez commencé et ses contenus ont été supprimés.'] : []),
+      ...(request.site ? ["Le site d'essai a été retiré et ses contenus supprimés."] : []),
     ]);
     ctx.body = { data: { emailed } };
   },

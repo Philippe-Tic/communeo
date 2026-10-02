@@ -17,6 +17,7 @@ import {
 } from '@communeo/core';
 import { RichTextField } from '@/components/blocks/rich-text';
 import { Form, TextField, useZodForm } from '@/components/form';
+import { AccessibilityHelp } from '@/components/settings/accessibility-help';
 import { accessibilityPayload, accessibilityValues } from '@/components/settings/accessibility-screen';
 import { legalPayload, legalSchema, legalValues } from '@/components/settings/legal-screen';
 import { Button } from '@/components/ui/button';
@@ -263,7 +264,9 @@ export function LegalStep({ site, step, next, back, alert }: StepProps & { alert
               help="Ce texte complète la page « Accessibilité » du site (état de conformité, contact et recours y figurent déjà)."
             />
           }
-        />
+        >
+          {level === DEFAULT_ACCESSIBILITY_LEVEL && <AccessibilityHelp className="-mt-2 ml-10" />}
+        </Row>
         <Row
           done={missing === 0}
           title="Mentions légales"

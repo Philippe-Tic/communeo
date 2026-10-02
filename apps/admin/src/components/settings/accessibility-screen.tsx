@@ -1,7 +1,8 @@
 /**
  * Accessibilité (handoff 6.10, ticket #143) : niveau de conformité déclaré (trois valeurs, chacune
  * expliquée : c'est une déclaration juridique), compléments de la déclaration, schéma pluriannuel
- * (obligatoire dès que le site n'est pas totalement conforme) et plan d'action.
+ * (obligatoire dès que le site n'est pas totalement conforme) et plan d'action. Une bulle explique
+ * pourquoi le site est « non conforme » tant qu'aucun audit n'a eu lieu (#365).
  */
 import { isRichTextEmpty, type RichTextDocument } from '@communeo/core';
 import { useWatch } from 'react-hook-form';
@@ -10,6 +11,7 @@ import { emptyDoc } from '@/components/blocks/catalog';
 import { RichTextField } from '@/components/blocks/rich-text';
 import { Form, FormSection, RadioGroupField, TextField } from '@/components/form';
 import type { AccessibilityLevel, SiteSettings } from '@/lib/site-settings';
+import { AccessibilityHelp } from './accessibility-help';
 import { ComplianceBadge } from './compliance-badge';
 import { SettingsScreen } from './settings-screen';
 import { useSettingsForm } from './use-settings-form';
@@ -123,6 +125,7 @@ export function AccessibilityScreen({ site }: { site: SiteSettings }) {
             badge={<ComplianceBadge />}
             options={LEVELS}
           />
+          <AccessibilityHelp className="-mt-2" />
           <RichTextField
             name="declaration"
             label="Compléments de la déclaration"

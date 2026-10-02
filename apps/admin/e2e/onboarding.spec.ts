@@ -243,6 +243,30 @@ test('obligations : textes pré-remplis à relire, informations manquantes deman
   ).toContain('Établissement de cette déclaration');
 });
 
+test('obligations : sans audit, une bulle explique pourquoi le site est « non conforme » (#365)', async ({ page }) => {
+  await mockApi(page, { onboarding: { step: 5 }, accessibilityLevel: null });
+  await page.goto('/assistant?etape=5');
+  const row = page.getByRole('region', { name: 'Accessibilité' });
+  await expect(row).toContainText('sans audit, le site se déclare « non conforme »');
+  await row.getByRole('button', { name: 'Pourquoi « non conforme » ?' }).click();
+  const bubble = page.getByRole('dialog', { name: 'Pourquoi « non conforme » sans audit ?' });
+  await expect(bubble).toContainText('Ce n’est pas un défaut de votre site');
+  await expect(bubble).toContainText('Ce que Communeo fait déjà');
+  await expect(bubble).toContainText('Ce qui dépend de la commune');
+  await expect(bubble).toContainText('Pour changer de niveau');
+  await expectNoViolations(page);
+  await bubble.getByRole('button', { name: 'Fermer' }).click();
+  await expect(bubble).toBeHidden();
+  await expect(row.getByRole('button', { name: 'Pourquoi « non conforme » ?' })).toBeFocused();
+});
+
+test('obligations : niveau déjà déclaré, pas de bulle « non conforme »', async ({ page }) => {
+  await mockApi(page, { onboarding: { step: 5 } });
+  await page.goto('/assistant?etape=5');
+  await expect(page.getByRole('region', { name: 'Accessibilité' })).toContainText('niveau « partiellement conforme »');
+  await expect(page.getByRole('button', { name: 'Pourquoi « non conforme » ?' })).toHaveCount(0);
+});
+
 test('obligations : compléter plus tard enregistre ce qui est là et passe à la suite', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 5 }, legalMissing: true });
   await page.goto('/assistant?etape=5');

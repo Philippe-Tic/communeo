@@ -343,6 +343,25 @@ test('accessibilité : niveau déclaré, schéma pluriannuel exigé sauf totale 
     ).toBeVisible();
 });
 
+test('accessibilité : la bulle explique « non conforme » sans audit, au clavier, sans violation (#365)', async ({
+  page,
+}) => {
+  await mockApi(page);
+  await page.goto('/mon-site/accessibilite');
+  const trigger = page.getByRole('button', { name: 'Pourquoi « non conforme » ?' });
+  await trigger.focus();
+  await page.keyboard.press('Enter');
+  const bubble = page.getByRole('dialog', { name: 'Pourquoi « non conforme » sans audit ?' });
+  await expect(bubble).toContainText('Ce n’est pas un défaut de votre site');
+  await expect(bubble).toContainText('WCAG 2.2 niveau AA');
+  await expect(bubble).toContainText('texte alternatif');
+  await expect(bubble).toContainText('audit RGAA');
+  await expectNoViolations(page);
+  await page.keyboard.press('Escape');
+  await expect(bubble).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
 test('réseaux sociaux : plateforme ajoutée depuis la liste, adresse complétée, lignes vides ignorées', async ({
   page,
 }) => {

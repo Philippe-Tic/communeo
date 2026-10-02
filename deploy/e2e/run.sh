@@ -3,7 +3,8 @@
 # démarrage (images de production, contrôles de santé), Caddy (https avec son autorité interne, http → https,
 # en-têtes), admin, connexion, création d'une commune, mise en ligne réelle par le worker dans le volume des
 # sites, site servi par l'origine (en-tête secret, redirection de l'ancien site, noindex d'un site en essai,
-# /x → x.html, page 404), preview fermée sans jeton, alerte disque, sauvegarde puis restauration.
+# /x → x.html, page 404), domaine nu d'une commune (certificat à la demande autorisé par Strapi, redirection
+# vers www), preview fermée sans jeton, alerte disque, sauvegarde puis restauration.
 #   deploy/e2e/run.sh                 construit les images puis teste
 #   E2E_BUILD=0 IMAGE_REGISTRY=ghcr.io/philippe-tic IMAGE_TAG=<sha> deploy/e2e/run.sh   images publiées
 #   E2E_KEEP=1 deploy/e2e/run.sh      garde la stack après le test (https://localhost:8443, certificat de
@@ -159,6 +160,20 @@ status=$(on origine.localhost /sites/commune-e2e/.regles/site.caddy -o /dev/null
 [ "$status" = 404 ] || fail "règles du site servies ($status)"
 echo "  403 sans secret ; accueil, /contact → contact.html, 301 de l'ancien site, noindex, cache, 404 du site"
 
+step "Domaine nu d'une commune : certificat à la demande (autorisé par Strapi), redirection vers www (#382)"
+ask() { compose exec -T caddy wget -S -q -O /dev/null "http://strapi:1337/api/domain/certificate-check?domain=$1" 2>&1 | grep -o 'HTTP/[0-9.]* [0-9]*' | tail -1 | cut -d' ' -f2 || true; }
+[ "$(ask mairie-e2e.test)" = 404 ] || fail "certificat autorisé pour un domaine qu'aucune commune n'a vérifié"
+compose exec -T postgres psql -qtA -U strapi strapi \
+  -c "UPDATE sites SET custom_domain = 'mairie-e2e.test', domain_type = 'apex', domain_status = 'verified' WHERE document_id = '$site'" >/dev/null
+[ "$(ask mairie-e2e.test)" = 200 ] || fail "certificat refusé pour le domaine vérifié de la commune"
+[ "$(ask www.mairie-e2e.test)" = 404 ] || fail "certificat autorisé pour www (servi par le CDN, jamais par le serveur)"
+status=$(curl -sS -o /dev/null -w '%{http_code}' "$base/api/domain/certificate-check?domain=mairie-e2e.test")
+[ "$status" = 404 ] || fail "autorisation des certificats ouverte au public ($status)"
+redirect=$(on mairie-e2e.test '/actualites?page=2' -o /dev/null -w '%{http_code} %{redirect_url}')
+[ "$redirect" = "301 https://www.mairie-e2e.test/actualites?page=2" ] || fail "domaine nu → www : $redirect"
+on inconnu-e2e.test / -o /dev/null 2>/dev/null && fail "certificat délivré pour un domaine inconnu"
+echo "  certificat pour le domaine vérifié seulement, mairie-e2e.test → www.mairie-e2e.test (301), point d'autorisation fermé au public"
+
 step "Preview fermée sans jeton"
 status=$(on preview.localhost / -o /dev/null -D /tmp/communeo-e2e-headers -w '%{http_code}')
 [ "$status" = 401 ] || fail "la preview répond sans jeton ($status)"
@@ -202,4 +217,4 @@ token=$(curl -sS -X POST "$base/api/auth/local" -H 'Content-Type: application/js
 curl -fsS -o /dev/null "$base$file_url" || fail "fichier absent après restauration"
 echo "  commune et fichier restaurés depuis S3"
 
-printf '\n✓ Stack de production : démarrage, Caddy (https, en-têtes), admin, commune, fichier, mise en ligne, origine des sites, preview, alerte disque, sauvegarde S3 chiffrée, restauration après perte du serveur\n'
+printf '\n✓ Stack de production : démarrage, Caddy (https, en-têtes), admin, commune, fichier, mise en ligne, origine des sites, domaine nu → www, preview, alerte disque, sauvegarde S3 chiffrée, restauration après perte du serveur\n'

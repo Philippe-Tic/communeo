@@ -100,6 +100,8 @@ export const site = (logo: 'horizontal' | 'blason' = 'horizontal') =>
       dpo_email: 'dpo@cdg49.fr',
       dpo_phone: '02 41 00 00 10',
     },
+    // Messages traités supprimés au bout de 3 ans (comme l'annonce la politique ci-dessus)
+    message_retention: 'months_36',
     accessibilite: {
       id: 1,
       accessibility_level: 'partiellement-conforme',

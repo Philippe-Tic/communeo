@@ -218,6 +218,10 @@ export default (config: any, { strapi }: { strapi: any }) => {
             if ('theme' in data && !['admin', 'super_admin'].includes(user.municipality_role)) {
               return ctx.forbidden('Seul un administrateur peut changer le thème du site');
             }
+            // Durée de conservation des messages (#342) : réglage des administrateurs (Mentions légales et RGPD)
+            if ('message_retention' in data && !['admin', 'super_admin'].includes(user.municipality_role)) {
+              return ctx.forbidden('Seul un administrateur peut changer la durée de conservation des messages');
+            }
           }
         }
         return next();

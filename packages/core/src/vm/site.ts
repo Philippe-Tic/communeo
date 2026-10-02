@@ -1,6 +1,7 @@
 import type { Page, Site } from '../generated/strapi';
 import { navigationConfigSchema, SECTIONS } from '../site/navigation';
 import { openingHoursSchema, summarizeWeek } from '../site/opening-hours';
+import { effectiveMessageRetention, MESSAGE_RETENTION_LABELS } from '../site/message-retention';
 import { DEFAULT_THEME, THEME_IDS, type ThemeId } from '../site/themes';
 import type { MapContext } from './context';
 import { ACCESSIBILITY_LEVEL_LABELS, LEGAL_PAGES } from './labels';
@@ -27,6 +28,7 @@ export function mapSite(ctx: MapContext, site: Site): SiteVM {
   const rgpd = site.rgpd;
   const accessibility = site.accessibilite;
   const level = accessibility?.accessibility_level ?? 'non-conforme';
+  const retention = effectiveMessageRetention(site.message_retention);
   // Chaque texte légal est une page à part : ses ancres sont indépendantes
   const richText = (value: unknown) => mapRichText(value, new AnchorRegistry());
 
@@ -73,6 +75,7 @@ export function mapSite(ctx: MapContext, site: Site): SiteVM {
         rgpd && (rgpd.dpo_name || rgpd.dpo_email || rgpd.dpo_phone)
           ? { name: text(rgpd.dpo_name), email: mapEmail(rgpd.dpo_email), phone: mapPhone(rgpd.dpo_phone) }
           : null,
+      messageRetention: retention === 'never' ? null : MESSAGE_RETENTION_LABELS[retention],
       accessibility: {
         level,
         levelLabel: ACCESSIBILITY_LEVEL_LABELS[level],

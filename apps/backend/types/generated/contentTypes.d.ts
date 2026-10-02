@@ -426,6 +426,7 @@ export interface ApiActivityLogActivityLog extends Struct.CollectionTypeSchema {
         'invoice_chorus',
         'invoice_remind',
         'billing_renewal',
+        'messages_purge',
       ]
     > &
       Schema.Attribute.Required;
@@ -1380,6 +1381,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     logo: Schema.Attribute.Media<'images'>;
     media_items: Schema.Attribute.Relation<'oneToMany', 'api::media-item.media-item'>;
     mentions_legales: Schema.Attribute.Component<'legal.mentions-legales', false>;
+    message_retention: Schema.Attribute.Enumeration<['months_6', 'months_12', 'months_24', 'months_36', 'never']>;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique &
@@ -1400,6 +1402,7 @@ export interface ApiSiteSite extends Struct.CollectionTypeSchema {
     publishedAt: Schema.Attribute.DateTime;
     rgpd: Schema.Attribute.Component<'legal.rgpd', false>;
     school_menus: Schema.Attribute.Relation<'oneToMany', 'api::school-menu.school-menu'>;
+    seo_checklist: Schema.Attribute.JSON & Schema.Attribute.Private;
     signup_approval: Schema.Attribute.Enumeration<['townhall', 'team']>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     social_links: Schema.Attribute.Component<'social.social-link', true>;

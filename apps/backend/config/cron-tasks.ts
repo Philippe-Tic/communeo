@@ -1,6 +1,7 @@
 import { purgeActivityLog } from '../src/services/activity-log';
 import { publishDueDocuments } from '../src/services/scheduled-publication';
 import { processBilling } from '../src/services/billing';
+import { purgeExpiredMessages } from '../src/services/message-retention';
 import { processTrials } from '../src/services/trial';
 
 export default {
@@ -16,6 +17,14 @@ export default {
       await purgeActivityLog();
     },
     options: { rule: '0 3 * * *', tz: 'Europe/Paris' },
+  },
+  // Messages des habitants (#342) : messages traités supprimés après la durée choisie par la commune,
+  // demandes d'inscription non confirmées après 30 jours
+  messageRetention: {
+    task: async () => {
+      await purgeExpiredMessages();
+    },
+    options: { rule: '30 3 * * *', tz: 'Europe/Paris' },
   },
   // Période d'essai : rappels (J-7, J-1), fin de l'essai, suppression des données 6 mois après
   trials: {

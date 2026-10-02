@@ -194,7 +194,7 @@
 
 		try_files {path} {path}.html {path}/index.html
 		file_server {
-			hide .regles .staging
+			hide .regles .staging .versions
 		}
 	}
 

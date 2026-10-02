@@ -71,12 +71,15 @@ if [ -n "$api_key" ]; then
     if [ "$status" = 200 ]; then
       zone_domain=$(json 'v.Domain' 'v["Domain"]')
       records=$(json '(v.Records || []).length' 'len(v.get("Records") or [])')
-      detected=$(json 'v.NameserversDetected' 'v.get("NameserversDetected")')
       ok "zone $zone_domain, $records enregistrement(s) (limite : 5 000)"
       if [ -n "$sites_domain" ] && [ "$zone_domain" != "$sites_domain" ]; then ko "la zone ($zone_domain) n'est pas SITES_DOMAIN ($sites_domain)"; fi
-      case "$detected" in
-        true|True) ok "serveurs de noms Bunny détectés : la zone est en service" ;;
-        *) ok "serveurs de noms pas encore chez Bunny : les adresses des communes existent mais ne servent pas encore (bascule #383)" ;;
+      # Délégation réelle, lue dans le DNS public (NameserversDetected de l'API Bunny peut être vrai avant le changement)
+      ns=$(curl -sS --max-time 15 -H 'Accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$zone_domain&type=NS" 2>/dev/null \
+        | grep -o '"data":"[^"]*"' | cut -d'"' -f4 | sed 's/\.$//' | sort | tr '\n' ' ' || true)
+      case "$ns" in
+        "") ok "serveurs de noms de $zone_domain illisibles depuis le serveur (DNS public)" ;;
+        *bunny.net*) ok "serveurs de noms : $ns→ la zone Bunny est en service" ;;
+        *) ok "serveurs de noms : $ns→ pas encore Bunny : les adresses des communes existent mais ne servent pas encore (bascule #383)" ;;
       esac
     else
       ko "zone DNS $dns_zone illisible ($status)"

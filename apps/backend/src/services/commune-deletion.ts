@@ -8,6 +8,7 @@
  * l'identité du client figée à l'émission et leur PDF archivé.
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
+import { removeExportFile } from '../utils/export-dir';
 import { log } from '../utils/logger';
 import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 
@@ -63,6 +64,9 @@ async function removeCommune(documentId: string): Promise<boolean> {
     const documentIds = [...new Set(entries.map((entry: any) => entry.documentId as string))];
     for (const id of documentIds) await strapi.documents(uid as any).delete({ documentId: id });
   }
+
+  // Archive d'export (#343) : données personnelles, jamais gardées après la commune
+  await removeExportFile(site.data_export?.file).catch((error) => log.error(`Failed to remove export of ${site.slug}:`, error));
 
   await strapi.documents(SITE).delete({ documentId });
   return true;

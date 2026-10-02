@@ -60,6 +60,8 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'deletion_scheduled_at',
   'deletion_requested_by',
   'deletion_reminded',
+  // Export des données (#343) : rien de visible sur le site
+  'data_export',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */

@@ -33,6 +33,8 @@ export type ActivityAction =
   | 'commune_delete'
   | 'deletion_request'
   | 'deletion_cancel'
+  | 'data_export'
+  | 'data_export_download'
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'

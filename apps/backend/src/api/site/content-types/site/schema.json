@@ -156,6 +156,10 @@
       "default": false,
       "private": true
     },
+    "data_export": {
+      "type": "json",
+      "private": true
+    },
     "seo_checklist": {
       "type": "json",
       "private": true

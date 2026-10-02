@@ -4,6 +4,7 @@ import { processBilling } from '../src/services/billing';
 import { purgeExpiredMessages } from '../src/services/message-retention';
 import { processTrials } from '../src/services/trial';
 import { processDeletionRequests } from '../src/services/commune-deletion-request';
+import { purgeExports, startExports } from '../src/services/data-export';
 
 export default {
   scheduledPublication: {
@@ -40,6 +41,14 @@ export default {
       await processDeletionRequests();
     },
     options: { rule: '15 * * * *', tz: 'Europe/Paris' },
+  },
+  // Export des données (#343) : exports en attente (reprise après un redémarrage), archives périmées effacées
+  dataExports: {
+    task: async () => {
+      await startExports();
+      await purgeExports();
+    },
+    options: { rule: '* * * * *' },
   },
   // Facturation (#314) : factures de renouvellement à l'échéance, relances des factures en retard
   billing: {

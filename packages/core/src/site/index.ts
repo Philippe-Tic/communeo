@@ -18,3 +18,4 @@ export * from './seo-checklist';
 export * from './signup';
 export * from './message-retention';
 export * from './commune-deletion';
+export * from './data-export';

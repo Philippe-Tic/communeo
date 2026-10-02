@@ -1,3 +1,4 @@
+import { requeueInterruptedExports } from '../services/data-export';
 import { syncHosting } from '../services/hosting';
 import { ensureBuildToken } from './build-token';
 import { applyPermissions, disablePublicRegistration } from './permissions';
@@ -15,4 +16,6 @@ export default async ({ strapi }: { strapi: any }) => {
 
   await ensureBuildToken(strapi);
   await syncHosting(strapi);
+  // Export des données (#343) interrompu par un redémarrage : repris par la tâche de chaque minute
+  await requeueInterruptedExports();
 };

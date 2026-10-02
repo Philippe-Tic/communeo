@@ -3,6 +3,7 @@
  * NETLIFY_TOKEN), rien ne plante au démarrage : seules les actions de publication échouent,
  * avec un message clair.
  */
+import path from 'node:path';
 import type { Logger } from '../logger';
 import { BunnyPublisher } from './bunny';
 import { LocalPublisher } from './local';
@@ -74,6 +75,16 @@ const PUBLISHER_ENV = [
   'SITES_DOMAIN',
   'CADDY_ADMIN_URL',
 ] as const;
+
+/**
+ * Dossier du site publié d'une commune quand les sites sont servis depuis le volume `sites` (Bunny, ou
+ * PUBLISH_DIR sans Netlify), même choix que `getPublisher` ; null chez Netlify (rien sur le serveur).
+ */
+export function publishedSiteDir(slug: string, env: NodeJS.ProcessEnv = process.env): string | null {
+  if (env.SITES_PUBLISHER === 'bunny') return path.join(env.PUBLISH_DIR || SITES_DIR, slug);
+  if (env.NETLIFY_TOKEN || !env.PUBLISH_DIR) return null;
+  return path.join(env.PUBLISH_DIR, slug);
+}
 
 /**
  * SITES_PUBLISHER=bunny → Bunny CDN devant l'origine servie par Caddy (#382 ; BUNNY_API_KEY,

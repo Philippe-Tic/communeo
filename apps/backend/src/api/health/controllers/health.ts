@@ -1,5 +1,5 @@
 /**
- * GET /api/health : Strapi répond et sa base aussi (supervision externe, derrière nginx). Aucune
+ * GET /api/health : Strapi répond et sa base aussi (supervision externe, derrière Caddy). Aucune
  * information sur la plateforme : 200 { status: 'ok' } ou 503.
  */
 export default {

@@ -29,13 +29,13 @@ pnpm workspaces + Turborepo monorepo (V2 refactor in progress, see board #6):
 
 ### Production (#179)
 
-`docker-compose.yml` runs postgres, strapi, worker, preview, `nginx` (image « web » = admin build + nginx, `apps/admin/Dockerfile`), `backup` (`deploy/backup`: nightly pg_dump kept 3 days + incremental uploads mirror with dated history of deleted/replaced files, same to S3 through an rclone crypt remote (names and contents encrypted, 90 days), `restore.sh [--from-s3] <stamp|latest>`) and certbot. Images are published to GHCR per commit by `.github/workflows/deploy.yml` (then `deploy/e2e/run.sh` on the runner, then `deploy/server/deploy.sh <sha>` over SSH when `DEPLOY_HOST` is set, with automatic rollback; it also writes `IMAGE_TAG` into the server's `.env` so a bare `docker compose up -d` never starts an old `latest` image; `./deploy.sh restart` after editing `.env`). PRs touching the stack run `deploy-e2e.yml`. `STRAPI_API_TOKEN` / `PREVIEW_API_TOKEN` can be generated up front: Strapi creates the tokens with those values. Setup: DEPLOYMENT.md; runbook: PRODUCTION.md.
+`docker-compose.yml` runs postgres, strapi, worker (`cpus: 2`), preview, `caddy` (#381, image « web » = admin build + Caddy, `apps/admin/Dockerfile`, config `caddy/Caddyfile`: Let's Encrypt certificates obtained and renewed by Caddy in the `caddy-data` volume; app = admin + `/api` `/uploads` `/admin` → Strapi, preview, and `origine.<domain>` = the communes' sites from the `sites` volume, `/sites/<slug>/x` → `x`, `x.html` or `x/index.html`, the site's `404.html`, served only with the CDN's `X-Communeo-Origine: $SITES_ORIGIN_SECRET` header, 403 otherwise) and `backup` (`deploy/backup`: nightly pg_dump kept 3 days + incremental uploads mirror with dated history of deleted/replaced files, same to S3 through an rclone crypt remote (names and contents encrypted, 90 days), `restore.sh [--from-s3] <stamp|latest>`; `disk-alert.sh` every 15 min e-mails `SIGNUP_NOTIFY_EMAIL` above `DISK_ALERT_THRESHOLD` %). Without `NETLIFY_TOKEN` the worker publishes into the `sites` volume (`LocalPublisher`, `PUBLISH_DIR`) with per-site rules `.regles/site.caddy` (`caddySiteRules` in `packages/pipeline/src/publisher/caddy.ts`: noindex during the trial, canonical-host redirect from `X-Forwarded-Host`, #335 redirects; format documented there, used by #382) imported by the Caddyfile, then reloads Caddy through its admin API (`CADDY_ADMIN_URL`, internal network only); a rule Caddy rejects puts the previous version back. Netlify stays the active publisher until #382/#383. Images are published to GHCR per commit by `.github/workflows/deploy.yml` (then `deploy/e2e/run.sh` on the runner, then `deploy/server/deploy.sh <sha>` over SSH when `DEPLOY_HOST` is set, with automatic rollback when strapi or caddy is unhealthy (the previous version's `docker-compose.yml` is restored too: `.deployed-compose.yml` / `.previous-compose.yml`, else fetched from GitHub); it also writes `IMAGE_TAG` into the server's `.env` so a bare `docker compose up -d` never starts an old `latest` image; `./deploy.sh restart` after editing `.env`). PRs touching the stack run `deploy-e2e.yml`. `STRAPI_API_TOKEN` / `PREVIEW_API_TOKEN` can be generated up front: Strapi creates the tokens with those values. Setup: DEPLOYMENT.md; runbook: PRODUCTION.md.
 
 ### Data Flow
 
 ```
 Admin UI → Strapi API (filtered by site-isolation middleware) → SQLite/PostgreSQL
-Admin « Mettre en ligne » → Strapi → build queue (pg-boss, Postgres) → worker → Astro renderer (reads Strapi with the read-only build token) → Static HTML → SitePublisher (Netlify)
+Admin « Mettre en ligne » → Strapi → build queue (pg-boss, Postgres) → worker → Astro renderer (reads Strapi with the read-only build token) → Static HTML → SitePublisher (Netlify; or the `sites` volume served by Caddy)
 ```
 
 ### Multi-Tenancy
@@ -59,7 +59,7 @@ pnpm --filter @communeo/renderer test:preview # preview server access: 401 witho
 pnpm --filter @communeo/site test:e2e         # communeo.fr: axe (WCAG 2.2 AA), 320 px, text at 200 %, interactions, at 390/1440 px
 pnpm --filter @communeo/worker dev   # build worker (apps/worker/.env: QUEUE_DATABASE_URL, STRAPI_URL, STRAPI_API_TOKEN, WORKER_SECRET, NETLIFY_TOKEN or PUBLISH_DIR)
 docker run -d -p 55432:5432 -e POSTGRES_PASSWORD=test -e POSTGRES_DB=queue postgres:16-alpine   # queue for local tests: TEST_QUEUE_DATABASE_URL=postgres://postgres:test@localhost:55432/queue pnpm test
-deploy/e2e/run.sh        # production stack end to end (images, health, commune + uploaded file, published by the worker, preview, encrypted S3 backup, restore from S3 only); E2E_KEEP=1 keeps it on :8088
+deploy/e2e/run.sh        # production stack end to end (images, health, Caddy with its internal CA + headers, commune + uploaded file, published by the worker and served by the origin: secret header, 301, noindex, /x → x.html, 404; preview, disk alert, encrypted S3 backup, restore from S3 only); E2E_KEEP=1 keeps it on https://localhost:8443
 pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts after any Strapi schema change (CI fails if stale)
 ```
 
@@ -82,8 +82,13 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 
 ### Worker (`apps/worker/.env.example`)
 - `QUEUE_DATABASE_URL`, `WORKER_SECRET`, `STRAPI_URL`, `STRAPI_PUBLIC_URL`, `STRAPI_API_TOKEN` (passed to the renderer)
-- `NETLIFY_TOKEN` (+ `SITES_DOMAIN`) — publish to Netlify; or `PUBLISH_DIR` (+ `PUBLISH_BASE_URL`) to publish into a local folder in dev
+- `NETLIFY_TOKEN` (+ `SITES_DOMAIN`) — publish to Netlify; or `PUBLISH_DIR` (+ `PUBLISH_BASE_URL`) to publish into a folder (dev, e2e, the `sites` volume served by Caddy), `CADDY_ADMIN_URL` to reload Caddy after each publication
 - `BUILD_TIMEOUT_SECONDS` (600), `WORK_DIR`, `RENDERER_DIR`
+
+### Server (`.env`, Caddy and backup)
+- `DOMAIN`, `PREVIEW_DOMAIN`, `ORIGIN_DOMAIN` (default `origine.communeo.fr`) — the three hosts served by Caddy (DNS A records to the VPS)
+- `SITES_ORIGIN_SECRET` — value of the `X-Communeo-Origine` header the CDN adds (hex); empty → the origin answers 403 to everything
+- `DISK_ALERT_THRESHOLD` — disk alert threshold in % (85)
 
 ### Admin
 - `VITE_API_URL` — Strapi backend URL (e.g., `http://localhost:1337`)
@@ -145,7 +150,7 @@ pnpm gen:types           # regenerate packages/core/src/generated/strapi.ts afte
 | Admin | React 19, Vite 8, Tailwind CSS 4, shadcn/ui, TanStack Router and Query |
 | Renderer and themes | Astro 7, TypeScript 5, Pagefind |
 | Docs | Astro 6, Starlight |
-| Hosting | Netlify (static sites) |
+| Hosting | OVH VPS (Docker Compose, Caddy), Netlify (communes' static sites until #382/#383) |
 
 ## GitHub Project Workflow
 

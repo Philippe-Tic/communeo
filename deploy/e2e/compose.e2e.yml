@@ -1,22 +1,21 @@
 # Surcharge pour le test de bout en bout de la stack de production (deploy/e2e/run.sh, CI) : mêmes images,
-# sans TLS ni Netlify (publication dans un dossier), un super admin de test.
+# Caddy avec les certificats de son autorité interne (aucun appel à Let's Encrypt), sans Netlify
+# (publication dans le volume des sites, servis par Caddy), un super admin de test.
 #   docker compose --env-file deploy/e2e/e2e.env -f docker-compose.yml -f deploy/e2e/compose.e2e.yml up -d
 name: communeo-e2e
 
 services:
-  nginx:
+  caddy:
     ports: !override
-      - "127.0.0.1:${E2E_PORT:-8088}:80"
-    volumes: !override
-      - ./deploy/e2e/nginx:/etc/nginx/templates:ro
-
-  certbot:
-    profiles: [disabled]
+      - "127.0.0.1:${E2E_HTTP_PORT:-8088}:80"
+      - "127.0.0.1:${E2E_PORT:-8443}:443"
+    environment:
+      CADDY_GLOBAL_OPTIONS: local_certs
 
   strapi:
     environment:
-      STRAPI_PUBLIC_URL: http://localhost:${E2E_PORT:-8088}
-      ADMIN_URL: http://localhost:${E2E_PORT:-8088}
+      STRAPI_PUBLIC_URL: https://localhost:${E2E_PORT:-8443}
+      ADMIN_URL: https://localhost:${E2E_PORT:-8443}
       NETLIFY_TOKEN: ""
       RESEND_API_KEY: ""
       SEED_SUPER_ADMIN_EMAIL: equipe@communeo.test
@@ -39,14 +38,8 @@ services:
       RCLONE_CONFIG_REMOTE_REGION: us-east-1
       RCLONE_CONFIG_REMOTE_ACCESS_KEY_ID: e2e-access-key
       RCLONE_CONFIG_REMOTE_SECRET_ACCESS_KEY: e2e-secret-key
+      RESEND_API_KEY: ""
 
   worker:
     environment:
       NETLIFY_TOKEN: ""
-      PUBLISH_DIR: /app/published
-      PUBLISH_BASE_URL: http://localhost:${E2E_PORT:-8088}/sites
-    volumes:
-      - published:/app/published
-
-volumes:
-  published:

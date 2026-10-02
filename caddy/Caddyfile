@@ -1,0 +1,205 @@
+# Caddy (#381), image « web » (apps/admin/Dockerfile) : remplace nginx et certbot sur le serveur.
+#   {$DOMAIN}          admin compilée, /api, /uploads et /admin relayés vers Strapi
+#   {$PREVIEW_DOMAIN}  serveur de preview des brouillons
+#   {$ORIGIN_DOMAIN}   origine des sites des communes (/sites/<slug>/), servie au CDN seulement
+# Certificats Let's Encrypt obtenus et renouvelés par Caddy (volume caddy-data). Variables : docker-compose.yml.
+{
+	# Redirection http → https écrite plus bas : 301 comme nginx, et /healthz sans redirection
+	auto_https disable_redirects
+	# API d'administration : rechargement par le worker après chaque publication (règles des sites).
+	# Port jamais publié : joignable depuis le réseau interne de la stack seulement.
+	admin :2019 {
+		# Le worker s'annonce avec l'en-tête Origin (Node fetch envoie Sec-Fetch-Mode, que Caddy traite
+		# comme un navigateur) ; localhost pour `caddy reload` dans le conteneur
+		origins caddy:2019 localhost:2019
+	}
+	# HTTP/1.1 et HTTP/2 comme nginx : pas de HTTP/3 (UDP 443 n'est pas ouvert)
+	servers {
+		protocols h1 h2
+	}
+	# Journal des erreurs sans le secret du CDN (le journal d'accès de l'origine le retire aussi)
+	log default {
+		format filter {
+			wrap json
+			request>headers>X-Communeo-Origine delete
+		}
+	}
+	# Tests de la stack (deploy/e2e) : `local_certs`, certificats de l'autorité interne de Caddy
+	{$CADDY_GLOBAL_OPTIONS}
+}
+
+# En-têtes de sécurité de l'admin (nginx : server 443)
+(securite) {
+	header {
+		defer
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+	}
+}
+
+# Vers Strapi : Host d'origine, X-Forwarded-For réécrit avec l'adresse du client (les valeurs envoyées par le
+# client sont ignorées, non falsifiable), X-Forwarded-Proto ; WebSocket pris en charge sans réglage
+(strapi) {
+	reverse_proxy strapi:1337 {
+		header_up X-Real-IP {remote_host}
+	}
+}
+
+# Tous les domaines, en http : contrôle de santé du conteneur (HEALTHCHECK de l'image), challenges ACME
+# (traités par Caddy avant ces routes), tout le reste vers https
+:80 {
+	handle /healthz {
+		log_skip
+		respond "ok" 200
+	}
+	handle {
+		redir https://{host}{uri} 301
+	}
+}
+
+# Administration
+{$DOMAIN} {
+	log
+	encode zstd gzip
+	request_body {
+		max_size 50MB
+	}
+	import securite
+
+	handle /healthz {
+		log_skip
+		respond "ok" 200
+	}
+
+	# API Strapi, jamais en cache dans le navigateur
+	handle /api/* {
+		header {
+			defer
+			Cache-Control "no-store, no-cache, must-revalidate"
+			Pragma "no-cache"
+		}
+		import strapi
+	}
+
+	# Fichiers envoyés (médiathèque)
+	handle /uploads/* {
+		header {
+			defer
+			Cache-Control "public, max-age=604800, immutable"
+		}
+		import strapi
+	}
+
+	# Panneau d'administration de Strapi (préfixe, comme `location /admin` de nginx)
+	handle /admin* {
+		import strapi
+	}
+
+	# Erreurs (Strapi injoignable, envoi trop lourd…) : mêmes en-têtes de sécurité
+	handle_errors {
+		import securite
+		respond {err.status_code}
+	}
+
+	# Admin (SPA React) : fichier demandé, sinon index.html
+	handle {
+		root * /srv/admin
+		route {
+			try_files {path} /index.html
+			# Pas de cache sur index.html (évite les problèmes de déploiement)
+			@index path / /index.html
+			header @index {
+				Cache-Control "no-cache, no-store, must-revalidate"
+				Pragma "no-cache"
+				Expires "0"
+			}
+			# Assets statiques (noms avec empreinte) : un an
+			@assets path_regexp (?i)\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$
+			header @assets Cache-Control "public, max-age=31536000, immutable"
+			file_server
+		}
+	}
+}
+
+# Preview des brouillons (serveur SSR du renderer) : jamais indexée ni mise en cache
+{$PREVIEW_DOMAIN} {
+	log
+	encode zstd gzip
+	request_body {
+		max_size 50MB
+	}
+	header {
+		defer
+		X-Content-Type-Options "nosniff"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Robots-Tag "noindex, nofollow, noarchive"
+	}
+	reverse_proxy preview:4321 {
+		header_up X-Real-IP {remote_host}
+	}
+}
+
+# En-têtes des sites des communes, pages d'erreur comprises
+(entetes_sites) {
+	header {
+		defer
+		X-Content-Type-Options "nosniff"
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+	}
+}
+
+# Origine des sites des communes : /sites/<slug>/x sert /srv/sites/<slug>/x, x.html ou x/index.html (volume
+# `sites`, écrit par le worker). Le CDN (Pull Zone Bunny, #382) ajoute l'en-tête secret ; sans lui : 403.
+# Règles propres à chaque site (redirections, noindex…) : /srv/sites/<slug>/.regles/site.caddy, écrites
+# par le worker (packages/pipeline, caddySiteRules) puis prises en compte par un rechargement de Caddy.
+{$ORIGIN_DOMAIN} {
+	# Journal d'accès sans le secret du CDN
+	log {
+		format filter {
+			request>headers>X-Communeo-Origine delete
+		}
+	}
+	encode zstd gzip
+	import entetes_sites
+
+	route {
+		# Secret vide : rien n'est servi
+		@hors_cdn not expression `{http.request.header.X-Communeo-Origine} == "{$SITES_ORIGIN_SECRET}" && "{$SITES_ORIGIN_SECRET}" != ""`
+		respond @hors_cdn "Accès réservé au CDN" 403
+
+		@hors_sites not path_regexp ^/sites/[a-z0-9-]+(/|$)
+		respond @hors_sites 404
+
+		root * /srv
+		# Pages courtes en cache (le CDN est vidé à chaque publication), fichiers d'Astro (noms avec empreinte) : un an
+		header Cache-Control "public, max-age=0, must-revalidate"
+		@astro path_regexp ^/sites/[a-z0-9-]+/_astro/
+		header @astro Cache-Control "public, max-age=31536000, immutable"
+
+		import /srv/sites/*/.regles/site.caddy
+
+		try_files {path} {path}.html {path}/index.html
+		file_server {
+			hide .regles .staging
+		}
+	}
+
+	# Page 404 du site
+	handle_errors 404 {
+		import entetes_sites
+		@site path_regexp site ^/sites/([a-z0-9-]+)/
+		handle @site {
+			root * /srv
+			rewrite * /sites/{re.site.1}/404.html
+			file_server {
+				status 404
+			}
+		}
+		handle {
+			respond 404
+		}
+	}
+}

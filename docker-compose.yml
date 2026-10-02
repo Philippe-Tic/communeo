@@ -118,6 +118,15 @@ services:
       WORKER_SECRET: ${WORKER_SECRET}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       SITES_DOMAIN: ${SITES_DOMAIN:-}
+      # Sans NETLIFY_TOKEN : sites écrits dans le volume `sites`, servis par Caddy (origine des sites, #381),
+      # rechargé après chaque publication par son API d'administration (réseau interne)
+      PUBLISH_DIR: /srv/sites
+      PUBLISH_BASE_URL: https://${ORIGIN_DOMAIN:-origine.communeo.fr}/sites
+      CADDY_ADMIN_URL: http://caddy:2019
+    volumes:
+      - sites:/srv/sites
+    # Deux cœurs sur quatre : un build ne ralentit ni l'admin ni l'API
+    cpus: "2"
     logging:
       driver: json-file
       options:
@@ -154,8 +163,9 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Image « web » (apps/admin/Dockerfile) : admin compilée + nginx (configuration dans nginx/)
-  nginx:
+  # Image « web » (apps/admin/Dockerfile) : admin compilée + Caddy (configuration dans caddy/Caddyfile).
+  # Certificats Let's Encrypt obtenus et renouvelés par Caddy (volume caddy-data, à garder).
+  caddy:
     image: ${IMAGE_REGISTRY:-ghcr.io/philippe-tic}/communeo-web:${IMAGE_TAG:-latest}
     build:
       context: .
@@ -174,11 +184,14 @@ services:
     environment:
       DOMAIN: ${DOMAIN}
       PREVIEW_DOMAIN: ${PREVIEW_DOMAIN}
-      # Seuls DOMAIN et PREVIEW_DOMAIN sont substitués dans les templates, les variables nginx ($host etc.) sont préservées
-      NGINX_ENVSUBST_FILTER: "DOMAIN"
+      # Origine des sites des communes (/sites/<slug>/), derrière le CDN
+      ORIGIN_DOMAIN: ${ORIGIN_DOMAIN:-origine.communeo.fr}
+      # En-tête X-Communeo-Origine ajouté par le CDN (hexadécimal) ; vide : l'origine répond 403 à tout
+      SITES_ORIGIN_SECRET: ${SITES_ORIGIN_SECRET:-}
     volumes:
-      - certbot-webroot:/var/www/certbot:ro
-      - certbot-certs:/etc/letsencrypt:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      - sites:/srv/sites:ro
     logging:
       driver: json-file
       options:
@@ -213,6 +226,11 @@ services:
       RCLONE_CONFIG_REMOTE_REGION: ${BACKUP_S3_REGION:-}
       RCLONE_CONFIG_REMOTE_ACCESS_KEY_ID: ${BACKUP_S3_ACCESS_KEY_ID:-}
       RCLONE_CONFIG_REMOTE_SECRET_ACCESS_KEY: ${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      # Alerte disque : e-mail à l'équipe quand le disque du serveur dépasse le seuil (en %)
+      DISK_ALERT_THRESHOLD: ${DISK_ALERT_THRESHOLD:-85}
+      DISK_ALERT_TO: ${SIGNUP_NOTIFY_EMAIL:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_DEFAULT_FROM: ${EMAIL_DEFAULT_FROM:-noreply@communeo.fr}
     volumes:
       - backups:/backups
       - strapi-uploads:/uploads
@@ -222,16 +240,12 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - certbot-webroot:/var/www/certbot
-      - certbot-certs:/etc/letsencrypt
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-
 volumes:
   postgres-data:
   strapi-uploads:
   backups:
-  certbot-webroot:
-  certbot-certs:
+  # Certificats et compte ACME de Caddy
+  caddy-data:
+  caddy-config:
+  # Sites des communes publiés par le worker, servis par Caddy
+  sites:

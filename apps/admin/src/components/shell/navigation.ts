@@ -27,6 +27,7 @@ import {
   Scale,
   Send,
   Share2,
+  Trash2,
   SlidersHorizontal,
   Users,
   UsersRound,
@@ -66,6 +67,7 @@ export const MY_SITE_LINKS: NavLink[] = [
   { label: 'Démarches', to: '/mon-site/demarches', icon: List },
   { label: 'Open data', to: '/mon-site/open-data', icon: Database },
   { label: 'Redirections', to: '/mon-site/redirections', icon: RouteIcon, adminOnly: true },
+  { label: 'Supprimer la commune', to: '/mon-site/suppression', icon: Trash2, adminOnly: true },
 ];
 
 export const NAVIGATION: NavGroup[] = [

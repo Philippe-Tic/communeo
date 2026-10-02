@@ -2,7 +2,7 @@
  * API Strapi simulée pour les tests de l'admin : une commune, une session, l'état de mise en ligne.
  */
 import type { Page } from '@playwright/test';
-import { computeCompliance, onboardingChecklist } from '@communeo/core';
+import { computeCompliance, deletionConfirmed, onboardingChecklist } from '@communeo/core';
 
 export const SITE = {
   documentId: 'site-saint-aubin',
@@ -447,6 +447,8 @@ export interface MockOptions {
   freshCommune?: boolean;
   /** Niveau d'accessibilité déclaré (« partiellement conforme » par défaut ; null : pas encore déclaré) */
   accessibilityLevel?: 'non-conforme' | 'partiellement-conforme' | 'conforme' | null;
+  /** Suppression de Saint-Aubin demandée (#391) : dans N jours */
+  deletionInDays?: number;
 }
 
 export type MockMedia = {
@@ -1105,7 +1107,12 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     to: options.approval === 'townhall' ? 'm***@saint-aubin.fr' : null,
     sentAt: options.approval === 'townhall' ? '2026-09-28T08:00:00.000Z' : (null as string | null),
   };
+  // Suppression demandée par la commune (#391)
+  const deletion = {
+    scheduledAt: options.deletionInDays != null ? new Date(Date.now() + options.deletionInDays * DAY).toISOString() : (null as string | null),
+  };
   const sessionPlan = () => ({
+    deletion_scheduled_at: deletion.scheduledAt,
     plan: plan.plan,
     trial_ends_at: plan.trialEndsAt,
     trial_expired_at: plan.trialExpiredAt,
@@ -1125,6 +1132,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     trialEndsAt: null as string | null,
     trialExpiredAt: null as string | null,
     liveRequestedAt: null as string | null,
+    deletionScheduledAt: null as string | null,
     createdAt: '2025-03-04T09:00:00.000Z',
     lastActivity: '2026-09-22T07:12:00.000Z',
     publication: { state: 'ok', at: '2026-09-22T05:45:00.000Z', pendingCount: 0 },
@@ -1136,6 +1144,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       customDomain: 'saint-aubin-sur-loire.fr',
       population: 3240,
       ...plan,
+      deletionScheduledAt: deletion.scheduledAt,
     },
     {
       ...communeSummary('site-bellefontaine', 'Bellefontaine', 'bellefontaine', 'moderne'),
@@ -1869,11 +1878,20 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       const communeMatch = /^\/api\/site-management\/([^/]+)$/.exec(url.pathname);
       const commune = communeMatch && communes.find((candidate) => candidate.documentId === communeMatch[1]);
       if (!commune) return json({ error: { status: 404, message: 'Commune introuvable' } }, 404);
+      if (method === 'DELETE') {
+        bodies.push({ call: `DELETE commune ${commune.documentId}`, body: { data: {} } });
+        communes.splice(communes.indexOf(commune), 1);
+        return json({ data: { documentId: commune.documentId } });
+      }
       if (method === 'PUT') {
         const { data } = route.request().postDataJSON() as { data: Record<string, unknown> };
         bodies.push({ call: `PUT commune ${commune.documentId}`, body: { data } });
-        const { extendTrialDays, ...rest } = data as { extendTrialDays?: number; plan?: string };
+        const { extendTrialDays, cancelDeletion, ...rest } = data as { extendTrialDays?: number; cancelDeletion?: boolean; plan?: string };
         Object.assign(commune, rest);
+        if (cancelDeletion) {
+          commune.deletionScheduledAt = null;
+          if (commune.documentId === SITE.documentId) deletion.scheduledAt = null;
+        }
         if (rest.plan === 'live') Object.assign(commune, { trialExpiredAt: null, liveRequestedAt: null });
         if (typeof extendTrialDays === 'number') {
           const running = commune.plan === 'trial' && commune.trialEndsAt && new Date(commune.trialEndsAt).getTime() > Date.now();
@@ -2092,6 +2110,20 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         domainState = 'none';
         return json({ success: true, defaultUrl: 'https://saint-aubin-mairie.netlify.app' });
       }
+    }
+    // Suppression de la commune (#391)
+    if (url.pathname === '/api/commune-deletion/request' && method === 'POST') {
+      const body = route.request().postDataJSON() as { name: string };
+      bodies.push({ call: 'POST commune-deletion', body: { data: body } });
+      if (!deletionConfirmed(body.name, SITE.name))
+        return json({ error: { status: 400, message: `Tapez le nom de la commune, « ${SITE.name} », pour confirmer la suppression.` } }, 400);
+      deletion.scheduledAt ??= new Date(Date.now() + 7 * DAY).toISOString();
+      return json({ data: { scheduledAt: deletion.scheduledAt } });
+    }
+    if (url.pathname === '/api/commune-deletion/cancel' && method === 'POST') {
+      bodies.push({ call: 'POST commune-deletion cancel', body: { data: {} } });
+      deletion.scheduledAt = null;
+      return json({ data: { scheduledAt: null } });
     }
     if (url.pathname === '/api/signup/approval') return json({ data: approvalState });
     if (url.pathname === '/api/signup/approval/resend' && method === 'POST') {

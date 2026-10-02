@@ -62,9 +62,23 @@ export interface ConfirmDialogProps {
   onConfirm: () => void | Promise<void>;
   /** Contenu sous la description (option à cocher…) */
   children?: ReactNode;
+  /** Action pas encore possible (nom à taper pour confirmer une suppression…) */
+  confirmDisabled?: boolean;
 }
 
-export function ConfirmDialog({ open, onOpenChange, tone = 'danger', icon, title, description, confirmLabel, cancelLabel = 'Annuler', onConfirm, children }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  tone = 'danger',
+  icon,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel = 'Annuler',
+  onConfirm,
+  children,
+  confirmDisabled = false,
+}: ConfirmDialogProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const returnFocus = useReturnFocus();
@@ -107,7 +121,7 @@ export function ConfirmDialog({ open, onOpenChange, tone = 'danger', icon, title
                 {cancelLabel}
               </Button>
             </AlertDialog.Cancel>
-            <Button variant={tone === 'danger' ? 'destructive' : 'primary'} disabled={pending} onClick={() => void confirm()}>
+            <Button variant={tone === 'danger' ? 'destructive' : 'primary'} disabled={pending || confirmDisabled} onClick={() => void confirm()}>
               {pending && <Loader2 aria-hidden="true" className="animate-spin" />}
               {confirmLabel}
             </Button>

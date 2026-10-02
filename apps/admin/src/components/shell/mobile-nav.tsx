@@ -1,13 +1,13 @@
 /**
  * Menu mobile : tiroir plein écran (focus piégé, fermeture par le bouton, Échap ou clic à l'extérieur),
  * avec « Voir le site », l'état de mise en ligne et les mêmes rubriques en grandes cibles (48 px).
+ * Le mode clair / sombre n'y est pas : c'est une préférence personnelle, dans le menu du compte (#366).
  */
 import { Dialog } from 'radix-ui';
 import { Menu, X } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import type { SessionUser } from '@/lib/session';
-import { ColorSchemeToggle } from './color-scheme-toggle';
 import { PublicationStatus } from './publication-status';
 import { NavList, SiteIdentity, type NavCounters } from './sidebar';
 
@@ -43,10 +43,6 @@ export function MobileNav({ user, counters, viewSite }: { user: SessionUser; cou
           <nav aria-label="Navigation principale" className="flex-1 p-3">
             <NavList user={user} density="mobile" counters={counters} onNavigate={() => setOpen(false)} />
           </nav>
-          <div className="flex items-center justify-between border-t border-border px-4 py-3 text-[15px]">
-            <span>Mode sombre</span>
-            <ColorSchemeToggle />
-          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

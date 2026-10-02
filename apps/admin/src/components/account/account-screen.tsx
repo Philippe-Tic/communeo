@@ -1,7 +1,8 @@
 /**
  * Mon compte (#367) : l'adresse e-mail, le rôle et la commune (en lecture), le prénom et le nom,
  * le mot de passe (avec l'actuel, 10 caractères minimum). Chaque carte a son propre bouton :
- * un changement de nom ne demande pas de mot de passe, et inversement.
+ * un changement de nom ne demande pas de mot de passe, et inversement. Préférences (#366) : le mode
+ * clair / sombre, appliqué tout de suite et gardé dans ce navigateur.
  */
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { CircleAlert } from 'lucide-react';
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/toast';
 import { changePassword, sendOwnPasswordReset, updateProfile } from '@/lib/account';
 import { ApiError } from '@/lib/api';
+import { COLOR_SCHEME_OPTIONS, setColorScheme, useColorSchemePreference, type ColorSchemePreference } from '@/lib/color-scheme';
 import { sessionQuery, type SessionUser } from '@/lib/session';
 import { ROLES } from '@/lib/users';
 
@@ -57,6 +59,7 @@ export function AccountScreen() {
       <RequiredNote />
       <ProfileForm user={user} />
       <PasswordForm user={user} />
+      <Preferences />
     </div>
   );
 }
@@ -210,6 +213,55 @@ function PasswordForm({ user }: { user: SessionUser }) {
         {reset === 'failed' && <FormError>Le lien n'a pas pu être envoyé. Réessayez dans un instant.</FormError>}
       </FormSection>
     </Form>
+  );
+}
+
+const SCHEME_HELP: Record<ColorSchemePreference, string> = {
+  light: 'Fond clair, en toutes circonstances.',
+  dark: 'Fond sombre, plus reposant le soir.',
+  system: 'Suit le réglage de l’ordinateur ou du téléphone.',
+};
+
+function Preferences() {
+  const scheme = useColorSchemePreference();
+  return (
+    <Card id="mon-compte-preferences" title="Préférences">
+      <fieldset aria-describedby="mon-compte-affichage-aide">
+        <legend className="font-medium">Affichage</legend>
+        <p id="mon-compte-affichage-aide" className="mt-1 text-[13px] text-secondary">
+          Appliqué tout de suite et gardé sur cet appareil. Aussi dans le menu de votre compte.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {COLOR_SCHEME_OPTIONS.map((option) => {
+            const id = `affichage-${option.value}`;
+            return (
+              <label
+                key={option.value}
+                htmlFor={id}
+                className="flex cursor-pointer items-start gap-2.5 rounded-lg border border-border-input px-3 py-2.5 has-checked:border-2 has-checked:border-brand has-checked:bg-selected-row"
+              >
+                <input
+                  type="radio"
+                  id={id}
+                  name="affichage"
+                  value={option.value}
+                  checked={scheme === option.value}
+                  onChange={() => setColorScheme(option.value)}
+                  aria-describedby={`${id}-desc`}
+                  className="mt-0.5 size-[18px] shrink-0 accent-[var(--brand-button)]"
+                />
+                <span>
+                  <span className="font-semibold">{option.label}</span>
+                  <span id={`${id}-desc`} className="mt-0.5 block text-[13px] text-secondary">
+                    {SCHEME_HELP[option.value]}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+    </Card>
   );
 }
 

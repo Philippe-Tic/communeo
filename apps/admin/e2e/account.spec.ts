@@ -104,3 +104,52 @@ test('mot de passe actuel oublié : un lien est envoyé à l’adresse du compte
   await expect(page.getByRole('status').filter({ hasText: 'Lien envoyé à sophie.leroy@saint-aubin.fr, valable 1 heure.' })).toBeVisible();
   expect(calls).toContain('POST /api/user-management/me/reset-password');
 });
+
+// Mode clair / sombre dans le profil (#366)
+test('affichage : choisi dans le menu du compte, repris dans Mon compte, sans violation en sombre', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await mockApi(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: /^Compte de/ }).click();
+  const menu = page.getByRole('menu');
+  await expect(menu.getByRole('menuitemradio', { name: 'Comme le système' })).toHaveAttribute('aria-checked', 'true');
+  await menu.getByRole('menuitemradio', { name: 'Sombre' }).click();
+  await expect(page.locator('html')).toHaveClass(/dark/);
+
+  await page.goto('/mon-compte');
+  const display = page.getByRole('group', { name: 'Affichage' });
+  await expect(display.getByRole('radio', { name: /^Sombre/ })).toBeChecked();
+  await page.waitForTimeout(300); // fin de la transition de couleurs
+  await expectNoViolations(page);
+  // « Comme le système » : le système est en clair
+  await display.getByRole('radio', { name: /^Comme le système/ }).check();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  await display.getByRole('radio', { name: /^Clair/ }).check();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  // Gardé au rechargement
+  await page.reload();
+  await expect(page.getByRole('group', { name: 'Affichage' }).getByRole('radio', { name: /^Clair/ })).toBeChecked();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+});
+
+test('mobile : plus de mode sombre dans la navigation ; ordinateur : bascule rapide dans l’en-tête', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/');
+  const mobile = (page.viewportSize()?.width ?? 1440) < 768;
+  if (mobile) {
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    const drawer = page.getByRole('dialog');
+    await expect(drawer.getByRole('navigation', { name: 'Navigation principale' })).toBeVisible();
+    await expect(drawer.getByRole('button', { name: 'Mode sombre' })).toHaveCount(0);
+    await expect(drawer).not.toContainText('Mode sombre');
+  } else {
+    const toggle = page.getByRole('banner').getByRole('button', { name: 'Mode sombre' });
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await page.getByRole('button', { name: /^Compte de/ }).click();
+    await expect(page.getByRole('menuitemradio', { name: 'Sombre' })).toHaveAttribute('aria-checked', 'true');
+  }
+});

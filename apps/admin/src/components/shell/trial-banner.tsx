@@ -1,12 +1,14 @@
 /**
  * Bandeau de la période d'essai (#310), au-dessus de l'administration : jours restants pendant
  * l'essai, lecture seule une fois l'essai terminé ; « Passer en live » mène à l'écran de la demande.
+ * Devis signé pendant l'essai : l'essai est suspendu jusqu'à la décision de l'équipe (#368), le compte
+ * à rebours laisse la place à l'attente.
  */
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Clock, TriangleAlert } from 'lucide-react';
+import { Clock, Hourglass, TriangleAlert } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import type { SessionSite } from '@/lib/session';
-import { daysLeftLabel, formatDay, trialState } from '@/lib/trial';
+import { daysLeftLabel, formatDay, QUOTE_PENDING_LABEL, trialState } from '@/lib/trial';
 import { cn } from '@/lib/utils';
 
 export function TrialBanner({ site }: { site: SessionSite | null }) {
@@ -15,9 +17,11 @@ export function TrialBanner({ site }: { site: SessionSite | null }) {
   if (!trial) return null;
 
   const expired = trial.kind === 'expired';
-  const soon = trial.kind === 'trial' && trial.daysLeft <= 7;
-  const Icon = expired ? TriangleAlert : Clock;
-  const requested = trial.requestedAt && `Passage en live demandé le ${formatDay(trial.requestedAt)} : l'équipe Communeo vous recontacte.`;
+  // Devis signé pendant l'essai : plus de compte à rebours
+  const suspended = trial.kind === 'trial' && !!trial.requestedAt;
+  const soon = trial.kind === 'trial' && !suspended && trial.daysLeft <= 7;
+  const Icon = expired ? TriangleAlert : suspended ? Hourglass : Clock;
+  const requested = expired && trial.requestedAt && `Passage en live demandé le ${formatDay(trial.requestedAt)} : l'équipe Communeo vous recontacte.`;
 
   return (
     <div
@@ -35,6 +39,11 @@ export function TrialBanner({ site }: { site: SessionSite | null }) {
             <strong className="font-semibold">Votre essai est terminé.</strong> Le site n'est plus en ligne et
             l'administration est en lecture seule.
             {trial.deletionAt && ` Vos contenus sont conservés jusqu'au ${formatDay(trial.deletionAt)}.`}
+          </>
+        ) : suspended ? (
+          <>
+            <strong className="font-semibold">{QUOTE_PENDING_LABEL}</strong> Votre essai est suspendu d'ici là : le site reste
+            en ligne et vous pouvez continuer à le modifier.
           </>
         ) : (
           <>

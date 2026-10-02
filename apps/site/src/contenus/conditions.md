@@ -49,6 +49,9 @@ un bandeau « Site en préparation », et il n'est pas proposé aux moteurs de r
 Communeo prévient la Commune par e-mail 7 jours puis 1 jour avant la fin de l'essai. L'équipe
 Communeo peut prolonger l'essai.
 
+Un devis validé par la Commune (article 5) suspend la fin de l'essai jusqu'à la réponse de l'équipe
+Communeo. Si le devis n'est pas retenu, l'essai reprend et dure encore au moins 7 jours.
+
 Sans abonnement à la fin de l'essai, le site est retiré et l'outil d'administration passe en lecture
 seule. Les données sont conservées six mois, puis supprimées (article 13).
 

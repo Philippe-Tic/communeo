@@ -209,6 +209,75 @@ describe('espace équipe', () => {
   });
 });
 
+describe('devis signé en attente de l’équipe (#368)', () => {
+  const now = new Date();
+  let quoteId: string;
+
+  beforeAll(async () => {
+    // Essai qui finit dans 12 heures, rappel J-7 déjà parti ; la commune signe son devis
+    await setSite({ plan: 'trial', trial_ends_at: addDays(now, 0.5), trial_notice: 'reminder_7', trial_expired_at: null, live_requested_at: now, live_requested_by: 'Marie Durand, Maire (test@example.com)' });
+    const quote = await strapi.documents('api::quote.quote').create({
+      data: {
+        site: siteA,
+        number: 'DEV-2026-0368',
+        status: 'signed',
+        commune_name: 'Test',
+        siret: '21580264000014',
+        address: '1 place de la Mairie',
+        billing_email: 'mairie@test.test',
+        population: 1000,
+        tier_label: '500 à 1 999 habitants',
+        amount_ht: 600,
+        vat_rate: 0,
+        amount_ttc: 600,
+        signatory_name: 'Marie Durand',
+        signatory_role: 'Maire',
+        signed_at: now,
+      } as any,
+    });
+    quoteId = quote.documentId;
+  });
+
+  it('signé à J-1 : ni rappel ni expiration à J0, tant que l’équipe n’a pas décidé', async () => {
+    await processTrials(now);
+    await processTrials(addDays(now, 1));
+    await processTrials(addDays(now, 10));
+    expect(emailsTo('test@example.com')).toHaveLength(0);
+    expect(await site()).toMatchObject({ plan: 'trial', trial_notice: 'reminder_7', trial_expired_at: null });
+  });
+
+  it('refusé : l’essai reprend 7 jours (rappel la veille), puis expire', async () => {
+    const res = await http.post(`/api/validations/live/${siteA}/reject`).set(auth(superAdmin)).send({ reason: 'Le SIRET ne correspond pas à la commune.' });
+    expect(res.status).toBe(200);
+    expect((await strapi.db.query('api::quote.quote').findOne({ where: { documentId: quoteId } })).status).toBe('rejected');
+    const resumed = await site();
+    expect(resumed).toMatchObject({ plan: 'trial', live_requested_at: null, trial_notice: 'reminder_7' });
+    const endsAt = new Date(resumed.trial_ends_at).getTime();
+    expect(endsAt).toBeGreaterThanOrEqual(addDays(now, 7).getTime());
+    expect(endsAt).toBeLessThan(addDays(new Date(), 7).getTime() + 1000);
+    const [mail] = emailsTo('test@example.com');
+    expect(mail!.text).toContain('Le SIRET ne correspond pas à la commune.');
+    expect(mail!.text).toMatch(/Votre essai continue jusqu'au \d+ \S+ \d{4}/);
+
+    sentEmails.length = 0;
+    const from = new Date();
+    await processTrials(addDays(from, 1));
+    expect(emailsTo('test@example.com')).toHaveLength(0);
+    await processTrials(addDays(from, 6.5));
+    expect(emailsTo('test@example.com').map((email) => email.subject)).toEqual([expect.stringMatching(/se termine demain/)]);
+    await processTrials(addDays(from, 7.01));
+    expect((await site()).plan).toBe('expired');
+  });
+
+  it('refusé alors que l’essai a encore plus de 7 jours : sa date ne change pas', async () => {
+    const endsAt = addDays(now, 20);
+    await setSite({ plan: 'trial', trial_ends_at: endsAt, trial_notice: null, trial_expired_at: null, live_requested_at: now });
+    await http.post(`/api/validations/live/${siteA}/reject`).set(auth(superAdmin)).send({ reason: 'Devis à refaire.' });
+    expect(new Date((await site()).trial_ends_at).getTime()).toBe(endsAt.getTime());
+    await setSite({ plan: 'live', trial_ends_at: null, trial_notice: null });
+  });
+});
+
 describe('suppression 6 mois après la fin de l’essai', () => {
   it('la commune, ses comptes et ses contenus sont supprimés ; le journal garde la trace', async () => {
     const created = await http.post('/api/site-management').set(auth(superAdmin)).send({

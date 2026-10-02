@@ -17,7 +17,7 @@ import { ApiError } from '@/lib/api';
 import { draftQuoteUrl, quotePdfUrl, quoteQuery, signQuote, type QuoteOffer, type QuoteSummary } from '@/lib/quote';
 import { sessionQuery } from '@/lib/session';
 import { TERMS_URL } from '@/lib/signup';
-import { daysLeftLabel, formatDay, trialState } from '@/lib/trial';
+import { daysLeftLabel, formatDay, QUOTE_PENDING_LABEL, trialState } from '@/lib/trial';
 
 const OTHER_ROLE = 'autre';
 
@@ -75,7 +75,7 @@ function Offer({ data }: { data: QuoteOffer }) {
   );
 }
 
-function SignedQuote({ quote }: { quote: QuoteSummary }) {
+function SignedQuote({ quote, suspended }: { quote: QuoteSummary; suspended: boolean }) {
   return (
     <div role="status" className="flex flex-wrap items-start gap-3 rounded-xl border border-success/40 bg-success-bg p-5">
       <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
@@ -86,7 +86,10 @@ function SignedQuote({ quote }: { quote: QuoteSummary }) {
           </strong>{' '}
           par {quote.signatoryName}, {quote.signatoryRole}.
         </p>
-        <p className="mt-1">L'équipe Communeo le vérifie et passe votre commune en live ; vous recevrez un e-mail.</p>
+        <p className="mt-1">
+          L'équipe Communeo le vérifie et passe votre commune en live ; vous recevrez un e-mail.
+          {suspended && " D'ici là, votre essai est suspendu : il ne se termine pas pendant l'attente."}
+        </p>
       </div>
       <a href={quotePdfUrl(quote.documentId)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-brand underline">
         <FileText aria-hidden="true" className="size-4" />
@@ -226,7 +229,9 @@ export function GoLiveScreen() {
         title="Passer en live"
         description={
           trial.kind === 'trial'
-            ? `Essai gratuit : ${daysLeftLabel(trial.daysLeft)}, jusqu'au ${formatDay(trial.endsAt)}.`
+            ? trial.requestedAt
+              ? QUOTE_PENDING_LABEL
+              : `Essai gratuit : ${daysLeftLabel(trial.daysLeft)}, jusqu'au ${formatDay(trial.endsAt)}.`
             : "Votre essai est terminé : le site n'est plus en ligne et l'administration est en lecture seule."
         }
       />
@@ -255,7 +260,7 @@ export function GoLiveScreen() {
 
       {data &&
         (pending ? (
-          <SignedQuote quote={pending} />
+          <SignedQuote quote={pending} suspended={trial.kind === 'trial'} />
         ) : admin ? (
           <>
             {data.quote?.status === 'rejected' && (

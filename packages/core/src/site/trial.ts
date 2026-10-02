@@ -10,6 +10,12 @@ export const TRIAL_DAYS = 30;
 export const EXPIRED_RETENTION_DAYS = 183;
 /** Dernier rappel avant la suppression des données */
 export const DELETION_NOTICE_DAYS = 30;
+/**
+ * Un devis signé suspend la fin de l'essai jusqu'à la décision de l'équipe (#368). Refusé, l'essai
+ * reprend avec au moins ce délai : le temps de régler le point soulevé et de signer un nouveau devis
+ * (un rappel à J-1 compris), sans prolonger l'essai indéfiniment.
+ */
+export const QUOTE_REJECTED_GRACE_DAYS = 7;
 
 const DAY = 86_400_000;
 

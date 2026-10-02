@@ -7,11 +7,21 @@
  *   avec un rappel un mois avant leur suppression.
  * - Le passage en live (équipe Communeo, puis devis en ligne #312) ou une prolongation rend la main ;
  *   un site retiré est remis en ligne aussitôt.
+ * - Un devis signé (en attente de l'équipe) suspend les rappels et l'expiration (#368) ; refusé,
+ *   l'essai reprend avec au moins `QUOTE_REJECTED_GRACE_DAYS` jours.
  *
  * `processTrials` est appelé toutes les heures (config/cron-tasks.ts) : chaque étape n'est faite
  * qu'une fois (`trial_notice` garde le dernier avis envoyé).
  */
-import { addDays, deletionDate, DELETION_NOTICE_DAYS, formatDate, TRIAL_DAYS, trialDaysLeft } from '@communeo/core';
+import {
+  addDays,
+  deletionDate,
+  DELETION_NOTICE_DAYS,
+  formatDate,
+  QUOTE_REJECTED_GRACE_DAYS,
+  TRIAL_DAYS,
+  trialDaysLeft,
+} from '@communeo/core';
 import { recordActivity } from './activity-log';
 import { issueGoLiveInvoice } from './billing';
 import { isBuildQueueConfigured } from './build-queue';
@@ -137,10 +147,19 @@ async function setNotice(site: any, notice: Notice) {
   await strapi.documents(SITE).update({ documentId: site.documentId, data: { trial_notice: notice } as any });
 }
 
+/** Communes (documentId) dont un devis signé attend la décision de l'équipe */
+async function sitesWithSignedQuote(): Promise<Set<string>> {
+  const quotes = await strapi.db.query('api::quote.quote').findMany({ where: { status: 'signed' }, populate: { site: { select: ['documentId'] } } });
+  return new Set(quotes.map((quote: any) => quote.site?.documentId).filter(Boolean));
+}
+
 /** Rappels, expirations et suppressions dus à `now` */
 export async function processTrials(now: Date = new Date()) {
   const trials = await strapi.db.query(SITE).findMany({ where: { plan: 'trial', trial_ends_at: { $notNull: true } } });
+  const waiting = await sitesWithSignedQuote();
   for (const site of trials as any[]) {
+    // Devis signé, en attente de l'équipe : ni rappel ni expiration jusqu'à sa décision (#368)
+    if (waiting.has(site.documentId)) continue;
     try {
       const days = trialDaysLeft(site.trial_ends_at, now);
       if (days === 0) await expireTrial(site, now);
@@ -257,16 +276,30 @@ export async function extendTrial(site: any, days: number, now: Date = new Date(
   return updated;
 }
 
-/** Demande de passage en live refusée par l'équipe : la demande est retirée, le motif envoyé à la commune */
-export async function rejectGoLive(site: any, reason: string) {
-  await strapi.documents(SITE).update({ documentId: site.documentId, data: { live_requested_at: null, live_requested_by: null } as any });
+/**
+ * Demande de passage en live refusée par l'équipe : la demande est retirée, le motif envoyé à la
+ * commune. L'essai, suspendu pendant l'attente (#368), reprend : s'il devait finir avant, il dure
+ * encore `QUOTE_REJECTED_GRACE_DAYS` jours (seul le rappel de la veille part ensuite).
+ */
+export async function rejectGoLive(site: any, reason: string, now: Date = new Date()) {
+  const graceEnd = addDays(now, QUOTE_REJECTED_GRACE_DAYS);
+  const resumed = site.plan === 'trial' && (!site.trial_ends_at || new Date(site.trial_ends_at) < graceEnd);
+  await strapi.documents(SITE).update({
+    documentId: site.documentId,
+    data: {
+      live_requested_at: null,
+      live_requested_by: null,
+      ...(resumed ? { trial_ends_at: graceEnd, trial_notice: 'reminder_7' } : {}),
+    } as any,
+  });
   await settleQuote(site, 'rejected');
   await recordActivity({
     action: 'live_reject',
     siteDocumentId: site.documentId,
     target: { type: 'site', id: site.documentId, label: site.name },
-    details: { reason },
+    details: { reason, ...(resumed ? { trialEndsAt: graceEnd.toISOString() } : {}) },
   });
+  const endsAt = site.plan === 'trial' ? (resumed ? graceEnd : new Date(site.trial_ends_at)) : null;
   await notifyAdmins(
     site,
     `Votre demande de passage en live — ${site.name}`,
@@ -274,6 +307,9 @@ export async function rejectGoLive(site: any, reason: string) {
       `L'équipe Communeo n'a pas validé le passage en live du site de ${site.name} :`,
       reason,
       "Vous pouvez valider un nouveau devis depuis l'administration, une fois le point réglé.",
+      ...(endsAt
+        ? [`Votre essai continue jusqu'au ${formatDate(endsAt)} : sans nouveau devis validé d'ici là, le site sera retiré et l'administration passera en lecture seule.`]
+        : []),
     ],
     GO_LIVE,
   );

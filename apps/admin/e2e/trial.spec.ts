@@ -70,7 +70,20 @@ test('passer en live : l’offre, puis le devis validé en ligne', async ({ page
     accept: true,
   });
   await expect(page.getByRole('link', { name: /Télécharger le devis \(PDF\)/ })).toHaveAttribute('href', '/api/quote/q-1/pdf');
-  await expect(banner(page)).toContainText('Passage en live demandé le');
+  // Devis signé : l'essai est suspendu, le compte à rebours laisse la place à l'attente (#368)
+  await expect(banner(page)).toContainText('Devis signé, en attente de validation par l’équipe Communeo. Votre essai est suspendu d\'ici là');
+  await expect(banner(page)).not.toContainText('jours restants');
+  await expect(page.getByText('Devis signé, en attente de validation par l’équipe Communeo.').first()).toBeVisible();
+  await expect(page.getByRole('status').filter({ hasText: 'Devis DEV-2026-0001 validé le' })).toContainText('votre essai est suspendu');
+  await expectNoViolations(page);
+});
+
+test('devis signé à la veille de la fin de l’essai : pas de compte à rebours (#368)', async ({ page }) => {
+  await mockApi(page, { trial: { endsInDays: 1, requested: true } });
+  await page.goto('/');
+  await expect(banner(page)).toContainText('Devis signé, en attente de validation par l’équipe Communeo.');
+  await expect(banner(page)).not.toContainText('dernier jour');
+  await expect(banner(page).getByRole('link', { name: 'Passer en live' })).toHaveCount(0);
   await expectNoViolations(page);
 });
 

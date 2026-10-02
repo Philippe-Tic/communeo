@@ -29,4 +29,10 @@ export const isReadOnly = (site: SessionSite | null | undefined) => site?.plan =
 export const formatDay = (date: Date) =>
   new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Europe/Paris' }).format(date);
 
+/**
+ * Devis signé, en attente de l'équipe (`live_requested_at`) : l'essai est suspendu, il ne se termine
+ * pas pendant l'attente (#368). Affiché à la place du compte à rebours.
+ */
+export const QUOTE_PENDING_LABEL = 'Devis signé, en attente de validation par l’équipe Communeo.';
+
 export const daysLeftLabel = (days: number) => (days <= 1 ? 'dernier jour' : `${days} jours restants`);

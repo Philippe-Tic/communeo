@@ -266,7 +266,7 @@ export function ValidationsScreen() {
         title={decision?.kind === 'reject-live' ? `Refuser le passage en live de ${decision.item.name} ?` : ''}
         description={
           decision?.kind === 'reject-live'
-            ? "Les administrateurs de la commune recevront votre motif par e-mail. La commune reste en essai et pourra refaire la demande."
+            ? `Les administrateurs de la commune recevront votre motif par e-mail. ${decision.item.plan === 'trial' ? "Suspendu pendant l'attente, l'essai reprend, avec au moins 7 jours devant lui" : "Son essai étant terminé, l'administration reste en lecture seule"} ; la commune pourra valider un nouveau devis.`
             : ''
         }
         confirmLabel="Refuser et envoyer le motif"

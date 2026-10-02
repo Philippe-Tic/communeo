@@ -2,11 +2,19 @@
  * Suppression de la commune demandée par la commune (#391), voir services/commune-deletion-request.ts.
  *
  * GET  /api/commune-deletion          → { scheduledAt } : tous les utilisateurs de la commune (bandeau)
- * POST /api/commune-deletion/request  → { name } : le nom de la commune, tapé pour confirmer ; administrateurs
+ * POST /api/commune-deletion/request  → { name } : le nom de la commune, tapé pour confirmer ; administrateurs ;
+ *                                       409 `paid_invoices` si la commune a payé un abonnement
  * POST /api/commune-deletion/cancel   → administrateurs (et l'équipe, dans l'administration de la commune)
  */
 import { deletionConfirmed } from '@communeo/core';
-import { cancelDeletion, deletionStateOf, requestDeletion } from '../../../services/commune-deletion-request';
+import {
+  cancelDeletion,
+  deletionStateOf,
+  hasPaidInvoices,
+  PAID_INVOICES,
+  PAID_INVOICES_MESSAGE,
+  requestDeletion,
+} from '../../../services/commune-deletion-request';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 
 const SITE = 'api::site.site';
@@ -35,21 +43,22 @@ export default {
   async state(ctx) {
     const site = await communeOf(ctx, { adminOnly: false });
     if (!site) return;
-    ctx.body = { data: deletionStateOf(site) };
+    ctx.body = { data: await deletionStateOf(site) };
   },
 
   async request(ctx) {
     const site = await communeOf(ctx, { adminOnly: true });
     if (!site) return;
+    if (await hasPaidInvoices(site.documentId)) return ctx.conflict(PAID_INVOICES_MESSAGE, { code: PAID_INVOICES });
     if (!deletionConfirmed((ctx.request.body ?? {}).name, site.name)) {
       return ctx.badRequest(`Tapez le nom de la commune, « ${site.name} », pour confirmer la suppression.`);
     }
-    ctx.body = { data: deletionStateOf(await requestDeletion(site, authorOf(ctx))) };
+    ctx.body = { data: await deletionStateOf(await requestDeletion(site, authorOf(ctx))) };
   },
 
   async cancel(ctx) {
     const site = await communeOf(ctx, { adminOnly: true });
     if (!site) return;
-    ctx.body = { data: deletionStateOf(await cancelDeletion(site, authorOf(ctx))) };
+    ctx.body = { data: await deletionStateOf(await cancelDeletion(site, authorOf(ctx))) };
   },
 };

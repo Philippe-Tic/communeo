@@ -94,3 +94,21 @@ test('équipe : suppression demandée par la commune, date affichée, annulée',
   expect(bodies.find((entry) => entry.call === 'PUT commune site-saint-aubin')!.body.data).toEqual({ cancelDeletion: true });
   await expect(page.getByText(/La commune a demandé sa suppression/)).toBeHidden();
 });
+
+test('abonnement payé : pas de demande possible, contacter l’équipe', async ({ page }) => {
+  await mockApi(page, { paidInvoices: true });
+  await page.goto('/mon-site/suppression');
+  await expect(page.getByText(/Votre commune a un abonnement payé : elle ne peut pas être supprimée/)).toBeVisible();
+  await expect(page.getByRole('link', { name: /Contactez l'équipe Communeo/ })).toHaveAttribute('href', 'https://communeo.fr/contact');
+  await expect(page.getByRole('button', { name: 'Demander la suppression…' })).toHaveCount(0);
+  await expectNoViolations(page);
+});
+
+test('équipe : commune avec un abonnement payé, suppression désactivée et expliquée', async ({ page }) => {
+  await mockApi(page, { user: 'super_admin', paidInvoices: true });
+  await page.goto('/plateforme/communes/site-saint-aubin');
+  const remove = page.getByRole('button', { name: 'Supprimer la commune…' });
+  await expect(remove).toBeDisabled();
+  await expect(remove).toHaveAccessibleDescription('Suppression impossible : la commune a un abonnement payé.');
+  await expectNoViolations(page);
+});

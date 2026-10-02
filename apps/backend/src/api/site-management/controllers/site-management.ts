@@ -5,7 +5,7 @@
 
 import { createCommune, emailTaken } from '../../../services/commune-creation';
 import { deleteCommune } from '../../../services/commune-deletion';
-import { cancelDeletion } from '../../../services/commune-deletion-request';
+import { cancelDeletion, hasPaidInvoices, PAID_INVOICES } from '../../../services/commune-deletion-request';
 import { extendTrial, goLive } from '../../../services/trial';
 import { sendInvitationEmail } from '../../user-management/controllers/user-management';
 import { DEFAULT_THEME, isReservedSiteSlug } from '@communeo/core';
@@ -210,6 +210,8 @@ export default {
         })),
         counts: { pages, articles, documents },
         deployments: { succeeded, failed },
+        // Abonnement payé : la commune ne peut pas être supprimée (#391)
+        paidInvoices: await hasPaidInvoices(documentId),
       },
     };
   },
@@ -308,13 +310,16 @@ export default {
   /**
    * DELETE /api/site-management/:documentId — la commune, son site chez l'hébergeur, ses comptes et
    * tous ses contenus (services/commune-deletion.ts), tout de suite, demande en cours ou non ; les
-   * factures et les devis sont conservés
+   * factures et les devis sont conservés. Refusé (409 `paid_invoices`) si la commune a payé un abonnement.
    */
   async delete(ctx) {
     await requireSuperAdmin(ctx);
     const { documentId } = ctx.params;
     const site: any = await strapi.db.query('api::site.site').findOne({ where: { documentId }, select: ['name'] });
     if (!site) ctx.throw(404, 'Site not found');
+    if (await hasPaidInvoices(documentId)) {
+      return ctx.conflict('Cette commune a un abonnement payé : elle ne peut pas être supprimée.', { code: PAID_INVOICES });
+    }
     await recordActivity({ action: 'commune_delete', siteDocumentId: null, target: { type: 'site', id: documentId, label: site.name } });
     await deleteCommune(documentId);
     ctx.body = { data: { documentId } };

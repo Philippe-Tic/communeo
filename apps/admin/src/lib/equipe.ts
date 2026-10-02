@@ -42,6 +42,8 @@ export interface CommuneDetail extends CommuneSummary {
   members: CommuneUser[];
   counts: { pages: number; articles: number; documents: number };
   deployments: { succeeded: number; failed: number };
+  /** Abonnement payé : la commune ne peut pas être supprimée (#391) */
+  paidInvoices?: boolean;
 }
 
 export const INACTIVE_DAYS = 30;

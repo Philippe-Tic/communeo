@@ -432,11 +432,23 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         >
           {commune.suspended ? 'Lever la suspension…' : 'Suspendre la commune…'}
         </Button>
-        <Button type="button" variant="destructive-outline" className="max-md:h-11" onClick={() => setDeleting(true)}>
+        <Button
+          type="button"
+          variant="destructive-outline"
+          className="max-md:h-11"
+          disabled={commune.paidInvoices}
+          aria-describedby={commune.paidInvoices ? 'suppression-impossible' : undefined}
+          onClick={() => setDeleting(true)}
+        >
           <Trash2 aria-hidden="true" />
           {deletionAt ? 'Supprimer maintenant…' : 'Supprimer la commune…'}
         </Button>
       </div>
+      {commune.paidInvoices && (
+        <p id="suppression-impossible" className="-mt-3 text-[13px] text-secondary">
+          Suppression impossible : la commune a un abonnement payé.
+        </p>
+      )}
 
       <ConfirmDialog
         open={deleting}

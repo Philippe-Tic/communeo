@@ -62,7 +62,7 @@ describe('demande de la commune', () => {
     expect((await api.post('/api/commune-deletion/cancel').set(auth(editorA))).status).toBe(403);
     const state = await api.get('/api/commune-deletion').set(auth(editorA));
     expect(state.status).toBe(200);
-    expect(state.body.data).toEqual({ scheduledAt: null });
+    expect(state.body.data).toEqual({ scheduledAt: null, paidInvoices: false });
     expect((await api.get('/api/commune-deletion')).status).toBe(403);
   });
 
@@ -111,7 +111,7 @@ describe('demande de la commune', () => {
 
   it('annulée par la mairie : commune gardée, administrateurs et équipe prévenus', async () => {
     const res = await api.post('/api/commune-deletion/cancel').set(auth(adminC));
-    expect(res.body.data).toEqual({ scheduledAt: null });
+    expect(res.body.data).toEqual({ scheduledAt: null, paidInvoices: false });
     expect((await site(siteC)).deletion_scheduled_at).toBeNull();
     expect(emailsTo('admin@c.test')[0]!.subject).toMatch(/annulée/);
     expect(emailsTo('equipe@communeo.test')[0]!.subject).toBe('Suppression annulée : Saint-Éloi-sur-Seine');
@@ -211,5 +211,60 @@ describe('échéance', () => {
     await strapi.db.query(SITE).update({ where: { documentId: siteD }, data: { deletion_scheduled_at: addDays(new Date(), 5) } });
     expect((await api.delete(`/api/site-management/${siteD}`).set(auth(superAdmin))).status).toBe(200);
     expect(await site(siteD)).toBeNull();
+  });
+});
+
+describe('abonnement payé : pas de suppression', () => {
+  let siteE: string;
+  let adminE: string;
+  let invoiceE: string;
+
+  beforeAll(async () => {
+    siteE = (await strapi.documents(SITE).create({ data: { name: 'Commune E', slug: 'commune-e', contact_mail: 'mairie@e.test' } as any })).documentId;
+    adminE = await createUser('admin@e.test', 'admin', siteE);
+    const invoice: any = await strapi.documents('api::invoice.invoice' as any).create({
+      data: {
+        site: siteE, number: 'FAC-2026-0201', kind: 'invoice', reason: 'go_live', status: 'issued', issued_at: '2026-10-01', due_at: '2026-10-31', label: 'Abonnement',
+        customer_name: 'Commune E', customer_siret: '21580236500017', customer_address: '1 place', customer_email: 'mairie@e.test',
+        amount_ht: 300, vat_rate: 0, amount_ttc: 300, pdf: 'JVBERi0=', pdf_sha256: 'e',
+      } as any,
+    });
+    invoiceE = invoice.documentId;
+  });
+
+  it('une facture en attente n’empêche pas la demande', async () => {
+    expect((await api.get('/api/commune-deletion').set(auth(adminE))).body.data).toEqual({ scheduledAt: null, paidInvoices: false });
+  });
+
+  it('payée pendant le délai : rien n’est supprimé à l’échéance, la demande est annulée, l’équipe prévenue', async () => {
+    expect((await api.post('/api/commune-deletion/request').set(auth(adminE)).send({ name: 'Commune E' })).status).toBe(200);
+    await strapi.db.query('api::invoice.invoice').update({ where: { documentId: invoiceE }, data: { status: 'paid', paid_at: '2026-10-05', paid_amount: 300 } });
+    sentEmails.length = 0;
+    await processDeletionRequests(addDays(new Date(), 8));
+    expect(await site(siteE)).toMatchObject({ deletion_scheduled_at: null });
+    expect(emailsTo('equipe@communeo.test')[0]!.subject).toBe('Suppression non faite : Commune E a un abonnement payé');
+    expect(emailsTo('admin@e.test')).toHaveLength(0);
+    expect((await activity('deletion_cancel'))[0]).toMatchObject({ target_label: 'Commune E', details: { reason: 'paid_invoices' } });
+  });
+
+  it('la commune ne peut plus la demander (409 paid_invoices) et le voit dans l’état', async () => {
+    expect((await api.get('/api/commune-deletion').set(auth(adminE))).body.data).toEqual({ scheduledAt: null, paidInvoices: true });
+    const res = await api.post('/api/commune-deletion/request').set(auth(adminE)).send({ name: 'Commune E' });
+    expect(res.status).toBe(409);
+    expect(res.body.error).toMatchObject({ message: expect.stringContaining('abonnement payé'), details: { code: 'paid_invoices' } });
+    expect((await site(siteE)).deletion_scheduled_at).toBeNull();
+  });
+
+  it('l’équipe non plus : fiche signalée, suppression refusée (409)', async () => {
+    expect((await api.get(`/api/site-management/${siteE}`).set(auth(superAdmin))).body.data.paidInvoices).toBe(true);
+    const res = await api.delete(`/api/site-management/${siteE}`).set(auth(superAdmin));
+    expect(res.status).toBe(409);
+    expect(res.body.error.details).toEqual({ code: 'paid_invoices' });
+    expect(await site(siteE)).not.toBeNull();
+  });
+
+  it('une facture payée puis annulée par un avoir ne bloque plus', async () => {
+    await strapi.db.query('api::invoice.invoice').update({ where: { documentId: invoiceE }, data: { status: 'cancelled' } });
+    expect((await api.get('/api/commune-deletion').set(auth(adminE))).body.data.paidInvoices).toBe(false);
   });
 });

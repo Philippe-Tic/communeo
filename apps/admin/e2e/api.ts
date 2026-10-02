@@ -449,6 +449,8 @@ export interface MockOptions {
   accessibilityLevel?: 'non-conforme' | 'partiellement-conforme' | 'conforme' | null;
   /** Suppression de Saint-Aubin demandée (#391) : dans N jours */
   deletionInDays?: number;
+  /** Saint-Aubin a payé un abonnement : suppression impossible (#391) */
+  paidInvoices?: boolean;
 }
 
 export type MockMedia = {
@@ -1924,6 +1926,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
                 ],
           counts: { pages: 12, articles: 48, documents: 214 },
           deployments: { succeeded: 142, failed: 1 },
+          paidInvoices: commune.documentId === SITE.documentId && !!options.paidInvoices,
         },
       });
     }
@@ -2112,18 +2115,22 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       }
     }
     // Suppression de la commune (#391)
+    if (url.pathname === '/api/commune-deletion' && method === 'GET')
+      return json({ data: { scheduledAt: deletion.scheduledAt, paidInvoices: !!options.paidInvoices } });
     if (url.pathname === '/api/commune-deletion/request' && method === 'POST') {
       const body = route.request().postDataJSON() as { name: string };
       bodies.push({ call: 'POST commune-deletion', body: { data: body } });
+      if (options.paidInvoices)
+        return json({ error: { status: 409, message: 'Votre commune a un abonnement payé.', details: { code: 'paid_invoices' } } }, 409);
       if (!deletionConfirmed(body.name, SITE.name))
         return json({ error: { status: 400, message: `Tapez le nom de la commune, « ${SITE.name} », pour confirmer la suppression.` } }, 400);
       deletion.scheduledAt ??= new Date(Date.now() + 7 * DAY).toISOString();
-      return json({ data: { scheduledAt: deletion.scheduledAt } });
+      return json({ data: { scheduledAt: deletion.scheduledAt, paidInvoices: false } });
     }
     if (url.pathname === '/api/commune-deletion/cancel' && method === 'POST') {
       bodies.push({ call: 'POST commune-deletion cancel', body: { data: {} } });
       deletion.scheduledAt = null;
-      return json({ data: { scheduledAt: null } });
+      return json({ data: { scheduledAt: null, paidInvoices: !!options.paidInvoices } });
     }
     if (url.pathname === '/api/signup/approval') return json({ data: approvalState });
     if (url.pathname === '/api/signup/approval/resend' && method === 'POST') {

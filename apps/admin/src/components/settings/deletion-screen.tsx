@@ -1,8 +1,9 @@
 /**
  * Supprimer la commune (#391, administrateurs) : la demande, confirmée en tapant le nom de la commune,
  * prend effet 7 jours plus tard ; d'ici là rien ne change et elle s'annule ici ou depuis le bandeau.
+ * Abonnement payé : pas de demande possible, la commune contacte l'équipe Communeo.
  */
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { COMMUNE_DELETION_DAYS, deletionConfirmed } from '@communeo/core';
@@ -12,7 +13,14 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { NameConfirmation } from '@/components/ui/name-confirmation';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
-import { cancelCommuneDeletion, deletionScheduledAt, requestCommuneDeletion, setDeletionInSession } from '@/lib/commune-deletion';
+import {
+  cancelCommuneDeletion,
+  COMMUNEO_CONTACT_URL,
+  deletionScheduledAt,
+  deletionStateQuery,
+  requestCommuneDeletion,
+  setDeletionInSession,
+} from '@/lib/commune-deletion';
 import { sessionQuery } from '@/lib/session';
 import { formatDay } from '@/lib/trial';
 
@@ -23,6 +31,8 @@ export function DeletionScreen() {
   const client = useQueryClient();
   const site = user.site!;
   const at = deletionScheduledAt(site);
+  const state = useQuery(deletionStateQuery);
+  const paid = state.data?.paidInvoices === true;
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState('');
   const cancel = useMutation({
@@ -64,6 +74,15 @@ export function DeletionScreen() {
               {cancel.isPending ? 'Annulation…' : 'Annuler la suppression'}
             </Button>
           </>
+        ) : paid ? (
+          <p className="mt-2">
+            Votre commune a un abonnement payé : elle ne peut pas être supprimée depuis l'administration.{' '}
+            <a href={COMMUNEO_CONTACT_URL} target="_blank" rel="noreferrer" className="font-medium text-brand underline">
+              Contactez l'équipe Communeo
+              <span className="sr-only"> (nouvel onglet)</span>
+            </a>
+            .
+          </p>
         ) : (
           <>
             <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -72,7 +91,13 @@ export function DeletionScreen() {
               <li>Les factures et les devis sont conservés : la loi l'exige.</li>
               <li>Les administrateurs de la commune et l'équipe Communeo sont prévenus par e-mail.</li>
             </ul>
-            <Button type="button" variant="destructive-outline" className="mt-4 max-md:h-11 max-md:w-full" onClick={() => setOpen(true)}>
+            <Button
+              type="button"
+              variant="destructive-outline"
+              className="mt-4 max-md:h-11 max-md:w-full"
+              disabled={!state.data}
+              onClick={() => setOpen(true)}
+            >
               <Trash2 aria-hidden="true" />
               Demander la suppression…
             </Button>

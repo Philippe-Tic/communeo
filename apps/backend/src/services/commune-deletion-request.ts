@@ -7,6 +7,10 @@
  * E-mails : à la demande (administrateurs de la commune et équipe), la veille (`deletion_reminded`), à
  * l'annulation et après la suppression. `processDeletionRequests` est appelé toutes les heures
  * (config/cron-tasks.ts).
+ *
+ * Une commune qui a payé un abonnement (au moins une facture payée, non annulée par un avoir) ne peut pas
+ * être supprimée, ni à sa demande ni par l'équipe : elle contacte l'équipe Communeo. Une facture payée
+ * pendant le délai annule la demande à l'échéance (l'équipe est prévenue).
  */
 import { communeDeletionDate, formatDate } from '@communeo/core';
 import { log } from '../utils/logger';
@@ -21,12 +25,26 @@ const CANCEL = { label: 'Annuler la suppression', path: '/mon-site/suppression' 
 
 const targetOf = (site: any) => ({ type: 'site', id: site.documentId, label: site.name });
 
+/** Refus : la commune a payé un abonnement (`details.code` de la réponse 409) */
+export const PAID_INVOICES = 'paid_invoices';
+export const PAID_INVOICES_MESSAGE =
+  "Votre commune a un abonnement payé : elle ne peut pas être supprimée depuis l'administration. Contactez l'équipe Communeo.";
+
 export interface DeletionState {
   scheduledAt: string | null;
+  /** Abonnement payé : suppression impossible */
+  paidInvoices: boolean;
 }
 
-export const deletionStateOf = (site: any): DeletionState => ({
+/** Au moins une facture payée (une facture annulée par un avoir passe « annulée ») */
+export async function hasPaidInvoices(siteDocumentId: string): Promise<boolean> {
+  const count = await strapi.db.query('api::invoice.invoice').count({ where: { site: { documentId: siteDocumentId }, kind: 'invoice', status: 'paid' } });
+  return count > 0;
+}
+
+export const deletionStateOf = async (site: any): Promise<DeletionState> => ({
   scheduledAt: site?.deletion_scheduled_at ? new Date(site.deletion_scheduled_at).toISOString() : null,
+  paidInvoices: site ? await hasPaidInvoices(site.documentId) : false,
 });
 
 async function adminEmails(siteDocumentId: string): Promise<string[]> {
@@ -93,6 +111,20 @@ async function remind(site: any) {
 }
 
 async function execute(site: any) {
+  // Facture payée pendant le délai : la commune est gardée, l'équipe voit avec elle
+  if (await hasPaidInvoices(site.documentId)) {
+    await strapi.db.query(SITE).update({
+      where: { documentId: site.documentId },
+      data: { deletion_scheduled_at: null, deletion_requested_by: null, deletion_reminded: false },
+    });
+    await recordActivity({ action: 'deletion_cancel', siteDocumentId: site.documentId, target: targetOf(site), details: { reason: PAID_INVOICES }, systemActor: 'Suppression demandée' });
+    await notifyTeam(
+      `Suppression non faite : ${site.name} a un abonnement payé`,
+      `La commune ${site.name} avait demandé sa suppression, mais une facture a été payée depuis : elle n'a pas été supprimée et sa demande est annulée. Voyez avec elle : ${adminUrl()}/plateforme/communes/${site.documentId}`,
+    );
+    log.warn(`[SUPPRESSION] ${site.slug} non supprimée : facture payée`);
+    return;
+  }
   // Adresses relevées avant la suppression des comptes
   const recipients = await adminEmails(site.documentId);
   await recordActivity({ action: 'commune_delete', siteDocumentId: null, target: targetOf(site), details: { reason: 'requested' }, systemActor: 'Suppression demandée' });

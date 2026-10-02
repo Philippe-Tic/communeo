@@ -78,12 +78,15 @@ const PUBLISHER_ENV = [
 
 /**
  * Dossier du site publié d'une commune quand les sites sont servis depuis le volume `sites` (Bunny, ou
- * PUBLISH_DIR sans Netlify), même choix que `getPublisher` ; null chez Netlify (rien sur le serveur).
+ * dossier local sans Netlify), même choix que `getPublisher` ; null chez Netlify (rien sur le serveur).
+ * `SITES_DIR` : le volume tel que le monte un service qui ne publie pas (Strapi lit le site pour
+ * l'export des données, #343), sans changer son hébergeur.
  */
 export function publishedSiteDir(slug: string, env: NodeJS.ProcessEnv = process.env): string | null {
-  if (env.SITES_PUBLISHER === 'bunny') return path.join(env.PUBLISH_DIR || SITES_DIR, slug);
-  if (env.NETLIFY_TOKEN || !env.PUBLISH_DIR) return null;
-  return path.join(env.PUBLISH_DIR, slug);
+  if (env.SITES_PUBLISHER === 'bunny') return path.join(env.PUBLISH_DIR || env.SITES_DIR || SITES_DIR, slug);
+  const dir = env.PUBLISH_DIR || env.SITES_DIR;
+  if (env.NETLIFY_TOKEN || !dir) return null;
+  return path.join(dir, slug);
 }
 
 /**

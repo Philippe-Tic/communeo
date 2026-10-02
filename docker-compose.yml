@@ -83,6 +83,10 @@ services:
       HOSTING_NAME: ${HOSTING_NAME:-}
       HOSTING_ADDRESS: ${HOSTING_ADDRESS:-}
       HOSTING_PHONE: ${HOSTING_PHONE:-}
+      # Export des données des communes (#343) : archives temporaires (7 jours, données personnelles),
+      # jamais servies telles quelles ; le site publié est lu dans le volume `sites`
+      EXPORT_DIR: /srv/exports
+      SITES_DIR: /srv/sites
       ADMIN_URL: https://${DOMAIN}
       DOMAIN: ${DOMAIN}
       # Seed initial admin (first boot only, optional)
@@ -94,8 +98,11 @@ services:
       SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
-      # Suppression du dossier d'une commune supprimée ou en fin d'essai (Strapi n'y écrit jamais rien d'autre)
+      # Suppression du dossier d'une commune supprimée ou en fin d'essai, lecture du site pour l'export des
+      # données (Strapi n'y écrit jamais rien d'autre)
       - sites:/srv/sites
+      # Archives d'export des données (#343), effacées au bout de 7 jours
+      - exports:/srv/exports
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:1337/_health"]
       interval: 30s
@@ -265,3 +272,5 @@ volumes:
   caddy-config:
   # Sites des communes publiés par le worker, servis par Caddy
   sites:
+  # Archives d'export des données des communes (#343), temporaires : pas sauvegardées
+  exports:

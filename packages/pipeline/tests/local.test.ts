@@ -176,5 +176,8 @@ describe('publishedSiteDir (export des données, #343)', () => {
     expect(publishedSiteDir('lyon', { PUBLISH_DIR: '/data/sites' })).toBe('/data/sites/lyon');
     expect(publishedSiteDir('lyon', { PUBLISH_DIR: '/data/sites', NETLIFY_TOKEN: 't' })).toBeNull();
     expect(publishedSiteDir('lyon', {})).toBeNull();
+    // Strapi : le volume monté sans publier lui-même
+    expect(publishedSiteDir('lyon', { SITES_DIR: '/srv/sites' })).toBe('/srv/sites/lyon');
+    expect(publishedSiteDir('lyon', { SITES_DIR: '/srv/sites', NETLIFY_TOKEN: 't' })).toBeNull();
   });
 });

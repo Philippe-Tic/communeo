@@ -1,0 +1,30 @@
+---
+title: "Exporter les données"
+description: "Récupérer toutes les données de la commune dans une archive ZIP, lisible sans Communeo."
+---
+
+L'écran **Mon site › Exporter les données** (administrateurs) prépare une archive ZIP avec toutes les données de la commune, dans des formats ouverts : pour les garder, les archiver ou changer de prestataire. La commune reste propriétaire de ses contenus.
+
+## Ce que contient l'archive
+
+- **Le site tel qu'il est en ligne** (dossier `site-publie`) : ouvrez `index.html` dans un navigateur.
+- **Les contenus** (dossier `contenus`) : pages, actualités, événements, documents officiels, alertes, équipe municipale, associations, menus de la cantine, collectes, redirections et réglages du site, en JSON, avec leurs dates et leur statut (brouillon, publié, publication programmée). Chaque page, actualité et événement a aussi sa page HTML, lisible dans un navigateur.
+- **Les fichiers de la médiathèque** (dossier `fichiers`), dans leur version d'origine ; `index.csv` donne le nom, le dossier, le texte alternatif et la légende de chacun.
+- **Les données personnelles** (dossier `donnees-personnelles`), en CSV, à ouvrir dans un tableur : messages du formulaire de contact avec les réponses et les pièces jointes, inscrits à la lettre d'information, fiches des associations.
+- Un fichier **LISEZMOI.md** qui décrit l'archive.
+
+## Préparer et télécharger l'export
+
+1. **Préparer l'export** : la préparation commence. Selon la quantité de fichiers, elle prend de quelques secondes à quelques minutes ; vous pouvez quitter l'écran.
+2. Quand l'archive est prête, l'écran l'indique et les administrateurs de la commune reçoivent un e-mail.
+3. **Télécharger l'archive**. Elle reste téléchargeable **7 jours**, puis elle est effacée de nos serveurs. Pour une version plus récente, **Préparer un nouvel export**.
+
+L'export reste possible quand l'essai est terminé, pendant les six mois où les données sont conservées, et pendant une [suppression demandée](/mon-site/suppression/). Chaque export demandé et chaque téléchargement est noté dans le [journal d'activité](/administration/journal/).
+
+:::caution
+L'archive contient des données personnelles d'habitants (noms, adresses e-mail, messages). La commune en est responsable : conservez-la en lieu sûr et supprimez-la quand elle n'est plus utile.
+:::
+
+## L'équipe Communeo
+
+L'équipe peut aussi préparer et télécharger l'export d'une commune, depuis sa fiche dans l'espace équipe. Les administrateurs de la commune sont prévenus quand l'archive est prête.

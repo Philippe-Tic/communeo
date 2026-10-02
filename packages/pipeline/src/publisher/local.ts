@@ -59,7 +59,6 @@ export class LocalPublisher implements SitePublisher {
     const rules = caddySiteRules({
       slug: site.slug,
       noindex: site.noindex,
-      canonicalHost: site.customDomain,
       redirects: site.redirects,
       files: new Set(await listFiles(next)),
     });

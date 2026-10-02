@@ -4,6 +4,7 @@
  * avec un message clair.
  */
 import type { Logger } from '../logger';
+import { BunnyPublisher } from './bunny';
 import { LocalPublisher } from './local';
 import { NetlifyPublisher } from './netlify';
 import type { SitePublisher } from './types';
@@ -12,12 +13,12 @@ export type * from './types';
 export { isApexDomain } from './dns';
 export { NetlifyPublisher, NetlifyApiError, zipDirectory, type NetlifyPublisherOptions } from './netlify';
 export { LocalPublisher, STAGING_DIR, type LocalPublisherOptions } from './local';
+export { BunnyPublisher, BunnyApiError, BUNNY_API_URL, BUNNY_RULES, ORIGIN_SECRET_HEADER, type BunnyEdgeRule, type BunnyPublisherOptions } from './bunny';
 export {
   CADDY_RULES_DIR,
   CADDY_RULES_FILE,
   CADDY_RULES_PATH,
   caddySiteRules,
-  FORWARDED_HOST_HEADER,
   reloadCaddy,
   type CaddySiteRules,
   type CaddySiteRulesInput,
@@ -57,23 +58,61 @@ export function isPublisherUnavailable(error: unknown): error is PublisherUnavai
 
 let cached: { key: string; publisher: SitePublisher } | undefined;
 
+/** Dossier des sites dans les conteneurs (volume `sites`) */
+const SITES_DIR = '/srv/sites';
+
+const PUBLISHER_ENV = [
+  'SITES_PUBLISHER',
+  'BUNNY_API_KEY',
+  'BUNNY_DNS_ZONE_ID',
+  'SITES_ORIGIN_SECRET',
+  'ORIGIN_DOMAIN',
+  'NETLIFY_TOKEN',
+  'NODE_ENV',
+  'PUBLISH_DIR',
+  'PUBLISH_BASE_URL',
+  'SITES_DOMAIN',
+  'CADDY_ADMIN_URL',
+] as const;
+
 /**
- * NETLIFY_TOKEN → Netlify (SITES_DOMAIN : adresses `<slug>.<domaine>`) ; sinon PUBLISH_DIR → dossier
- * local (développement, tests de la stack, origine servie par Caddy : CADDY_ADMIN_URL pour le recharger
- * après chaque publication) ; sinon indisponible.
+ * SITES_PUBLISHER=bunny → Bunny CDN devant l'origine servie par Caddy (#382 ; BUNNY_API_KEY,
+ * SITES_ORIGIN_SECRET et ORIGIN_DOMAIN requis, sinon indisponible : on ne publie jamais ailleurs que là
+ * où on l'a demandé). Sinon, comme avant : NETLIFY_TOKEN → Netlify (SITES_DOMAIN : adresses
+ * `<slug>.<domaine>`) ; sinon PUBLISH_DIR → dossier local (développement, tests de la stack, origine
+ * servie par Caddy : CADDY_ADMIN_URL pour le recharger après chaque publication) ; sinon indisponible.
  * Lu à chaque appel : un jeton ajouté ou retiré est pris en compte sans redémarrer.
  */
 export function getPublisher(env: NodeJS.ProcessEnv = process.env, logger?: Logger): SitePublisher {
-  const token = env.NETLIFY_TOKEN || undefined;
-  const localDir = env.PUBLISH_DIR || undefined;
-  const key = `${token ?? ''}|${env.NODE_ENV ?? ''}|${localDir ?? ''}|${env.PUBLISH_BASE_URL ?? ''}|${env.SITES_DOMAIN ?? ''}|${env.CADDY_ADMIN_URL ?? ''}`;
+  const key = PUBLISHER_ENV.map((name) => env[name] ?? '').join('|');
   if (cached?.key === key) return cached.publisher;
 
-  const publisher = token
-    ? new NetlifyPublisher({ token, namePrefix: env.NODE_ENV === 'production' ? '' : 'dev-', sitesDomain: env.SITES_DOMAIN, logger })
-    : localDir
-      ? new LocalPublisher({ root: localDir, baseUrl: env.PUBLISH_BASE_URL, caddyAdminUrl: env.CADDY_ADMIN_URL || undefined, logger })
-      : unavailablePublisher("NETLIFY_TOKEN n'est pas défini");
+  const token = env.NETLIFY_TOKEN || undefined;
+  const localDir = env.PUBLISH_DIR || undefined;
+  const namePrefix = env.NODE_ENV === 'production' ? '' : 'dev-';
+  let publisher: SitePublisher;
+  if (env.SITES_PUBLISHER === 'bunny') {
+    const missing = (['BUNNY_API_KEY', 'SITES_ORIGIN_SECRET', 'ORIGIN_DOMAIN'] as const).filter((name) => !env[name]);
+    publisher = missing.length
+      ? unavailablePublisher(`SITES_PUBLISHER=bunny mais ${missing.join(', ')} non défini`)
+      : new BunnyPublisher({
+          apiKey: env.BUNNY_API_KEY!,
+          originSecret: env.SITES_ORIGIN_SECRET!,
+          originDomain: env.ORIGIN_DOMAIN!,
+          sitesDomain: env.SITES_DOMAIN,
+          dnsZoneId: env.BUNNY_DNS_ZONE_ID || undefined,
+          sitesDir: localDir ?? SITES_DIR,
+          caddyAdminUrl: env.CADDY_ADMIN_URL || undefined,
+          namePrefix,
+          logger,
+        });
+  } else if (token) {
+    publisher = new NetlifyPublisher({ token, namePrefix, sitesDomain: env.SITES_DOMAIN, logger });
+  } else if (localDir) {
+    publisher = new LocalPublisher({ root: localDir, baseUrl: env.PUBLISH_BASE_URL, caddyAdminUrl: env.CADDY_ADMIN_URL || undefined, logger });
+  } else {
+    publisher = unavailablePublisher("NETLIFY_TOKEN n'est pas défini");
+  }
   cached = { key, publisher };
   return publisher;
 }

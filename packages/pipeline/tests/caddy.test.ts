@@ -17,16 +17,9 @@ describe('caddySiteRules', () => {
     ]);
   });
 
-  it("redirige les autres adresses du site vers l'adresse canonique, chemin et requête gardés", () => {
-    expect(lines(caddySiteRules({ slug: 'saint-aubin', canonicalHost: 'Mairie-Saint-Aubin.fr' }).content)).toEqual([
-      '@site-saint-aubin-canonique {',
-      '\tpath /sites/saint-aubin /sites/saint-aubin/*',
-      '\theader X-Forwarded-Host *',
-      '\tnot header X-Forwarded-Host mairie-saint-aubin.fr',
-      '\tpath_regexp site_saint_aubin_chemin ^/sites/saint-aubin/?(.*)$',
-      '}',
-      'redir @site-saint-aubin-canonique https://mairie-saint-aubin.fr/{re.site_saint_aubin_chemin.1}{?query} 301',
-    ]);
+  it("ne redirige jamais d'après un en-tête d'adresse (fait par le CDN, avant son cache)", () => {
+    const { content } = caddySiteRules({ slug: 'lyon', noindex: true, redirects: [{ from: '/a', to: '/b' }] });
+    expect(content).not.toMatch(/Forwarded|CDN-Host|canonique/);
   });
 
   it("écrit les redirections de l'ancien site, avec ou sans barre finale, et les conditions de requête", () => {
@@ -54,10 +47,10 @@ describe('caddySiteRules', () => {
     ]);
   });
 
-  it('place le noindex et la redirection canonique avant les redirections', () => {
-    const { content } = caddySiteRules({ slug: 'lyon', noindex: true, canonicalHost: 'lyon.fr', redirects: [{ from: '/a', to: '/b' }] });
+  it('place le noindex avant les redirections', () => {
+    const { content } = caddySiteRules({ slug: 'lyon', noindex: true, redirects: [{ from: '/a', to: '/b' }] });
     const order = lines(content).map((line) => line.split(' ')[0]);
-    expect(order.indexOf('header')).toBeLessThan(order.indexOf('@site-lyon-canonique'));
+    expect(order.indexOf('header')).toBeLessThan(order.indexOf('redir'));
     expect(order.lastIndexOf('redir')).toBe(order.length - 1);
     expect(content).toContain('redir @site-lyon-1 "/b" 301');
   });
@@ -112,9 +105,8 @@ describe('caddySiteRules', () => {
     expect(content).toContain('path "/sites/lyon/actualit%C3%A9s.html"');
   });
 
-  it('refuse un slug ou une adresse canonique qui sortirait des règles du site', () => {
+  it('refuse un slug qui sortirait des règles du site', () => {
     expect(() => caddySiteRules({ slug: '../x' })).toThrow('Slug invalide');
-    expect(() => caddySiteRules({ slug: 'lyon', canonicalHost: 'lyon.fr {' })).toThrow('Adresse canonique invalide');
   });
 });
 

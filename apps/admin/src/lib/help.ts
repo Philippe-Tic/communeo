@@ -30,4 +30,5 @@ export const SCREEN_HELP: Record<string, string> = {
   '/mon-site/open-data': 'Le lien vers les données publiées par la commune.',
   '/mon-site/accueil': "Choisissez les sections de la page d'accueil : le thème décide de leur disposition.",
   '/mon-site/menu': "Le menu principal et le pied de page. Une page en brouillon n'y apparaît qu'une fois publiée.",
+  '/mon-compte': 'Vos informations personnelles et votre mot de passe : ils ne concernent que vous, pas le site.',
 };

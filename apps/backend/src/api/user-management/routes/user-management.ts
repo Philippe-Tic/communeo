@@ -45,6 +45,12 @@ export default {
       config: { policies: [], middlewares: [] },
     },
     {
+      method: 'PUT',
+      path: '/user-management/me/password',
+      handler: 'user-management.changeMyPassword',
+      config: { policies: [], middlewares: [] },
+    },
+    {
       method: 'POST',
       path: '/user-management/me/reset-password',
       handler: 'user-management.requestPasswordReset',

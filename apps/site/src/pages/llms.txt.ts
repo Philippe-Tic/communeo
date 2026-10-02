@@ -15,7 +15,7 @@ export const GET: APIRoute = ({ site }) => {
 
 > ${DEFINITION}
 
-Communeo est édité en France par Philippe Chevreul (entreprise individuelle, SIREN 911 592 764). Les données des communes sont hébergées en France (OVH, Roubaix).
+Communeo est édité en France par Philippe Chevreul (entreprise individuelle, SIREN 911 592 764). Les données des communes sont hébergées en France, chez OVH (Gravelines), avec des sauvegardes chiffrées à Paris.
 
 ## L'offre
 - Essai gratuit de 30 jours, sans engagement et sans carte bancaire : ${TRIAL_URL}

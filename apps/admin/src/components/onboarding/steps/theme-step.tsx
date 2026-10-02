@@ -15,50 +15,76 @@ import { WizardActions, type StepProps } from '../onboarding-screen';
 import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
 
-/** Schéma de la page d'accueil de chaque thème, aux couleurs du thème, avec la commune dedans */
-const LOOKS: Record<string, { bar: string; barText: string; hero: string; blocks: string; layout: 'three' | 'split' }> =
+/**
+ * Schéma de la page d'accueil de chaque thème, aux couleurs du thème, avec la commune dedans.
+ * `onDark` : bandeau foncé, le logo est posé sur un cartouche blanc (comme dans la barre latérale du
+ * thème Journal), sinon un logo aux couleurs sombres disparaîtrait. `edge` : bandeau blanc, bordé pour
+ * se détacher du fond blanc de la vignette.
+ */
+const LOOKS: Record<
+  string,
   {
-    institutionnel: {
-      bar: 'bg-[#1E3A5F]',
-      barText: 'text-white',
-      hero: 'bg-[#C9D6E6]',
-      blocks: 'bg-[#E3EAF2]',
-      layout: 'three',
-    },
-    moderne: {
-      bar: 'bg-white',
-      barText: 'text-[#1C1B18]',
-      hero: 'bg-[#D5E6DC]',
-      blocks: 'bg-[#EFE7DA]',
-      layout: 'three',
-    },
-    journal: {
-      bar: 'bg-[#1C1B18]',
-      barText: 'text-white',
-      hero: 'bg-[#DDD9CF]',
-      blocks: 'bg-[#ECE9E1]',
-      layout: 'split',
-    },
-    bourg: {
-      bar: 'bg-[#F3EADB]',
-      barText: 'text-[#5B4630]',
-      hero: 'bg-[#E4D5BC]',
-      blocks: 'bg-[#F1E8D8]',
-      layout: 'three',
-    },
-  };
+    bar: string;
+    barText: string;
+    hero: string;
+    blocks: string;
+    layout: 'three' | 'split';
+    onDark?: boolean;
+    edge?: string;
+  }
+> = {
+  institutionnel: {
+    bar: 'bg-[#1E3A5F]',
+    barText: 'text-white',
+    hero: 'bg-[#C9D6E6]',
+    blocks: 'bg-[#E3EAF2]',
+    layout: 'three',
+    onDark: true,
+  },
+  moderne: {
+    bar: 'bg-white',
+    barText: 'text-[#1C1B18]',
+    hero: 'bg-[#D5E6DC]',
+    blocks: 'bg-[#EFE7DA]',
+    layout: 'three',
+    edge: 'border border-[#E4E0D5]',
+  },
+  journal: {
+    bar: 'bg-[#1C1B18]',
+    barText: 'text-white',
+    hero: 'bg-[#DDD9CF]',
+    blocks: 'bg-[#ECE9E1]',
+    layout: 'split',
+    onDark: true,
+  },
+  bourg: {
+    bar: 'bg-[#F3EADB]',
+    barText: 'text-[#5B4630]',
+    hero: 'bg-[#E4D5BC]',
+    blocks: 'bg-[#F1E8D8]',
+    layout: 'three',
+  },
+};
 
 function Vignette({ theme, site }: { theme: Theme; site: SiteSettings }) {
   const look = LOOKS[theme.id] ?? LOOKS.institutionnel!;
   return (
     <div aria-hidden="true" className="flex aspect-[16/9] flex-col gap-1.5 rounded-t-[10px] bg-white p-2">
-      <div className={cn('flex h-5 items-center gap-1.5 rounded px-1.5', look.bar, look.barText)}>
+      <div className={cn('flex h-6 shrink-0 items-center gap-1.5 rounded px-1.5', look.bar, look.barText, look.edge)}>
         {site.logo ? (
-          <img src={site.logo.url} alt="" className="h-3.5 w-3.5 rounded-full bg-white object-contain" />
+          // Le logo garde ses proportions (blason en hauteur, logo en longueur), comme dans l'en-tête du thème
+          <img
+            src={site.logo.url}
+            alt=""
+            className={cn(
+              'h-5 w-auto max-w-[40%] shrink-0 object-contain py-0.5',
+              look.onDark && 'rounded-sm bg-white px-0.5',
+            )}
+          />
         ) : (
-          <span className="size-2.5 rounded-full bg-current opacity-80" />
+          <span className="size-2.5 shrink-0 rounded-full bg-current opacity-80" />
         )}
-        <span className="truncate text-[9px] font-semibold">{site.name}</span>
+        <span className="min-w-0 truncate text-[9px] font-semibold">{site.name}</span>
       </div>
       {look.layout === 'split' ? (
         <div className="grid flex-1 grid-cols-[2fr_1fr] gap-1.5">

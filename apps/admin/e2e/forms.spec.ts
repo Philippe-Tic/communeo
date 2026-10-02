@@ -21,7 +21,7 @@ test('sans violation, au repos, en erreur et en sombre', async ({ page }) => {
   await page.getByRole('button', { name: 'Publier', exact: true }).click();
   await expect(page.getByRole('alert').filter({ hasText: 'empêchent la publication' })).toBeVisible();
   await expectNoViolations(page);
-  // Mode sombre du système (la bascule est dans le tiroir sur mobile)
+  // Mode sombre du système (le choix est aussi dans le menu du compte)
   await page.emulateMedia({ colorScheme: 'dark' });
   await expect(page.locator('html')).toHaveClass(/dark/);
   await page.waitForTimeout(300); // fin de la transition de couleurs

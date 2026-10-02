@@ -1,8 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { ChevronDown, LogOut, UserRound } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { auth } from '@/lib/api';
+import { COLOR_SCHEME_OPTIONS, setColorScheme, useColorSchemePreference, type ColorSchemePreference } from '@/lib/color-scheme';
 import { logout as endSession } from '@/lib/session';
 import { displayName, type SessionUser } from '@/lib/session';
 import { cn, initials } from '@/lib/utils';
@@ -22,6 +32,7 @@ export function AccountMenu({ user, compact }: { user: SessionUser; compact?: bo
   const navigate = useNavigate();
   const client = useQueryClient();
   const name = displayName(user);
+  const scheme = useColorSchemePreference();
 
   const logout = async () => {
     await endSession().catch(() => undefined);
@@ -51,6 +62,17 @@ export function AccountMenu({ user, compact }: { user: SessionUser; compact?: bo
           <UserRound aria-hidden="true" />
           Mon compte
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {/* Préférence personnelle (#366) : ici sur toutes les tailles d'écran, plus dans la navigation */}
+        <DropdownMenuLabel id="menu-compte-affichage">Affichage</DropdownMenuLabel>
+        <DropdownMenuRadioGroup aria-labelledby="menu-compte-affichage" value={scheme} onValueChange={(value) => setColorScheme(value as ColorSchemePreference)}>
+          {COLOR_SCHEME_OPTIONS.map((option) => (
+            <DropdownMenuRadioItem key={option.value} value={option.value}>
+              {option.label}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={logout}>
           <LogOut aria-hidden="true" />
           Se déconnecter

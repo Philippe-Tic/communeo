@@ -61,6 +61,18 @@ test('votre commune : pré-remplie depuis les données publiques, sources affich
   });
 });
 
+test('votre commune : le SIRET de l’Annuaire complète les mentions légales, sans leur identifiant Strapi', async ({ page }) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 2 }, legalMissing: true });
+  await page.goto('/assistant?etape=2');
+  await chooseCommune(page);
+  await expect(page.getByText('Informations trouvées. Vérifiez-les et corrigez si besoin.')).toBeVisible();
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Votre logo' })).toBeVisible();
+  const legal = lastSitePut(bodies)?.mentions_legales as Record<string, unknown>;
+  expect(legal).toMatchObject({ siret: '21580236500017', publication_director_title: 'Maire' });
+  expect(legal).not.toHaveProperty('id');
+});
+
 test('votre commune : le centre trouvé par l’INSEE, ou une adresse cherchée, sans coordonnées à saisir (#362)', async ({
   page,
 }) => {

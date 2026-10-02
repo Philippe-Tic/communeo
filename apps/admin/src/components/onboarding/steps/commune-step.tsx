@@ -123,7 +123,11 @@ export function CommuneStep({ site, step, next, back, later, alert }: StepProps 
   const payload = (values: InformationsValues) => {
     const { data, cached } = informationsPayload(values, site);
     const extra: Record<string, unknown> = insee ? { code_insee: insee } : {};
-    if (siret && !site.mentions_legales?.siret) extra.mentions_legales = { ...(site.mentions_legales ?? {}), siret };
+    if (siret && !site.mentions_legales?.siret) {
+      // Sans l'identifiant du composant lu par l'admin : Strapi refuse une clé `id` (« Invalid key id »)
+      const { id: _id, ...legal } = (site.mentions_legales ?? {}) as Record<string, unknown>;
+      extra.mentions_legales = { ...legal, siret };
+    }
     return { data: { ...data, ...extra }, cached: { ...cached, ...extra } };
   };
 

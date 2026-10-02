@@ -1348,6 +1348,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       longitude: 3.7891,
     }) as unknown,
     mentions_legales: {
+      // Composant lu tel que Strapi le renvoie, avec son identifiant (jamais renvoyé : « Invalid key id »)
+      id: 12,
       siret: legalMissing ? null : '215 803 205 00017',
       publication_director: legalMissing ? null : 'Claire Martin',
       publication_director_title: 'Maire',

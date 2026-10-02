@@ -2,9 +2,11 @@
  * Étape 4 — Votre thème (#151, handoff 6.18) : les 4 thèmes en vignettes, avec le nom et le logo de
  * la commune déjà dedans ; « Aperçu » ouvre le vrai site de la commune dans le thème (aperçu plein
  * écran de l'écran Apparence). Les thèmes pas encore construits sont montrés, sans pouvoir être
- * choisis. Le choix est enregistré en continuant ; on peut en changer ensuite dans Mon site › Apparence.
+ * choisis. Un clic n'importe où sur la carte choisit le thème (#364), sauf sur « Aperçu ». Le choix est
+ * enregistré en continuant ; on peut en changer ensuite dans Mon site › Apparence.
  */
 import { useQueryClient } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { THEMES } from '@communeo/core';
 import { ThemePreview, type Theme } from '@/components/appearance/appearance-screen';
@@ -15,50 +17,76 @@ import { WizardActions, type StepProps } from '../onboarding-screen';
 import { WizardFrame } from '../wizard-frame';
 import { StepHeading } from './step-heading';
 
-/** Schéma de la page d'accueil de chaque thème, aux couleurs du thème, avec la commune dedans */
-const LOOKS: Record<string, { bar: string; barText: string; hero: string; blocks: string; layout: 'three' | 'split' }> =
+/**
+ * Schéma de la page d'accueil de chaque thème, aux couleurs du thème, avec la commune dedans.
+ * `onDark` : bandeau foncé, le logo est posé sur un cartouche blanc (comme dans la barre latérale du
+ * thème Journal), sinon un logo aux couleurs sombres disparaîtrait. `edge` : bandeau blanc, bordé pour
+ * se détacher du fond blanc de la vignette.
+ */
+const LOOKS: Record<
+  string,
   {
-    institutionnel: {
-      bar: 'bg-[#1E3A5F]',
-      barText: 'text-white',
-      hero: 'bg-[#C9D6E6]',
-      blocks: 'bg-[#E3EAF2]',
-      layout: 'three',
-    },
-    moderne: {
-      bar: 'bg-white',
-      barText: 'text-[#1C1B18]',
-      hero: 'bg-[#D5E6DC]',
-      blocks: 'bg-[#EFE7DA]',
-      layout: 'three',
-    },
-    journal: {
-      bar: 'bg-[#1C1B18]',
-      barText: 'text-white',
-      hero: 'bg-[#DDD9CF]',
-      blocks: 'bg-[#ECE9E1]',
-      layout: 'split',
-    },
-    bourg: {
-      bar: 'bg-[#F3EADB]',
-      barText: 'text-[#5B4630]',
-      hero: 'bg-[#E4D5BC]',
-      blocks: 'bg-[#F1E8D8]',
-      layout: 'three',
-    },
-  };
+    bar: string;
+    barText: string;
+    hero: string;
+    blocks: string;
+    layout: 'three' | 'split';
+    onDark?: boolean;
+    edge?: string;
+  }
+> = {
+  institutionnel: {
+    bar: 'bg-[#1E3A5F]',
+    barText: 'text-white',
+    hero: 'bg-[#C9D6E6]',
+    blocks: 'bg-[#E3EAF2]',
+    layout: 'three',
+    onDark: true,
+  },
+  moderne: {
+    bar: 'bg-white',
+    barText: 'text-[#1C1B18]',
+    hero: 'bg-[#D5E6DC]',
+    blocks: 'bg-[#EFE7DA]',
+    layout: 'three',
+    edge: 'border border-[#E4E0D5]',
+  },
+  journal: {
+    bar: 'bg-[#1C1B18]',
+    barText: 'text-white',
+    hero: 'bg-[#DDD9CF]',
+    blocks: 'bg-[#ECE9E1]',
+    layout: 'split',
+    onDark: true,
+  },
+  bourg: {
+    bar: 'bg-[#F3EADB]',
+    barText: 'text-[#5B4630]',
+    hero: 'bg-[#E4D5BC]',
+    blocks: 'bg-[#F1E8D8]',
+    layout: 'three',
+  },
+};
 
 function Vignette({ theme, site }: { theme: Theme; site: SiteSettings }) {
   const look = LOOKS[theme.id] ?? LOOKS.institutionnel!;
   return (
     <div aria-hidden="true" className="flex aspect-[16/9] flex-col gap-1.5 rounded-t-[10px] bg-white p-2">
-      <div className={cn('flex h-5 items-center gap-1.5 rounded px-1.5', look.bar, look.barText)}>
+      <div className={cn('flex h-6 shrink-0 items-center gap-1.5 rounded px-1.5', look.bar, look.barText, look.edge)}>
         {site.logo ? (
-          <img src={site.logo.url} alt="" className="h-3.5 w-3.5 rounded-full bg-white object-contain" />
+          // Le logo garde ses proportions (blason en hauteur, logo en longueur), comme dans l'en-tête du thème
+          <img
+            src={site.logo.url}
+            alt=""
+            className={cn(
+              'h-5 w-auto max-w-[40%] shrink-0 object-contain py-0.5',
+              look.onDark && 'rounded-sm bg-white px-0.5',
+            )}
+          />
         ) : (
-          <span className="size-2.5 rounded-full bg-current opacity-80" />
+          <span className="size-2.5 shrink-0 rounded-full bg-current opacity-80" />
         )}
-        <span className="truncate text-[9px] font-semibold">{site.name}</span>
+        <span className="min-w-0 truncate text-[9px] font-semibold">{site.name}</span>
       </div>
       {look.layout === 'split' ? (
         <div className="grid flex-1 grid-cols-[2fr_1fr] gap-1.5">
@@ -125,11 +153,18 @@ export function ThemeStep({ site, step, next, back, later, alert }: StepProps & 
           {THEMES.map((theme) => {
             const selected = chosen.id === theme.id;
             return (
+              // Toute la carte sélectionne le thème : le label du radio s'étend sur la carte (::after),
+              // seul « Aperçu » passe au-dessus. Au clavier, le radio garde son comportement (flèches).
               <li
                 key={theme.id}
                 className={cn(
-                  'flex flex-col rounded-xl bg-surface dark:bg-sidebar',
-                  selected ? 'border-2 border-brand' : 'border border-border',
+                  'relative isolate flex flex-col rounded-xl border bg-surface dark:bg-sidebar',
+                  'has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-2 has-[input:focus-visible]:outline-brand',
+                  selected
+                    ? 'border-brand ring-1 ring-brand'
+                    : theme.available
+                      ? 'border-border hover:border-brand'
+                      : 'border-border',
                 )}
               >
                 <Vignette theme={theme} site={site} />
@@ -137,7 +172,10 @@ export function ThemeStep({ site, step, next, back, later, alert }: StepProps & 
                   <label
                     className={cn(
                       'flex min-h-11 flex-1 items-center gap-2 font-semibold md:min-h-0',
-                      theme.available ? 'cursor-pointer' : 'cursor-not-allowed',
+                      "after:absolute after:inset-0 after:rounded-xl after:content-['']",
+                      theme.available
+                        ? 'cursor-pointer after:cursor-pointer'
+                        : 'cursor-not-allowed after:cursor-not-allowed',
                     )}
                   >
                     <input
@@ -147,9 +185,19 @@ export function ThemeStep({ site, step, next, back, later, alert }: StepProps & 
                       checked={selected}
                       disabled={!theme.available}
                       onChange={() => setChosen(theme)}
-                      className="size-4 accent-[var(--color-brand)]"
+                      className="size-4 accent-[var(--color-brand)] focus-visible:outline-none"
                     />
                     {theme.name}
+                    {/* Repère visuel ; l'état coché du radio est déjà annoncé */}
+                    {selected && (
+                      <span
+                        aria-hidden="true"
+                        className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-0.5 text-[11px] font-semibold text-brand"
+                      >
+                        <Check aria-hidden="true" className="size-3" />
+                        Choisi
+                      </span>
+                    )}
                     {!theme.available && (
                       <span className="rounded-full bg-neutral-bg px-2 py-0.5 text-[11px] font-semibold text-neutral">
                         Bientôt disponible
@@ -161,6 +209,7 @@ export function ThemeStep({ site, step, next, back, later, alert }: StepProps & 
                       type="button"
                       variant="tertiary"
                       size="sm"
+                      className="relative z-10"
                       aria-label={`Aperçu de votre site dans le thème ${theme.name}`}
                       onClick={() => setPreviewed(theme)}
                     >

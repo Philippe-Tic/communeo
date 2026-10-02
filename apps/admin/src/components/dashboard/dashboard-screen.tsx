@@ -36,7 +36,6 @@ import { inboxQuery, MESSAGE_CATEGORIES, type MessageSummary } from '@/lib/messa
 import { publicationQuery, type PublicationStatus } from '@/lib/publication';
 import { sessionQuery } from '@/lib/session';
 import { isReadOnly } from '@/lib/trial';
-import { awaitingApproval } from '@/lib/signup';
 import { cn } from '@/lib/utils';
 import { Checklist } from './checklist';
 
@@ -278,7 +277,6 @@ const PUBLICATION_BADGE: Record<PublicationStatus['state'], { tone: Tone; label:
 function usePublicationBadge(state: PublicationStatus['state'] | undefined) {
   const { data: user } = useQuery(sessionQuery);
   if (isReadOnly(user?.site)) return { tone: 'danger' as Tone, label: 'Site retiré : essai terminé' };
-  if (awaitingApproval(user?.site)) return { tone: 'info' as Tone, label: awaitingApproval(user?.site) === 'townhall' ? 'En attente de la mairie' : 'En cours de vérification' };
   return state ? PUBLICATION_BADGE[state] : null;
 }
 

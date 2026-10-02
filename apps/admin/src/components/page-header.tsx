@@ -41,16 +41,3 @@ export function PageHeader({
     </div>
   );
 }
-
-/** Écran pas encore construit (phase 3 en cours) */
-export function ComingSoon({ title, ticket }: { title: string; ticket: number }) {
-  return (
-    <>
-      <PageHeader title={title} />
-      <div className="rounded-xl border border-border bg-surface p-8">
-        <p>Cet écran arrive bientôt.</p>
-        <p className="mt-1 text-[13px] text-secondary">Ticket #{ticket}</p>
-      </div>
-    </>
-  );
-}

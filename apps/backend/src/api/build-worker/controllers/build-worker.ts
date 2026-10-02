@@ -11,6 +11,7 @@ import { BUILD_STEPS, type BuildSite, type FinishBuildRequest, type ProgressBuil
 import { clearPendingChanges } from '../../../services/pending-changes';
 import { listRedirects } from '../../../services/redirects';
 import { log } from '../../../utils/logger';
+import { publisher } from '../../../utils/publisher';
 
 const DEPLOYMENT = 'api::deployment.deployment';
 
@@ -40,6 +41,18 @@ async function findDeployment(jobId: string) {
   return strapi.documents(DEPLOYMENT).findFirst({ filters: { job_id: jobId } as any, populate: ['site'] });
 }
 
+/** Site chez l'hébergeur qu'aucune commune ne référence plus : retiré (un échec est consigné) */
+async function removeOrphanHostSite(hostId: string) {
+  if (await strapi.db.query('api::site.site').count({ where: { netlify_site_id: hostId } })) return;
+  try {
+    // L'adaptateur local range le site sous son identifiant (= adresse du site)
+    await publisher().deleteSite({ documentId: '', slug: hostId, name: '', hostId });
+    log.info(`🧹 [BUILD] Site ${hostId} retiré de l'hébergeur : sa commune a été supprimée pendant le build`);
+  } catch (error) {
+    log.error(`[BUILD] Site ${hostId} d'une commune supprimée non retiré de l'hébergeur :`, error);
+  }
+}
+
 export default {
   /**
    * POST /api/build-worker/jobs/:jobId/start
@@ -53,9 +66,9 @@ export default {
       filters: { documentId: body.siteDocumentId } as any,
     });
     if (!site) return ctx.notFound('Site non trouvé');
-    // Demande déposée avant la suspension ou la fin de l'essai, ou inscription pas encore approuvée
-    // (#337) : rien n'est mis en ligne
-    const cancelled = site.suspended ? 'commune suspendue' : site.plan === 'expired' ? 'essai terminé' : site.signup_approval ? 'inscription à approuver' : null;
+    // Demande déposée avant la suspension ou la fin de l'essai : rien n'est mis en ligne. Une inscription
+    // pas encore approuvée publie son site d'essai (#369).
+    const cancelled = site.suspended ? 'commune suspendue' : site.plan === 'expired' ? 'essai terminé' : null;
     if (cancelled) {
       log.info(`🚫 [BUILD] Job ${jobId} annulé pour ${site.slug} (${cancelled})`);
       ctx.body = { cancelled };
@@ -136,7 +149,13 @@ export default {
     if (!['ready', 'building', 'error'].includes(body.status)) return ctx.badRequest('Statut invalide');
 
     const deployment: any = await findDeployment(jobId);
-    if (!deployment) return ctx.notFound('Déploiement non trouvé');
+    if (!deployment) {
+      // Commune supprimée pendant le build (inscription refusée alors que son site d'essai se
+      // publiait, #369) : le site que le worker vient de créer ou de mettre à jour chez l'hébergeur
+      // n'appartient plus à personne, il est retiré
+      if (body.hostId) await removeOrphanHostSite(body.hostId);
+      return ctx.notFound('Déploiement non trouvé');
+    }
 
     await strapi.documents(DEPLOYMENT).update({
       documentId: deployment.documentId,

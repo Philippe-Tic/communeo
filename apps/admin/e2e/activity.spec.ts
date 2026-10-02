@@ -21,6 +21,9 @@ test('administrateur : journal de la commune, actions de l’équipe signalées,
     await expect(entries(page).getByRole('columnheader')).toHaveText(['Date', 'Qui', 'Action', 'Élément']);
   await expect(entries(page)).toContainText('Actualité — Nouveaux horaires de la déchetterie');
   await expect(entries(page)).toContainText('Moderne → Institutionnel');
+  // Suppression automatique des messages (#342) : une ligne par passage
+  await expect(entries(page)).toContainText('12 messages traités supprimés (conservés 1 an)');
+  await expect(entries(page).getByText('Suppression automatique', { exact: true }).filter({ visible: true }).first()).toBeVisible();
   await expect(entries(page)).toContainText('claire.martin@saint-aubin.fr : Éditeur → Administrateur');
   // L'action de l'équipe Communeo est signalée ; pas d'adresse IP pour la commune ; pas d'autre commune
   await expect(entries(page).getByText('Équipe Communeo').filter({ visible: true }).first()).toBeVisible();

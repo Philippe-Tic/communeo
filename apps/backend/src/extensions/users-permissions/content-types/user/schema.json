@@ -94,6 +94,10 @@
     },
     "last_login_at": {
       "type": "datetime"
+    },
+    "password_changed_at": {
+      "type": "datetime",
+      "private": true
     }
   }
 }

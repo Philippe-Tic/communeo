@@ -19,7 +19,6 @@ import { focusHeadingIfRequested } from '@/lib/focus';
 import { previewQuery } from '@/lib/preview';
 import { publicationQuery, usePublish } from '@/lib/publication';
 import { sessionQuery, themeName } from '@/lib/session';
-import { awaitingApproval } from '@/lib/signup';
 import { saveSiteSettings, type SiteSettings } from '@/lib/site-settings';
 import { cn } from '@/lib/utils';
 
@@ -160,14 +159,15 @@ export function ThemePreview({
           <Dialog.Description className="sr-only">
             Votre vrai site, dans le thème choisi. Rien n'est modifié tant que vous ne choisissez pas le thème.
           </Dialog.Description>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2">
+          {/* Sous 768 px : fermer et choisir sur la première ligne, les thèmes sur toute la largeur dessous */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2 max-md:justify-between">
             <Dialog.Close asChild>
-              <Button type="button" variant="secondary" size="sm" className="max-md:h-11">
+              <Button type="button" variant="secondary" size="sm" className="max-md:h-11 max-md:w-11 max-md:px-0">
                 <X aria-hidden="true" />
-                Fermer l'aperçu
+                <span className="max-md:sr-only">Fermer l'aperçu</span>
               </Button>
             </Dialog.Close>
-            <fieldset className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <fieldset className="flex min-w-0 flex-1 flex-wrap items-center gap-1 max-md:order-last max-md:basis-full">
               <legend className="sr-only">Thème montré</legend>
               {THEMES.map((entry) => (
                 <label
@@ -274,9 +274,6 @@ function SwitchStatus({ theme, published }: { theme: string; published: boolean 
 export function AppearanceScreen({ site }: { site: SiteSettings }) {
   const client = useQueryClient();
   const publish = usePublish();
-  // Inscription pas encore approuvée (#337) : rien n'est mis en ligne, pas de mise en ligne immédiate
-  const { data: user } = useQuery(sessionQuery);
-  const canPublish = !awaitingApproval(user?.site);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => focusHeadingIfRequested(heading.current), []);
   useEffect(() => {
@@ -306,7 +303,7 @@ export function AppearanceScreen({ site }: { site: SiteSettings }) {
     }
     setPreviewed(null);
     let published = false;
-    if (publishNow && canPublish) {
+    if (publishNow) {
       try {
         await publish.mutateAsync();
         published = true;
@@ -383,17 +380,15 @@ export function AppearanceScreen({ site }: { site: SiteSettings }) {
         confirmLabel={`Passer au thème ${choosing?.name ?? ''}`}
         onConfirm={confirm}
       >
-        {canPublish && (
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <input
-              type="checkbox"
-              checked={publishNow}
-              onChange={(event) => setPublishNow(event.target.checked)}
-              className="mt-0.5 size-[18px] shrink-0 rounded accent-[var(--brand-button)]"
-            />
-            Mettre en ligne immédiatement après le changement
-          </label>
-        )}
+        <label className="flex cursor-pointer items-start gap-2.5">
+          <input
+            type="checkbox"
+            checked={publishNow}
+            onChange={(event) => setPublishNow(event.target.checked)}
+            className="mt-0.5 size-[18px] shrink-0 rounded accent-[var(--brand-button)]"
+          />
+          Mettre en ligne immédiatement après le changement
+        </label>
       </ConfirmDialog>
     </div>
   );

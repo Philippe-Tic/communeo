@@ -1,13 +1,22 @@
 /**
  * Mentions légales et RGPD (handoff 6.10, ticket #143, administrateurs) : éditeur du site (SIRET,
  * directeur de la publication requis pour la conformité), hébergeur renseigné par Communeo (non
- * modifiable), données personnelles (délégué, politique) et compléments (crédits, mentions).
+ * modifiable), données personnelles (délégué, politique), durée de conservation des messages des
+ * habitants (#342) et compléments (crédits, mentions).
  */
-import { isRichTextEmpty, type RichTextDocument } from '@communeo/core';
+import {
+  DEFAULT_MESSAGE_RETENTION,
+  isRichTextEmpty,
+  MESSAGE_RETENTION_LABELS,
+  MESSAGE_RETENTIONS,
+  type RichTextDocument,
+} from '@communeo/core';
+import { useSearch } from '@tanstack/react-router';
+import { useEffect } from 'react';
 import { z } from 'zod';
 import { emptyDoc } from '@/components/blocks/catalog';
 import { RichTextField } from '@/components/blocks/rich-text';
-import { Form, FormSection, TextField } from '@/components/form';
+import { Form, FormSection, RadioGroupField, TextField } from '@/components/form';
 import type { SiteSettings } from '@/lib/site-settings';
 import { ComplianceBadge } from './compliance-badge';
 import { SettingsScreen } from './settings-screen';
@@ -37,6 +46,8 @@ export const legalSchema = z.object({
   rgpd_policy: z.custom<RichTextDocument>(),
   credits: z.custom<RichTextDocument>(),
   mentions_legales_extra: z.custom<RichTextDocument>(),
+  // Vide : pas encore choisie (la durée par défaut s'applique)
+  message_retention: z.union([z.literal(''), z.enum(MESSAGE_RETENTIONS)]),
 });
 
 export type LegalValues = z.infer<typeof legalSchema>;
@@ -59,6 +70,7 @@ export function legalValues(site: SiteSettings): Values {
     rgpd_policy: doc(rgpd?.rgpd_policy),
     credits: doc(legal?.credits),
     mentions_legales_extra: doc(legal?.mentions_legales_extra),
+    message_retention: site.message_retention ?? '',
   };
 }
 
@@ -83,7 +95,12 @@ export function legalPayload(values: Values, site: SiteSettings) {
     hebergeur_address: legal?.hebergeur_address ?? null,
     hebergeur_phone: legal?.hebergeur_phone ?? null,
   };
-  return { data: { mentions_legales, rgpd }, cached: { mentions_legales: { ...mentions_legales, ...host }, rgpd } };
+  // Envoyée seulement une fois choisie : rien choisi reste « pas encore choisi » (point de conformité)
+  const retention = values.message_retention ? { message_retention: values.message_retention } : {};
+  return {
+    data: { mentions_legales, rgpd, ...retention },
+    cached: { mentions_legales: { ...mentions_legales, ...host }, rgpd, ...retention },
+  };
 }
 
 function HostCard({ site }: { site: SiteSettings }) {
@@ -107,6 +124,14 @@ function HostCard({ site }: { site: SiteSettings }) {
   );
 }
 
+/** Ancre de la section « Conservation des messages » (écran Messages, Conformité : `?section=conservation`) */
+export const RETENTION_SECTION = 'conservation';
+
+const RETENTION_OPTIONS = MESSAGE_RETENTIONS.map((value) => ({
+  value,
+  label: value === DEFAULT_MESSAGE_RETENTION ? `${MESSAGE_RETENTION_LABELS[value]} (par défaut)` : MESSAGE_RETENTION_LABELS[value],
+}));
+
 export function LegalScreen({ site }: { site: SiteSettings }) {
   const { form, onSubmit, screen } = useSettingsForm({
     site,
@@ -117,6 +142,18 @@ export function LegalScreen({ site }: { site: SiteSettings }) {
     saved: 'Mentions légales enregistrées. Elles seront en ligne à la prochaine mise en ligne du site.',
     failed: "Les mentions légales n'ont pas pu être enregistrées",
   });
+  // Arrivée depuis l'écran Messages ou Conformité : la section de la durée de conservation, titre focalisé
+  const { section } = useSearch({ strict: false }) as { section?: unknown };
+  useEffect(() => {
+    if (section !== RETENTION_SECTION) return;
+    const heading = document.getElementById(RETENTION_SECTION);
+    if (!heading) return;
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+    // Après la restauration du défilement du routeur (haut de page à chaque navigation)
+    const frame = requestAnimationFrame(() => heading.parentElement?.scrollIntoView({ block: 'start' }));
+    return () => cancelAnimationFrame(frame);
+  }, [section]);
   return (
     <SettingsScreen id="legal" form={FORM_ID} {...screen}>
       <Form id={FORM_ID} form={form} className="space-y-6" requiredNote={false} onSubmit={onSubmit}>
@@ -158,6 +195,37 @@ export function LegalScreen({ site }: { site: SiteSettings }) {
             headings={false}
             help="Données collectées, finalités, durées de conservation. Le site ajoute les droits des personnes et le formulaire pour les exercer."
           />
+        </FormSection>
+
+        <FormSection
+          title="Conservation des messages"
+          id={RETENTION_SECTION}
+          fields={['message_retention']}
+          // Sous l'en-tête et la barre d'enregistrement collantes
+          className="scroll-mt-36"
+        >
+          <RadioGroupField
+            name="message_retention"
+            label="Supprimer automatiquement les messages traités après"
+            options={RETENTION_OPTIONS}
+            hideOptional
+            help={
+              site.message_retention
+                ? 'Messages « Traité » ou « Clos », comptés depuis leur dernière modification, pièces jointes comprises.'
+                : `Pas encore choisi : les messages traités sont supprimés après ${MESSAGE_RETENTION_LABELS[DEFAULT_MESSAGE_RETENTION]}. Messages « Traité » ou « Clos », comptés depuis leur dernière modification, pièces jointes comprises.`
+            }
+          />
+          <div className="space-y-2 text-[13px] text-secondary">
+            <p>
+              Un message en attente ou en cours n'est jamais supprimé, ni une demande RGPD avant la fin de son délai d'un
+              mois. La durée choisie est indiquée sur la page Données personnelles du site.
+            </p>
+            <p>
+              La correspondance de la mairie peut relever des archives publiques (Code du patrimoine) : la durée est votre
+              choix. Choisissez « Jamais » si les messages doivent être gardés, par exemple à la demande des Archives
+              départementales ; vous les supprimez alors vous-même dans l'écran Messages.
+            </p>
+          </div>
         </FormSection>
 
         <FormSection title="Compléments" fields={['credits', 'mentions_legales_extra']}>

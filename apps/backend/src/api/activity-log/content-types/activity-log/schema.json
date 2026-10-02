@@ -51,7 +51,8 @@
         "invoice_cancel",
         "invoice_chorus",
         "invoice_remind",
-        "billing_renewal"
+        "billing_renewal",
+        "messages_purge"
       ],
       "required": true
     },

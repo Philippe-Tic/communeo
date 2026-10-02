@@ -5,7 +5,7 @@ import RichText from '@communeo/ui-a11y/RichText.astro';
 
 interface Props { site: SiteVM }
 const { site } = Astro.props;
-const { privacyPolicy, dpo } = site.legal;
+const { privacyPolicy, dpo, messageRetention } = site.legal;
 ---
 <p>Responsable des traitements : mairie de {site.name}, représentée par son maire.</p>
 {privacyPolicy ? <RichText doc={privacyPolicy} /> : <p>La politique de protection des données de la commune sera bientôt publiée.</p>}
@@ -18,6 +18,19 @@ const { privacyPolicy, dpo } = site.legal;
     {dpo.phone && <>Téléphone : <a href={dpo.phone.href}>{dpo.phone.label}</a></>}
   </p>
 ) : <p>Contactez la mairie : <a href={site.contact.email.href}>{site.contact.email.label}</a>.</p>}
+
+<h2>Conservation de vos messages</h2>
+{messageRetention ? (
+  <p>
+    Les messages envoyés à la mairie depuis ce site (formulaire de contact, demande d'exercice de vos droits)
+    sont supprimés automatiquement {messageRetention} après leur traitement.
+  </p>
+) : (
+  <p>
+    Les messages envoyés à la mairie depuis ce site (formulaire de contact, demande d'exercice de vos droits)
+    sont conservés par la mairie : ils ne sont pas supprimés automatiquement.
+  </p>
+)}
 
 <h2>Vos droits</h2>
 <p>

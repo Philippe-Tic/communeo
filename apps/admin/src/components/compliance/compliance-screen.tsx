@@ -1,5 +1,5 @@
 /**
- * Conformité (handoff 6.17) : score en repère, puis la liste qui compte — 18 points en 5 catégories.
+ * Conformité (handoff 6.17) : score en repère, puis la liste qui compte — 19 points en 5 catégories.
  * Un point fait est coché ; un point à faire dit précisément quoi faire et mène à l'écran où on le
  * complète (réservé aux administrateurs pour les réglages légaux : un éditeur voit qui s'en charge).
  */

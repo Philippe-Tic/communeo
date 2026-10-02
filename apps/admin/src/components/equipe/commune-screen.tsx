@@ -1,21 +1,23 @@
 /**
  * Fiche d'une commune (handoff 6.20) : « Entrer dans l'administration » est l'action principale
  * (bandeau d'impersonation) ; site, thème, mise en ligne, utilisateurs, contenus ; renvoyer
- * l'invitation d'un administrateur qui ne l'a pas acceptée ; suspendre la commune.
+ * l'invitation d'un administrateur qui ne l'a pas acceptée ; suspendre la commune ; la supprimer tout de
+ * suite (nom tapé pour confirmer), ou annuler la suppression qu'elle a demandée (#391).
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { CalendarPlus, ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle, Rocket } from 'lucide-react';
-import { addCalendarDays, deletionDate, formatEuros, trialDaysLeft } from '@communeo/core';
+import { CalendarPlus, ChevronRight, ExternalLink, LogIn, PauseCircle, PlayCircle, Rocket, Trash2 } from 'lucide-react';
+import { addCalendarDays, deletionConfirmed, deletionDate, formatEuros, trialDaysLeft } from '@communeo/core';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { controlClass, Field } from '@/components/form/field';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { NameConfirmation } from '@/components/ui/name-confirmation';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toast } from '@/components/ui/toast';
 import { ApiError } from '@/lib/api';
 import { formatCalendarDay, formatShortDay, invoicePdfUrl, stateBadge, stateOf as invoiceStateOf, teamBillingQuery } from '@/lib/billing';
-import { communeQuery, enterCommune, refreshCommunes, updateCommune, type CommuneDetail } from '@/lib/equipe';
+import { communeQuery, deleteCommune, enterCommune, refreshCommunes, updateCommune, type CommuneDetail } from '@/lib/equipe';
 import { focusHeadingIfRequested } from '@/lib/focus';
 import { themeName } from '@/lib/session';
 import { fullName, resendInvitation, roleLabel, stateOf } from '@/lib/users';
@@ -170,6 +172,9 @@ function Detail({ commune }: { commune: CommuneDetail }) {
   const [goingLive, setGoingLive] = useState(false);
   const [extending, setExtending] = useState(false);
   const [extension, setExtension] = useState<number>(15);
+  const [deleting, setDeleting] = useState(false);
+  const [cancellingDeletion, setCancellingDeletion] = useState(false);
+  const [typed, setTyped] = useState('');
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => focusHeadingIfRequested(heading.current), []);
   useEffect(() => {
@@ -223,7 +228,30 @@ function Detail({ commune }: { commune: CommuneDetail }) {
     toast.success(`Essai de ${commune.name} prolongé de ${extension} jours.`);
   };
 
+  const remove = async () => {
+    try {
+      await deleteCommune(commune.documentId);
+    } catch (error) {
+      throw new Error(`La commune n'a pas été supprimée : ${failure(error)}`);
+    }
+    client.removeQueries({ queryKey: communeQuery(commune.documentId).queryKey });
+    void refreshCommunes(client);
+    toast.success(`${commune.name} est supprimée.`);
+    await navigate({ to: '/plateforme' });
+  };
+
+  const cancelDeletion = async () => {
+    try {
+      await updateCommune(commune.documentId, { cancelDeletion: true });
+    } catch (error) {
+      throw new Error(`La suppression n'a pas été annulée : ${failure(error)}`);
+    }
+    void refreshCommunes(client);
+    toast.success(`Suppression de ${commune.name} annulée : les administrateurs sont prévenus.`);
+  };
+
   const plan = planSummary(commune);
+  const deletionAt = commune.deletionScheduledAt ? new Date(commune.deletionScheduledAt) : null;
 
   return (
     <div className="mx-auto max-w-[960px] space-y-5">
@@ -248,6 +276,7 @@ function Detail({ commune }: { commune: CommuneDetail }) {
           <h1 ref={heading} className="flex flex-wrap items-center gap-3 outline-none">
             {commune.name}
             {commune.suspended && <StatusBadge tone="danger">Suspendue</StatusBadge>}
+            {deletionAt && <StatusBadge tone="danger">Suppression demandée</StatusBadge>}
             <PlanBadge commune={commune} />
           </h1>
           <p className="mt-1 text-secondary">
@@ -271,6 +300,18 @@ function Detail({ commune }: { commune: CommuneDetail }) {
           Commune suspendue : ses utilisateurs ne peuvent plus se connecter et rien n'est mis en ligne. Le site public
           reste en ligne tel quel.
         </p>
+      )}
+
+      {deletionAt && (
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-danger bg-danger-alert-bg p-4">
+          <p className="min-w-0 flex-1 basis-72">
+            La commune a demandé sa suppression : elle aura lieu le {formatDay(deletionAt)}. D'ici là, le site reste en ligne
+            et l'administration fonctionne.
+          </p>
+          <Button type="button" variant="secondary" className="max-md:h-11 max-md:w-full" onClick={() => setCancellingDeletion(true)}>
+            Annuler la suppression…
+          </Button>
+        </div>
       )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -391,7 +432,50 @@ function Detail({ commune }: { commune: CommuneDetail }) {
         >
           {commune.suspended ? 'Lever la suspension…' : 'Suspendre la commune…'}
         </Button>
+        <Button
+          type="button"
+          variant="destructive-outline"
+          className="max-md:h-11"
+          disabled={commune.paidInvoices}
+          aria-describedby={commune.paidInvoices ? 'suppression-impossible' : undefined}
+          onClick={() => setDeleting(true)}
+        >
+          <Trash2 aria-hidden="true" />
+          {deletionAt ? 'Supprimer maintenant…' : 'Supprimer la commune…'}
+        </Button>
       </div>
+      {commune.paidInvoices && (
+        <p id="suppression-impossible" className="-mt-3 text-[13px] text-secondary">
+          Suppression impossible : la commune a un abonnement payé.
+        </p>
+      )}
+
+      <ConfirmDialog
+        open={deleting}
+        onOpenChange={(value) => {
+          setDeleting(value);
+          if (!value) setTyped('');
+        }}
+        title={`Supprimer ${commune.name} ?`}
+        description="Tout de suite et définitivement : le site est retiré d'internet, les contenus, les fichiers et les comptes de la commune sont supprimés. Les factures et les devis sont conservés."
+        confirmLabel="Supprimer la commune"
+        confirmDisabled={!deletionConfirmed(typed, commune.name)}
+        onConfirm={remove}
+      >
+        <NameConfirmation name={commune.name} value={typed} onChange={setTyped} />
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={cancellingDeletion}
+        onOpenChange={setCancellingDeletion}
+        tone="info"
+        icon={Trash2}
+        title={`Annuler la suppression de ${commune.name} ?`}
+        description="La commune est conservée ; ses administrateurs sont prévenus par e-mail."
+        confirmLabel="Annuler la suppression"
+        cancelLabel="Fermer"
+        onConfirm={cancelDeletion}
+      />
 
       <ConfirmDialog
         open={suspending}

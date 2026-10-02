@@ -62,6 +62,7 @@ import { Route as AppMonSiteMenuRouteImport } from './routes/_app/mon-site/menu'
 import { Route as AppMonSiteOpenDataRouteImport } from './routes/_app/mon-site/open-data'
 import { Route as AppMonSiteRedirectionsRouteImport } from './routes/_app/mon-site/redirections'
 import { Route as AppMonSiteReseauxRouteImport } from './routes/_app/mon-site/reseaux'
+import { Route as AppMonSiteSuppressionRouteImport } from './routes/_app/mon-site/suppression'
 import { Route as AppPagesDocumentIdRouteImport } from './routes/_app/pages_.$documentId'
 import { Route as PlateformeCommunesDocumentIdRouteImport } from './routes/plateforme/communes.$documentId'
 
@@ -329,6 +330,11 @@ const AppMonSiteReseauxRoute = AppMonSiteReseauxRouteImport.update({
   path: '/mon-site/reseaux',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMonSiteSuppressionRoute = AppMonSiteSuppressionRouteImport.update({
+  id: '/mon-site/suppression',
+  path: '/mon-site/suppression',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPagesDocumentIdRoute = AppPagesDocumentIdRouteImport.update({
   id: '/pages_/$documentId',
   path: '/pages/$documentId',
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/mon-site/suppression': typeof AppMonSiteSuppressionRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
@@ -449,6 +456,7 @@ export interface FileRoutesByTo {
   '/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/mon-site/suppression': typeof AppMonSiteSuppressionRoute
   '/pages/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
@@ -507,6 +515,7 @@ export interface FileRoutesById {
   '/_app/mon-site/open-data': typeof AppMonSiteOpenDataRoute
   '/_app/mon-site/redirections': typeof AppMonSiteRedirectionsRoute
   '/_app/mon-site/reseaux': typeof AppMonSiteReseauxRoute
+  '/_app/mon-site/suppression': typeof AppMonSiteSuppressionRoute
   '/_app/pages_/$documentId': typeof AppPagesDocumentIdRoute
   '/plateforme/communes/$documentId': typeof PlateformeCommunesDocumentIdRoute
 }
@@ -565,6 +574,7 @@ export interface FileRouteTypes {
     | '/mon-site/open-data'
     | '/mon-site/redirections'
     | '/mon-site/reseaux'
+    | '/mon-site/suppression'
     | '/pages/$documentId'
     | '/plateforme/communes/$documentId'
   fileRoutesByTo: FileRoutesByTo
@@ -620,6 +630,7 @@ export interface FileRouteTypes {
     | '/mon-site/open-data'
     | '/mon-site/redirections'
     | '/mon-site/reseaux'
+    | '/mon-site/suppression'
     | '/pages/$documentId'
     | '/plateforme/communes/$documentId'
   id:
@@ -677,6 +688,7 @@ export interface FileRouteTypes {
     | '/_app/mon-site/open-data'
     | '/_app/mon-site/redirections'
     | '/_app/mon-site/reseaux'
+    | '/_app/mon-site/suppression'
     | '/_app/pages_/$documentId'
     | '/plateforme/communes/$documentId'
   fileRoutesById: FileRoutesById
@@ -1068,6 +1080,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonSiteReseauxRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/mon-site/suppression': {
+      id: '/_app/mon-site/suppression'
+      path: '/mon-site/suppression'
+      fullPath: '/mon-site/suppression'
+      preLoaderRoute: typeof AppMonSiteSuppressionRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/pages_/$documentId': {
       id: '/_app/pages_/$documentId'
       path: '/pages/$documentId'
@@ -1122,6 +1141,7 @@ interface AppRouteChildren {
   AppMonSiteOpenDataRoute: typeof AppMonSiteOpenDataRoute
   AppMonSiteRedirectionsRoute: typeof AppMonSiteRedirectionsRoute
   AppMonSiteReseauxRoute: typeof AppMonSiteReseauxRoute
+  AppMonSiteSuppressionRoute: typeof AppMonSiteSuppressionRoute
   AppPagesDocumentIdRoute: typeof AppPagesDocumentIdRoute
 }
 
@@ -1162,6 +1182,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonSiteOpenDataRoute: AppMonSiteOpenDataRoute,
   AppMonSiteRedirectionsRoute: AppMonSiteRedirectionsRoute,
   AppMonSiteReseauxRoute: AppMonSiteReseauxRoute,
+  AppMonSiteSuppressionRoute: AppMonSiteSuppressionRoute,
   AppPagesDocumentIdRoute: AppPagesDocumentIdRoute,
 }
 

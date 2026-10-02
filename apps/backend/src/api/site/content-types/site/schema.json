@@ -144,6 +144,18 @@
       "type": "string",
       "private": true
     },
+    "deletion_scheduled_at": {
+      "type": "datetime"
+    },
+    "deletion_requested_by": {
+      "type": "string",
+      "private": true
+    },
+    "deletion_reminded": {
+      "type": "boolean",
+      "default": false,
+      "private": true
+    },
     "seo_checklist": {
       "type": "json",
       "private": true

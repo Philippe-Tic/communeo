@@ -3,7 +3,9 @@
  * site (brouillons et versions publiées, fichiers de la médiathèque), puis le site lui-même.
  * Partagée par l'espace équipe et la fin de conservation d'un essai expiré (#310).
  *
- * Le journal d'activité est gardé (trace de la suppression) : il est purgé au bout de 6 mois.
+ * Le journal d'activité est gardé (trace de la suppression) : il est purgé au bout de 6 mois. Les
+ * factures, avoirs et devis aussi (obligation comptable, 10 ans) : détachés de la commune, ils gardent
+ * l'identité du client figée à l'émission et leur PDF archivé.
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { log } from '../utils/logger';
@@ -11,7 +13,7 @@ import { publisher as getPublisher, toPublisherSite } from '../utils/publisher';
 
 const SITE = 'api::site.site';
 const MEDIA_ITEM = 'api::media-item.media-item';
-const KEPT = new Set(['api::activity-log.activity-log']);
+const KEPT = new Set(['api::activity-log.activity-log', 'api::invoice.invoice', 'api::quote.quote']);
 
 // Suppression en cours : ni mise en ligne programmée, ni « modification en attente », ni ligne de
 // journal par contenu supprimé (voir auto-deploy.ts et activity-log.ts)

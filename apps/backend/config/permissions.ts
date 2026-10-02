@@ -68,6 +68,7 @@ export const ROLE_PERMISSIONS: Record<'authenticated' | 'public', string[]> = {
     ...custom('seo', ['checklist', 'declare']),
     ...custom('billing', ['list', 'pdf', 'team', 'markPaid', 'markDeposited', 'remind', 'cancel', 'issueFirst', 'renewal']),
     ...custom('signup', ['approvalState', 'resendApproval']),
+    ...custom('commune-deletion', ['state', 'request', 'cancel']),
     ...custom('validation', ['list', 'approveSignup', 'rejectSignup', 'approveLive', 'rejectLive']),
     // Compte courant (la gestion des utilisateurs passe par /api/user-management). Pas de
     // /api/auth/change-password : le changement passe par /api/user-management/me/password

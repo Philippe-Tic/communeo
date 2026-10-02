@@ -70,6 +70,7 @@ export default defineConfig({
             { label: "Accessibilité", slug: "mon-site/accessibilite" },
             { label: "Réseaux sociaux, démarches, open data", slug: "mon-site/autres-reglages" },
             { label: "Redirections", slug: "mon-site/redirections" },
+            { label: "Supprimer la commune", slug: "mon-site/suppression" },
           ],
         },
         {

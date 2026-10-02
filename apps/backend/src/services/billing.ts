@@ -58,7 +58,8 @@ interface Customer {
 }
 
 interface IssueInput {
-  site: { id?: number; documentId: string; name: string };
+  /** null : commune supprimée, sa facture est gardée (avoir d'une facture d'une commune supprimée) */
+  site: { id?: number; documentId: string; name: string } | null;
   kind: InvoiceKind;
   reason: 'go_live' | 'renewal' | 'manual' | 'cancellation';
   today: string;
@@ -104,7 +105,7 @@ async function issue(input: IssueInput) {
     try {
       const invoice: any = await strapi.documents(INVOICE as any).create({
         data: {
-          site: input.site.documentId,
+          site: input.site?.documentId ?? null,
           quote: input.quote?.documentId ?? null,
           number,
           kind: input.kind,
@@ -366,7 +367,8 @@ export async function remindNow(invoice: any, now: Date = new Date()) {
 /** Annulation : un avoir du même montant ; la facture passe « annulée », elle n'est pas modifiée */
 export async function cancelWithCreditNote(invoice: any, reason: string, now: Date = new Date()) {
   if (invoice.kind !== 'invoice' || invoice.status === 'cancelled') throw new BillingError('Cette facture est déjà annulée.');
-  const site = invoice.site;
+  // Commune supprimée (#391) : la facture reste, au nom du client figé à l'émission
+  const site = invoice.site ?? null;
   const { invoice: credit, pdf } = await issue({
     site,
     kind: 'credit_note',
@@ -381,7 +383,7 @@ export async function cancelWithCreditNote(invoice: any, reason: string, now: Da
     cancelReason: reason,
   });
   await strapi.db.query(INVOICE).update({ where: { id: invoice.id }, data: { status: 'cancelled', cancel_reason: reason } });
-  await announce({ ...credit, site }, pdf, site);
+  await announce({ ...credit, site }, pdf, site ?? { name: invoice.customer_name });
   return credit;
 }
 

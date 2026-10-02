@@ -1,5 +1,6 @@
 /**
  * Espace de l'équipe Communeo (super admin) : communes de la plateforme, fiche, création, suspension,
+ * suppression,
  * entrée dans l'administration d'une commune (bandeau « Mode équipe Communeo »).
  */
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
@@ -25,6 +26,8 @@ export interface CommuneSummary {
   signupApproval?: 'townhall' | 'team' | null;
   /** Code de vérification Google Search Console posé par l'équipe */
   googleSiteVerification?: string | null;
+  /** Suppression demandée par la commune (#391) : date prévue */
+  deletionScheduledAt?: string | null;
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null } | null;
   createdAt: string;
   lastActivity: string;
@@ -39,6 +42,8 @@ export interface CommuneDetail extends CommuneSummary {
   members: CommuneUser[];
   counts: { pages: number; articles: number; documents: number };
   deployments: { succeeded: number; failed: number };
+  /** Abonnement payé : la commune ne peut pas être supprimée (#391) */
+  paidInvoices?: boolean;
 }
 
 export const INACTIVE_DAYS = 30;
@@ -85,9 +90,19 @@ export const createCommune = (values: {
 
 export const updateCommune = (
   documentId: string,
-  data: { name?: string; suspended?: boolean; plan?: 'live'; extendTrialDays?: number; googleSiteVerification?: string },
+  data: {
+    name?: string;
+    suspended?: boolean;
+    plan?: 'live';
+    extendTrialDays?: number;
+    googleSiteVerification?: string;
+    cancelDeletion?: true;
+  },
 ) =>
   api<{ data: CommuneSummary }>(`/api/site-management/${documentId}`, { method: 'PUT', json: { data } });
+
+/** Suppression immédiate (#391) : la commune, son site, ses comptes et ses contenus ; factures gardées */
+export const deleteCommune = (documentId: string) => api(`/api/site-management/${documentId}`, { method: 'DELETE' });
 
 /** Ouvre l'administration de la commune : tout le cache est vidé (autre commune, autres données) */
 export function enterCommune(client: QueryClient, documentId: string) {

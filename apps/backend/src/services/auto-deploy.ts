@@ -56,6 +56,10 @@ export const TECHNICAL_SITE_FIELDS = new Set([
   'live_requested_by',
   // Inscription en attente d'approbation (#337) : la mise en ligne suit l'approbation
   'signup_approval',
+  // Suppression demandée (#391) : le site reste en ligne tel quel pendant le délai
+  'deletion_scheduled_at',
+  'deletion_requested_by',
+  'deletion_reminded',
 ]);
 
 /** Contenus visibles seulement dans certains états (une association en attente n'est pas publiée) */

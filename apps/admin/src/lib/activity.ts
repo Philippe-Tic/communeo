@@ -21,6 +21,8 @@ export type ActivityAction =
   | 'commune_suspend'
   | 'commune_unsuspend'
   | 'commune_delete'
+  | 'deletion_request'
+  | 'deletion_cancel'
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'
@@ -87,6 +89,8 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   commune_suspend: 'Commune suspendue',
   commune_unsuspend: 'Suspension levée',
   commune_delete: 'Commune supprimée',
+  deletion_request: 'Suppression de la commune demandée',
+  deletion_cancel: 'Suppression de la commune annulée',
   trial_extend: 'Essai prolongé',
   trial_expire: 'Essai terminé',
   live_request: 'Passage en live demandé',

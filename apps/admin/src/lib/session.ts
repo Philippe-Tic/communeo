@@ -23,6 +23,8 @@ export interface SessionSite {
   live_requested_at?: string | null;
   /** Inscription pas encore approuvée par la mairie ou l'équipe (lib/signup.ts) : rien n'est mis en ligne */
   signup_approval?: 'townhall' | 'team' | null;
+  /** Suppression de la commune demandée (#391, lib/commune-deletion.ts) : date prévue */
+  deletion_scheduled_at?: string | null;
 }
 
 export interface SessionUser {
@@ -62,6 +64,7 @@ export const sessionQuery = queryOptions({
         trial_expired_at: site.trialExpiredAt,
         live_requested_at: site.liveRequestedAt,
         signup_approval: site.signupApproval ?? null,
+        deletion_scheduled_at: site.deletionScheduledAt ?? null,
       },
     };
   },

@@ -34,7 +34,13 @@ describe('createZipWriter', () => {
     const size = await zip.finalize();
 
     expect(size).toBe(fs.statSync(file).size);
-    expect(entries(file)).toEqual(['LISEZMOI.md', 'fichiers/1-photo.jpg', 'site-publie/actualites/', 'site-publie/actualites/index.html', 'site-publie/index.html']);
+    expect(entries(file)).toEqual([
+      'LISEZMOI.md',
+      'fichiers/1-photo.jpg',
+      'site-publie/actualites/',
+      'site-publie/actualites/index.html',
+      'site-publie/index.html',
+    ]);
     expect(read(file, 'LISEZMOI.md')).toBe('# Données');
     expect(read(file, 'site-publie/actualites/index.html')).toBe('<h1>Actualités</h1>');
   });

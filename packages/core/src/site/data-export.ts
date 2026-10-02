@@ -34,7 +34,8 @@ export interface DataExportState {
 export const dataExportExpiry = (finishedAt: Date | string) => addDays(finishedAt, DATA_EXPORT_KEEP_DAYS);
 
 /** Un export en préparation : pas de nouvelle demande */
-export const dataExportInProgress = (status: DataExportStatus | null | undefined) => status === 'queued' || status === 'running';
+export const dataExportInProgress = (status: DataExportStatus | null | undefined) =>
+  status === 'queued' || status === 'running';
 
 /** Nom de l'archive proposé au téléchargement : `communeo-export-saint-aubin-2026-10-02.zip` */
 export const dataExportFileName = (slug: string, finishedAt: Date | string) =>
@@ -48,9 +49,16 @@ export type PublicationLabel = 'brouillon' | 'publié' | 'publié, modifications
  * Statut d'un contenu à brouillon et publication, à partir de ses deux versions (même règle que les
  * listes de l'administration) : jamais publié, publié, ou publié avec des modifications plus récentes.
  */
-export function publicationLabel(draft: { updatedAt?: string | Date | null } | null, published: { updatedAt?: string | Date | null } | null): PublicationLabel {
+export function publicationLabel(
+  draft: { updatedAt?: string | Date | null } | null,
+  published: { updatedAt?: string | Date | null } | null,
+): PublicationLabel {
   if (!published) return 'brouillon';
-  if (draft?.updatedAt && published.updatedAt && new Date(draft.updatedAt).getTime() > new Date(published.updatedAt).getTime()) {
+  if (
+    draft?.updatedAt &&
+    published.updatedAt &&
+    new Date(draft.updatedAt).getTime() > new Date(published.updatedAt).getTime()
+  ) {
     return 'publié, modifications en brouillon';
   }
   return 'publié';
@@ -75,9 +83,13 @@ function inlineToHtml(nodes: RichTextInline[] | undefined): string {
 
 function listToHtml(list: RichTextList): string {
   const tag = list.type === 'orderedList' ? 'ol' : 'ul';
-  const start = list.type === 'orderedList' && list.attrs?.start && list.attrs.start !== 1 ? ` start="${list.attrs.start}"` : '';
+  const start =
+    list.type === 'orderedList' && list.attrs?.start && list.attrs.start !== 1 ? ` start="${list.attrs.start}"` : '';
   const items = list.content
-    .map((item) => `<li>${item.content.map((child) => (child.type === 'paragraph' ? inlineToHtml(child.content) : listToHtml(child))).join('')}</li>`)
+    .map(
+      (item) =>
+        `<li>${item.content.map((child) => (child.type === 'paragraph' ? inlineToHtml(child.content) : listToHtml(child))).join('')}</li>`,
+    )
     .join('');
   return `<${tag}${start}>${items}</${tag}>`;
 }
@@ -104,9 +116,15 @@ export interface ExportedMedia {
   mime: string | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- blocs peuplés par Strapi, de formes variées
 type Block = Record<string, any> & { __component?: string };
 
-const CALLOUT_LABELS: Record<string, string> = { info: 'Information', warning: 'Attention', important: 'Important', tip: 'Conseil' };
+const CALLOUT_LABELS: Record<string, string> = {
+  info: 'Information',
+  warning: 'Attention',
+  important: 'Important',
+  tip: 'Conseil',
+};
 
 /**
  * Blocs d'une page, d'une actualité ou d'un événement → HTML simple et sémantique.
@@ -118,7 +136,9 @@ export function blocksToHtml(blocks: unknown, media: (file: unknown) => Exported
     const found = media(file);
     if (!found) return '';
     const img = `<img src="${escapeHtml(found.href)}" alt="${escapeHtml(found.alt ?? '')}">`;
-    return caption ? `<figure>${img}<figcaption>${escapeHtml(caption)}</figcaption></figure>` : `<figure>${img}</figure>`;
+    return caption
+      ? `<figure>${img}<figcaption>${escapeHtml(caption)}</figcaption></figure>`
+      : `<figure>${img}</figure>`;
   };
   const title = (text: unknown) => (typeof text === 'string' && text.trim() ? `<h2>${escapeHtml(text)}</h2>` : '');
   return (blocks as Block[])
@@ -147,15 +167,22 @@ export function blocksToHtml(blocks: unknown, media: (file: unknown) => Exported
           return `${title(block.title)}${(block.images ?? []).map((file: unknown) => image(file)).join('')}`;
         case 'blocks.faq':
           return `${title(block.title)}${(block.items ?? [])
-            .map((item: Block) => `<details><summary>${escapeHtml(item.question ?? '')}</summary>${richTextToHtml(item.answer)}</details>`)
+            .map(
+              (item: Block) =>
+                `<details><summary>${escapeHtml(item.question ?? '')}</summary>${richTextToHtml(item.answer)}</details>`,
+            )
             .join('')}`;
         case 'blocks.contact': {
-          const lines = [block.address, block.phone, block.email, block.hours].filter((line) => typeof line === 'string' && line.trim());
+          const lines = [block.address, block.phone, block.email, block.hours].filter(
+            (line) => typeof line === 'string' && line.trim(),
+          );
           return `<address><strong>${escapeHtml(block.name ?? '')}</strong>${lines.map((line: string) => `<br>${escapeHtml(line)}`).join('')}</address>`;
         }
         case 'blocks.video':
           return `<p><a href="${escapeHtml(block.url ?? '')}">${escapeHtml(block.title || 'Vidéo')}</a></p>${
-            block.transcript ? `<details><summary>Transcription</summary><p>${escapeHtml(block.transcript)}</p></details>` : ''
+            block.transcript
+              ? `<details><summary>Transcription</summary><p>${escapeHtml(block.transcript)}</p></details>`
+              : ''
           }`;
         default:
           return '';
@@ -166,7 +193,13 @@ export function blocksToHtml(blocks: unknown, media: (file: unknown) => Exported
 }
 
 /** Page HTML autonome d'un contenu exporté */
-export function exportHtmlDocument(input: { title: string; communeName: string; details?: string[]; lead?: string | null; body: string }): string {
+export function exportHtmlDocument(input: {
+  title: string;
+  communeName: string;
+  details?: string[];
+  lead?: string | null;
+  body: string;
+}): string {
   const details = (input.details ?? []).filter(Boolean);
   return [
     '<!doctype html>',
@@ -198,7 +231,8 @@ export interface CsvColumn<T> {
 
 const csvCell = (value: unknown) => {
   if (value === null || value === undefined) return '';
-  const text = value instanceof Date ? value.toISOString() : typeof value === 'object' ? JSON.stringify(value) : String(value);
+  const text =
+    value instanceof Date ? value.toISOString() : typeof value === 'object' ? JSON.stringify(value) : String(value);
   return /[";\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 };
 
@@ -206,8 +240,11 @@ const csvCell = (value: unknown) => {
  * CSV lisible par un tableur français : séparateur `;`, UTF-8 avec BOM (accents dans Excel), lignes CRLF.
  */
 export function toCsv<T>(columns: CsvColumn<T>[], rows: T[]): string {
-  const lines = [columns.map((column) => csvCell(column.label)), ...rows.map((row) => columns.map((column) => csvCell(column.value(row))))];
-  return `﻿${lines.map((cells) => cells.join(';')).join('\r\n')}\r\n`;
+  const lines = [
+    columns.map((column) => csvCell(column.label)),
+    ...rows.map((row) => columns.map((column) => csvCell(column.value(row)))),
+  ];
+  return `\uFEFF${lines.map((cells) => cells.join(';')).join('\r\n')}\r\n`;
 }
 
 // LISEZMOI
@@ -240,7 +277,9 @@ export function exportReadme(input: ExportReadmeInput): string {
     `  - \`documents-officiels.json\` (${count('documents')}), \`alertes.json\` (${count('alerts')}), \`equipe-municipale.json\` (${count('team')}), \`associations.json\` (${count('associations')}), \`menus-cantine.json\` (${count('canteen')}), \`collectes.json\` (${count('waste')}), \`redirections.json\` (${count('redirects')}) ;`,
     '  - `reglages-du-site.json` : nom, coordonnées, horaires, page d’accueil, menu, mentions légales et autres réglages.',
     `- \`fichiers/\` : les ${count('files')} fichiers d’origine de la médiathèque (images, PDF…). \`fichiers/index.csv\` donne pour chacun son nom, son dossier, son texte alternatif et sa légende.${
-      input.missingFiles ? ` ${input.missingFiles} fichier(s) introuvable(s) sur le serveur, signalé(s) dans l’index.` : ''
+      input.missingFiles
+        ? ` ${input.missingFiles} fichier(s) introuvable(s) sur le serveur, signalé(s) dans l’index.`
+        : ''
     }`,
     '- `donnees-personnelles/` : les données personnelles confiées par les habitants, en CSV (séparateur `;`, ouvrable dans un tableur) :',
     `  - \`messages.csv\` (${count('messages')}) : messages du formulaire de contact, avec la réponse de la mairie et l’historique ; leurs pièces jointes dans \`messages-pieces-jointes/\` ;`,

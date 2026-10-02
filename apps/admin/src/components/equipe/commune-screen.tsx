@@ -23,6 +23,7 @@ import { themeName } from '@/lib/session';
 import { fullName, resendInvitation, roleLabel, stateOf } from '@/lib/users';
 import { formatDay } from '@/lib/trial';
 import { cn } from '@/lib/utils';
+import { DataExportPanel } from '@/components/settings/data-export-panel';
 import { PublicationBadge, siteAddress } from './communes-screen';
 import { PlanBadge } from './plan-badge';
 
@@ -390,6 +391,10 @@ function Detail({ commune }: { commune: CommuneDetail }) {
       </Card>
 
       <BillingCard commune={commune} />
+
+      <Card title="Export des données">
+        <DataExportPanel site={commune.documentId} />
+      </Card>
 
       {commune.plan === 'live' && <SearchConsoleCard commune={commune} />}
 

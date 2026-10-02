@@ -451,6 +451,8 @@ export interface MockOptions {
   deletionInDays?: number;
   /** Saint-Aubin a payé un abonnement : suppression impossible (#391) */
   paidInvoices?: boolean;
+  /** Export des données de Saint-Aubin (#343) : déjà prêt, ou en échec */
+  dataExport?: 'ready' | 'failed';
 }
 
 export type MockMedia = {
@@ -1113,6 +1115,36 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const deletion = {
     scheduledAt: options.deletionInDays != null ? new Date(Date.now() + options.deletionInDays * DAY).toISOString() : (null as string | null),
   };
+  // Export des données (#343), par commune : préparé au premier état demandé après la demande
+  type ExportState = {
+    status: 'queued' | 'running' | 'ready' | 'failed' | null;
+    requestedAt: string | null;
+    requestedBy: string | null;
+    finishedAt: string | null;
+    expiresAt: string | null;
+    size: number | null;
+    error: string | null;
+  };
+  const readyExport = (requestedBy: string): ExportState => ({
+    status: 'ready',
+    requestedAt: '2026-09-30T08:00:00.000Z',
+    requestedBy,
+    finishedAt: '2026-09-30T08:02:00.000Z',
+    expiresAt: '2026-10-07T08:02:00.000Z',
+    size: 13_002_342,
+    error: null,
+  });
+  const noExport: ExportState = { status: null, requestedAt: null, requestedBy: null, finishedAt: null, expiresAt: null, size: null, error: null };
+  const exports = new Map<string, ExportState>([
+    [
+      SITE.documentId,
+      options.dataExport === 'ready'
+        ? readyExport('Claire Martin')
+        : options.dataExport === 'failed'
+          ? { ...noExport, status: 'failed', requestedAt: '2026-09-30T08:00:00.000Z', requestedBy: 'Claire Martin', error: "L'export n'a pas pu être préparé. Réessayez ; si l'erreur revient, contactez l'équipe Communeo." }
+          : noExport,
+    ],
+  ]);
   const sessionPlan = () => ({
     deletion_scheduled_at: deletion.scheduledAt,
     plan: plan.plan,
@@ -2133,6 +2165,33 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       bodies.push({ call: 'POST commune-deletion cancel', body: { data: {} } });
       deletion.scheduledAt = null;
       return json({ data: { scheduledAt: null, paidInvoices: !!options.paidInvoices } });
+    }
+    // Export des données (#343) : ?site= pour l'équipe (fiche de la commune, lien de téléchargement)
+    if (url.pathname.startsWith('/api/data-export')) {
+      if (user === 'editor') return json({ error: { status: 403, message: 'Réservé aux administrateurs de la commune' } }, 403);
+      const site = url.searchParams.get('site') ?? SITE.documentId;
+      const current = exports.get(site) ?? noExport;
+      if (url.pathname === '/api/data-export' && method === 'GET') {
+        // Demande en cours : prête au relevé suivant
+        if (current.status === 'queued') exports.set(site, { ...current, status: 'running' });
+        else if (current.status === 'running') exports.set(site, { ...readyExport(current.requestedBy!), requestedAt: current.requestedAt });
+        return json({ data: current });
+      }
+      if (url.pathname === '/api/data-export' && method === 'POST') {
+        bodies.push({ call: 'POST data-export', body: { data: { site } } });
+        const next: ExportState = { ...noExport, status: 'queued', requestedAt: new Date().toISOString(), requestedBy: user === 'super_admin' ? "L'équipe Communeo (Équipe Communeo)" : 'Claire Martin' };
+        exports.set(site, next);
+        return json({ data: next }, 202);
+      }
+      if (url.pathname === '/api/data-export/download' && current.status === 'ready') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/zip',
+          headers: { 'Content-Disposition': 'attachment; filename="communeo-export-saint-aubin-2026-09-30.zip"' },
+          body: 'PK\u0005\u0006' + '\u0000'.repeat(18),
+        });
+      }
+      return json({ error: { status: 404, message: 'Aucun export prêt' } }, 404);
     }
     if (url.pathname === '/api/signup/approval') return json({ data: approvalState });
     if (url.pathname === '/api/signup/approval/resend' && method === 'POST') {

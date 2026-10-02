@@ -7,7 +7,8 @@ import fs from 'node:fs';
 import { finished } from 'node:stream/promises';
 
 /** Déjà compressés : rangés tels quels (les recompresser coûte du temps sans rien gagner) */
-const COMPRESSED = /\.(jpe?g|png|gif|webp|avif|heic|mp4|mov|webm|mp3|m4a|zip|gz|7z|rar|pdf|docx|xlsx|pptx|odt|ods|odp|woff2?)$/i;
+const COMPRESSED =
+  /\.(jpe?g|png|gif|webp|avif|heic|mp4|mov|webm|mp3|m4a|zip|gz|7z|rar|pdf|docx|xlsx|pptx|odt|ods|odp|woff2?)$/i;
 
 export interface ZipWriter {
   /** Texte (JSON, CSV, HTML, LISEZMOI) */

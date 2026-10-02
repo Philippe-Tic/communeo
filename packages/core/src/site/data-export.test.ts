@@ -14,7 +14,9 @@ import {
 describe('export des données (#343)', () => {
   it('archive gardée 7 jours, nom avec la commune et la date', () => {
     expect(dataExportExpiry('2026-10-02T08:00:00.000Z').toISOString()).toBe('2026-10-09T08:00:00.000Z');
-    expect(dataExportFileName('saint-aubin', '2026-10-02T23:30:00.000Z')).toBe('communeo-export-saint-aubin-2026-10-02.zip');
+    expect(dataExportFileName('saint-aubin', '2026-10-02T23:30:00.000Z')).toBe(
+      'communeo-export-saint-aubin-2026-10-02.zip',
+    );
     expect(dataExportInProgress('queued')).toBe(true);
     expect(dataExportInProgress('running')).toBe(true);
     expect(dataExportInProgress('ready')).toBe(false);
@@ -23,8 +25,12 @@ describe('export des données (#343)', () => {
 
   it('statut de publication : brouillon, publié, publié avec des modifications plus récentes', () => {
     expect(publicationLabel({ updatedAt: '2026-10-01' }, null)).toBe('brouillon');
-    expect(publicationLabel({ updatedAt: '2026-10-01T10:00:00Z' }, { updatedAt: '2026-10-01T10:00:00Z' })).toBe('publié');
-    expect(publicationLabel({ updatedAt: '2026-10-02T10:00:00Z' }, { updatedAt: '2026-10-01T10:00:00Z' })).toBe('publié, modifications en brouillon');
+    expect(publicationLabel({ updatedAt: '2026-10-01T10:00:00Z' }, { updatedAt: '2026-10-01T10:00:00Z' })).toBe(
+      'publié',
+    );
+    expect(publicationLabel({ updatedAt: '2026-10-02T10:00:00Z' }, { updatedAt: '2026-10-01T10:00:00Z' })).toBe(
+      'publié, modifications en brouillon',
+    );
   });
 
   it('texte riche → HTML : titres, marques, liens, listes imbriquées, texte échappé', () => {
@@ -48,7 +54,12 @@ describe('export des données (#343)', () => {
               type: 'listItem',
               content: [
                 { type: 'paragraph', content: [{ type: 'text', text: 'un' }] },
-                { type: 'bulletList', content: [{ type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'deux' }] }] }] },
+                {
+                  type: 'bulletList',
+                  content: [
+                    { type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'deux' }] }] },
+                  ],
+                },
               ],
             },
           ],
@@ -65,12 +76,21 @@ describe('export des données (#343)', () => {
   it('blocs → HTML, avec les fichiers de l’archive et leur texte alternatif', () => {
     const media = (file: unknown) => {
       const f = file as { id: number; name: string; alternativeText?: string | null } | null;
-      return f ? { href: `../../fichiers/${f.id}-${f.name}`, name: f.name, alt: f.alternativeText ?? null, mime: null } : null;
+      return f
+        ? { href: `../../fichiers/${f.id}-${f.name}`, name: f.name, alt: f.alternativeText ?? null, mime: null }
+        : null;
     };
     const html = blocksToHtml(
       [
-        { __component: 'blocks.text', body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Bonjour' }] }] } },
-        { __component: 'blocks.image', image: { id: 4, name: 'mairie.jpg', alternativeText: 'La mairie' }, caption: 'Façade' },
+        {
+          __component: 'blocks.text',
+          body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Bonjour' }] }] },
+        },
+        {
+          __component: 'blocks.image',
+          image: { id: 4, name: 'mairie.jpg', alternativeText: 'La mairie' },
+          caption: 'Façade',
+        },
         { __component: 'blocks.documents', title: 'Comptes rendus', files: [{ id: 5, name: 'cr.pdf' }, null] },
         { __component: 'blocks.callout', variant: 'warning', body: null },
         { __component: 'blocks.faq', items: [{ question: 'Quand ?', answer: null }] },
@@ -81,7 +101,9 @@ describe('export des données (#343)', () => {
       media,
     );
     expect(html).toContain('<p>Bonjour</p>');
-    expect(html).toContain('<figure><img src="../../fichiers/4-mairie.jpg" alt="La mairie"><figcaption>Façade</figcaption></figure>');
+    expect(html).toContain(
+      '<figure><img src="../../fichiers/4-mairie.jpg" alt="La mairie"><figcaption>Façade</figcaption></figure>',
+    );
     expect(html).toContain('<h2>Comptes rendus</h2><ul><li><a href="../../fichiers/5-cr.pdf">cr.pdf</a></li></ul>');
     expect(html).toContain('<aside><p><strong>Attention</strong></p></aside>');
     expect(html).toContain('<details><summary>Quand ?</summary></details>');
@@ -91,7 +113,12 @@ describe('export des données (#343)', () => {
   });
 
   it('page HTML autonome, titre et commune échappés', () => {
-    const page = exportHtmlDocument({ title: 'A & B', communeName: 'Saint-Aubin', details: ['Publié', ''], body: '<p>x</p>' });
+    const page = exportHtmlDocument({
+      title: 'A & B',
+      communeName: 'Saint-Aubin',
+      details: ['Publié', ''],
+      body: '<p>x</p>',
+    });
     expect(page).toContain('<html lang="fr">');
     expect(page).toContain('<title>A &amp; B — Saint-Aubin</title>');
     expect(page).toContain('<p><small>Publié</small></p>');
@@ -104,7 +131,10 @@ describe('export des données (#343)', () => {
         { label: 'Note', value: (row) => row.note },
         { label: 'Date', value: (row) => row.at },
       ],
-      [{ name: 'Durand; Marie', note: 'Il a dit "oui"\nmerci', at: new Date('2026-10-02T08:00:00.000Z') }, { name: 'Léa', note: null, at: new Date(0) }],
+      [
+        { name: 'Durand; Marie', note: 'Il a dit "oui"\nmerci', at: new Date('2026-10-02T08:00:00.000Z') },
+        { name: 'Léa', note: null, at: new Date(0) },
+      ],
     );
     expect(csv).toBe(
       '﻿Nom;Note;Date\r\n"Durand; Marie";"Il a dit ""oui""\nmerci";2026-10-02T08:00:00.000Z\r\nLéa;;1970-01-01T00:00:00.000Z\r\n',
@@ -126,8 +156,14 @@ describe('export des données (#343)', () => {
     expect(readme).toContain('les 12 fichiers d’origine');
     expect(readme).toContain('1 fichier(s) introuvable(s)');
     expect(readme).toContain('`messages.csv` (3)');
-    expect(exportReadme({ communeName: 'X', generatedAt: new Date(), publishedSite: { included: true }, counts: {}, missingFiles: 0 })).toContain(
-      '`site-publie/`',
-    );
+    expect(
+      exportReadme({
+        communeName: 'X',
+        generatedAt: new Date(),
+        publishedSite: { included: true },
+        counts: {},
+        missingFiles: 0,
+      }),
+    ).toContain('`site-publie/`');
   });
 });

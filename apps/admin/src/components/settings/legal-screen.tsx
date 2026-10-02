@@ -149,7 +149,10 @@ export function LegalScreen({ site }: { site: SiteSettings }) {
     const heading = document.getElementById(RETENTION_SECTION);
     if (!heading) return;
     heading.tabIndex = -1;
-    heading.focus();
+    heading.focus({ preventScroll: true });
+    // Après la restauration du défilement du routeur (haut de page à chaque navigation)
+    const frame = requestAnimationFrame(() => heading.parentElement?.scrollIntoView({ block: 'start' }));
+    return () => cancelAnimationFrame(frame);
   }, [section]);
   return (
     <SettingsScreen id="legal" form={FORM_ID} {...screen}>
@@ -194,7 +197,13 @@ export function LegalScreen({ site }: { site: SiteSettings }) {
           />
         </FormSection>
 
-        <FormSection title="Conservation des messages" id={RETENTION_SECTION} fields={['message_retention']}>
+        <FormSection
+          title="Conservation des messages"
+          id={RETENTION_SECTION}
+          fields={['message_retention']}
+          // Sous l'en-tête et la barre d'enregistrement collantes
+          className="scroll-mt-36"
+        >
           <RadioGroupField
             name="message_retention"
             label="Supprimer automatiquement les messages traités après"

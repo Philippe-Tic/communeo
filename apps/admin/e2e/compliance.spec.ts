@@ -56,4 +56,5 @@ test('durée de conservation des messages pas encore choisie : mène à son rég
     .click();
   await expect(page).toHaveURL(/\/mon-site\/legal\?section=conservation$/);
   await expect(page.getByRole('heading', { level: 2, name: 'Conservation des messages' })).toBeFocused();
+  await expect(page.getByRole('radio', { name: '6 mois' })).toBeInViewport();
 });

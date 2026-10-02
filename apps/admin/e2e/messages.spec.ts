@@ -41,6 +41,7 @@ test('durée de conservation rappelée ; lien vers le réglage pour un administr
   await list.getByRole('link', { name: 'Modifier la durée' }).click();
   await expect(page).toHaveURL(/\/mon-site\/legal\?section=conservation$/);
   await expect(page.getByRole('heading', { level: 2, name: 'Conservation des messages' })).toBeFocused();
+  await expect(page.getByRole('radio', { name: '6 mois' })).toBeInViewport();
 });
 
 test('durée de conservation : un éditeur la voit, sans lien', async ({ page }) => {

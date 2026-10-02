@@ -443,6 +443,8 @@ export interface MockOptions {
    * les reprend des données publiques). Pour les vidéos de communeo.fr (v2/videos).
    */
   freshCommune?: boolean;
+  /** Niveau d'accessibilité déclaré (« partiellement conforme » par défaut ; null : pas encore déclaré) */
+  accessibilityLevel?: 'non-conforme' | 'partiellement-conforme' | 'conforme' | null;
 }
 
 export type MockMedia = {
@@ -937,6 +939,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     legalMissing = false,
     deployOutcome = 'running',
     freshCommune = false,
+    accessibilityLevel = 'partiellement-conforme',
   } = options;
   const canteen = menus();
   const library = mediaSet === 'none' ? [] : mediaItems();
@@ -1338,7 +1341,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       mentions_legales_extra: null,
     } as unknown,
     rgpd: null as unknown,
-    accessibilite: { accessibility_level: 'partiellement-conforme', accessibility_schema_url: null } as unknown,
+    accessibilite: { accessibility_level: accessibilityLevel, accessibility_schema_url: null } as unknown,
     social_links: [] as unknown[],
     homepage: {
       hero: {

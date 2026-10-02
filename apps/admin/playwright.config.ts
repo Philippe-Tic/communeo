@@ -4,7 +4,7 @@
  */
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 4800;
+const PORT = Number(process.env.ADMIN_E2E_PORT ?? 4800);
 
 export default defineConfig({
   testDir: './e2e',

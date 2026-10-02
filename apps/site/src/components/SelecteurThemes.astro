@@ -2,9 +2,11 @@
 /**
  * Aperçu des quatre thèmes : un bouton par thème (`aria-pressed`), les captures superposées en fondu
  * et la description du thème choisi (`aria-live`). Sans JavaScript, le premier thème reste affiché.
- * `page` : la version de la page Thèmes (boutons groupés, grand aperçu, description dessous).
+ * `page` : la version de la page Thèmes (boutons groupés, grand aperçu, description dessous). Un lien mène
+ * à la démonstration (#359) dans le thème choisi.
  */
 import Navigateur from './Navigateur.astro';
+import { demoUrl } from '../lib/site';
 import { THEMES_PRESENTES } from '../lib/themes';
 
 interface Props {
@@ -47,15 +49,27 @@ const [premier] = THEMES_PRESENTES;
     </div>
     {
       page ? (
-        <p class="description-page" aria-live="polite">
-          <b class="nom">{premier!.label}</b> · <span class="d">{premier!.d}</span>
-        </p>
+        <div class="pile-page">
+          <p class="description-page" aria-live="polite">
+            <b class="nom">{premier!.label}</b> · <span class="d">{premier!.d}</span>
+          </p>
+          <p class="demo">
+            <a class="lien-fort" href={demoUrl(premier!.key)} data-lien-demo>
+              Visiter la démonstration en thème <span data-demo-nom>{premier!.label}</span>
+            </a>
+          </p>
+        </div>
       ) : (
         <div class="description" aria-live="polite">
           <h3 class="h3-serif nom">{premier!.label}</h3>
           <p class="texte d">{premier!.d}</p>
           <p class="ideal">
             <b>Idéal pour</b> <span class="i">{premier!.ideal}</span>
+          </p>
+          <p class="demo">
+            <a class="lien-fort" href={demoUrl(premier!.key)} data-lien-demo>
+              Visiter la démonstration en thème <span data-demo-nom>{premier!.label}</span>
+            </a>
           </p>
         </div>
       )
@@ -85,6 +99,11 @@ const [premier] = THEMES_PRESENTES;
       text('d')!.textContent = button.dataset.d ?? '';
       const ideal = text('i');
       if (ideal) ideal.textContent = button.dataset.ideal ?? '';
+      const demo = selector.querySelector<HTMLAnchorElement>('[data-lien-demo]');
+      if (demo) {
+        demo.href = `/demo/${button.dataset.theme}/`;
+        demo.querySelector('[data-demo-nom]')!.textContent = button.dataset.label ?? '';
+      }
     };
     buttons.forEach((button) => button.addEventListener('click', () => pick(button)));
     pick(buttons[0]!);
@@ -232,5 +251,15 @@ const [premier] = THEMES_PRESENTES;
 
   .description-page b {
     color: var(--encre);
+  }
+
+  .pile-page {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .demo {
+    margin: 0;
   }
 </style>

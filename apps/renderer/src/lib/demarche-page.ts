@@ -3,6 +3,7 @@
  * est récupérée auprès de l'API publique, puis rendue avec le balisage commun à tous les thèmes.
  */
 import { demarcheHref, mapFiche, officialUrl, renderNodes, type DemarcheAudience, type DemarcheLinkVM, type DemarcheRef, type DemarcheVM } from '@communeo/core/client';
+import { rebaseHtml } from './base';
 
 const AUDIENCES: DemarcheAudience[] = ['particuliers', 'professionnels'];
 
@@ -82,12 +83,13 @@ export async function initDemarche() {
   const audience = AUDIENCES.includes(requested as DemarcheAudience) ? (requested as DemarcheAudience) : 'particuliers';
 
   const fallback = (message: string) => {
-    status.innerHTML =
+    status.innerHTML = rebaseHtml(
       `${escape(message)} ${
         id
           ? `<a href="${escape(officialUrl(id, audience))}" target="_blank" rel="noopener noreferrer">Consulter la fiche sur service-public.fr<span class="cn-sr-only"> (nouvelle fenêtre)</span></a>. `
           : ''
-      }<a href="/demarches">Revenir à la liste des démarches</a>.`;
+      }<a href="/demarches">Revenir à la liste des démarches</a>.`,
+    );
   };
 
   if (!id) return fallback('Aucune fiche demandée.');
@@ -112,5 +114,5 @@ export async function initDemarche() {
   if (heading) heading.textContent = fiche.title;
   const current = document.querySelector<HTMLElement>('nav[aria-label="Fil d’Ariane"] [aria-current="page"], nav[aria-label="Fil d\'Ariane"] [aria-current="page"]');
   if (current) current.textContent = fiche.title;
-  container.innerHTML = renderFiche(fiche);
+  container.innerHTML = rebaseHtml(renderFiche(fiche));
 }

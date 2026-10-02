@@ -1,6 +1,7 @@
 /** Manifeste d'application : nom de la commune et icône, pour l'ajout à l'écran d'accueil. */
 import { mairieOf } from '@communeo/core';
 import type { APIRoute } from 'astro';
+import { withBase } from '../lib/base';
 import { getSource } from '../lib/content';
 
 export const GET: APIRoute = async () => {
@@ -10,12 +11,12 @@ export const GET: APIRoute = async () => {
     name: mairieOf(site.name),
     short_name: site.name,
     lang: 'fr',
-    start_url: '/',
-    scope: '/',
+    start_url: withBase('/'),
+    scope: withBase('/'),
     display: 'browser',
     background_color: '#ffffff',
     theme_color: '#ffffff',
-    icons: icon ? [{ src: icon.src, sizes: 'any', type: icon.src.endsWith('.svg') ? 'image/svg+xml' : 'image/png' }] : [],
+    icons: icon ? [{ src: withBase(icon.src), sizes: 'any', type: icon.src.endsWith('.svg') ? 'image/svg+xml' : 'image/png' }] : [],
   };
   return new Response(JSON.stringify(manifest, null, 2), { headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' } });
 };

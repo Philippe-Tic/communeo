@@ -4,6 +4,8 @@ export const TRIAL_URL = `${APP_URL}/inscription`;
 export const LOGIN_URL = `${APP_URL}/connexion`;
 export const DOC_URL = 'https://doc.communeo.fr';
 export const CONTACT_EMAIL = 'contact@communeo.fr';
+/** Démonstration publique (#359) : la commune fictive dans un thème, construite avec le site (scripts/demo.mjs) */
+export const demoUrl = (theme = 'institutionnel') => `/demo/${theme}/`;
 /** Envoi du formulaire de contact (route publique de Strapi) */
 export const CONTACT_ENDPOINT = `${import.meta.env.PUBLIC_API_URL ?? APP_URL}/api/prospect-contact`;
 

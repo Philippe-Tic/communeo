@@ -9,6 +9,7 @@ import BandeauPage from '../components/BandeauPage.astro';
 import Navigateur from '../components/Navigateur.astro';
 import Video from '../components/Video.astro';
 import Base from '../layouts/Base.astro';
+import { demoUrl } from '../lib/site';
 import type { IdVideo } from '../lib/videos';
 
 interface Groupe {
@@ -22,6 +23,8 @@ interface Groupe {
   adresse?: string;
   alt?: string;
   rubriques?: boolean;
+  /** Lien vers la démonstration publique (#359) sous l'introduction */
+  demo?: boolean;
   feats: Array<{ t: string; p: string; ex?: string }>;
 }
 
@@ -33,6 +36,7 @@ const groupes: Groupe[] = [
     intro: 'Un site clair, lisible sur téléphone, qui fonctionne même avec une connexion lente. Vos habitants y trouvent l’essentiel sans appeler la mairie.',
     video: { id: 'v2-alerte', libelle: 'Voir l’alerte · 20 s' },
     rubriques: true,
+    demo: true,
     feats: [
       { t: 'Alertes en bandeau', p: 'Visibles sur le site en moins d’une minute, avec un niveau de gravité et une date de fin.', ex: '« Route barrée entre le bourg et le lavoir jusqu’à vendredi. »' },
       { t: 'Actualités et agenda', p: 'Actualités par catégories, événements avec lieu et inscription.', ex: 'La fête du village, la réunion publique sur le PLU.' },
@@ -155,6 +159,11 @@ const rubriques = [
                 {g.t}
               </h2>
               <p class="chapo-groupe">{g.intro}</p>
+              {g.demo && (
+                <a class="lien-fort lien-demo" href={demoUrl()}>
+                  Visiter le site de démonstration
+                </a>
+              )}
             </div>
             {g.video ? <Video id={g.video.id} libelle={g.video.libelle} compact /> : g.image && <Navigateur src={g.image} adresse={g.adresse} alt={g.alt ?? ''} largeur={640} />}
           </div>
@@ -191,6 +200,10 @@ const rubriques = [
 </Base>
 
 <style>
+  .lien-demo {
+    align-self: flex-start;
+  }
+
   .sous-nav {
     position: sticky;
     /* Juste sous l'en-tête collant */

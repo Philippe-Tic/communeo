@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --port 4321",
-    "build": "astro build",
+    "build": "astro build && node scripts/demo.mjs",
     "preview": "astro preview",
     "lint": "eslint src e2e playwright.config.ts",
     "typecheck": "astro check",
     "test": "vitest run",
-    "test:e2e": "astro build && playwright test",
+    "test:e2e": "pnpm build && playwright test",
     "a-fournir": "node scripts/a-fournir.mjs",
     "captures:themes": "node scripts/captures-themes.mjs",
     "icones": "node scripts/icones.mjs",
@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@communeo/renderer": "workspace:*",
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "typescript": "^5.9.2",

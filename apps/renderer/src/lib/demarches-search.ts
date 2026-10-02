@@ -11,6 +11,7 @@ import {
   type DemarcheIndexEntry,
   type DemarcheSearchVM,
 } from '@communeo/core/client';
+import { withBase } from './base';
 
 let demoIndex: Promise<DemarcheSearchIndex | null> | null = null;
 
@@ -45,7 +46,7 @@ const kindLabel = (kind: string) => {
 export function searchResultItem(result: DemarcheIndexEntry, audience: DemarcheAudience): HTMLLIElement {
   const item = document.createElement('li');
   const link = document.createElement('a');
-  link.href = demarcheHref(result.id, audience);
+  link.href = withBase(demarcheHref(result.id, audience));
   link.textContent = result.title;
   const type = document.createElement('p');
   type.textContent = [kindLabel(result.kind), result.context].filter(Boolean).join(' · ');

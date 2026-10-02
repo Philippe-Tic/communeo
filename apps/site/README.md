@@ -6,7 +6,7 @@ tierce : polices DM Sans et DM Serif Display servies par le site.
 
 ```bash
 pnpm --filter @communeo/site dev          # http://localhost:4321
-pnpm --filter @communeo/site build        # dist/
+pnpm --filter @communeo/site build        # dist/, démonstration comprise (dist/demo/<thème>)
 pnpm --filter @communeo/site test:e2e     # build + axe (WCAG 2.2 AA), 320 px, texte à 200 %, interactions, en 390 et 1440 px
 pnpm --filter @communeo/site a-fournir    # contenus encore à fournir (après un build)
 pnpm --filter @communeo/site captures:themes   # captures des thèmes (voir plus bas)
@@ -35,6 +35,16 @@ pnpm --filter @communeo/site captures:themes   # captures des thèmes (voir plus
 - `public/partage.png` : l'image de partage (1 200 × 630, balises `og:image`), dessinée en HTML avec les
   polices et couleurs du site par `pnpm image:partage`.
 
+## Démonstration (#359)
+
+`communeo.fr/demo/<thème>` : la commune fictive Saint-Aubin-sur-Loire, un vrai site construit par le
+renderer (fixtures `complete`) dans chacun des quatre thèmes, avec les photos de `packages/fixtures/photos/`
+à la place des images hachurées. `scripts/demo.mjs`, lancé par `build`, le construit dans `dist/demo/` :
+renderer en mode démonstration (`DEMO=1` : bandeau « Site de démonstration » avec le choix du thème,
+`noindex`, formulaires qui n'envoient rien) servi sous un sous-dossier (`BASE_PATH`). Jamais indexée
+(`X-Robots-Tag` et sa propre CSP dans `netlify.toml`), absente du plan du site ; `/demo` mène au thème
+Institutionnel. Liens : sélecteur de thèmes (accueil, page Thèmes), page Fonctionnalités, `llms.txt`.
+
 ## Formulaire de contact
 
 Envoyé à Strapi (`POST /api/prospect-contact`, public, 5 messages par heure et par adresse IP, champ piège
@@ -48,5 +58,5 @@ Site Netlify relié à ce dépôt : « Base directory » vide (racine du monorep
 pnpm), « Package directory » `apps/site`. `netlify.toml` porte la commande de build, le dossier publié,
 les redirections des adresses de l'ancien site (communeo-landing) et les en-têtes de sécurité (CSP,
 rejouée par le serveur des tests). Les pages sont servies sans extension (`/tarifs` → `tarifs.html`).
-Pas de build quand un commit ne touche ni le site, ni `@communeo/core`, ni les dépendances ou la config
-du monorepo (`ignore`) ; un build manuel reste possible (Deploys → Trigger deploy).
+Pas de build quand un commit ne touche ni le site, ni ce qui construit la démonstration (renderer, thèmes,
+fixtures et leurs paquets), ni `@communeo/core`, ni les dépendances ou la config du monorepo (`ignore`) ; un build manuel reste possible (Deploys → Trigger deploy).

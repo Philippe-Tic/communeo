@@ -39,7 +39,8 @@ function createSource(): ContentSource {
   }
   return createContentSource(
     withSettings(createFixtureLoader({ variant: (env.FIXTURE_VARIANT as FixtureVariant) || 'complete', logo: env.FIXTURE_LOGO === 'blason' ? 'blason' : 'horizontal', criticalAlert: env.FIXTURE_ALERT === 'critical', trial: env.FIXTURE_PLAN === 'trial' })),
-    FIXTURE_CONTEXT,
+    // Adresse de la démonstration de communeo.fr (`SITE_URL`, #359), sinon celle de la commune fictive
+    env.SITE_URL ? { ...FIXTURE_CONTEXT, siteUrl: env.SITE_URL.replace(/\/$/, '') } : FIXTURE_CONTEXT,
     { now: FIXTURE_NOW },
   );
 }

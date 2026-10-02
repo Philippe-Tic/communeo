@@ -12,7 +12,7 @@ import type { SitePublisher } from './types';
 export type * from './types';
 export { isApexDomain } from './dns';
 export { NetlifyPublisher, NetlifyApiError, zipDirectory, type NetlifyPublisherOptions } from './netlify';
-export { LocalPublisher, STAGING_DIR, type LocalPublisherOptions } from './local';
+export { LocalPublisher, VERSIONS_DIR, type LocalPublisherOptions } from './local';
 export { BunnyPublisher, BunnyApiError, BUNNY_API_URL, BUNNY_RULES, ORIGIN_SECRET_HEADER, type BunnyEdgeRule, type BunnyPublisherOptions } from './bunny';
 export {
   CADDY_RULES_DIR,

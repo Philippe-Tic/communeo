@@ -52,6 +52,13 @@ services:
       STRAPI_PUBLIC_URL: https://${DOMAIN}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       SITES_DOMAIN: ${SITES_DOMAIN:-}
+      # Sites des communes chez Bunny CDN (#382) quand SITES_PUBLISHER=bunny, sinon Netlify comme avant :
+      # Pull Zones et domaines créés par Strapi, dossier du site supprimé avec la commune (volume `sites`)
+      SITES_PUBLISHER: ${SITES_PUBLISHER:-}
+      BUNNY_API_KEY: ${BUNNY_API_KEY:-}
+      BUNNY_DNS_ZONE_ID: ${BUNNY_DNS_ZONE_ID:-}
+      SITES_ORIGIN_SECRET: ${SITES_ORIGIN_SECRET:-}
+      ORIGIN_DOMAIN: ${ORIGIN_DOMAIN:-origine.communeo.fr}
       # Émetteur des devis (#312) et des factures (#314)
       COMMUNEO_LEGAL_NAME: ${COMMUNEO_LEGAL_NAME:-}
       COMMUNEO_LEGAL_ADDRESS: ${COMMUNEO_LEGAL_ADDRESS:-}
@@ -87,6 +94,8 @@ services:
       SEED_SUPER_ADMIN_PASSWORD: ${SEED_SUPER_ADMIN_PASSWORD:-}
     volumes:
       - strapi-uploads:/app/public/uploads
+      # Suppression du dossier d'une commune supprimée ou en fin d'essai (Strapi n'y écrit jamais rien d'autre)
+      - sites:/srv/sites
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:1337/_health"]
       interval: 30s
@@ -118,6 +127,13 @@ services:
       WORKER_SECRET: ${WORKER_SECRET}
       NETLIFY_TOKEN: ${NETLIFY_TOKEN}
       SITES_DOMAIN: ${SITES_DOMAIN:-}
+      # SITES_PUBLISHER=bunny : sites écrits dans le volume `sites` puis servis par Bunny CDN (#382), cache
+      # vidé à chaque publication ; sinon Netlify (NETLIFY_TOKEN) ou le volume seul, comme avant
+      SITES_PUBLISHER: ${SITES_PUBLISHER:-}
+      BUNNY_API_KEY: ${BUNNY_API_KEY:-}
+      BUNNY_DNS_ZONE_ID: ${BUNNY_DNS_ZONE_ID:-}
+      SITES_ORIGIN_SECRET: ${SITES_ORIGIN_SECRET:-}
+      ORIGIN_DOMAIN: ${ORIGIN_DOMAIN:-origine.communeo.fr}
       # Sans NETLIFY_TOKEN : sites écrits dans le volume `sites`, servis par Caddy (origine des sites, #381),
       # rechargé après chaque publication par son API d'administration (réseau interne)
       PUBLISH_DIR: /srv/sites

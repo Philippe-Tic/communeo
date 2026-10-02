@@ -94,6 +94,6 @@ jobs:
           echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
           echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Fichiers de la stack
-        run: scp docker-compose.yml deploy/server/deploy.sh "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}:${{ vars.DEPLOY_PATH }}/"
+        run: scp docker-compose.yml deploy/server/deploy.sh deploy/server/bunny-check.sh "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}:${{ vars.DEPLOY_PATH }}/"
       - name: Mise à jour du serveur (retour arrière automatique en cas d'échec)
         run: ssh "${{ vars.DEPLOY_USER }}@${{ vars.DEPLOY_HOST }}" "cd ${{ vars.DEPLOY_PATH }} && ./deploy.sh $VERSION"

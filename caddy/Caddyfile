@@ -2,6 +2,7 @@
 #   {$DOMAIN}          admin compilée, /api, /uploads et /admin relayés vers Strapi
 #   {$PREVIEW_DOMAIN}  serveur de preview des brouillons
 #   {$ORIGIN_DOMAIN}   origine des sites des communes (/sites/<slug>/), servie au CDN seulement
+#   https://           domaines nus des communes (mairie-x.fr), redirigés vers www (servi par le CDN, #382)
 # Certificats Let's Encrypt obtenus et renouvelés par Caddy (volume caddy-data). Variables : docker-compose.yml.
 {
 	# Redirection http → https écrite plus bas : 301 comme nginx, et /healthz sans redirection
@@ -23,6 +24,11 @@
 			wrap json
 			request>headers>X-Communeo-Origine delete
 		}
+	}
+	# Certificats à la demande (domaines nus des communes) : Caddy demande d'abord à Strapi, qui n'accepte
+	# que le domaine vérifié d'une commune (GET /api/domain/certificate-check?domain=…, réseau interne)
+	on_demand_tls {
+		ask http://strapi:1337/api/domain/certificate-check
 	}
 	# Tests de la stack (deploy/e2e) : `local_certs`, certificats de l'autorité interne de Caddy
 	{$CADDY_GLOBAL_OPTIONS}
@@ -72,6 +78,11 @@
 	handle /healthz {
 		log_skip
 		respond "ok" 200
+	}
+
+	# Autorisation des certificats à la demande : pour Caddy seulement (réseau interne), jamais en public
+	handle /api/domain/certificate-check {
+		respond 404
 	}
 
 	# API Strapi, jamais en cache dans le navigateur
@@ -202,4 +213,16 @@
 			respond 404
 		}
 	}
+}
+
+# Domaines nus des communes (#382) : `mairie-x.fr` pointe vers le serveur (enregistrement A), `www.mairie-x.fr`
+# vers la Pull Zone Bunny de la commune (CNAME). Bunny ne sert un domaine nu qu'avec Bunny DNS : ici, redirection
+# 301 vers www, chemin et requête gardés. Certificat obtenu à la première visite, si Strapi l'autorise (domaine
+# vérifié d'une commune) ; tout autre nom : pas de certificat, la connexion échoue.
+https:// {
+	tls {
+		on_demand
+	}
+	log
+	redir https://www.{host}{uri} 301
 }

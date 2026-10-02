@@ -38,6 +38,9 @@ WORKDIR /app
 COPY --from=builder /out ./
 
 # Les sites ne sont pas construits ici : voir le worker (apps/worker/Dockerfile)
+# Volume des sites (écrit par le worker, utilisateur node = 1000 ; Strapi n'y supprime que le dossier d'une
+# commune supprimée, #382) : même propriétaire quel que soit le conteneur qui le crée en premier
+RUN mkdir -p /srv/sites && chown 1000:1000 /srv/sites
 
 EXPOSE 1337
 

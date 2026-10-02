@@ -8,10 +8,13 @@
  * - directives Caddyfile appliquées dans l'ordre, avant les fichiers du site (dans un `route`), sur les
  *   adresses de l'origine `/sites/<slug>/…` ; noms de matchers préfixés `@site-<slug>` (uniques entre
  *   les sites, tous importés dans le même bloc) ;
- * - dans l'ordre : `X-Robots-Tag: noindex` (site en essai), redirection vers l'adresse canonique
- *   (requête reçue par une autre adresse du site, que le CDN transmet dans `X-Forwarded-Host`), puis
- *   les redirections 301 de l'ancien site (#335). Les destinations sont relatives (`/contact`) : le
- *   navigateur les résout sur l'adresse publique du site, pas sur celle de l'origine ;
+ * - dans l'ordre : `X-Robots-Tag: noindex` (site en essai), puis les redirections 301 de l'ancien site
+ *   (#335). Les destinations sont relatives (`/contact`) : le navigateur les résout sur l'adresse publique
+ *   du site, pas sur celle de l'origine ;
+ * - pas de redirection vers l'adresse canonique ici : l'origine ne voit que son propre nom d'hôte, et un
+ *   en-tête d'adresse (`X-Forwarded-Host`) n'est pas envoyé par Bunny mais transmis tel quel s'il vient du
+ *   visiteur (la redirection serait mise en cache pour tous : boucle). Elle est faite par le CDN, avant
+ *   son cache (règle de la Pull Zone, `bunny.ts`) ;
  * - pris en compte par un rechargement de Caddy (`reloadCaddy`) : une règle invalide est refusée par
  *   Caddy, qui garde la configuration en cours.
  */
@@ -20,15 +23,11 @@ export const CADDY_RULES_DIR = '.regles';
 export const CADDY_RULES_FILE = 'site.caddy';
 /** Chemin du fichier de règles dans le dossier d'un site */
 export const CADDY_RULES_PATH = `${CADDY_RULES_DIR}/${CADDY_RULES_FILE}`;
-/** En-tête dans lequel le CDN transmet l'adresse demandée par le visiteur */
-export const FORWARDED_HOST_HEADER = 'X-Forwarded-Host';
 
 export interface CaddySiteRulesInput {
   slug: string;
   /** Site en essai : aucune page indexée */
   noindex?: boolean;
-  /** Adresse canonique (domaine personnalisé vérifié) : les autres adresses du site y redirigent */
-  canonicalHost?: string | null;
   /** Redirections de l'ancien site : ancienne adresse (chemin et requête) → page du site */
   redirects?: Array<{ from: string; to: string }>;
   /**
@@ -46,7 +45,6 @@ export interface CaddySiteRules {
 }
 
 const SLUG = /^[a-z0-9-]+$/;
-const HOST = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?$/i;
 /** Caractères d'un chemin admis tels quels dans une règle (ni `*`, ni accolades, ni guillemets, ni espaces) */
 const SAFE_PATH = /^\/[A-Za-z0-9\-._~!$&()+,;=:@%/]*$/;
 /** Valeur de requête ou destination : ni guillemet, ni barre oblique inverse, ni accolade, ni caractère de contrôle */
@@ -62,21 +60,6 @@ export function caddySiteRules(input: CaddySiteRulesInput): CaddySiteRules {
   const skipped: CaddySiteRules['skipped'] = [];
 
   if (input.noindex) lines.push(`@${name} path ${prefix} ${prefix}/*`, `header @${name} X-Robots-Tag "noindex, nofollow"`);
-
-  const canonical = input.canonicalHost?.trim().toLowerCase();
-  if (canonical) {
-    if (!HOST.test(canonical)) throw new Error(`Adresse canonique invalide : ${canonical}`);
-    const capture = `${name.replace(/-/g, '_')}_chemin`;
-    lines.push(
-      `@${name}-canonique {`,
-      `\tpath ${prefix} ${prefix}/*`,
-      `\theader ${FORWARDED_HOST_HEADER} *`,
-      `\tnot header ${FORWARDED_HOST_HEADER} ${canonical}`,
-      `\tpath_regexp ${capture} ^${prefix}/?(.*)$`,
-      '}',
-      `redir @${name}-canonique https://${canonical}/{re.${capture}.1}{?query} 301`,
-    );
-  }
 
   let count = 0;
   for (const redirect of input.redirects ?? []) {

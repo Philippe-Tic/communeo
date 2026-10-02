@@ -24,7 +24,14 @@ origine.communeo.fr ──────►│                        (en-tête se
 
 Caddy (#381) a remplacé nginx et certbot : il obtient et renouvelle seul les certificats (volume `caddy-data`),
 sa configuration est dans l'image « web » (`caddy/Caddyfile`). Les sites des communes restent chez Netlify
-jusqu'à #382 (CDN Bunny devant l'origine) et #383 (bascule) ; l'origine est prête et testée.
+jusqu'à la bascule (#383) : l'adaptateur Bunny (#382, section 10) est prêt mais ne sert qu'avec
+`SITES_PUBLISHER=bunny`. Après la bascule :
+
+```
+<commune>.communeo.fr, www.<domaine de la commune> ──► Bunny CDN (une Pull Zone par commune, cache, https)
+                                                        └─► https://origine.communeo.fr/sites/<slug>/ (en-tête secret)
+<domaine nu de la commune> (A → VPS) ──► Caddy : 301 vers www.<domaine> (certificat à la demande)
+```
 
 Images : publiées sur GHCR par `.github/workflows/deploy.yml` (`ghcr.io/philippe-tic/communeo-{backend,worker,preview,web,backup}`),
 une version par commit (`IMAGE_TAG`, tenue à jour dans le `.env` par `deploy.sh`). Le serveur n'a pas le code source : seulement `docker-compose.yml`, `deploy.sh` et `.env`. Après une modification du `.env` : `./deploy.sh restart`.
@@ -117,6 +124,10 @@ SITES_ORIGIN_SECRET=$(secret)
 DISK_ALERT_THRESHOLD=85
 
 NETLIFY_TOKEN=
+# Bunny CDN (#382, section 10) : vides jusqu'à la bascule (#383) ; SITES_PUBLISHER=bunny pour l'activer
+SITES_PUBLISHER=
+BUNNY_API_KEY=
+BUNNY_DNS_ZONE_ID=
 RESEND_API_KEY=
 EMAIL_DEFAULT_FROM=noreply@communeo.fr
 SIGNUP_NOTIFY_EMAIL=
@@ -217,9 +228,10 @@ par le worker quand il publie sans `NETLIFY_TOKEN` (`PUBLISH_DIR`, `LocalPublish
   (le CDN l'ajoute, #382) ; sinon 403. Secret vide : tout est refusé ;
 - **règles par site** : `/srv/sites/<slug>/.regles/site.caddy`, réécrit à chaque publication (jamais servi),
   importé dans le bloc de l'origine du `caddy/Caddyfile` et appliqué avant les fichiers :
-  `X-Robots-Tag: noindex, nofollow` pendant l'essai, redirection vers l'adresse canonique (domaine de la commune,
-  d'après `X-Forwarded-Host` transmis par le CDN : à confirmer avec Bunny dans #382), redirections 301 de l'ancien
-  site (#335, destinations relatives). Générées par `caddySiteRules` (`packages/pipeline/src/publisher/caddy.ts`,
+  `X-Robots-Tag: noindex, nofollow` pendant l'essai, redirections 301 de l'ancien site (#335, destinations
+  relatives). La redirection vers l'adresse principale (domaine de la commune) n'est pas faite ici mais par Bunny,
+  avant son cache (section 10) : Bunny n'envoie pas `X-Forwarded-Host` (seulement `CDN-Host`) et transmet tel quel
+  celui d'un visiteur, qui ferait mettre en cache une redirection pour tout le monde. Générées par `caddySiteRules` (`packages/pipeline/src/publisher/caddy.ts`,
   format détaillé en tête du fichier) ;
 - après chaque publication, le worker recharge Caddy par son API d'administration (`CADDY_ADMIN_URL`,
   `http://caddy:2019`, port jamais publié : réseau interne de la stack seulement). Une règle refusée par Caddy :
@@ -261,6 +273,80 @@ curl -sI https://origine.communeo.fr/sites/x/                # 403
 Puis dans le navigateur : admin, connexion, aperçu d'une page (preview), envoi d'une image dans la médiathèque.
 Deux semaines plus tard, si tout va bien : `docker volume rm communeo_certbot-certs communeo_certbot-webroot`
 (gardés jusque-là pour un retour arrière vers nginx).
+
+## 10. Bunny CDN devant l'origine (#382)
+
+`BunnyPublisher` (`packages/pipeline/src/publisher/bunny.ts`) remplace Netlify quand **`SITES_PUBLISHER=bunny`**
+et que `BUNNY_API_KEY`, `SITES_ORIGIN_SECRET` et `ORIGIN_DOMAIN` sont définis (sinon : publication indisponible,
+jamais un repli silencieux vers Netlify). Sans `SITES_PUBLISHER=bunny`, rien ne change.
+
+| Variable | Où | Rôle |
+|----------|----|------|
+| `SITES_PUBLISHER` | strapi, worker | `bunny` pour publier chez Bunny ; vide : Netlify (`NETLIFY_TOKEN`) ou le volume seul |
+| `BUNNY_API_KEY` | strapi, worker | clé du compte Bunny (Account settings → API key), jamais dans le dépôt |
+| `BUNNY_DNS_ZONE_ID` | strapi, worker | identifiant de la zone Bunny DNS de `SITES_DOMAIN` (adresses `<slug>.communeo.fr`) |
+| `SITES_ORIGIN_SECRET` | strapi, worker, caddy | en-tête `X-Communeo-Origine` ajouté par chaque Pull Zone, exigé par l'origine |
+| `ORIGIN_DOMAIN` | strapi, worker, caddy | origine des sites (`origine.communeo.fr`) ; ses adresses IP sont aussi la cible des domaines nus |
+
+Ce que fait l'adaptateur :
+
+- **une Pull Zone par commune** (`communeo-<slug>`, `dev-communeo-<slug>` hors production), origine
+  `https://origine.communeo.fr/sites/<slug>/`, régions **Europe + Amérique du Nord** (même prix ; Antilles,
+  Saint-Pierre-et-Miquelon), les autres régions (plus chères) servies depuis l'Europe ; `UseStaleWhileOffline` et
+  `UseStaleWhileUpdating` ; cache de Bunny d'un an **vidé à chaque publication**, erreurs jamais en cache, une
+  entrée de cache par requête (`/?p=12` redirige, `/` non) ; journaux sans adresse IP complète ;
+- **règles de la Pull Zone** (Edge Rules `Communeo : …`, tenues à jour à chaque publication, les autres jamais
+  touchées) : en-tête secret vers l'origine, redirection 301 des autres adresses vers le domaine vérifié (avant le
+  cache), `X-Robots-Tag: noindex` sur l'adresse technique `communeo-<slug>.b-cdn.net` ;
+- **adresse `<slug>.communeo.fr`** : ajoutée à la Pull Zone, CNAME vers `communeo-<slug>.b-cdn.net` dans la zone
+  Bunny DNS, certificat Let's Encrypt gratuit de Bunny puis https forcé. Tant que la zone communeo.fr n'est pas
+  servie par Bunny (avant #383), le certificat échoue sans bloquer : il est redemandé à chaque publication. Le
+  site se teste sur `https://communeo-<slug>.b-cdn.net` ;
+- **publication** : écriture atomique dans le volume `sites` (logique de `LocalPublisher`, règles Caddy du site,
+  rechargement de Caddy), puis vidage du cache de la Pull Zone (un échec fait échouer la mise en ligne, relancée) ;
+- **domaine de la commune** : sous-domaine (`www.mairie-x.fr`) → un CNAME vers la Pull Zone. **Domaine nu**
+  (`mairie-x.fr`) : Bunny ne peut le servir que si la commune utilise Bunny DNS ; la commune crée donc un CNAME
+  `www` vers la Pull Zone et un enregistrement **A** `@` vers le serveur (adresses de `ORIGIN_DOMAIN`), et Caddy
+  redirige `mairie-x.fr` vers `www.mairie-x.fr` (bloc `https://` du Caddyfile, certificat à la demande autorisé par
+  `GET /api/domain/certificate-check` de Strapi pour les seuls domaines vérifiés d'une commune, fermé au public).
+  Le site est alors servi sur `www.mairie-x.fr` (adresse canonique des pages) ;
+- **suppression** (commune supprimée, fin d'essai) : Pull Zone, CNAME de la commune et dossier du site. Strapi
+  monte le volume `sites` pour supprimer ce dossier (il n'y écrit rien d'autre).
+
+Limites du compte Bunny (documentation « CDN Limits and Defaults ») : **500 Pull Zones** par compte, 10 adresses par
+Pull Zone, 50 Edge Rules par Pull Zone ; Bunny DNS : 500 zones, 5 000 enregistrements par zone. Les limites sont
+relevées sur demande au support : le demander dès 300 communes.
+
+Vérification sur le serveur, sans rien modifier (copié avec `deploy.sh` par le workflow) :
+
+```bash
+./bunny-check.sh           # clé, nombre de Pull Zones, zone DNS, origine fermée sans secret / ouverte avec
+./bunny-check.sh lyon      # et le site de la commune « lyon » servi par l'origine
+```
+
+### Avant le merge de #382
+
+Rien d'obligatoire : sans `SITES_PUBLISHER=bunny`, la production reste sur Netlify. Le merge ajoute seulement le
+volume `sites` à Strapi, la route d'autorisation des certificats et le bloc des domaines nus dans Caddy (sans effet
+tant qu'aucun domaine nu ne pointe vers le serveur).
+
+### À la bascule (#383)
+
+1. Bunny → **DNS** → **Add DNS Zone** `communeo.fr` (copier d'abord les enregistrements de la zone Netlify :
+   `app`, `preview`, `origine`, MX, SPF/DKIM de Resend…), noter son **identifiant** (URL du tableau de bord ou
+   `GET /dnszone`).
+2. `.env` du serveur (et sa copie dans le gestionnaire de mots de passe) :
+   ```
+   BUNNY_API_KEY=<clé du compte Bunny>
+   BUNNY_DNS_ZONE_ID=<identifiant de la zone communeo.fr>
+   ```
+   puis `./bunny-check.sh` (tout en ✓, sauf les serveurs de noms tant que la délégation n'est pas faite).
+3. `SITES_PUBLISHER=bunny` dans le `.env`, `./deploy.sh restart`, puis une mise en ligne de chaque commune :
+   Pull Zones, adresses et enregistrements DNS créés ; tester sur `https://communeo-<slug>.b-cdn.net`.
+4. Délégation de communeo.fr vers Bunny DNS (serveurs `kiki.bunny.net` et `coco.bunny.net` chez le registraire) ;
+   une nouvelle mise en ligne demande les certificats des adresses `<slug>.communeo.fr`.
+5. Communes avec un domaine : nouvelles instructions DNS (CNAME `www` vers la Pull Zone ; pour un domaine nu,
+   A vers le serveur au lieu de Netlify), puis vérification depuis l'admin.
 
 ## Essayer la stack en local
 

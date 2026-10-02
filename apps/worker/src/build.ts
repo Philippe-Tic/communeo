@@ -57,7 +57,8 @@ export async function processBuild(job: BuildJob, deps: BuildDeps): Promise<void
   try {
     const host = await deps.publisher.ensureSite(toPublisherSite(site));
     hostId = host.hostId;
-    const siteUrl = site.customDomain ? `https://${site.customDomain}` : host.defaultUrl;
+    // Domaine nu chez Bunny : adresse canonique en www (le domaine nu y redirige)
+    const siteUrl = site.customDomain ? `https://${deps.publisher.canonicalDomain?.(site.customDomain) ?? site.customDomain}` : host.defaultUrl;
 
     await step('rendering');
     await deps.renderer.build({ site, outDir, siteUrl, signal });

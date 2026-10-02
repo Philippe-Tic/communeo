@@ -96,6 +96,12 @@ export interface SitePublisher {
   removeDomain(site: PublisherSite, domain: string): Promise<{ defaultUrl: string | null }>;
   /** État du certificat HTTPS tel que l'hébergeur le décrit, `null` si inconnu. */
   certificateStatus(site: PublisherSite): Promise<unknown | null>;
+  /**
+   * Adresse sous laquelle le site est servi pour un domaine personnalisé (liens canoniques, sitemap,
+   * adresse du site). Absent : le domaine lui-même. Bunny sert `www.<domaine>` pour un domaine nu, que
+   * Caddy redirige vers `www`.
+   */
+  canonicalDomain?(domain: string): string;
 
   /** Supprime le site chez l'hébergeur. */
   deleteSite(site: PublisherSite): Promise<void>;

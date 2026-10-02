@@ -3,7 +3,7 @@
  */
 
 import domainService from '../../../services/domain';
-import { isPublisherUnavailable } from '@communeo/pipeline';
+import { isApexDomain, isPublisherUnavailable } from '@communeo/pipeline';
 import domainValidationService from '../../../services/domain-validation';
 import { getEffectiveSite, hasRole } from '../../../utils/getEffectiveSite';
 import { log } from '../../../utils/logger';
@@ -261,6 +261,25 @@ export default {
       log.error('Get domain status error:', error);
       ctx.internalServerError('Erreur lors de la récupération du statut du domaine');
     }
+  },
+
+  /**
+   * Certificat à la demande de Caddy pour un domaine nu (#382) : 200 seulement pour le domaine vérifié
+   * d'une commune (Caddy le redirige vers www, servi par le CDN), sinon 404 et aucun certificat demandé.
+   * GET /api/domain/certificate-check?domain=mairie-x.fr
+   */
+  async certificateCheck(ctx) {
+    const domain = String(ctx.query?.domain ?? '').trim().toLowerCase().replace(/\.$/, '');
+    const allowed =
+      !!domain &&
+      domainService.validateDomainFormat(domain) &&
+      isApexDomain(domain) &&
+      !!(await strapi.db.query('api::site.site').findOne({
+        where: { custom_domain: { $eqi: domain }, domain_status: 'verified' },
+        select: ['id'],
+      }));
+    ctx.status = allowed ? 200 : 404;
+    ctx.body = allowed ? 'ok' : 'Domaine inconnu';
   },
 
   /**

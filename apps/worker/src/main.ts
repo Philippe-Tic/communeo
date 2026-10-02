@@ -11,7 +11,7 @@ import { startWorker } from './worker';
 const log = consoleLogger;
 const config = readConfig();
 const publisher = getPublisher(process.env, log);
-if (!publisher.configured) log.warn("[WORKER] Aucun hébergeur configuré (NETLIFY_TOKEN) : chaque build échouera à la publication");
+if (!publisher.configured) log.warn("[WORKER] Aucun hébergeur configuré (SITES_PUBLISHER=bunny, NETLIFY_TOKEN ou PUBLISH_DIR) : chaque build échouera à la publication");
 
 const queue = await createBuildQueue(config.queueUrl, { timeoutSeconds: config.timeoutSeconds, logger: log });
 await startWorker(queue, {

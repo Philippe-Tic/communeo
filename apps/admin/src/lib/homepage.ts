@@ -302,7 +302,7 @@ export function sectionSummary(
     case 'weather':
       return context.hasCoordinates
         ? 'Prévisions du jour pour la commune'
-        : 'Coordonnées GPS à renseigner dans Informations de la commune';
+        : 'Emplacement de la commune à renseigner dans Informations de la commune';
     case 'waste_collection':
       return 'Prochains passages des collectes';
     case 'disruptions':

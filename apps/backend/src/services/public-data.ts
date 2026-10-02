@@ -1,13 +1,23 @@
 /**
  * Données publiques d'une commune pour l'assistant de création (#150) : geo.api.gouv.fr (recherche,
  * population, coordonnées) et l'Annuaire de l'administration (mairie). Lues par le serveur, avec un
- * délai court : si un service ne répond pas, l'assistant laisse saisir à la main.
- * `GEO_API_URL` et `ANNUAIRE_API_URL` changent les adresses (tests).
+ * délai court : si un service ne répond pas, l'assistant laisse saisir à la main. Emplacement de la
+ * commune (#362) : géocodage de la Base adresse nationale, servi par la Géoplateforme de l'IGN
+ * (l'ancienne adresse api-adresse.data.gouv.fr est fermée depuis janvier 2026).
+ * `GEO_API_URL`, `ANNUAIRE_API_URL` et `GEOCODING_API_URL` changent les adresses (tests).
  */
-import { fromGeo, townHallFromAnnuaire, type CommuneDetails, type CommuneMatch } from '@communeo/core';
+import {
+  fromGeo,
+  placesFromGeocoding,
+  townHallFromAnnuaire,
+  type CommuneDetails,
+  type CommuneMatch,
+  type PlaceMatch,
+} from '@communeo/core';
 import { log } from '../utils/logger';
 
 const GEO = () => process.env.GEO_API_URL || 'https://geo.api.gouv.fr';
+const GEOCODING = () => process.env.GEOCODING_API_URL || 'https://data.geopf.fr/geocodage';
 const ANNUAIRE = () =>
   process.env.ANNUAIRE_API_URL ||
   'https://api-lannuaire.service-public.fr/api/explore/v2.1/catalog/datasets/api-lannuaire-administration/records';
@@ -66,6 +76,59 @@ export async function communeDetails(insee: string): Promise<CommuneDetails | nu
     townHall = null;
   }
   return { ...fromGeo(record), townHall };
+}
+
+/** Réponses du géocodage gardées une journée (les lieux ne bougent pas ; limite de débit du service) */
+const PLACES_TTL_MS = 24 * 60 * 60 * 1000;
+const PLACES_MAX = 500;
+const placesCache = new Map<string, { at: number; value: unknown }>();
+
+async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+  const hit = placesCache.get(key);
+  if (hit && Date.now() - hit.at < PLACES_TTL_MS) return hit.value as T;
+  const value = await load();
+  placesCache.delete(key);
+  placesCache.set(key, { at: Date.now(), value });
+  // Le plus ancien sort en premier (ordre d'insertion de la Map)
+  if (placesCache.size > PLACES_MAX) placesCache.delete(placesCache.keys().next().value!);
+  return value;
+}
+
+const coordinate = (value: unknown, max: number) => {
+  const number = Number(value);
+  return value !== undefined && value !== '' && Number.isFinite(number) && Math.abs(number) <= max ? number : null;
+};
+
+/**
+ * Recherche d'une ville ou d'une adresse (#362) : emplacement de la commune pour la carte et la météo.
+ * Base adresse nationale (`/search`), avec la position actuelle pour favoriser les lieux proches.
+ */
+export async function searchPlaces(query: string, near?: { lat?: unknown; lon?: unknown }): Promise<PlaceMatch[]> {
+  const q = query.trim().slice(0, 200);
+  if (q.length < 3) return [];
+  const search = new URLSearchParams({ q, limit: '6', autocomplete: '1' });
+  const lat = coordinate(near?.lat, 90);
+  const lon = coordinate(near?.lon, 180);
+  if (lat !== null && lon !== null) {
+    search.set('lat', lat.toFixed(4));
+    search.set('lon', lon.toFixed(4));
+  }
+  const url = `${GEOCODING()}/search?${search}`;
+  return cached(url, async () => placesFromGeocoding(await getJson(url)));
+}
+
+/** La commune où se trouve un point (geo.api.gouv.fr) : pour nommer une position déjà enregistrée */
+export async function communeAt(lat: unknown, lon: unknown): Promise<{ name: string; postalCode: string | null } | null> {
+  const latitude = coordinate(lat, 90);
+  const longitude = coordinate(lon, 180);
+  if (latitude === null || longitude === null) return null;
+  const url = `${GEO()}/communes?${new URLSearchParams({ lat: String(latitude), lon: String(longitude), fields: 'nom,codesPostaux' })}`;
+  return cached(url, async () => {
+    const records = await getJson(url);
+    const record = Array.isArray(records) ? records[0] : null;
+    if (!record?.nom) return null;
+    return { name: String(record.nom), postalCode: Array.isArray(record.codesPostaux) ? (record.codesPostaux[0] ?? null) : null };
+  });
 }
 
 /** Population municipale INSEE d'une commune (devis #312) ; `null` : commune inconnue */

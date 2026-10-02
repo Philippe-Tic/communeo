@@ -17,7 +17,10 @@ test('informations : valeurs enregistrées, sommaire des réglages, sans violati
   await page.goto('/mon-site/informations');
   await expect(page.getByRole('heading', { level: 1, name: 'Informations de la commune' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: /Nom de la commune/ })).toHaveValue('Saint-Aubin-sur-Loire');
-  await expect(page.getByRole('textbox', { name: /Coordonnées GPS/ })).toHaveValue('46.7412, 3.7891');
+  // Emplacement : nommé par sa commune, sans coordonnées affichées
+  const location = page.locator('[data-field="coordinates"]');
+  await expect(location).toContainText('Dans la commune de Saint-Aubin-sur-Loire (58300)');
+  await expect(location).not.toContainText('46.7412');
   await expect(page.getByRole('textbox', { name: /Population/ })).toHaveValue('3240');
   await expect(page.getByRole('combobox', { name: 'Lundi, plage 2 : fermeture' })).toHaveValue('17:00');
   await expect(page.getByRole('group', { name: 'Mercredi' })).toContainText('Fermé');
@@ -125,15 +128,10 @@ test('identité et coordonnées : erreurs sous les champs, logo sans texte alter
   const { bodies } = await mockApi(page);
   await page.goto('/mon-site/informations');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await page.getByRole('textbox', { name: /Coordonnées GPS/ }).fill('46,7 nord');
   await page.getByRole('textbox', { name: /^E-mail/ }).fill('mairie@');
   await page.getByRole('textbox', { name: /Téléphone/ }).fill('03 86');
   await save(page).click();
-  await expect(page.getByRole('alert').filter({ hasText: "3 erreurs empêchent l'enregistrement" })).toBeFocused();
-  await expect(page.getByRole('textbox', { name: /Coordonnées GPS/ })).toHaveAccessibleDescription(
-    /Indiquez la latitude puis la longitude/,
-  );
-  await page.getByRole('textbox', { name: /Coordonnées GPS/ }).fill('47.1; 2.5');
+  await expect(page.getByRole('alert').filter({ hasText: "2 erreurs empêchent l'enregistrement" })).toBeFocused();
   await page.getByRole('textbox', { name: /^E-mail/ }).fill('accueil@saint-aubin-sur-loire.fr');
   await page.getByRole('textbox', { name: /Téléphone/ }).fill('');
   await page.getByRole('textbox', { name: /Nom de la commune/ }).fill('Saint-Aubin-les-Bois');
@@ -157,9 +155,59 @@ test('identité et coordonnées : erreurs sous les champs, logo sans texte alter
     logo: 502,
     favicon: null,
   });
-  expect(data.infos_pratiques).toMatchObject({ latitude: 47.1, longitude: 2.5, population: 3240 });
+  expect(data.infos_pratiques).toMatchObject({ latitude: 46.7412, longitude: 3.7891, population: 3240 });
   // Le nom de la commune suit partout (barre latérale, en-tête)
   await expect(page.getByText('Saint-Aubin-les-Bois', { exact: true }).filter({ visible: true }).first()).toBeVisible();
+});
+
+test('emplacement sur la carte : recherche d’une adresse, choisie au clavier, enregistrée (#362)', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/informations');
+  const search = page.getByRole('searchbox', { name: /^Emplacement sur la carte/ });
+  await expect(search).toHaveAccessibleDescription(/la carte et la météo du site s'y placent/);
+  await search.fill('1 place de la mairie saint-aubin');
+  const places = page.getByRole('list', { name: 'Lieux trouvés' });
+  await expect(places.getByRole('button')).toHaveCount(2);
+  await expect(page.getByRole('status').filter({ hasText: '2 lieux trouvés' })).toBeAttached();
+  await expectNoViolations(page);
+  await places.getByRole('button', { name: /^1 Place de la Mairie 58300 Saint-Aubin-sur-Loire/ }).focus();
+  await page.keyboard.press('Enter');
+  await expect(places).toBeHidden();
+  await expect(search).toBeFocused();
+  await expect(search).toHaveValue('');
+  const location = page.locator('[data-field="coordinates"]');
+  await expect(location).toContainText('1 Place de la Mairie 58300 Saint-Aubin-sur-Loire');
+  // Pas de chiffres pour la commune (les coordonnées sont réservées à l'équipe)
+  await expect(location.getByText(/Latitude/)).toHaveCount(0);
+
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Informations enregistrées.' })).toBeVisible();
+  expect(sent(bodies)!.infos_pratiques).toMatchObject({ latitude: 46.74389, longitude: 3.79052 });
+
+  // Retirer : plus d'emplacement, la carte et la météo ne s'affichent pas
+  await location.getByRole('button', { name: 'Retirer l’emplacement' }).click();
+  await expect(location).toContainText('Pas encore d’emplacement');
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Informations enregistrées.' })).toBeVisible();
+  expect(sent(bodies)!.infos_pratiques).toMatchObject({ latitude: null, longitude: null });
+});
+
+test('emplacement : aucun lieu trouvé, ou recherche en panne', async ({ page }) => {
+  await mockApi(page, { publicData: 'down' });
+  await page.goto('/mon-site/informations');
+  const search = page.getByRole('searchbox', { name: /^Emplacement sur la carte/ });
+  await search.fill('Nevers');
+  await expect(page.getByText('La recherche d’adresses ne répond pas pour le moment')).toBeVisible();
+});
+
+test('emplacement : l’équipe voit les coordonnées en détail', async ({ page }) => {
+  await mockApi(page, { user: 'super_admin' });
+  // Équipe entrée dans l'administration de Saint-Aubin
+  await page.addInitScript(() => sessionStorage.setItem('communeo.impersonated-site', 'site-saint-aubin'));
+  await page.goto('/mon-site/informations');
+  const location = page.locator('[data-field="coordinates"]');
+  await location.getByText('Coordonnées (équipe Communeo)').click();
+  await expect(location).toContainText('Latitude 46.7412, longitude 3.7891');
 });
 
 test('quitter avec des modifications : rester, ou enregistrer et quitter', async ({ page }) => {

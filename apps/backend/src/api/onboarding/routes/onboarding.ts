@@ -14,6 +14,18 @@ export default {
     },
     {
       method: 'GET',
+      path: '/onboarding/places',
+      handler: 'onboarding.places',
+      config: { policies: [], middlewares: [] },
+    },
+    {
+      method: 'GET',
+      path: '/onboarding/places/commune',
+      handler: 'onboarding.placeCommune',
+      config: { policies: [], middlewares: [] },
+    },
+    {
+      method: 'GET',
       path: '/onboarding/checklist',
       handler: 'onboarding.checklist',
       config: { policies: [], middlewares: [] },

@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { Inbox } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { rgpdDaysLeft } from '@communeo/core';
+import { messageRetentionSummary, rgpdDaysLeft } from '@communeo/core';
 import { Pagination } from '@/components/content-list/pagination';
 import { Toolbar } from '@/components/content-list/toolbar';
 import type { Noun } from '@/components/content-list/types';
@@ -27,6 +27,7 @@ import {
   type MessageSummary,
 } from '@/lib/messages';
 import { sessionQuery } from '@/lib/session';
+import { siteSettingsQuery } from '@/lib/site-settings';
 import { cn } from '@/lib/utils';
 import { MessageDetail } from './message-detail';
 
@@ -116,7 +117,8 @@ export function MessagesScreen({ search, onSearchChange }: { search: MessagesSea
               </p>
             )}
           </div>
-          <ScreenHelp className="pb-3" />
+          <ScreenHelp />
+          <RetentionNote />
         </div>
         <Toolbar
           noun={NOUN}
@@ -242,6 +244,33 @@ export function MessagesScreen({ search, onSearchChange }: { search: MessagesSea
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Durée de conservation en vigueur (#342) et lien vers le réglage (administrateurs) : les messages
+ * traités disparaissent d'eux-mêmes, la commune doit savoir quand.
+ */
+function RetentionNote() {
+  const { data: user } = useQuery(sessionQuery);
+  const site = useQuery({ ...siteSettingsQuery(user?.site?.documentId ?? ''), enabled: !!user?.site });
+  const admin = user?.municipality_role === 'admin' || user?.municipality_role === 'super_admin';
+  if (!site.data) return <div className="pb-3" />;
+  return (
+    <p className="mt-1 max-w-[680px] pb-3 text-[13px] text-secondary">
+      {messageRetentionSummary(site.data.message_retention)}{' '}
+      {admin ? (
+        <Link
+          to="/mon-site/legal"
+          search={{ section: 'conservation' } as never}
+          className="font-semibold whitespace-nowrap text-brand underline decoration-1 underline-offset-2"
+        >
+          Modifier la durée
+        </Link>
+      ) : (
+        <span>Réglée par un administrateur.</span>
+      )}
+    </p>
   );
 }
 

@@ -1,5 +1,5 @@
 /**
- * Conformité (#147, handoff 6.17) : score en repère, 18 points en 5 catégories, chaque point à faire
+ * Conformité (#147, handoff 6.17) : score en repère, 19 points en 5 catégories, chaque point à faire
  * mène à l'écran où on le complète ; un éditeur voit les réglages légaux sans lien (administrateurs).
  */
 import { expect, test } from '@playwright/test';
@@ -14,7 +14,7 @@ test('score, catégories, prochaine action ; un point à faire mène à son écr
   await expect(page.getByRole('img', { name: /^Score de conformité : \d+ %$/ })).toBeVisible();
   for (const name of ['Mentions légales', 'RGPD', 'Accessibilité', 'Publication des actes', 'Cookies'])
     await expect(page.getByRole('region', { name })).toBeVisible();
-  await expect(page.getByText(/^\d+ points sur 18 sont en ordre\./)).toBeVisible();
+  await expect(page.getByText(/^\d+ points sur 19 sont en ordre\./)).toBeVisible();
   // Assurés par Communeo : faits, sans lien
   const cookies = page.getByRole('region', { name: 'Cookies' });
   await expect(cookies).toContainText('3 / 3');
@@ -45,4 +45,15 @@ test('éditeur : les réglages légaux sont signalés sans lien (réservés aux 
   await expect(rgpd).toContainText('Politique de données (par un administrateur)');
   await expect(rgpd.getByRole('link', { name: 'Politique de données' })).toHaveCount(0);
   await expectNoViolations(page);
+});
+
+test('durée de conservation des messages pas encore choisie : mène à son réglage, section focalisée', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/conformite');
+  await page
+    .getByRole('region', { name: 'RGPD' })
+    .getByRole('link', { name: 'Durée de conservation des messages définie' })
+    .click();
+  await expect(page).toHaveURL(/\/mon-site\/legal\?section=conservation$/);
+  await expect(page.getByRole('heading', { level: 2, name: 'Conservation des messages' })).toBeFocused();
 });

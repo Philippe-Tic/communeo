@@ -34,7 +34,8 @@ export type ActivityAction =
   | 'invoice_cancel'
   | 'invoice_chorus'
   | 'invoice_remind'
-  | 'billing_renewal';
+  | 'billing_renewal'
+  | 'messages_purge';
 
 export interface ActivityEntry {
   id: number;
@@ -100,6 +101,7 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   invoice_chorus: 'Facture déposée sur Chorus Pro',
   invoice_remind: 'Relance de facture',
   billing_renewal: 'Renouvellement de l’abonnement modifié',
+  messages_purge: 'Suppression automatique des messages',
 };
 
 /** Actions qu'une commune voit (les autres concernent la plateforme) */
@@ -124,6 +126,7 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'invoice_issue',
   'invoice_paid',
   'invoice_cancel',
+  'messages_purge',
 ];
 
 const TYPE_LABELS: Record<string, string> = {
@@ -163,6 +166,12 @@ export function describeTarget(entry: ActivityEntry, themeName: (id: string) => 
   if (entry.action === 'domain_change')
     return `${details.change === 'remove' ? 'Retiré' : 'Configuré'}${entry.target?.label ? ` : ${entry.target.label}` : ''}`;
   if (entry.action === 'login') return entry.ip ? `Adresse IP ${entry.ip}` : '';
+  // Une ligne par passage de la tâche de nuit (#342) : le nombre et la durée en vigueur
+  if (entry.action === 'messages_purge') {
+    const count = Number(details.count ?? 0);
+    const label = typeof details.label === 'string' ? details.label.toLowerCase() : null;
+    return `${count} message${count > 1 ? 's' : ''} traité${count > 1 ? 's' : ''} supprimé${count > 1 ? 's' : ''}${label ? ` (conservés ${label})` : ''}`;
+  }
   // La commune elle-même : déjà dans la colonne Commune (équipe) ou c'est la sienne (administrateur)
   if (entry.action.startsWith('commune_')) return '';
   if (!entry.target) return '';

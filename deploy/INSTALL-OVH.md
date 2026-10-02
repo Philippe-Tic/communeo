@@ -57,20 +57,23 @@ docker --version && docker compose version && sudo ufw status
 
 ## Étape 3 — DNS (dans Netlify)
 
-**Domains → communeo.fr → DNS settings → Add new record**, deux fois :
+**Domains → communeo.fr → DNS settings → Add new record**, trois fois :
 
 | Type | Name | Value |
 |------|------|-------|
 | A | `app` | IP_DU_VPS |
 | A | `preview` | IP_DU_VPS |
+| A | `origine` | IP_DU_VPS |
+
+`origine` : l'origine des sites des communes, servie par Caddy au CDN (#381, #382).
 
 **Vérification** (sur le Mac, après quelques minutes) :
-x@
+
 ```bash
-dig +short app.communeo.fr && dig +short preview.communeo.fr
+dig +short app.communeo.fr && dig +short preview.communeo.fr && dig +short origine.communeo.fr
 ```
 
-Les deux renvoient l'IP du VPS.
+Les trois renvoient l'IP du VPS.
 
 ---
 
@@ -116,6 +119,7 @@ secret() { openssl rand -hex 32; }
 cat > .env <<ENV
 DOMAIN=app.communeo.fr
 PREVIEW_DOMAIN=preview.communeo.fr
+ORIGIN_DOMAIN=origine.communeo.fr
 SITES_DOMAIN=communeo.fr
 
 POSTGRES_PASSWORD=$(secret)
@@ -129,6 +133,8 @@ STRAPI_API_TOKEN=$(openssl rand -hex 64)
 PREVIEW_API_TOKEN=$(openssl rand -hex 64)
 WORKER_SECRET=$(secret)
 PREVIEW_SECRET=$(secret)
+SITES_ORIGIN_SECRET=$(secret)
+DISK_ALERT_THRESHOLD=85
 
 NETLIFY_TOKEN=
 RESEND_API_KEY=
@@ -170,7 +176,7 @@ nano .env        # enregistrer : Ctrl+O puis Entrée ; quitter : Ctrl+X
 |----------|--------|
 | `NETLIFY_TOKEN` | jeton Netlify (étape 4) |
 | `RESEND_API_KEY` | clé Resend (étape 4) |
-| `SIGNUP_NOTIFY_EMAIL` | adresse de l'équipe qui reçoit inscriptions, devis, demandes |
+| `SIGNUP_NOTIFY_EMAIL` | adresse de l'équipe qui reçoit inscriptions, devis, demandes et alertes disque |
 | `HOSTING_NAME`, `HOSTING_ADDRESS`, `HOSTING_PHONE` | hébergeur **des sites publics** pour les mentions légales des communes : Netlify (nom et adresse tels qu'indiqués sur leur page légale) |
 | `COMMUNEO_LEGAL_NAME`, `COMMUNEO_LEGAL_ADDRESS`, `COMMUNEO_SIRET`, `COMMUNEO_BILLING_EMAIL` | ton identité sur les devis |
 | `COMMUNEO_VAT_RATE` | `0` en micro-entreprise (franchise de TVA), `0.2` sinon |
@@ -189,21 +195,9 @@ Sans `BACKUP_PASSPHRASE`, les sauvegardes sont illisibles ; sans `ENCRYPTION_KEY
 
 ## Étape 7 — Certificats HTTPS (Let's Encrypt)
 
-nginx a besoin des certificats pour démarrer : on les obtient une fois, avant le premier lancement
-(remplacer l'adresse e-mail) :
-
-```bash
-cd ~/communeo
-docker volume create communeo_certbot-certs && docker volume create communeo_certbot-webroot
-docker run --rm -p 80:80 -v communeo_certbot-certs:/etc/letsencrypt certbot/certbot certonly --standalone \
-  --non-interactive --agree-tos -m ton-adresse@communeo.fr \
-  -d app.communeo.fr -d preview.communeo.fr --cert-name app.communeo.fr
-docker run --rm -v communeo_certbot-certs:/etc/letsencrypt alpine sh -c \
-  'ln -sfn app.communeo.fr /etc/letsencrypt/live/preview.communeo.fr'
-```
-
-**Vérification** : certbot affiche `Successfully received certificate`. En cas d'échec, le DNS de l'étape 3
-n'est pas encore propagé : attendre et relancer.
+Rien à faire : Caddy (le service `caddy`, qui sert l'admin, la preview et l'origine des sites) obtient les
+certificats d'`app`, `preview` et `origine` à son premier démarrage (étape 8), puis les renouvelle seul. Il faut
+seulement que le DNS de l'étape 3 soit propagé et que les ports 80 et 443 soient ouverts (étape 2).
 
 ---
 
@@ -213,16 +207,18 @@ n'est pas encore propagé : attendre et relancer.
 cd ~/communeo && ./deploy.sh latest
 ```
 
-Le téléchargement des images prend quelques minutes, puis le script attend que Strapi et nginx soient sains.
+Le téléchargement des images prend quelques minutes, puis le script attend que Strapi et Caddy soient sains.
 
 **Vérification** :
 
 ```bash
-docker compose ps                  # postgres, strapi, preview, nginx, backup : « healthy » ; worker, certbot : « running »
+docker compose ps                  # postgres, strapi, preview, caddy, backup : « healthy » ; worker : « running »
 docker compose logs backup         # « [backup] … terminée » et « copie envoyée vers communeo-s3/communeo (chiffrée) »
+docker compose logs caddy | grep -i "certificate obtained"   # app, preview et origine
 ```
 
 Puis dans le navigateur : **https://app.communeo.fr** → connexion avec `SEED_SUPER_ADMIN_EMAIL` / `SEED_SUPER_ADMIN_PASSWORD`.
+Et `curl -sI https://origine.communeo.fr/sites/x/` répond `403` (origine fermée tant que le CDN n'est pas branché).
 
 Une fois connecté, retirer le mot de passe du `.env` (le compte existe maintenant) :
 

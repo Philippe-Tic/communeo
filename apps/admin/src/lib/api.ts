@@ -1,5 +1,5 @@
 /**
- * Client de l'API Strapi (même origine : proxy Vite en développement, nginx en production).
+ * Client de l'API Strapi (même origine : proxy Vite en développement, Caddy en production).
  * La session est un cookie HttpOnly posé par Strapi (POST /api/session/login) : l'admin ne voit jamais
  * le jeton. Chaque requête porte l'en-tête X-Communeo-Csrf, exigé par Strapi pour les écritures.
  * La commune incarnée par un super admin est ajoutée à chaque requête.

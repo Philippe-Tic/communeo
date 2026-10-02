@@ -68,7 +68,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Démarrage, commune, mise en ligne, sauvegarde et restauration
+      - name: Démarrage, Caddy, commune, mise en ligne, origine des sites, sauvegarde et restauration
         run: E2E_BUILD=0 E2E_REGISTRY=${{ env.REGISTRY }} E2E_TAG=${{ github.sha }} deploy/e2e/run.sh
       - name: Versions testées marquées « latest »
         run: |

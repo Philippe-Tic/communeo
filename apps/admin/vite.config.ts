@@ -8,7 +8,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true }), react(), tailwindcss()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  // En développement, l'API Strapi est servie sous la même origine (comme derrière nginx en production)
+  // En développement, l'API Strapi est servie sous la même origine (comme derrière Caddy en production)
   server: {
     port: 5173,
     proxy: {

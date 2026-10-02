@@ -11,7 +11,18 @@ import type { SitePublisher } from './types';
 export type * from './types';
 export { isApexDomain } from './dns';
 export { NetlifyPublisher, NetlifyApiError, zipDirectory, type NetlifyPublisherOptions } from './netlify';
-export { LocalPublisher, type LocalPublisherOptions } from './local';
+export { LocalPublisher, STAGING_DIR, type LocalPublisherOptions } from './local';
+export {
+  CADDY_RULES_DIR,
+  CADDY_RULES_FILE,
+  CADDY_RULES_PATH,
+  caddySiteRules,
+  FORWARDED_HOST_HEADER,
+  reloadCaddy,
+  type CaddySiteRules,
+  type CaddySiteRulesInput,
+  type ReloadCaddyOptions,
+} from './caddy';
 
 export class PublisherUnavailableError extends Error {
   constructor(reason: string) {
@@ -48,19 +59,20 @@ let cached: { key: string; publisher: SitePublisher } | undefined;
 
 /**
  * NETLIFY_TOKEN → Netlify (SITES_DOMAIN : adresses `<slug>.<domaine>`) ; sinon PUBLISH_DIR → dossier
- * local (développement) ; sinon indisponible.
+ * local (développement, tests de la stack, origine servie par Caddy : CADDY_ADMIN_URL pour le recharger
+ * après chaque publication) ; sinon indisponible.
  * Lu à chaque appel : un jeton ajouté ou retiré est pris en compte sans redémarrer.
  */
 export function getPublisher(env: NodeJS.ProcessEnv = process.env, logger?: Logger): SitePublisher {
   const token = env.NETLIFY_TOKEN || undefined;
   const localDir = env.PUBLISH_DIR || undefined;
-  const key = `${token ?? ''}|${env.NODE_ENV ?? ''}|${localDir ?? ''}|${env.PUBLISH_BASE_URL ?? ''}|${env.SITES_DOMAIN ?? ''}`;
+  const key = `${token ?? ''}|${env.NODE_ENV ?? ''}|${localDir ?? ''}|${env.PUBLISH_BASE_URL ?? ''}|${env.SITES_DOMAIN ?? ''}|${env.CADDY_ADMIN_URL ?? ''}`;
   if (cached?.key === key) return cached.publisher;
 
   const publisher = token
     ? new NetlifyPublisher({ token, namePrefix: env.NODE_ENV === 'production' ? '' : 'dev-', sitesDomain: env.SITES_DOMAIN, logger })
     : localDir
-      ? new LocalPublisher({ root: localDir, baseUrl: env.PUBLISH_BASE_URL })
+      ? new LocalPublisher({ root: localDir, baseUrl: env.PUBLISH_BASE_URL, caddyAdminUrl: env.CADDY_ADMIN_URL || undefined, logger })
       : unavailablePublisher("NETLIFY_TOKEN n'est pas défini");
   cached = { key, publisher };
   return publisher;

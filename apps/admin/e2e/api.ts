@@ -1392,6 +1392,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const previewPosts: Array<Record<string, unknown>> = [];
   // Mots de passe acceptés : celui des comptes de test, et ceux choisis par invitation
   const passwords = new Set([PASSWORD]);
+  // Prénom et nom modifiés depuis « Mon compte »
+  const profile: { first_name?: string; last_name?: string } = {};
 
   // Serveur de preview simulé : la page demandée, avec le numéro de version reçu
   await page.route('http://preview.test/**', (route) => {
@@ -1487,9 +1489,31 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     if (url.pathname === '/api/users/me')
       return json(
         USERS[user].site
-          ? { ...USERS[user], site: { ...USERS[user].site, ...(onboarding ? { onboarding: site.onboarding } : {}), ...sessionPlan() } }
-          : USERS[user],
+          ? { ...USERS[user], ...profile, site: { ...USERS[user].site, ...(onboarding ? { onboarding: site.onboarding } : {}), ...sessionPlan() } }
+          : { ...USERS[user], ...profile },
       );
+    // Mon compte (#367) : seuls le prénom et le nom ; mot de passe avec l'actuel
+    if (url.pathname === '/api/user-management/me' && method === 'PUT') {
+      const { data } = route.request().postDataJSON() as { data: Record<string, string> };
+      bodies.push({ call: 'PUT me', body: { data } });
+      const refused = Object.keys(data).filter((key) => !['first_name', 'last_name', 'phone'].includes(key));
+      if (refused.length) return json({ error: { status: 400, message: `Champ non modifiable : ${refused.join(', ')}` } }, 400);
+      Object.assign(profile, { first_name: data.first_name, last_name: data.last_name });
+      const { id, email, municipality_role } = USERS[user];
+      return json({ data: { id, email, municipality_role, phone: null, ...profile } });
+    }
+    if (url.pathname === '/api/user-management/me/password' && method === 'PUT') {
+      const body = route.request().postDataJSON() as { currentPassword: string; password: string; passwordConfirmation: string };
+      bodies.push({ call: 'PUT me/password', body: { data: body } });
+      if (!passwords.has(body.currentPassword))
+        return json({ error: { status: 400, message: 'Le mot de passe actuel est incorrect', details: { field: 'currentPassword' } } }, 400);
+      if (body.password.length < 10)
+        return json({ error: { status: 400, message: 'Le mot de passe doit contenir au moins 10 caractères' } }, 400);
+      passwords.delete(body.currentPassword);
+      passwords.add(body.password);
+      return json({ ok: true });
+    }
+    if (url.pathname === '/api/user-management/me/reset-password' && method === 'POST') return json({ ok: true });
     // Essai terminé : l'administration de la commune est en lecture seule (sauf pour l'équipe)
     if (
       plan.plan === 'expired' &&

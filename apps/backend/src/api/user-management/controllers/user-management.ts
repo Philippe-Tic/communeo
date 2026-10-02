@@ -17,6 +17,8 @@ import {
   resolveInvitationToken,
 } from '../../../utils/security';
 import { log } from '../../../utils/logger';
+import { LOGIN_LOCKED, loginAttempts } from '../../../utils/login-attempts';
+import { issueSession, SESSION_COOKIE } from '../../../utils/session-cookie';
 
 const ALLOWED_ROLES = ['super_admin', 'admin'];
 
@@ -25,6 +27,20 @@ const ASSIGNABLE_ROLES: Record<string, string[]> = {
   super_admin: ['super_admin', 'admin', 'editor'],
   admin: ['admin', 'editor'],
 };
+
+// Mon compte : seuls champs que la personne modifie elle-même
+const SELF_EDITABLE_FIELDS = ['first_name', 'last_name', 'phone'];
+const MAX_NAME_LENGTH = 100;
+
+/** Profil renvoyé à la personne : aucun champ technique ni la fiche de la commune */
+const ownProfile = (user) => ({
+  id: user.id,
+  email: user.email,
+  first_name: user.first_name,
+  last_name: user.last_name,
+  phone: user.phone ?? null,
+  municipality_role: user.municipality_role,
+});
 
 const isRateLimited = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
 
@@ -102,6 +118,24 @@ async function sendPasswordResetEmail(email: string, rawFirstName: string, token
   });
 }
 
+async function sendPasswordChangedEmail(email: string, rawFirstName: string, rawSiteName: string) {
+  const firstName = escapeHtml(rawFirstName);
+  const siteName = escapeHtml(rawSiteName);
+  const adminUrl = process.env.ADMIN_URL || 'http://localhost:5173';
+  const forgotLink = `${adminUrl}/mot-de-passe-oublie`;
+
+  await strapi.plugin('email').service('email').send({
+    to: email,
+    subject: `Votre mot de passe a été modifié — ${rawSiteName}`,
+    html: `
+      <p>Bonjour ${firstName},</p>
+      <p>Le mot de passe de votre compte sur <strong>${siteName}</strong> vient d'être modifié depuis l'écran « Mon compte ». Vos autres sessions ont été fermées.</p>
+      <p>Si ce n'est pas vous, choisissez tout de suite un nouveau mot de passe avec <a href="${forgotLink}">Mot de passe oublié</a> et prévenez un administrateur de la commune.</p>
+    `,
+    text: `Bonjour ${rawFirstName}, le mot de passe de votre compte sur ${rawSiteName} vient d'être modifié depuis l'écran « Mon compte ». Vos autres sessions ont été fermées. Si ce n'est pas vous, choisissez tout de suite un nouveau mot de passe (${forgotLink}) et prévenez un administrateur de la commune.`,
+  });
+}
+
 async function getAuthenticatedUserBasic(ctx) {
   const user = ctx.state.user;
   if (!user) {
@@ -143,26 +177,88 @@ export default {
   },
 
   /**
-   * Self-service endpoint — update own profile.
-   * PUT /api/user-management/me
+   * Mon compte : prénom, nom et téléphone de la personne connectée, rien d'autre (ni rôle, ni
+   * commune, ni adresse e-mail : un champ non prévu est refusé).
+   * PUT /api/user-management/me — { data: { first_name?, last_name?, phone? } }
    */
   async updateMe(ctx) {
     const currentUser = await getAuthenticatedUserBasic(ctx);
-    const data = ctx.request.body?.data || ctx.request.body;
+    const data = ctx.request.body?.data ?? ctx.request.body;
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return ctx.badRequest('Données manquantes');
 
-    const updateData: Record<string, any> = {};
-    if (data.first_name !== undefined) updateData.first_name = data.first_name;
-    if (data.last_name !== undefined) updateData.last_name = data.last_name;
-    if (data.phone !== undefined) updateData.phone = data.phone;
+    const refused = Object.keys(data).filter((key) => !SELF_EDITABLE_FIELDS.includes(key));
+    if (refused.length) return ctx.badRequest(`Champ non modifiable : ${refused.join(', ')}`);
 
-    const updatedUser = await strapi.query('plugin::users-permissions.user').update({
+    const updateData: Record<string, string | null> = {};
+    for (const [field, label] of [['first_name', 'Le prénom'], ['last_name', 'Le nom']] as const) {
+      if (data[field] === undefined) continue;
+      const value = typeof data[field] === 'string' ? data[field].trim() : '';
+      if (!value) return ctx.badRequest(`${label} est obligatoire`);
+      if (value.length > MAX_NAME_LENGTH) return ctx.badRequest(`${label} ne doit pas dépasser ${MAX_NAME_LENGTH} caractères`);
+      updateData[field] = value;
+    }
+    if (data.phone !== undefined) {
+      if (data.phone !== null && typeof data.phone !== 'string') return ctx.badRequest('Téléphone invalide');
+      const phone = data.phone?.trim() || null;
+      if (phone && phone.length > 30) return ctx.badRequest('Téléphone invalide');
+      updateData.phone = phone;
+    }
+
+    const updated = await strapi.query('plugin::users-permissions.user').update({ where: { id: currentUser.id }, data: updateData });
+    ctx.body = { data: ownProfile(updated) };
+  },
+
+  /**
+   * Mon compte : changement du mot de passe, avec le mot de passe actuel. Les erreurs de mot de passe
+   * actuel comptent comme des échecs de connexion (5 essais, puis blocage 15 minutes). Les autres
+   * sessions du compte sont fermées ; celle-ci continue avec un nouveau cookie. Un e-mail prévient
+   * la personne.
+   * PUT /api/user-management/me/password — { currentPassword, password, passwordConfirmation }
+   */
+  async changeMyPassword(ctx) {
+    const currentUser = await getAuthenticatedUserBasic(ctx);
+    const { currentPassword, password, passwordConfirmation } = ctx.request.body ?? {};
+    const ip = ctx.request.ip;
+
+    if (typeof currentPassword !== 'string' || !currentPassword) return ctx.badRequest('Indiquez votre mot de passe actuel');
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+      return ctx.badRequest(`Le mot de passe doit contenir au moins ${MIN_PASSWORD_LENGTH} caractères`);
+    }
+    if (password !== passwordConfirmation) return ctx.badRequest('Les mots de passe ne correspondent pas');
+    if (loginAttempts.isLocked(currentUser.email, ip)) return ctx.tooManyRequests(LOGIN_LOCKED);
+
+    const userService = strapi.plugin('users-permissions').service('user');
+    const stored = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: currentUser.id }, select: ['password'] });
+    if (!stored?.password || !(await userService.validatePassword(currentPassword, stored.password))) {
+      loginAttempts.failed(currentUser.email, ip);
+      return ctx.badRequest('Le mot de passe actuel est incorrect', { field: 'currentPassword' });
+    }
+    loginAttempts.succeeded(currentUser.email);
+    if (password === currentPassword) return ctx.badRequest("Choisissez un mot de passe différent de l'actuel");
+
+    const hashed = (await userService.ensureHashedPasswords({ password })).password;
+    await strapi.query('plugin::users-permissions.user').update({
       where: { id: currentUser.id },
-      data: updateData,
-      populate: ['site'],
+      data: { password: hashed, password_changed_at: new Date(), resetPasswordToken: null },
     });
 
-    const { password, resetPasswordToken, confirmationToken, ...sanitized } = updatedUser;
-    ctx.body = { data: sanitized };
+    // Session de l'admin : un nouveau cookie (même durée), l'ancien jeton ne vaut plus rien
+    if (ctx.state.cookieSession) {
+      const payload = await strapi
+        .plugin('users-permissions')
+        .service('jwt')
+        .verify(ctx.cookies.get(SESSION_COOKIE))
+        .catch(() => null);
+      issueSession(ctx, currentUser.id, payload?.remember === true);
+    }
+
+    try {
+      await sendPasswordChangedEmail(currentUser.email, currentUser.first_name, currentUser.site?.name || 'Communeo');
+    } catch (emailError) {
+      log.error('Failed to send password changed email:', emailError);
+    }
+
+    ctx.body = { ok: true };
   },
 
   /**
@@ -547,6 +643,8 @@ export default {
         password: hashedPassword,
         blocked: false,
         resetPasswordToken: null,
+        // Mot de passe oublié : les sessions ouvertes avec l'ancien mot de passe sont fermées
+        password_changed_at: new Date(),
       },
     });
 

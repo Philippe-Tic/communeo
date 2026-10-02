@@ -15,6 +15,8 @@ interface StrapiUser {
   blocked?: boolean;
   /** `false` : compte désactivé par un administrateur */
   active?: boolean;
+  /** Jeton émis avant le dernier changement de mot de passe : session fermée */
+  sessionRevoked?: boolean;
   site?: {
     id: number;
     documentId: string;
@@ -115,6 +117,10 @@ const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const writableWhenExpired = (apiId: string | null, id: string | null) =>
   ['session', 'auth', 'preview', 'quote'].includes(apiId ?? '') || (apiId === 'user-management' && id === 'me');
 
+/** Jeton émis avant le dernier changement de mot de passe (`iat` en secondes) */
+const revokedByPasswordChange = (user: { password_changed_at?: string | Date | null }, decoded: { iat?: number }) =>
+  !!user.password_changed_at && (decoded.iat ?? 0) < Math.floor(new Date(user.password_changed_at).getTime() / 1000);
+
 const parsePath = (rawUrl: string) => {
   const pathname = rawUrl.split('?')[0];
   const segments = pathname.split('/').filter(Boolean).map((s) => decodeURIComponent(s));
@@ -128,10 +134,11 @@ export default (config: any, { strapi }: { strapi: any }) => {
   const getUserFromToken = async (token: string): Promise<StrapiUser | null> => {
     try {
       const decoded = await strapi.plugin('users-permissions').service('jwt').verify(token);
-      return await strapi.db.query('plugin::users-permissions.user').findOne({
+      const user = await strapi.db.query('plugin::users-permissions.user').findOne({
         where: { id: decoded.id },
         populate: ['site'],
       });
+      return user && revokedByPasswordChange(user, decoded) ? { ...user, sessionRevoked: true } : user;
     } catch {
       // Jeton invalide ou API token (non-JWT) : laissé aux permissions Strapi
       return null;
@@ -165,6 +172,11 @@ export default (config: any, { strapi }: { strapi: any }) => {
       user = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { id: user.id }, populate: ['site'] });
     }
 
+    // Mot de passe changé depuis l'ouverture de cette session (Mon compte, mot de passe oublié) :
+    // elle est fermée ; seule la déconnexion reste possible (effacement du cookie)
+    if (user?.sessionRevoked) {
+      return apiId === 'session' ? next() : ctx.unauthorized('Session fermée : le mot de passe a été changé');
+    }
     if (!user || user.blocked) return next();
     // Compte désactivé par un administrateur, ou commune suspendue : la session en cours ne vaut plus rien
     if (user.active === false) return ctx.unauthorized('Compte désactivé');
@@ -217,6 +229,10 @@ export default (config: any, { strapi }: { strapi: any }) => {
             // Le choix du thème est réservé aux administrateurs (écran Apparence)
             if ('theme' in data && !['admin', 'super_admin'].includes(user.municipality_role)) {
               return ctx.forbidden('Seul un administrateur peut changer le thème du site');
+            }
+            // Durée de conservation des messages (#342) : réglage des administrateurs (Mentions légales et RGPD)
+            if ('message_retention' in data && !['admin', 'super_admin'].includes(user.municipality_role)) {
+              return ctx.forbidden('Seul un administrateur peut changer la durée de conservation des messages');
             }
           }
         }

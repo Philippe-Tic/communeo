@@ -3,7 +3,7 @@
  * Un réglage enregistré est visible à la prochaine mise en ligne ; la preview peut le montrer avant.
  */
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
-import type { NavigationConfig, OpeningHours } from '@communeo/core';
+import type { MessageRetention, NavigationConfig, OpeningHours } from '@communeo/core';
 import { api } from './api';
 import type { LibraryFile } from './media-library';
 import { sessionQuery } from './session';
@@ -64,6 +64,8 @@ export interface SiteSettings {
   infos_pratiques: PracticalInfo | null;
   mentions_legales: LegalNotice | null;
   rgpd: PrivacySettings | null;
+  /** Durée de conservation des messages des habitants (#342) ; null : pas encore choisie (1 an) */
+  message_retention: MessageRetention | null;
   accessibilite: AccessibilitySettings | null;
   social_links: SocialLink[] | null;
   code_insee: string | null;
@@ -105,6 +107,7 @@ const FIELDS = [
   'navigation_config',
   'waste_notes',
   'onboarding',
+  'message_retention',
 ];
 /** Composants et fichiers : chaque écran de réglages enregistre les siens en entier */
 const POPULATE = ['logo', 'favicon', 'infos_pratiques', 'mentions_legales', 'rgpd', 'accessibilite', 'social_links'];

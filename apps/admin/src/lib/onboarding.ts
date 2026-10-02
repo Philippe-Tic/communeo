@@ -5,7 +5,7 @@
  */
 import { queryOptions, type QueryClient } from '@tanstack/react-query';
 import type { OnboardingChecklist } from '@communeo/core';
-import type { CommuneDetails, CommuneMatch } from '@communeo/core/client';
+import type { CommuneDetails, CommuneMatch, PlaceMatch } from '@communeo/core/client';
 import { api } from './api';
 import { sessionQuery, type SessionUser } from './session';
 import { saveSiteSettings, type OnboardingProgress } from './site-settings';
@@ -41,6 +41,18 @@ export const communeDetails = (insee: string) =>
   api<{ data: CommuneDetails }>(`/api/onboarding/communes/${encodeURIComponent(insee)}`).then(
     (response) => response.data,
   );
+
+/** Ville ou adresse (Base adresse nationale, via l'API Communeo), proches de `near` s'il est connu (#362) */
+export const searchPlaces = (q: string, near?: { latitude: number; longitude: number } | null) =>
+  api<{ data: PlaceMatch[] }>(
+    `/api/onboarding/places?${new URLSearchParams({ q, ...(near ? { lat: String(near.latitude), lon: String(near.longitude) } : {}) })}`,
+  ).then((response) => response.data);
+
+/** Commune où se trouve une position déjà enregistrée (pour la nommer) */
+export const placeCommune = (latitude: number, longitude: number) =>
+  api<{ data: { name: string; postalCode: string | null } | null }>(
+    `/api/onboarding/places/commune?${new URLSearchParams({ lat: String(latitude), lon: String(longitude) })}`,
+  ).then((response) => response.data);
 
 /** Enregistre la progression (et, avec `data`, les réglages de l'étape) ; la session suit */
 export async function saveProgress(

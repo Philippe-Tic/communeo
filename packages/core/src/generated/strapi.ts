@@ -81,7 +81,7 @@ export type SchoolMenuMealDay = (typeof schoolMenuMealDayValues)[number];
 export const socialSocialLinkPlatformValues = ['facebook', 'instagram', 'linkedin', 'x', 'youtube', 'tiktok', 'autre'] as const;
 export type SocialSocialLinkPlatform = (typeof socialSocialLinkPlatformValues)[number];
 
-export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_approve', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal'] as const;
+export const activityLogActionValues = ['login', 'publish', 'unpublish', 'delete', 'theme_change', 'domain_change', 'user_invite', 'role_change', 'user_deactivate', 'user_reactivate', 'user_delete', 'commune_create', 'commune_suspend', 'commune_unsuspend', 'commune_delete', 'trial_extend', 'trial_expire', 'live_request', 'commune_go_live', 'live_reject', 'signup_approve', 'signup_reject', 'quote_sign', 'invoice_issue', 'invoice_paid', 'invoice_cancel', 'invoice_chorus', 'invoice_remind', 'billing_renewal', 'messages_purge'] as const;
 export type ActivityLogAction = (typeof activityLogActionValues)[number];
 
 export const alerteSeverityValues = ['info', 'warning', 'critical'] as const;
@@ -170,6 +170,9 @@ export type SiteTrialNotice = (typeof siteTrialNoticeValues)[number];
 
 export const siteSignupApprovalValues = ['townhall', 'team'] as const;
 export type SiteSignupApproval = (typeof siteSignupApprovalValues)[number];
+
+export const siteMessageRetentionValues = ['months_6', 'months_12', 'months_24', 'months_36', 'never'] as const;
+export type SiteMessageRetention = (typeof siteMessageRetentionValues)[number];
 
 export const siteOpenDataPlatformValues = ['data-gouv-fr', 'opendatasoft', 'custom', 'none'] as const;
 export type SiteOpenDataPlatform = (typeof siteOpenDataPlatformValues)[number];
@@ -753,6 +756,7 @@ export interface Site extends StrapiDocument {
   mentions_legales?: LegalMentionsLegales | null;
   rgpd?: LegalRgpd | null;
   accessibilite?: LegalAccessibilite | null;
+  message_retention: SiteMessageRetention | null;
   infos_pratiques?: LegalInfosPratiques | null;
   open_data_enabled: boolean | null;
   open_data_url: string | null;

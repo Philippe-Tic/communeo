@@ -42,6 +42,48 @@ export function fromGeo(record: any): CommuneMatch & { latitude: number | null; 
   };
 }
 
+/**
+ * Un lieu trouvé par le service de géocodage de la Base adresse nationale (Géoplateforme IGN, ex
+ * api-adresse.data.gouv.fr) : commune, rue, adresse ou lieu-dit, avec sa position (#362).
+ */
+export interface PlaceMatch {
+  /** « 1 Place de la Mairie 58240 Saint-Pierre-le-Moûtier », « Saint-Pierre-le-Moûtier » */
+  label: string;
+  /** Département et région : « 58, Nièvre, Bourgogne-Franche-Comté » */
+  context: string | null;
+  kind: 'commune' | 'rue' | 'adresse' | 'lieu-dit';
+  latitude: number;
+  longitude: number;
+}
+
+const PLACE_KINDS: Record<string, PlaceMatch['kind']> = {
+  municipality: 'commune',
+  street: 'rue',
+  housenumber: 'adresse',
+  locality: 'lieu-dit',
+};
+
+/** Réponse GeoJSON de `/search` (BAN) → lieux ; un élément sans position est ignoré */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- réponse d'une API externe, lue champ par champ
+export function placesFromGeocoding(collection: any): PlaceMatch[] {
+  const features: unknown[] = Array.isArray(collection?.features) ? collection.features : [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- idem
+  return features.flatMap((feature: any) => {
+    const [longitude, latitude] = Array.isArray(feature?.geometry?.coordinates) ? feature.geometry.coordinates : [];
+    const label = String(feature?.properties?.label ?? '').trim();
+    if (typeof latitude !== 'number' || typeof longitude !== 'number' || !label) return [];
+    return [
+      {
+        label,
+        context: typeof feature.properties.context === 'string' ? feature.properties.context : null,
+        kind: PLACE_KINDS[String(feature.properties.type)] ?? 'lieu-dit',
+        latitude,
+        longitude,
+      },
+    ];
+  });
+}
+
 const DAY_NAMES: Record<string, Weekday> = {
   lundi: 'monday',
   mardi: 'tuesday',

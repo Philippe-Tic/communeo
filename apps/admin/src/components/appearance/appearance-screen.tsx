@@ -159,14 +159,15 @@ export function ThemePreview({
           <Dialog.Description className="sr-only">
             Votre vrai site, dans le thème choisi. Rien n'est modifié tant que vous ne choisissez pas le thème.
           </Dialog.Description>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2">
+          {/* Sous 768 px : fermer et choisir sur la première ligne, les thèmes sur toute la largeur dessous */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2 max-md:justify-between">
             <Dialog.Close asChild>
-              <Button type="button" variant="secondary" size="sm" className="max-md:h-11">
+              <Button type="button" variant="secondary" size="sm" className="max-md:h-11 max-md:w-11 max-md:px-0">
                 <X aria-hidden="true" />
-                Fermer l'aperçu
+                <span className="max-md:sr-only">Fermer l'aperçu</span>
               </Button>
             </Dialog.Close>
-            <fieldset className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <fieldset className="flex min-w-0 flex-1 flex-wrap items-center gap-1 max-md:order-last max-md:basis-full">
               <legend className="sr-only">Thème montré</legend>
               {THEMES.map((entry) => (
                 <label

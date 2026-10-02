@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CloudUpload,
   Database,
+  Download,
   Files,
   FileText,
   HandHeart,
@@ -67,6 +68,7 @@ export const MY_SITE_LINKS: NavLink[] = [
   { label: 'Démarches', to: '/mon-site/demarches', icon: List },
   { label: 'Open data', to: '/mon-site/open-data', icon: Database },
   { label: 'Redirections', to: '/mon-site/redirections', icon: RouteIcon, adminOnly: true },
+  { label: 'Exporter les données', to: '/mon-site/export', icon: Download, adminOnly: true },
   { label: 'Supprimer la commune', to: '/mon-site/suppression', icon: Trash2, adminOnly: true },
 ];
 

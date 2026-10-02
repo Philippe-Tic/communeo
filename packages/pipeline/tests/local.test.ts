@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getPublisher, LocalPublisher } from '../src';
+import { getPublisher, LocalPublisher, publishedSiteDir } from '../src';
 
 let root: string;
 let build: string;
@@ -166,5 +166,18 @@ describe('LocalPublisher', () => {
     expect(getPublisher({ PUBLISH_DIR: root }).id).toBe('local');
     expect(getPublisher({ PUBLISH_DIR: root, NETLIFY_TOKEN: 't' }).id).toBe('netlify');
     expect(getPublisher({ PUBLISH_DIR: root, CADDY_ADMIN_URL: 'http://caddy:2019' }).id).toBe('local');
+  });
+});
+
+describe('publishedSiteDir (export des données, #343)', () => {
+  it('dossier du site quand les sites sont servis depuis le serveur, null chez Netlify', () => {
+    expect(publishedSiteDir('lyon', { SITES_PUBLISHER: 'bunny' })).toBe('/srv/sites/lyon');
+    expect(publishedSiteDir('lyon', { SITES_PUBLISHER: 'bunny', PUBLISH_DIR: '/data/sites', NETLIFY_TOKEN: 't' })).toBe('/data/sites/lyon');
+    expect(publishedSiteDir('lyon', { PUBLISH_DIR: '/data/sites' })).toBe('/data/sites/lyon');
+    expect(publishedSiteDir('lyon', { PUBLISH_DIR: '/data/sites', NETLIFY_TOKEN: 't' })).toBeNull();
+    expect(publishedSiteDir('lyon', {})).toBeNull();
+    // Strapi : le volume monté sans publier lui-même
+    expect(publishedSiteDir('lyon', { SITES_DIR: '/srv/sites' })).toBe('/srv/sites/lyon');
+    expect(publishedSiteDir('lyon', { SITES_DIR: '/srv/sites', NETLIFY_TOKEN: 't' })).toBeNull();
   });
 });

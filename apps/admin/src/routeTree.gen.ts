@@ -56,6 +56,7 @@ import { Route as AppMonSiteAccessibiliteRouteImport } from './routes/_app/mon-s
 import { Route as AppMonSiteAccueilRouteImport } from './routes/_app/mon-site/accueil'
 import { Route as AppMonSiteApparenceRouteImport } from './routes/_app/mon-site/apparence'
 import { Route as AppMonSiteDemarchesRouteImport } from './routes/_app/mon-site/demarches'
+import { Route as AppMonSiteExportRouteImport } from './routes/_app/mon-site/export'
 import { Route as AppMonSiteInformationsRouteImport } from './routes/_app/mon-site/informations'
 import { Route as AppMonSiteLegalRouteImport } from './routes/_app/mon-site/legal'
 import { Route as AppMonSiteMenuRouteImport } from './routes/_app/mon-site/menu'
@@ -300,6 +301,11 @@ const AppMonSiteDemarchesRoute = AppMonSiteDemarchesRouteImport.update({
   path: '/mon-site/demarches',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMonSiteExportRoute = AppMonSiteExportRouteImport.update({
+  id: '/mon-site/export',
+  path: '/mon-site/export',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMonSiteInformationsRoute = AppMonSiteInformationsRouteImport.update({
   id: '/mon-site/informations',
   path: '/mon-site/informations',
@@ -394,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/mon-site/apparence': typeof AppMonSiteApparenceRoute
   '/mon-site/demarches': typeof AppMonSiteDemarchesRoute
+  '/mon-site/export': typeof AppMonSiteExportRoute
   '/mon-site/informations': typeof AppMonSiteInformationsRoute
   '/mon-site/legal': typeof AppMonSiteLegalRoute
   '/mon-site/menu': typeof AppMonSiteMenuRoute
@@ -450,6 +457,7 @@ export interface FileRoutesByTo {
   '/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/mon-site/apparence': typeof AppMonSiteApparenceRoute
   '/mon-site/demarches': typeof AppMonSiteDemarchesRoute
+  '/mon-site/export': typeof AppMonSiteExportRoute
   '/mon-site/informations': typeof AppMonSiteInformationsRoute
   '/mon-site/legal': typeof AppMonSiteLegalRoute
   '/mon-site/menu': typeof AppMonSiteMenuRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/_app/mon-site/accueil': typeof AppMonSiteAccueilRoute
   '/_app/mon-site/apparence': typeof AppMonSiteApparenceRoute
   '/_app/mon-site/demarches': typeof AppMonSiteDemarchesRoute
+  '/_app/mon-site/export': typeof AppMonSiteExportRoute
   '/_app/mon-site/informations': typeof AppMonSiteInformationsRoute
   '/_app/mon-site/legal': typeof AppMonSiteLegalRoute
   '/_app/mon-site/menu': typeof AppMonSiteMenuRoute
@@ -568,6 +577,7 @@ export interface FileRouteTypes {
     | '/mon-site/accueil'
     | '/mon-site/apparence'
     | '/mon-site/demarches'
+    | '/mon-site/export'
     | '/mon-site/informations'
     | '/mon-site/legal'
     | '/mon-site/menu'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/mon-site/accueil'
     | '/mon-site/apparence'
     | '/mon-site/demarches'
+    | '/mon-site/export'
     | '/mon-site/informations'
     | '/mon-site/legal'
     | '/mon-site/menu'
@@ -682,6 +693,7 @@ export interface FileRouteTypes {
     | '/_app/mon-site/accueil'
     | '/_app/mon-site/apparence'
     | '/_app/mon-site/demarches'
+    | '/_app/mon-site/export'
     | '/_app/mon-site/informations'
     | '/_app/mon-site/legal'
     | '/_app/mon-site/menu'
@@ -1038,6 +1050,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonSiteDemarchesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/mon-site/export': {
+      id: '/_app/mon-site/export'
+      path: '/mon-site/export'
+      fullPath: '/mon-site/export'
+      preLoaderRoute: typeof AppMonSiteExportRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/mon-site/informations': {
       id: '/_app/mon-site/informations'
       path: '/mon-site/informations'
@@ -1135,6 +1154,7 @@ interface AppRouteChildren {
   AppMonSiteAccueilRoute: typeof AppMonSiteAccueilRoute
   AppMonSiteApparenceRoute: typeof AppMonSiteApparenceRoute
   AppMonSiteDemarchesRoute: typeof AppMonSiteDemarchesRoute
+  AppMonSiteExportRoute: typeof AppMonSiteExportRoute
   AppMonSiteInformationsRoute: typeof AppMonSiteInformationsRoute
   AppMonSiteLegalRoute: typeof AppMonSiteLegalRoute
   AppMonSiteMenuRoute: typeof AppMonSiteMenuRoute
@@ -1176,6 +1196,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonSiteAccueilRoute: AppMonSiteAccueilRoute,
   AppMonSiteApparenceRoute: AppMonSiteApparenceRoute,
   AppMonSiteDemarchesRoute: AppMonSiteDemarchesRoute,
+  AppMonSiteExportRoute: AppMonSiteExportRoute,
   AppMonSiteInformationsRoute: AppMonSiteInformationsRoute,
   AppMonSiteLegalRoute: AppMonSiteLegalRoute,
   AppMonSiteMenuRoute: AppMonSiteMenuRoute,

@@ -141,8 +141,10 @@ La Commune peut demander la suppression anticipée de ses données. Elle peut au
 pendant l'abonnement et jusqu'à la suppression, récupérer ses données sous la forme d'une archive
 comprenant : son site tel qu'il est publié (pages HTML consultables sans Communeo), ses contenus dans un
 format ouvert et réutilisable (JSON et texte), tous ses fichiers d'origine (images, documents), et ses
-messages, inscrits à la lettre d'information et fiches d'associations (CSV). L'archive est fournie sur
-simple demande à contact@communeo.fr.
+messages, inscrits à la lettre d'information et fiches d'associations (CSV). Les administrateurs de la
+Commune la téléchargent eux-mêmes depuis l'outil d'administration (écran « Exporter les données »), y
+compris pendant les six mois de lecture seule ; préparée à leur demande, elle reste disponible sept jours
+puis elle est effacée. Elle peut aussi être fournie sur simple demande à contact@communeo.fr.
 
 Communeo peut conserver ce que la loi l'oblige à garder (devis, bons de commande et factures, pendant
 10 ans), qui ne contient que les coordonnées de facturation et le nom du signataire.

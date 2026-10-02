@@ -4,7 +4,8 @@
 # en-têtes), admin, connexion, création d'une commune, mise en ligne réelle par le worker dans le volume des
 # sites, site servi par l'origine (en-tête secret, redirection de l'ancien site, noindex d'un site en essai,
 # /x → x.html, page 404), domaine nu d'une commune (certificat à la demande autorisé par Strapi, redirection
-# vers www), preview fermée sans jeton, alerte disque, sauvegarde puis restauration.
+# vers www), export des données de la commune (#343), preview fermée sans jeton, alerte disque, sauvegarde puis
+# restauration.
 #   deploy/e2e/run.sh                 construit les images puis teste
 #   E2E_BUILD=0 IMAGE_REGISTRY=ghcr.io/philippe-tic IMAGE_TAG=<sha> deploy/e2e/run.sh   images publiées
 #   E2E_KEEP=1 deploy/e2e/run.sh      garde la stack après le test (https://localhost:8443, certificat de
@@ -159,6 +160,28 @@ status=$(on origine.localhost /sites/commune-e2e/page-inconnue -o /tmp/communeo-
 status=$(on origine.localhost /sites/commune-e2e/.regles/site.caddy -o /dev/null -w '%{http_code}' "${origin_secret[@]}")
 [ "$status" = 404 ] || fail "règles du site servies ($status)"
 echo "  403 sans secret ; accueil, /contact → contact.html, 301 de l'ancien site, noindex, cache, 404 du site"
+
+step "Export des données de la commune (#343)"
+status=$(api POST /api/data-export '' -H "X-Site-Document-Id: $site" -o /dev/null -w '%{http_code}')
+[ "$status" = 202 ] || fail "export refusé ($status)"
+deadline=$((SECONDS + 120))
+while :; do
+  state=$(api GET /api/data-export '' -H "X-Site-Document-Id: $site" | jq -r .data.status)
+  [ "$state" = ready ] && break
+  [ "$state" = failed ] && fail "l'export a échoué"
+  [ $SECONDS -lt $deadline ] || fail "export trop long (état : $state)"
+  sleep 2
+done
+curl -fsS -o /tmp/communeo-e2e-export.zip "$base/api/data-export/download" -H "Authorization: Bearer $token" -H "X-Site-Document-Id: $site" \
+  || fail "export non téléchargé"
+entries=$(unzip -Z1 /tmp/communeo-e2e-export.zip)
+for entry in LISEZMOI.md contenus/reglages-du-site.json donnees-personnelles/messages.csv site-publie/index.html; do
+  grep -qx "$entry" <<<"$entries" || fail "$entry absent de l'export"
+done
+grep -q '^fichiers/[0-9]*-salle\.png$' <<<"$entries" || fail "fichier de la médiathèque absent de l'export"
+grep -q '\.regles' <<<"$entries" && fail "règles Caddy dans l'export"
+compose exec -T strapi sh -c 'ls /srv/exports/*.zip' >/dev/null || fail "archive hors du volume exports"
+echo "  archive prête : LISEZMOI, contenus, médiathèque, données personnelles, site publié (sans ses règles)"
 
 step "Domaine nu d'une commune : certificat à la demande (autorisé par Strapi), redirection vers www (#382)"
 ask() { compose exec -T caddy wget -S -q -O /dev/null "http://strapi:1337/api/domain/certificate-check?domain=$1" 2>&1 | grep -o 'HTTP/[0-9.]* [0-9]*' | tail -1 | cut -d' ' -f2 || true; }

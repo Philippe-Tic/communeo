@@ -23,6 +23,8 @@ export type ActivityAction =
   | 'commune_delete'
   | 'deletion_request'
   | 'deletion_cancel'
+  | 'data_export'
+  | 'data_export_download'
   | 'trial_extend'
   | 'trial_expire'
   | 'live_request'
@@ -91,6 +93,8 @@ export const ACTION_LABELS: Record<ActivityAction, string> = {
   commune_delete: 'Commune supprimée',
   deletion_request: 'Suppression de la commune demandée',
   deletion_cancel: 'Suppression de la commune annulée',
+  data_export: 'Export des données demandé',
+  data_export_download: 'Export des données téléchargé',
   trial_extend: 'Essai prolongé',
   trial_expire: 'Essai terminé',
   live_request: 'Passage en live demandé',
@@ -131,6 +135,8 @@ export const COMMUNE_ACTIONS: ActivityAction[] = [
   'invoice_paid',
   'invoice_cancel',
   'messages_purge',
+  'data_export',
+  'data_export_download',
 ];
 
 const TYPE_LABELS: Record<string, string> = {

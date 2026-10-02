@@ -184,9 +184,10 @@ traitement ; ils sont décrits sur [communeo.fr/donnees-personnelles](/donnees-p
 - au terme de ces six mois, la Commune et toutes ses données sont supprimées ; les sauvegardes qui les
   contiennent sont effacées dans les 90 jours suivants.
 
-Sur simple demande, pendant le contrat ou pendant ces six mois, la Commune reçoit une archive de ses
-données : son site tel que publié, ses contenus dans un format ouvert, ses fichiers d'origine, ses
-messages, inscrits et associations.
+Pendant le contrat ou pendant ces six mois, la Commune récupère une archive de ses données : son site
+tel que publié, ses contenus dans un format ouvert, ses fichiers d'origine, ses messages, inscrits et
+associations. Ses administrateurs la téléchargent depuis l'outil d'administration (« Exporter les
+données ») ; elle peut aussi être fournie sur simple demande.
 
 Les devis, bons de commande et factures sont conservés dix ans, comme la loi l'impose.
 

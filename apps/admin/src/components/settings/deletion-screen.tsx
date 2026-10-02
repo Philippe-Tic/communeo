@@ -4,6 +4,7 @@
  * Abonnement payé : pas de demande possible, la commune contacte l'équipe Communeo.
  */
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { COMMUNE_DELETION_DAYS, deletionConfirmed } from '@communeo/core';
@@ -104,6 +105,14 @@ export function DeletionScreen() {
           </>
         )}
       </section>
+
+      <p className="mt-4 text-secondary">
+        Avant la suppression, récupérez les données de la commune (contenus, fichiers, messages, site publié) :{' '}
+        <Link to="/mon-site/export" className="font-medium text-brand underline">
+          exporter les données
+        </Link>
+        .
+      </p>
 
       <ConfirmDialog
         open={open}

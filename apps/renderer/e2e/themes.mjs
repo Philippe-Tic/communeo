@@ -7,7 +7,9 @@ export const themes = (process.env.E2E_THEMES?.split(',').filter(Boolean) ??
   readdirSync(themesDir).filter((name) => existsSync(new URL(`${name}/package.json`, themesDir)))).sort();
 
 export const outDir = (theme) => new URL(`../.e2e/${theme}/`, import.meta.url);
-export const PORT_BASE = 4500;
+// Autre plage avec RENDERER_E2E_PORT (deux copies du dépôt testées en même temps : en local, Playwright
+// réutiliserait les serveurs de l'autre copie)
+export const PORT_BASE = Number(process.env.RENDERER_E2E_PORT ?? 4500);
 
 /**
  * Builds supplémentaires : un thème avec une variante des données de démonstration, testés par leur

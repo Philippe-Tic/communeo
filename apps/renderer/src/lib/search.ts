@@ -6,6 +6,7 @@
  * Pagefind, où les termes trouvés sont déjà mis en évidence.
  */
 import type { DemarcheAudience } from '@communeo/core/client';
+import { BASE, withBase } from './base';
 import { resultCount, searchDemarches, searchResultItem } from './demarches-search';
 
 type PagefindResult = {
@@ -38,14 +39,15 @@ export function initSearch() {
   let engine: Pagefind | null | undefined;
   const demarches = initDemarchesResults();
 
-  // L'index n'existe que sur le site construit : il est chargé à l'exécution, hors du bundle.
-  // L'import passe par une fonction créée à la volée, sinon le bundler le réécrit et le casse.
-  const importModule = new Function('url', 'return import(url)') as (url: string) => Promise<unknown>;
+  // L'index n'existe que sur le site construit : il est chargé à l'exécution, hors du bundle (adresse
+  // calculée, ignorée par Vite). Sans `new Function` : une politique de sécurité sans 'unsafe-eval'
+  // (démonstration de communeo.fr, #359) le refuserait.
+  const importModule = (url: string): Promise<unknown> => import(/* @vite-ignore */ url);
 
   const load = async (): Promise<Pagefind | null> => {
     if (engine !== undefined) return engine;
     try {
-      engine = (await importModule(`${location.origin}/pagefind/pagefind.js`)) as Pagefind;
+      engine = (await importModule(`${location.origin}${BASE}/pagefind/pagefind.js`)) as Pagefind;
     } catch {
       // Pas d'index (preview, développement) : la page le dit au visiteur
       engine = null;
@@ -78,10 +80,11 @@ export function initSearch() {
 
     for (const page of shown) {
       // Pagefind donne le chemin du fichier (`/actualites/brocante.html`) : adresse de la page sans `.html`
+      // (depuis la racine du site : l'index est construit dans son dossier, sous-dossier éventuel compris)
       const path = new URL(page.url, location.origin).pathname.replace(/(\/index)?\.html$/, '').replace(/\/$/, '') || '/';
       const item = document.createElement('li');
       const link = document.createElement('a');
-      link.href = path;
+      link.href = withBase(path);
       link.textContent = page.meta?.title ?? path;
       const type = document.createElement('p');
       type.textContent = typeOf(path);
@@ -132,7 +135,7 @@ function initDemarchesResults() {
     if (request !== latest || !found || !found.total) return;
     count.textContent = resultCount(found.total, term);
     list.replaceChildren(...found.results.map((result) => searchResultItem(result, audience)));
-    more.href = `/demarches?q=${encodeURIComponent(term)}`;
+    more.href = withBase(`/demarches?q=${encodeURIComponent(term)}`);
     more.textContent = found.total > found.results.length ? `Voir les ${found.total} démarches pour « ${term} »` : 'Voir la page Démarches';
     section.hidden = false;
   };

@@ -5,7 +5,7 @@
  */
 import type { APIRoute } from 'astro';
 import { DEFINITION } from '../lib/seo';
-import { CONTACT_EMAIL, DOC_URL, TRIAL_URL } from '../lib/site';
+import { CONTACT_EMAIL, demoUrl, DOC_URL, TRIAL_URL } from '../lib/site';
 import { TRANCHES } from '../lib/tarifs';
 
 export const GET: APIRoute = ({ site }) => {
@@ -34,6 +34,7 @@ ${prix}
 - [Accueil](${page('/')}): présentation et démonstration vidéo
 - [Fonctionnalités](${page('/fonctionnalites')}): le site public, l'administration, la conformité
 - [Thèmes](${page('/themes')}): les quatre mises en page
+- [Démonstration](${page(demoUrl())}): le site de la commune fictive Saint-Aubin-sur-Loire, dans chacun des quatre thèmes
 - [Tarifs](${page('/tarifs')}): grille de prix, ce qui est compris, devis et facturation
 - [Comment ça marche](${page('/comment-ca-marche')}): de l'inscription à la facture, en sept étapes
 - [Questions fréquentes](${page('/questions')}): compétences, délais, nom de domaine, accessibilité, cookies, Chorus Pro

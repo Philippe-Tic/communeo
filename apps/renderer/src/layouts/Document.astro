@@ -1,11 +1,12 @@
 ---
 /**
  * Document HTML commun à tous les thèmes : métadonnées, SEO, données structurées, lien d'évitement,
- * bandeau « Site en préparation » (commune en période d'essai, #311) et bandeau de consentement. Le thème rend le contenu du <body> ; sa feuille de styles est liée ici,
+ * bandeau « Site en préparation » (commune en période d'essai, #311) ou « Site de démonstration » (`DEMO`,
+ * démonstration de communeo.fr, #359) et bandeau de consentement. Le thème rend le contenu du <body> ; sa feuille de styles est liée ici,
  * seule (en preview, tous les thèmes sont chargés mais chaque page ne reçoit que celle de son thème).
  */
 import type { PageContext } from '@communeo/theme-contract';
-import { homeTitle, mairieOf, SHARE_HEIGHT, SHARE_WIDTH, shareImage, toSchemaOrgOpeningHours } from '@communeo/core';
+import { homeTitle, mairieOf, SHARE_HEIGHT, SHARE_WIDTH, shareImage, THEMES, toSchemaOrgOpeningHours } from '@communeo/core';
 import CookieBanner from '@communeo/ui-a11y/CookieBanner.astro';
 import SkipLinks from '@communeo/ui-a11y/SkipLinks.astro';
 import theme from 'virtual:communeo/theme';
@@ -57,6 +58,45 @@ const jsonLd = [organization, ...breadcrumbLd, ...seo.jsonLd];
 // Bandeau d'alertes rechargé par le navigateur : mise en ligne immédiate, sans reconstruire le site
 const apiUrl = (process.env.STRAPI_PUBLIC_URL ?? process.env.STRAPI_URL ?? '').replace(/\/$/, '');
 const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUrl}/api/alertes/public/${site.id}` : undefined;
+
+// Démonstration de communeo.fr (#359) : commune fictive, jamais indexée, formulaires qui n'envoient rien
+const demo = process.env.DEMO === '1';
+// La même page dans les autres thèmes de la démonstration (`/demo/<thème>/…`), par une adresse relative :
+// le préfixe du sous-dossier n'y est pas ajouté et la démonstration marche aussi en local
+const demoThemes = demo
+  ? (process.env.DEMO_THEMES ?? '')
+      .split(',')
+      .map((id) => THEMES.find((entry) => entry.id === id.trim()))
+      .filter((entry) => !!entry)
+  : [];
+const up = '../'.repeat(Math.max(1, ctx.path.split('/').filter(Boolean).length));
+const demoHref = (id: string) => `${up}${id}${ctx.path === '/' ? '/' : ctx.path}`;
+const currentTheme = (import.meta.env.BASE_URL ?? '').replace(/\/$/, '').split('/').pop();
+// Les formulaires (contact, droits, associations, lettre d'information) n'envoient rien : une note au-dessus
+// de chacun, et l'envoi arrêté avant les scripts des thèmes (phase de capture)
+const DEMO_FORMS = `(() => {
+  const status = (form) => {
+    let note = form.previousElementSibling;
+    if (!note || !note.classList.contains('cn-demo-form')) {
+      note = document.createElement('p');
+      note.className = 'cn-demo-form';
+      note.setAttribute('role', 'status');
+      note.textContent = 'Formulaire de démonstration : rien ne sera envoyé.';
+      form.before(note);
+    }
+    return note;
+  };
+  document.querySelectorAll('form[method="post"]').forEach(status);
+  document.addEventListener('submit', (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || form.method !== 'post') return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    const note = status(form);
+    note.textContent = '';
+    requestAnimationFrame(() => { note.textContent = 'Démonstration : rien n’a été envoyé, la commune est fictive.'; });
+  }, true);
+})();`;
 ---
 <!doctype html>
 <html lang="fr">
@@ -67,7 +107,7 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     <link rel="stylesheet" href={theme.stylesheet} />
     {seo.description && <meta name="description" content={seo.description} />}
     <link rel="canonical" href={seo.canonical} />
-    {site.inPreparation ? <meta name="robots" content="noindex, nofollow" /> : seo.noindex && <meta name="robots" content="noindex" />}
+    {site.inPreparation || demo ? <meta name="robots" content="noindex, nofollow" /> : seo.noindex && <meta name="robots" content="noindex" />}
     {site.favicon ? <link rel="icon" href={site.favicon.src} /> : site.logo && <link rel="icon" href={site.logo.src} />}
     {(site.favicon ?? site.logo) && <link rel="apple-touch-icon" href={(site.favicon ?? site.logo)!.src} />}
     <link rel="manifest" href="/site.webmanifest" />
@@ -90,7 +130,33 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     <script is:inline>document.documentElement.classList.add('cn-js');</script>
     <SkipLinks />
     {
-      site.inPreparation && (
+      demo && (
+        <aside class="cn-demo" aria-label="Site de démonstration">
+          <p>
+            <strong>Site de démonstration.</strong> {site.name} est une commune fictive : voici le site qu'une mairie obtient
+            avec Communeo. <a href="https://communeo.fr/">Découvrir Communeo</a>
+          </p>
+          {
+            demoThemes.length > 1 && (
+              <nav aria-label="Thème de la démonstration">
+                <span>Thème :</span>
+                <ul>
+                  {demoThemes.map((entry) => (
+                    <li>
+                      <a href={demoHref(entry.id)} aria-current={entry.id === currentTheme ? 'page' : undefined}>
+                        {entry.name}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )
+          }
+        </aside>
+      )
+    }
+    {
+      !demo && site.inPreparation && (
         <aside class="cn-preparation" aria-label="Site en préparation">
           <p>
             <strong>Site en préparation.</strong> Le site de {site.name} est en cours de construction : ses informations
@@ -101,6 +167,7 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     }
     <slot />
     <CookieBanner />
+    {demo && <script is:inline set:html={DEMO_FORMS} />}
   </body>
 </html>
 
@@ -117,5 +184,55 @@ const alertsEndpoint = process.env.DATA_SOURCE === 'strapi' && apiUrl ? `${apiUr
     margin: 0 auto;
     max-width: 75rem;
     padding: 0.625rem 1rem;
+  }
+  .cn-demo {
+    background: #0f3b33;
+    color: #ffffff;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+  .cn-demo p,
+  .cn-demo nav {
+    margin: 0 auto;
+    max-width: 75rem;
+    padding: 0.5rem 1rem;
+  }
+  .cn-demo nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding-top: 0;
+  }
+  .cn-demo ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cn-demo a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .cn-demo a[aria-current='page'] {
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .cn-demo a:focus-visible {
+    outline: 3px solid #ffd166;
+    outline-offset: 2px;
+  }
+  /* Ajouté par le script de démonstration, au-dessus de chaque formulaire */
+  /* Mêmes couleurs quel que soit le bloc du thème autour (fond foncé d'une lettre d'information…) */
+  :global(.cn-demo-form) {
+    background: #fff4d6 !important;
+    color: #3d2e00 !important;
+    border: 1px solid #d9b95c;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
   }
 </style>

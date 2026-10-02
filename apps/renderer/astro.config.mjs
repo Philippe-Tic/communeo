@@ -9,6 +9,10 @@
  * - SITE_URL         URL publique du site (liens canoniques, sitemap)
  * - STRAPI_URL, STRAPI_TOKEN, SITE_DOCUMENT_ID, STRAPI_PUBLIC_URL (données Strapi)
  * - CONTENT_STATUS   « draft » pour la preview (brouillons)
+ * - BASE_PATH        sous-dossier où le site est servi (démonstration de communeo.fr : `/demo/<thème>`,
+ *                    #359) ; les sites des communes sont à la racine
+ * - DEMO             « 1 » : site de démonstration (bandeau, noindex, formulaires qui n'envoient rien) ;
+ *                    DEMO_THEMES : thèmes proposés dans le bandeau (`institutionnel,moderne,…`)
  */
 import { cpSync, existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -68,6 +72,7 @@ const fixtureAssets = () => {
 export default defineConfig({
   site: process.env.SITE_URL || 'https://saint-aubin-sur-loire.fr',
   outDir: process.env.OUT_DIR || './dist',
+  base: process.env.BASE_PATH || undefined,
   output: server ? 'server' : 'static',
   adapter: server ? node({ mode: 'standalone' }) : undefined,
   // Preview : l'admin (autre origine) envoie ses réglages non enregistrés par un POST de formulaire.

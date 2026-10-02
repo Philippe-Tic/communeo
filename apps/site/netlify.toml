@@ -3,10 +3,11 @@
 [build]
   command = "pnpm turbo run build --filter @communeo/site..."
   publish = "apps/site/dist"
-  # Pas de build (ni d'aperçu de PR) quand le commit ne touche ni le site, ni @communeo/core (tarifs), ni
-  # les dépendances ou la config du monorepo : une mise à jour de Strapi, de l'admin ou d'un thème n'en
-  # déclenche pas. Captures des thèmes : `pnpm captures:themes`, dont le commit déclenche le build.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/site packages/core pnpm-lock.yaml package.json pnpm-workspace.yaml turbo.json"
+  # Pas de build (ni d'aperçu de PR) quand le commit ne touche ni le site, ni ce qui construit sa
+  # démonstration (/demo, #359 : renderer, thèmes, fixtures et leurs paquets), ni @communeo/core (tarifs),
+  # ni les dépendances ou la config du monorepo : une mise à jour de Strapi ou de l'admin n'en déclenche pas.
+  # Captures des thèmes : `pnpm captures:themes`, dont le commit déclenche le build.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/site apps/renderer themes packages/core packages/fixtures packages/ui-a11y packages/theme-contract pnpm-lock.yaml package.json pnpm-workspace.yaml turbo.json"
 
 [build.environment]
   NODE_VERSION = "24"
@@ -37,6 +38,17 @@
   to = "/mentions-legales"
   status = 301
 
+# Démonstration (#359) : un dossier par thème, l'Institutionnel par défaut
+[[redirects]]
+  from = "/demo"
+  to = "/demo/institutionnel/"
+  status = 302
+
+[[redirects]]
+  from = "/demo/"
+  to = "/demo/institutionnel/"
+  status = 302
+
 [[redirects]]
   from = "/sitemap-index.xml"
   to = "/sitemap.xml"
@@ -49,6 +61,15 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+
+# Démonstration (#359) : la commune fictive, jamais indexée. Ses pages chargent la météo (Open-Meteo), une
+# vidéo et une carte après consentement, et la recherche (Pagefind, WebAssembly). Placée après la règle
+# générale, cette politique la remplace pour /demo.
+[[headers]]
+  for = "/demo/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.open-meteo.com; frame-src https://www.youtube-nocookie.com https://www.openstreetmap.org; form-action 'self'; frame-ancestors 'none'; base-uri 'self'"
+    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/_astro/*"

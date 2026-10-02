@@ -2,10 +2,12 @@
  * Preview (mode serveur) : chaque requête est rendue pour une commune et un thème, avec ses brouillons.
  * La réponse est entièrement rendue dans le contexte de la requête (pas de streaming) : aucun
  * composant ne peut lire le thème ou la commune d'une autre requête. Jamais indexée ni mise en cache.
- * En build statique, le middleware ne fait rien.
+ * En build statique, il ne fait rien, sauf pour un site servi sous un sous-dossier (`BASE_PATH`, la
+ * démonstration de communeo.fr) : les adresses depuis la racine du HTML reçoivent le préfixe (`base.ts`).
  */
 import { defineMiddleware } from 'astro:middleware';
 import { HOMEPAGE_SECTION_IDS } from '@communeo/core';
+import { BASE, rebaseHtml } from './lib/base';
 import { getSource } from './lib/content';
 import { resolvePreview } from './lib/preview';
 import { requestContext, withRequestContext, type RequestContext } from './lib/request-context';
@@ -40,7 +42,12 @@ if (section) requestAnimationFrame(() => section.scrollIntoView({ block: 'start'
 </script>`;
 
 export const onRequest = defineMiddleware(async ({ request }, next) => {
-  if (process.env.RENDER_MODE !== 'server') return next();
+  if (process.env.RENDER_MODE !== 'server') {
+    if (!BASE) return next();
+    const response = await next();
+    if (!response.headers.get('content-type')?.includes('text/html')) return response;
+    return new Response(rebaseHtml(await response.text()), { status: response.status, statusText: response.statusText, headers: response.headers });
+  }
   // Déjà dans une requête autorisée (réécriture interne d'Astro) : rien à revérifier
   if (requestContext()) return next();
 

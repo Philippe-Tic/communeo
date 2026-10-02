@@ -120,6 +120,43 @@ test('votre thème déjà choisi : rien à changer, on continue', async ({ page 
   expect(lastSitePut(bodies)).not.toHaveProperty('theme');
 });
 
+test('votre thème : toute la carte choisit le thème, à la souris comme au clavier ; « Aperçu » ne choisit pas (#364)', async ({
+  page,
+}) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
+  await page.goto('/assistant?etape=4');
+  const themes = page.getByRole('group', { name: 'Thème du site' });
+  const card = (name: string) => themes.getByRole('listitem').filter({ has: page.getByRole('radio', { name: new RegExp(`^${name}`) }) });
+
+  // Clic sur la vignette, puis sur la description (recouverte par la zone cliquable du label : force)
+  await card('Moderne').click({ position: { x: 40, y: 40 } });
+  await expect(themes.getByRole('radio', { name: /^Moderne/ })).toBeChecked();
+  const description = card('Bourg').getByText(/Chaleureux et pratique/);
+  await description.evaluate((element) => element.scrollIntoView({ block: 'center' })); // hors de la barre collée en bas
+  await description.click({ force: true });
+  await expect(themes.getByRole('radio', { name: /^Bourg/ })).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Continuer avec Bourg' })).toBeVisible();
+
+  // « Aperçu » ouvre l'aperçu sans changer le choix
+  await card('Journal').getByRole('button', { name: 'Aperçu de votre site dans le thème Journal' }).click();
+  const preview = page.getByRole('dialog', { name: /Aperçu de votre site dans le thème Journal/ });
+  await expect(preview).toBeVisible();
+  await preview.getByRole('button', { name: "Fermer l'aperçu" }).click();
+  await expect(card('Journal').getByRole('button', { name: /^Aperçu/ })).toBeFocused();
+  await expect(themes.getByRole('radio', { name: /^Bourg/ })).toBeChecked();
+
+  // Clavier : les flèches parcourent les thèmes du groupe
+  await themes.getByRole('radio', { name: /^Bourg/ }).focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeChecked();
+  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeFocused();
+  await expectNoViolations(page);
+
+  await page.getByRole('button', { name: 'Continuer avec Journal' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ theme: 'journal' });
+});
+
 test('obligations : textes pré-remplis à relire, informations manquantes demandées', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 5 }, legalMissing: true });
   await page.goto('/assistant?etape=5');

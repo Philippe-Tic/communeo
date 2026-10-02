@@ -8,6 +8,7 @@ const complete: ComplianceInput = {
     name: 'Saint-Aubin-sur-Loire',
     address: '1 place de la Mairie, 58300 Saint-Aubin-sur-Loire',
     contact_mail: 'mairie@saint-aubin.fr',
+    message_retention: 'months_12',
     mentions_legales: { siret: '21580001200017', publication_director: 'Jean Moreau', hebergeur_name: 'Netlify', credits: doc('Photos : mairie') },
     rgpd: { rgpd_policy: doc('Données collectées…'), dpo_name: 'CDG 58', dpo_email: 'dpo@cdg58.fr' },
     accessibilite: {
@@ -27,17 +28,17 @@ const complete: ComplianceInput = {
 };
 
 describe('computeCompliance', () => {
-  it('18 points en 5 catégories ; tout est fait : conforme, pas de prochaine action', () => {
+  it('19 points en 5 catégories ; tout est fait : conforme, pas de prochaine action', () => {
     const report = computeCompliance(complete);
-    expect(report.total).toBe(18);
+    expect(report.total).toBe(19);
     expect(report.categories.map(({ id, total }) => [id, total])).toEqual([
       ['mentions', 4],
-      ['rgpd', 4],
+      ['rgpd', 5],
       ['accessibilite', 4],
       ['actes', 3],
       ['cookies', 3],
     ]);
-    expect(report).toMatchObject({ done: 18, score: 100, level: 'conforme', next: null });
+    expect(report).toMatchObject({ done: 19, score: 100, level: 'conforme', next: null });
   });
 
   it('points à faire : libellé précis, écran à compléter, prochaine action la plus urgente', () => {
@@ -46,13 +47,25 @@ describe('computeCompliance', () => {
       site: { ...complete.site, accessibilite: { accessibility_level: 'conforme' }, mentions_legales: { ...complete.site.mentions_legales, credits: doc('') } },
       imagesWithoutAlt: 7,
     });
-    expect(report.done).toBe(14);
-    expect(report.score).toBe(78);
+    expect(report.done).toBe(15);
+    expect(report.score).toBe(79);
     expect(report.level).toBe('partiellement-conforme');
     const images = report.points.find((point) => point.id === 'accessibilite-images')!;
     expect(images).toMatchObject({ done: false, label: '7 images sans texte alternatif', todo: 'Décrire 7 images de la médiathèque', target: { to: '/mediatheque', search: { alt: true } } });
     expect(report.next?.id).toBe('accessibilite-images');
     expect(report.categories.find((category) => category.id === 'accessibilite')).toMatchObject({ done: 1, total: 4 });
+  });
+
+  it('durée de conservation des messages : faite dès que la commune a choisi, « jamais » compris', () => {
+    const point = (message_retention: string | null) =>
+      computeCompliance({ ...complete, site: { ...complete.site, message_retention } }).points.find((entry) => entry.id === 'rgpd-conservation')!;
+    expect(point(null)).toMatchObject({
+      done: false,
+      label: 'Durée de conservation des messages définie',
+      target: { to: '/mon-site/legal', search: { section: 'conservation' }, adminOnly: true },
+    });
+    expect(point('never').done).toBe(true);
+    expect(point('months_6').done).toBe(true);
   });
 
   it('une demande RGPD sans réponse après un mois passe avant tout le reste', () => {

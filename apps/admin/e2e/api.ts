@@ -1219,6 +1219,18 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const templatePages: Record<string, { documentId: string; title: string }> = {};
   const saintAubin = { documentId: SITE.documentId, name: SITE.name };
   const activityLog = [
+    // Tâche de nuit (#342) : une ligne par passage, pas une par message
+    {
+      id: 8,
+      at: '2026-09-25T01:30:00.000Z',
+      action: 'messages_purge',
+      actorName: 'Suppression automatique',
+      onBehalf: false,
+      target: { type: 'contact-submission', id: null, label: '12 messages' },
+      site: saintAubin,
+      ip: null,
+      details: { count: 12, retention: 'months_12', label: '1 an' },
+    },
     {
       id: 7,
       at: '2026-09-24T08:12:00.000Z',
@@ -1338,6 +1350,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       mentions_legales_extra: null,
     } as unknown,
     rgpd: null as unknown,
+    // Durée de conservation des messages (#342) : pas encore choisie
+    message_retention: null as string | null,
     accessibilite: { accessibility_level: 'partiellement-conforme', accessibility_schema_url: null } as unknown,
     social_links: [] as unknown[],
     homepage: {

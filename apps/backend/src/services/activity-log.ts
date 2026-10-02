@@ -44,7 +44,8 @@ export type ActivityAction =
   | 'invoice_cancel'
   | 'invoice_chorus'
   | 'invoice_remind'
-  | 'billing_renewal';
+  | 'billing_renewal'
+  | 'messages_purge';
 
 export interface ActivityInput {
   action: ActivityAction;
@@ -54,6 +55,8 @@ export interface ActivityInput {
   details?: Record<string, unknown>;
   /** Connexion : la personne n'est pas encore dans la requête */
   actor?: { id: number; first_name?: string | null; last_name?: string | null; email?: string | null };
+  /** Tâche automatique sans personne connectée : nom affiché (« Suppression automatique ») */
+  systemActor?: string;
   ip?: string;
 }
 
@@ -76,7 +79,7 @@ export async function recordActivity(input: ActivityInput): Promise<void> {
         site: site?.id ?? null,
         action: input.action,
         actor: user?.id ?? null,
-        actor_name: user ? nameOf(user) : scheduled ? 'Publication programmée' : null,
+        actor_name: user ? nameOf(user) : (input.systemActor ?? (scheduled ? 'Publication programmée' : null)),
         // Action de l'équipe Communeo sur une commune (impersonation ou espace équipe)
         on_behalf: !!site && user?.municipality_role === 'super_admin',
         target_type: input.target?.type ?? null,

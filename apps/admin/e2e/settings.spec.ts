@@ -203,6 +203,8 @@ test('mentions légales : hébergeur non modifiable, SIRET vérifié, politique 
   await save(page).click();
   await expect(page.getByRole('status').filter({ hasText: 'Mentions légales enregistrées.' })).toBeVisible();
   const data = sent(bodies)!;
+  // Durée de conservation pas choisie : pas envoyée (elle reste « à choisir » pour la conformité)
+  expect(data).not.toHaveProperty('message_retention');
   // L'hébergeur n'est jamais envoyé : le serveur le fixe
   expect(data.mentions_legales).toEqual({
     siret: '21580320500017',
@@ -225,6 +227,29 @@ test('mentions légales : hébergeur non modifiable, SIRET vérifié, politique 
       ],
     },
   });
+});
+
+test('mentions légales : durée de conservation des messages, 1 an tant que rien n’est choisi', async ({ page }) => {
+  const { bodies } = await mockApi(page);
+  await page.goto('/mon-site/legal');
+  const group = page.getByRole('group', { name: 'Supprimer automatiquement les messages traités après' });
+  await expect(group).toHaveAccessibleDescription(/Pas encore choisi : les messages traités sont supprimés après 1 an/);
+  await expect(group.getByRole('radio')).toHaveCount(5);
+  for (const radio of await group.getByRole('radio').all()) await expect(radio).not.toBeChecked();
+  await expect(group.getByRole('radio', { name: '1 an (par défaut)' })).toBeVisible();
+  // La suppression reste un choix de la commune (archives publiques)
+  await expect(page.getByRole('region', { name: 'Conservation des messages' })).toContainText('archives publiques');
+  await expectNoViolations(page);
+
+  await group.getByRole('radio', { name: '2 ans' }).check();
+  await save(page).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Mentions légales enregistrées.' })).toBeVisible();
+  expect(sent(bodies)).toMatchObject({ message_retention: 'months_24' });
+
+  await group.getByRole('radio', { name: 'Jamais' }).check();
+  await save(page).click();
+  await expect.poll(() => sent(bodies)?.message_retention).toBe('never');
+  await expect(group).not.toHaveAccessibleDescription(/Pas encore choisi/);
 });
 
 test('mentions légales : réservées aux administrateurs, absentes du sommaire pour un éditeur', async ({ page }) => {

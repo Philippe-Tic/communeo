@@ -33,6 +33,25 @@ test('boîte de réception : non lus, RGPD avec délai, sans violation', async (
   await expectNoViolations(page);
 });
 
+test('durée de conservation rappelée ; lien vers le réglage pour un administrateur', async ({ page }) => {
+  await mockApi(page);
+  await page.goto('/messages');
+  const list = page.getByRole('region', { name: 'Messages' });
+  await expect(list).toContainText('Les messages traités sont supprimés automatiquement après 1 an.');
+  await list.getByRole('link', { name: 'Modifier la durée' }).click();
+  await expect(page).toHaveURL(/\/mon-site\/legal\?section=conservation$/);
+  await expect(page.getByRole('heading', { level: 2, name: 'Conservation des messages' })).toBeFocused();
+  await expect(page.getByRole('radio', { name: '6 mois' })).toBeInViewport();
+});
+
+test('durée de conservation : un éditeur la voit, sans lien', async ({ page }) => {
+  await mockApi(page, { user: 'editor' });
+  await page.goto('/messages');
+  const list = page.getByRole('region', { name: 'Messages' });
+  await expect(list).toContainText('après 1 an. Réglée par un administrateur.');
+  await expect(list.getByRole('link', { name: 'Modifier la durée' })).toHaveCount(0);
+});
+
 test('filtres : non lus, catégorie, statut, recherche', async ({ page }) => {
   await mockApi(page);
   await page.goto('/messages');

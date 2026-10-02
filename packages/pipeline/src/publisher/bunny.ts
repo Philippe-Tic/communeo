@@ -7,6 +7,8 @@
  * - **une Pull Zone par commune** (`communeo-<slug>`, préfixée `dev-` hors production), d'origine
  *   `https://<ORIGIN_DOMAIN>/sites/<slug>/`, servie en Europe et en Amérique du Nord, cache d'un an vidé à
  *   chaque publication, pages gardées en cache quand le serveur est hors ligne (`UseStaleWhileOffline`) ;
+ *   le navigateur, lui, redemande chaque page (`max-age=0`, réponse 304 quand rien n'a changé) : un cache
+ *   navigateur ne se vide pas, une page modifiée doit se voir tout de suite ;
  * - ses adresses : `<slug>.<SITES_DOMAIN>` (enregistrement CNAME dans la zone Bunny DNS de
  *   `SITES_DOMAIN`, `BUNNY_DNS_ZONE_ID`), le domaine de la commune ou `www.<domaine>` pour un domaine nu,
  *   chacune avec son certificat Let's Encrypt gratuit délivré par Bunny ;
@@ -14,7 +16,8 @@
  *   publication : en-tête secret `X-Communeo-Origine` vers l'origine (sans lui, l'origine répond 403),
  *   redirection 301 des autres adresses vers l'adresse principale (avant le cache de Bunny : jamais une
  *   redirection mise en cache pour la mauvaise adresse), `X-Robots-Tag: noindex` sur l'adresse technique
- *   `*.b-cdn.net` (gardée pour tester un site sans toucher au DNS).
+ *   `*.b-cdn.net` (gardée pour tester un site sans toucher au DNS), un an de cache navigateur pour les
+ *   fichiers d'Astro (`/_astro/`, noms avec empreinte).
  *
  * Domaine nu (`mairie-x.fr`) : Bunny ne le sert qu'avec Bunny DNS chez la commune (aplatissement du
  * CNAME). La commune pointe donc `www` vers la Pull Zone (CNAME) et le domaine nu vers le serveur
@@ -31,13 +34,18 @@ export const BUNNY_API_URL = 'https://api.bunny.net';
 /** En-tête secret que la Pull Zone ajoute aux requêtes vers l'origine (caddy/Caddyfile) */
 export const ORIGIN_SECRET_HEADER = 'X-Communeo-Origine';
 const CDN_SUFFIX = '.b-cdn.net';
-/** Cache de Bunny : un an, vidé à chaque publication (le navigateur suit les en-têtes de l'origine) */
+/** Cache de Bunny : un an, vidé à chaque publication */
 const EDGE_CACHE_SECONDS = 31_536_000;
+/**
+ * Cache du navigateur pour les pages : aucun (`Cache-Control: public, max-age=0`). Sans ce réglage, Bunny
+ * envoie au navigateur la durée de son propre cache (un an), quels que soient les en-têtes de l'origine.
+ */
+const BROWSER_CACHE_SECONDS = 0;
 const DNS_TTL_SECONDS = 300;
 const PAGE_SIZE = 1000;
 
 /** Enums de l'API Bunny (core/openapi.json) */
-const ACTION = { redirect: 1, setResponseHeader: 5, setRequestHeader: 6 } as const;
+const ACTION = { redirect: 1, setResponseHeader: 5, setRequestHeader: 6, overrideBrowserCacheTime: 16 } as const;
 const TRIGGER_URL = 0;
 const MATCH_ANY = 0;
 const DNS_CNAME = 2;
@@ -48,6 +56,7 @@ export const BUNNY_RULES = {
   originSecret: `${RULE_PREFIX}en-tête secret vers l'origine`,
   canonical: `${RULE_PREFIX}redirection vers l'adresse principale`,
   technicalHost: `${RULE_PREFIX}adresse technique non indexée`,
+  astroAssets: `${RULE_PREFIX}fichiers d'Astro gardés un an par le navigateur`,
 } as const;
 
 interface BunnyHostname {
@@ -82,6 +91,7 @@ interface BunnyPullZone {
   OriginUrl?: string;
   Hostnames?: BunnyHostname[];
   EdgeRules?: BunnyEdgeRule[];
+  CacheControlPublicMaxAgeOverride?: number;
 }
 
 interface BunnyDnsRecord {
@@ -178,6 +188,7 @@ export class BunnyPublisher implements SitePublisher {
   private async ensureZone(site: PublisherSite): Promise<BunnyPullZone> {
     const zone = (await this.findZone(site)) ?? (await this.createZone(site));
     await this.ensureCommuneoAddress(zone, site.slug);
+    await this.syncBrowserCache(zone);
     await this.syncEdgeRules(zone, site.customDomain ?? null);
     return zone;
   }
@@ -234,6 +245,7 @@ export class BunnyPublisher implements SitePublisher {
       VerifyOriginSSL: true,
       // Cache de Bunny d'un an, vidé à chaque publication ; jamais d'erreur gardée en cache
       CacheControlMaxAgeOverride: EDGE_CACHE_SECONDS,
+      CacheControlPublicMaxAgeOverride: BROWSER_CACHE_SECONDS,
       CacheErrorResponses: false,
       // Les redirections de l'ancien site portent sur la requête (`/?p=12`) : une entrée de cache par requête
       IgnoreQueryStrings: false,
@@ -502,6 +514,13 @@ export class BunnyPublisher implements SitePublisher {
         ActionParameter2: 'noindex, nofollow',
         ...onUrls([`*://${technical}/*`]),
       },
+      {
+        Description: BUNNY_RULES.astroAssets,
+        Enabled: true,
+        ActionType: ACTION.overrideBrowserCacheTime,
+        ActionParameter1: String(EDGE_CACHE_SECONDS),
+        ...onUrls(['*/_astro/*']),
+      },
     ];
     // Domaine vérifié : les autres adresses de la Pull Zone y redirigent (l'adresse technique reste testable)
     const canonical = customDomain ? this.canonicalDomain(customDomain) : null;
@@ -520,6 +539,13 @@ export class BunnyPublisher implements SitePublisher {
       });
     }
     return rules;
+  }
+
+  /** Pull Zones créées avant ce réglage (#383 : un an de cache navigateur pour les pages) : mises à jour */
+  private async syncBrowserCache(zone: BunnyPullZone): Promise<void> {
+    if (zone.CacheControlPublicMaxAgeOverride === BROWSER_CACHE_SECONDS) return;
+    await this.request('POST', `/pullzone/${zone.Id}`, { CacheControlPublicMaxAgeOverride: BROWSER_CACHE_SECONDS });
+    zone.CacheControlPublicMaxAgeOverride = BROWSER_CACHE_SECONDS;
   }
 
   /** Ajoute, met à jour ou retire les règles `Communeo : …` ; celles qui n'ont pas changé ne sont pas renvoyées */

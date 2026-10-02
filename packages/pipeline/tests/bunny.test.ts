@@ -20,6 +20,7 @@ interface Zone {
   OriginUrl: string;
   Hostnames: Array<{ Id: number; Value: string; IsSystemHostname: boolean; HasCertificate: boolean; ForceSSL: boolean }>;
   EdgeRules: BunnyEdgeRule[];
+  CacheControlPublicMaxAgeOverride: number;
   settings: Record<string, unknown>;
 }
 
@@ -56,6 +57,8 @@ function fakeBunny() {
         OriginUrl: body.OriginUrl,
         Hostnames: [{ Id: nextId++, Value: `${body.Name}.b-cdn.net`, IsSystemHostname: true, HasCertificate: true, ForceSSL: false }],
         EdgeRules: [],
+        // -1 : valeur par défaut de Bunny (le navigateur reçoit la durée du cache de Bunny)
+        CacheControlPublicMaxAgeOverride: body.CacheControlPublicMaxAgeOverride ?? -1,
         settings: body,
       };
       zones.set(zone.Id, zone);
@@ -78,6 +81,10 @@ function fakeBunny() {
       if (!zone) return json({ Message: 'Pull Zone not found' }, 404);
       const action = match[2] ?? '';
       if (method === 'GET' && action === '') return json(zone);
+      if (method === 'POST' && action === '') {
+        Object.assign(zone, body);
+        return json(zone);
+      }
       if (method === 'DELETE' && action === '') {
         zones.delete(zone.Id);
         return { status: 204 };
@@ -217,6 +224,7 @@ describe('ensureSite : Pull Zone de la commune', () => {
       EnableGeoZoneAF: false,
       VerifyOriginSSL: true,
       CacheControlMaxAgeOverride: 31_536_000,
+      CacheControlPublicMaxAgeOverride: 0,
       CacheErrorResponses: false,
       IgnoreQueryStrings: false,
     });
@@ -241,6 +249,28 @@ describe('ensureSite : Pull Zone de la commune', () => {
       Triggers: [{ Type: 0, PatternMatches: ['*://communeo-lyon.b-cdn.net/*'], PatternMatchingType: 0 }],
     });
     expect(rule(api.zone('communeo-lyon'), BUNNY_RULES.canonical)).toBeUndefined();
+  });
+
+  it("garde les fichiers d'Astro un an dans le navigateur, les pages jamais", async () => {
+    const { api, p } = setup();
+    await p.ensureSite(site);
+    expect(rule(api.zone('communeo-lyon'), BUNNY_RULES.astroAssets)).toMatchObject({
+      ActionType: 16,
+      ActionParameter1: '31536000',
+      Triggers: [{ Type: 0, PatternMatches: ['*/_astro/*'], PatternMatchingType: 0 }],
+    });
+  });
+
+  it('met à jour le cache navigateur des Pull Zones créées avant (un an pour les pages), et retire la règle d’essai', async () => {
+    const { api, p } = setup();
+    const { hostId } = await p.ensureSite(site);
+    const zone = api.zone('communeo-lyon');
+    zone.CacheControlPublicMaxAgeOverride = -1;
+    zone.EdgeRules.push({ Guid: 'essai', Description: 'Communeo : essai cache navigateur _astro', ActionType: 16, ActionParameter1: '31536000', Enabled: true, TriggerMatchingType: 0, Triggers: [] });
+    await p.ensureSite({ ...site, hostId });
+    expect(zone.CacheControlPublicMaxAgeOverride).toBe(0);
+    expect(api.calls).toContainEqual(expect.objectContaining({ method: 'POST', path: `/pullzone/${zone.Id}`, body: { CacheControlPublicMaxAgeOverride: 0 } }));
+    expect(zone.EdgeRules.map((r) => r.Description)).not.toContain('Communeo : essai cache navigateur _astro');
   });
 
   it("ajoute l'adresse <slug>.communeo.fr, son CNAME dans Bunny DNS et son certificat", async () => {

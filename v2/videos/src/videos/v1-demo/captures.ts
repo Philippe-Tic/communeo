@@ -71,7 +71,7 @@ const ASSISTANT = {
   adresse: (p: Page) => p.getByLabel(/^Adresse de la mairie/),
   telephone: (p: Page) => p.getByLabel(/^Téléphone/),
   email: (p: Page) => p.getByLabel(/^E-mail/),
-  gps: (p: Page) => p.getByLabel(/^Coordonnées GPS/),
+  gps: (p: Page) => p.getByLabel(/^Emplacement sur la carte/),
   horaires: (p: Page) => p.getByText('Horaires d’ouverture').or(p.getByText("Horaires d'ouverture")).first().locator('..'),
   continuer: (p: Page) => p.getByRole('button', { name: 'Continuer' }),
 };

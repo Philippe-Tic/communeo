@@ -1,5 +1,5 @@
 /**
- * Conformité du site d'une commune : 18 points en 5 catégories (mentions légales, RGPD, accessibilité,
+ * Conformité du site d'une commune : 19 points en 5 catégories (mentions légales, RGPD, accessibilité,
  * publication des actes, cookies). Calcul pur, partagé par l'API (`GET /api/compliance`), l'écran
  * Conformité, le tableau de bord et l'assistant de création. Chaque point à faire mène à l'écran de
  * l'admin où on le complète ; la prochaine action est le point à faire le plus urgent.
@@ -8,6 +8,7 @@
  * restent listés, pour que la commune sache qu'ils sont couverts.
  */
 import { rgpdDaysLeft } from '../format/rgpd';
+import { isMessageRetentionChosen } from './message-retention';
 
 export type ComplianceCategoryId = 'mentions' | 'rgpd' | 'accessibilite' | 'actes' | 'cookies';
 
@@ -61,6 +62,8 @@ export interface ComplianceInput {
     name?: string | null;
     address?: string | null;
     contact_mail?: string | null;
+    /** Durée de conservation des messages des habitants (#342) ; vide : pas encore choisie */
+    message_retention?: string | null;
     mentions_legales?: {
       siret?: string | null;
       publication_director?: string | null;
@@ -105,6 +108,7 @@ const URGENCY = [
   'rgpd-politique',
   'rgpd-dpo',
   'rgpd-contact',
+  'rgpd-conservation',
   'accessibilite-niveau',
   'actes-deliberations',
   'actes-pv',
@@ -197,6 +201,16 @@ export function computeCompliance(input: ComplianceInput): ComplianceReport {
       todo: "Indiquer l'e-mail de la mairie qui reçoit les messages",
       why: 'Les habitants doivent pouvoir saisir la mairie en ligne (art. L112-8 CRPA) ; le formulaire les informe de l’usage de leurs données.',
       target: { to: '/mon-site/informations' },
+    },
+    {
+      id: 'rgpd-conservation',
+      category: 'rgpd',
+      label: 'Durée de conservation des messages définie',
+      // « Jamais » est un choix (archives publiques) : le point est fait dès que la commune a choisi
+      done: isMessageRetentionChosen(site.message_retention),
+      todo: 'Choisir la durée de conservation des messages des habitants',
+      why: 'Les données personnelles ne sont gardées que le temps nécessaire (RGPD, art. 5.1.e) : la commune fixe la durée de conservation des messages.',
+      target: { to: '/mon-site/legal', search: { section: 'conservation' }, adminOnly: true },
     },
     {
       id: 'rgpd-delai',

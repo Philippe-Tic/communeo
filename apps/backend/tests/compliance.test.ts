@@ -1,5 +1,5 @@
 /**
- * Conformité (#147) : GET /api/compliance calcule les 18 points à partir des réglages, des documents
+ * Conformité (#147) : GET /api/compliance calcule les 19 points à partir des réglages, des documents
  * publiés (pas des brouillons), des images sans texte alternatif et des demandes RGPD en retard de la
  * commune — jamais de celles d'une autre commune.
  */
@@ -38,9 +38,9 @@ describe('GET /api/compliance', () => {
     expect((await http.get('/api/compliance')).status).toBeGreaterThanOrEqual(401);
   });
 
-  it('18 points ; les réglages de la commune comptent', async () => {
+  it('19 points ; les réglages de la commune comptent', async () => {
     let data = await report();
-    expect(data.total).toBe(18);
+    expect(data.total).toBe(19);
     expect(data.categories).toHaveLength(5);
     const before = point(data, 'mentions-directeur').done;
     await strapi.documents('api::site.site').update({

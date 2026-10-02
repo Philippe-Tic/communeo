@@ -9,10 +9,10 @@
  *   administrateur, renvoie l'invitation (choix du mot de passe) et qui doit encore approuver :
  *   personne si l'adresse est celle de la mairie ou de son domaine, sinon la mairie (e-mail à son
  *   adresse officielle, Annuaire de l'administration) ou l'équipe (aucune adresse officielle connue).
- *   Tant que ce n'est pas fait, la commune prépare son site mais rien n'est mis en ligne.
+ *   En attendant, le site d'essai est publié sur son adresse Communeo (#369).
  * GET  /api/signup/approve?jeton= → la demande, pour la mairie
- * POST /api/signup/approve        → { jeton } : la mairie approuve, le site peut être mis en ligne
- * POST /api/signup/decline        → { jeton } : la mairie refuse, la commune créée est supprimée
+ * POST /api/signup/approve        → { jeton } : la mairie approuve, l'essai continue
+ * POST /api/signup/decline        → { jeton } : la mairie refuse, la commune créée et son site d'essai sont supprimés
  * GET  /api/signup/approval       → (administration) { status: 'townhall' | 'team' | null, to, sentAt }
  * POST /api/signup/approval/resend → (administrateur) renvoie l'e-mail d'approbation à la mairie
  *
@@ -253,18 +253,18 @@ export default {
     if (waitingFor === 'team' && isTestAddress(request.email)) {
       await notifyTeam(
         `Inscription de test : ${request.commune_name}`,
-        `${who} a créé le site de test ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}), adresse de test (SIGNUP_TEST_EMAILS) : aucune demande n'est partie à la mairie. Approuvez-la pour tester la mise en ligne, dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
+        `${who} a créé le site de test ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}), adresse de test (SIGNUP_TEST_EMAILS) : aucune demande n'est partie à la mairie. Le site d'essai est publié ; approuvez ou refusez la demande dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
       );
     } else if (waitingFor === 'team') {
       await notifyTeam(
         `Inscription à vérifier : ${request.commune_name}`,
-        `${who} a créé le site ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}). Aucune adresse officielle de mairie n'est connue : le site ne sera pas mis en ligne avant votre vérification, dans l'espace équipe : ${adminUrl()}/plateforme/a-valider`,
+        `${who} a créé le site ${ofCommune(request.commune_name)} (INSEE ${request.code_insee}). Aucune adresse officielle de mairie n'est connue : le site d'essai est publié, vérifiez la demande dans l'espace équipe (un refus le retire) : ${adminUrl()}/plateforme/a-valider`,
       );
     } else {
       await notifyTeam(
         `Nouvelle commune en essai : ${request.commune_name}`,
         waitingFor === 'townhall'
-          ? `${request.commune_name} (INSEE ${request.code_insee}) est en essai. Administrateur : ${who}. La demande d'approbation est partie à l'adresse officielle de la mairie : le site ne sera pas mis en ligne avant sa réponse. Fiche : ${fiche}`
+          ? `${request.commune_name} (INSEE ${request.code_insee}) est en essai. Administrateur : ${who}. La demande d'approbation est partie à l'adresse officielle de la mairie ; le site d'essai est publié en attendant sa réponse. Fiche : ${fiche}`
           : `${request.commune_name} (INSEE ${request.code_insee}) est en essai. Administrateur : ${who}, inscrit avec ${approval === 'same_email' ? "l'adresse officielle de la mairie" : "une adresse du domaine de la mairie"}. Fiche : ${fiche}`,
       );
     }
@@ -292,7 +292,7 @@ export default {
     if (!request) return;
     await declineSignup(request, 'townhall');
     await emailRejection(request, [
-      `La mairie ${ofCommune(request.commune_name)} n'a pas approuvé la création du site internet de la commune sur Communeo : le site que vous aviez commencé et ses contenus ont été supprimés.`,
+      `La mairie ${ofCommune(request.commune_name)} n'a pas approuvé la création du site internet de la commune sur Communeo : le site d'essai a été retiré et ses contenus supprimés.`,
       "Si c'est une erreur, rapprochez-vous de la mairie avant de refaire la demande.",
     ]);
     ctx.body = { data: { commune: request.commune_name } };

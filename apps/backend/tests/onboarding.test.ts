@@ -18,6 +18,8 @@ let editor: string;
 let publicData: http.Server;
 let annuaireDown = false;
 let geoDown = false;
+let geocodingDown = false;
+const geocodingQueries: URLSearchParams[] = [];
 
 const GEO_RECORD = {
   nom: 'Saint-Pierre-le-Moûtier',
@@ -49,8 +51,23 @@ beforeAll(async () => {
       res.writeHead(status, { 'content-type': 'application/json' });
       res.end(JSON.stringify(body));
     };
+    if (url.pathname === '/geocodage/search') {
+      if (geocodingDown) return send(503, {});
+      geocodingQueries.push(url.searchParams);
+      return send(200, {
+        type: 'FeatureCollection',
+        features: [
+          {
+            geometry: { type: 'Point', coordinates: [3.1402, 46.7921] },
+            properties: { label: "33 Place de l'Église 58240 Saint-Pierre-le-Moûtier", context: '58, Nièvre, Bourgogne-Franche-Comté', type: 'housenumber' },
+          },
+        ],
+      });
+    }
     if (url.pathname.startsWith('/geo')) {
       if (geoDown) return send(503, {});
+      if (url.pathname === '/geo/communes' && url.searchParams.get('lat'))
+        return send(200, url.searchParams.get('lat') === '46.7915' ? [{ nom: 'Saint-Pierre-le-Moûtier', codesPostaux: ['58240'] }] : []);
       if (url.pathname === '/geo/communes')
         return send(200, url.searchParams.get('nom')?.startsWith('Saint-Pierre') || url.searchParams.get('codePostal') === '58240' ? [GEO_RECORD] : []);
       if (url.pathname === '/geo/communes/58264') return send(200, GEO_RECORD);
@@ -63,6 +80,7 @@ beforeAll(async () => {
   const port = (publicData.address() as AddressInfo).port;
   process.env.GEO_API_URL = `http://127.0.0.1:${port}/geo`;
   process.env.ANNUAIRE_API_URL = `http://127.0.0.1:${port}/annuaire`;
+  process.env.GEOCODING_API_URL = `http://127.0.0.1:${port}/geocodage`;
 
   strapi = await setupStrapi();
   api = request(strapi.server.httpServer);
@@ -83,6 +101,7 @@ afterAll(async () => {
   publicData.close();
   delete process.env.GEO_API_URL;
   delete process.env.ANNUAIRE_API_URL;
+  delete process.env.GEOCODING_API_URL;
 });
 
 describe('progression de l’assistant', () => {
@@ -143,6 +162,49 @@ describe('pré-remplissage', () => {
   it('code INSEE inconnu ou invalide : introuvable', async () => {
     expect((await api.get('/api/onboarding/communes/99999').set(auth(admin))).status).toBe(404);
     expect((await api.get('/api/onboarding/communes/abc').set(auth(admin))).status).toBe(404);
+  });
+});
+
+describe('emplacement de la commune : recherche d’une ville ou d’une adresse (#362)', () => {
+  it('lieux de la Base adresse nationale, proches de la position actuelle ; ouvert aux rédacteurs', async () => {
+    const found = await api
+      .get(`/api/onboarding/places?${new URLSearchParams({ q: "33 place de l'église", lat: '46.7915', lon: '3.1374' })}`)
+      .set(auth(editor));
+    expect(found.status).toBe(200);
+    expect(found.body.data).toEqual([
+      {
+        label: "33 Place de l'Église 58240 Saint-Pierre-le-Moûtier",
+        context: '58, Nièvre, Bourgogne-Franche-Comté',
+        kind: 'adresse',
+        latitude: 46.7921,
+        longitude: 3.1402,
+      },
+    ]);
+    expect(geocodingQueries.at(-1)?.get('lat')).toBe('46.7915');
+    expect(geocodingQueries.at(-1)?.get('autocomplete')).toBe('1');
+    // Moins de 3 caractères : rien n'est demandé au service
+    const before = geocodingQueries.length;
+    expect((await api.get('/api/onboarding/places?q=ab').set(auth(admin))).body.data).toEqual([]);
+    expect(geocodingQueries).toHaveLength(before);
+  });
+
+  it('réponses gardées en cache ; service en panne : 502 explicite ; sans session : refusé', async () => {
+    const before = geocodingQueries.length;
+    await api.get('/api/onboarding/places?q=Saint-Pierre').set(auth(admin));
+    await api.get('/api/onboarding/places?q=Saint-Pierre').set(auth(admin));
+    expect(geocodingQueries).toHaveLength(before + 1);
+    geocodingDown = true;
+    const down = await api.get('/api/onboarding/places?q=Nevers').set(auth(admin));
+    geocodingDown = false;
+    expect(down.status).toBe(502);
+    expect((await api.get('/api/onboarding/places?q=Nevers')).status).toBeGreaterThanOrEqual(401);
+  });
+
+  it('nom de la commune d’une position déjà enregistrée', async () => {
+    const at = await api.get('/api/onboarding/places/commune?lat=46.7915&lon=3.1374').set(auth(editor));
+    expect(at.body.data).toEqual({ name: 'Saint-Pierre-le-Moûtier', postalCode: '58240' });
+    expect((await api.get('/api/onboarding/places/commune?lat=48&lon=2').set(auth(editor))).body.data).toBeNull();
+    expect((await api.get('/api/onboarding/places/commune?lat=abc&lon=2').set(auth(editor))).body.data).toBeNull();
   });
 });
 

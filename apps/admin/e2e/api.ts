@@ -426,6 +426,8 @@ export interface MockOptions {
   pageImageWithoutAlt?: boolean;
   /** SIRET et directeur de publication pas encore renseignés */
   legalMissing?: boolean;
+  /** Logo de la commune (adresse du fichier) ; aucun par défaut */
+  logo?: string;
   /** Assistant de création en cours (commune créée par l'équipe) */
   onboarding?: { step: number; postponedAt?: string | null; completedAt?: string | null; checklistHiddenAt?: string | null };
   /** Mise en ligne demandée : reste en cours (défaut), réussit ou échoue à la lecture suivante de l'état */
@@ -933,6 +935,7 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     failUploadFor,
     pageImageWithoutAlt = false,
     onboarding,
+    logo,
     publicData = 'ok',
     legalMissing = false,
     deployOutcome = 'running',
@@ -1219,6 +1222,18 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
   const templatePages: Record<string, { documentId: string; title: string }> = {};
   const saintAubin = { documentId: SITE.documentId, name: SITE.name };
   const activityLog = [
+    // Tâche de nuit (#342) : une ligne par passage, pas une par message
+    {
+      id: 8,
+      at: '2026-09-25T01:30:00.000Z',
+      action: 'messages_purge',
+      actorName: 'Suppression automatique',
+      onBehalf: false,
+      target: { type: 'contact-submission', id: null, label: '12 messages' },
+      site: saintAubin,
+      ip: null,
+      details: { count: 12, retention: 'months_12', label: '1 an' },
+    },
     {
       id: 7,
       at: '2026-09-24T08:12:00.000Z',
@@ -1300,7 +1315,9 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
     updatedAt: '2026-09-22T14:30:00.000Z',
     name: SITE.name,
     theme,
-    logo: null as unknown,
+    logo: (logo
+      ? { id: 77, name: logo.split('/').at(-1), ext: '.svg', size: 1, url: logo, width: null, height: null, alternativeText: null, caption: null, credit: null }
+      : null) as unknown,
     favicon: null as unknown,
     contact_mail: 'mairie@saint-aubin-sur-loire.fr',
     contact_phone: (freshCommune ? null : '03 86 00 00 00') as string | null,
@@ -1338,6 +1355,8 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       mentions_legales_extra: null,
     } as unknown,
     rgpd: null as unknown,
+    // Durée de conservation des messages (#342) : pas encore choisie
+    message_retention: null as string | null,
     accessibilite: { accessibility_level: 'partiellement-conforme', accessibility_schema_url: null } as unknown,
     social_links: [] as unknown[],
     homepage: {
@@ -1573,6 +1592,26 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
         department: 'Nièvre',
       };
       return json({ data: q.startsWith('saint-aubin') || q === '58300' ? [match] : [] });
+    }
+    // Emplacement de la commune (#362) : Base adresse nationale simulée
+    if (url.pathname === '/api/onboarding/places') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      const q = (url.searchParams.get('q') ?? '').toLowerCase();
+      const context = '58, Nièvre, Bourgogne-Franche-Comté';
+      const places = [
+        { label: '1 Place de la Mairie 58300 Saint-Aubin-sur-Loire', context, kind: 'adresse', latitude: 46.74389, longitude: 3.79052 },
+        { label: 'Place de la Mairie 58300 Saint-Aubin-sur-Loire', context, kind: 'rue', latitude: 46.7437, longitude: 3.7901 },
+        { label: 'Saint-Aubin-sur-Loire', context, kind: 'commune', latitude: 46.7412, longitude: 3.7891 },
+      ];
+      return json({
+        data: q.includes('mairie') ? places.slice(0, 2) : q.startsWith('saint-aubin') ? places.slice(2) : [],
+      });
+    }
+    if (url.pathname === '/api/onboarding/places/commune') {
+      if (publicData === 'down')
+        return json({ error: { status: 502, message: 'Les données publiques ne répondent pas' } }, 502);
+      return json({ data: { name: 'Saint-Aubin-sur-Loire', postalCode: '58300' } });
     }
     if (url.pathname === '/api/onboarding/communes/58236') {
       if (publicData === 'down')
@@ -2057,9 +2096,6 @@ export async function mockApi(page: Page, options: MockOptions = {}) {
       return json({ data: { to: approvalState.to, sentAt: approvalState.sentAt } });
     }
     if (url.pathname === '/api/deployment/trigger' && method === 'POST') {
-      if (approvalState.status) {
-        return json({ error: { status: 403, message: 'Le site sera mis en ligne dès que la mairie aura approuvé la création du site.', details: { code: 'approval_pending' } } }, 403);
-      }
       state = 'running';
       deploy = { readsLeft: 1, triggeredAt: new Date().toISOString() };
       return json({ status: 'queued', queued: true }, 202);

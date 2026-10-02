@@ -61,6 +61,31 @@ test('votre commune : pré-remplie depuis les données publiques, sources affich
   });
 });
 
+test('votre commune : le centre trouvé par l’INSEE, ou une adresse cherchée, sans coordonnées à saisir (#362)', async ({
+  page,
+}) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 2 } });
+  await page.goto('/assistant?etape=2');
+  await chooseCommune(page);
+  const location = page.locator('[data-field="coordinates"]');
+  await expect(location).toContainText('Centre de Saint-Aubin-sur-Loire');
+  await expect(location).toContainText('Source : INSEE');
+  await expect(location).not.toContainText('46.7412');
+
+  // Plus précis : l'adresse de la mairie
+  await page.getByRole('searchbox', { name: /^Emplacement sur la carte/ }).fill('1 place de la mairie');
+  await page
+    .getByRole('list', { name: 'Lieux trouvés' })
+    .getByRole('button', { name: /^1 Place de la Mairie 58300 Saint-Aubin-sur-Loire/ })
+    .click();
+  await expect(location).toContainText('1 Place de la Mairie 58300 Saint-Aubin-sur-Loire');
+  await expectNoViolations(page);
+
+  await page.getByRole('button', { name: 'Continuer', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Votre logo' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ infos_pratiques: { latitude: 46.74389, longitude: 3.79052 } });
+});
+
 test('données publiques en panne : on saisit à la main', async ({ page }) => {
   await mockApi(page, { onboarding: { step: 2 }, publicData: 'down' });
   await page.goto('/assistant?etape=2');
@@ -112,12 +137,76 @@ test('votre thème : la commune dans chaque vignette, tous les thèmes proposés
   expect(lastSitePut(bodies)).toMatchObject({ theme: 'institutionnel', onboarding: { step: 5 } });
 });
 
+test('votre thème : le logo garde ses proportions dans l’en-tête des vignettes, l’en-tête de l’aperçu tient sur mobile (#363)', async ({
+  page,
+}) => {
+  await mockApi(page, { onboarding: { step: 4 }, logo: '/uploads/logo-horizontal.svg' });
+  await page.route('**/uploads/logo-horizontal.svg', (route) =>
+    route.fulfill({ path: new URL('../../../packages/fixtures/assets/logo-horizontal.svg', import.meta.url).pathname }),
+  );
+  await page.goto('/assistant?etape=4');
+  const themes = page.getByRole('group', { name: 'Thème du site' });
+  // Logo en longueur (480 × 120) : il n'est plus écrasé dans une pastille ronde de 14 px
+  for (const logo of await themes.locator('img').all()) {
+    await expect(logo).toHaveJSProperty('complete', true);
+    const box = (await logo.boundingBox())!;
+    expect(box.width).toBeGreaterThan(box.height * 2.5);
+  }
+
+  await themes.getByRole('button', { name: 'Aperçu de votre site dans le thème Moderne' }).click();
+  const preview = page.getByRole('dialog', { name: /Aperçu de votre site dans le thème Moderne/ });
+  const close = (await preview.getByRole('button', { name: "Fermer l'aperçu" }).boundingBox())!;
+  const choose = (await preview.getByRole('button', { name: 'Choisir le thème Moderne' }).boundingBox())!;
+  const moderne = (await preview.getByText('Moderne', { exact: true }).boundingBox())!;
+  // Fermer et choisir sur une ligne, les thèmes en dessous (sous 768 px) ou à côté, jamais en colonne
+  expect(Math.abs(close.y + close.height / 2 - (choose.y + choose.height / 2))).toBeLessThan(2);
+  expect(choose.x + choose.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  expect(moderne.y + moderne.height).toBeLessThan(close.y + close.height + 80);
+});
+
 test('votre thème déjà choisi : rien à changer, on continue', async ({ page }) => {
   const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
   await page.goto('/assistant?etape=4');
   await page.getByRole('button', { name: 'Continuer avec Institutionnel' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
   expect(lastSitePut(bodies)).not.toHaveProperty('theme');
+});
+
+test('votre thème : toute la carte choisit le thème, à la souris comme au clavier ; « Aperçu » ne choisit pas (#364)', async ({
+  page,
+}) => {
+  const { bodies } = await mockApi(page, { onboarding: { step: 4 } });
+  await page.goto('/assistant?etape=4');
+  const themes = page.getByRole('group', { name: 'Thème du site' });
+  const card = (name: string) => themes.getByRole('listitem').filter({ has: page.getByRole('radio', { name: new RegExp(`^${name}`) }) });
+
+  // Clic sur la vignette, puis sur la description (recouverte par la zone cliquable du label : force)
+  await card('Moderne').click({ position: { x: 40, y: 40 } });
+  await expect(themes.getByRole('radio', { name: /^Moderne/ })).toBeChecked();
+  const description = card('Bourg').getByText(/Chaleureux et pratique/);
+  await description.evaluate((element) => element.scrollIntoView({ block: 'center' })); // hors de la barre collée en bas
+  await description.click({ force: true });
+  await expect(themes.getByRole('radio', { name: /^Bourg/ })).toBeChecked();
+  await expect(page.getByRole('button', { name: 'Continuer avec Bourg' })).toBeVisible();
+
+  // « Aperçu » ouvre l'aperçu sans changer le choix
+  await card('Journal').getByRole('button', { name: 'Aperçu de votre site dans le thème Journal' }).click();
+  const preview = page.getByRole('dialog', { name: /Aperçu de votre site dans le thème Journal/ });
+  await expect(preview).toBeVisible();
+  await preview.getByRole('button', { name: "Fermer l'aperçu" }).click();
+  await expect(card('Journal').getByRole('button', { name: /^Aperçu/ })).toBeFocused();
+  await expect(themes.getByRole('radio', { name: /^Bourg/ })).toBeChecked();
+
+  // Clavier : les flèches parcourent les thèmes du groupe
+  await themes.getByRole('radio', { name: /^Bourg/ }).focus();
+  await page.keyboard.press('ArrowUp');
+  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeChecked();
+  await expect(themes.getByRole('radio', { name: /^Journal/ })).toBeFocused();
+  await expectNoViolations(page);
+
+  await page.getByRole('button', { name: 'Continuer avec Journal' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Vos obligations légales' })).toBeVisible();
+  expect(lastSitePut(bodies)).toMatchObject({ theme: 'journal' });
 });
 
 test('obligations : textes pré-remplis à relire, informations manquantes demandées', async ({ page }) => {
@@ -246,14 +335,12 @@ test('mise en ligne : récapitulatif, suivi, succès ; l’assistant est termin�
   await expect(page.getByRole('region', { name: 'Terminez la création de votre site' })).toHaveCount(0);
 });
 
-test('inscription à approuver : l’assistant se termine sans mise en ligne, le site est prêt', async ({ page }) => {
-  const { bodies, calls } = await mockApi(page, { onboarding: { step: 7 }, publication: 'idle', trial: { endsInDays: 30 }, approval: 'townhall' });
+test('inscription à approuver : le site d’essai est mis en ligne quand même (#369)', async ({ page }) => {
+  const { bodies, calls } = await mockApi(page, { onboarding: { step: 7 }, deployOutcome: 'ok', publication: 'idle', trial: { endsInDays: 30 }, approval: 'townhall' });
   await page.goto('/assistant?etape=7');
-  await expect(page.getByText('Le site sera mis en ligne dès que la mairie aura approuvé sa création').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Mettre le site en ligne' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Terminer' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Le site de Saint-Aubin-sur-Loire est prêt' })).toBeFocused();
-  expect(calls).not.toContain('POST /api/deployment/trigger');
+  await page.getByRole('button', { name: 'Mettre le site en ligne' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Le site de Saint-Aubin-sur-Loire est en ligne' })).toBeFocused();
+  expect(calls).toContain('POST /api/deployment/trigger');
   expect(lastSitePut(bodies)?.onboarding).toMatchObject({ completedAt: expect.any(String) });
   await expectNoViolations(page);
 });

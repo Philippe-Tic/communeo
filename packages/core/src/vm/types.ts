@@ -176,6 +176,11 @@ export interface SiteVM {
     extra: RichTextVM | null;
     privacyPolicy: RichTextVM | null;
     dpo: { name: string | null; email: ContactPointVM | null; phone: ContactPointVM | null } | null;
+    /**
+     * Durée de conservation des messages envoyés à la mairie (#342), après leur traitement :
+     * « 1 an » ; `null` : la commune ne les supprime pas automatiquement.
+     */
+    messageRetention: string | null;
     accessibility: {
       level: AccessibilityLevel;
       /** « Partiellement conforme » */

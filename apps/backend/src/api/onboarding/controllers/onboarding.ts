@@ -4,13 +4,17 @@
  * GET /api/onboarding/communes/:insee                    → { data: CommuneDetails }
  * Réservé aux administrateurs (et à l'équipe) : ce sont eux qui créent le site.
  *
+ * Emplacement de la commune pour la carte et la météo (#362), pour tous les utilisateurs de la commune :
+ * GET /api/onboarding/places?q=&lat=&lon=     → { data: PlaceMatch[] } (ville ou adresse, proches du point)
+ * GET /api/onboarding/places/commune?lat=&lon= → { data: { name, postalCode } | null } (commune du point)
+ *
  * Checklist « Pour terminer votre site » (#154), pour tous les utilisateurs de la commune :
  * GET  /api/onboarding/checklist      → { data: OnboardingChecklist & { visible } }
  * POST /api/onboarding/checklist/hide → masquée pour toute la commune (`onboarding.checklistHiddenAt`)
  */
 import { onboardingChecklist } from '@communeo/core';
 import { getEffectiveSite } from '../../../utils/getEffectiveSite';
-import { communeDetails, PublicDataUnavailable, searchCommunes } from '../../../services/public-data';
+import { communeAt, communeDetails, PublicDataUnavailable, searchCommunes, searchPlaces } from '../../../services/public-data';
 import { isTestAddress } from '../../../utils/test-signup';
 
 const PAGE = 'api::page.page';
@@ -68,6 +72,28 @@ export default {
       // Site de test de l'équipe : pas l'e-mail de la vraie mairie comme contact du site
       const test = isTestAddress(ctx.state.user?.email) && details.townHall;
       ctx.body = { data: test ? { ...details, townHall: { ...details.townHall, email: null } } : details };
+    } catch (error) {
+      if (error instanceof PublicDataUnavailable) return unavailable(ctx);
+      throw error;
+    }
+  },
+
+  // Emplacement de la commune (carte et météo, #362) : assistant et écran Informations, ouvert à
+  // tous les utilisateurs de la commune (les rédacteurs modifient aussi les informations)
+  async places(ctx) {
+    if (!(await communeSite(ctx))) return;
+    try {
+      ctx.body = { data: await searchPlaces(String(ctx.query.q ?? ''), { lat: ctx.query.lat, lon: ctx.query.lon }) };
+    } catch (error) {
+      if (error instanceof PublicDataUnavailable) return unavailable(ctx);
+      throw error;
+    }
+  },
+
+  async placeCommune(ctx) {
+    if (!(await communeSite(ctx))) return;
+    try {
+      ctx.body = { data: await communeAt(ctx.query.lat, ctx.query.lon) };
     } catch (error) {
       if (error instanceof PublicDataUnavailable) return unavailable(ctx);
       throw error;

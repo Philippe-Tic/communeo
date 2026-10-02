@@ -1,7 +1,7 @@
 /**
  * Inscription d'une mairie en libre-service (#309, #337) : demande, confirmation de l'adresse saisie,
  * choix du mot de passe ; la mairie approuve ou refuse depuis son adresse officielle ; en attendant,
- * l'administration fonctionne mais rien n'est mis en ligne.
+ * l'administration fonctionne et le site d'essai se met en ligne (#369).
  */
 import { expect, test } from '@playwright/test';
 import { mockApi } from './api';
@@ -64,7 +64,7 @@ test('adresse confirmée, puis mot de passe du demandeur, sans violation', async
   await page.goto('/inscription/confirmer?jeton=jeton-inscription');
   await expect(page.getByRole('heading', { level: 1, name: 'Créer le site de Bourg-Neuf' })).toBeVisible();
   await expect(page.getByText('julie@gmail.test')).toBeVisible();
-  await expect(page.getByText('une fois la demande approuvée par la mairie')).toBeVisible();
+  await expect(page.getByText('mairie devra aussi approuver la demande : si elle la refuse, le site sera retiré')).toBeVisible();
   await expectNoViolations(page);
   // Ouvrir le lien ne crée rien : seulement le clic
   expect(posts['/api/signup/confirm']).toBeUndefined();
@@ -93,7 +93,7 @@ test('la mairie approuve depuis son adresse officielle, sans violation', async (
   expect(posts['/api/signup/approve']).toBeUndefined();
   await page.getByRole('button', { name: 'Approuver la demande' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Demande approuvée' })).toBeVisible();
-  await expect(page.getByRole('status').filter({ hasText: 'Merci. Le site de Bourg-Neuf pourra être mis en ligne' })).toBeFocused();
+  await expect(page.getByRole('status').filter({ hasText: 'Merci. Le site de Bourg-Neuf continue son essai' })).toBeFocused();
   expect(posts['/api/signup/approve']).toEqual([{ jeton: 'jeton-mairie' }]);
 });
 
@@ -121,25 +121,23 @@ test('lien de la mairie expiré ou déjà utilisé', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1, name: 'Ce lien ne fonctionne pas' })).toBeVisible();
 });
 
-test('en attendant la mairie : bandeau, renvoi de la demande, rien n’est mis en ligne', async ({ page }) => {
+test('en attendant la mairie : bandeau, renvoi de la demande, le site d’essai se met en ligne (#369)', async ({ page }) => {
   const { posts } = await mockApi(page, { trial: { endsInDays: 30 }, approval: 'townhall', publication: 'pending' });
   await page.goto('/');
   const banner = page.getByRole('region', { name: 'Inscription en attente' });
   await expect(banner).toContainText('En attente de l’approbation de la mairie.');
-  await expect(banner).toContainText('dès qu’elle aura répondu à la demande envoyée à m***@saint-aubin.fr le 28 septembre 2026.');
-  // Pas de « Mettre en ligne » : la mise en ligne attend la mairie
-  await expect(page.getByText('En attente de la mairie').locator('visible=true').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Mettre en ligne' })).toHaveCount(0);
+  await expect(banner).toContainText('La demande lui a été envoyée à m***@saint-aubin.fr le 28 septembre 2026.');
+  await expect(banner).toContainText('Votre site d’essai peut être mis en ligne en attendant ; si la mairie refuse, il sera retiré.');
   await expectNoViolations(page);
 
   await banner.getByRole('button', { name: 'Renvoyer la demande' }).click();
   await expect(page.getByText('Demande renvoyée à m***@saint-aubin.fr.')).toBeVisible();
   expect(posts['/api/signup/approval/resend']).toHaveLength(1);
 
+  // La mise en ligne n'attend pas la mairie
   await page.goto('/mise-en-ligne');
-  await expect(page.getByRole('heading', { level: 2, name: 'En attente de l’approbation de la mairie' })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Mettre en ligne/ })).toHaveCount(0);
-  expect(posts['/api/deployment/trigger']).toBeUndefined();
+  await page.getByRole('button', { name: 'Mettre en ligne maintenant' }).click();
+  await expect.poll(() => posts['/api/deployment/trigger']?.length ?? 0).toBe(1);
 });
 
 test('en attendant l’équipe : bandeau sans renvoi', async ({ page }) => {
@@ -147,6 +145,6 @@ test('en attendant l’équipe : bandeau sans renvoi', async ({ page }) => {
   await page.goto('/');
   const banner = page.getByRole('region', { name: 'Inscription en attente' });
   await expect(banner).toContainText('Demande en cours de vérification.');
-  await expect(banner).toContainText('dès que l’équipe Communeo l’aura vérifiée');
+  await expect(banner).toContainText('L’équipe Communeo va vérifier votre demande. Votre site d’essai peut être mis en ligne en attendant');
   await expect(banner.getByRole('button')).toHaveCount(0);
 });

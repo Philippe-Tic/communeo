@@ -2,7 +2,6 @@
  * deployment controller
  */
 
-import { approvalPendingMessage, isAwaitingApproval } from '../../../services/signup-approval';
 import { isExpired, TRIAL_EXPIRED_MESSAGE } from '../../../services/trial';
 import { factories } from '@strapi/strapi';
 import deploymentService from '../../../services/deployment';
@@ -59,7 +58,6 @@ export default factories.createCoreController('api::deployment.deployment', ({ s
         return ctx.forbidden("Cette commune est suspendue : la mise en ligne n'est pas possible");
       }
       if (isExpired(siteData as any)) return ctx.forbidden(TRIAL_EXPIRED_MESSAGE, { code: 'trial_expired' });
-      if (isAwaitingApproval(siteData as any)) return ctx.forbidden(approvalPendingMessage(siteData as any), { code: 'approval_pending' });
 
       if (!isBuildQueueConfigured()) {
         ctx.status = 503;

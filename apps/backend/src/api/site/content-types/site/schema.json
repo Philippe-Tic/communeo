@@ -240,6 +240,16 @@
       "component": "legal.accessibilite",
       "required": false
     },
+    "message_retention": {
+      "type": "enumeration",
+      "enum": [
+        "months_6",
+        "months_12",
+        "months_24",
+        "months_36",
+        "never"
+      ]
+    },
     "infos_pratiques": {
       "type": "component",
       "component": "legal.infos-pratiques",

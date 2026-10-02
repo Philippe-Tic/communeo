@@ -36,7 +36,8 @@ export function privacyPolicyTemplate({ communeName }: { communeName: string }):
       ),
       heading('Durée de conservation'),
       paragraph(
-        "Vos messages sont conservés le temps de traiter votre demande, puis selon les règles applicables aux archives publiques. L'adresse d'un abonné n'est plus utilisée dès sa désinscription.",
+        // La durée réglée par la commune (#342) est ajoutée par le site, sous ce texte
+        "Vos messages sont conservés le temps de traiter votre demande, puis pendant la durée indiquée plus bas sur cette page. L'adresse d'un abonné n'est plus utilisée dès sa désinscription.",
       ),
     ],
   } as RichTextDocument;

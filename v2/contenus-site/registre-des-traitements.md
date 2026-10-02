@@ -24,7 +24,7 @@ La liste n'est pas recopiée ici : elle fait foi dans l'outil et peut être expo
 | Traitement | Personnes | Données |
 |---|---|---|
 | Hébergement et publication du site de la commune | Personnes citées dans les contenus (élus, agents, habitants, associations) | Contenus publiés : textes, photos, documents officiels |
-| Réception des messages du formulaire de contact | Habitants et usagers | Nom, prénom, e-mail, téléphone, message, pièces jointes, réponse |
+| Réception des messages du formulaire de contact | Habitants et usagers | Nom, prénom, e-mail, téléphone, message, pièces jointes, réponse ; messages traités supprimés après la durée choisie par la commune (1 an par défaut, « jamais » possible) |
 | Demandes d'exercice des droits RGPD | Habitants | Idem, nature de la demande, délai |
 | Lettre d'information | Abonnés | Adresse e-mail, date d'inscription |
 | Annuaire des associations | Contacts d'associations | Nom, e-mail, téléphone, adresse, fiche |
@@ -65,8 +65,8 @@ OVH SAS (serveur et sauvegardes, France), Netlify, Inc., Plus Five Five, Inc. (R
   la validation du devis, SIRET, adresse de facturation, factures et paiements.
 - **Destinataires** : Communeo ; Chorus Pro (dépôt des factures) ; Resend (envoi des e-mails).
 - **Durées** : compte tant que la commune est cliente, puis 6 mois ; demande d'inscription non
-  confirmée : 30 jours (le lien de confirmation expire au bout de 7 jours ; suppression automatique à
-  ajouter, ticket #342) ; devis, bons de commande et factures : 10 ans
+  confirmée : 30 jours (le lien de confirmation expire au bout de 7 jours ; supprimée automatiquement
+  chaque nuit au-delà de 30 jours) ; devis, bons de commande et factures : 10 ans
   (code de commerce, art. L123-22).
 - **Transferts hors UE** : Resend (voir 1.3).
 - **Sécurité** : celle de la partie 1.
@@ -102,6 +102,6 @@ OVH SAS (serveur et sauvegardes, France), Netlify, Inc., Plus Five Five, Inc. (R
 
 ## Mise à jour
 
-À revoir à chaque nouveau prestataire, nouvelle fonction qui traite des données (par exemple la
-suppression automatique des messages, ticket #342, ou l'export des données, ticket #343), et au moins une fois par
-an. Dernière mise à jour : 30 septembre 2026.
+À revoir à chaque nouveau prestataire, nouvelle fonction qui traite des données (par exemple
+l'export des données, ticket #343), et au moins une fois par
+an. Dernière mise à jour : 2 octobre 2026.

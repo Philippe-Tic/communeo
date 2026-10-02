@@ -96,7 +96,9 @@ class DomainService {
         };
       }
 
-      const customUrl = `https://${domain}`;
+      // Domaine nu chez Bunny : le site est servi sur www (le domaine nu y redirige)
+      const publisher = getPublisher();
+      const customUrl = `https://${publisher.canonicalDomain?.(domain) ?? domain}`;
       await strapi.documents('api::site.site').update({ documentId: site.documentId,
         data: {
           domain_status: 'verified',

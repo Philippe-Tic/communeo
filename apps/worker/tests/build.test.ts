@@ -101,6 +101,13 @@ describe('processBuild', () => {
     expect(rendered[0]?.siteUrl).toBe('https://mairie-lyon.fr');
   });
 
+  it("prend l'adresse servie par l'hébergeur pour un domaine nu (Bunny : www)", async () => {
+    const d = deps({}, { customDomain: 'mairie-lyon.fr', hostId: 'host-lyon' });
+    d.publisher.canonicalDomain = (domain: string) => `www.${domain}`;
+    await processBuild(job(), d);
+    expect(rendered[0]?.siteUrl).toBe('https://www.mairie-lyon.fr');
+  });
+
   it("relance sans signaler d'erreur tant qu'il reste une tentative", async () => {
     const d = deps({ renderer: { build: async () => { throw new Error('astro a échoué'); } } });
     await expect(processBuild(job({ retryCount: 0, retryLimit: 1 }), d)).rejects.toThrow('astro a échoué');

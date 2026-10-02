@@ -41,6 +41,14 @@ export default {
       },
     },
     {
+      // Caddy (`on_demand_tls`, `ask`) avant de demander le certificat d'un domaine nu de commune, redirigé
+      // vers www (#382) : appelé sur le réseau interne, sans utilisateur ; fermé côté public par le Caddyfile
+      method: 'GET',
+      path: '/domain/certificate-check',
+      handler: 'domain.certificateCheck',
+      config: { auth: false },
+    },
+    {
       method: 'GET',
       path: '/domain/diagnostic/:domain',
       handler: 'domain.diagnostic',

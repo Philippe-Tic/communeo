@@ -81,14 +81,11 @@ export const approvalStateQuery = queryOptions({
 export const resendApproval = () =>
   api<{ data: { to: string; sentAt: string } }>('/api/signup/approval/resend', { method: 'POST' }).then((response) => response.data);
 
-/** Qui doit encore approuver l'inscription de la commune de la session ; `null` : rien n'attend */
+/**
+ * Qui doit encore approuver l'inscription de la commune de la session ; `null` : rien n'attend. Le
+ * site d'essai se met en ligne pendant l'attente (#369).
+ */
 export const awaitingApproval = (site: { signup_approval?: SignupApproval } | null | undefined): SignupApproval => site?.signup_approval ?? null;
-
-/** Ce qu'attend la mise en ligne, en une phrase */
-export const approvalWaitingLabel = (approval: Exclude<SignupApproval, null>) =>
-  approval === 'townhall'
-    ? 'Le site sera mis en ligne dès que la mairie aura approuvé sa création, depuis son adresse officielle.'
-    : 'Le site sera mis en ligne dès que l’équipe Communeo aura vérifié votre demande.';
 
 /** Adresse des conditions d'utilisation (page publique de Communeo), si elle est configurée */
 export const TERMS_URL = import.meta.env.VITE_TERMS_URL as string | undefined;

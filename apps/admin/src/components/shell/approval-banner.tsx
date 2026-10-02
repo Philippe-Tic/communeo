@@ -1,7 +1,8 @@
 /**
- * Bandeau de l'inscription en attente (#337), au-dessus de l'administration : la commune prépare son
- * site, mais rien n'est mis en ligne tant que la mairie (depuis son adresse officielle) ou l'équipe
- * Communeo n'a pas approuvé. Un administrateur peut renvoyer l'e-mail à la mairie.
+ * Bandeau de l'inscription en attente (#337), au-dessus de l'administration : la mairie (depuis son
+ * adresse officielle) ou l'équipe Communeo n'a pas encore approuvé. Le site d'essai se met en ligne
+ * quand même (#369) ; refusée, la demande le retire avec la commune. Un administrateur peut renvoyer
+ * l'e-mail à la mairie.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hourglass } from 'lucide-react';
@@ -35,8 +36,8 @@ export function ApprovalBanner({ user }: { user: SessionUser }) {
       <p className="min-w-0 flex-1 basis-60">
         <strong className="font-semibold">{approval === 'townhall' ? 'En attente de l’approbation de la mairie.' : 'Demande en cours de vérification.'}</strong>{' '}
         {approval === 'townhall'
-          ? `Le site sera mis en ligne dès qu’elle aura répondu à la demande envoyée${sent}.`
-          : 'Le site sera mis en ligne dès que l’équipe Communeo l’aura vérifiée.'}
+          ? `La demande lui a été envoyée${sent}. Votre site d’essai peut être mis en ligne en attendant ; si la mairie refuse, il sera retiré.`
+          : 'L’équipe Communeo va vérifier votre demande. Votre site d’essai peut être mis en ligne en attendant ; si la demande est refusée, il sera retiré.'}
       </p>
       {approval === 'townhall' && admin && state.data?.to && (
         <Button variant="secondary" size="sm" className="max-md:h-11" disabled={resend.isPending} onClick={() => resend.mutate()}>

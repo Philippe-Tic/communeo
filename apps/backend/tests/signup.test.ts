@@ -2,11 +2,14 @@
  * Inscription d'une mairie en libre-service (#309, #337) : le lien part à l'adresse saisie ; au clic,
  * la commune est créée en essai et le demandeur choisit son mot de passe. La mairie approuve ensuite
  * depuis son adresse officielle (Annuaire de l'administration, simulé par un serveur local), sauf si
- * le demandeur utilise cette adresse ou son domaine ; sans adresse officielle, l'équipe vérifie. Tant
- * que l'inscription n'est pas approuvée, rien n'est mis en ligne ; refusée, la commune est supprimée.
+ * le demandeur utilise cette adresse ou son domaine ; sans adresse officielle, l'équipe vérifie. En
+ * attendant, le site d'essai est publié (#369) ; refusée, la commune est supprimée et son site retiré.
  */
+import fs from 'node:fs';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
+import os from 'node:os';
+import path from 'node:path';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Core } from '@strapi/strapi';
@@ -200,21 +203,29 @@ describe('adresse confirmée, la mairie doit approuver', () => {
     expect(jwt).toBeTruthy();
   });
 
-  it('en attendant : l’administration fonctionne, mais rien n’est mis en ligne', async () => {
+  it('en attendant : le site d’essai est mis en ligne, sans indexation, ni domaine, ni passage en live', async () => {
     const state = await api.get('/api/signup/approval').set(auth(jwt));
     expect(state.body.data).toEqual({ status: 'townhall', to: 'm***@saintpierrelemoutier.fr', sentAt: expect.any(String) });
 
     expect((await api.put(`/api/sites/${site.documentId}`).set(auth(jwt)).send({ data: { name: 'Saint-Pierre-le-Moûtier' } })).status).toBe(200);
+    // « Mettre en ligne » n'attend plus l'approbation (ici, seule la file des builds manque : 503)
     const trigger = await api.post('/api/deployment/trigger').set(auth(jwt));
-    expect(trigger.status).toBe(403);
-    expect(trigger.body.error.details).toEqual({ code: 'approval_pending' });
+    expect(trigger.status).toBe(503);
+    expect(trigger.body.error.details?.code).toBeUndefined();
 
-    // Une demande déjà dans la file est annulée par le worker
+    // Le worker construit le site d'essai : bandeau « Site en préparation » et jamais indexé
     const worker = await api
       .post('/api/build-worker/jobs/job-attente/start')
       .set(auth('test-worker-secret'))
       .send({ siteDocumentId: site.documentId, triggeredBy: null, attempt: 0 });
-    expect(worker.body).toEqual({ cancelled: 'inscription à approuver' });
+    expect(worker.status).toBe(200);
+    expect(worker.body.site).toMatchObject({ documentId: site.documentId, noindex: true });
+
+    // Garde-fous de l'essai : pas de domaine personnalisé ; le site reste en essai
+    const domain = await api.post('/api/domain/configure').set(auth(jwt)).send({ customDomain: 'saintpierrelemoutier.fr' });
+    expect(domain.status).toBe(403);
+    expect(domain.body.error.details).toEqual({ code: 'live_only' });
+    expect((await strapi.db.query(SITE).findOne({ where: { id: site.id } })).plan).toBe('trial');
 
     // La commune ne lève pas elle-même l'attente
     await api.put(`/api/sites/${site.documentId}`).set(auth(jwt)).send({ data: { signup_approval: null } });
@@ -234,7 +245,7 @@ describe('adresse confirmée, la mairie doit approuver', () => {
     approvalLink = fresh!;
   });
 
-  it('la mairie approuve : le site peut être mis en ligne, le demandeur est prévenu ; lien à usage unique', async () => {
+  it('la mairie approuve : l’essai continue, le demandeur est prévenu ; lien à usage unique', async () => {
     const jeton = approvalLink;
     const info = await api.get(`/api/signup/approve?jeton=${jeton}`);
     expect(info.body.data).toEqual({ commune: 'Saint-Pierre-le-Moûtier', firstName: 'Julie', lastName: 'Secrétaire', email: 'julie@gmail.test' });
@@ -244,7 +255,7 @@ describe('adresse confirmée, la mairie doit approuver', () => {
     expect((await api.post('/api/signup/approve').send({ jeton })).status).toBe(200);
     expect((await strapi.db.query(SITE).findOne({ where: { id: site.id } })).signup_approval).toBeNull();
     expect(await strapi.db.query(REQUEST).findOne({ where: { code_insee: '58264', status: 'confirmed' } })).toMatchObject({ approval: 'townhall', approval_token: null });
-    expect(sentEmails.find((mail) => mail.to === 'julie@gmail.test')?.subject).toMatch(/peut être mis en ligne/);
+    expect(sentEmails.find((mail) => mail.to === 'julie@gmail.test')?.subject).toMatch(/Création du site .* approuvée/);
     expect(await strapi.db.query('api::activity-log.activity-log').count({ where: { action: 'signup_approve' } })).toBe(1);
 
     expect((await api.get('/api/signup/approval').set(auth(jwt))).body.data.status).toBeNull();
@@ -260,20 +271,60 @@ describe('adresse confirmée, la mairie doit approuver', () => {
 });
 
 describe('la mairie refuse', () => {
-  it('la commune créée, ses comptes et ses contenus sont supprimés ; le demandeur est prévenu', async () => {
+  // Hébergeur local (PUBLISH_DIR) : le site d'essai y est créé dès l'inscription (#369)
+  let publishDir: string;
+  beforeAll(() => {
+    publishDir = fs.mkdtempSync(path.join(os.tmpdir(), 'communeo-signup-'));
+    process.env.PUBLISH_DIR = publishDir;
+  });
+  afterAll(() => {
+    delete process.env.PUBLISH_DIR;
+    fs.rmSync(publishDir, { recursive: true, force: true });
+  });
+
+  it('la commune créée, ses comptes, ses contenus et son site d’essai sont supprimés ; le demandeur est prévenu', async () => {
     const { site } = await signupAndConfirm('2A004', 'usurpateur@gmail.test');
+    // Le site d'essai existe chez l'hébergeur avant toute réponse de la mairie
+    expect(site.signup_approval).toBe('townhall');
+    expect(site.netlify_site_id).toBe(site.slug);
+    expect(fs.existsSync(path.join(publishDir, site.slug))).toBe(true);
+
     const jeton = linkTo('contact@ville-ajaccio.fr')!;
     const declined = await withTeamAddress(() => api.post('/api/signup/decline').send({ jeton }));
     expect(declined.status).toBe(200);
 
+    expect(fs.existsSync(path.join(publishDir, site.slug))).toBe(false);
     expect(await strapi.db.query(SITE).count({ where: { id: site.id } })).toBe(0);
     expect(await strapi.db.query(USER).count({ where: { email: 'usurpateur@gmail.test' } })).toBe(0);
     expect(await strapi.db.query(REQUEST).findOne({ where: { code_insee: '2A004' } })).toMatchObject({ status: 'rejected', reviewed_by: 'mairie', approval_token: null });
-    expect(sentEmails.find((mail) => mail.to === 'usurpateur@gmail.test' && /Votre demande/.test(mail.subject))?.text).toMatch(/n'a pas approuvé/);
-    expect(sentEmails.find((mail) => mail.to === 'equipe@communeo.test')?.subject).toBe('Inscription refusée : Ajaccio');
+    const mail = sentEmails.find((email) => email.to === 'usurpateur@gmail.test' && /Votre demande/.test(email.subject));
+    expect(mail?.text).toMatch(/n'a pas approuvé/);
+    expect(mail?.text).toContain("le site d'essai a été retiré");
+    expect(sentEmails.find((email) => email.to === 'equipe@communeo.test')?.subject).toBe('Inscription refusée : Ajaccio');
     // La commune est de nouveau libre, et le lien ne sert plus
     expect((await signup({ insee: '2A004', email: 'mairie.ajaccio@gmail.test' })).status).toBe(202);
     expect((await api.post('/api/signup/approve').send({ jeton })).status).toBe(400);
+  });
+
+  it('refus pendant une mise en ligne : le site publié ensuite par le worker est retiré', async () => {
+    // La commune et son enregistrement Deployment ont disparu ; le worker annonce la fin de son build
+    fs.mkdirSync(path.join(publishDir, 'ajaccio'), { recursive: true });
+    const finish = await api
+      .post('/api/build-worker/jobs/job-commune-supprimee/finish')
+      .set(auth('test-worker-secret'))
+      .send({ status: 'ready', buildSeconds: 12, deployId: 'local-1', hostId: 'ajaccio', defaultUrl: 'http://localhost:8080/ajaccio' });
+    expect(finish.status).toBe(404);
+    expect(fs.existsSync(path.join(publishDir, 'ajaccio'))).toBe(false);
+
+    // Un site chez l'hébergeur encore rattaché à une commune n'est jamais retiré ainsi
+    const other: any = await strapi.db.query(SITE).findOne({ where: { code_insee: '58264' } });
+    fs.mkdirSync(path.join(publishDir, other.netlify_site_id ?? other.slug), { recursive: true });
+    if (!other.netlify_site_id) await strapi.db.query(SITE).update({ where: { id: other.id }, data: { netlify_site_id: other.slug } });
+    await api
+      .post('/api/build-worker/jobs/job-inconnu/finish')
+      .set(auth('test-worker-secret'))
+      .send({ status: 'ready', buildSeconds: 1, hostId: other.netlify_site_id ?? other.slug });
+    expect(fs.existsSync(path.join(publishDir, other.netlify_site_id ?? other.slug))).toBe(true);
   });
 });
 
@@ -300,13 +351,14 @@ describe('sans adresse officielle : l’équipe vérifie', () => {
     expect(site.signup_approval).toBe('team');
     expect(sentEmails.find((mail) => mail.to === 'equipe@communeo.test')?.subject).toBe('Inscription à vérifier : Sans-Annuaire');
     expect((await api.get('/api/signup/approval').set(auth(jwt))).body.data).toEqual({ status: 'team', to: null, sentAt: null });
-    expect((await api.post('/api/deployment/trigger').set(auth(jwt))).status).toBe(403);
+    // Le site d'essai peut être mis en ligne pendant la vérification (ici, sans file des builds : 503)
+    expect((await api.post('/api/deployment/trigger').set(auth(jwt))).status).toBe(503);
 
     const [pending] = (await api.get('/api/validations').set(auth(superAdmin))).body.data.signups;
     expect(pending).toMatchObject({ communeName: 'Sans-Annuaire', waitingFor: 'team', siteDocumentId: site.documentId });
     expect((await api.post(`/api/validations/signups/${pending.id}/approve`).set(auth(superAdmin))).status).toBe(200);
     expect((await strapi.db.query(SITE).findOne({ where: { id: site.id } })).signup_approval).toBeNull();
-    expect(sentEmails.find((mail) => mail.to === 'mairie@sans-annuaire.test' && /peut être mis en ligne/.test(mail.subject))).toBeTruthy();
+    expect(sentEmails.find((mail) => mail.to === 'mairie@sans-annuaire.test' && /Création du site .* approuvée/.test(mail.subject))).toBeTruthy();
     expect((await api.get('/api/validations').set(auth(superAdmin))).body.data.signups).toEqual([]);
   });
 
@@ -318,7 +370,7 @@ describe('sans adresse officielle : l’équipe vérifie', () => {
     expect(await strapi.db.query(SITE).count({ where: { id: site.id } })).toBe(0);
     const mail = sentEmails.find((email) => email.to === 'paul@sans-annuaire-bis.test' && /Votre demande/.test(email.subject));
     expect(mail?.text).toContain('Nous n’avons pas pu joindre la mairie.');
-    expect(mail?.text).toContain('ont été supprimés');
+    expect(mail?.text).toContain('retiré et ses contenus supprimés');
   });
 });
 

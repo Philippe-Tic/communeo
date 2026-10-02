@@ -2,7 +2,7 @@
  * Confirmation de l'adresse de la personne qui s'inscrit (#309, #337), depuis le lien reçu dans sa
  * boîte : la commune n'est créée qu'au clic (les antivirus de messagerie ouvrent les liens tout
  * seuls). Ensuite : choix de son mot de passe, puis assistant de démarrage ; la mairie approuve de
- * son côté avant la mise en ligne du site.
+ * son côté, le site d'essai pouvant être mis en ligne en attendant (#369).
  */
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
@@ -68,8 +68,8 @@ export function SignupConfirmScreen({ token }: { token: string | undefined }) {
         gratuit.
       </p>
       <p className="mt-3 text-secondary">
-        Vous choisirez ensuite votre mot de passe et pourrez préparer le site tout de suite. Il sera mis en ligne une fois la demande approuvée par la
-        mairie.
+        Vous choisirez ensuite votre mot de passe et pourrez préparer le site tout de suite, puis le mettre en ligne pendant l’essai. La
+        mairie devra aussi approuver la demande : si elle la refuse, le site sera retiré.
       </p>
       {error && (
         <p role="alert" className="mt-4 flex gap-2 text-[13px] text-danger">

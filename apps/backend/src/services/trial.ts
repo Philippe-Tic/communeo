@@ -187,7 +187,7 @@ async function settleQuote(site: any, status: 'accepted' | 'rejected') {
  */
 async function republish(site: any, { ifPublished = false } = {}) {
   const published = !!(site.netlify_site_id || site.live_url);
-  if (!(isExpired(site) || (ifPublished && published)) || site.signup_approval || !isBuildQueueConfigured()) return;
+  if (!(isExpired(site) || (ifPublished && published)) || !isBuildQueueConfigured()) return;
   try {
     await deploymentService.requestBuild(site.documentId, { triggeredBy: null, reason: 'manual' });
   } catch (error) {

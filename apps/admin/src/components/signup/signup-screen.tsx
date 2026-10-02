@@ -1,7 +1,7 @@
 /**
  * Inscription d'une mairie en libre-service (#309, #337) : commune (recherche dans le référentiel
  * officiel), nom et e-mail de la personne, conditions. Le lien de confirmation part à l'adresse saisie ;
- * la mairie approuve ensuite depuis son adresse officielle avant la mise en ligne du site.
+ * la mairie approuve ensuite depuis son adresse officielle ; le site d'essai peut être en ligne en attendant (#369).
  */
 import { Link } from '@tanstack/react-router';
 import { CircleAlert, Loader2, MailCheck, Search } from 'lucide-react';
@@ -201,8 +201,8 @@ function SignupSent({ result, commune }: { result: SignupResult; commune: string
             Pour créer le site{commune ? ` ${ofCommune(commune)}` : null}, confirmez votre adresse : un lien vient d’être envoyé à <strong>{result.to}</strong>.
           </p>
           <p className="text-secondary">
-            Le lien est valable 7 jours. Vous choisirez ensuite votre mot de passe et pourrez préparer votre site tout de suite. Il sera mis en ligne une fois la
-            demande approuvée par la mairie, depuis son adresse officielle.
+            Le lien est valable 7 jours. Vous choisirez ensuite votre mot de passe et pourrez préparer votre site tout de suite, puis le mettre en
+            ligne pendant l’essai. La mairie devra aussi approuver la demande, depuis son adresse officielle.
           </p>
           <p className="text-secondary">Rien reçu ? Regardez dans les indésirables, ou vérifiez l’adresse et refaites la demande.</p>
         </div>
